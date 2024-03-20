@@ -23,7 +23,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
   switch (messageId) {
     case 'wrongArgumentType':
       return {
-        message: i18n.translate('monaco.esql.validation.wrongArgumentType', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.wrongArgumentType', {
           defaultMessage:
             'Argument of [{name}] must be [{argType}], found value [{value}] type [{givenType}]',
           values: {
@@ -36,28 +36,28 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unknownColumn':
       return {
-        message: i18n.translate('monaco.esql.validation.unknownColumn', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.unknownColumn', {
           defaultMessage: 'Unknown column [{name}]',
           values: { name: out.name },
         }),
       };
     case 'unknownIndex':
       return {
-        message: i18n.translate('monaco.esql.validation.unknownIndex', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.unknownIndex', {
           defaultMessage: 'Unknown index [{name}]',
           values: { name: out.name },
         }),
       };
     case 'unknownFunction':
       return {
-        message: i18n.translate('monaco.esql.validation.missingFunction', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.missingFunction', {
           defaultMessage: 'Unknown function [{name}]',
           values: { name: out.name },
         }),
       };
     case 'wrongArgumentNumber':
       return {
-        message: i18n.translate('monaco.esql.validation.wrongArgumentExactNumber', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.wrongArgumentExactNumber', {
           defaultMessage:
             'Error: [{fn}] function expects exactly {numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
           values: {
@@ -69,7 +69,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'wrongArgumentNumberTooMany':
       return {
-        message: i18n.translate('monaco.esql.validation.wrongArgumentTooManyNumber', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.wrongArgumentTooManyNumber', {
           defaultMessage:
             'Error: [{fn}] function expects {extraArgs, plural, =0 {} other {no more than }}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
           values: {
@@ -82,7 +82,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'wrongArgumentNumberTooFew':
       return {
-        message: i18n.translate('monaco.esql.validation.wrongArgumentTooFewNumber', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.wrongArgumentTooFewNumber', {
           defaultMessage:
             'Error: [{fn}] function expects {missingArgs, plural, =0 {} other {at least }}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
           values: {
@@ -95,7 +95,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'noNestedArgumentSupport':
       return {
-        message: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.noNestedArgumentSupport', {
           defaultMessage:
             "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
           values: { name: out.name, argType: out.argType },
@@ -103,7 +103,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'shadowFieldType':
       return {
-        message: i18n.translate('monaco.esql.validation.typeOverwrite', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.typeOverwrite', {
           defaultMessage:
             'Column [{field}] of type {fieldType} has been overwritten as new type: {newType}',
           values: { field: out.field, fieldType: out.fieldType, newType: out.newType },
@@ -112,21 +112,24 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unsupportedColumnTypeForCommand':
       return {
-        message: i18n.translate('monaco.esql.validation.unsupportedColumnTypeForCommand', {
-          defaultMessage:
-            '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type [{givenType}]',
-          values: {
-            command: out.command,
-            type: out.type,
-            typeCount: out.typeCount,
-            column: out.column,
-            givenType: out.givenType,
-          },
-        }),
+        message: i18n.translate(
+          'kbn-esql-ast-core.esql.validation.unsupportedColumnTypeForCommand',
+          {
+            defaultMessage:
+              '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type [{givenType}]',
+            values: {
+              command: out.command,
+              type: out.type,
+              typeCount: out.typeCount,
+              column: out.column,
+              givenType: out.givenType,
+            },
+          }
+        ),
       };
     case 'unknownOption':
       return {
-        message: i18n.translate('monaco.esql.validation.unknownOption', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.unknownOption', {
           defaultMessage: 'Invalid option for {command}: [{option}]',
           values: {
             command: out.command,
@@ -136,7 +139,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unsupportedFunctionForCommand':
       return {
-        message: i18n.translate('monaco.esql.validation.unsupportedFunctionForCommand', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.unsupportedFunctionForCommand', {
           defaultMessage: '{command} does not support function {name}',
           values: {
             command: out.command,
@@ -146,18 +149,21 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unsupportedFunctionForCommandOption':
       return {
-        message: i18n.translate('monaco.esql.validation.unsupportedFunctionforCommandOption', {
-          defaultMessage: '{command} {option} does not support function {name}',
-          values: {
-            command: out.command,
-            option: out.option,
-            name: out.name,
-          },
-        }),
+        message: i18n.translate(
+          'kbn-esql-ast-core.esql.validation.unsupportedFunctionforCommandOption',
+          {
+            defaultMessage: '{command} {option} does not support function {name}',
+            values: {
+              command: out.command,
+              option: out.option,
+              name: out.name,
+            },
+          }
+        ),
       };
     case 'unknownInterval':
       return {
-        message: i18n.translate('monaco.esql.validation.unknownInterval', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.unknownInterval', {
           defaultMessage: `Unexpected time interval qualifier: '{value}'`,
           values: {
             value: out.value,
@@ -166,7 +172,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unsupportedTypeForCommand':
       return {
-        message: i18n.translate('monaco.esql.validation.unsupportedTypeForCommand', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.unsupportedTypeForCommand', {
           defaultMessage: '{command} does not support [{type}] in expression [{value}]',
           values: {
             command: out.command,
@@ -177,7 +183,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unknownPolicy':
       return {
-        message: i18n.translate('monaco.esql.validation.unknownPolicy', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.unknownPolicy', {
           defaultMessage: 'Unknown policy [{name}]',
           values: {
             name: out.name,
@@ -186,7 +192,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unknownAggregateFunction':
       return {
-        message: i18n.translate('monaco.esql.validation.unknowAggregateFunction', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.unknowAggregateFunction', {
           defaultMessage:
             'Expected an aggregate function or group but got [{value}] of type [{type}]',
           values: {
@@ -197,26 +203,32 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'wildcardNotSupportedForCommand':
       return {
-        message: i18n.translate('monaco.esql.validation.wildcardNotSupportedForCommand', {
-          defaultMessage: 'Using wildcards (*) in {command} is not allowed [{value}]',
-          values: {
-            command: out.command,
-            value: out.value,
-          },
-        }),
+        message: i18n.translate(
+          'kbn-esql-ast-core.esql.validation.wildcardNotSupportedForCommand',
+          {
+            defaultMessage: 'Using wildcards (*) in {command} is not allowed [{value}]',
+            values: {
+              command: out.command,
+              value: out.value,
+            },
+          }
+        ),
       };
     case 'noWildcardSupportAsArg':
       return {
-        message: i18n.translate('monaco.esql.validation.wildcardNotSupportedForFunction', {
-          defaultMessage: 'Using wildcards (*) in {name} is not allowed',
-          values: {
-            name: out.name,
-          },
-        }),
+        message: i18n.translate(
+          'kbn-esql-ast-core.esql.validation.wildcardNotSupportedForFunction',
+          {
+            defaultMessage: 'Using wildcards (*) in {name} is not allowed',
+            values: {
+              name: out.name,
+            },
+          }
+        ),
       };
     case 'unsupportedFieldType':
       return {
-        message: i18n.translate('monaco.esql.validation.unsupportedFieldType', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.unsupportedFieldType', {
           defaultMessage:
             'Field [{field}] cannot be retrieved, it is unsupported or not indexed; returning null',
           values: {
@@ -227,7 +239,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unsupportedSetting':
       return {
-        message: i18n.translate('monaco.esql.validation.unsupportedSetting', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.unsupportedSetting', {
           defaultMessage: 'Unsupported setting [{setting}], expected [{expected}]',
           values: {
             setting: out.setting,
@@ -238,7 +250,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unsupportedSettingCommandValue':
       return {
-        message: i18n.translate('monaco.esql.validation.unsupportedSettingValue', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.unsupportedSettingValue', {
           defaultMessage:
             'Unrecognized value [{value}] for {command}, mode needs to be one of [{expected}]',
           values: {
@@ -251,7 +263,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'expectedConstant':
       return {
-        message: i18n.translate('monaco.esql.validation.expectedConstantValue', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.expectedConstantValue', {
           defaultMessage: 'Argument of [{fn}] must be a constant, received [{given}]',
           values: {
             given: out.given,
@@ -262,14 +274,14 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'metadataBracketsDeprecation':
       return {
-        message: i18n.translate('monaco.esql.validation.metadataBracketsDeprecation', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.metadataBracketsDeprecation', {
           defaultMessage: "Square brackets '[]' need to be removed from FROM METADATA declaration",
         }),
         type: 'warning',
       };
     case 'unknownMetadataField':
       return {
-        message: i18n.translate('monaco.esql.validation.wrongMetadataArgumentType', {
+        message: i18n.translate('kbn-esql-ast-core.esql.validation.wrongMetadataArgumentType', {
           defaultMessage:
             'Metadata field [{value}] is not available. Available metadata fields are: [{availableFields}]',
           values: {
@@ -281,13 +293,16 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'wrongDissectOptionArgumentType':
       return {
-        message: i18n.translate('monaco.esql.validation.wrongDissectOptionArgumentType', {
-          defaultMessage:
-            'Invalid value for DISSECT append_separator: expected a string, but was [{value}]',
-          values: {
-            value: out.value,
-          },
-        }),
+        message: i18n.translate(
+          'kbn-esql-ast-core.esql.validation.wrongDissectOptionArgumentType',
+          {
+            defaultMessage:
+              'Invalid value for DISSECT append_separator: expected a string, but was [{value}]',
+            values: {
+              value: out.value,
+            },
+          }
+        ),
         type: 'error',
       };
   }
@@ -321,7 +336,7 @@ export function createMessage(
 }
 
 export function getUnknownTypeLabel() {
-  return i18n.translate('monaco.esql.validation.unknownColumnType', {
+  return i18n.translate('kbn-esql-ast-core.esql.validation.unknownColumnType', {
     defaultMessage: 'Unknown type',
   });
 }

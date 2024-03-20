@@ -110,7 +110,7 @@ function buildCharCompleteItem(
 }
 export const pipeCompleteItem = buildCharCompleteItem(
   '|',
-  i18n.translate('monaco.esql.autocomplete.pipeDoc', {
+  i18n.translate('kbn-esql-ast-core.esql.autocomplete.pipeDoc', {
     defaultMessage: 'Pipe (|)',
   }),
   { sortText: 'C', quoted: false }
@@ -118,7 +118,7 @@ export const pipeCompleteItem = buildCharCompleteItem(
 
 export const commaCompleteItem = buildCharCompleteItem(
   ',',
-  i18n.translate('monaco.esql.autocomplete.commaDoc', {
+  i18n.translate('kbn-esql-ast-core.esql.autocomplete.commaDoc', {
     defaultMessage: 'Comma (,)',
   }),
   { sortText: 'B', quoted: false }
@@ -126,14 +126,14 @@ export const commaCompleteItem = buildCharCompleteItem(
 
 export const colonCompleteItem = buildCharCompleteItem(
   ':',
-  i18n.translate('monaco.esql.autocomplete.colonDoc', {
+  i18n.translate('kbn-esql-ast-core.esql.autocomplete.colonDoc', {
     defaultMessage: 'Colon (:)',
   }),
   { sortText: 'A', quoted: true }
 );
 export const semiColonCompleteItem = buildCharCompleteItem(
   ';',
-  i18n.translate('monaco.esql.autocomplete.semiColonDoc', {
+  i18n.translate('kbn-esql-ast-core.esql.autocomplete.semiColonDoc', {
     defaultMessage: 'Semi colon (;)',
   }),
   { sortText: 'A', quoted: true }
@@ -144,7 +144,7 @@ export const listCompleteItem: SuggestionRawDefinition = {
   text: '( $0 )',
   asSnippet: true,
   kind: 11,
-  detail: i18n.translate('monaco.esql.autocomplete.listDoc', {
+  detail: i18n.translate('kbn-esql-ast-core.esql.autocomplete.listDoc', {
     defaultMessage: 'List of items ( ...)',
   }),
   sortText: 'A',

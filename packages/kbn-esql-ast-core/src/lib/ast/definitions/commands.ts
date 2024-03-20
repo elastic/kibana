@@ -29,7 +29,7 @@ import type { CommandDefinition } from './types';
 export const commandDefinitions: CommandDefinition[] = [
   {
     name: 'row',
-    description: i18n.translate('monaco.esql.definitions.rowDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.rowDoc', {
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',
     }),
@@ -44,7 +44,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'from',
-    description: i18n.translate('monaco.esql.definitions.fromDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.fromDoc', {
       defaultMessage:
         'Retrieves data from one or more data streams, indices, or aliases. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',
     }),
@@ -58,7 +58,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'show',
-    description: i18n.translate('monaco.esql.definitions.showDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
     }),
     examples: ['show functions', 'show info'],
@@ -71,7 +71,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'stats',
-    description: i18n.translate('monaco.esql.definitions.statsDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.statsDoc', {
       defaultMessage:
         'Calculates aggregate statistics, such as average, count, and sum, over the incoming search results set. Similar to SQL aggregation, if the stats command is used without a BY clause, only one row is returned, which is the aggregation over the entire incoming search results set. When you use a BY clause, one row is returned for each distinct value in the field specified in the BY clause. The stats command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. When you perform more than one aggregation, separate each aggregation with a comma.',
     }),
@@ -87,7 +87,7 @@ export const commandDefinitions: CommandDefinition[] = [
       if (!command.args.length) {
         messages.push({
           location: command.location,
-          text: i18n.translate('monaco.esql.validation.statsNoArguments', {
+          text: i18n.translate('kbn-esql-ast-core.esql.validation.statsNoArguments', {
             defaultMessage: 'At least one aggregation or grouping expression required in [STATS]',
           }),
           type: 'error',
@@ -127,7 +127,7 @@ export const commandDefinitions: CommandDefinition[] = [
           messages.push(
             ...noAggsExpressions.map((fn) => ({
               location: fn.location,
-              text: i18n.translate('monaco.esql.validation.statsNoAggFunction', {
+              text: i18n.translate('kbn-esql-ast-core.esql.validation.statsNoAggFunction', {
                 defaultMessage:
                   'At least one aggregation function required in [STATS], found [{expression}]',
                 values: {
@@ -166,13 +166,16 @@ export const commandDefinitions: CommandDefinition[] = [
             messages.push(
               ...invalidExpressions.map((fn) => ({
                 location: fn.location,
-                text: i18n.translate('monaco.esql.validation.noCombinationOfAggAndNonAggValues', {
-                  defaultMessage:
-                    'Cannot combine aggregation and non-aggregation values in [STATS], found [{expression}]',
-                  values: {
-                    expression: fn.text,
-                  },
-                }),
+                text: i18n.translate(
+                  'kbn-esql-ast-core.esql.validation.noCombinationOfAggAndNonAggValues',
+                  {
+                    defaultMessage:
+                      'Cannot combine aggregation and non-aggregation values in [STATS], found [{expression}]',
+                    values: {
+                      expression: fn.text,
+                    },
+                  }
+                ),
                 type: 'error' as const,
                 code: 'statsNoCombinationOfAggAndNonAggValues',
               }))
@@ -185,7 +188,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'eval',
-    description: i18n.translate('monaco.esql.definitions.evalDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.evalDoc', {
       defaultMessage:
         'Calculates an expression and puts the resulting value into a search results field.',
     }),
@@ -204,7 +207,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'rename',
-    description: i18n.translate('monaco.esql.definitions.renameDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.renameDoc', {
       defaultMessage: 'Renames an old column to a new one',
     }),
     examples: ['… | rename old as new', '… | rename old as new, a as b'],
@@ -217,7 +220,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'limit',
-    description: i18n.translate('monaco.esql.definitions.limitDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.limitDoc', {
       defaultMessage:
         'Returns the first search results, in search order, based on the "limit" specified.',
     }),
@@ -231,7 +234,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'keep',
-    description: i18n.translate('monaco.esql.definitions.keepDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.keepDoc', {
       defaultMessage: 'Rearranges fields in the input table by applying the keep clauses in fields',
     }),
     examples: ['… | keep a', '… | keep a,b'],
@@ -244,7 +247,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'drop',
-    description: i18n.translate('monaco.esql.definitions.dropDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.dropDoc', {
       defaultMessage: 'Drops columns',
     }),
     examples: ['… | drop a', '… | drop a,b'],
@@ -261,7 +264,7 @@ export const commandDefinitions: CommandDefinition[] = [
         messages.push(
           ...wildcardItems.map((column) => ({
             location: (column as ESQLColumn).location,
-            text: i18n.translate('monaco.esql.validation.dropAllColumnsError', {
+            text: i18n.translate('kbn-esql-ast-core.esql.validation.dropAllColumnsError', {
               defaultMessage: 'Removing all fields is not allowed [*]',
             }),
             type: 'error' as const,
@@ -275,7 +278,7 @@ export const commandDefinitions: CommandDefinition[] = [
       if (droppingTimestamp) {
         messages.push({
           location: (droppingTimestamp as ESQLColumn).location,
-          text: i18n.translate('monaco.esql.validation.dropTimestampWarning', {
+          text: i18n.translate('kbn-esql-ast-core.esql.validation.dropTimestampWarning', {
             defaultMessage: 'Drop [@timestamp] will remove all time filters to the search results',
           }),
           type: 'warning',
@@ -287,7 +290,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'sort',
-    description: i18n.translate('monaco.esql.definitions.sortDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.sortDoc', {
       defaultMessage:
         'Sorts all results by the specified fields. By default, null values are treated as being larger than any other value. With an ascending sort order, null values are sorted last, and with a descending sort order, null values are sorted first. You can change that by providing NULLS FIRST or NULLS LAST',
     }),
@@ -309,7 +312,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'where',
-    description: i18n.translate('monaco.esql.definitions.whereDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.whereDoc', {
       defaultMessage:
         'Uses "predicate-expressions" to filter search results. A predicate expression, when evaluated, returns TRUE or FALSE. The where command only returns the results that evaluate to TRUE. For example, to filter results for a specific field value',
     }),
@@ -323,7 +326,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'dissect',
-    description: i18n.translate('monaco.esql.definitions.dissectDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.dissectDoc', {
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
@@ -340,7 +343,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'grok',
-    description: i18n.translate('monaco.esql.definitions.grokDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.grokDoc', {
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
@@ -357,7 +360,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'mv_expand',
-    description: i18n.translate('monaco.esql.definitions.mvExpandDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.mvExpandDoc', {
       defaultMessage: 'Expands multivalued fields into one row per value, duplicating other fields',
     }),
     examples: ['row a=[1,2,3] | mv_expand a'],
@@ -370,7 +373,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'enrich',
-    description: i18n.translate('monaco.esql.definitions.enrichDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definitions.enrichDoc', {
       defaultMessage:
         'Enrich table with another table. Before you can use enrich, you need to create and execute an enrich policy.',
     }),

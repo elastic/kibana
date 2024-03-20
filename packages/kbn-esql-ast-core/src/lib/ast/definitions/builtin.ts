@@ -90,28 +90,28 @@ export const builtinFunctions: FunctionDefinition[] = [
   createMathDefinition(
     '+',
     ['number', 'date', ['date', 'time_literal'], ['time_literal', 'date']],
-    i18n.translate('monaco.esql.definition.addDoc', {
+    i18n.translate('kbn-esql-ast-core.esql.definition.addDoc', {
       defaultMessage: 'Add (+)',
     })
   ),
   createMathDefinition(
     '-',
     ['number', 'date', ['date', 'time_literal'], ['time_literal', 'date']],
-    i18n.translate('monaco.esql.definition.subtractDoc', {
+    i18n.translate('kbn-esql-ast-core.esql.definition.subtractDoc', {
       defaultMessage: 'Subtract (-)',
     })
   ),
   createMathDefinition(
     '*',
     ['number'],
-    i18n.translate('monaco.esql.definition.multiplyDoc', {
+    i18n.translate('kbn-esql-ast-core.esql.definition.multiplyDoc', {
       defaultMessage: 'Multiply (*)',
     })
   ),
   createMathDefinition(
     '/',
     ['number'],
-    i18n.translate('monaco.esql.definition.divideDoc', {
+    i18n.translate('kbn-esql-ast-core.esql.definition.divideDoc', {
       defaultMessage: 'Divide (/)',
     }),
     (fnDef) => {
@@ -123,7 +123,7 @@ export const builtinFunctions: FunctionDefinition[] = [
             messages.push({
               type: 'warning' as const,
               code: 'divideByZero',
-              text: i18n.translate('monaco.esql.divide.warning.divideByZero', {
+              text: i18n.translate('kbn-esql-ast-core.esql.divide.warning.divideByZero', {
                 defaultMessage: 'Cannot divide by zero: {left}/{right}',
                 values: {
                   left: left.text,
@@ -141,7 +141,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   createMathDefinition(
     '%',
     ['number'],
-    i18n.translate('monaco.esql.definition.moduleDoc', {
+    i18n.translate('kbn-esql-ast-core.esql.definition.moduleDoc', {
       defaultMessage: 'Module (%)',
     }),
     (fnDef) => {
@@ -153,7 +153,7 @@ export const builtinFunctions: FunctionDefinition[] = [
             messages.push({
               type: 'warning' as const,
               code: 'moduleByZero',
-              text: i18n.translate('monaco.esql.divide.warning.zeroModule', {
+              text: i18n.translate('kbn-esql-ast-core.esql.divide.warning.zeroModule', {
                 defaultMessage: 'Module by zero can return null value: {left}%{right}',
                 values: {
                   left: left.text,
@@ -171,37 +171,37 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...[
     {
       name: '==',
-      description: i18n.translate('monaco.esql.definition.equalToDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.equalToDoc', {
         defaultMessage: 'Equal to',
       }),
     },
     {
       name: '!=',
-      description: i18n.translate('monaco.esql.definition.notEqualToDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.notEqualToDoc', {
         defaultMessage: 'Not equal to',
       }),
     },
     {
       name: '<',
-      description: i18n.translate('monaco.esql.definition.lessThanDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.lessThanDoc', {
         defaultMessage: 'Less than',
       }),
     },
     {
       name: '>',
-      description: i18n.translate('monaco.esql.definition.greaterThanDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.greaterThanDoc', {
         defaultMessage: 'Greater than',
       }),
     },
     {
       name: '<=',
-      description: i18n.translate('monaco.esql.definition.lessThanOrEqualToDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.lessThanOrEqualToDoc', {
         defaultMessage: 'Less than or equal to',
       }),
     },
     {
       name: '>=',
-      description: i18n.translate('monaco.esql.definition.greaterThanOrEqualToDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.greaterThanOrEqualToDoc', {
         defaultMessage: 'Greater than or equal to',
       }),
     },
@@ -211,20 +211,20 @@ export const builtinFunctions: FunctionDefinition[] = [
     // new special comparison operator for strings only
     // {
     //   name: '=~',
-    //   description: i18n.translate('monaco.esql.definition.equalToCaseInsensitiveDoc', {
+    //   description: i18n.translate('kbn-esql-ast-core.esql.definition.equalToCaseInsensitiveDoc', {
     //     defaultMessage: 'Case insensitive equality',
     //   }),
     // },
     {
       name: 'like',
-      description: i18n.translate('monaco.esql.definition.likeDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.likeDoc', {
         defaultMessage: 'Filter data based on string patterns',
       }),
     },
     { name: 'not_like', description: '' },
     {
       name: 'rlike',
-      description: i18n.translate('monaco.esql.definition.rlikeDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.rlikeDoc', {
         defaultMessage: 'Filter data based on string regular expressions',
       }),
     },
@@ -249,7 +249,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...[
     {
       name: 'in',
-      description: i18n.translate('monaco.esql.definition.inDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.inDoc', {
         defaultMessage:
           'Tests if the value an expression takes is contained in a list of other expressions',
       }),
@@ -295,13 +295,13 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...[
     {
       name: 'and',
-      description: i18n.translate('monaco.esql.definition.andDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.andDoc', {
         defaultMessage: 'and',
       }),
     },
     {
       name: 'or',
-      description: i18n.translate('monaco.esql.definition.orDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.orDoc', {
         defaultMessage: 'or',
       }),
     },
@@ -324,7 +324,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   {
     type: 'builtin' as const,
     name: 'not',
-    description: i18n.translate('monaco.esql.definition.notDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definition.notDoc', {
       defaultMessage: 'Not',
     }),
     supportedCommands: ['eval', 'where', 'row'],
@@ -339,13 +339,13 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...[
     {
       name: 'is null',
-      description: i18n.translate('monaco.esql.definition.isNullDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.isNullDoc', {
         defaultMessage: 'Predicate for NULL comparison: returns true if the value is NULL',
       }),
     },
     {
       name: 'is not null',
-      description: i18n.translate('monaco.esql.definition.isNotNullDoc', {
+      description: i18n.translate('kbn-esql-ast-core.esql.definition.isNotNullDoc', {
         defaultMessage: 'Predicate for NULL comparison: returns true if the value is not NULL',
       }),
     },
@@ -364,7 +364,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   {
     type: 'builtin' as const,
     name: '=',
-    description: i18n.translate('monaco.esql.definition.assignDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
     supportedCommands: ['eval', 'stats', 'row', 'dissect', 'where', 'enrich'],
@@ -382,7 +382,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   {
     name: 'functions',
     type: 'builtin',
-    description: i18n.translate('monaco.esql.definition.functionsDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definition.functionsDoc', {
       defaultMessage: 'Show ES|QL avaialble functions with signatures',
     }),
     supportedCommands: ['show'],
@@ -396,7 +396,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   {
     name: 'info',
     type: 'builtin',
-    description: i18n.translate('monaco.esql.definition.infoDoc', {
+    description: i18n.translate('kbn-esql-ast-core.esql.definition.infoDoc', {
       defaultMessage: 'Show information about the current ES node',
     }),
     supportedCommands: ['show'],

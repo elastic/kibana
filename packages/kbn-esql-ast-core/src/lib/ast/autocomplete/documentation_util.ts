@@ -8,11 +8,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-const declarationLabel = i18n.translate('monaco.esql.autocomplete.declarationLabel', {
+const declarationLabel = i18n.translate('kbn-esql-ast-core.esql.autocomplete.declarationLabel', {
   defaultMessage: 'Declaration:',
 });
 
-const examplesLabel = i18n.translate('monaco.esql.autocomplete.examplesLabel', {
+const examplesLabel = i18n.translate('kbn-esql-ast-core.esql.autocomplete.examplesLabel', {
   defaultMessage: 'Examples:',
 });
 

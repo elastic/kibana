@@ -58,7 +58,7 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   return {
     label: fn.name,
     text: hasArgs ? `${fn.name} $0` : fn.name,
-    ...(hasArgs ? { insertTextRules: 4 } : {}), // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    ...(hasArgs ? { insertTextRules: 4 } : {}), // kbn-esql-ast-core.languages.CompletionItemInsertTextRule.InsertAsSnippet,
     kind: 11,
     detail: fn.description,
     documentation: {
@@ -118,7 +118,7 @@ export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinitio
     label,
     text: getSafeInsertText(label),
     kind: 4,
-    detail: i18n.translate('monaco.esql.autocomplete.fieldDefinition', {
+    detail: i18n.translate('kbn-esql-ast-core.esql.autocomplete.fieldDefinition', {
       defaultMessage: `Field specified by the input table`,
     }),
     sortText: 'D',
@@ -129,7 +129,7 @@ export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDef
     label,
     text: label,
     kind: 4,
-    detail: i18n.translate('monaco.esql.autocomplete.variableDefinition', {
+    detail: i18n.translate('kbn-esql-ast-core.esql.autocomplete.variableDefinition', {
       defaultMessage: `Variable specified by the user within the ES|QL query`,
     }),
     sortText: 'D',
@@ -140,7 +140,7 @@ export const buildSourcesDefinitions = (sources: string[]): SuggestionRawDefinit
     label,
     text: getSafeInsertText(label, { dashSupported: true }),
     kind: 21,
-    detail: i18n.translate('monaco.esql.autocomplete.sourceDefinition', {
+    detail: i18n.translate('kbn-esql-ast-core.esql.autocomplete.sourceDefinition', {
       defaultMessage: `Index`,
     }),
     sortText: 'A',
@@ -156,7 +156,7 @@ export const buildConstantsDefinitions = (
     kind: 14,
     detail:
       detail ??
-      i18n.translate('monaco.esql.autocomplete.constantDefinition', {
+      i18n.translate('kbn-esql-ast-core.esql.autocomplete.constantDefinition', {
         defaultMessage: `Constant`,
       }),
     sortText: 'A',
@@ -167,7 +167,7 @@ export const buildNewVarDefinition = (label: string): SuggestionRawDefinition =>
     label,
     text: `${label} =`,
     kind: 21,
-    detail: i18n.translate('monaco.esql.autocomplete.newVarDoc', {
+    detail: i18n.translate('kbn-esql-ast-core.esql.autocomplete.newVarDoc', {
       defaultMessage: 'Define a new variable',
     }),
     sortText: '1',
@@ -181,7 +181,7 @@ export const buildPoliciesDefinitions = (
     label,
     text: getSafeInsertText(label, { dashSupported: true }),
     kind: 5,
-    detail: i18n.translate('monaco.esql.autocomplete.policyDefinition', {
+    detail: i18n.translate('kbn-esql-ast-core.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
       values: {
         count: sourceIndices.length,
@@ -199,7 +199,7 @@ export const buildMatchingFieldsDefinition = (
     label,
     text: label,
     kind: 4,
-    detail: i18n.translate('monaco.esql.autocomplete.matchingFieldDefinition', {
+    detail: i18n.translate('kbn-esql-ast-core.esql.autocomplete.matchingFieldDefinition', {
       defaultMessage: `Use to match on {matchingField} on the policy`,
       values: {
         matchingField,
@@ -243,18 +243,18 @@ export const buildSettingDefinitions = (
 };
 
 export const buildNoPoliciesAvailableDefinition = (): SuggestionRawDefinition => ({
-  label: i18n.translate('monaco.esql.autocomplete.noPoliciesLabel', {
+  label: i18n.translate('kbn-esql-ast-core.esql.autocomplete.noPoliciesLabel', {
     defaultMessage: 'No available policy',
   }),
   text: '',
   kind: 26,
-  detail: i18n.translate('monaco.esql.autocomplete.noPoliciesLabelsFound', {
+  detail: i18n.translate('kbn-esql-ast-core.esql.autocomplete.noPoliciesLabelsFound', {
     defaultMessage: 'Click to create',
   }),
   sortText: 'D',
   command: {
     id: 'esql.policies.create',
-    title: i18n.translate('monaco.esql.autocomplete.createNewPolicy', {
+    title: i18n.translate('kbn-esql-ast-core.esql.autocomplete.createNewPolicy', {
       defaultMessage: 'Click to create',
     }),
   },
@@ -292,7 +292,7 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
         suggestions.push(
           ...buildConstantsDefinitions(
             [commandName === 'grok' ? '"%{WORD:firstWord}"' : '"%{firstWord}"'],
-            i18n.translate('monaco.esql.autocomplete.aPatternString', {
+            i18n.translate('kbn-esql-ast-core.esql.autocomplete.aPatternString', {
               defaultMessage: 'A pattern string',
             })
           )
