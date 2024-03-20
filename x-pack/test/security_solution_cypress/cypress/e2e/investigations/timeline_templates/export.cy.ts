@@ -16,9 +16,11 @@ import {
 import { TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 import { searchByTitle } from '../../../tasks/table_pagination';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
+    deleteTimelines();
     createTimelineTemplate(getTimelineTemplate()).then((response) => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');

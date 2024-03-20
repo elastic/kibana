@@ -10,16 +10,16 @@ import semverCoerce from 'semver/functions/coerce';
 import semverValid from 'semver/functions/valid';
 import { css } from '@emotion/react';
 import {
+  EuiCallOut,
   EuiFieldText,
+  EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTitle,
-  EuiSelect,
-  EuiForm,
-  EuiCallOut,
   EuiTextArea,
-  EuiHorizontalRule,
+  EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
@@ -42,16 +42,11 @@ import { MIN_VERSION_GCP_CIS } from '../../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
 import { GCP_ORGANIZATION_ACCOUNT } from '../policy_template_form';
-import { GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from '../../test_subjects';
+import {
+  CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
+  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
+} from '../../test_subjects';
 
-export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
-  GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
-  PROJECT_ID: 'project_id_test_id',
-  ORGANIZATION_ID: 'organization_id_test_id',
-  CREDENTIALS_TYPE: 'credentials_type_test_id',
-  CREDENTIALS_FILE: 'credentials_file_test_id',
-  CREDENTIALS_JSON: 'credentials_json_test_id',
-};
 type SetupFormatGCP = 'google_cloud_shell' | 'manual';
 export const GCPSetupInfoContent = () => (
   <>

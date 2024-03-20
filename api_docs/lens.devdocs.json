@@ -10939,7 +10939,9 @@
             "section": "def-public.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          " | undefined>; } & ",
+          " | undefined>; canViewUnderlyingData: () => Promise<boolean>; getViewUnderlyingDataArgs: () => ",
+          "ViewUnderlyingDataArgs",
+          "; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",

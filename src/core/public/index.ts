@@ -26,6 +26,8 @@
 
 import './index.scss';
 
+import 'reflect-metadata';
+
 export type { DocLinksStart } from '@kbn/core-doc-links-browser';
 export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 export type { I18nStart } from '@kbn/core-i18n-browser';
