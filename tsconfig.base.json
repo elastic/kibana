@@ -1560,6 +1560,8 @@
       "@kbn/shared-ux-storybook-mock/*": ["packages/shared-ux/storybook/mock/*"],
       "@kbn/shared-ux-utility": ["packages/kbn-shared-ux-utility"],
       "@kbn/shared-ux-utility/*": ["packages/kbn-shared-ux-utility/*"],
+      "@kbn/slo-plugin": ["x-pack/plugins/observability_solution/slo"],
+      "@kbn/slo-plugin/*": ["x-pack/plugins/observability_solution/slo/*"],
       "@kbn/slo-schema": ["x-pack/packages/kbn-slo-schema"],
       "@kbn/slo-schema/*": ["x-pack/packages/kbn-slo-schema/*"],
       "@kbn/snapshot-restore-plugin": ["x-pack/plugins/snapshot_restore"],
@@ -1842,6 +1844,10 @@
     "downlevelIteration": true,
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
     "importHelpers": true,
+    // Allow usage of experimental decorators
+    "experimentalDecorators": true,
+    // Emits decorators metadata
+    "emitDecoratorMetadata": true,
     // adding global typings
     "types": [
       "node",
