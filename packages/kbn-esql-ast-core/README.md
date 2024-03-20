@@ -6,13 +6,13 @@ This library enables all the advanced features for ES|QL within Monaco, as valid
 The package is structure as follow:
 
 ```
+src
 |- antlr                        // => contains the ES|QL grammar files and various compilation assets
 |- lib
 |   |- ast
-|   |    | autocomplete         // => the autocomplete/suggest logic
+|   |    | autocomplete         // => the autocomplete/suggest service logic
+|   |    | code_actions         // => the quick fixes service logic
 |   |    | definitions          // => static assets to define all components behaviour of a ES|QL query: commands, functions, etc...
-|   |    | hover                // => hover logic
-|   |    | signature            // => signature service logic
 |   |    | validation           // => the validation logic
 |   |    ast_factory.ts         // => binding to the Antlr that generates the AST data structure
 |   |    ast_errors.ts          // => error translation utility from raw Antlr to something understandable (somewhat)
@@ -20,15 +20,119 @@ The package is structure as follow:
 |   |- monaco                   // => some high level interfaces to work with
 |   |   | esql_ast_provider.ts  // => the API to work with validation, autocomplete, etc... 
 |   |   | ...
+|   antlr_error_listener.ts     // => The ES|QL syntax error listener
 |   antlr_facade.ts             // => getParser and getLexer utilities
-|- worker                       // => some Monaco utilities that runs in a WebWorker
-language.ts                     // => ES|QL language definition for Monaco with API that expose all features to it
 ```
 
-### Syntax highlight support
+### Basic usage
 
-In general the syntax highlight works out of the box, but in case of new tokens added it is required to add them into the `esql_theme.ts` file to color them.
-There's also a special | (pipe) handling in case of multi-line with some offset applied to the token location indexes to fix some grammar problems with multi-line. In case of issues with highlight look into the `esql_token_provider.ts` file.
+#### Validation
+
+This module contains a low level validation logic useful to perform a full check of an ES|QL query string.
+While callbacks argument is optional in this function, the logic will not skip checks based on those, rather report all errors
+considering the lack of information as an empty set of values.
+For instance, not passing the `getSources` callback will report all index mentioned in the ES|QL with the `Unknown index [...]` error.
+It is recommended to use the `validate` function from the `@kbn/esql-validation` package who is more lenient about lack of callbacks.
+
+##### Usage
+
+```js
+import { validateAst, getAstAndSyntaxErrors } from '@kbn/esql-ast-core';
+
+const myCallbacks = {
+  getSources: async () => [{name: 'index', hidden: false}],
+  ...
+};
+const { errors, warnings } = await validateAst("from index | stats 1 + avg(myColumn)", getAstAndSyntaxErrors, myCallbacks);
+```
+
+#### Autocomplete
+
+This is the complete logic for the ES|QL autocomplete language, it is completely indipendent from the actual editor (i.e. Monaco) and the suggestions reported need to be wrapped against the specific editor shape.
+
+```js
+import { suggest, getAstAndSyntaxErrors } from '@kbn/esql-ast-core';
+
+const queryString = "from index | stats 1 + avg(myColumn) ";
+const myCallbacks = {
+  getSources: async () => [{name: 'index', hidden: false}],
+  ...
+};
+
+const suggestions = await suggest(
+  queryString,
+  queryString.length - 1, // the cursor position in a single line context
+  { triggerCharacter: " "; triggerKind: 1 }, // kind = 0 is a programmatic trigger, while other values are ignored
+  getAstAndSyntaxErrors,
+  myCallbacks
+);
+
+// Log the actual text to be injected as suggestion
+console.log(suggestions.map(({text}) => text));
+
+// for Monaco editor it is required to map each suggestion with the editor specific type
+suggestions.map( s => ({
+  label: s.label,
+  insertText: s.text,
+  insertTextRules: asSnippet
+        ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+        : undefined,
+  ...
+  }))
+```
+
+Note that the autocomplete service will work as best effort with invalid queries, trying to correct them on the fly before generating the suggestions. In case an invalid query cannot be handled an empty suggestion result set will be returned.
+
+#### Quick fixes
+
+This feature provides a list of suggestions to propose as fixes for a subset of validation errors.
+The feature works in combination with the validation service.
+
+```js
+import { validateAst, getAstAndSyntaxErrors, getActions } from '@kbn/esql-ast-core';
+
+const queryString = "from index2 | stats 1 + avg(myColumn)"
+
+const myCallbacks = {
+  getSources: async () => [{name: 'index', hidden: false}],
+  ...
+};
+const { errors, warnings } = await validateAst(queryString, getAstAndSyntaxErrors, myCallbacks);
+
+const {title, edits} = await getActions(
+  queryString,
+  errors,
+  getAstAndSyntaxErrors,
+  myCallbacks
+);
+
+// log the title of the fix suggestion and the proposed change
+// in this example it should suggest to change from "index2" to "index"
+console.log({ title, edits });
+```
+
+### getAstContext
+
+This is an important function in order to build more features on top of the existing one.
+For instance to show contextual information on Hover the `getAstContext` function can be leveraged to get the correct context for the cursor position:
+
+```js
+import { getAstContext, getAstAndSyntaxErrors } from '@kbn/esql-ast-core';
+
+const queryString = "from index2 | stats 1 + avg(myColumn)";
+const offset = queryString.indexOf("avg");
+
+const astContext = getAstContext(queryString, getAstAndSyntaxErrors(queryString), offset);
+
+if(astContext.type === "function"){
+  const fnNode = astContext.node;
+  const fnDefinition = getFunctionDefinition(fnNode.name);
+
+  // show something like "avg( field: number ): number"
+  console.log(getFunctionSignature(fnDefinition));
+}
+```
+
 
 ### How does it work
 
@@ -60,6 +164,7 @@ In general Antlr is resilient to grammar errors, in the sense that it can produe
 Validation takes an AST as input and generates a list of messages to show to the user.
 The validation function leverages the definition files to check if the current AST is respecting the defined behaviour.
 Most of the logic rely purely on the definitions, but in some specific cases some ad-hoc conditions are defined within the code for specific commands/options.
+The validation test suite generates a set of fixtures at the end of its execution, which are then re-used for other test suites (i.e. `@kbn/esql-validation` and some FTR integration tests) as `esql_validation_meta_tests.json`.
 
 #### Autocomplete
 
@@ -69,20 +174,13 @@ Note that autocomplete works most of the time with incomplete/invalid queries, s
 Once the AST is produced there's a `getAstContext` function that finds the cursor position node (and its parent command), together with some hint like the type of current context: `expression`, `function`, `newCommand`, `option`.
 The most complex case is the `expression` as it can cover a moltitude of cases. The function is highly commented in order to identify the specific cases, but there's probably some obscure area still to comment/clarify.
 
-#### Hover
-
-The hover logic leverages the same `getAstContext` function as autocomplete but its logic is way simpler as it picks the right definition based on context and produces a set of strings for the tooltip.
-
-#### Signature
-
-No signature implementation has been added yet, but it will likely work as hover if/when implemented.
-
 ### Keeping ES|QL up to date
 
 In general when operating on changes here use the `yarn kbn watch` in a terminal window to make sure changes are correctly compiled.
 
 #### How to add new functions
 
+A CI job is already present in Kibana to automatically sync most functions based on the ES implementation (it relies on the `META FUNCTIONS` command in ES|QL).
 When a new function is added to ES|QL, this can be of one of these types:
 
 * Built-in function (+, -, in, like, etc...)
@@ -124,5 +222,6 @@ To update the definitions:
 On TOKEN renaming or with subtle `lexer` grammar changes it can happens that test breaks, this can be happen for two main issues:
 * A TOKEN name changed so the `ast_walker.ts` doesn't find it any more. Go there and rename the TOKEN name.
 * TOKEN order changed and tests started failing. This probably generated some TOKEN id reorder and there are two functions in `ast_helpers.ts` who rely on hardcoded ids: `getQuotedText` and `getUnquotedText`.
+  * Note that the `getQuotedText` and `getUnquotedText` are automatically updated on grammar changes detected by the Kibana CI sync job.
   * to fix this just look at the commented tokens and update the ids. If a new token add it and leave a comment to point to the new token name.
   * This choice was made to reduce the bundle size, as importing the `esql_parser` adds some hundreds of Kbs to the bundle otherwise.

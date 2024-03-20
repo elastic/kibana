@@ -136,7 +136,20 @@ function isBuiltinFunction(node: ESQLFunction) {
   return getFunctionDefinition(node.name)?.type === 'builtin';
 }
 
-export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
+/**
+ * Given a ES|QL query string, its AST and the cursor position,
+ * it returns the type of context for the position ("list", "function", "option", "setting", "expression", "newCommand")
+ * plus the whole hierarchy of nodes (command, option, setting and actual position node) context.
+ *
+ * Type details:
+ * * "list": the cursor is inside a "in" list of values (i.e. `a in (1, 2, <here>)`)
+ * * "function": the cursor is inside a function call (i.e. `fn(<here>)`)
+ * * "option": the cursor is inside a command option (i.e. `command ... by <here>`)
+ * * "setting": the cursor is inside a setting (i.e. `command _<here>`)
+ * * "expression": the cursor is inside a command expression (i.e. `command ... <here>` or `command a = ... <here>`)
+ * * "newCommand": the cursor is at the beginning of a new command (i.e. `command1 | command2 | <here>`)
+ */
+export function getAstContext(queryString: string, ast: ESQLAst, offset: number) {
   const { command, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'function') {
@@ -159,7 +172,7 @@ export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
       return { type: 'setting' as const, command, node, option, setting };
     }
   }
-  if (!command && innerText.trim().toLowerCase() === 'show') {
+  if (!command && queryString.trim().toLowerCase() === 'show') {
     return {
       type: 'expression' as const,
       // The ES grammar makes the "SHOW" command an invalid type at grammar level
@@ -167,8 +180,8 @@ export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
       command: {
         type: 'command',
         name: 'show',
-        text: innerText.trim(),
-        location: { min: 0, max: innerText.length },
+        text: queryString.trim(),
+        location: { min: 0, max: queryString.length },
         incomplete: true,
         args: [],
       } as ESQLCommand,
@@ -177,7 +190,7 @@ export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
     };
   }
 
-  if (!command || (innerText.length <= offset && getLastCharFromTrimmed(innerText) === '|')) {
+  if (!command || (queryString.length <= offset && getLastCharFromTrimmed(queryString) === '|')) {
     //   // ... | <here>
     return { type: 'newCommand' as const, command: undefined, node, option, setting };
   }

@@ -19,3 +19,10 @@ export interface SuggestionRawDefinition {
     id: string;
   };
 }
+
+export interface EditorContext {
+  /** The actual char that triggered the suggestion (1 single char) */
+  triggerCharacter?: string;
+  /** The type of trigger id. triggerKind = 0 is a programmatic trigger, while any other non-zero value is currently ignored. */
+  triggerKind: number;
+}

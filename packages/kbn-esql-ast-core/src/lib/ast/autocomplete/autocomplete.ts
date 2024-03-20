@@ -7,7 +7,7 @@
  */
 
 import uniqBy from 'lodash/uniqBy';
-import type { SuggestionRawDefinition } from './types';
+import type { EditorContext, SuggestionRawDefinition } from './types';
 import { nonNullable } from '../ast_helpers';
 import {
   columnExists,
@@ -147,7 +147,7 @@ function countBracketsUnclosed(bracketType: '(' | '[', text: string) {
 export async function suggest(
   fullText: string,
   offset: number,
-  context: { triggerCharacter?: string; triggerKind: number },
+  context: EditorContext,
   astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
 ): Promise<SuggestionRawDefinition[]> {
