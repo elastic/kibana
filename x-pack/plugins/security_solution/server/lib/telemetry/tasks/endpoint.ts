@@ -32,6 +32,7 @@ import {
   isPackagePolicyList,
   newTelemetryLogger,
   safeValue,
+  type TelemetryLogger,
 } from '../helpers';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
@@ -113,7 +114,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          */
         const policyIdByAgent = endpointData.policyIdByAgent;
         endpointData.policyIdByAgent.delete(DefaultEndpointPolicyIdToIgnore);
-        const endpointPolicyById = await endpointPolicies(policyIdByAgent.values(), receiver);
+        const endpointPolicyById = await endpointPolicies(policyIdByAgent.values(), receiver, log);
 
         /**
          * STAGE 3 - Fetch Endpoint Policy Responses
@@ -217,11 +218,19 @@ async function fetchClusterData(
   return { clusterInfo, licenseInfo };
 }
 
-async function endpointPolicies(policyIds: IterableIterator<string>, receiver: ITelemetryReceiver) {
+async function endpointPolicies(
+  policyIds: IterableIterator<string>,
+  receiver: ITelemetryReceiver,
+  log: TelemetryLogger
+) {
   const endpointPolicyCache = new Map<string, PolicyData>();
   for (const policyId of policyIds) {
     if (policyId !== null && policyId !== undefined && !endpointPolicyCache.has(policyId)) {
-      const agentPolicy = await receiver.fetchPolicyConfigs(policyId);
+      const agentPolicy = await receiver.fetchPolicyConfigs(policyId).catch((e) => {
+        log.l(`error fetching policy config due to ${e?.message}`);
+        return null;
+      });
+
       const packagePolicies = agentPolicy?.package_policies;
 
       if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
