@@ -388,4 +388,38 @@ describe('pollEsNodesVersion', () => {
 
     expect(internalClient.nodes.info).toHaveBeenCalledTimes(2);
   });
+
+  it('switch from startup interval to normal interval after first green status', () => {
+    expect.assertions(1);
+
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.nodes.info.mockReturnValueOnce([createNodes('6.3.0')]);
+
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.nodes.info.mockReturnValueOnce([createNodes('5.1.0')]);
+
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.nodes.info.mockReturnValueOnce([createNodes('5.2.0')]);
+
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.nodes.info.mockReturnValueOnce([createNodes('5.3.0')]);
+
+    getTestScheduler().run(({ expectObservable }) => {
+      const esNodesCompatibility$ = pollEsNodesVersion({
+        internalClient,
+        healthCheckInterval: 100,
+        healthCheckStartupInterval: 50,
+        ignoreVersionMismatch: false,
+        kibanaVersion: KIBANA_VERSION,
+        log: mockLogger,
+      }).pipe(take(4));
+
+      expectObservable(esNodesCompatibility$).toBe('a 49ms (bc) 96ms (d|)', {
+        a: expect.any(Object),
+        b: expect.any(Object),
+        c: expect.any(Object),
+        d: expect.any(Object),
+      });
+    });
+  });
 });

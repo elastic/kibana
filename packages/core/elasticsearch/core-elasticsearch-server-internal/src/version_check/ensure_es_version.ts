@@ -168,7 +168,7 @@ export const pollEsNodesVersion = ({
   );
 
   return checkInterval$.pipe(
-    switchMap((interval) => timer(0, interval)),
+    switchMap((checkInterval) => timer(0, checkInterval)),
     exhaustMap(() => {
       return from(
         internalClient.nodes.info({
