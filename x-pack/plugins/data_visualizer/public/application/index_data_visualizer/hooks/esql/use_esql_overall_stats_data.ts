@@ -28,7 +28,6 @@ import {
   isESQLQuery,
 } from '../../search_strategy/requests/esql_utils';
 import type { NonAggregatableField } from '../../types/overall_stats';
-import { getESQLSupportedAggs } from '../../utils/get_supported_aggs';
 import { getESQLOverallStats } from '../../search_strategy/esql_requests/get_count_and_cardinality';
 import type { AggregatableField } from '../../types/esql_data_visualizer';
 import {
@@ -247,18 +246,25 @@ export const useESQLOverallStatsData = (
         // For doc count chart, we want the full base query without any limit
         const esqlBaseQuery = searchQuery.esql;
 
+        // dropNullColumns wills all columns are empty if limti 0
+        // So we can use this one query to
+        // 1) identify populated/empty fields
+        // 2) gather examples for populated text fields
         const columnsResp = await runRequest(
           {
             params: {
-              query: esqlBaseQuery + '| LIMIT 0',
+              query: esqlBaseQuery + '| LIMIT 1000',
               ...(filter ? { filter } : {}),
+              dropNullColumns: true,
             },
           },
           { strategy: ESQL_SEARCH_STRATEGY }
         );
+
+        const populatedColumns = new Set(columnsResp?.rawResponse.columns.map((c) => c.name));
         const columns = columnsResp?.rawResponse
           ? // @ts-expect-error ES types need to be updated with columns for ESQL queries
-            (columnsResp.rawResponse.columns.map((c) => ({
+            (columnsResp.rawResponse.all_columns.map((c) => ({
               ...c,
               secondaryType: getSupportedFieldType(c.type),
             })) as Column[])
@@ -326,7 +332,7 @@ export const useESQLOverallStatsData = (
         setOverallStatsProgress({
           loaded: 50,
         });
-        const aggregatableFields: Array<{
+        const aggregatableNotExistsFields: Array<{
           fieldName: string;
           name: string;
           type: string;
@@ -334,12 +340,14 @@ export const useESQLOverallStatsData = (
           secondaryType: string;
           aggregatable: boolean;
         }> = [];
-        const nonAggregatableFields: Array<{
+
+        const nonAggregatableNotExistsFields: Array<{
           fieldName: string;
           name: string;
           type: string;
           secondaryType: string;
         }> = [];
+
         const fields = columns
           // Some field types are not supported by ESQL yet
           // Also, temporarily removing null columns because it causes problems with some aggs
@@ -348,29 +356,31 @@ export const useESQLOverallStatsData = (
           .map((field) => {
             return { ...field, aggregatable: !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) };
           });
-
+        const populatedFields = fields.filter((field) => populatedColumns.has(field.name));
         fields?.forEach((field) => {
           const fieldName = field.name;
+
           if (!OMIT_FIELDS.includes(fieldName)) {
             if (!field.aggregatable) {
-              nonAggregatableFields.push({
-                ...field,
-                fieldName: field.name,
-                secondaryType: getSupportedFieldType(field.type),
-              });
+              if (!populatedColumns.has(fieldName)) {
+                nonAggregatableNotExistsFields.push({
+                  ...field,
+                  fieldName: field.name,
+                  secondaryType: getSupportedFieldType(field.type),
+                });
+              }
             } else {
-              aggregatableFields.push({
-                ...field,
-                fieldName: field.name,
-                secondaryType: getSupportedFieldType(field.type),
-                supportedAggs: getESQLSupportedAggs(field, true),
-                aggregatable: true,
-              });
+              if (!populatedColumns.has(fieldName)) {
+                aggregatableNotExistsFields.push({
+                  ...field,
+                  fieldName: field.name,
+                  aggregatable: true,
+                  existsInDocs: false,
+                });
+              }
             }
           }
         });
-
-        setTableData({ aggregatableFields, nonAggregatableFields });
 
         // COUNT + CARDINALITY
         // For % count & cardinality, we want the full base query WITH specified limit
@@ -396,13 +406,17 @@ export const useESQLOverallStatsData = (
         if (totalCount > 0 && fields.length > 0) {
           const stats = await getESQLOverallStats({
             runRequest,
-            fields,
+            // Only need to fetch stats for fields we know are populated
+            fields: populatedFields,
             esqlBaseQueryWithLimit,
             filter,
             limitSize,
             totalCount,
             onError,
           });
+          stats.aggregatableNotExistsFields = aggregatableNotExistsFields;
+          stats.nonAggregatableNotExistsFields = nonAggregatableNotExistsFields;
+          stats.totalFields = columns.length;
 
           setTableData({ overallStats: stats });
           setOverallStatsProgress({

@@ -496,13 +496,7 @@ export const useESQLDataVisualizerData = (
     if (!overallStats) return;
 
     let _visibleFieldsCount = 0;
-    let _totalFieldsCount = 0;
-    Object.keys(overallStats).forEach((key) => {
-      const fieldsGroup = overallStats[key as keyof typeof overallStats];
-      if (Array.isArray(fieldsGroup) && fieldsGroup.length > 0) {
-        _totalFieldsCount += fieldsGroup.length;
-      }
-    });
+    const _totalFieldsCount = overallStats.totalFields;
 
     if (showEmptyFields === true) {
       _visibleFieldsCount = _totalFieldsCount;
