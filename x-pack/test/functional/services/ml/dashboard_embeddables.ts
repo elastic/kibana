@@ -16,6 +16,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  // const ml = getService('ml');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['discover']);
 
@@ -23,6 +24,22 @@ export function MachineLearningDashboardEmbeddablesProvider(
     async assertAnomalyChartsEmbeddableInitializerExists() {
       await retry.tryForTime(10 * 1000, async () => {
         await testSubjects.existOrFail('mlAnomalyChartsEmbeddableInitializer', { timeout: 1000 });
+      });
+    },
+
+    async assertSingleMetricViewerEmbeddableInitializerExists() {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.existOrFail('mlSingleMetricViewerEmbeddableInitializer', {
+          timeout: 1000,
+        });
+      });
+    },
+
+    async assertSingleMetricViewerEmbeddableInitializerNotExists() {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.missingOrFail('mlSingleMetricViewerEmbeddableInitializer', {
+          timeout: 1000,
+        });
       });
     },
 
@@ -46,9 +63,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
       });
     },
 
-    async assertInitializerConfirmButtonEnabled() {
-      const subj = 'mlAnomalyChartsInitializerConfirmButton';
-
+    async assertInitializerConfirmButtonEnabled(subj: string) {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail(subj);
         await testSubjects.isEnabled(subj);
@@ -58,9 +73,18 @@ export function MachineLearningDashboardEmbeddablesProvider(
     async clickInitializerConfirmButtonEnabled() {
       const subj = 'mlAnomalyChartsInitializerConfirmButton';
       await retry.tryForTime(60 * 1000, async () => {
-        await this.assertInitializerConfirmButtonEnabled();
+        await this.assertInitializerConfirmButtonEnabled(subj);
         await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
         await this.assertAnomalyChartsEmbeddableInitializerNotExists();
+      });
+    },
+
+    async clickSingleMetricViewerInitializerConfirmButtonEnabled() {
+      const subj = 'mlSingleMetricViewerInitializerConfirmButton';
+      await retry.tryForTime(60 * 1000, async () => {
+        await this.assertInitializerConfirmButtonEnabled(subj);
+        await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
+        await this.assertSingleMetricViewerEmbeddableInitializerNotExists();
       });
     },
 
@@ -101,7 +125,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
     },
 
     async openAnomalyJobSelectionFlyout(
-      mlEmbeddableType: 'ml_anomaly_swimlane' | 'ml_anomaly_charts'
+      mlEmbeddableType: 'ml_anomaly_swimlane' | 'ml_anomaly_charts' | 'ml_single_metric_viewer'
     ) {
       await retry.tryForTime(60 * 1000, async () => {
         await dashboardAddPanel.clickEditorMenuButton();
