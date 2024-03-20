@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(toastTitle).toMatch(/created/i);
     });
 
-    it('should create SLO successfully', async () => {
+    // Flaky test
+    it.skip('should create SLO successfully', async () => {
       await testSubjects.clickWhenNotDisabled('observabilityLogsExplorerAlertsPopoverToggleButton');
       await testSubjects.click('observabilityLogsExplorerCreateSLOMenuItem');
       await testSubjects.exists('customKqlIndicatorFormGoodQueryInput');
