@@ -615,18 +615,11 @@ const putSloSettings = createSloServerRoute({
     await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
-    try {
-      const object = await soClient.create<SloSettings>(SO_SLO_SETTINGS_TYPE, params.body, {
-        id: sloSettingsObjectId,
-        overwrite: true,
-      });
-      return object.attributes;
-    } catch (e) {
-      return {
-        useAllRemoteClusters: false,
-        selectedRemoteClusters: [],
-      };
-    }
+    const object = await soClient.create<SloSettings>(SO_SLO_SETTINGS_TYPE, params.body, {
+      id: sloSettingsObjectId,
+      overwrite: true,
+    });
+    return object.attributes;
   },
 });
 
