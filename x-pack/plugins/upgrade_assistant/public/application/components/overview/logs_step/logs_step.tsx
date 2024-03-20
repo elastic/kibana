@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
+import { DEPRECATION_LOGS_INDEX, APP_LOGS_COUNT_PRIVILEGES } from '../../../../../common/constants';
 import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { loadLogsCheckpoint } from '../../../lib/logs_checkpoint';
@@ -53,13 +53,13 @@ const i18nTexts = {
       }}
     />
   ),
-  missingPrivilegesTitle: i18n.translate(
+  missingIndexPrivilegesTitle: i18n.translate(
     'xpack.upgradeAssistant.overview.logsStep.missingPrivilegesTitle',
     {
       defaultMessage: 'You require index privileges to analyze the deprecation logs',
     }
   ),
-  missingPrivilegesDescription: (privilegesMissing: MissingPrivileges) => (
+  missingIndexPrivilegesDescription: (privilegesMissing: MissingPrivileges) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.logsStep.missingPrivilegesDescription"
       defaultMessage="The deprecation logs will continue to be indexed, but you won't be able to analyze them until you have the read index {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}"
@@ -68,6 +68,24 @@ const i18nTexts = {
           <EuiCode transparentBackground={true}>{privilegesMissing?.index?.join(', ')}</EuiCode>
         ),
         privilegesCount: privilegesMissing?.index?.length,
+      }}
+    />
+  ),
+  missingClusterPrivilegesTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.logsStep.missingClusterPrivilegesTitle',
+    {
+      defaultMessage: 'You require cluster privileges to analyze the deprecation logs',
+    }
+  ),
+  missingClusterPrivilegesDescription: (privilegesMissing: MissingPrivileges) => (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.overview.logsStep.missingClusterPrivilegesDescription"
+      defaultMessage="The deprecation logs will continue to be indexed, but you won't be able to analyze them until you have the cluster {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}"
+      values={{
+        missingPrivileges: (
+          <EuiCode transparentBackground={true}>{privilegesMissing?.cluster?.join(', ')}</EuiCode>
+        ),
+        privilegesCount: privilegesMissing?.cluster?.length,
       }}
     />
   ),
@@ -132,14 +150,31 @@ const LogsStep = ({
 
         <EuiSpacer />
 
-        <EuiCallOut
-          iconType="help"
-          color="warning"
-          title={i18nTexts.missingPrivilegesTitle}
-          data-test-subj="missingPrivilegesCallout"
-        >
-          <p>{i18nTexts.missingPrivilegesDescription(privilegesMissing)}</p>
-        </EuiCallOut>
+        {privilegesMissing.cluster && (
+          <EuiCallOut
+            iconType="help"
+            color="warning"
+            title={i18nTexts.missingClusterPrivilegesTitle}
+            data-test-subj="missingClusterPrivilegesCallout"
+          >
+            <p>{i18nTexts.missingClusterPrivilegesDescription(privilegesMissing)}</p>
+          </EuiCallOut>
+        )}
+
+        {privilegesMissing.cluster && privilegesMissing.index && (
+          <EuiSpacer />
+        )}
+
+        {privilegesMissing.index && (
+          <EuiCallOut
+            iconType="help"
+            color="warning"
+            title={i18nTexts.missingIndexPrivilegesTitle}
+            data-test-subj="missingIndexPrivilegesCallout"
+          >
+            <p>{i18nTexts.missingIndexPrivilegesDescription(privilegesMissing)}</p>
+          </EuiCallOut>
+        )}
       </>
     );
   }
@@ -216,12 +251,17 @@ export const getLogsStep = ({
 }: OverviewStepProps & CustomProps): EuiStepProps => {
   const status = isComplete ? 'complete' : 'incomplete';
 
+  const requiredPrivileges = [
+    `index.${DEPRECATION_LOGS_INDEX}`,
+    ...APP_LOGS_COUNT_PRIVILEGES.map(privilege => `cluster.${privilege}`),
+  ];
+
   return {
     status,
     title: i18nTexts.logsStepTitle,
     'data-test-subj': `logsStep-${status}`,
     children: (
-      <WithPrivileges privileges={`index.${DEPRECATION_LOGS_INDEX}`}>
+      <WithPrivileges privileges={requiredPrivileges}>
         {({ hasPrivileges, isLoading, privilegesMissing }) => (
           <LogsStep
             setIsComplete={setIsComplete}

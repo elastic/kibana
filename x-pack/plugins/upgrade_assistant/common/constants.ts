@@ -41,3 +41,5 @@ export const APPS_WITH_DEPRECATION_LOGS = [
 
 // The field that will indicate which elastic product generated the deprecation log
 export const DEPRECATION_LOGS_ORIGIN_FIELD = 'elasticsearch.elastic_product_origin';
+
+export const APP_LOGS_COUNT_PRIVILEGES = ['manage_security'];
