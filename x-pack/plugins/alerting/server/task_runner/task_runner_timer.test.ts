@@ -33,7 +33,7 @@ describe('TaskRunnerTimer', () => {
       expect(timer.toJson()).toEqual({
         claim_to_start_duration_ms: 259200000,
         persist_alerts_duration_ms: 0,
-        prepare_to_run_duration_ms: 0,
+        prepare_rule_duration_ms: 0,
         process_alerts_duration_ms: 0,
         process_rule_duration_ms: 0,
         rule_type_run_duration_ms: 0,
@@ -51,7 +51,7 @@ describe('TaskRunnerTimer', () => {
       expect(timer.toJson()).toEqual({
         claim_to_start_duration_ms: 432000000,
         persist_alerts_duration_ms: 0,
-        prepare_to_run_duration_ms: 0,
+        prepare_rule_duration_ms: 0,
         process_alerts_duration_ms: 0,
         process_rule_duration_ms: 0,
         rule_type_run_duration_ms: 0,

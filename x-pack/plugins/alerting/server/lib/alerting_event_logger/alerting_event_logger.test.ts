@@ -776,7 +776,7 @@ describe('AlertingEventLogger', () => {
         timings: {
           [TaskRunnerTimerSpan.StartTaskRun]: 10,
           [TaskRunnerTimerSpan.TotalRunDuration]: 20,
-          [TaskRunnerTimerSpan.PrepareToRun]: 35,
+          [TaskRunnerTimerSpan.PrepareRule]: 30,
           [TaskRunnerTimerSpan.RuleTypeRun]: 40,
           [TaskRunnerTimerSpan.ProcessAlerts]: 50,
           [TaskRunnerTimerSpan.PersistAlerts]: 60,
@@ -799,7 +799,7 @@ describe('AlertingEventLogger', () => {
                 metrics: {
                   claim_to_start_duration_ms: 10,
                   total_run_duration_ms: 20,
-                  prepare_to_run_duration_ms: 35,
+                  prepare_rule_duration_ms: 30,
                   rule_type_run_duration_ms: 40,
                   process_alerts_duration_ms: 50,
                   persist_alerts_duration_ms: 60,
@@ -837,7 +837,7 @@ describe('AlertingEventLogger', () => {
         timings: {
           [TaskRunnerTimerSpan.StartTaskRun]: 10,
           [TaskRunnerTimerSpan.TotalRunDuration]: 20,
-          [TaskRunnerTimerSpan.PrepareToRun]: 35,
+          [TaskRunnerTimerSpan.PrepareRule]: 30,
           [TaskRunnerTimerSpan.RuleTypeRun]: 40,
           [TaskRunnerTimerSpan.ProcessAlerts]: 50,
           [TaskRunnerTimerSpan.PersistAlerts]: 60,
@@ -871,7 +871,7 @@ describe('AlertingEventLogger', () => {
                   total_search_duration_ms: 10333,
                   claim_to_start_duration_ms: 10,
                   total_run_duration_ms: 20,
-                  prepare_to_run_duration_ms: 35,
+                  prepare_rule_duration_ms: 30,
                   rule_type_run_duration_ms: 40,
                   process_alerts_duration_ms: 50,
                   persist_alerts_duration_ms: 60,

@@ -435,7 +435,7 @@ export class TaskRunner<
    * - clear expired snoozes
    */
   private async prepareToRun(): Promise<RunRuleParams<Params>> {
-    return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareToRun, async () => {
+    return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareRule, async () => {
       const {
         params: { alertId: ruleId, spaceId, consumer },
         startedAt,
