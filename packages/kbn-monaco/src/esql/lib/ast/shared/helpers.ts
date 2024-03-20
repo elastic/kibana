@@ -408,8 +408,10 @@ function getMatcher(name: string, position: 'start' | 'end' | 'middle' | 'multip
     return (resource: string) => resource.startsWith(prefix);
   }
   if (position === 'multiple-within') {
+    // make sure to remove the * at the beginning of the name if present
+    const safeName = name.startsWith('*') ? name.slice(1) : name;
     // replace 2 ore more consecutive wildcards with a single one
-    const setOfChars = name.replace(/\*{2+}/g, '*').split('*');
+    const setOfChars = safeName.replace(/\*{2+}/g, '*').split('*');
     return (resource: string) => {
       let index = -1;
       return setOfChars.every((char) => {
