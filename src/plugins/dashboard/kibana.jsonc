@@ -34,7 +34,9 @@
       "usageCollection",
       "taskManager",
       "serverless",
-      "noDataPage"
+      "noDataPage",
+      "security",
+      "spaces"
     ],
     "requiredBundles": [
       "kibanaReact",

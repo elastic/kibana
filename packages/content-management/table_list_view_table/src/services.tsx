@@ -16,6 +16,7 @@ import {
   ContentEditorKibanaProvider,
   type SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
+import type { UserProfileAPIClient } from '@kbn/security-plugin-types-public';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';
@@ -58,6 +59,8 @@ export interface Services {
   /** Handler to return the url to navigate to the kibana tags management */
   getTagManagementUrl: () => string;
   getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
+
+  suggestUsers: (query: any) => Promise<any>;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -154,6 +157,10 @@ export interface TableListViewKibanaDependencies {
   };
   /** The <FormattedRelative /> component from the @kbn/i18n-react package */
   FormattedRelative: typeof FormattedRelative;
+
+  security?: {
+    userProfiles: UserProfileAPIClient;
+  };
 }
 
 /**
@@ -216,6 +223,18 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
     [getTagIdsFromReferences]
   );
 
+  const suggestUsers = useCallback(
+    (query: { name: string }) => {
+      return (
+        services.security?.userProfiles.suggest(
+          `/internal/user_profiles_dashboard/_suggest`,
+          query
+        ) || Promise.resolve([])
+      );
+    },
+    [services.security?.userProfiles]
+  );
+
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
       <ContentEditorKibanaProvider
@@ -242,6 +261,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
           itemHasTags={itemHasTags}
           getTagIdsFromReferences={getTagIdsFromReferences}
           getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+          suggestUsers={suggestUsers}
         >
           {children}
         </TableListViewProvider>

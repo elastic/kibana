@@ -40,6 +40,15 @@ const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   return savedObjects.client;
 };
 
+const userIdFromRequest = async (ctx: StorageContext) => {
+  if (!ctx.requestHandlerContext) {
+    throw new Error('Storage context.requestHandlerContext missing.');
+  }
+
+  const user = (await ctx.requestHandlerContext.core).security.authc.getCurrentUser();
+  return user?.profile_uid;
+};
+
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
@@ -65,6 +74,7 @@ function savedObjectToItem<Attributes extends object>(
     type,
     updated_at: updatedAt,
     created_at: createdAt,
+    created_by: createdBy,
     attributes,
     references,
     error,
@@ -79,6 +89,7 @@ function savedObjectToItem<Attributes extends object>(
     managed,
     updatedAt,
     createdAt,
+    createdBy,
     attributes: pick(attributes, allowedSavedObjectAttributes),
     references,
     error,
@@ -105,6 +116,7 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
     defaultSearchOperator: 'AND',
     searchFields: options?.searchFields ?? ['description', 'title'],
     fields: options?.fields ?? ['description', 'title'],
+    filter: query.createdBy ? `created_by:"${query.createdBy}"` : undefined,
     ...tagsToFindOptions(query.tags),
   };
 };
@@ -297,6 +309,9 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
   ): Promise<Types['CreateOut']> {
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
+    const currentUserId = await userIdFromRequest(ctx);
+
+    this.logger.info('Creating content for user: ' + currentUserId);
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
@@ -321,7 +336,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     const savedObject = await soClient.create<Types['Attributes']>(
       this.savedObjectType,
       dataToLatest,
-      createOptions
+      { ...createOptions, createdBy: currentUserId }
     );
 
     const result = {

@@ -71,7 +71,7 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
         savedObjectsTagging,
       }),
     findDashboards: {
-      search: ({ hasReference, hasNoReference, search, size, options }) =>
+      search: ({ hasReference, hasNoReference, search, size, options, createdBy }) =>
         searchDashboards({
           contentManagement,
           hasNoReference,
@@ -79,6 +79,7 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
           options,
           search,
           size,
+          createdBy,
         }),
       findById: (id) => findDashboardById(contentManagement, id),
       findByIds: (ids) => findDashboardsByIds(contentManagement, ids),

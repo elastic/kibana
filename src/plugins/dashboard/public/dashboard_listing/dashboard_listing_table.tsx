@@ -86,6 +86,8 @@ export const DashboardListingTable = ({
     [application, notifications, overlays, http, theme]
   );
 
+  const security = pluginServices.getServices().security;
+
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
@@ -93,6 +95,7 @@ export const DashboardListingTable = ({
         toMountPoint={toMountPoint}
         savedObjectsTagging={savedObjectsTaggingFakePlugin}
         FormattedRelative={FormattedRelative}
+        security={security.userProfiles ? { userProfiles: security.userProfiles } : undefined}
       >
         <>
           <DashboardUnsavedListing

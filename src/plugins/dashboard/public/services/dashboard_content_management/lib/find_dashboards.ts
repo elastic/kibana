@@ -23,6 +23,7 @@ export interface SearchDashboardsArgs {
   options?: DashboardCrudTypes['SearchIn']['options'];
   hasNoReference?: SavedObjectsFindOptionsReference[];
   hasReference?: SavedObjectsFindOptionsReference[];
+  createdBy?: string;
   search: string;
   size: number;
 }
@@ -39,6 +40,7 @@ export async function searchDashboards({
   options,
   search,
   size,
+  createdBy,
 }: SearchDashboardsArgs): Promise<SearchDashboardsResponse> {
   const {
     hits,
@@ -55,6 +57,7 @@ export async function searchDashboards({
         included: (hasReference ?? []).map(({ id }) => id),
         excluded: (hasNoReference ?? []).map(({ id }) => id),
       },
+      createdBy,
     },
     options,
   });

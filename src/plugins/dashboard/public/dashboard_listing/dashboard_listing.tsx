@@ -65,6 +65,8 @@ export const DashboardListing = ({
       : undefined;
   }, [savedObjectsTagging]);
 
+  const security = pluginServices.getServices().security;
+
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
@@ -79,6 +81,7 @@ export const DashboardListing = ({
           toMountPoint,
           savedObjectsTagging: savedObjectsTaggingFakePlugin,
           FormattedRelative,
+          security: security.userProfiles ? { userProfiles: security.userProfiles } : undefined,
         }}
       >
         <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>

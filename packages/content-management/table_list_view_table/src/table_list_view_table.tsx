@@ -45,6 +45,7 @@ import type { SavedObjectsFindOptionsReference } from './services';
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
+import { useUsers } from './use_users';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
 
@@ -82,7 +83,8 @@ export interface TableListViewTableProps<
     refs?: {
       references?: SavedObjectsFindOptionsReference[];
       referencesToExclude?: SavedObjectsFindOptionsReference[];
-    }
+    },
+    createdBy?: string
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
   getDetailViewLink?: (entity: T) => string | undefined;
@@ -302,6 +304,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     notifyError,
     DateFormatterComp,
     getTagList,
+    suggestUsers,
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
@@ -384,7 +387,30 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         ? await searchQueryParser(searchQuery.text)
         : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
 
-      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
+      let createdBy: string | undefined;
+      try {
+        const parsed = Query.parse(searchQuery.text);
+        const field = parsed.ast.getOrFieldClause('user', undefined, true, 'eq')?.value;
+        if (field) {
+          const creatorName = Array.isArray(field) ? field[0] : field;
+          const users = await suggestUsers({ name: creatorName });
+          const user = users.find((u) => u.user.username === creatorName);
+          if (user) {
+            createdBy = user.uid;
+          }
+        }
+      } catch (e) {
+        // noop
+      }
+
+      const response = await findItems(
+        searchQueryParsed,
+        {
+          references,
+          referencesToExclude,
+        },
+        createdBy
+      );
 
       if (!isMounted.current) {
         return;
@@ -429,6 +455,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     clearTagSelection,
     tagsToTableItemMap,
   } = useTags({
+    query: searchQuery.query,
+    updateQuery,
+    items,
+  });
+
+  const { setUserSelection, clearUserSelection } = useUsers({
     query: searchQuery.query,
     updateQuery,
     items,
@@ -1016,6 +1048,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
           clearTagSelection={clearTagSelection}
+          setUserSelection={setUserSelection}
         />
 
         {/* Delete modal */}

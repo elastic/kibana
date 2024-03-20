@@ -27,6 +27,7 @@ const searchArgsToSOFindOptions = (
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,
     defaultSearchOperator: 'AND',
+    filter: query.createdBy ? `dashboard.created_by:"${query.createdBy}"` : undefined,
     ...tagsToFindOptions(query.tags),
   };
 };

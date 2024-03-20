@@ -70,6 +70,7 @@ import { DashboardMountContextProps } from './dashboard_app/types';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { addPanelMenuTrigger } from './triggers';
+import { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -109,6 +110,7 @@ export interface DashboardStartDependencies {
   customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
+  security?: SecurityPluginStart;
 }
 
 export interface DashboardSetup {

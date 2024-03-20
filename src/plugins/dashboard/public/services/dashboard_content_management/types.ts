@@ -109,7 +109,7 @@ export interface FindDashboardsService {
   search: (
     props: Pick<
       SearchDashboardsArgs,
-      'hasReference' | 'hasNoReference' | 'search' | 'size' | 'options'
+      'hasReference' | 'hasNoReference' | 'search' | 'size' | 'options' | 'createdBy'
     >
   ) => Promise<SearchDashboardsResponse>;
   findById: (id: string) => Promise<FindDashboardsByIdResponse>;

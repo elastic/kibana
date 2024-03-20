@@ -195,7 +195,8 @@ export const useDashboardListingTable = ({
       }: {
         references?: SavedObjectsFindOptionsReference[];
         referencesToExclude?: SavedObjectsFindOptionsReference[];
-      } = {}
+      } = {},
+      createdBy?: string
     ) => {
       const searchStartTime = window.performance.now();
 
@@ -205,6 +206,7 @@ export const useDashboardListingTable = ({
           size: listingLimit,
           hasReference: references,
           hasNoReference: referencesToExclude,
+          createdBy,
         })
         .then(({ total, hits }) => {
           const searchEndTime = window.performance.now();

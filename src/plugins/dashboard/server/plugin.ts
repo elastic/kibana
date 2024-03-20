@@ -13,7 +13,10 @@ import {
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import {
   initializeDashboardTelemetryTask,
@@ -38,6 +41,8 @@ interface SetupDeps {
 
 interface StartDeps {
   taskManager: TaskManagerStartContract;
+  security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class DashboardPlugin
@@ -51,6 +56,54 @@ export class DashboardPlugin
 
   public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     this.logger.debug('dashboard: Setup');
+
+    core.http.createRouter().post(
+      {
+        path: '/internal/user_profiles_dashboard/_suggest',
+        validate: {
+          body: schema.object({
+            name: schema.string(),
+            dataPath: schema.maybe(schema.string()),
+          }),
+        },
+        // TODO:
+        // /**
+        //  * Important: You must restrict access to this endpoint using access `tags`.
+        //  */
+        // options: { tags: ['access:suggestUserProfiles'] },
+      },
+      async (context, request, response) => {
+        const [, pluginDeps] = await core.getStartServices();
+
+        /**
+         * Important: `requiredPrivileges` must be hard-coded server-side and cannot be exposed as a
+         * param client-side.
+         *
+         * If your app requires suggestions based on different privileges you must expose separate
+         * endpoints for each use-case.
+         *
+         * In this example we ensure that suggested users have access to the current space and are
+         * able to login but in your app you will want to change that to something more relevant.
+         */
+        try {
+          const profiles = await pluginDeps.security!.userProfiles.suggest({
+            name: request.body.name,
+            dataPath: request.body.dataPath,
+            requiredPrivileges: {
+              spaceId: pluginDeps.spaces!.spacesService.getSpaceId(request),
+              privileges: {
+                kibana: [pluginDeps.security!.authz.actions.login],
+              },
+            },
+          });
+
+          return response.ok({ body: profiles });
+        } catch (e) {
+          this.logger.error(e);
+          return response.customError(e);
+        }
+      }
+    );
 
     core.savedObjects.registerType(
       createDashboardSavedObjectType({

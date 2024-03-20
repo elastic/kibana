@@ -23,6 +23,7 @@ export const searchQuerySchema = schema.oneOf([
       ),
       limit: schema.maybe(schema.number()),
       cursor: schema.maybe(schema.string()),
+      createdBy: schema.maybe(schema.string()),
     },
     {
       unknowns: 'forbid',
@@ -70,6 +71,8 @@ export interface SearchQuery {
   limit?: number;
   /** The cursor for this query. Can be a page number or a cursor */
   cursor?: string;
+
+  createdBy?: string;
 }
 
 export interface SearchIn<T extends string = string, Options extends void | object = object> {

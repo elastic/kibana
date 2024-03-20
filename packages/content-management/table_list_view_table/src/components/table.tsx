@@ -32,9 +32,12 @@ import type {
 import type { TableItemsRowActions } from '../types';
 import { TableSortSelect } from './table_sort_select';
 import { TagFilterPanel } from './tag_filter_panel';
+import { UserFilterContext, UserFilterPanel } from './user_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
+import { useUserFilterPanel } from './use_user_filter_panel';
 import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
 import type { SortColumnField } from './table_sort_select';
+import type { UserProfile } from '@kbn/user-profile-components';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
@@ -61,6 +64,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
   onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;
   clearTagSelection: () => void;
+  setUserSelection: (users: UserProfile[]) => void;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -86,8 +90,9 @@ export function Table<T extends UserContentCommonSchema>({
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
   clearTagSelection,
+  setUserSelection,
 }: Props<T>) {
-  const { getTagList } = useServices();
+  const { getTagList, suggestUsers } = useServices();
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -141,19 +146,36 @@ export function Table<T extends UserContentCommonSchema>({
   }, [deleteItems, dispatch, tableItemsRowActions]);
 
   const {
-    isPopoverOpen,
-    isInUse,
-    closePopover,
-    onFilterButtonClick,
-    onSelectChange,
-    options,
-    totalActiveFilters,
+    isPopoverOpen: isTagPopoverOpen,
+    isInUse: isTagInUse,
+    closePopover: closeTagPopover,
+    onFilterButtonClick: onTagFilterButtonClick,
+    onSelectChange: onTagSelectChange,
+    options: tagOptions,
+    totalActiveFilters: totalActiveTagFilters,
   } = useTagFilterPanel({
     query: searchQuery.query,
     getTagList,
     tagsToTableItemMap,
     addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,
+  });
+
+  const {
+    isPopoverOpen: isUserPopoverOpen,
+    isInUse: isUserInUse,
+    closePopover: closeUserPopover,
+    onFilterButtonClick: onUserFilterButtonClick,
+    onSelectChange: onUserSelectChange,
+    options: userOptions,
+    totalActiveFilters: totalActiveUserFilters,
+    onUserSearchChange,
+  } = useUserFilterPanel({
+    query: searchQuery.query,
+    setUserSelection,
+    suggestUsers,
+    // addOrRemoveExcludeTagFilter,
+    // addOrRemoveIncludeTagFilter,
   });
 
   const tableSortSelectFilter = useMemo<SearchFilterConfig>(() => {
@@ -177,32 +199,39 @@ export function Table<T extends UserContentCommonSchema>({
       component: () => {
         return (
           <TagFilterPanel
-            isPopoverOpen={isPopoverOpen}
-            isInUse={isInUse}
-            closePopover={closePopover}
-            options={options}
-            totalActiveFilters={totalActiveFilters}
-            onFilterButtonClick={onFilterButtonClick}
-            onSelectChange={onSelectChange}
+            isPopoverOpen={isTagPopoverOpen}
+            isInUse={isTagInUse}
+            closePopover={closeTagPopover}
+            options={tagOptions}
+            totalActiveFilters={totalActiveTagFilters}
+            onFilterButtonClick={onTagFilterButtonClick}
+            onSelectChange={onTagSelectChange}
             clearTagSelection={clearTagSelection}
           />
         );
       },
     };
   }, [
-    isPopoverOpen,
-    isInUse,
-    closePopover,
-    options,
-    totalActiveFilters,
-    onFilterButtonClick,
-    onSelectChange,
+    isTagPopoverOpen,
+    isTagInUse,
+    closeTagPopover,
+    tagOptions,
+    totalActiveTagFilters,
+    onTagFilterButtonClick,
+    onTagSelectChange,
     clearTagSelection,
   ]);
 
+  const userFilterPanel = useMemo<SearchFilterConfig>(() => {
+    return {
+      type: 'custom_component',
+      component: UserFilterPanel,
+    };
+  }, []);
+
   const searchFilters = useMemo(() => {
-    return [tableSortSelectFilter, tagFilterPanel];
-  }, [tableSortSelectFilter, tagFilterPanel]);
+    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel];
+  }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel]);
 
   const search = useMemo((): Search => {
     return {
@@ -227,22 +256,36 @@ export function Table<T extends UserContentCommonSchema>({
   );
 
   return (
-    <EuiInMemoryTable<T>
-      itemId="id"
-      items={items}
-      columns={tableColumns}
-      pagination={pagination}
-      loading={isFetchingItems}
-      message={noItemsMessage}
-      selection={selection}
-      search={search}
-      executeQueryOptions={{ enabled: false }}
-      sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
-      onChange={onTableChange}
-      data-test-subj="itemsInMemTable"
-      rowHeader="attributes.title"
-      tableCaption={tableCaption}
-      isSelectable
-    />
+    <UserFilterContext.Provider
+      value={{
+        clearUserSelection: () => setUserSelection([]),
+        closePopover: closeUserPopover,
+        isPopoverOpen: isUserPopoverOpen,
+        isInUse: isUserInUse,
+        options: userOptions,
+        totalActiveFilters: totalActiveUserFilters,
+        onFilterButtonClick: onUserFilterButtonClick,
+        onSelectChange: onUserSelectChange,
+        onSearchChange: onUserSearchChange,
+      }}
+    >
+      <EuiInMemoryTable<T>
+        itemId="id"
+        items={items}
+        columns={tableColumns}
+        pagination={pagination}
+        loading={isFetchingItems}
+        message={noItemsMessage}
+        selection={selection}
+        search={search}
+        executeQueryOptions={{ enabled: false }}
+        sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
+        onChange={onTableChange}
+        data-test-subj="itemsInMemTable"
+        rowHeader="attributes.title"
+        tableCaption={tableCaption}
+        isSelectable
+      />
+    </UserFilterContext.Provider>
   );
 }
