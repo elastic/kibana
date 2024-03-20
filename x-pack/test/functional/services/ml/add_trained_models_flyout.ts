@@ -45,11 +45,9 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     }
 
     public async assertDownloadButtonExists(): Promise<void> {
-      expect(
-        await testSubjects.exists('mlAddTrainedModelFlyoutDownloadButton', {
-          timeout: fiveSeconds,
-        })
-      ).to.be.ok();
+      await testSubjects.existOrFail('mlAddTrainedModelFlyoutDownloadButton', {
+        timeout: fiveSeconds,
+      });
     }
 
     public async assertOpen(expectOpen: boolean): Promise<void> {
