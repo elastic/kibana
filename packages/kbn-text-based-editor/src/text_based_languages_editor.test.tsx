@@ -252,25 +252,6 @@ describe('TextBasedLanguagesEditor', () => {
     );
   });
 
-  it('should render the run query text', async () => {
-    const newProps = {
-      ...props,
-      isCodeEditorExpanded: true,
-    };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).not.toBe(0);
-  });
-
-  it('should not render the run query text if the hideRunQueryText prop is set to true', async () => {
-    const newProps = {
-      ...props,
-      isCodeEditorExpanded: true,
-      hideRunQueryText: true,
-    };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).toBe(0);
-  });
-
   it('should render correctly if editorIsInline prop is set to true', async () => {
     const onTextLangQuerySubmit = jest.fn();
     const newProps = {
@@ -281,7 +262,6 @@ describe('TextBasedLanguagesEditor', () => {
       onTextLangQuerySubmit,
     };
     const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).toBe(0);
     expect(
       component.find('[data-test-subj="TextBasedLangEditor-run-query-button"]').length
     ).not.toBe(1);
