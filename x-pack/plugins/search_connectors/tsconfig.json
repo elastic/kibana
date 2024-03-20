@@ -19,5 +19,6 @@
     "@kbn/config-schema",
     "@kbn/doc-links",
     "@kbn/core-http-browser",
+    "@kbn/i18n",
   ]
 }
