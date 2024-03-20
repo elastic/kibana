@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type {AgentConfigOptions, Labels} from 'elastic-apm-node';
+import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
 import {
   gitRevExecMock,
   mockedRootDir,
@@ -14,7 +14,7 @@ import {
   resetAllMocks,
 } from './config.test.mocks';
 
-import {ApmConfiguration, CENTRALIZED_SERVICE_BASE_CONFIG} from './config';
+import { ApmConfiguration, CENTRALIZED_SERVICE_BASE_CONFIG } from './config';
 
 describe('ApmConfiguration', () => {
   beforeEach(() => {
