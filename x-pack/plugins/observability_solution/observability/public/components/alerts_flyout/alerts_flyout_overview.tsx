@@ -24,6 +24,7 @@ import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
+  ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
 } from '@kbn/rule-data-utils';
@@ -32,6 +33,7 @@ import moment from 'moment';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { CaseStatuses, Tooltip as CaseTooltip } from '@kbn/cases-components';
+import { paths } from '../../../common/locators/paths';
 import { metricValueFormatter } from '../../../common/custom_threshold_rule/metric_value_formatter';
 import {
   Comparator,
@@ -40,6 +42,7 @@ import {
 import { TopAlert } from '../../typings/alerts';
 import { Case, Cases, useFetchBulkCases } from '../../hooks/use_fetch_bulk_cases';
 import { NavigateToCaseView, useCaseViewNavigation } from '../../hooks/use_case_view_navigation';
+import { useKibana } from '../../utils/kibana_react';
 
 interface AlertOverviewField {
   id: string;
@@ -113,8 +116,12 @@ const columns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
           );
         case ColumnIDs.RULE_NAME:
           const ruleName = value as string;
-          return <EuiText size="s">{ruleName}</EuiText>;
-        case ColumnIDs.OBSERVED_VALUE:
+          const ruleLink = meta?.ruleLink as string;
+          return (
+            <EuiLink data-test-subj="alertFlyoutOverview" href={ruleLink ? ruleLink : '#'}>
+              {ruleName}
+            </EuiLink>
+          );
           const observedValues = value as number[];
           return (
             <div>
@@ -218,6 +225,7 @@ const columns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
   },
 ];
 export const Overview = memo(({ alert }: { alert: TopAlert }) => {
+  const { http } = useKibana().services;
   const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
   const dateFormat = useUiSetting<string>('dateFormat');
   const { navigateToCaseView } = useCaseViewNavigation();
@@ -283,6 +291,11 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
           defaultMessage: 'Rule name',
         }),
         value: alert.fields[ALERT_RULE_NAME],
+        meta: {
+          ruleLink:
+            alert.fields[ALERT_RULE_UUID] &&
+            http.basePath.prepend(paths.observability.ruleDetails(alert.fields[ALERT_RULE_UUID])),
+        },
       },
       {
         id: ColumnIDs.RULE_TYPE,
@@ -304,6 +317,6 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
         },
       },
     ];
-  }, [alert.fields, cases, dateFormat, isLoading, navigateToCaseView]);
+  }, [alert.fields, cases, dateFormat, http.basePath, isLoading, navigateToCaseView]);
   return <EuiInMemoryTable width={'80%'} columns={columns} itemId="key" items={items} />;
 });
