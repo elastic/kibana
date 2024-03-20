@@ -54,7 +54,7 @@ export function GroupListView({
   summary,
   filters,
 }: Props) {
-  const groupQuery = `"${groupBy === 'remoteCluster' ? '_index' : groupBy}": "${group}"`;
+  const groupQuery = `"${groupBy}": "${group}"`;
   const query = kqlQuery ? `"${groupQuery}) and ${kqlQuery}` : groupQuery;
   let groupName = group.toLowerCase();
   if (groupBy === 'slo.indicator.type') {

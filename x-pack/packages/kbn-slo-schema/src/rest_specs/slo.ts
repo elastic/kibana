@@ -117,7 +117,7 @@ const groupBySchema = t.union([
   t.literal('slo.tags'),
   t.literal('status'),
   t.literal('slo.indicator.type'),
-  t.literal('remoteCluster'),
+  t.literal('_index'),
 ]);
 
 const findSLOGroupsParamsSchema = t.partial({

@@ -77,7 +77,7 @@ export class FindSLOGroups {
         aggs: {
           groupBy: {
             terms: {
-              field: groupBy === 'remoteCluster' ? '_index' : groupBy,
+              field: groupBy,
               size: 10000,
             },
             aggs: {
@@ -150,7 +150,7 @@ export class FindSLOGroups {
     const results =
       response.aggregations?.groupBy?.buckets.reduce((acc, bucket) => {
         const sliDocument = bucket.worst?.hits?.hits[0]?._source as SliDocument;
-        if (String(bucket.key).endsWith('.temp') && groupBy === 'remoteCluster') {
+        if (String(bucket.key).endsWith('.temp') && groupBy === '_index') {
           return acc;
         }
         return [
