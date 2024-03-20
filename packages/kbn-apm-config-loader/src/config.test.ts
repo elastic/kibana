@@ -152,6 +152,7 @@ describe('ApmConfiguration', () => {
       delete process.env.ELASTIC_APM_SECRET_TOKEN;
       delete process.env.ELASTIC_APM_API_KEY;
       delete process.env.ELASTIC_APM_SERVER_URL;
+      delete process.env.ELASTIC_APM_GLOBAL_LABELS;
       delete process.env.NODE_ENV;
     });
 
@@ -195,7 +196,7 @@ describe('ApmConfiguration', () => {
               git_rev: 'sha',
               test1: '1',
               test2: '4',
-            }
+            },
           })
         );
       });
