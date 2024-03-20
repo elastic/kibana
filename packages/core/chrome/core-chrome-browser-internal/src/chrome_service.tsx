@@ -283,9 +283,9 @@ export class ChromeService {
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
-    >(navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
+    >(id: string, navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
       validateChromeStyle();
-      projectNavigation.initNavigation(navigationTree$);
+      projectNavigation.initNavigation(id, navigationTree$);
     }
 
     const setProjectBreadcrumbs = (

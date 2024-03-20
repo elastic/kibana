@@ -10,6 +10,9 @@ import { type Services } from '../../common/services';
 export const initSideNavigation = (services: Services) => {
   import('./project_navigation').then(({ init }) => {
     const { navigationTree$, panelContentProvider, dataTestSubj } = init(services);
-    services.serverless.initNavigation(navigationTree$, { panelContentProvider, dataTestSubj });
+    services.serverless.initNavigation('security', navigationTree$, {
+      panelContentProvider,
+      dataTestSubj,
+    });
   });
 };

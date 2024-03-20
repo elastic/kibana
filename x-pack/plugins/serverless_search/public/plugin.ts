@@ -125,7 +125,7 @@ export class ServerlessSearchPlugin
     serverless.setProjectHome('/app/elasticsearch');
 
     const navigationTree$ = of(navigationTree);
-    serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
+    serverless.initNavigation('search', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled()
