@@ -14,6 +14,7 @@ import { createDefaultContext } from './defaults';
 import type {
   DataViewsContext,
   DataViewsEvent,
+  DataViewsFilterParams,
   DataViewsSearchParams,
   DataViewsTypestate,
   DefaultDataViewsContext,
@@ -57,6 +58,9 @@ export const createPureDataViewsStateMachine = (
                 SORT_DATA_VIEWS: {
                   actions: ['storeSearch', 'searchDataViews'],
                 },
+                FILTER_DATA_VIEWS: {
+                  actions: ['storeFilter', 'searchDataViews'],
+                },
                 SELECT_DATA_VIEW: {
                   actions: ['navigateToDiscoverDataView'],
                 },
@@ -91,6 +95,9 @@ export const createPureDataViewsStateMachine = (
           // Store search from search event
           ...('search' in event && { search: event.search }),
         })),
+        storeFilter: assign((_context, event) => ({
+          ...('filter' in event && { filter: event.filter }),
+        })),
         storeDataViews: assign((_context, event) =>
           'data' in event && !isError(event.data)
             ? { dataViewsSource: event.data, dataViews: event.data }
@@ -99,7 +106,7 @@ export const createPureDataViewsStateMachine = (
         searchDataViews: assign((context) => {
           if (context.dataViewsSource !== null) {
             return {
-              dataViews: searchDataViews(context.dataViewsSource, context.search),
+              dataViews: searchDataViews(context.dataViewsSource, context.search, context.filter),
             };
           }
           return {};
@@ -139,15 +146,21 @@ export const createDataViewsStateMachine = ({
           : dataViews
               .getIdsWithTitle()
               .then((views) => views.map(DataViewDescriptor.create))
-              .then((views) => searchDataViews(views, searchParams));
+              .then((views) => searchDataViews(views, searchParams, context.filter));
       },
     },
   });
 
-const searchDataViews = (dataViews: DataViewDescriptor[], search: DataViewsSearchParams) => {
+const searchDataViews = (
+  dataViews: DataViewDescriptor[],
+  search: DataViewsSearchParams,
+  filter: DataViewsFilterParams
+) => {
   const { name, sortOrder } = search;
+  const { dataType } = filter;
 
   return dataViews
     .filter((dataView) => Boolean(dataView.name?.includes(name ?? '')))
+    .filter((dataView) => !dataType || Boolean(dataView.dataType === dataType))
     .sort(createComparatorByField('name', sortOrder));
 };

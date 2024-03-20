@@ -4,10 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
-import { EuiContextMenu, EuiFlexGroup, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+} from '@elastic/eui';
 import styled from '@emotion/styled';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
 import {
@@ -41,6 +52,7 @@ export function DataSourceSelector({
   dataSourceSelection,
   datasetsError,
   dataViews,
+  dataViewCount,
   dataViewsError,
   discoverEsqlUrlProps,
   integrations,
@@ -53,6 +65,7 @@ export function DataSourceSelector({
   isSearchingIntegrations,
   onDataViewsReload,
   onDataViewsSearch,
+  onDataViewsFilter,
   onDataViewsSort,
   onDataViewsTabClick,
   onIntegrationsLoadMore,
@@ -70,6 +83,7 @@ export function DataSourceSelector({
   const {
     panelId,
     search,
+    dataViewsFilter,
     tabId,
     isOpen,
     isAllMode,
@@ -77,6 +91,7 @@ export function DataSourceSelector({
     closePopover,
     scrollToIntegrationsBottom,
     searchByName,
+    filterByType,
     selectAllLogs,
     selectDataset,
     selectDataView,
@@ -88,6 +103,7 @@ export function DataSourceSelector({
   } = useDataSourceSelector({
     initialContext: { selection: dataSourceSelection },
     onDataViewsSearch,
+    onDataViewsFilter,
     onDataViewsSort,
     onIntegrationsLoadMore,
     onIntegrationsReload,
@@ -215,6 +231,16 @@ export function DataSourceSelector({
     </EuiTab>
   ));
 
+  const [isPopoverOpen, setPopover] = useState(false);
+
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closeTypePopover = () => {
+    setPopover(false);
+  };
+
   return (
     <SelectorPopover
       selection={dataSourceSelection}
@@ -233,7 +259,78 @@ export function DataSourceSelector({
         onSearch={searchByName}
         onSort={sortByOrder}
         isLoading={isSearchingIntegrations || isLoadingUncategorized}
+        filterComponent={
+          tabId === DATA_VIEWS_TAB_ID && (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="xs">
+                  {i18n.translate('xpack.logsExplorer.dataSourceSelector.dataViewCount', {
+                    defaultMessage: '{count, plural, one {# data view} other {# data views}}',
+                    values: { count: dataViewCount },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  button={
+                    <EuiButtonEmpty
+                      data-test-subj="logsExplorerDataSourceSelectorShowAllButton"
+                      iconType="arrowDown"
+                      iconSide="right"
+                      size="xs"
+                      onClick={onButtonClick}
+                    >
+                      {dataViewsFilter.dataType !== 'logs' ? 'Show all' : 'Logs-only'}
+                    </EuiButtonEmpty>
+                  }
+                  isOpen={isPopoverOpen}
+                  closePopover={closeTypePopover}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                >
+                  <EuiContextMenu
+                    size="s"
+                    initialPanelId={0}
+                    panels={[
+                      {
+                        id: 0,
+                        width: 'auto',
+                        title: (
+                          <div>
+                            {i18n.translate(
+                              'xpack.logsExplorer.dataSourceSelector.div.selectTypeLabel',
+                              { defaultMessage: 'Select type' }
+                            )}
+                          </div>
+                        ),
+                        items: [
+                          {
+                            icon: dataViewsFilter.dataType !== 'logs' ? 'check' : '',
+                            name: 'Show all',
+                            onClick: () => {
+                              filterByType({ dataType: undefined });
+                              closeTypePopover();
+                            },
+                          },
+                          {
+                            icon: dataViewsFilter.dataType === 'logs' ? 'check' : '',
+                            name: 'Logs-only',
+                            onClick: () => {
+                              filterByType({ dataType: 'logs' });
+                              closeTypePopover();
+                            },
+                          },
+                        ],
+                      },
+                    ]}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )
+        }
       />
+
       <EuiHorizontalRule margin="none" />
       {/* For a smoother user experience, we keep each tab content mount and we only show the select one
       "hiding" all the others. Unmounting mounting each tab content on change makes it feel glitchy,
@@ -279,7 +376,6 @@ export function DataSourceSelector({
         panels={[
           {
             id: DATA_VIEWS_PANEL_ID,
-            title: dataViewsLabel,
             width: DATA_SOURCE_SELECTOR_WIDTH,
             items: dataViewsItems,
           },

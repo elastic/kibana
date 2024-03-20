@@ -11,7 +11,7 @@ import { useInterpret, useSelector } from '@xstate/react';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataViewDescriptor } from '../../common/data_views/models/data_view_descriptor';
 import { SortOrder } from '../../common/latest';
-import { createDataViewsStateMachine } from '../state_machines/data_views';
+import { DataViewsFilterParams, createDataViewsStateMachine } from '../state_machines/data_views';
 import { LogsExplorerCustomizations } from '../controller';
 
 interface DataViewsContextDeps {
@@ -25,6 +25,7 @@ export interface SearchDataViewsParams {
 }
 
 export type SearchDataViews = (params: SearchDataViewsParams) => void;
+export type FilterDataViews = (params: DataViewsFilterParams) => void;
 export type LoadDataViews = () => void;
 export type ReloadDataViews = () => void;
 export type IsDataViewAvailable = (dataView: DataViewDescriptor) => boolean;
@@ -37,6 +38,10 @@ const useDataViews = ({ dataViewsService, events }: DataViewsContextDeps) => {
   );
 
   const dataViews = useSelector(dataViewsStateService, (state) => state.context.dataViews);
+  const dataViewCount = useSelector(
+    dataViewsStateService,
+    (state) => state.context.dataViewsSource?.length || 0
+  );
 
   const error = useSelector(dataViewsStateService, (state) => state.context.error);
 
@@ -68,6 +73,15 @@ const useDataViews = ({ dataViewsService, events }: DataViewsContextDeps) => {
     [dataViewsStateService]
   );
 
+  const filterDataViews: FilterDataViews = useCallback(
+    (filterParams) =>
+      dataViewsStateService.send({
+        type: 'FILTER_DATA_VIEWS',
+        filter: filterParams,
+      }),
+    [dataViewsStateService]
+  );
+
   const sortDataViews: SearchDataViews = useCallback(
     (searchParams) =>
       dataViewsStateService.send({
@@ -89,12 +103,14 @@ const useDataViews = ({ dataViewsService, events }: DataViewsContextDeps) => {
 
     // Data
     dataViews,
+    dataViewCount,
 
     // Actions
     isDataViewAvailable,
     loadDataViews,
     reloadDataViews,
     searchDataViews,
+    filterDataViews,
     sortDataViews,
   };
 };
