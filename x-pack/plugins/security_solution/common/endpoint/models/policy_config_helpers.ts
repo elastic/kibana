@@ -103,7 +103,10 @@ const disableCommonProtections = (policy: PolicyConfig) => {
   }, policy);
 };
 
-const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: PolicyOperatingSystem) => ({
+const getDisabledCommonProtectionsForOS = (
+  policy: PolicyConfig,
+  os: PolicyOperatingSystem
+): Partial<PolicyConfig['windows']> => ({
   behavior_protection: {
     ...policy[os].behavior_protection,
     mode: ProtectionModes.off,
@@ -115,6 +118,7 @@ const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: PolicyOpera
   malware: {
     ...policy[os].malware,
     blocklist: false,
+    on_write_scan: false,
     mode: ProtectionModes.off,
   },
 });
