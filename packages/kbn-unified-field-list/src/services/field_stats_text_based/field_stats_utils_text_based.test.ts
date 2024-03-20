@@ -7,11 +7,7 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import {
-  buildSearchFilter,
-  fetchAndCalculateFieldStats,
-  getESQLWithSafeLimit,
-} from './field_stats_utils_text_based';
+import { buildSearchFilter, fetchAndCalculateFieldStats } from './field_stats_utils_text_based';
 
 describe('fieldStatsUtilsTextBased', function () {
   describe('buildSearchFilter()', () => {
@@ -127,23 +123,6 @@ describe('fieldStatsUtilsTextBased', function () {
           query:
             'from logs* | limit 1000| WHERE `message` IS NOT NULL\n    | KEEP `message`\n    | LIMIT 100',
         })
-      );
-    });
-  });
-
-  describe('getESQLWithSafeLimit()', () => {
-    it('should not add the limit', () => {
-      expect(getESQLWithSafeLimit('show info')).toBe('show info');
-      expect(getESQLWithSafeLimit('row t = 5')).toBe('row t = 5');
-    });
-
-    it('should add the limit', () => {
-      expect(getESQLWithSafeLimit(' from logs')).toBe('from logs | LIMIT 10000');
-      expect(getESQLWithSafeLimit('FROM logs* | LIMIT 5')).toBe(
-        'FROM logs* | LIMIT 10000 | LIMIT 5'
-      );
-      expect(getESQLWithSafeLimit('from logs* | STATS MIN(a) BY b')).toBe(
-        'from logs* | LIMIT 10000 | STATS MIN(a) BY b'
       );
     });
   });

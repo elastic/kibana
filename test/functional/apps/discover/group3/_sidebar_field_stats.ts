@@ -145,7 +145,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('text based columns', function () {
       before(async () => {
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        const TEST_START_TIME = 'Sep 23, 2015 @ 06:31:44.000';
+        const TEST_END_TIME = 'Sep 23, 2015 @ 18:31:44.000';
+        await PageObjects.timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
 

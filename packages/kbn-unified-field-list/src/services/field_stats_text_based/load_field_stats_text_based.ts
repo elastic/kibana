@@ -15,12 +15,12 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
 import type { AggregateQuery } from '@kbn/es-query';
+import { getESQLWithSafeLimit } from '@kbn/esql-utils';
 import type { FieldStatsResponse } from '../../types';
 import {
   buildSearchFilter,
   SearchHandlerTextBased,
   fetchAndCalculateFieldStats,
-  getESQLWithSafeLimit,
 } from './field_stats_utils_text_based';
 
 interface FetchFieldStatsParamsTextBased {
