@@ -360,17 +360,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         expect(userActionsLists).length(2);
 
-        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(10);
+        expect(await userActionsLists[0].findAllByCssSelector('li')).length(10);
 
-        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
+        expect(await userActionsLists[1].findAllByCssSelector('li')).length(4);
 
         testSubjects.click('cases-show-more-user-actions');
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(20);
-
-        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
+        expect(await userActionsLists[0].findAllByCssSelector('li')).length(20);
       });
     });
 
