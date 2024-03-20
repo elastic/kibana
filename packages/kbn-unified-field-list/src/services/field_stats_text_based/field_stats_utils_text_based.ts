@@ -13,6 +13,7 @@ import {
   DEFAULT_TOP_VALUES_SIZE,
   DEFAULT_SIMPLE_EXAMPLES_SIZE,
   SIMPLE_EXAMPLES_FETCH_SIZE,
+  ESQL_SAFE_LIMIT,
 } from '../../constants';
 import {
   canProvideStatsForFieldTextBased,
@@ -148,4 +149,19 @@ export async function getSimpleTextExamples(
 
 function getSafeESQLFieldName(str: string): string {
   return `\`${str}\``;
+}
+
+export function getESQLWithSafeLimit(esql: string): string {
+  if (!esql.trim().toLowerCase().startsWith('from')) {
+    return esql;
+  }
+  const parts = esql.split('|');
+
+  if (!parts.length) {
+    return esql;
+  }
+  return (
+    `${parts[0].trim()} | LIMIT ${ESQL_SAFE_LIMIT}` +
+    (parts.length > 1 ? ` | ${parts.slice(1).join('|').trim()}` : '')
+  );
 }
