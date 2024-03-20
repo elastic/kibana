@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { isPlainObject, isString, ary, sortBy, assign } from 'lodash';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { ary, assign, isPlainObject, isString, sortBy } from 'lodash';
 import moment from 'moment';
 import dateMath from '@kbn/datemath';
-
+import { parseInterval } from './parse_interval';
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
-import { parseInterval } from '../../../common/util/parse_interval';
-import { getFieldFormats, getUiSettings } from './dependency_cache';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 
 const unitsDesc = dateMath.unitsDesc;
 
@@ -24,23 +22,14 @@ const timeUnitsMaxSupportedIndex = unitsDesc.indexOf('w');
 
 const calcAuto = timeBucketsCalcAutoIntervalProvider();
 
-export function getTimeBucketsFromCache() {
-  const uiSettings = getUiSettings();
-  return new TimeBuckets({
-    [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-    [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-    dateFormat: uiSettings.get('dateFormat'),
-    'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-  });
-}
-
 /**
  * Helper object for wrapping the concept of an "Interval", which
  * describes a timespan that will separate buckets of time,
  * for example the interval between points on a time series chart.
  */
-export function TimeBuckets(timeBucketsConfig) {
+export function TimeBuckets(timeBucketsConfig, fieldFormats) {
   this._timeBucketsConfig = timeBucketsConfig;
+  this._fieldFormats = fieldFormats;
   this.barTarget = this._timeBucketsConfig[UI_SETTINGS.HISTOGRAM_BAR_TARGET];
   this.maxBars = this._timeBucketsConfig[UI_SETTINGS.HISTOGRAM_MAX_BARS];
 }
@@ -300,6 +289,39 @@ TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
 };
 
 /**
+ * Returns an interval which in the last step of calculation is rounded to
+ * the closest multiple of the supplied divisor (in seconds).
+ *
+ * @return {moment.duration|undefined}
+ */
+TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
+  const interval = this.getInterval();
+  const intervalSecs = interval.asSeconds();
+
+  const remainder = intervalSecs % divisorSecs;
+  if (remainder === 0) {
+    return interval;
+  }
+
+  // Create a new interval which is a multiple of the supplied divisor (not zero).
+  let nearestMultiple =
+    remainder > divisorSecs / 2 ? intervalSecs + divisorSecs - remainder : intervalSecs - remainder;
+  nearestMultiple = nearestMultiple === 0 ? divisorSecs : nearestMultiple;
+  const nearestMultipleInt = moment.duration(nearestMultiple, 'seconds');
+  decorateInterval(nearestMultipleInt, this.getDuration());
+
+  // Check to see if the new interval is scaled compared to the original.
+  const preScaled = interval.preScaled;
+  if (preScaled !== undefined && preScaled < nearestMultipleInt) {
+    nearestMultipleInt.preScaled = preScaled;
+    nearestMultipleInt.scale = preScaled / nearestMultipleInt;
+    nearestMultipleInt.scaled = true;
+  }
+
+  return nearestMultipleInt;
+};
+
+/**
  * Get a date format string that will represent dates that
  * progress at our interval.
  *
@@ -325,7 +347,7 @@ TimeBuckets.prototype.getScaledDateFormat = function () {
 };
 
 TimeBuckets.prototype.getScaledDateFormatter = function () {
-  const fieldFormats = getFieldFormats();
+  const fieldFormats = this._fieldFormats;
   const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
   return new DateFieldFormat(
     {
@@ -377,10 +399,9 @@ export function getBoundsRoundedToInterval(bounds, interval, inclusiveEnd = fals
   return { min: moment(adjustedMinMs), max: moment(adjustedMaxMs) };
 }
 
+// Converts a moment.duration into an Elasticsearch compatible interval expression,
+// and provides associated metadata.
 export function calcEsInterval(duration) {
-  // Converts a moment.duration into an Elasticsearch compatible interval expression,
-  // and provides associated metadata.
-
   // Note this was a copy of Kibana's original ui/time_buckets/calc_es_interval,
   // but with the definition of a 'large' unit changed from 'M' to 'w',
   // bringing it into line with the time units supported by Elasticsearch
@@ -399,7 +420,7 @@ export function calcEsInterval(duration) {
 
       return {
         value: val,
-        unit: unit,
+        unit,
         expression: val + unit,
       };
     }
