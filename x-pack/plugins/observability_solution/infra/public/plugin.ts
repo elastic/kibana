@@ -29,6 +29,7 @@ import {
   type InfraLocators,
   InfraLogsLocatorDefinition,
   InfraNodeLogsLocatorDefinition,
+  AssetDetailsLocatorDefinition,
 } from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
@@ -185,6 +186,9 @@ export class Plugin implements InfraClientPluginClass {
     const nodeLogsLocator = this.config.featureFlags.logsUIEnabled
       ? pluginsSetup.share.url.locators.create(new InfraNodeLogsLocatorDefinition({ core }))
       : undefined;
+    const assetDetailsLocator = pluginsSetup.share.url.locators.create(
+      new AssetDetailsLocatorDefinition({ core })
+    );
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdRuleType(core, pluginsSetup.share.url)
@@ -369,6 +373,7 @@ export class Plugin implements InfraClientPluginClass {
     this.locators = {
       logsLocator,
       nodeLogsLocator,
+      assetDetailsLocator,
     };
 
     return {

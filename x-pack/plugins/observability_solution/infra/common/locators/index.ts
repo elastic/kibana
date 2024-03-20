@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { AssetDetailsLocator } from './asset_details_locator';
 import type { InfraLogsLocator } from './logs_locator';
 import type { InfraNodeLogsLocator } from './node_logs_locator';
 
 export * from './logs_locator';
 export * from './node_logs_locator';
+export * from './asset_details_locator';
 
 export interface InfraLocators {
   logsLocator?: InfraLogsLocator;
   nodeLogsLocator?: InfraNodeLogsLocator;
+  assetDetailsLocator?: AssetDetailsLocator;
 }

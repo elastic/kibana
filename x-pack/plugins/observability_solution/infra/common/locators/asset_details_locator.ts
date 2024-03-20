@@ -1,0 +1,46 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { SerializableRecord } from '@kbn/utility-types';
+import rison from '@kbn/rison';
+import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { InfraClientCoreSetup } from '../../public/types';
+
+export type AssetDetailsLocator = LocatorPublic<AssetDetailsLocatorParams>;
+
+export interface AssetDetailsLocatorDependencies {
+  core: InfraClientCoreSetup;
+}
+
+export interface AssetDetailsLocatorParams extends SerializableRecord {
+  assetType: string;
+  assetId: string;
+  assetDetails: {
+    tabId?: string;
+    dashboardId?: string;
+    dateRange?: {
+      from: string;
+      to: string;
+    };
+  };
+}
+
+export const ASSET_DETAILS_LOCATOR_ID = 'ASSET_DETAILS_LOCATOR';
+
+export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDetailsLocatorParams> {
+  public readonly id = ASSET_DETAILS_LOCATOR_ID;
+
+  constructor(protected readonly deps: AssetDetailsLocatorDependencies) {}
+
+  public readonly getLocation = async (params: AssetDetailsLocatorParams) => {
+    const assetDetails = rison.encodeUnknown(params.assetDetails);
+    return {
+      app: 'metrics',
+      path: `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}`,
+      state: {},
+    };
+  };
+}
