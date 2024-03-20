@@ -53,7 +53,7 @@ export const AgentPolicyActionMenu = memo<{
       () =>
         agentPolicy.package_policies?.some(
           (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
-        ),
+        ) ?? false,
       [agentPolicy]
     );
 
@@ -102,7 +102,11 @@ export const AgentPolicyActionMenu = memo<{
             : [
                 <EuiContextMenuItem
                   icon="plusInCircle"
-                  disabled={!authz.fleet.allAgents}
+                  disabled={
+                    (isFleetServerPolicy && !authz.fleet.addFleetServers) ||
+                    (!isFleetServerPolicy && !authz.fleet.addAgents)
+                  }
+                  data-test-subj="agentPolicyActionMenuAddAgentButton"
                   onClick={() => {
                     setIsContextMenuOpen(false);
                     setIsEnrollmentFlyoutOpen(true);
@@ -123,9 +127,7 @@ export const AgentPolicyActionMenu = memo<{
                 </EuiContextMenuItem>,
                 viewPolicyItem,
                 <EuiContextMenuItem
-                  disabled={
-                    !authz.fleet.allAgentPolicies || !authz.integrations.writeIntegrationPolicies
-                  }
+                  disabled={!authz.integrations.writeIntegrationPolicies}
                   icon="copy"
                   onClick={() => {
                     setIsContextMenuOpen(false);

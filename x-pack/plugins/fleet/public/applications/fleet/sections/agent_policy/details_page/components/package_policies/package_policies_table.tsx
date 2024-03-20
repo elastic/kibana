@@ -62,10 +62,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
 }) => {
   const { application } = useStartServices();
   const authz = useAuthz();
-  const canWriteIntegrationPolicies =
-    authz.integrations.writeIntegrationPolicies && authz.fleet.allAgentPolicies;
-  const canReadIntegrationPolicies =
-    authz.fleet.readAgentPolicies && authz.integrations.readIntegrationPolicies;
+  const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
+  const canReadIntegrationPolicies = authz.integrations.readIntegrationPolicies;
   const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
 

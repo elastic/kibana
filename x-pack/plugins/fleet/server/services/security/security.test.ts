@@ -27,6 +27,8 @@ describe('When using calculateRouteAuthz()', () => {
       allAgents: false,
       readSettings: false,
       allSettings: false,
+      addAgents: false,
+      addFleetServers: false,
     },
     integrations: {
       readPackageInfo: false,
