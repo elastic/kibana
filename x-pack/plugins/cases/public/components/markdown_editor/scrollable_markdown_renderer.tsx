@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 
 import { MarkdownRenderer } from './renderer';
 
-export const ContentWrapper = styled.div`
-  padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
+export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
+  padding: ${`${euiTheme.size.m} ${euiTheme.size.l}`};
   text-overflow: ellipsis;
   word-break: break-word;
   display: -webkit-box;
@@ -19,10 +21,15 @@ export const ContentWrapper = styled.div`
 `;
 
 const ScrollableMarkdownRenderer = ({ content }: { content: string }) => {
+  const { euiTheme } = useEuiTheme();
   return (
-    <ContentWrapper className={'eui-xScroll'} data-test-subj="scrollable-markdown">
+    <div
+      className={'eui-xScroll'}
+      css={getContentWrapperCss(euiTheme)}
+      data-test-subj="scrollable-markdown"
+    >
       <MarkdownRenderer>{content}</MarkdownRenderer>
-    </ContentWrapper>
+    </div>
   );
 };
 
