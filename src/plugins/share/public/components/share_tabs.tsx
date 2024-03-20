@@ -56,7 +56,7 @@ export const ShareMenuTabs = () => {
       modalTitle={`Share this ${objectType}`}
       onClose={onClose}
       tabs={tabs}
-      selectedTabId="link"
+      defaultSelectedTabId="link"
     />
   );
 };

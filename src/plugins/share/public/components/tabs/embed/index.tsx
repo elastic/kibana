@@ -6,19 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import { copyToClipboard } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { EmbedContent } from './embed_content';
 import { useShareTabsContext } from '../../context';
 
+const EMBED_TAB_ACTIONS = {
+  SET_EMBED_URL: 'SET_EMBED_URL',
+};
+
 type IEmbedTab = IModalTabDeclaration<{ url: string }>;
 
-const embedTabReducer: IEmbedTab['reducer'] = (state, action) => {
+const embedTabReducer: IEmbedTab['reducer'] = (state = { url: '' }, action) => {
   switch (action.type) {
-    case String(1):
+    case EMBED_TAB_ACTIONS.SET_EMBED_URL:
       return {
         ...state,
         url: action.payload,
@@ -31,12 +35,16 @@ const embedTabReducer: IEmbedTab['reducer'] = (state, action) => {
 const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ dispatch }) => {
   const { embedUrlParamExtensions, shareableUrlForSavedObject, shareableUrl, isEmbedded } =
     useShareTabsContext()!;
-  const onChange = (shareUrl: string) => {
-    dispatch({
-      type: '1',
-      payload: shareUrl,
-    });
-  };
+
+  const onChange = useCallback(
+    (shareUrl: string) => {
+      dispatch({
+        type: EMBED_TAB_ACTIONS.SET_EMBED_URL,
+        payload: shareUrl,
+      });
+    },
+    [dispatch]
+  );
 
   return (
     <EmbedContent

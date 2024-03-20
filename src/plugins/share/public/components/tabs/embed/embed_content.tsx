@@ -102,6 +102,7 @@ export const EmbedContent = ({
     const tempUrl = getSnapshotUrl(true);
 
     const parsedUrl = parseUrl(tempUrl);
+
     if (!parsedUrl || !parsedUrl.hash) {
       return;
     }
@@ -123,6 +124,7 @@ export const EmbedContent = ({
         },
       }),
     });
+
     return updateUrlParams(formattedUrl);
   }, [getSnapshotUrl, updateUrlParams]);
 
@@ -196,7 +198,7 @@ export const EmbedContent = ({
 
   const renderUrlParamExtensions = () => {
     if (!urlParamExtensions) {
-      return <></>;
+      return null;
     }
 
     const setParamValue =
@@ -216,6 +218,7 @@ export const EmbedContent = ({
       </React.Fragment>
     );
   };
+
   return (
     <EuiForm>
       <EuiSpacer size="m" />
