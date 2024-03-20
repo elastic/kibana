@@ -53,8 +53,8 @@ while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
 # docker run -p 5601:5601 --rm docker.elastic.co/kibana-ci/kibana-ubi-fips:$FULL_VERSION-$BUILDKITE_COMMIT
 docker run \
   -p 5601:5601 \
-  --add-host=host.docker.internal:host-gateway \
-  --env ELASTICSEARCH_HOSTS="http://host.docker.internal:9200" \
+  --env SERVER_HOST="0.0.0.0" \
+  --env ELASTICSEARCH_HOSTS="http://127.0.0.1:9200" \
   --env ELASTICSEARCH_USERNAME="kibana_system" \
   --env ELASTICSEARCH_PASSWORD="changeme" \
-  docker.elastic.co/kibana/kibana-ubuntu:sha256-cc026fad557bbde3376c6bff7148e57db504cc3e0a233c72db32169d52b1a75e # --env SERVER_HOST="0.0.0.0" \
+  docker.elastic.co/kibana-ci/kibana-ubi-fips:8.14.0-SNAPSHOT-75d5abe8ff6163ddcf7311beebe988d47bb7f790

@@ -15,16 +15,16 @@ steps:
 
   - wait
 
-  - command: .buildkite/scripts/steps/fips/smoke_tests.sh
-    label: 'Smoke testing for FIPS'
-    agents:
-      queue: n2-4-virt
-    timeout_in_minutes: 60
-    soft_fail: true
-
-  # - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
+  # - command: .buildkite/scripts/steps/fips/smoke_tests.sh
   #   label: 'Smoke testing for FIPS'
   #   agents:
   #     queue: n2-4-virt
   #   timeout_in_minutes: 60
   #   soft_fail: true
+
+  - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
+    label: 'Smoke testing for FIPS'
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 60
+    soft_fail: true
