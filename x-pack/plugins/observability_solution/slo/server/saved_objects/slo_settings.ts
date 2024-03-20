@@ -8,6 +8,7 @@
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObject } from '@kbn/core/server';
 
+import { i18n } from '@kbn/i18n';
 import { SloSettings } from '../domain/models';
 
 export const SO_SLO_SETTINGS_TYPE = 'slo-settings';
@@ -23,10 +24,15 @@ export const sloSettings: SavedObjectsType = {
     properties: {},
   },
   management: {
-    displayName: 'SLO Settings',
+    displayName: i18n.translate('xpack.slo.savedObject.sloSettings.displayName', {
+      defaultMessage: 'SLO Settings',
+    }),
     importableAndExportable: false,
     getTitle(sloSavedObject: SavedObject<SloSettings>) {
-      return `SLO Settings [id=${sloSavedObject.id}]`;
+      return i18n.translate('xpack.slo.sloSettings.', {
+        defaultMessage: 'SLO Settings [id={id}]',
+        values: { id: sloSavedObject.id },
+      });
     },
   },
 };
