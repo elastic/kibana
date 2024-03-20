@@ -6,7 +6,14 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiBasicTableColumn, EuiCallOut, EuiInMemoryTable, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiCallOut,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiSkeletonText,
+  EuiText,
+} from '@elastic/eui';
 import {
   AlertStatus,
   ALERT_CASE_IDS,
@@ -24,13 +31,14 @@ import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import moment from 'moment';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { CaseStatuses, Tooltip as CaseTooltip } from '@kbn/cases-components';
 import { metricValueFormatter } from '../../../common/custom_threshold_rule/metric_value_formatter';
 import {
   Comparator,
   CustomMetricExpressionParams,
 } from '../../../common/custom_threshold_rule/types';
 import { TopAlert } from '../../typings/alerts';
-import { Cases, useFetchBulkCases } from '../../hooks/use_fetch_bulk_cases';
+import { Case, Cases, useFetchBulkCases } from '../../hooks/use_fetch_bulk_cases';
 import { NavigateToCaseView, useCaseViewNavigation } from '../../hooks/use_case_view_navigation';
 
 interface AlertOverviewField {
@@ -51,6 +59,25 @@ const ColumnIDs = {
   CASES: 'cases',
 } as const;
 
+export interface CaseTooltipContentProps {
+  title: string;
+  description: string;
+  status: CaseStatuses;
+  totalComments: number;
+  createdAt: string;
+  createdBy: { username?: string; fullName?: string };
+}
+const formatCase = (theCase: Case): CaseTooltipContentProps => ({
+  title: theCase.title,
+  description: theCase.description,
+  createdAt: theCase.created_at,
+  createdBy: {
+    username: theCase.created_by.username ?? undefined,
+    fullName: theCase.created_by.full_name ?? undefined,
+  },
+  status: theCase.status,
+  totalComments: theCase.totalComment,
+});
 const columns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
   {
     field: 'key',
@@ -155,21 +182,34 @@ const columns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
 
         case ColumnIDs.CASES:
           const cases = meta?.cases as Cases;
+          const isLoading = meta?.isLoading as boolean;
           const navigateToCaseView = meta?.navigateToCaseView as NavigateToCaseView;
           return (
-            <>
-              {cases.map((caseInfo) => {
-                return (
-                  <EuiLink
-                    key={caseInfo.id}
-                    onClick={() => navigateToCaseView({ caseId: caseInfo.id })}
-                    data-test-subj="o11yAlertFlyoutOverviewTabCasesLink"
-                  >
-                    {caseInfo.title}
-                  </EuiLink>
-                );
-              })}
-            </>
+            <EuiSkeletonText
+              isLoading={isLoading}
+              lines={1}
+              size="s"
+              data-test-subj="cases-cell-loading"
+            >
+              {cases.length ? (
+                cases.map((caseInfo, index) => {
+                  return [
+                    index > 0 && index < cases.length && ', ',
+                    <CaseTooltip loading={false} content={formatCase(caseInfo)} key={caseInfo.id}>
+                      <EuiLink
+                        key={caseInfo.id}
+                        onClick={() => navigateToCaseView({ caseId: caseInfo.id })}
+                        data-test-subj="o11yAlertFlyoutOverviewTabCasesLink"
+                      >
+                        {caseInfo.title}
+                      </EuiLink>
+                    </CaseTooltip>,
+                  ];
+                })
+              ) : (
+                <>{'-'}</>
+              )}
+            </EuiSkeletonText>
           );
         default:
           return <>{'-'}</>;
@@ -178,7 +218,7 @@ const columns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
   },
 ];
 export const Overview = memo(({ alert }: { alert: TopAlert }) => {
-  const { cases } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
+  const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
   const dateFormat = useUiSetting<string>('dateFormat');
   const { navigateToCaseView } = useCaseViewNavigation();
   const items = useMemo(() => {
@@ -260,9 +300,10 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
         meta: {
           cases,
           navigateToCaseView,
+          isLoading,
         },
       },
     ];
-  }, [alert.fields, cases, dateFormat, navigateToCaseView]);
+  }, [alert.fields, cases, dateFormat, isLoading, navigateToCaseView]);
   return <EuiInMemoryTable width={'80%'} columns={columns} itemId="key" items={items} />;
 });
