@@ -72,12 +72,6 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
     onCloseInspect,
     queryId,
   });
-  // console.log({
-  //   request,
-  //   response,
-  //   additionalRequests,
-  //   additionalResponses,
-  // });
   return (
     <>
       {inputId === InputsModelId.timeline && !compact && showInspectButton && (

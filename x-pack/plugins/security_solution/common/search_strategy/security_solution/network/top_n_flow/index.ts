@@ -7,18 +7,10 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { GeoItem, TopNetworkTablesEcsField } from '../common';
-import type {
-  CursorType,
-  Inspect,
-  Maybe,
-  PageInfoPaginated,
-  TotalValue,
-  GenericBuckets,
-} from '../../../common';
+import type { CursorType, Inspect, Maybe, TotalValue, GenericBuckets } from '../../../common';
 
 export interface NetworkTopNFlowStrategyResponse extends IEsSearchResponse {
   edges: NetworkTopNFlowEdges[];
-  // pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }
 

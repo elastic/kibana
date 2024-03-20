@@ -55,6 +55,7 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
         name: `${APP_UI_ID} searchStrategy ${factoryQueryType}`,
         spanName: 'batched search',
       });
+      // return observable directly, any extra subscription causes duplicate requests
       return data.search
         .search<StrategyRequestInputType<QueryType>, StrategyResponseType<QueryType>>(
           { ...request, factoryQueryType } as StrategyRequestInputType<QueryType>,
