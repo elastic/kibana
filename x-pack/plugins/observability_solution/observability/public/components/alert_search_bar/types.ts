@@ -44,6 +44,7 @@ export interface ObservabilityAlertSearchBarProps
   extends AlertSearchBarContainerState,
     AlertSearchBarStateTransitions,
     CommonAlertSearchBarProps {
+  showFilterBar?: boolean;
   savedQuery?: SavedQuery;
   services: Services;
 }
@@ -53,7 +54,7 @@ interface AlertSearchBarContainerState {
   rangeTo: string;
   kuery: string;
   status: AlertStatus;
-  filters: Filter[];
+  filters?: Filter[];
   savedQueryId?: string;
 }
 
@@ -62,8 +63,8 @@ interface AlertSearchBarStateTransitions {
   onRangeToChange: (rangeTo: string) => void;
   onKueryChange: (kuery: string) => void;
   onStatusChange: (status: AlertStatus) => void;
-  onFiltersChange: (filters: Filter[]) => void;
-  setSavedQuery: (savedQueryId?: SavedQuery) => void;
+  onFiltersChange?: (filters: Filter[]) => void;
+  setSavedQuery?: (savedQueryId?: SavedQuery) => void;
 }
 
 interface CommonAlertSearchBarProps {

@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { Query } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { AlertsStatusFilter } from './components';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
@@ -26,6 +26,7 @@ const getAlertStatusQuery = (status: string): Query[] => {
 const toastTitle = i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
   defaultMessage: 'Invalid query string',
 });
+const defaultFilters: Filter[] = [];
 
 export function ObservabilityAlertSearchBar({
   appName,
@@ -36,7 +37,8 @@ export function ObservabilityAlertSearchBar({
   onRangeToChange,
   onStatusChange,
   onFiltersChange,
-  filters,
+  showFilterBar = false,
+  filters = defaultFilters,
   savedQuery,
   setSavedQuery,
   kuery,
@@ -47,7 +49,10 @@ export function ObservabilityAlertSearchBar({
 }: ObservabilityAlertSearchBarProps) {
   const toasts = useToasts();
 
-  const clearSavedQuery = useCallback(() => setSavedQuery(undefined), [setSavedQuery]);
+  const clearSavedQuery = useCallback(
+    () => (setSavedQuery ? setSavedQuery(undefined) : null),
+    [setSavedQuery]
+  );
   const onAlertStatusChange = useCallback(
     (alertStatus: AlertStatus) => {
       try {
@@ -129,7 +134,7 @@ export function ObservabilityAlertSearchBar({
           featureIds={observabilityAlertFeatureIds}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
-          showFilterBar
+          showFilterBar={showFilterBar}
           filters={filters}
           onFiltersUpdated={onFiltersChange}
           savedQuery={savedQuery}
