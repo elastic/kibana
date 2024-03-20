@@ -63,6 +63,10 @@ describe('OpenAIConnector', () => {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
         defaultModel: DEFAULT_OPENAI_MODEL,
+        headers: {
+          'X-My-Custom-Header': 'foo',
+          Authorization: 'override',
+        },
       },
       secrets: { apiKey: '123' },
       logger: loggingSystemMock.createLogger(),
@@ -96,6 +100,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -114,6 +119,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...requestBody, stream: false }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -131,6 +137,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -165,6 +172,7 @@ describe('OpenAIConnector', () => {
           }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -195,6 +203,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -215,6 +224,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: true, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -253,6 +263,7 @@ describe('OpenAIConnector', () => {
           }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -302,6 +313,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: true, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -334,6 +346,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
