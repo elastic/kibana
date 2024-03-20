@@ -942,9 +942,8 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
-  const { dataGridId, setDataGridWrapper } = useFullScreenWatcher();
+  const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
-  const docTableRef = useRef<HTMLDivElement>(null);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
@@ -987,7 +986,7 @@ export const UnifiedDataTable = ({
       <span className="unifiedDataTable__inner">
         <div
           ref={setDataGridWrapper}
-          ref={docTableRef}
+          key={isCompareActive ? 'comparisonTable' : 'docTable'}
           data-test-subj="discoverDocTable"
           data-render-complete={isRenderComplete}
           data-shared-item=""
@@ -999,8 +998,7 @@ export const UnifiedDataTable = ({
           {isCompareActive ? (
             <CompareDocuments
               id={dataGridId}
-              key="comparisonTable"
-              wrapperRef={docTableRef}
+              wrapper={dataGridWrapper}
               consumer={consumer}
               ariaDescribedBy={randomId}
               ariaLabelledBy={ariaLabelledBy}
@@ -1017,7 +1015,6 @@ export const UnifiedDataTable = ({
           ) : (
             <EuiDataGridMemoized
               id={dataGridId}
-              key="docTable"
               aria-describedby={randomId}
               aria-labelledby={ariaLabelledBy}
               columns={euiGridColumns}

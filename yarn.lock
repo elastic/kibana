@@ -9448,11 +9448,6 @@
   resolved "https://registry.yarnpkg.com/@types/diff/-/diff-5.0.8.tgz#28dc501cc3e7c62d4c5d096afe20755170acf276"
   integrity sha512-kR0gRf0wMwpxQq6ME5s+tWk9zVCfJUl98eRkD05HWWRbhPB/eu4V1IbyZAsvzC1Gn4znBJ0HN01M4DGXdBEV8Q==
 
-"@types/diff@^5.0.3":
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-5.0.3.tgz#1f89e49ff83b5d200d78964fb896c68498ce1828"
-  integrity sha512-amrLbRqTU9bXMCc6uX0sWpxsQzRIo9z6MJPkH1pkez/qOxuqSZVuryJAWoBRq94CeG8JxY+VK4Le9HtjQR5T9A==
-
 "@types/ejs@^3.0.6":
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"

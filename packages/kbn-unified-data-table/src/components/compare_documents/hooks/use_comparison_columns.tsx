@@ -9,10 +9,10 @@
 import { EuiDataGridColumn, EuiListGroupItemProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
-import { RefObject, useMemo } from 'react';
+import { useMemo } from 'react';
 
 export interface UseComparisonColumnsProps {
-  wrapperRef: RefObject<HTMLElement>;
+  wrapper: HTMLElement | null;
   fieldColumnId: string;
   selectedDocs: string[];
   getDocById: (docId: string) => DataTableRecord | undefined;
@@ -26,7 +26,7 @@ const fieldColumnName = i18n.translate('unifiedDataTable.fieldColumnTitle', {
 });
 
 export const useComparisonColumns = ({
-  wrapperRef,
+  wrapper,
   fieldColumnId,
   selectedDocs,
   getDocById,
@@ -43,7 +43,7 @@ export const useComparisonColumns = ({
     };
 
     const currentColumns = [fieldsColumn];
-    const wrapperWidth = wrapperRef.current?.offsetWidth ?? 0;
+    const wrapperWidth = wrapper?.offsetWidth ?? 0;
     const columnWidth =
       defaultColumnWidth * selectedDocs.length + fieldColumnWidth > wrapperWidth
         ? defaultColumnWidth
@@ -109,7 +109,7 @@ export const useComparisonColumns = ({
     });
 
     return currentColumns;
-  }, [fieldColumnId, getDocById, selectedDocs, setSelectedDocs, wrapperRef]);
+  }, [fieldColumnId, getDocById, selectedDocs, setSelectedDocs, wrapper]);
 
   return comparisonColumns;
 };
