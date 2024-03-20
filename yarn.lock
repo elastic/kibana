@@ -3097,6 +3097,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aiops-test-utils@link:x-pack/packages/ml/aiops_test_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-utils@link:x-pack/packages/ml/aiops_utils":
   version "0.0.0"
   uid ""
@@ -6165,11 +6169,23 @@
   version "0.0.0"
   uid ""
 
+"@kbn/slo-plugin@link:x-pack/plugins/observability_solution/slo":
+  version "0.0.0"
+  uid ""
+
 "@kbn/slo-schema@link:x-pack/packages/kbn-slo-schema":
   version "0.0.0"
   uid ""
 
 "@kbn/snapshot-restore-plugin@link:x-pack/plugins/snapshot_restore":
+  version "0.0.0"
+  uid ""
+
+"@kbn/solution-nav-es@link:packages/solution-nav/es":
+  version "0.0.0"
+  uid ""
+
+"@kbn/solution-nav-oblt@link:packages/solution-nav/oblt":
   version "0.0.0"
   uid ""
 
@@ -23170,10 +23186,10 @@ node-source-walk@^6.0.0, node-source-walk@^6.0.1, node-source-walk@^6.0.2:
   dependencies:
     "@babel/parser" "^7.21.8"
 
-nodemailer@^6.6.2:
-  version "6.6.2"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.6.2.tgz#e184c9ed5bee245a3e0bcabc7255866385757114"
-  integrity sha512-YSzu7TLbI+bsjCis/TZlAXBoM4y93HhlIgo0P5oiA2ua9Z4k+E2Fod//ybIzdJxOlXGRcHIh/WaeCBehvxZb/Q==
+nodemailer@^6.9.9:
+  version "6.9.9"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.9.9.tgz#4549bfbf710cc6addec5064dd0f19874d24248d9"
+  integrity sha512-dexTll8zqQoVJEZPwQAKzxxtFn0qTnjdQTchoU6Re9BUUGBJiOy3YMn/0ShTW6J5M0dfQ1NeDeRTTl4oIWgQMA==
 
 nopt@^4.0.1:
   version "4.0.3"
