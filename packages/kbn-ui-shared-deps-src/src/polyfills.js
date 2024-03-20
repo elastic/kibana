@@ -48,12 +48,16 @@ typeof window !== 'undefined' &&
   // eslint-disable-next-line no-global-assign
   (Worker = ((BaseWorker) =>
     class Worker extends BaseWorker {
-      constructor(scriptURL, options) {
-        const url = String(scriptURL);
-        super(
-          // Check if the URL is remote
-          url.includes('://') && !url.startsWith(window.location.origin) && !url.startsWith('blob:') // to bootstrap the actual script to work around the same origin policy.
-            ? URL.createObjectURL(
+      constructor(url, options) {
+        let scriptUrl;
+        let objectURLRef;
+
+        try {
+          const isCrossOrigin = (URLObject) =>
+            URLObject.protocol === 'https:' && URLObject.origin !== window.location.origin;
+
+          scriptUrl = isCrossOrigin(new URL(String(url))) // to bootstrap the actual script to work around the same origin policy.
+            ? (objectURLRef = URL.createObjectURL(
                 new Blob(
                   [
                     // Replace the `importScripts` function with
@@ -69,15 +73,29 @@ typeof window !== 'undefined' &&
                     // i = original importScripts
                     // a = arguments
                     // u = URL
-                    `importScripts=((i)=>(...a)=>i(...a.map((u)=>''+new URL(u,"${url}"))))(importScripts);importScripts("${url}")`,
+                    `importScripts=((i)=>(...a)=>i(...a.map((u)=>''+new URL(u,"${url}"))))(importScripts);importScripts("${url}");`,
                   ],
                   {
                     type: 'text/javascript',
                   }
                 )
-              )
-            : scriptURL,
-          options
+              ))
+            : String(url);
+        } catch {
+          scriptUrl = String(url);
+        }
+
+        super(scriptUrl, options);
+
+        this.addEventListener(
+          'message',
+          function revokeURL() {
+            if (objectURLRef) {
+              URL.revokeObjectURL(objectURLRef);
+              objectURLRef = null;
+            }
+          },
+          { once: true }
         );
       }
     })(Worker));
