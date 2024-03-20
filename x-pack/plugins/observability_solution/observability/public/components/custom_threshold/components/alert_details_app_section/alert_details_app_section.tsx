@@ -196,7 +196,10 @@ export default function AlertDetailsAppSection({
         ),
         value: (
           <>
-            <Groups groups={groups} timeRange={timeRange} />
+            <Groups
+              groups={groups}
+              timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
+            />
             <span>
               <EuiLink
                 data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
@@ -241,7 +244,7 @@ export default function AlertDetailsAppSection({
     });
 
     setAlertSummaryFields(alertSummaryFields);
-  }, [groups, tags, rule, ruleLink, setAlertSummaryFields, timeRange, viewInAppUrl]);
+  }, [groups, tags, rule, ruleLink, setAlertSummaryFields, timeRange, alertEnd, viewInAppUrl]);
 
   useEffect(() => {
     const initDataView = async () => {
