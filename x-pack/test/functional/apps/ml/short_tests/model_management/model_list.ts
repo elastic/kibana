@@ -540,9 +540,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           'Assert the "Click to Download" and "Manual Download" tabs exists'
         );
-        const clickToDownloadTab: AddModelFlyoutTabId = 'clickToDownload';
-        const manualDownloadTab: AddModelFlyoutTabId = 'manualDownload';
-        await ml.trainedModelsFlyout.assertFlyoutTabs([clickToDownloadTab, manualDownloadTab]);
+        await ml.trainedModelsFlyout.assertFlyoutTabs(['clickToDownload', 'manualDownload']);
       });
 
       it('should list Elser panels contents correctly', async () => {

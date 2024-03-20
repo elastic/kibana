@@ -73,7 +73,9 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
 
     public async assertFlyoutTabs(tabs: AddModelFlyoutTabId[]): Promise<void> {
       for await (const tab of tabs)
-        await testSubjects.existOrFail(`mlAddTrainedModelFlyoutTab-${tab}`);
+        await testSubjects.existOrFail(`mlAddTrainedModelFlyoutTab-${tab}`, {
+          timeout: 3_000,
+        });
     }
 
     public async assertElandPythonClientCodeBlocks() {
