@@ -303,6 +303,23 @@ export abstract class AbstractDataView {
   }
 
   /**
+   * Set field custom description
+   * @param fieldName name of field to set custom description on
+   * @param customDescription custom description value. If undefined, custom description is removed
+   */
+
+  protected setFieldCustomDescriptionInternal(
+    fieldName: string,
+    customDescription: string | undefined | null
+  ) {
+    this.setFieldAttrs(
+      fieldName,
+      'customDescription',
+      customDescription === null ? undefined : customDescription
+    );
+  }
+
+  /**
    * Set field formatter
    * @param fieldName name of field to set format on
    * @param format field format in serialized form
