@@ -11,7 +11,7 @@ import {
   PresentationContainer,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
-import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
+import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
@@ -37,12 +37,14 @@ export const ReactEmbeddableRenderer = <
   state,
   parentApi,
   onApiAvailable,
+  panelProps,
 }: {
   maybeId?: string;
   type: string;
   state: SerializedPanelState<StateType>;
   parentApi?: PresentationContainer;
   onApiAvailable?: (api: ApiType) => void;
+  panelProps?: Omit<PresentationPanelProps<ApiType>, 'Component'>;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
 
@@ -107,5 +109,5 @@ export const ReactEmbeddableRenderer = <
     };
   }, []);
 
-  return <PresentationPanel Component={componentPromise} />;
+  return <PresentationPanel {...panelProps} Component={componentPromise} />;
 };
