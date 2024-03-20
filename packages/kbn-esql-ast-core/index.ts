@@ -62,6 +62,7 @@ export type {
   ESQLVariable,
   ESQLRealField,
   ESQLPolicy,
+  ErrorTypes as ESQLValidationErrorTypes,
 } from './src/lib/ast/validation/types';
 export { ESQLErrorListener } from './src/lib/antlr_error_listener';
 export { collectVariables } from './src/lib/ast/shared/variables';
