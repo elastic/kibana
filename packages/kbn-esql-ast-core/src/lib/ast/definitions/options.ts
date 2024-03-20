@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { isColumnItem, isLiteralItem } from '../shared/helpers';
 import { ESQLCommandOption, ESQLMessage } from '../types';
+import { getMessageFromId } from '../validation/errors';
 import { CommandOptionsDefinition } from './types';
 
 export const byOption: CommandOptionsDefinition = {
@@ -38,33 +39,29 @@ export const metadataOption: CommandOptionsDefinition = {
     const messages: ESQLMessage[] = [];
     // need to test the parent command here
     if (/\[metadata/i.test(command.text)) {
-      messages.push({
-        location: option.location,
-        text: i18n.translate('monaco.esql.validation.metadataBracketsDeprecation', {
-          defaultMessage: "Square brackets '[]' need to be removed from FROM METADATA declaration",
-        }),
-        type: 'warning',
-        code: 'metadataBracketsDeprecation',
-      });
+      messages.push(
+        getMessageFromId({
+          messageId: 'metadataBracketsDeprecation',
+          values: {},
+          locations: option.location,
+        })
+      );
     }
     const fields = option.args.filter(isColumnItem);
     const metadataFieldsAvailable = references as unknown as Set<string>;
     if (metadataFieldsAvailable.size > 0) {
       for (const field of fields) {
         if (!metadataFieldsAvailable.has(field.name)) {
-          messages.push({
-            location: field.location,
-            text: i18n.translate('monaco.esql.validation.wrongMetadataArgumentType', {
-              defaultMessage:
-                'Metadata field [{value}] is not available. Available metadata fields are: [{availableFields}]',
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownMetadataField',
               values: {
                 value: field.name,
                 availableFields: Array.from(metadataFieldsAvailable).join(', '),
               },
-            }),
-            type: 'error',
-            code: 'unknownMetadataField',
-          });
+              locations: field.location,
+            })
+          );
         }
       }
     }
@@ -125,18 +122,13 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
       (!isLiteralItem(firstArg) || firstArg.literalType !== 'string')
     ) {
       const value = 'value' in firstArg ? firstArg.value : firstArg.name;
-      messages.push({
-        location: firstArg.location,
-        text: i18n.translate('monaco.esql.validation.wrongDissectOptionArgumentType', {
-          defaultMessage:
-            'Invalid value for DISSECT append_separator: expected a string, but was [{value}]',
-          values: {
-            value,
-          },
-        }),
-        type: 'error',
-        code: 'wrongDissectOptionArgumentType',
-      });
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongDissectOptionArgumentType',
+          values: { value },
+          locations: firstArg.location,
+        })
+      );
     }
     return messages;
   },

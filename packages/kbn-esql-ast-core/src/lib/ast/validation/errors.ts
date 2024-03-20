@@ -260,6 +260,36 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         }),
         type: 'error',
       };
+    case 'metadataBracketsDeprecation':
+      return {
+        message: i18n.translate('monaco.esql.validation.metadataBracketsDeprecation', {
+          defaultMessage: "Square brackets '[]' need to be removed from FROM METADATA declaration",
+        }),
+        type: 'warning',
+      };
+    case 'unknownMetadataField':
+      return {
+        message: i18n.translate('monaco.esql.validation.wrongMetadataArgumentType', {
+          defaultMessage:
+            'Metadata field [{value}] is not available. Available metadata fields are: [{availableFields}]',
+          values: {
+            value: out.value,
+            availableFields: out.availableFields,
+          },
+        }),
+        type: 'error',
+      };
+    case 'wrongDissectOptionArgumentType':
+      return {
+        message: i18n.translate('monaco.esql.validation.wrongDissectOptionArgumentType', {
+          defaultMessage:
+            'Invalid value for DISSECT append_separator: expected a string, but was [{value}]',
+          values: {
+            value: out.value,
+          },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }

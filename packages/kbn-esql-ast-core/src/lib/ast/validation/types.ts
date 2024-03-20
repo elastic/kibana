@@ -152,6 +152,18 @@ export interface ValidationErrors {
     message: string;
     type: { fn: string; given: string };
   };
+  metadataBracketsDeprecation: {
+    message: string;
+    type: {};
+  };
+  unknownMetadataField: {
+    message: string;
+    type: { value: string; availableFields: string };
+  };
+  wrongDissectOptionArgumentType: {
+    message: string;
+    type: { value: string | number };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;
