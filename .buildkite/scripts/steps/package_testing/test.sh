@@ -3,6 +3,8 @@
 set -euo pipefail
 
 source "$(dirname "$0")/../../common/util.sh"
+source .buildkite/scripts/steps/artifacts/env.sh
+
 .buildkite/scripts/bootstrap.sh
 
 # temporary adding this to get screenshots
@@ -19,7 +21,7 @@ elif [[ "$TEST_PACKAGE" == "rpm" ]]; then
   download_artifact 'kibana-*-x86_64.rpm' . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.6"
 elif [[ "$TEST_PACKAGE" == "docker" ]]; then
-  download_artifact "kibana-$KIBANA_PKG_VERSION*-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact "kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.7"
 fi
 cd ..
