@@ -64,6 +64,7 @@ export const runMigration = () =>
       const locationFilePath =
         flagsReader.string('outputLocationFile') ||
         path.resolve(outputFolder, DEFAULT_LOCATION_FILE_NAME);
+      const filterExpression = flagsReader.string('filter') || '';
 
       // Ensure output folder exists
       if (!fs.existsSync(outputFolder)) {
@@ -71,11 +72,13 @@ export const runMigration = () =>
       }
 
       // Collect .tf files
-      const paths = await globby('*.tf', {
-        cwd: pathToPipelines,
-        onlyFiles: true,
-        gitignore: true,
-      });
+      const paths = (
+        await globby('*.tf', {
+          cwd: pathToPipelines,
+          onlyFiles: true,
+          gitignore: true,
+        })
+      ).filter((p) => !filterExpression || p.includes(filterExpression));
 
       // Generate YAML files for each pipeline definition
       const unprocessedFiles: string[] = [];
@@ -130,14 +133,16 @@ export const runMigration = () =>
         '--input-folder </path/to/kibana-buildkite/pipelines>',
         '[--output-folder </path/to/output/folder>]',
         '[--output-location-file </path/to/output/location/file>]',
+        '[--filter <file-path-filter>]',
       ].join(' '),
       flags: {
         allowUnexpected: true,
-        string: ['input-folder', 'output-folder', 'output-location-file'],
+        string: ['input-folder', 'output-folder', 'output-location-file', 'filter'],
         help: `
     --input-folder          Path to the pipelines folder in the kibana-buildkite repo
     --output-folder         Path to the folder where the generated YAML files should be written to
     --output-location-file  Path to the location file that will contain the list of all generated YAML files
+    --filter                A string to filter the files to process
   `,
       },
     }
