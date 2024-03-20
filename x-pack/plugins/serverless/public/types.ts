@@ -15,7 +15,6 @@ import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
-// import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
