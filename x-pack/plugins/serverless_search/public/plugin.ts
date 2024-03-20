@@ -127,11 +127,10 @@ export class ServerlessSearchPlugin
     const navigationTree$ = of(navigationTree);
     serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
-    management.setIsSidebarEnabled(false);
-
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled()
     );
+
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],

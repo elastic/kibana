@@ -51,14 +51,11 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { observabilityShared, serverless, management, security } = setupDeps;
-    observabilityShared.setIsSidebarEnabled(false);
+    const { serverless, management, security } = setupDeps;
 
     const navigationTree$ = of(navigationTree);
     serverless.setProjectHome('/app/observability/landing');
     serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
-
-    management.setIsSidebarEnabled(false);
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled(),
