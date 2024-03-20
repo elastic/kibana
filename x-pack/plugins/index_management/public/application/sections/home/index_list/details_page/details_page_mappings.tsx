@@ -93,10 +93,12 @@ export const DetailsPageMappings: FunctionComponent<DetailsPageMappingsProps> = 
     );
   }
 
+
   return (
     <DetailsPageMappingsContent
       index={index}
       data={stringifiedData}
+      jsonData={data}
       showAboutMappings={showAboutMappings}
     />
   );
