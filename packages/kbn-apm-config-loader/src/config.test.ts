@@ -192,9 +192,9 @@ describe('ApmConfiguration', () => {
         expect(config.getConfig('serviceName')).toEqual(
           expect.objectContaining({
             globalLabels: {
-              git_rev: "sha",
-              test1: "1",
-              test2: "4"
+              git_rev: 'sha',
+              test1: '1',
+              test2: '4',
             }
           })
         );
