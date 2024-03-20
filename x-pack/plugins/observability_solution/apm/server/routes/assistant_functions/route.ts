@@ -7,13 +7,15 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { omit } from 'lodash';
-import moment from 'moment';
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import {
+  apmAlertDetailsContextRt,
+  getApmAlertDetailsContext,
+} from './get_apm_alert_details_context';
 
 import {
   CorrelationValue,
@@ -25,20 +27,19 @@ import {
   getAssistantDownstreamDependencies,
   type APMDownstreamDependency,
 } from './get_apm_downstream_dependencies';
-import { ApmServicesListItem, getApmServiceList } from './get_apm_service_list';
 import {
   getApmServiceSummary,
   serviceSummaryRouteRt,
   type ServiceSummary,
 } from './get_apm_service_summary';
+import { ApmAnomalies } from './get_apm_service_summary/get_anomalies';
 import {
-  ApmTimeseriesType,
   getApmTimeseries,
   getApmTimeseriesRt,
   TimeseriesChangePoint,
   type ApmTimeseries,
 } from './get_apm_timeseries';
-import { getLogCategories, LogCategories } from './get_log_categories';
+import { LogCategories } from './get_log_categories';
 
 const getApmAlertDetailsContextRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/assistant/get_apm_alert_details_context',
@@ -47,28 +48,13 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
   },
 
   params: t.type({
-    query: t.intersection([
-      t.type({
-        'service.name': t.string,
-        alert_started_at: t.string,
-      }),
-      t.partial({
-        'service.environment': t.string,
-        'transaction.type': t.string,
-        'transaction.name': t.string,
-
-        // alert fields
-        'host.name': t.string,
-        'container.id': t.string,
-      }),
-    ]),
+    query: apmAlertDetailsContextRt,
   }),
   handler: async (
     resources
   ): Promise<{
     serviceSummary: ServiceSummary;
     downstreamDependencies: APMDownstreamDependency[];
-    serviceList: ApmServicesListItem[];
     logCategories: LogCategories;
     serviceChangePoints: Array<{
       title: string;
@@ -78,19 +64,21 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
       title: string;
       changes: TimeseriesChangePoint[];
     }>;
+    anomalies: ApmAnomalies;
   }> => {
     const { context, request, plugins, logger, params } = resources;
     const { query } = params;
-    const apmEventClient = await getApmEventClient(resources);
+
     const alertStartedAt = query.alert_started_at;
 
     const [
+      apmEventClient,
       annotationsClient,
       esClient,
       apmAlertsClient,
       mlClient,
-      randomSampler,
     ] = await Promise.all([
+      getApmEventClient(resources),
       plugins.observability.setup.getScopedAnnotationsClient(context, request),
       context.core.then(
         (coreContext): ElasticsearchClient =>
@@ -105,190 +93,16 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
       }),
     ]);
 
-    // const ONE_MINUTE = 1 * 60 * 1000;
-    // const start = new Date(alert.start - FIFTEEN_MINUTES).toISOString();
-
-    const serviceSummaryPromise = getApmServiceSummary({
-      apmEventClient,
+    return getApmAlertDetailsContext({
+      alertStartedAt,
       annotationsClient,
-      esClient,
       apmAlertsClient,
-      mlClient,
-      logger,
-      arguments: {
-        'service.name': query['service.name'],
-        'service.environment': query['service.environment'],
-        start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-        end: alertStartedAt,
-      },
-    });
-
-    const downstreamDependenciesPromise = getAssistantDownstreamDependencies({
       apmEventClient,
-      arguments: {
-        'service.name': query['service.name'],
-        'service.environment': query['service.environment'],
-        start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-        end: alertStartedAt,
-      },
-    });
-
-    const serviceListPromise = getApmServiceList({
-      apmEventClient,
-      apmAlertsClient,
-      randomSampler,
-      mlClient,
-      logger,
-      arguments: {
-        'service.environment': query['service.environment'],
-        start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-        end: alertStartedAt,
-      },
-    });
-
-    const logCategoriesPromise = getLogCategories({
       esClient,
-      arguments: {
-        start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-        end: alertStartedAt,
-
-        'service.name': query['service.name'],
-        'host.name': query['host.name'],
-        'container.id': query['container.id'],
-      },
+      logger,
+      mlClient,
+      query,
     });
-
-    const serviceTimeseriesPromise = getApmTimeseries({
-      apmEventClient,
-      arguments: {
-        start: moment(alertStartedAt).subtract(12, 'hours').toISOString(),
-        end: alertStartedAt,
-        stats: [
-          {
-            title: 'Latency',
-            'service.name': query['service.name'],
-            'service.environment': query['service.environment'],
-            timeseries: {
-              name: ApmTimeseriesType.transactionLatency,
-              function: LatencyAggregationType.p95,
-              'transaction.type': query['transaction.type'],
-              'transaction.name': query['transaction.name'],
-            },
-          },
-          {
-            title: 'Throughput',
-            'service.name': query['service.name'],
-            'service.environment': query['service.environment'],
-            timeseries: {
-              name: ApmTimeseriesType.transactionThroughput,
-              'transaction.type': query['transaction.type'],
-              'transaction.name': query['transaction.name'],
-            },
-          },
-          {
-            title: 'Failure rate',
-            'service.name': query['service.name'],
-            'service.environment': query['service.environment'],
-            timeseries: {
-              name: ApmTimeseriesType.transactionFailureRate,
-              'transaction.type': query['transaction.type'],
-              'transaction.name': query['transaction.name'],
-            },
-          },
-          {
-            title: 'Error events',
-            'service.name': query['service.name'],
-            'service.environment': query['service.environment'],
-            timeseries: {
-              name: ApmTimeseriesType.errorEventRate,
-            },
-          },
-        ],
-      },
-    });
-
-    const exitSpanTimeseriesPromise = getApmTimeseries({
-      apmEventClient,
-      arguments: {
-        start: moment(alertStartedAt).subtract(30, 'minute').toISOString(),
-        end: alertStartedAt,
-        stats: [
-          {
-            title: 'Exit span latency',
-            'service.name': query['service.name'],
-            'service.environment': query['service.environment'],
-            timeseries: {
-              name: ApmTimeseriesType.exitSpanLatency,
-            },
-          },
-          {
-            title: 'Exit span failure rate',
-            'service.name': query['service.name'],
-            'service.environment': query['service.environment'],
-            timeseries: {
-              name: ApmTimeseriesType.exitSpanFailureRate,
-            },
-          },
-        ],
-      },
-    });
-
-    const [
-      serviceSummary,
-      downstreamDependencies,
-      serviceList,
-      logCategories,
-      serviceTimeseries,
-      exitSpanTimeseries,
-    ] = await Promise.all([
-      serviceSummaryPromise,
-      downstreamDependenciesPromise,
-      serviceListPromise,
-      logCategoriesPromise,
-      serviceTimeseriesPromise,
-      exitSpanTimeseriesPromise,
-    ]);
-
-    const serviceChangePoints = serviceTimeseries.map(
-      (
-        timeseries
-      ): {
-        title: string;
-        grouping: string;
-        changes: TimeseriesChangePoint[];
-      } => {
-        return {
-          title: timeseries.stat.title,
-          grouping: timeseries.id,
-          changes: timeseries.changes,
-        };
-      }
-    );
-
-    const exitSpanChangePoints = exitSpanTimeseries.map(
-      (
-        timeseries
-      ): {
-        title: string;
-        grouping: string;
-        changes: TimeseriesChangePoint[];
-      } => {
-        return {
-          title: timeseries.stat.title,
-          grouping: timeseries.id,
-          changes: timeseries.changes,
-        };
-      }
-    );
-
-    return {
-      serviceSummary,
-      downstreamDependencies,
-      serviceList,
-      logCategories,
-      serviceChangePoints,
-      exitSpanChangePoints,
-    };
   },
 });
 

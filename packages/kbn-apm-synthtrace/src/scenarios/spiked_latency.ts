@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { random } from 'lodash';
+import { random, times } from 'lodash';
 import {
   apm,
   log,
@@ -28,14 +28,18 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
     generate: ({ range, clients: { apmEsClient, logsEsClient } }) => {
       const serviceNames = ['spikey-frontend', 'spikey-backend'];
 
+      const CLUSTER_COUNT = 3;
       const CLOUD_PROVIDERS = ['gcp', 'aws', 'azure'];
       const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
-
-      const CLUSTER = [
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-1' },
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-2' },
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-3' },
-      ];
+      const CLUSTERS = times(CLUSTER_COUNT).map((index) => ({
+        clusterName: `synth-cluster-${index}`,
+        clusterId: generateShortId(),
+        projectId: generateShortId(),
+        ressourceId: generateShortId(),
+        instanceId: generateShortId(),
+        cloudProvider: CLOUD_PROVIDERS[index],
+        cloudRegion: CLOUD_REGION[index],
+      }));
 
       function buildLogs(serviceName: string) {
         return range
@@ -45,7 +49,17 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
             return Array(20)
               .fill(0)
               .map(() => {
-                const index = Math.floor(Math.random() * 3);
+                const clusterIndex = Math.floor(Math.random() * CLUSTER_COUNT);
+                const {
+                  clusterId,
+                  clusterName,
+                  projectId,
+                  ressourceId,
+                  instanceId,
+                  cloudRegion,
+                  cloudProvider,
+                } = CLUSTERS[clusterIndex];
+
                 const logMessage = `Error message #${generateShortId()} from ${serviceName}`;
                 const logLevel = 'error';
 
@@ -57,14 +71,14 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
                   .defaults({
                     'trace.id': generateShortId(),
                     'agent.name': 'synth-agent',
-                    'orchestrator.cluster.name': CLUSTER[index].clusterName,
-                    'orchestrator.cluster.id': CLUSTER[index].clusterId,
-                    'orchestrator.resource.id': generateShortId(),
-                    'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
-                    'cloud.region': CLOUD_REGION[index],
-                    'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
-                    'cloud.project.id': generateShortId(),
-                    'cloud.instance.id': generateShortId(),
+                    'orchestrator.cluster.name': clusterName,
+                    'orchestrator.cluster.id': clusterId,
+                    'orchestrator.resource.id': ressourceId,
+                    'cloud.provider': cloudProvider,
+                    'cloud.region': cloudRegion,
+                    'cloud.availability_zone': `${CLOUD_REGION[clusterIndex]}a`,
+                    'cloud.project.id': projectId,
+                    'cloud.instance.id': instanceId,
                     'log.file.path': `/logs/${generateLongId()}/error.txt`,
                   })
                   .timestamp(timestamp);
@@ -85,6 +99,9 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
         sometimesSpikeTransactionName,
       ];
 
+      const containerId = `spiked-${generateShortId()}`;
+      const hostName = `spiked-${generateShortId()}`;
+
       const buildTransactions = (serviceInstance: Instance, transactionName: string) => {
         const interval = random(1, 100, false);
         const rangeWithInterval = range.interval(`${interval}s`);
@@ -92,8 +109,8 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
         return rangeWithInterval.generator((timestamp, i) => {
           const duration = getDuration(transactionName);
           return serviceInstance
-            .containerId(`spiked-${generateShortId()}`)
-            .hostName(`spiked-${generateShortId()}`)
+            .containerId(containerId)
+            .hostName(hostName)
             .transaction({ transactionName })
             .timestamp(timestamp)
             .duration(duration)

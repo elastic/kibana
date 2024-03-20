@@ -13,6 +13,7 @@ import {
 import React, { useCallback } from 'react';
 import dedent from 'dedent';
 
+import { i18n } from '@kbn/i18n';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import {
   CONTAINER_ID,
@@ -39,11 +40,11 @@ export function AlertDetailContextualInsights({
   const getPromptMessages = useCallback(async () => {
     const {
       serviceSummary,
-      serviceList,
       downstreamDependencies,
       logCategories,
       serviceChangePoints,
       exitSpanChangePoints,
+      anomalies,
     } = await callApmApi(
       'GET /internal/apm/assistant/get_apm_alert_details_context',
       {
@@ -63,14 +64,12 @@ export function AlertDetailContextualInsights({
     );
 
     const serviceName = alert.fields[SERVICE_NAME];
+    const serviceEnvironment = alert.fields[SERVICE_ENVIRONMENT];
 
     const content = {
       apmAlertContext: dedent(
         `High level information about the service where the alert occurred. Use this as background but do not repeat this information to the user. 
         ${JSON.stringify(serviceSummary)}
-        
-        Related APM services. These may be able to influence the performance of "${serviceName}":
-        ${JSON.stringify(serviceList)}
   
         Downstream dependencies from the service "${serviceName}". Problems in these services can negatively affect the performance of "${serviceName}":
         ${JSON.stringify(downstreamDependencies)}
@@ -83,6 +82,9 @@ export function AlertDetailContextualInsights({
   
         Log events occurring around the time of the alert. The log messages can sometimes diagnose the root cause of the alert:
         ${JSON.stringify(logCategories)}
+
+        Anomalies for services running in the environment "${serviceEnvironment}"
+        ${anomalies}
   
         Help the user understand the root cause of the alert by using the above information. Suggest actions the user should take to investigate further.
         `
@@ -92,17 +94,12 @@ export function AlertDetailContextualInsights({
     return [
       createFunctionRequestMessage({
         name: 'get_apm_alert_details_context',
-        args: {
-          [SERVICE_NAME]: alert.fields[SERVICE_NAME],
-          [SERVICE_ENVIRONMENT]: alert.fields[SERVICE_ENVIRONMENT],
-          [TRANSACTION_TYPE]: alert.fields[TRANSACTION_TYPE],
-          [TRANSACTION_NAME]: alert.fields[TRANSACTION_NAME],
-        },
+        args: {},
       }).message,
 
       createFunctionResponseMessage({
         name: 'get_apm_alert_details_context',
-        content: JSON.stringify(content),
+        content,
         data: content,
       }).message,
     ];
@@ -116,7 +113,10 @@ export function AlertDetailContextualInsights({
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <ObservabilityAIAssistantContextualInsight
-          title={'Help me understand this alert'}
+          title={i18n.translate(
+            'xpack.apm.alertDetailContextualInsights.InsightButtonLabel',
+            { defaultMessage: 'Help me understand this alert' }
+          )}
           messages={getPromptMessages}
         />
       </EuiFlexItem>
