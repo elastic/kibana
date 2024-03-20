@@ -29,7 +29,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         <EuiToolTip
           content={
             <FormattedMessage
-              defaultMessage="Selected objects can’t be deleted because they are either Elastic managed objects or hidden objects."
+              defaultMessage="Selected objects can’t be deleted because they are hidden objects."
               id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
               values={Object {}}
             />
@@ -277,7 +277,7 @@ exports[`Table should render normally 1`] = `
         <EuiToolTip
           content={
             <FormattedMessage
-              defaultMessage="Selected objects can’t be deleted because they are either Elastic managed objects or hidden objects."
+              defaultMessage="Selected objects can’t be deleted because they are hidden objects."
               id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
               values={Object {}}
             />
