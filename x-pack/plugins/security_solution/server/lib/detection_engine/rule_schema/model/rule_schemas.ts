@@ -202,8 +202,8 @@ export const QuerySpecificRuleParams = z.object({
   filters: RuleFilterArray.optional(),
   savedId: SavedQueryId.optional(),
   dataViewId: DataViewId.optional(),
-  ruleParent: RuleParentId.optional(),
-  ruleChildren: RuleChildrenIds.optional(),
+  ruleParentId: RuleParentId.optional(),
+  ruleChildrenIds: RuleChildrenIds.optional(),
   responseActions: z.array(RuleResponseAction).optional(),
   alertSuppression: AlertSuppressionCamel.optional(),
 });

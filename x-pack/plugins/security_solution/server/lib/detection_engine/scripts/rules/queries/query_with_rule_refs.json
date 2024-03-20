@@ -1,0 +1,11 @@
+{
+  "name": "Simplest Query",
+  "description": "Simplest query with the least amount of fields required",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "query",
+  "query": "user.name: root or user.name: admin",
+  "index": ["myfakeindex*"],
+  "rule_parent_id": "1234",
+  "rule_children_ids": ["1234", "5678"]
+}
