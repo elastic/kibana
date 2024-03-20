@@ -50,6 +50,7 @@ export interface UsageStats {
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
   'observability:apmEnableTableSearchBar': boolean;
+  'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logsExplorer:allowedDataViews': string[];
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
