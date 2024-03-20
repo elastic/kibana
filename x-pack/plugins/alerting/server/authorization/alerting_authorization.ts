@@ -14,7 +14,7 @@ import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { Space } from '@kbn/spaces-plugin/server';
 import { RegistryRuleType } from '../rule_type_registry';
-import { ALERTS_FEATURE_ID, RuleTypeRegistry } from '../types';
+import { ALERTING_FEATURE_ID, RuleTypeRegistry } from '../types';
 import {
   asFiltersByRuleTypeAndConsumer,
   asFiltersBySpaceId,
@@ -131,7 +131,7 @@ export class AlertingAuthorization {
 
     this.allPossibleConsumers = this.featuresIds.then((featuresIds) => {
       return featuresIds.size
-        ? asAuthorizedConsumers([ALERTS_FEATURE_ID, ...featuresIds], {
+        ? asAuthorizedConsumers([ALERTING_FEATURE_ID, ...featuresIds], {
             read: true,
             all: true,
           })
@@ -339,7 +339,7 @@ export class AlertingAuthorization {
       >();
       const allPossibleConsumers = await this.allPossibleConsumers;
       const addLegacyConsumerPrivileges = (legacyConsumer: string) =>
-        legacyConsumer === ALERTS_FEATURE_ID || isEmpty(featuresIds);
+        legacyConsumer === ALERTING_FEATURE_ID || isEmpty(featuresIds);
       for (const feature of fIds) {
         const featureDef = this.features
           .getKibanaFeatures()
@@ -505,6 +505,6 @@ export const getValidConsumer = ({
   legacyConsumer: string;
   producer: string;
 }): string =>
-  legacyConsumer === ALERTS_FEATURE_ID || validLegacyConsumers.includes(legacyConsumer)
+  legacyConsumer === ALERTING_FEATURE_ID || validLegacyConsumers.includes(legacyConsumer)
     ? producer
     : legacyConsumer;

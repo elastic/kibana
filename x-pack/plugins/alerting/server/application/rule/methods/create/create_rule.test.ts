@@ -228,7 +228,7 @@ describe('create()', () => {
       return rulesClient.create(options);
     }
 
-    test('ensures user is authorised to create this type of alert under the consumer', async () => {
+    test('ensures user is authorised to create this type of rule under the consumer', async () => {
       const data = getMockData({
         alertTypeId: 'myType',
         consumer: 'myApp',
@@ -244,18 +244,18 @@ describe('create()', () => {
       });
     });
 
-    test('throws when user is not authorised to create this type of alert', async () => {
+    test('throws when user is not authorised to create this type of rule', async () => {
       const data = getMockData({
         alertTypeId: 'myType',
         consumer: 'myApp',
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to create a "myType" alert for "myApp"`)
+        new Error(`Unauthorized to create a "myType" rule for "myApp"`)
       );
 
       await expect(tryToExecuteOperation({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to create a "myType" alert for "myApp"]`
+        `[Error: Unauthorized to create a "myType" rule for "myApp"]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
@@ -327,7 +327,7 @@ describe('create()', () => {
     });
   });
 
-  test('creates an alert', async () => {
+  test('creates an rule', async () => {
     const data = getMockData();
     const createdAttributes = {
       ...data,
@@ -558,7 +558,7 @@ describe('create()', () => {
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
   });
 
-  test('creates an alert with a custom id', async () => {
+  test('creates an rule with a custom id', async () => {
     const data = getMockData();
     const createdAttributes = {
       ...data,
@@ -738,7 +738,7 @@ describe('create()', () => {
     `);
   });
 
-  test('creates an alert with multiple actions', async () => {
+  test('creates an rule with multiple actions', async () => {
     const data = getMockData({
       actions: [
         {
@@ -1445,7 +1445,7 @@ describe('create()', () => {
     expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(3);
   });
 
-  test('creates a disabled alert', async () => {
+  test('creates a disabled rule', async () => {
     const data = getMockData({ enabled: false });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1895,14 +1895,14 @@ describe('create()', () => {
     `);
   });
 
-  test('should trim alert name when creating API key', async () => {
-    const data = getMockData({ name: ' my alert name ' });
+  test('should trim rule name when creating API key', async () => {
+    const data = getMockData({ name: ' my rule name ' });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: false,
-        name: ' my alert name ',
+        name: ' my rule name ',
         alertTypeId: '123',
         schedule: { interval: 10000 },
         params: {
@@ -1933,10 +1933,10 @@ describe('create()', () => {
     });
 
     await rulesClient.create({ data });
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/my alert name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/my rule name');
   });
 
-  test('should create alert with given notifyWhen value if notifyWhen is not null', async () => {
+  test('should create rule with given notifyWhen value if notifyWhen is not null', async () => {
     const data = getMockData({ notifyWhen: 'onActionGroupChange', throttle: '10m' });
     const createdAttributes = {
       ...data,
@@ -2077,7 +2077,7 @@ describe('create()', () => {
     `);
   });
 
-  test('should create alert with notifyWhen = onThrottleInterval if notifyWhen is null and throttle is set', async () => {
+  test('should create rule with notifyWhen = onThrottleInterval if notifyWhen is null and throttle is set', async () => {
     const data = getMockData({ throttle: '10m' });
     const createdAttributes = {
       ...data,
@@ -2218,7 +2218,7 @@ describe('create()', () => {
     `);
   });
 
-  test('should create alert with notifyWhen = onActiveAlert if notifyWhen is null and throttle is null', async () => {
+  test('should create rule with notifyWhen = onActiveAlert if notifyWhen is null and throttle is null', async () => {
     const data = getMockData();
     const createdAttributes = {
       ...data,
@@ -2359,7 +2359,7 @@ describe('create()', () => {
     `);
   });
 
-  test('should create alerts with mapped_params', async () => {
+  test('should create rules with mapped_params', async () => {
     const data = getMockData({
       params: {
         bar: true,
@@ -2744,11 +2744,11 @@ describe('create()', () => {
       `"Task manager error"`
     );
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to cleanup alert "1" after scheduling task failed. Error: Saved object delete error'
+      'Failed to cleanup rule "1" after scheduling task failed. Error: Saved object delete error'
     );
   });
 
-  test('throws an error if alert type not registered', async () => {
+  test('throws an error if rule type not registered', async () => {
     const data = getMockData();
     ruleTypeRegistry.get.mockImplementation(() => {
       throw new Error('Invalid type');
@@ -2867,7 +2867,7 @@ describe('create()', () => {
     );
   });
 
-  test(`doesn't create API key for disabled alerts`, async () => {
+  test(`doesn't create API key for disabled rules`, async () => {
     const data = getMockData({ enabled: false });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',

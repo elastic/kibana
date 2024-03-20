@@ -16,10 +16,6 @@ import { LandingPage } from '../pages/landing/landing';
 import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details/rule_details';
-import { SlosPage } from '../pages/slos/slos';
-import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
-import { SloDetailsPage } from '../pages/slo_details/slo_details';
-import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import {
   ALERTS_PATH,
   ALERT_DETAIL_PATH,
@@ -31,15 +27,13 @@ import {
   RULES_LOGS_PATH,
   RULES_PATH,
   RULE_DETAIL_PATH,
-  SLOS_OUTDATED_DEFINITIONS_PATH,
-  SLOS_PATH,
-  SLOS_WELCOME_PATH,
-  SLO_CREATE_PATH,
-  SLO_DETAIL_PATH,
-  SLO_EDIT_PATH,
+  OLD_SLOS_PATH,
+  OLD_SLOS_WELCOME_PATH,
+  OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
+  OLD_SLO_DETAIL_PATH,
+  OLD_SLO_EDIT_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
-import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -48,10 +42,15 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
     application: { navigateToApp },
   } = useKibana().services;
   const history = useHistory();
-  const { search, hash } = useLocation();
-
+  const { search, hash, pathname } = useLocation();
   if (redirectToApp) {
-    navigateToApp(redirectToApp, { path: `/${search}${hash}`, replace: true });
+    if (to === '/:sloId') {
+      to = pathname.split('/slos')[1];
+    }
+    navigateToApp(redirectToApp, {
+      path: `/${to}${search ? `?${search}` : ''}${hash}`,
+      replace: true,
+    });
   } else if (to) {
     history.replace(to);
   }
@@ -139,44 +138,37 @@ export const routes = {
     params: {},
     exact: true,
   },
-  [SLOS_PATH]: {
+  [OLD_SLOS_PATH]: {
     handler: () => {
-      return <SlosPage />;
+      return <SimpleRedirect to="/" redirectToApp="slo" />;
     },
     params: {},
     exact: true,
   },
-  [SLO_CREATE_PATH]: {
+  [OLD_SLOS_WELCOME_PATH]: {
     handler: () => {
-      return <SloEditPage />;
+      return <SimpleRedirect to="/welcome" redirectToApp="slo" />;
     },
     params: {},
     exact: true,
   },
-  [SLOS_WELCOME_PATH]: {
+  [OLD_SLOS_OUTDATED_DEFINITIONS_PATH]: {
     handler: () => {
-      return <SlosWelcomePage />;
+      return <SimpleRedirect to="/outdated-definitions" redirectToApp="slo" />;
     },
     params: {},
     exact: true,
   },
-  [SLOS_OUTDATED_DEFINITIONS_PATH]: {
+  [OLD_SLO_DETAIL_PATH]: {
     handler: () => {
-      return <SlosOutdatedDefinitions />;
+      return <SimpleRedirect to="/:sloId" redirectToApp="slo" />;
     },
     params: {},
     exact: true,
   },
-  [SLO_EDIT_PATH]: {
+  [OLD_SLO_EDIT_PATH]: {
     handler: () => {
-      return <SloEditPage />;
-    },
-    params: {},
-    exact: true,
-  },
-  [SLO_DETAIL_PATH]: {
-    handler: () => {
-      return <SloDetailsPage />;
+      return <SimpleRedirect to="/:sloId" redirectToApp="slo" />;
     },
     params: {},
     exact: true,

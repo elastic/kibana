@@ -2442,6 +2442,9 @@
   "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
+      "alertSampleSizePerShard": {
+        "type": "integer"
+      },
       "dataViewId": {
         "type": "keyword"
       },

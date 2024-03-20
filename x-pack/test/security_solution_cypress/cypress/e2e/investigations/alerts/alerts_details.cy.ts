@@ -65,12 +65,12 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('With unmapped fields', () => {
     before(() => {
-      deleteAlertsAndRules();
       cy.task('esArchiverLoad', { archiveName: 'unmapped_fields' });
-      createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
     });
 
     beforeEach(() => {
+      deleteAlertsAndRules();
+      createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
       login();
       disableExpandableFlyout();
       visit(ALERTS_URL);
@@ -188,7 +188,6 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
 
     before(() => {
       deleteAlertsAndRules();
-
       // It just imports an alert without a rule but rule details page should work anyway
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
