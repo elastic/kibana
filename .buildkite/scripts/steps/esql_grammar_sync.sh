@@ -98,7 +98,9 @@ main () {
     exit
   fi
 
-  report_main_step "No existing PR found. Building ANTLR artifacts."
+  echo "No existing PR found. Proceeding."
+
+  report_main_step "Building ANTLR artifacts."
 
   # Bootstrap Kibana
   yarn kbn bootstrap || exit
@@ -120,7 +122,7 @@ main () {
   git push --set-upstream origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --draft --title '[ES|QL] Update lexer grammar' --body 'This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch.' --base main --head "$BRANCH_NAME" --label 'release_note:skip' || exit
+  gh pr create --draft --title '[ES|QL] Update lexer grammar' --body 'This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch.' --base main --head "$BRANCH_NAME" --label 'release_note:skip' --label 'Team:Visualizations' || exit
 }
 
 main
