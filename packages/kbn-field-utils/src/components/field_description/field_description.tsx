@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiButtonEmpty, EuiTextBlockTruncate, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EcsFlat } from '@elastic/ecs';
 
 const MAX_VISIBLE_LENGTH = 110;
 
@@ -29,10 +30,13 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const customDescription = (field?.customDescription || '').trim();
-  const isTooLong = Boolean(truncate && customDescription.length > MAX_VISIBLE_LENGTH);
+  const { description: ecsDescription } = EcsFlat[field.name as keyof typeof EcsFlat] ?? {};
+  const description = customDescription || ecsDescription;
+
+  const isTooLong = Boolean(truncate && description.length > MAX_VISIBLE_LENGTH);
   const [isTruncated, setIsTruncated] = useState<boolean>(isTooLong);
 
-  if (!customDescription) {
+  if (!description) {
     return null;
   }
 
@@ -61,13 +65,13 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
               }
             `}
           >
-            <EuiTextBlockTruncate lines={2}>{customDescription}</EuiTextBlockTruncate>
+            <EuiTextBlockTruncate lines={2}>{description}</EuiTextBlockTruncate>
           </button>
         </EuiText>
       ) : (
         <>
           <EuiText color={color} size="xs" className="eui-textBreakWord eui-textLeft">
-            {customDescription}
+            {description}
           </EuiText>
           {isTooLong && (
             <EuiButtonEmpty
