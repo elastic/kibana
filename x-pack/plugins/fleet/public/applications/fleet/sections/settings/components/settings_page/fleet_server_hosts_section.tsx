@@ -59,7 +59,7 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
         fleetServerHosts={fleetServerHosts}
         deleteFleetServerHost={deleteFleetServerHost}
       />
-      {authz.fleet.allSettings ? (
+      {authz.fleet.allSettings && authz.fleet.allAgents ? (
         <>
           <EuiSpacer size="s" />
           <EuiButtonEmpty
