@@ -15,6 +15,7 @@ import { useFetchSloDetails } from '../../../../hooks/use_fetch_slo_details';
 import { BurnRateRuleParams } from '../../../../typings/slo';
 import { AlertsHistoryPanel } from './components/alerts_history/alerts_history_panel';
 import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
+import { CustomAlertDetailsPanel } from './components/custom_panels/custom_panel';
 
 export type BurnRateRule = Rule<BurnRateRuleParams>;
 export type BurnRateAlert = TopAlert;
@@ -73,6 +74,7 @@ export default function AlertDetailsAppSection({
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">
       <ErrorRatePanel alert={alert} slo={slo} isLoading={isLoading} />
       <AlertsHistoryPanel alert={alert} rule={rule} slo={slo} isLoading={isLoading} />
+      <CustomAlertDetailsPanel slo={slo} />
     </EuiFlexGroup>
   );
 }
