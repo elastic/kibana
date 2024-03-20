@@ -152,7 +152,10 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
     },
 
     async selectModel(name: string): Promise<void> {
-      await testSubjects.click(`checkboxSelectRow-${name}`);
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.click(`checkboxSelectRow-${name}`);
+        await testSubjects.isChecked(`checkboxSelectRow-${name}`);
+      });
     },
 
     async clickBulkDelete() {
