@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { shallow } from 'enzyme';
-import type { ClusterDetails } from '@kbn/es-types';
 import { ClusterView } from './cluster_view';
 
 describe('render', () => {
@@ -24,7 +24,7 @@ describe('render', () => {
         skipped: 0,
         failed: 0,
       },
-    } as ClusterDetails;
+    } as estypes.ClusterDetails;
     const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
     expect(wrapper).toMatchSnapshot();
   });
@@ -61,7 +61,7 @@ describe('render', () => {
             },
           },
         ],
-      } as ClusterDetails;
+      } as estypes.ClusterDetails;
 
       const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
       expect(wrapper).toMatchSnapshot();
@@ -79,7 +79,7 @@ describe('render', () => {
           skipped: 0,
           failed: 0,
         },
-      } as ClusterDetails;
+      } as estypes.ClusterDetails;
       const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
       expect(wrapper).toMatchSnapshot();
     });
@@ -101,7 +101,7 @@ describe('render', () => {
             },
           },
         ],
-      } as unknown as ClusterDetails;
+      } as unknown as estypes.ClusterDetails;
       const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
       expect(wrapper).toMatchSnapshot();
     });
@@ -154,7 +154,7 @@ describe('render', () => {
             },
           },
         ],
-      } as unknown as ClusterDetails;
+      } as unknown as estypes.ClusterDetails;
       const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
       expect(wrapper).toMatchSnapshot();
     });
