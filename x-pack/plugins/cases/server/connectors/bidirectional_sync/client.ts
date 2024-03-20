@@ -10,7 +10,6 @@ import { TASK_NAME } from './constants';
 
 interface RegisterSynchingArgs {
   caseId: string;
-  connectorId: string;
 }
 
 export class BidirectionalSyncClient {
@@ -20,33 +19,35 @@ export class BidirectionalSyncClient {
     this.taskManager = taskManager;
   }
 
-  private getTaskId({ caseId, connectorId }: Pick<RegisterSynchingArgs, 'caseId' | 'connectorId'>) {
-    return `${caseId}:${connectorId}`;
+  private getTaskId({ caseId }: Pick<RegisterSynchingArgs, 'caseId'>) {
+    return `cases-bi-di-sync:${caseId}`;
   }
 
   private getRunAt(): Date {
     const today = new Date();
     // run the task after 1 minutes
-    today.setMinutes(today.getMinutes() + 1);
+    today.setSeconds(today.getSeconds() + 10);
 
     return today;
   }
 
-  public async registerSynching({ caseId, connectorId }: RegisterSynchingArgs) {
-    const id = this.getTaskId({ caseId, connectorId });
+  public async registerSynching({ caseId }: RegisterSynchingArgs) {
+    const id = this.getTaskId({ caseId });
 
     await this.taskManager.schedule({
       id,
       taskType: TASK_NAME,
-      params: {},
+      params: {
+        caseId,
+      },
       state: {},
-      schedule: { interval: '5m' },
+      schedule: { interval: '10s' },
       runAt: this.getRunAt(),
     });
   }
 
-  public async unregisterSynching({ caseId, connectorId }: RegisterSynchingArgs) {
-    const id = this.getTaskId({ caseId, connectorId });
+  public async unregisterSynching({ caseId }: RegisterSynchingArgs) {
+    const id = this.getTaskId({ caseId });
 
     await this.taskManager.removeIfExists(id);
   }

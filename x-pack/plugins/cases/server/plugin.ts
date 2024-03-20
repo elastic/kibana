@@ -80,7 +80,10 @@ export class CasePlugin
     this.userProfileService = new UserProfileService(this.logger);
   }
 
-  public setup(core: CoreSetup, plugins: CasesServerSetupDependencies): CasesServerSetup {
+  public setup(
+    core: CoreSetup<CasesServerStartDependencies>,
+    plugins: CasesServerSetupDependencies
+  ): CasesServerSetup {
     this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
@@ -148,10 +151,19 @@ export class CasePlugin
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
 
+    const getCasesClient = async (request: KibanaRequest): Promise<CasesClient> => {
+      const [coreStart] = await core.getStartServices();
+      return this.getCasesClientWithRequest(coreStart)(request);
+    };
+
     /**
      * Connectors bidirectional sync
      */
-    registerBidirectionalSyncTask({ taskManager: plugins.taskManager });
+    registerBidirectionalSyncTask({
+      core,
+      taskManager: plugins.taskManager,
+      getCasesClient,
+    });
 
     return {
       attachmentFramework: {
@@ -205,18 +217,8 @@ export class CasePlugin
       taskManager: plugins.taskManager,
     });
 
-    const client = core.elasticsearch.client;
-
-    const getCasesClientWithRequest = async (request: KibanaRequest): Promise<CasesClient> => {
-      return this.clientFactory.create({
-        request,
-        scopedClusterClient: client.asScoped(request).asCurrentUser,
-        savedObjectsService: core.savedObjects,
-      });
-    };
-
     return {
-      getCasesClientWithRequest,
+      getCasesClientWithRequest: this.getCasesClientWithRequest(core),
       getExternalReferenceAttachmentTypeRegistry: () =>
         this.externalReferenceAttachmentTypeRegistry,
       getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
@@ -247,4 +249,16 @@ export class CasePlugin
       };
     };
   };
+
+  private getCasesClientWithRequest =
+    (core: CoreStart) =>
+    async (request: KibanaRequest): Promise<CasesClient> => {
+      const client = core.elasticsearch.client;
+
+      return this.clientFactory.create({
+        request,
+        scopedClusterClient: client.asScoped(request).asCurrentUser,
+        savedObjectsService: core.savedObjects,
+      });
+    };
 }

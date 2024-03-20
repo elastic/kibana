@@ -124,7 +124,6 @@ export const create = async (
     if (newCase.attributes.connector.type === '.jira') {
       bidirectionalSyncClient.registerSynching({
         caseId: newCase.id,
-        connectorId: newCase.attributes.connector.id,
       });
     }
 
