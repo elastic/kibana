@@ -26556,7 +26556,13 @@
             "text": "IKibanaSearchRequest"
           },
           "<",
-          "EqlSearchRequest",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EqlRequestParams",
+            "text": "EqlRequestParams"
+          },
           ">"
         ],
         "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
@@ -31874,6 +31880,8 @@
         "label": "EqlRequestParams",
         "description": [],
         "signature": [
+          "EqlSearchRequest",
+          " | ",
           "EqlSearchRequest"
         ],
         "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
