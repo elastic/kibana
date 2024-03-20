@@ -142,17 +142,27 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
   log.info('Loading: ' + ymlPath);
   const doc = yaml.safeLoad(file);
 
-  if (!doc.steps) {
-    log.info('No steps, skipping: ' + ymlPath);
-    return;
+  if (doc.steps) {
+    for (const step of doc.steps as BuildkiteStepPartial[]) {
+      if (isQueueTargetingRule(step) && !step.agents.queue.startsWith('kb-static')) {
+        log.info('Rewriting: ' + ymlPath, step);
+        file = editYmlInPlace(file, ['agents:', `queue: ${step.agents.queue}`], () => {
+          return yaml
+            .safeDump({ agents: getFullAgentTargetingRule(step.agents.queue) })
+            .split('\n');
+        });
+      }
+    }
   }
 
-  for (const step of doc.steps as BuildkiteStepPartial[]) {
-    if (isQueueTargetingRule(step) && !step.agents.queue.startsWith('kb-static')) {
-      log.info('Rewriting: ' + ymlPath, step);
-      file = editYmlInPlace(file, ['agents:', `queue: ${step.agents.queue}`], () => {
-        return yaml.safeDump({ agents: getFullAgentTargetingRule(step.agents.queue) }).split('\n');
+  if (doc.agents && doc.agents.queue) {
+    if (typeof doc.agents.queue === 'string' && !doc.agents.queue.startsWith('kb-static')) {
+      log.info('Rewriting: ' + ymlPath, doc.agents);
+      file = editYmlInPlace(file, ['agents:', `queue: ${doc.agents.queue}`], () => {
+        return yaml.safeDump({ agents: getFullAgentTargetingRule(doc.agents.queue) }).split('\n');
       });
+    } else {
+      log.info(`Doc agents isn't parseable: ${doc.agents} in ${ymlPath}`);
     }
   }
 
