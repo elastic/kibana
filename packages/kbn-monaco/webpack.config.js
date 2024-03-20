@@ -71,6 +71,22 @@ const workerConfig = (languages) => ({
           },
         },
       },
+      {
+        /**
+         * further process the modules exported by monaco-editor and monaco-yaml
+         * because their exports leverage some none-standard language APIs at this time.
+         */
+        test: /(monaco-editor\/esm\/vs\/basic-languages\/_.contribution.js)$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            envName: process.env.NODE_ENV || 'development',
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          },
+        },
+      },
+      { test: /\.css$/, use: 'raw-loader' },
     ],
   },
   optimization: {
