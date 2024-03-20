@@ -6,21 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement, lazy, Suspense } from 'react';
+import React, { ComponentType, lazy, Suspense } from 'react';
 import {
   EmbeddableConsoleProps,
   EmbeddableConsoleDependencies,
 } from '../../../types/embeddable_console';
 
-const RemoteConsole = lazy(() => import('./embeddable_console'));
+type EmbeddableConsoleInternalProps = EmbeddableConsoleProps & EmbeddableConsoleDependencies;
 
-export function renderEmbeddableConsole(
-  props: EmbeddableConsoleProps | undefined,
-  deps: EmbeddableConsoleDependencies
-): ReactElement | null {
+const Console = lazy<ComponentType<EmbeddableConsoleInternalProps>>(async () => {
+  return {
+    default: (await import('./embeddable_console')).EmbeddableConsole,
+  };
+});
+
+export const EmbeddableConsole: React.FC<EmbeddableConsoleInternalProps> = (props) => {
   return (
-    <Suspense fallback={<></>}>
-      <RemoteConsole {...props} {...deps} />
+    <Suspense fallback={null}>
+      <Console {...props} />
     </Suspense>
   );
-}
+};
