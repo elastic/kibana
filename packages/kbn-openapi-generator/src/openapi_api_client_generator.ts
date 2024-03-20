@@ -9,10 +9,8 @@
 import { writeFileSync } from 'fs';
 import globby from 'globby';
 import { resolve } from 'path';
-// import Handlebars from 'handlebars';
-import { snakeCase, camelCase } from 'lodash';
+import { camelCase, upperFirst, lowerFirst } from 'lodash';
 import { TemplateName, initTemplateService } from './template_service/template_service';
-import { registerTemplates } from './template_service/register_templates';
 import { NormalizedOperation } from './parser/openapi_types';
 
 export interface GeneratorConfig {
@@ -22,49 +20,51 @@ export interface GeneratorConfig {
   operations: NormalizedOperation[];
 }
 
+export type ApiMethodInterface = Record<
+  string,
+  {
+    paths: {
+      schemaTypesRelativePath: string;
+      apiMethodRelativePath: string;
+    };
+    operation: NormalizedOperation | undefined;
+  }
+>;
+
 export const generateApiClient = async (config: GeneratorConfig) => {
   const { rootDir, sourceGlob, templateName, operations } = config;
 
   const TemplateService = await initTemplateService();
 
   const sourceFilesGlob = resolve(rootDir, sourceGlob);
-  const apiMethodPaths = await globby([sourceFilesGlob]);
+  const apiMethodFilePaths = await globby([sourceFilesGlob]);
 
-  const context = apiMethodPaths.map((filePath) => {
-    const operationIdFromPath = getOperationIdFromPath(filePath);
+  const operationIdsFromPath = apiMethodFilePaths.map((filePath) => {
+    return [filePath, camelCase(getOperationIdFromPath(filePath))];
+  }) as Array<[string, string]>;
 
-    const operation =
-      operations.find((o) => snakeCase(o.operationId) === operationIdFromPath) ??
-      ({} as NormalizedOperation);
+  const apiMethodContext = operationIdsFromPath.reduce<ApiMethodInterface>(
+    (acc: ApiMethodInterface, operationTuple: [string, string]) => {
+      const [filePath, operationId] = operationTuple;
+      const operation = operations.find((op) => op.operationId === upperFirst(operationId));
+      acc[operationId] = {
+        paths: {
+          schemaTypesRelativePath: getSchemaTypesRelativePathFromFilePath(filePath, rootDir),
+          apiMethodRelativePath: getApiMethodRelativePathFromFilePath(filePath, rootDir),
+        },
+        operation,
+      };
+      return acc;
+    },
+    {}
+  );
+  console.log({ operationIdsFromPath, apiMethodContext });
+  console.log(JSON.stringify(apiMethodContext, null, 2));
 
-    const { operationId, description, requestQuery, requestBody } = operation;
-    const apiMethodRelativePath = `../../..${filePath.replace(rootDir, '').replace(/\.ts$/, '')}`;
-    const generatedTypesRelativePath = `../../..${filePath
-      .replace(rootDir, '')
-      .replace(/\.api_method/, '')
-      .replace(/\.ts$/, '')}`;
 
-    return {
-      generatedTypesRelativePath,
-      apiMethodRelativePath,
-      operationId: camelCase(operationId),
-      description,
-      requestQuery,
-      requestBody,
-    };
-  });
+  const result = TemplateService.compileTemplate(templateName, apiMethodContext);
 
-  console.log({ apiMethodPaths, context });
-
-  const result = TemplateService.compileTemplate(templateName, {context});
-
-  // const templates = await registerTemplates(
-  //   resolve(__dirname, './template_service/templates'),
-  //   handlebars
-  // );
-
-  // const result = handlebars.compile(templates[templateName])({ context });
-  console.log({result});
+  // console.log({ result });
   writeFileSync('./public/common/api_client/client.ts', result);
 };
 
@@ -77,7 +77,7 @@ export const generateApiClient = async (config: GeneratorConfig) => {
  *
  * Returns the first match group, which will be the operationId.
  *
- * Rxample:
+ * Example:
  *
  * '/some/path/delete_rule_route.api_client.gen.ts' -> 'delete_rule'
  */
@@ -86,4 +86,14 @@ export const getOperationIdFromPath = (path: string) => {
   if (match) {
     return match[1];
   }
+  return '';
 };
+
+const getApiMethodRelativePathFromFilePath = (filePath: string, rootDir: string) =>
+  `../../..${filePath.replace(rootDir, '').replace(/\.ts$/, '')}`;
+
+const getSchemaTypesRelativePathFromFilePath = (filePath: string, rootDir: string) =>
+  `../../..${filePath
+    .replace(rootDir, '')
+    .replace(/\.api_method/, '')
+    .replace(/\.ts$/, '')}`;

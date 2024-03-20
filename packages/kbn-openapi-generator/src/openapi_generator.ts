@@ -18,7 +18,7 @@ import { formatOutput } from './lib/format_output';
 import { getGeneratedFilePath } from './lib/get_generated_file_path';
 import { removeGenArtifacts } from './lib/remove_gen_artifacts';
 import { lint } from './openapi_linter';
-import { getGenerationContext } from './parser/get_generation_context';
+import { getSchemaTypesGenerationContext } from './parser/get_generation_context';
 import type { NormalizedOperation, OpenApiDocument } from './parser/openapi_types';
 import { initTemplateService, TemplateName } from './template_service/template_service';
 
@@ -69,7 +69,7 @@ export const generate = async (config: GeneratorConfig) => {
   const TemplateService = await initTemplateService();
   const contexts = await Promise.all(
     parsedSources.map(async ({ sourcePath, parsedSchema }) => {
-      const generationContext = getGenerationContext(parsedSchema);
+      const generationContext = getSchemaTypesGenerationContext(parsedSchema);
 
       // If there are no operations or components to generate, skip this file
       const shouldGenerate =

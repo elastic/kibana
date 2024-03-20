@@ -11,19 +11,33 @@ import { getApiOperationsList } from './lib/get_api_operations_list';
 import { getComponents } from './lib/get_components';
 import { getImportsMap, ImportsMap } from './lib/get_imports_map';
 import { normalizeSchema } from './lib/normalize_schema';
-import { NormalizedOperation, OpenApiDocument } from './openapi_types';
+import { NormalizedOperation, NormalizedSchemaItem, OpenApiDocument } from './openapi_types';
 import { getInfo } from './lib/get_info';
 
-export interface GenerationContext {
+interface BaseContext {
+  type: 'schema_types' | 'api_client';
+}
+
+export interface SchemaTypesGenerationContext extends BaseContext {
+  type: 'schema_types';
   components: OpenAPIV3.ComponentsObject | undefined;
   operations: NormalizedOperation[];
   info: OpenAPIV3.InfoObject;
   imports: ImportsMap;
-  // generatedTypesRelativePath?: string;
-  // apiMethodRelativePath?: string;
+}
+export interface ApiClientGenerationContext extends BaseContext {
+  type: 'api_client';
+  generatedTypesRelativePath: string;
+  apiMethodRelativePath: string;
+  operationId: string;
+  description: string | undefined;
+  requestQuery: NormalizedSchemaItem | undefined;
+  requestBody: NormalizedSchemaItem | undefined;
 }
 
-export function getGenerationContext(document: OpenApiDocument): GenerationContext {
+export function getSchemaTypesGenerationContext(
+  document: OpenApiDocument
+): SchemaTypesGenerationContext {
   const normalizedDocument = normalizeSchema(document);
 
   const components = getComponents(normalizedDocument);
@@ -32,6 +46,7 @@ export function getGenerationContext(document: OpenApiDocument): GenerationConte
   const imports = getImportsMap(normalizedDocument);
 
   return {
+    type: 'schema_types',
     components,
     operations,
     info,

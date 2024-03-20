@@ -6,15 +6,14 @@
  */
 
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
-{{#each context}}
-  {{#if requestBody}}
-  import type { {{capitalize (camelCase operationId)}}RequestBody } from '{{generatedTypesRelativePath}}';
-  {{/if}}
-  {{#if requestQuery}}
-  import type { {{capitalize (camelCase operationId)}}RequestQuery } from '{{generatedTypesRelativePath}}';
-  {{/if}}
-
-import { {{operationId}} } from '{{apiMethodRelativePath}}';
+{{#each this}}
+{{#if operation.requestBody}}
+import type { {{capitalize (camelCase @key)}}RequestBody } from '{{paths.schemaTypesRelativePath}}';
+{{/if}}
+{{#if operation.requestQuery}}
+import type { {{capitalize (camelCase @key)}}RequestQuery } from '{{paths.schemaTypesRelativePath}}';
+{{/if}}
+import { {{@key}} } from '{{paths.apiMethodRelativePath}}';
 {{/each}}
 
 interface HttpClient {
@@ -29,25 +28,25 @@ export class ApiClient<TClient extends HttpClient> {
     this.client = client;
   }
 
-  {{#each context}}
+  {{#each this}}
  /*
-  * {{description}}
+  * {{operation.description}}
   */
-  public async {{operationId}}(
-  {{#if requestBody}}
-  params: {{capitalize (camelCase operationId)}}RequestBody, 
+  public async {{@key}}(
+  {{#if operation.requestBody}}
+  params: {{capitalize (camelCase @key)}}RequestBody, 
   {{/if}}
-  {{#if requestQuery}}
-  query: {{capitalize (camelCase operationId)}}RequestQuery,
+  {{#if operation.requestQuery}}
+  query: {{capitalize (camelCase @key)}}RequestQuery,
   {{/if}}
   signal?: AbortSignal
   ) {
-    return {{operationId}}(
+    return {{@key}}(
       this.client,
-      {{#if requestBody}}
+      {{#if operation.requestBody}}
         params,
       {{/if}}
-      {{#if requestQuery}}
+      {{#if operation.requestQuery}}
       query,
       {{/if}}
       signal
