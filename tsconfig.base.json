@@ -780,6 +780,8 @@
       "@kbn/esql-ast-core/*": ["packages/kbn-esql-ast-core/*"],
       "@kbn/esql-utils": ["packages/kbn-esql-utils"],
       "@kbn/esql-utils/*": ["packages/kbn-esql-utils/*"],
+      "@kbn/esql-validation": ["packages/kbn-esql-validation"],
+      "@kbn/esql-validation/*": ["packages/kbn-esql-validation/*"],
       "@kbn/event-annotation-common": ["packages/kbn-event-annotation-common"],
       "@kbn/event-annotation-common/*": ["packages/kbn-event-annotation-common/*"],
       "@kbn/event-annotation-components": ["packages/kbn-event-annotation-components"],
