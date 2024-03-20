@@ -159,7 +159,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -186,7 +186,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -217,7 +217,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -252,7 +252,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -276,7 +276,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -302,7 +302,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -315,7 +315,7 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
-  it('starts polling immediately and then every esVersionCheckInterval', () => {
+  it('starts polling immediately and then every healthCheckInterval', () => {
     expect.assertions(1);
 
     // @ts-expect-error we need to return an incompatible type to use the testScheduler here
@@ -328,7 +328,7 @@ describe('pollEsNodesVersion', () => {
 
       const esNodesCompatibility$ = pollEsNodesVersion({
         internalClient,
-        esVersionCheckInterval: 100,
+        healthCheckInterval: 100,
         ignoreVersionMismatch: false,
         kibanaVersion: KIBANA_VERSION,
         log: mockLogger,
@@ -366,7 +366,7 @@ describe('pollEsNodesVersion', () => {
 
       const esNodesCompatibility$ = pollEsNodesVersion({
         internalClient,
-        esVersionCheckInterval: 10,
+        healthCheckInterval: 10,
         ignoreVersionMismatch: false,
         kibanaVersion: KIBANA_VERSION,
         log: mockLogger,

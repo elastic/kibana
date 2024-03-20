@@ -98,11 +98,12 @@ export class ElasticsearchService
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
-      internalClient: this.client.asInternalUser,
-      log: this.log,
-      ignoreVersionMismatch: config.ignoreVersionMismatch,
-      esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
       kibanaVersion: this.kibanaVersion,
+      ignoreVersionMismatch: config.ignoreVersionMismatch,
+      healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
+      healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
+      log: this.log,
+      internalClient: this.client.asInternalUser,
     }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
     this.esNodesCompatibility$ = esNodesCompatibility$;
