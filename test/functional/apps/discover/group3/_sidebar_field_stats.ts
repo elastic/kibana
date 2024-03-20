@@ -165,7 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
         expect(topValuesRows.length).to.eql(10);
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '42 records'
+          '42 values'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -179,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '500 records'
+          '500 values'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -193,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '32 records'
+          '32 values'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -207,7 +207,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '500 records'
+          '500 values'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -227,7 +227,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '100 records'
+          '100 sample records'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -241,7 +241,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '100 records'
+          '100 sample records'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -255,7 +255,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '100 records'
+          '100 sample records'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -273,7 +273,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
         expect(topValuesRows.length).to.eql(3);
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '3 records'
+          '3 values'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -294,7 +294,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'true\n100%'
         );
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '1 record'
+          '1 value'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });

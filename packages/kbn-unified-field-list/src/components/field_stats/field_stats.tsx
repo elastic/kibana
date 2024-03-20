@@ -296,44 +296,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   let title = <></>;
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
-    const dataTestSubjDocsCount = 'unifiedFieldStats-statsFooter-docsCount';
-    const countsElement = totalDocuments ? (
-      <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
-        {sampledDocuments && sampledDocuments < totalDocuments ? (
-          <FormattedMessage
-            id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
-            defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
-            values={{
-              sampledDocuments,
-              sampledDocumentsFormatted: (
-                <strong data-test-subj={dataTestSubjDocsCount}>
-                  {fieldFormats
-                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                    .convert(sampledDocuments)}
-                </strong>
-              ),
-            }}
-          />
-        ) : (
-          <FormattedMessage
-            id="unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel"
-            defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
-            values={{
-              totalDocuments,
-              totalDocumentsFormatted: (
-                <strong data-test-subj={dataTestSubjDocsCount}>
-                  {fieldFormats
-                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                    .convert(totalDocuments)}
-                </strong>
-              ),
-            }}
-          />
-        )}
-      </EuiText>
-    ) : (
-      <></>
-    );
+    const countsElement = getCountsElement(state, services, isTextBased, dataTestSubject);
 
     return (
       <>
@@ -595,6 +558,96 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   return null;
 };
+
+function getCountsElement(
+  state: FieldStatsState,
+  services: FieldStatsServices,
+  isTextBased: boolean,
+  dataTestSubject: string
+): JSX.Element {
+  const dataTestSubjDocsCount = 'unifiedFieldStats-statsFooter-docsCount';
+  const { fieldFormats } = services;
+  const { totalDocuments, sampledValues, sampledDocuments, topValues } = state;
+
+  if (!totalDocuments) {
+    return <></>;
+  }
+
+  let labelElement;
+
+  if (isTextBased) {
+    labelElement = topValues?.areExamples ? (
+      <FormattedMessage
+        id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
+        defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+        values={{
+          sampledDocuments,
+          sampledDocumentsFormatted: (
+            <strong data-test-subj={dataTestSubjDocsCount}>
+              {fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(sampledDocuments)}
+            </strong>
+          ),
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="unifiedFieldList.fieldStats.calculatedFromValuesLabel"
+        defaultMessage="Calculated from {sampledValuesFormatted} {sampledValues, plural, one {value} other {values}}."
+        values={{
+          sampledValues,
+          sampledValuesFormatted: (
+            <strong data-test-subj={dataTestSubjDocsCount}>
+              {fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(sampledValues)}
+            </strong>
+          ),
+        }}
+      />
+    );
+  } else {
+    labelElement =
+      sampledDocuments && sampledDocuments < totalDocuments ? (
+        <FormattedMessage
+          id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
+          defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+          values={{
+            sampledDocuments,
+            sampledDocumentsFormatted: (
+              <strong data-test-subj={dataTestSubjDocsCount}>
+                {fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                  .convert(sampledDocuments)}
+              </strong>
+            ),
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel"
+          defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
+          values={{
+            totalDocuments,
+            totalDocumentsFormatted: (
+              <strong data-test-subj={dataTestSubjDocsCount}>
+                {fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                  .convert(totalDocuments)}
+              </strong>
+            ),
+          }}
+        />
+      );
+  }
+
+  return (
+    <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
+      {labelElement}
+    </EuiText>
+  );
+}
 
 /**
  * Component which fetches and renders stats for a data view field

@@ -90,7 +90,7 @@ export async function getStringTopValues(
     return {};
   }
 
-  const sampledDocuments = values?.reduce((acc: number, row) => acc + row[0], 0);
+  const sampledValues = values?.reduce((acc: number, row) => acc + row[0], 0);
 
   const topValues = {
     buckets: values.map((value) => ({
@@ -100,9 +100,9 @@ export async function getStringTopValues(
   };
 
   return {
-    totalDocuments: sampledDocuments,
-    sampledDocuments,
-    sampledValues: sampledDocuments,
+    totalDocuments: sampledValues,
+    sampledDocuments: sampledValues,
+    sampledValues,
     topValues,
   };
 }
