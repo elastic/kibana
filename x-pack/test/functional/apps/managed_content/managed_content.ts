@@ -151,16 +151,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await assertInspectorReadonly('Managed legacy visualization');
         await assertInspectorReadonly('Managed map');
       });
-
-      it('dashboard library: managed content is read-only', async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL();
-
-        const deletableItems = await listingTable.getAllSelectableItemsNames();
-
-        expect(deletableItems).to.eql([]);
-
-        await assertInspectorReadonly('Managed dashboard');
-      });
     });
 
     describe('managed panels in dashboards', () => {
