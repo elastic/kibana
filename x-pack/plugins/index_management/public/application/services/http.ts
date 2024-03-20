@@ -11,9 +11,7 @@ export class HttpService {
   private client: any;
 
   public setup(httpClient: HttpSetup): void {
-    if (!this.client) {
-      this.client = httpClient;
-    }
+    this.client = httpClient;
   }
 
   public get httpClient(): HttpSetup {

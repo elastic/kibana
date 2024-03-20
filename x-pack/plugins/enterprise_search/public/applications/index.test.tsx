@@ -39,6 +39,9 @@ describe('renderApp', () => {
       charts: chartPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
       guidedOnboarding: guidedOnboardingMock.createStart(),
+      indexManagement: {
+        getIndexMappingComponent: jest.fn(),
+      },
       lens: lensPluginMock.createStartContract(),
       licensing: licensingMock.createStart(),
       security: securityMock.createStart(),
