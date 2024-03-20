@@ -33,6 +33,16 @@ export interface FindListsParams extends ApiParams {
   sortField?: SortFieldOrUndefined;
 }
 
+export interface FindListItemsParams extends ApiParams {
+  cursor?: string | undefined;
+  pageSize: number | undefined;
+  pageIndex: number | undefined;
+  sortOrder?: SortOrderOrUndefined;
+  sortField?: SortFieldOrUndefined;
+  filter: string | undefined;
+  listId: string;
+}
+
 export interface ImportListParams extends ApiParams {
   file: File;
   listId: string | undefined;
@@ -43,6 +53,17 @@ export interface DeleteListParams extends ApiParams {
   deleteReferences?: boolean;
   id: string;
   ignoreReferences?: boolean;
+}
+
+export interface DeleteListItemParams extends ApiParams {
+  refresh?: string;
+  id: string;
+}
+
+export interface PatchListItemParams extends ApiParams {
+  refresh?: string;
+  id: string;
+  value: string;
 }
 
 export interface ExportListParams extends ApiParams {

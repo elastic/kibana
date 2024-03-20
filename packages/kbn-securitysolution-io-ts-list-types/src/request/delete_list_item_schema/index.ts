@@ -19,7 +19,7 @@ export const deleteListItemSchema = t.intersection([
       value: valueOrUndefined,
     })
   ),
-  t.exact(t.partial({ id, list_id })),
+  t.exact(t.partial({ id, list_id, refresh: t.union([t.literal('true'), t.literal('false')]) })),
 ]);
 
 export type DeleteListItemSchema = t.OutputOf<typeof deleteListItemSchema>;

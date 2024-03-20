@@ -73,6 +73,7 @@ export interface DeleteListOptions {
 export interface DeleteListItemOptions {
   /** The id of the list to delete from */
   id: Id;
+  refresh?: boolean;
 }
 
 /**
@@ -135,6 +136,7 @@ export interface DeleteListItemByValueOptions {
   value: string;
   /** The type of list such as "boolean", "double", "text", "keyword", etc... */
   type: Type;
+  refresh?: boolean;
 }
 
 /**
@@ -217,6 +219,7 @@ export interface UpdateListItemOptions {
   value: string | null | undefined;
   /** Additional meta data to associate with the list items as an object of "key/value" pairs. You can set this to "undefined" to not update meta values. */
   meta: MetaOrUndefined;
+  refresh?: boolean;
 }
 
 /**

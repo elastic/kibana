@@ -20,7 +20,9 @@ export const patchListItemSchema = t.intersection([
       id,
     })
   ),
-  t.exact(t.partial({ _version, meta, value })),
+  t.exact(
+    t.partial({ _version, meta, value, refresh: t.union([t.literal('true'), t.literal('false')]) })
+  ),
 ]);
 
 export type PatchListItemSchema = t.OutputOf<typeof patchListItemSchema>;

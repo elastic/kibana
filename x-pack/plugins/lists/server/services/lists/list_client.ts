@@ -646,10 +646,13 @@ export class ListClient {
    * Given a list item id, this will delete the single list item
    * @returns The list item if found, otherwise null
    */
-  public deleteListItem = async ({ id }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
+  public deleteListItem = async ({
+    id,
+    refresh,
+  }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
     const { esClient } = this;
     const listItemName = this.getListItemName();
-    return deleteListItem({ esClient, id, listItemIndex: listItemName });
+    return deleteListItem({ esClient, id, listItemIndex: listItemName, refresh });
   };
 
   /**
@@ -664,6 +667,7 @@ export class ListClient {
     listId,
     value,
     type,
+    refresh,
   }: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
     const { esClient } = this;
     const listItemName = this.getListItemName();
@@ -671,6 +675,7 @@ export class ListClient {
       esClient,
       listId,
       listItemIndex: listItemName,
+      refresh,
       type,
       value,
     });
@@ -893,6 +898,7 @@ export class ListClient {
     id,
     value,
     meta,
+    refresh,
   }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
     const { esClient, user } = this;
     const listItemName = this.getListItemName();
@@ -905,6 +911,7 @@ export class ListClient {
       meta,
       user,
       value,
+      refresh,
     });
   };
 
