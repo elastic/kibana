@@ -213,9 +213,10 @@ function generateWrongMappingForArgs(
     if (literalOnly) {
       return { name: literalValues[type as keyof typeof literalValues], type, ...rest };
     }
-    const canBeFieldButNotString =
+    const canBeFieldButNotString = Boolean(
       fieldTypes.filter((t) => t !== 'string').includes(type) &&
-      signatures.every(({ params: fnParams }) => fnParams[i].type !== 'string');
+        signatures.every(({ params: fnParams }) => fnParams[i].type !== 'string')
+    );
     const canBeFieldButNotNumber =
       fieldTypes.filter((t) => t !== 'number').includes(type) &&
       signatures.every(({ params: fnParams }) => fnParams[i].type !== 'number');
@@ -253,7 +254,7 @@ function generateWrongMappingForArgs(
 }
 
 describe('validation logic', () => {
-  const testCases: Array<{ query: string; error: string[] }> = [];
+  const testCases: Array<{ query: string; error: string[]; warning: string[] }> = [];
 
   afterAll(async () => {
     const targetFolder = join(__dirname, 'esql_validation_meta_tests.json');
@@ -285,7 +286,11 @@ describe('validation logic', () => {
     { only, skip }: { only?: boolean; skip?: boolean } = {}
   ) {
     const testFn = only ? it.only : skip ? it.skip : it;
-    testCases.push({ query: statement, error: expectedErrors });
+    testCases.push({
+      query: statement,
+      error: expectedErrors,
+      warning: expectedWarnings,
+    });
 
     testFn(
       `${statement} => ${expectedErrors.length} errors, ${expectedWarnings.length} warnings`,
