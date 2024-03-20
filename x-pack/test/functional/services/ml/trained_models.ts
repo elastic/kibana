@@ -148,7 +148,10 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
     },
 
     async closeCheckingSpacePermissionsModal(): Promise<void> {
-      await testSubjects.click('mlDeleteSpaceAwareItemCheckModalOverlayCloseButton');
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.click('mlDeleteSpaceAwareItemCheckModalOverlayCloseButton');
+        await testSubjects.missingOrFail('mlDeleteSpaceAwareItemCheckModalOverlay');
+      });
     },
 
     async selectModel(name: string): Promise<void> {
