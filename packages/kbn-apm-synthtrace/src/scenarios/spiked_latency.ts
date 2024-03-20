@@ -40,6 +40,8 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
         cloudProvider: CLOUD_PROVIDERS[index],
         cloudRegion: CLOUD_REGION[index],
       }));
+      const containerId = `spiked-${generateShortId()}`;
+      const hostName = `spiked-${generateShortId()}`;
 
       function buildLogs(serviceName: string) {
         return range
@@ -68,6 +70,8 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
                   .message(logMessage)
                   .logLevel(logLevel)
                   .service(serviceName)
+                  .containerId(containerId)
+                  .hostName(hostName)
                   .defaults({
                     'trace.id': generateShortId(),
                     'agent.name': 'synth-agent',
@@ -98,9 +102,6 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
         alwaysSpikeTransactionName,
         sometimesSpikeTransactionName,
       ];
-
-      const containerId = `spiked-${generateShortId()}`;
-      const hostName = `spiked-${generateShortId()}`;
 
       const buildTransactions = (serviceInstance: Instance, transactionName: string) => {
         const interval = random(1, 100, false);
