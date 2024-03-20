@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { linkTab } from './link';
-export { embedTab } from './embed';
-export { exportTab } from './export';
+import { IShareContext } from '../../context';
+
+type ExportProps = Pick<IShareContext, 'shareMenuItems'> & {
+  setExportType: (exportType: string) => void;
+};
+
+export const ExportContent = ({ shareMenuItems }: ExportProps) => {
+  // TODO: use share menu items to build export tab
+
+  return null;
+};
