@@ -7,14 +7,19 @@
  */
 
 import { createContext, useContext } from 'react';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 
-import { AnonymousAccessServiceContract } from '../../../common';
+import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
+import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsProviderOptions } from '@kbn/reporting-public/share/share_context_menu';
+import { ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import type {
   ShareMenuItem,
   UrlParamExtension,
   BrowserUrlService,
   ShareContext,
 } from '../../types';
+import { AnonymousAccessServiceContract } from '../../../common';
 
 export interface IShareContext extends ShareContext {
   allowEmbed: boolean;
@@ -26,6 +31,12 @@ export interface IShareContext extends ShareContext {
   snapshotShareWarning?: string;
   objectTypeTitle?: string;
   isEmbedded: boolean;
+  layoutOption?: 'print' | 'canvas';
+  apiClient: ReportingAPIClient;
+  getJobParams?: JobParamsPDFV2 | JobParamsPNGV2;
+  jobProviderOptions?: JobParamsProviderOptions;
+  toasts: ToastsSetup;
+  theme: ThemeServiceSetup;
 }
 
 export const ShareTabsContext = createContext<IShareContext | null>(null);
