@@ -210,32 +210,45 @@ export function Insight({
   title,
   dataTestSubj,
 }: InsightProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<{ messages: Message[]; status: FETCH_STATUS }>({
+    messages: [],
+    status: FETCH_STATUS.NOT_INITIATED,
+  });
   const [isEditingPrompt, setEditingPrompt] = useState(false);
   const [isInsightOpen, setInsightOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const [isPromptUpdated, setIsPromptUpdated] = useState(false);
-  const [messagesFetchStatus, setMessagesFetchStatus] = useState<FETCH_STATUS>(
-    FETCH_STATUS.NOT_INITIATED
-  );
 
   const updateInitialMessages = useCallback(() => {
     if (isArray(initialMessagesOrCallback)) {
-      setMessages(initialMessagesOrCallback);
-      setMessagesFetchStatus(FETCH_STATUS.SUCCESS);
-    } else {
-      setMessagesFetchStatus(FETCH_STATUS.LOADING);
-      initialMessagesOrCallback()
-        .then((data) => {
-          setMessages(data ?? []);
-          setMessagesFetchStatus(FETCH_STATUS.SUCCESS);
-        })
-        .catch((e) => {
-          setMessagesFetchStatus(FETCH_STATUS.FAILURE);
-          // eslint-disable-next-line no-console
-          console.log('Could not load insight messages', e);
-        });
+      setMessages({
+        messages: initialMessagesOrCallback,
+        status: FETCH_STATUS.SUCCESS,
+      });
+      return;
     }
+
+    setMessages({
+      messages: [],
+      status: FETCH_STATUS.LOADING,
+    });
+
+    initialMessagesOrCallback()
+      .then((data) => {
+        setMessages({
+          messages: data ?? [],
+          status: FETCH_STATUS.SUCCESS,
+        });
+      })
+      .catch((e) => {
+        setMessages({
+          messages: [],
+          status: FETCH_STATUS.FAILURE,
+        });
+
+        // eslint-disable-next-line no-console
+        console.log('Could not load insight messages', e);
+      });
   }, [initialMessagesOrCallback]);
 
   useEffect(() => {
@@ -255,14 +268,14 @@ export function Insight({
     [service]
   );
 
-  const handleSend = (newPrompt: string) => {
-    const clonedMessages = cloneDeep(messages);
+  const onEditPrompt = (newPrompt: string) => {
+    const clonedMessages = cloneDeep(messages.messages);
     const userMessage = getLastMessageOfType(clonedMessages, MessageRole.User);
     if (!userMessage) return false;
 
     userMessage.message.content = newPrompt;
     setIsPromptUpdated(true);
-    setMessages(clonedMessages);
+    setMessages({ messages: clonedMessages, status: FETCH_STATUS.SUCCESS });
     setEditingPrompt(false);
     return true;
   };
@@ -282,7 +295,7 @@ export function Insight({
   if (
     connectors.selectedConnector &&
     ((!isInsightOpen && hasOpened) ||
-      (isInsightOpen && !isEditingPrompt && messagesFetchStatus === FETCH_STATUS.SUCCESS))
+      (isInsightOpen && !isEditingPrompt && messages.status === FETCH_STATUS.SUCCESS))
   ) {
     children = (
       <>
@@ -322,7 +335,7 @@ export function Insight({
 
         <ChatContent
           title={title}
-          initialMessages={messages}
+          initialMessages={messages.messages}
           connectorId={connectors.selectedConnector}
         />
       </>
@@ -330,8 +343,10 @@ export function Insight({
   } else if (isEditingPrompt) {
     children = (
       <PromptEdit
-        initialPrompt={getLastMessageOfType(messages, MessageRole.User)?.message.content || ''}
-        onSend={handleSend}
+        initialPrompt={
+          getLastMessageOfType(messages.messages, MessageRole.User)?.message.content || ''
+        }
+        onSend={onEditPrompt}
         onCancel={handleCancel}
       />
     );
@@ -339,7 +354,7 @@ export function Insight({
     children = (
       <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
     );
-  } else if (messagesFetchStatus === FETCH_STATUS.FAILURE) {
+  } else if (messages.status === FETCH_STATUS.FAILURE) {
     children = (
       <EuiCallOut
         size="s"
