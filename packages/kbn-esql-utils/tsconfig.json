@@ -19,6 +19,5 @@
     "@kbn/data-views-plugin",
     "@kbn/crypto-browser",
     "@kbn/data-view-utils",
-    "@kbn/unified-field-list",
   ]
 }
