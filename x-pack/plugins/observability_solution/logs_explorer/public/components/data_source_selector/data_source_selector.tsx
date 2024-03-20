@@ -4,21 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPopover,
-  EuiTab,
-  EuiTabs,
-  EuiText,
-} from '@elastic/eui';
+import { EuiContextMenu, EuiFlexGroup, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
 import styled from '@emotion/styled';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
 import {
@@ -46,6 +35,7 @@ import {
   createUncategorizedStatusItem,
 } from './utils';
 import { AddDataButton } from './sub_components/add_data_button';
+import { DataViewsFilter } from './sub_components/data_view_filter';
 
 export function DataSourceSelector({
   datasets,
@@ -231,16 +221,6 @@ export function DataSourceSelector({
     </EuiTab>
   ));
 
-  const [isPopoverOpen, setPopover] = useState(false);
-
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
-  };
-
-  const closeTypePopover = () => {
-    setPopover(false);
-  };
-
   return (
     <SelectorPopover
       selection={dataSourceSelection}
@@ -261,72 +241,11 @@ export function DataSourceSelector({
         isLoading={isSearchingIntegrations || isLoadingUncategorized}
         filterComponent={
           tabId === DATA_VIEWS_TAB_ID && (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs">
-                  {i18n.translate('xpack.logsExplorer.dataSourceSelector.dataViewCount', {
-                    defaultMessage: '{count, plural, one {# data view} other {# data views}}',
-                    values: { count: dataViewCount },
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  button={
-                    <EuiButtonEmpty
-                      data-test-subj="logsExplorerDataSourceSelectorShowAllButton"
-                      iconType="arrowDown"
-                      iconSide="right"
-                      size="xs"
-                      onClick={onButtonClick}
-                    >
-                      {dataViewsFilter.dataType !== 'logs' ? 'Show all' : 'Logs-only'}
-                    </EuiButtonEmpty>
-                  }
-                  isOpen={isPopoverOpen}
-                  closePopover={closeTypePopover}
-                  panelPaddingSize="none"
-                  anchorPosition="downLeft"
-                >
-                  <EuiContextMenu
-                    size="s"
-                    initialPanelId={0}
-                    panels={[
-                      {
-                        id: 0,
-                        width: 'auto',
-                        title: (
-                          <div>
-                            {i18n.translate(
-                              'xpack.logsExplorer.dataSourceSelector.div.selectTypeLabel',
-                              { defaultMessage: 'Select type' }
-                            )}
-                          </div>
-                        ),
-                        items: [
-                          {
-                            icon: dataViewsFilter.dataType !== 'logs' ? 'check' : '',
-                            name: 'Show all',
-                            onClick: () => {
-                              filterByType({ dataType: undefined });
-                              closeTypePopover();
-                            },
-                          },
-                          {
-                            icon: dataViewsFilter.dataType === 'logs' ? 'check' : '',
-                            name: 'Logs-only',
-                            onClick: () => {
-                              filterByType({ dataType: 'logs' });
-                              closeTypePopover();
-                            },
-                          },
-                        ],
-                      },
-                    ]}
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <DataViewsFilter
+              filter={dataViewsFilter}
+              count={dataViewCount}
+              onFilter={filterByType}
+            />
           )
         }
       />
