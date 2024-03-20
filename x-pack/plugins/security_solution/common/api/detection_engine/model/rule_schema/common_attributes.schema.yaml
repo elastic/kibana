@@ -252,6 +252,17 @@ components:
     DataViewId:
       type: string
 
+    RuleParentId:
+      type: string
+
+    RuleChildId:
+      type: string
+
+    RuleChildrenIds:
+      type: array
+      items:
+        $ref: '#/components/schemas/RuleChildId'
+
     SavedQueryId:
       type: string
 

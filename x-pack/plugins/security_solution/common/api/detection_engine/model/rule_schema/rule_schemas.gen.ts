@@ -64,6 +64,8 @@ import {
   RuleFilterArray,
   SavedQueryId,
   AlertSuppression,
+  RuleParentId,
+  RuleChildrenIds,
   KqlQueryLanguage,
 } from './common_attributes.gen';
 import { RuleExecutionSummary } from '../../rule_monitoring/model/execution_summary.gen';
@@ -258,6 +260,8 @@ export const QueryRuleOptionalFields = z.object({
   saved_id: SavedQueryId.optional(),
   response_actions: z.array(ResponseAction).optional(),
   alert_suppression: AlertSuppression.optional(),
+  rule_parent_id: RuleParentId.optional(),
+  rule_children_ids: RuleChildrenIds.optional(),
 });
 
 export type QueryRuleDefaultableFields = z.infer<typeof QueryRuleDefaultableFields>;
