@@ -13,7 +13,7 @@ import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { ScopedHistory } from '@kbn/core-application-browser';
 import { CoreTheme } from '@kbn/core-theme-browser';
 import { Observable } from 'rxjs';
-import { DetailsPageMappingsProps } from './application/sections/home/index_list/details_page/details_page_mappings_types';
+import { IndexMappingProps } from './application/sections/home/index_list/details_page/index_mapping_with_context_types';
 import { ExtensionsSetup, PublicApiServiceSetup } from './services';
 
 export interface IndexManagementPluginSetup {
@@ -26,7 +26,7 @@ export interface IndexManagementPluginStart {
   getIndexMappingComponent: (deps: {
     history: ScopedHistory<unknown>;
     theme$: Observable<CoreTheme>;
-  }) => React.FC<DetailsPageMappingsProps>;
+  }) => React.FC<IndexMappingProps>;
 }
 
 export interface SetupDependencies {

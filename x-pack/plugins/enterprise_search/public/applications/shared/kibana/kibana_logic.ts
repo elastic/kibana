@@ -22,7 +22,7 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { DetailsPageMappingsProps } from '@kbn/index-management-plugin/public/application/sections/home/index_list/details_page/details_page_mappings_types';
+import { IndexMappingProps } from '@kbn/index-management-plugin/public/application/sections/home/index_list/details_page/index_mapping_with_context_types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
@@ -49,7 +49,7 @@ export interface KibanaLogicProps {
   esConfig: ESConfig;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
-  indexMappingComponent: React.FC<DetailsPageMappingsProps>;
+  indexMappingComponent: React.FC<IndexMappingProps>;
   isSidebarEnabled: boolean;
   lens: LensPublicStart;
   ml: MlPluginStart;

@@ -6,18 +6,18 @@
  */
 
 import React, { lazy, Suspense, ComponentType } from 'react';
-import { DetailsPageMappingsProps } from './details_page_mappings_types';
+import { IndexMappingWithContextProps } from './index_mapping_with_context_types';
 
-const DetailsPageMappings = lazy<ComponentType<DetailsPageMappingsProps>>(async () => {
+const IndexMappingWithContext = lazy<ComponentType<IndexMappingWithContextProps>>(async () => {
   return {
-    default: (await import('./details_page_mappings')).DetailsPageMappings,
+    default: (await import('./index_mapping_with_context')).IndexMappingWithContext,
   };
 });
 
-export const IndexMapping: React.FC<DetailsPageMappingsProps> = (props) => {
+export const IndexMapping: React.FC<IndexMappingWithContextProps> = (props) => {
   return (
     <Suspense fallback={null}>
-      <DetailsPageMappings {...props} />
+      <IndexMappingWithContext {...props} />
     </Suspense>
   );
 };

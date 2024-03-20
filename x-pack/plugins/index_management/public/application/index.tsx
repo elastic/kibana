@@ -27,7 +27,7 @@ import { ComponentTemplatesProvider, MappingsEditorProvider } from './components
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
-interface IndexManagementAppContextProps {
+export interface IndexManagementAppContextProps {
   core: CoreStart;
   dependencies: AppDependencies;
 }

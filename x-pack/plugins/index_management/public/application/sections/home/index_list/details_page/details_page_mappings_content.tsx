@@ -245,7 +245,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             )}
           </EuiFlexItem>
         )}
-        ;
         <EuiFlexItem
           grow={3}
           css={css`

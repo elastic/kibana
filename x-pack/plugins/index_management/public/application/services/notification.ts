@@ -11,7 +11,9 @@ export class NotificationService {
   private _toasts: any;
 
   public setup(notifications: NotificationsStart): void {
-    this._toasts = notifications.toasts;
+    if (!this._toasts) {
+      this._toasts = notifications.toasts;
+    }
   }
 
   public get toasts() {

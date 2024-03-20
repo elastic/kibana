@@ -45,7 +45,6 @@
     "@kbn/code-editor",
     "@kbn/monaco",
     "@kbn/console-plugin",
-    "@kbn/core-theme-browser",
   ],
   "exclude": [
     "target/**/*",

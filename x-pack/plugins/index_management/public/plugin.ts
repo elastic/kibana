@@ -11,12 +11,10 @@ import SemVer from 'semver/classes/semver';
 import {
   CoreSetup,
   CoreStart,
-  CoreTheme,
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import { Observable } from 'rxjs';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 
 import { ExtensionsService, PublicApiService } from './services';
@@ -31,13 +29,7 @@ import {
 
 // avoid import from index files in plugin.ts, use specific import paths
 import { PLUGIN } from '../common/constants/plugin';
-import { DetailsPageMappingsProps } from './application/sections/home/index_list/details_page/details_page_mappings_types';
-import { IndexMappings } from './application/sections/home/index_list/details_page/index_mappings_embeddable';
-import { getIndexManagementDependencies } from './application/mount_management_section';
-import { UiMetricService } from './application/services';
-import { IndexManagementAppContext } from './application';
-import { httpService } from './application/services/http';
-import { notificationService } from './application/services/notification';
+import { IndexMapping } from './application/sections/home/index_list/details_page/index_mappings_embeddable';
 
 export class IndexMgmtUIPlugin
   implements
@@ -116,35 +108,44 @@ export class IndexMgmtUIPlugin
   }
 
   public start(coreStart: CoreStart, plugins: StartDependencies): IndexManagementPluginStart {
-    const { fleet, usageCollection, cloud } = plugins;
+    const { fleet, usageCollection, cloud, share, console } = plugins;
 
     return {
       extensionsService: this.extensionsService.setup(),
-      getIndexMappingComponent: (deps: {
-        history: ScopedHistory<unknown>;
-        theme$: Observable<CoreTheme>;
-      }) => {
-        httpService.setup(coreStart.http);
-        notificationService.setup(coreStart.notifications);
-        const appDependencies = getIndexManagementDependencies({
-          core: coreStart,
-          usageCollection,
-          extensionsService: this.extensionsService,
-          history: deps.history,
-          isFleetEnabled: Boolean(fleet),
-          kibanaVersion: this.kibanaVersion,
+      getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
+        const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
+          coreStart;
+        const { url } = share;
+        const appDependencies = {
+          core: {
+            fatalErrors,
+            getUrlForApp: application.getUrlForApp,
+            executionContext,
+            application,
+            http,
+          },
+          plugins: {
+            usageCollection,
+            isFleetEnabled: Boolean(fleet),
+            share,
+            cloud,
+            console,
+          },
+          services: {
+            extensionsService: this.extensionsService,
+          },
           config: this.config,
-          cloud,
-          startDependencies: plugins,
-          theme$: deps.theme$,
-          uiMetricService: new UiMetricService('TODO'),
-        });
-        return (props: DetailsPageMappingsProps) => {
-          return IndexManagementAppContext({
-            children: IndexMappings(props),
-            dependencies: appDependencies,
-            core: coreStart,
-          });
+          history: deps.history,
+          setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
+          uiSettings,
+          settings,
+          url,
+          docLinks,
+          kibanaVersion: this.kibanaVersion,
+          theme$: coreStart.theme.theme$,
+        };
+        return (props: any) => {
+          return IndexMapping({ dependencies: appDependencies, core: coreStart, ...props });
         };
       },
     };
