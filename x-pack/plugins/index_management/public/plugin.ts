@@ -59,7 +59,7 @@ export class IndexMgmtUIPlugin
     isIndexManagementUiEnabled: boolean;
   };
 
-  constructor(private ctx: PluginInitializerContext) {
+  constructor(ctx: PluginInitializerContext) {
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
     // For the selectors we should expose them through app dependencies and read them from there on each container component.
     setExtensionsService(this.extensionsService);

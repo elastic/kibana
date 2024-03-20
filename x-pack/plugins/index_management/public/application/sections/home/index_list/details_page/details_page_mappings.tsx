@@ -93,7 +93,6 @@ export const DetailsPageMappings: FunctionComponent<DetailsPageMappingsProps> = 
     );
   }
 
-
   return (
     <DetailsPageMappingsContent
       index={index}

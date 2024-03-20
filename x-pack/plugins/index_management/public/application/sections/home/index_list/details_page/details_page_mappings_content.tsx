@@ -41,7 +41,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
   data: string;
   showAboutMappings: boolean;
-  jsonData: unknown;
+  jsonData: any;
 }> = ({ index, data, jsonData, showAboutMappings }) => {
   const {
     services: { extensionsService },
@@ -244,8 +244,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               </>
             )}
           </EuiFlexItem>
-        )};
-
+        )}
+        ;
         <EuiFlexItem
           grow={3}
           css={css`
