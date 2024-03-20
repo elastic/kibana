@@ -64,9 +64,7 @@ export const addIndexBulkDocs = async <T>(
 ) => {
   await es.bulk({
     refresh: true,
-    operations: indices.map((index) => ({
-      ...insertOperation(index, indexDocs),
-    })),
+    operations: indices.flatMap((index) => insertOperation(index, indexDocs)),
   });
 };
 
