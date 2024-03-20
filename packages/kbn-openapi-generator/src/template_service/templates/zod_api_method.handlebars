@@ -7,9 +7,14 @@
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
 {{#each operations}}
 import type {
-  {{operationId}}RequestBody,
+  {{#if requestQuery}}
+    {{operationId}}RequestQuery,
+  {{/if}}
+  {{#if requestBody}}
+    {{operationId}}RequestBody,
+  {{/if}}
   {{operationId}}Response
-} from './{{snakeCase operationId}}_route.gen.ts';
+} from './{{snakeCase operationId}}_route.gen';
 {{/each}}
 
 interface HttpClient {
@@ -19,13 +24,23 @@ interface HttpClient {
 {{#each operations}}
 export const {{camelCase operationId}} = async <TClient extends HttpClient>(
   client: TClient, 
+  {{#if requestBody}}
   params: {{operationId}}RequestBody, 
+  {{/if}}
+  {{#if requestQuery}}
+  query: {{operationId}}RequestQuery,
+  {{/if}}
   signal?: AbortSignal
 ) => {
   return client.fetch<{{operationId}}Response>('{{path}}', {
     method: '{{method}}', 
     version: '{{../info.version}}',
-    body: JSON.stringify(params),
+    {{#if requestBody}}
+      body: JSON.stringify(params),
+    {{/if}}
+    {{#if requestQuery}}
+    query,
+    {{/if}}
     signal
   });
 }  

@@ -19,7 +19,8 @@ export interface GenerationContext {
   operations: NormalizedOperation[];
   info: OpenAPIV3.InfoObject;
   imports: ImportsMap;
-  files?: any;
+  // generatedTypesRelativePath?: string;
+  // apiMethodRelativePath?: string;
 }
 
 export function getGenerationContext(document: OpenApiDocument): GenerationContext {

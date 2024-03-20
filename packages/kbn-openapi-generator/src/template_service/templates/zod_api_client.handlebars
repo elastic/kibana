@@ -6,8 +6,15 @@
  */
 
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
-{{#each files}}
-import { {{methods}} } from '{{file}}';
+{{#each context}}
+  {{#if requestBody}}
+  import type { {{capitalize (camelCase operationId)}}RequestBody } from '{{generatedTypesRelativePath}}';
+  {{/if}}
+  {{#if requestQuery}}
+  import type { {{capitalize (camelCase operationId)}}RequestQuery } from '{{generatedTypesRelativePath}}';
+  {{/if}}
+
+import { {{operationId}} } from '{{apiMethodRelativePath}}';
 {{/each}}
 
 interface HttpClient {
@@ -22,9 +29,29 @@ export class ApiClient<TClient extends HttpClient> {
     this.client = client;
   }
 
-  {{#each files}}
-  public async {{methods}}(params, signal) {
-    return {{methods}}(this.client, params, signal);
+  {{#each context}}
+ /*
+  * {{description}}
+  */
+  public async {{operationId}}(
+  {{#if requestBody}}
+  params: {{capitalize (camelCase operationId)}}RequestBody, 
+  {{/if}}
+  {{#if requestQuery}}
+  query: {{capitalize (camelCase operationId)}}RequestQuery,
+  {{/if}}
+  signal?: AbortSignal
+  ) {
+    return {{operationId}}(
+      this.client,
+      {{#if requestBody}}
+        params,
+      {{/if}}
+      {{#if requestQuery}}
+      query,
+      {{/if}}
+      signal
+    );
   }
 
   {{/each}}

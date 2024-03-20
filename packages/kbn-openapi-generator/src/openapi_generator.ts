@@ -78,6 +78,11 @@ export const generate = async (config: GeneratorConfig) => {
         return;
       }
 
+      // console.log({
+      //   generationContext,
+      //   operations: JSON.stringify(generationContext.operations, null, 1),
+      // });
+
       const result = TemplateService.compileTemplate(templateName, generationContext);
 
       const generatedFilePath = getGeneratedFilePath(sourcePath, extension);
@@ -93,9 +98,9 @@ export const generate = async (config: GeneratorConfig) => {
   // unformatted code and fix any eslint errors
   console.log(`💅  Formatting output`);
 
-  const generatedArtifactsGlob = resolve(rootDir, `./**/*${extension}`);
-  await formatOutput(generatedArtifactsGlob);
-  await fixEslint(generatedArtifactsGlob);
+  // const generatedArtifactsGlob = resolve(rootDir, `./**/*${extension}`);
+  // await formatOutput(generatedArtifactsGlob);
+  // await fixEslint(generatedArtifactsGlob);
 
   return {
     operations: contexts.reduce((acc, context) => {

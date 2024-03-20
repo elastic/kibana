@@ -6,7 +6,7 @@
  */
 
 require('../../../../../src/setup_node_env');
-const { generate } = require('@kbn/openapi-generator');
+const { generate, generateApiClient } = require('@kbn/openapi-generator');
 const { resolve } = require('path');
 
 const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
@@ -14,5 +14,12 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
 generate({
   rootDir: SECURITY_SOLUTION_ROOT,
   sourceGlob: './**/rule_management/crud/**/*.schema.yaml',
-  templateName: 'zod_api_client',
+  templateName: 'zod_api_method',
+}).then(({ operations }) => {
+  generateApiClient({
+    rootDir: SECURITY_SOLUTION_ROOT,
+    sourceGlob: './**/*.api_method.gen.ts',
+    templateName: 'zod_api_client',
+    operations,
+  });
 });

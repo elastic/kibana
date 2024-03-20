@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { readFileSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 import globby from 'globby';
 import { resolve } from 'path';
-import handlebars from 'handlebars';
-import { TemplateName } from './template_service/template_service';
+// import Handlebars from 'handlebars';
+import { snakeCase, camelCase } from 'lodash';
+import { TemplateName, initTemplateService } from './template_service/template_service';
 import { registerTemplates } from './template_service/register_templates';
 import { NormalizedOperation } from './parser/openapi_types';
 
@@ -18,52 +19,71 @@ export interface GeneratorConfig {
   rootDir: string;
   sourceGlob: string;
   templateName: TemplateName;
-  contexts: NormalizedOperation[];
+  operations: NormalizedOperation[];
 }
 
 export const generateApiClient = async (config: GeneratorConfig) => {
-  const { rootDir, sourceGlob, templateName, contexts } = config;
+  const { rootDir, sourceGlob, templateName, operations } = config;
+
+  const TemplateService = await initTemplateService();
 
   const sourceFilesGlob = resolve(rootDir, sourceGlob);
   const apiMethodPaths = await globby([sourceFilesGlob]);
 
-  const files = apiMethodPaths.map((file) => {
-    const content = readFileSync(file, 'utf8');
-    if (!content) {
-      return;
-    }
+  const context = apiMethodPaths.map((filePath) => {
+    const operationIdFromPath = getOperationIdFromPath(filePath);
 
-    const exportedMethods = content.match(/export const (\w+) =/g);
-    if (!exportedMethods) {
-      return;
-    }
+    const operation =
+      operations.find((o) => snakeCase(o.operationId) === operationIdFromPath) ??
+      ({} as NormalizedOperation);
 
-    const methods = exportedMethods.map((s: string) => {
-      const match = s.match(/export const (\w+) =/);
-      if (match) {
-        return match[1];
-      }
-    });
-
-    const methodContext = contexts.find((c) => c.path === file);
-
-    const paramsTypes = content.match(/export type (\w+)Params =/g);
-    console.log({paramsTypes});
-
-    const relativePath = file.replace(rootDir, '').replace(/\.ts$/, '');;
+    const { operationId, description, requestQuery, requestBody } = operation;
+    const apiMethodRelativePath = `../../..${filePath.replace(rootDir, '').replace(/\.ts$/, '')}`;
+    const generatedTypesRelativePath = `../../..${filePath
+      .replace(rootDir, '')
+      .replace(/\.api_method/, '')
+      .replace(/\.ts$/, '')}`;
 
     return {
-      file: `../../..${relativePath}`,
-      methods: methods.join(''),
+      generatedTypesRelativePath,
+      apiMethodRelativePath,
+      operationId: camelCase(operationId),
+      description,
+      requestQuery,
+      requestBody,
     };
   });
-  const templates = await registerTemplates(
-    resolve(__dirname, './template_service/templates'),
-    handlebars
-  );
-  const result = handlebars.compile(templates[templateName])({ files });
 
+  console.log({ apiMethodPaths, context });
+
+  const result = TemplateService.compileTemplate(templateName, {context});
+
+  // const templates = await registerTemplates(
+  //   resolve(__dirname, './template_service/templates'),
+  //   handlebars
+  // );
+
+  // const result = handlebars.compile(templates[templateName])({ context });
+  console.log({result});
   writeFileSync('./public/common/api_client/client.ts', result);
-  console.log(result);
 };
 
+/**
+ * Extracts the operationId from a given path string.
+ *
+ * Looks for a match against the pattern:
+ *
+ * /([^/]+)_route\.api_client\.gen\.ts$
+ *
+ * Returns the first match group, which will be the operationId.
+ *
+ * Rxample:
+ *
+ * '/some/path/delete_rule_route.api_client.gen.ts' -> 'delete_rule'
+ */
+export const getOperationIdFromPath = (path: string) => {
+  const match = path.match(/\/([^/]+)_route\.api_method\.gen\.ts$/);
+  if (match) {
+    return match[1];
+  }
+};
