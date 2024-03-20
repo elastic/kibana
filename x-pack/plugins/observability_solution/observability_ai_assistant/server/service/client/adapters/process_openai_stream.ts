@@ -15,6 +15,7 @@ import {
   ChatCompletionChunkEvent,
   createInternalServerError,
   createTokenLimitReachedError,
+  Message,
   StreamingChatResponseEventType,
 } from '../../../../common';
 

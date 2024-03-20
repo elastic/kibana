@@ -22,9 +22,9 @@ export type CompatibleJSONSchema = {
   items?: CompatibleJSONSchema[] | CompatibleJSONSchema;
   required?: string[] | readonly string[] | undefined;
   properties?: Record<string, CompatibleJSONSchema>;
-  allOf?: CompatibleJSONSchema[] | undefined;
-  anyOf?: CompatibleJSONSchema[] | undefined;
-  oneOf?: CompatibleJSONSchema[] | undefined;
+  allOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
+  anyOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
+  oneOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
   description?: string;
 };
 
