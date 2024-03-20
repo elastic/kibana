@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import React from 'react';
 import { DataSourceSelector } from '../components/data_source_selector';
@@ -54,6 +55,7 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
     dataViewCount,
     error: dataViewsError,
     isLoading: isLoadingDataViews,
+    isDataViewAllowed,
     isDataViewAvailable,
     loadDataViews,
     reloadDataViews,
@@ -73,6 +75,7 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
       dataViewCount={dataViewCount}
       dataViewsError={dataViewsError}
       discoverEsqlUrlProps={discoverEsqlUrlProps}
+      isDataViewAllowed={isDataViewAllowed}
       isDataViewAvailable={isDataViewAvailable}
       integrations={integrations}
       integrationsError={integrationsError}
@@ -106,6 +109,7 @@ export default CustomDataSourceSelector;
 
 export type CustomDataSourceSelectorBuilderProps = CustomDataSourceSelectorProps & {
   controller: LogsExplorerController;
+  core: CoreStart;
   datasetsClient: IDatasetsClient;
   dataViews: DataViewsPublicPluginStart;
 };
@@ -113,6 +117,7 @@ export type CustomDataSourceSelectorBuilderProps = CustomDataSourceSelectorProps
 function withProviders(Component: React.FunctionComponent<CustomDataSourceSelectorProps>) {
   return function ComponentWithProviders({
     controller,
+    core,
     datasetsClient,
     dataViews,
     logsExplorerControllerStateService,
@@ -121,6 +126,7 @@ function withProviders(Component: React.FunctionComponent<CustomDataSourceSelect
       <IntegrationsProvider datasetsClient={datasetsClient}>
         <DatasetsProvider datasetsClient={datasetsClient}>
           <DataViewsProvider
+            core={core}
             dataViewsService={dataViews}
             events={controller.customizations?.events}
           >

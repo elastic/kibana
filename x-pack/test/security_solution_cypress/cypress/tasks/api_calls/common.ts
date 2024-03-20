@@ -37,7 +37,6 @@ export const rootRequest = <T = unknown>({
 
 export const deleteAlertsAndRules = () => {
   cy.log('Delete all alerts and rules');
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
   rootRequest({
     method: 'POST',
@@ -48,24 +47,6 @@ export const deleteAlertsAndRules = () => {
     },
     failOnStatusCode: false,
     timeout: 300000,
-  });
-
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'alert',
-              },
-            },
-          ],
-        },
-      },
-    },
   });
 
   deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);

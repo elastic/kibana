@@ -8,17 +8,14 @@
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { isError } from 'lodash';
 import { assign, createMachine } from 'xstate';
-import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
-import { createComparatorByField } from '../../../utils/comparator_by_field';
 import { createDefaultContext } from './defaults';
 import type {
   DataViewsContext,
   DataViewsEvent,
-  DataViewsFilterParams,
-  DataViewsSearchParams,
   DataViewsTypestate,
   DefaultDataViewsContext,
 } from './types';
+import { loadDataViews, searchDataViews } from './services/data_views_service';
 
 export const createPureDataViewsStateMachine = (
   initialContext: DefaultDataViewsContext = createDefaultContext()
@@ -139,28 +136,6 @@ export const createDataViewsStateMachine = ({
 }: DataViewsStateMachineDependencies) =>
   createPureDataViewsStateMachine(initialContext).withConfig({
     services: {
-      loadDataViews: (context) => {
-        const searchParams = context.search;
-        return context.cache.has(searchParams)
-          ? Promise.resolve(context.cache.get(searchParams))
-          : dataViews
-              .getIdsWithTitle()
-              .then((views) => views.map(DataViewDescriptor.create))
-              .then((views) => searchDataViews(views, searchParams, context.filter));
-      },
+      loadDataViews: loadDataViews({ dataViews }),
     },
   });
-
-const searchDataViews = (
-  dataViews: DataViewDescriptor[],
-  search: DataViewsSearchParams,
-  filter: DataViewsFilterParams
-) => {
-  const { name, sortOrder } = search;
-  const { dataType } = filter;
-
-  return dataViews
-    .filter((dataView) => Boolean(dataView.name?.includes(name ?? '')))
-    .filter((dataView) => !dataType || Boolean(dataView.dataType === dataType))
-    .sort(createComparatorByField('name', sortOrder));
-};
