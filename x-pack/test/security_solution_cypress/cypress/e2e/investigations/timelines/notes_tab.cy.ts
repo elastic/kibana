@@ -18,20 +18,18 @@ import {
   MARKDOWN_INVESTIGATE_BUTTON,
 } from '../../../screens/timeline';
 import { MODAL_CONFIRMATION_BTN } from '../../../screens/alerts_detection_rules';
-import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { createTimeline, deleteAllTimelines } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
 import { visitTimeline } from '../../../tasks/navigation';
 import { addNotesToTimeline, goToNotesTab } from '../../../tasks/timeline';
-
-import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 const text = 'system_indices_superuser';
 const link = 'https://www.elastic.co/';
 
 describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(function () {
-    deleteTimelines();
+    deleteAllTimelines();
 
     createTimeline(getTimelineNonValidQuery())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)

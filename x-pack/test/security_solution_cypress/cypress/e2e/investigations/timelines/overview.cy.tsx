@@ -19,14 +19,17 @@ import {
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
+import {
+  createTimeline,
+  deleteAllTimelines,
+  favoriteTimeline,
+} from '../../../tasks/api_calls/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
   beforeEach(() => {
-    deleteTimelines();
+    deleteAllTimelines();
     createTimeline(getFavoritedTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId) => favoriteTimeline({ timelineId, timelineType: 'default' }));
