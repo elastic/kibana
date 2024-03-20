@@ -69,6 +69,19 @@ const Query = styled.div`
   white-space: pre-wrap;
 `;
 
+export const getQueryLabel = (ruleType: Type | undefined): string => {
+  switch (ruleType) {
+    case 'eql':
+      return i18n.EQL_QUERY_LABEL;
+    case 'saved_query':
+      return i18n.SAVED_QUERY_LABEL;
+    case 'esql':
+      return i18n.ESQL_QUERY_LABEL;
+    default:
+      return i18n.QUERY_LABEL;
+  }
+};
+
 export const buildQueryBarDescription = ({
   field,
   filters,

@@ -20,6 +20,7 @@ import { MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
 import type { ObservabilityAIAssistantClient } from '../service/client';
+import { ChatFn } from '../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
 
 const MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN = 1000;
@@ -65,7 +66,7 @@ export function registerContextFunction({
         required: ['queries', 'categories'],
       } as const,
     },
-    async ({ arguments: args, messages, connectorId, screenContexts }, signal) => {
+    async ({ arguments: args, messages, connectorId, screenContexts, chat }, signal) => {
       const { queries, categories } = args;
 
       async function getContext() {
@@ -127,7 +128,7 @@ export function registerContextFunction({
           suggestions,
           queries: queriesOrUserPrompt,
           messages,
-          client,
+          chat,
           connectorId,
           signal,
           logger: resources.logger,
@@ -198,7 +199,7 @@ async function scoreSuggestions({
   suggestions,
   messages,
   queries,
-  client,
+  chat,
   connectorId,
   signal,
   logger,
@@ -206,7 +207,7 @@ async function scoreSuggestions({
   suggestions: Awaited<ReturnType<typeof retrieveSuggestions>>;
   messages: Message[];
   queries: string[];
-  client: ObservabilityAIAssistantClient;
+  chat: ChatFn;
   connectorId: string;
   signal: AbortSignal;
   logger: Logger;
@@ -263,7 +264,7 @@ async function scoreSuggestions({
 
   const response = await lastValueFrom(
     (
-      await client.chat('score_suggestions', {
+      await chat('score_suggestions', {
         connectorId,
         messages: [...messages.slice(0, -1), newUserMessage],
         functions: [scoreFunction],

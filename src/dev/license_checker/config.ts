@@ -57,6 +57,7 @@ export const LICENSE_ALLOWED = [
   '(MIT OR CC0-1.0)',
   'MIT',
   'MIT*',
+  'MIT-0',
   'MIT/X11',
   'new BSD, and MIT',
   '(OFL-1.1 AND MIT)',

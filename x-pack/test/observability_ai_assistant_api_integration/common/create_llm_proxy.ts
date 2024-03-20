@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import http, { type Server } from 'http';
 import { once, pull } from 'lodash';
@@ -41,23 +42,18 @@ export class LlmProxy {
 
   interceptors: Array<RequestInterceptor & { handle: RequestHandler }> = [];
 
-  constructor(private readonly port: number) {
+  constructor(private readonly port: number, private readonly log: ToolingLog) {
     this.server = http
-      .createServer(async (request, response) => {
-        const interceptors = this.interceptors.concat();
+      .createServer()
+      .on('request', async (request, response) => {
+        this.log.info(`LLM request received`);
 
-        const body = await new Promise<string>((resolve, reject) => {
-          let concatenated = '';
-          request.on('data', (chunk) => {
-            concatenated += chunk.toString();
-          });
-          request.on('close', () => {
-            resolve(concatenated);
-          });
-        });
+        const interceptors = this.interceptors.concat();
+        const body = await getRequestBody(request);
 
         while (interceptors.length) {
           const interceptor = interceptors.shift()!;
+
           if (interceptor.when(body)) {
             pull(this.interceptors, interceptor);
             interceptor.handle(request, response);
@@ -67,6 +63,9 @@ export class LlmProxy {
 
         response.writeHead(500, 'No interceptors found to handle request: ' + request.url);
         response.end();
+      })
+      .on('error', (error) => {
+        this.log.error(`LLM proxy encountered an error: ${error}`);
       })
       .listen(port);
   }
@@ -83,18 +82,31 @@ export class LlmProxy {
     this.server.close();
   }
 
-  intercept(
+  waitForAllInterceptorsSettled() {
+    return Promise.all(this.interceptors);
+  }
+
+  intercept<
+    TResponseChunks extends Array<Record<string, unknown>> | string | undefined = undefined
+  >(
     name: string,
-    when: RequestInterceptor['when']
-  ): {
-    waitForIntercept: () => Promise<LlmResponseSimulator>;
-  } {
+    when: RequestInterceptor['when'],
+    responseChunks?: TResponseChunks
+  ): TResponseChunks extends undefined
+    ? {
+        waitForIntercept: () => Promise<LlmResponseSimulator>;
+      }
+    : {
+        complete: () => Promise<void>;
+      } {
     const waitForInterceptPromise = Promise.race([
-      new Promise<LlmResponseSimulator>((outerResolve, outerReject) => {
+      new Promise<LlmResponseSimulator>((outerResolve) => {
         this.interceptors.push({
           name,
           when,
           handle: (request, response) => {
+            this.log.info(`LLM request intercepted by "${name}"`);
+
             function write(chunk: string) {
               return new Promise<void>((resolve) => response.write(chunk, () => resolve()));
             }
@@ -135,18 +147,50 @@ export class LlmProxy {
         });
       }),
       new Promise<LlmResponseSimulator>((_, reject) => {
-        setTimeout(() => reject(new Error('Operation timed out')), 5000);
+        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 5000ms`)), 5000);
       }),
     ]);
 
+    if (responseChunks === undefined) {
+      return { waitForIntercept: () => waitForInterceptPromise } as any;
+    }
+
+    const parsedChunks = Array.isArray(responseChunks)
+      ? responseChunks
+      : responseChunks.split(' ').map((token, i) => (i === 0 ? token : ` ${token}`));
+
     return {
-      waitForIntercept: () => waitForInterceptPromise,
-    };
+      complete: async () => {
+        const simulator = await waitForInterceptPromise;
+        for (const chunk of parsedChunks) {
+          await simulator.next(chunk);
+        }
+        await simulator.complete();
+      },
+    } as any;
   }
 }
 
-export async function createLlmProxy() {
+export async function createLlmProxy(log: ToolingLog) {
   const port = await getPort({ port: getPort.makeRange(9000, 9100) });
 
-  return new LlmProxy(port);
+  return new LlmProxy(port, log);
+}
+
+async function getRequestBody(request: http.IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let data = '';
+
+    request.on('data', (chunk) => {
+      data += chunk.toString();
+    });
+
+    request.on('close', () => {
+      resolve(data);
+    });
+
+    request.on('error', (error) => {
+      reject(error);
+    });
+  });
 }
