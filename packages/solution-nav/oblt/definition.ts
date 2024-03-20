@@ -295,6 +295,6 @@ export const definition: SolutionNavigationDefinition = {
   id: 'oblt',
   title: 'Observability',
   icon: 'logoObservability',
-  homePage: 'discover', // Temp. Wil be updated when all links are registered
+  homePage: 'observabilityOnboarding',
   navigationTree$: of(navTree),
 };

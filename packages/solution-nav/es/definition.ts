@@ -298,6 +298,6 @@ export const definition: SolutionNavigationDefinition = {
   id: 'es',
   title: 'Search',
   icon: 'logoElasticsearch',
-  homePage: 'dev_tools', // Temp. Wil be updated when all links are registered
+  homePage: 'home', // Temp. Wil be updated when all links are registered
   navigationTree$: of(navTree),
 };
