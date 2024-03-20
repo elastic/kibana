@@ -227,6 +227,23 @@ export const getDefaultAwsCredentialsType = (
 
   return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
 };
+
+export const getDefaultAzureCredentialsType = (
+  packageInfo: PackageInfo,
+  setupTechnology?: SetupTechnology
+): string => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return 'service_principal_with_client_secret';
+  }
+
+  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
+  if (hasArmTemplateUrl) {
+    return 'arm_template';
+  }
+
+  return 'managed_identity';
+};
+
 /**
  * Input vars that are hidden from the user
  */
@@ -234,12 +251,19 @@ export const getPostureInputHiddenVars = (
   inputType: PostureInput,
   packageInfo: PackageInfo,
   setupTechnology: SetupTechnology
-) => {
+): Record<string, PackagePolicyConfigRecordEntry> | undefined => {
   switch (inputType) {
     case 'cloudbeat/cis_aws':
       return {
         'aws.credentials.type': {
           value: getDefaultAwsCredentialsType(packageInfo, setupTechnology),
+          type: 'text',
+        },
+      };
+    case 'cloudbeat/cis_azure':
+      return {
+        'azure.credentials.type': {
+          value: getDefaultAzureCredentialsType(packageInfo, setupTechnology),
           type: 'text',
         },
       };
