@@ -112,6 +112,8 @@ export const performCreate = async <T>(
     throw SavedObjectsErrorHelpers.createConflictError(type, id);
   }
 
+  const createdBy = options.createdBy;
+
   // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
   // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
   const originId = Object.keys(options).includes('originId') ? options.originId : existingOriginId;
@@ -133,6 +135,7 @@ export const performCreate = async <T>(
     managed: setManaged({ optionsManaged: managed }),
     created_at: time,
     updated_at: time,
+    ...(createdBy ? { created_by: createdBy } : undefined),
     ...(Array.isArray(references) && { references }),
   });
 

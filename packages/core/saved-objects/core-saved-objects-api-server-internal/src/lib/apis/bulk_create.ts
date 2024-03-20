@@ -209,6 +209,8 @@ export const performBulkCreate = async <T>(
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      const createdBy: string | undefined = undefined;
+
       // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
       // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
       const originId = Object.keys(object).includes('originId')
@@ -231,6 +233,7 @@ export const performBulkCreate = async <T>(
         managed: setManaged({ optionsManaged, objectManaged: object.managed }),
         updated_at: time,
         created_at: time,
+        ...(createdBy ? { created_by: createdBy } : undefined),
         references: object.references || [],
         originId,
       }) as SavedObjectSanitizedDoc<T>;

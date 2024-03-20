@@ -71,4 +71,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   managed?: boolean;
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
+
+  /** The ID of the user who is creating this object. */
+  createdBy?: string;
 }
