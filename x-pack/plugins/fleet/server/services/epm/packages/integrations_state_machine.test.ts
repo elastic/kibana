@@ -8,7 +8,7 @@
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../..';
 
-import { handleStateMachine } from './integrations_state_machine';
+import { handleState } from './integrations_state_machine';
 
 const getTestDefinition = (
   mockEvent1: any,
@@ -39,7 +39,7 @@ const getTestDefinition = (
   };
 };
 
-describe('handleStateMachine', () => {
+describe('handleState', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   beforeEach(async () => {
     // prevents `Logger not set.` and other appContext errors
@@ -57,7 +57,7 @@ describe('handleStateMachine', () => {
     const mockEventState3 = jest.fn();
     const testDefinition = getTestDefinition(mockEventState1, mockEventState2, mockEventState3);
 
-    await handleStateMachine('state1', testDefinition);
+    await handleState('state1', testDefinition, testDefinition.context);
     expect(mockEventState1).toHaveBeenCalledTimes(1);
     expect(mockEventState2).toHaveBeenCalledTimes(1);
     expect(mockEventState3).toHaveBeenCalledTimes(1);
@@ -77,7 +77,7 @@ describe('handleStateMachine', () => {
     const mockEventState2 = jest.fn();
     const mockEventState3 = jest.fn();
     const testDefinition = getTestDefinition(mockEventState1, mockEventState2, mockEventState3);
-    await handleStateMachine('state2', testDefinition);
+    await handleState('state2', testDefinition, testDefinition.context);
 
     expect(mockEventState1).toHaveBeenCalledTimes(0);
     expect(mockEventState2).toHaveBeenCalledTimes(1);
@@ -90,7 +90,7 @@ describe('handleStateMachine', () => {
     const mockEventState2 = jest.fn();
     const mockEventState3 = jest.fn();
     const testDefinition = getTestDefinition(mockEventState1, mockEventState2, mockEventState3);
-    await handleStateMachine('state1', testDefinition);
+    await handleState('state1', testDefinition, testDefinition.context);
 
     expect(mockEventState1).toHaveBeenCalledTimes(1);
     expect(mockEventState2).toHaveBeenCalledTimes(0);
@@ -114,7 +114,7 @@ describe('handleStateMachine', () => {
       contextData
     );
 
-    await handleStateMachine('state1', testDefinition);
+    await handleState('state1', testDefinition, testDefinition.context);
     expect(mockEventState1).toHaveBeenCalledWith({ testData: 'test' });
     expect(mockEventState2).toHaveBeenCalledWith({
       testData: 'test',
@@ -156,7 +156,7 @@ describe('handleStateMachine', () => {
       contextData
     );
 
-    await handleStateMachine('state1', testDefinition);
+    await handleState('state1', testDefinition, testDefinition.context);
     expect(mockEventState1).toHaveBeenCalledWith({ testData: 'test' });
     expect(mockEventState2).toHaveBeenCalledWith({
       testData: 'test',
@@ -180,7 +180,7 @@ describe('handleStateMachine', () => {
     );
   });
 
-  it.skip('should return updated context data', async () => {
+  it('should return updated context data', async () => {
     const mockEventState1 = jest
       .fn()
       .mockImplementation(() => Promise.resolve({ promiseData: {} }));
@@ -201,7 +201,7 @@ describe('handleStateMachine', () => {
       contextData
     );
 
-    const updatedContext = await handleStateMachine('state1', testDefinition);
+    const updatedContext = await handleState('state1', testDefinition, testDefinition.context);
     expect(mockEventState1).toHaveBeenCalledWith({ testData: 'test' });
     expect(mockEventState2).toHaveBeenCalledWith({
       testData: 'test',
@@ -234,7 +234,7 @@ describe('handleStateMachine', () => {
       undefined,
       mockPostTransition
     );
-    await handleStateMachine('state1', testDefinition);
+    await handleState('state1', testDefinition, testDefinition.context);
 
     expect(mockEventState1).toHaveBeenCalled();
     expect(mockPostTransition).toHaveBeenCalled();

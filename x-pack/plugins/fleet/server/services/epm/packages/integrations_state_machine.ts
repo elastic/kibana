@@ -19,14 +19,7 @@ export interface StateMachineDefinition<T extends string> {
   states: StateMachineStates<T>;
 }
 
-export async function handleStateMachine(
-  startState: string,
-  definition: StateMachineDefinition<string>
-) {
-  await handleState(startState, definition, definition.context);
-}
-
-async function handleState(
+export async function handleState(
   currentStateName: string,
   definition: StateMachineDefinition<string>,
   context: any
@@ -69,8 +62,8 @@ async function handleState(
     }
   }
   if (currentStatus === 'success' && currentState?.nextState && currentState?.nextState !== 'end') {
-    await handleState(currentState.nextState, definition, updatedContext);
+    return await handleState(currentState.nextState, definition, updatedContext);
   } else {
-    return;
+    return updatedContext;
   }
 }
