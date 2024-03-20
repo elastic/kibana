@@ -25,13 +25,7 @@ const createContext = (events: any[] = []): EmbeddableApiContext => {
   return {
     embeddable: {
       enhancements: {
-        dynamicActions: {
-          state: {
-            get: () => ({
-              events,
-            }),
-          },
-        } as unknown as DynamicActionManager,
+        dynamicActions: {} as unknown as DynamicActionManager,
       },
       setDynamicActions: (value: DynamicActionsSerializedState['enhancements']) => {
         dynamicActionsState$.next(value);

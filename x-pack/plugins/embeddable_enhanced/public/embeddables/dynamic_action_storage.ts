@@ -17,7 +17,7 @@ export type DynamicActionStorageApi = Pick<
   HasDynamicActions,
   'setDynamicActions' | 'dynamicActionsState$'
 >;
-export class ApiActionStorage extends AbstractActionStorage {
+export class DynamicActionStorage extends AbstractActionStorage {
   constructor(
     private id: string,
     private getPanelTitle: () => string | undefined,

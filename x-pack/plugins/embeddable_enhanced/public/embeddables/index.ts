@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './api_action_storage';
+export * from './dynamic_action_storage';

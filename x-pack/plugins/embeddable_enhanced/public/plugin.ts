@@ -30,7 +30,10 @@ import {
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import { PanelNotificationsAction } from './actions';
-import { ApiActionStorage, type DynamicActionStorageApi } from './embeddables/api_action_storage';
+import {
+  DynamicActionStorage,
+  type DynamicActionStorageApi,
+} from './embeddables/dynamic_action_storage';
 import { HasDynamicActions } from './embeddables/interfaces/has_dynamic_actions';
 import { EnhancedEmbeddable } from './types';
 
@@ -149,7 +152,7 @@ export class EmbeddableEnhancedPlugin
       dynamicActionsState$,
       setDynamicActions: (newState) => dynamicActionsState$.next(newState),
     };
-    const storage = new ApiActionStorage(uuid, getTitle, api);
+    const storage = new DynamicActionStorage(uuid, getTitle, api);
     const dynamicActions = new DynamicActionManager({
       isCompatible: async (context: unknown) => {
         return apiHasUniqueId(context) && context.uuid === uuid;
@@ -214,7 +217,11 @@ export class EmbeddableEnhancedPlugin
         } as DynamicActionsSerializedState['enhancements']);
       });
 
-    const storage = new ApiActionStorage(String(embeddable.runtimeId), embeddable.getTitle, api);
+    const storage = new DynamicActionStorage(
+      String(embeddable.runtimeId),
+      embeddable.getTitle,
+      api
+    );
     const dynamicActions = new DynamicActionManager({
       isCompatible: async (context: unknown) => {
         if (!this.isEmbeddableContext(context)) return false;
