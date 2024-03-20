@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import getPort from 'get-port';
 import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getWebhookServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover } from '../../../common/lib';
+import { Spaces } from '../../scenarios';
+import { createWebhookAction } from './connector_types/stack/webhook';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUnsecuredActionTests({ getService }: FtrProviderContext) {
@@ -33,7 +37,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         .post(`/api/execute_unsecured_action`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          requesterId: 'functional_tester',
+          requesterId: 'background_task',
           id: 'my-test-email',
           params: {
             to: ['you@test.com'],
@@ -41,66 +45,22 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
             message: 'does this work??',
           },
           spaceId: 'default',
+          relatedSavedObjects: [
+            {
+              id: 'task:123',
+              type: 'task',
+              typeId: 'taskType',
+            },
+          ],
         })
         .expect(200);
       expect(response.body.status).to.eql('success');
       expect(response.body.result.actionId).to.eql('my-test-email');
       expect(response.body.result.status).to.eql('ok');
 
+      const query = getEventLogExecuteQuery(testStart, 'my-test-email');
       await retry.try(async () => {
-        const searchResult = await es.search({
-          index: '.kibana-event-log*',
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      'event.provider': {
-                        value: 'actions',
-                      },
-                    },
-                  },
-                  {
-                    term: {
-                      'event.action': 'execute',
-                    },
-                  },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: testStart,
-                      },
-                    },
-                  },
-                  {
-                    nested: {
-                      path: 'kibana.saved_objects',
-                      query: {
-                        bool: {
-                          filter: [
-                            {
-                              term: {
-                                'kibana.saved_objects.id': {
-                                  value: 'my-test-email',
-                                },
-                              },
-                            },
-                            {
-                              term: {
-                                'kibana.saved_objects.type': 'action',
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        });
+        const searchResult = await es.search(query);
         expect((searchResult.hits.total as SearchTotalHits).value).to.eql(1);
 
         const hit = searchResult.hits.hits[0];
@@ -110,6 +70,141 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         expect(hit?._source?.message).to.eql(
           `action executed: .email:my-test-email: TestEmail#xyz`
         );
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.kibana?.action?.execution?.source).to.eql('background_task');
+
+        // @ts-expect-error _source: unknown
+        const savedObjects = hit?._source?.kibana?.saved_objects;
+        const taskSORef = (savedObjects ?? []).find((so: any) => so.type === 'task');
+        expect(taskSORef).to.eql({
+          rel: 'primary',
+          type: 'task',
+          id: 'task:123',
+          type_id: 'taskType',
+        });
+
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.kibana?.space_ids).to.eql(['default']);
+      });
+    });
+
+    it('should successfully execute email action for custom space', async () => {
+      const testStart = new Date().toISOString();
+      const response = await supertest
+        .post(`/api/execute_unsecured_action`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          requesterId: 'background_task',
+          id: 'my-test-email',
+          params: {
+            to: ['you@test.com'],
+            subject: 'hello from Kibana!',
+            message: 'does this work??',
+          },
+          spaceId: Spaces.other.id,
+          relatedSavedObjects: [
+            {
+              id: 'task:123',
+              type: 'task',
+              typeId: 'taskType',
+            },
+          ],
+        })
+        .expect(200);
+      expect(response.body.status).to.eql('success');
+      expect(response.body.result.actionId).to.eql('my-test-email');
+      expect(response.body.result.status).to.eql('ok');
+
+      const query = getEventLogExecuteQuery(testStart, 'my-test-email');
+      await retry.try(async () => {
+        const searchResult = await es.search(query);
+        expect((searchResult.hits.total as SearchTotalHits).value).to.eql(1);
+
+        const hit = searchResult.hits.hits[0];
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.event?.outcome).to.eql('success');
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.message).to.eql(
+          `action executed: .email:my-test-email: TestEmail#xyz`
+        );
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.kibana?.action?.execution?.source).to.eql('background_task');
+
+        // @ts-expect-error _source: unknown
+        const savedObjects = hit?._source?.kibana?.saved_objects;
+        const taskSORef = (savedObjects ?? []).find((so: any) => so.type === 'task');
+        expect(taskSORef).to.eql({
+          rel: 'primary',
+          type: 'task',
+          id: 'task:123',
+          type_id: 'taskType',
+        });
+
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.kibana?.space_ids).to.eql(['other']);
+      });
+    });
+
+    it('should successfully execute webhook action', async () => {
+      const testStart = new Date().toISOString();
+      const webhookServer = await getWebhookServer();
+      const availablePort = await getPort({ port: 9000 });
+      webhookServer.listen(availablePort);
+      const webhookActionId = await createWebhookAction(
+        supertest,
+        `http://localhost:${availablePort}`
+      );
+
+      const response = await supertest
+        .post(`/api/execute_unsecured_action`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          requesterId: 'background_task',
+          id: webhookActionId,
+          params: {
+            body: 'success',
+          },
+          spaceId: 'default',
+          relatedSavedObjects: [
+            {
+              id: 'task:123',
+              type: 'task',
+              typeId: 'taskType',
+            },
+          ],
+        })
+        .expect(200);
+      expect(response.body.status).to.eql('success');
+      expect(response.body.result.actionId).to.eql(webhookActionId);
+      expect(response.body.result.status).to.eql('ok');
+
+      const query = getEventLogExecuteQuery(testStart, webhookActionId);
+      await retry.try(async () => {
+        const searchResult = await es.search(query);
+        expect((searchResult.hits.total as SearchTotalHits).value).to.eql(1);
+
+        const hit = searchResult.hits.hits[0];
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.event?.outcome).to.eql('success');
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.message).to.eql(
+          `action executed: .webhook:${webhookActionId}: A generic Webhook action`
+        );
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.kibana?.action?.execution?.source).to.eql('background_task');
+
+        // @ts-expect-error _source: unknown
+        const savedObjects = hit?._source?.kibana?.saved_objects;
+        const taskSORef = (savedObjects ?? []).find((so: any) => so.type === 'task');
+        expect(taskSORef).to.eql({
+          rel: 'primary',
+          type: 'task',
+          id: 'task:123',
+          type_id: 'taskType',
+        });
+
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.kibana?.space_ids).to.eql(['default']);
       });
     });
 
@@ -134,4 +229,60 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       );
     });
   });
+
+  function getEventLogExecuteQuery(start: string, actionId: string) {
+    return {
+      index: '.kibana-event-log*',
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'event.provider': {
+                    value: 'actions',
+                  },
+                },
+              },
+              {
+                term: {
+                  'event.action': 'execute',
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: start,
+                  },
+                },
+              },
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      filter: [
+                        {
+                          term: {
+                            'kibana.saved_objects.id': {
+                              value: actionId,
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': 'action',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+  }
 }

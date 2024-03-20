@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ISavedObjectsRepository } from '@kbn/core/server';
+import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import {
   BulkUnsecuredExecutionEnqueuer,
   ExecuteOptions,
@@ -39,6 +39,7 @@ export interface UnsecuredActionsClientOpts {
   actionExecutor: ActionExecutorContract;
   internalSavedObjectsRepository: ISavedObjectsRepository;
   executionEnqueuer: BulkUnsecuredExecutionEnqueuer<ExecutionResponse>;
+  logger: Logger;
 }
 
 type UnsecuredExecuteOptions = Omit<ExecuteOptions, 'source'> & {
@@ -58,11 +59,13 @@ export class UnsecuredActionsClient {
   private readonly actionExecutor: ActionExecutorContract;
   private readonly internalSavedObjectsRepository: ISavedObjectsRepository;
   private readonly executionEnqueuer: BulkUnsecuredExecutionEnqueuer<ExecutionResponse>;
+  private readonly logger: Logger;
 
   constructor(params: UnsecuredActionsClientOpts) {
     this.actionExecutor = params.actionExecutor;
     this.executionEnqueuer = params.executionEnqueuer;
     this.internalSavedObjectsRepository = params.internalSavedObjectsRepository;
+    this.logger = params.logger;
   }
 
   public async execute({
@@ -76,6 +79,12 @@ export class UnsecuredActionsClient {
     if (!ALLOWED_REQUESTER_IDS.includes(requesterId)) {
       throw new Error(
         `"${requesterId}" feature is not allow-listed for UnsecuredActionsClient access.`
+      );
+    }
+
+    if (!relatedSavedObjects) {
+      this.logger.warn(
+        `Calling "execute" in UnsecuredActionsClient without any relatedSavedObjects data. Consider including this for traceability.`
       );
     }
 
@@ -136,7 +145,7 @@ export class UnsecuredActionsClient {
           return {
             source: asBackgroundTaskExecutionSource({
               taskId: taskSO.id,
-              taskType: taskSO.typeId ?? 'task',
+              taskType: taskSO.typeId ?? 'unknown',
             }),
           };
         }

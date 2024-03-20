@@ -57,6 +57,15 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
           id: schema.string(),
           spaceId: schema.string(),
           params: schema.recordOf(schema.string(), schema.any()),
+          relatedSavedObjects: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                id: schema.string(),
+                type: schema.string(),
+                typeId: schema.maybe(schema.string()),
+              })
+            )
+          ),
         }),
       },
     },
@@ -70,12 +79,13 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
 
       try {
         const unsecuredActionsClient = actions.getUnsecuredActionsClient();
-        const { requesterId, spaceId, id, params } = body;
+        const { requesterId, spaceId, id, params, relatedSavedObjects } = body;
         const result = await unsecuredActionsClient.execute({
           requesterId,
           id,
           params,
           spaceId,
+          relatedSavedObjects,
         });
 
         return res.ok({ body: { status: 'success', result } });

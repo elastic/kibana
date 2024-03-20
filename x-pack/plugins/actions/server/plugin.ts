@@ -498,6 +498,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
         }),
+        logger: this.logger,
       });
     };
 
