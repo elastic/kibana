@@ -6,7 +6,7 @@
  */
 
 import { IStaticAssets } from '@kbn/core-http-browser';
-import { ConnectorServerSideDefinition, CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
+import { ConnectorServerSideDefinition, CONNECTOR_DEFINITIONS } from '../connectors';
 import { CONNECTORS_DICT } from '../constants';
 import { ConnectorDefinition } from '../types';
 

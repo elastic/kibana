@@ -168,7 +168,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (customIntegrations) {
       registerEnterpriseSearchIntegrations(
         config,
-        http,
         customIntegrations,
         isCloud,
         searchConnectors?.getConnectorTypes() || []

@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpServiceSetup } from '@kbn/core/server';
-
 import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors-plugin/server';
 
 import { ConfigType } from '.';
 
 export const registerEnterpriseSearchIntegrations = (
   config: ConfigType,
-  http: HttpServiceSetup,
   customIntegrations: CustomIntegrationsPluginSetup,
   isCloud: boolean,
   connectors: ConnectorServerSideDefinition[]

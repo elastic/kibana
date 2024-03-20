@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type {
-  IRouter,
-  Logger,
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-} from '@kbn/core/server';
-import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import { ConnectorServerSideDefinition } from '../common/connectors';
 import { getConnectorTypes } from '../common/lib/connector_types';
 import type {
   SearchConnectorsPluginSetup as SearchConnectorsPluginSetup,
@@ -20,12 +14,6 @@ import type {
   SetupDependencies,
   StartDependencies,
 } from './types';
-
-export interface RouteDependencies {
-  http: CoreSetup<StartDependencies>['http'];
-  logger: Logger;
-  router: IRouter;
-}
 
 export class SearchConnectorsPlugin
   implements
@@ -36,12 +24,9 @@ export class SearchConnectorsPlugin
       StartDependencies
     >
 {
-  private readonly logger: Logger;
-
   private connectors: ConnectorServerSideDefinition[];
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
     this.connectors = [];
   }
 
