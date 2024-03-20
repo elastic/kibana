@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { copyToClipboard } from '@elastic/eui';
@@ -18,7 +18,7 @@ type ILinkTab = IModalTabDeclaration<{
   dashboardUrl: string;
 }>;
 
-const LINK_TAB_ACTION = {
+const LINK_TAB_ACTIONS = {
   SET_DASHBOARD_URL: 'SET_DASHBOARD_URL',
 };
 
@@ -29,7 +29,7 @@ const linkTabReducer: ILinkTab['reducer'] = (
   action
 ) => {
   switch (action.type) {
-    case LINK_TAB_ACTION.SET_DASHBOARD_URL:
+    case LINK_TAB_ACTIONS.SET_DASHBOARD_URL:
       return {
         ...state,
         dashboardUrl: action.payload,
@@ -51,9 +51,12 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
     shareableUrlLocatorParams,
   } = useShareTabsContext()!;
 
-  const setDashboardLink = (url: string) => {
-    dispatch({ type: LINK_TAB_ACTION.SET_DASHBOARD_URL, payload: url });
-  };
+  const setDashboardLink = useCallback(
+    (url: string) => {
+      dispatch({ type: LINK_TAB_ACTIONS.SET_DASHBOARD_URL, payload: url });
+    },
+    [dispatch]
+  );
 
   return (
     <LinkContent
@@ -66,6 +69,7 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
         shareableUrlForSavedObject,
         urlService,
         shareableUrlLocatorParams,
+        dashboardLink: state.dashboardUrl,
         setDashboardLink,
       }}
     />

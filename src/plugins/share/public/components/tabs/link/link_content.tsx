@@ -49,9 +49,10 @@ export const LinkContent = ({
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
 
-  // useEffect(() => {
-  //   setDashboardLink(url);
-  // }, [setDashboardLink, url]);
+  useEffect(() => {
+    // propagate url updates upwards to tab
+    setDashboardLink(url);
+  }, [setDashboardLink, url]);
 
   const isNotSaved = useCallback(() => {
     return objectId === undefined || objectId === '' || isDirty;
