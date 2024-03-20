@@ -58,7 +58,11 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
             <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
             <SLOCardItemInstanceBadge slo={slo} />
             <SloTimeWindowBadge slo={slo} color="default" />
-            <SloRulesBadge rules={rules} onClick={handleCreateRule} />
+            <SloRulesBadge
+              rules={rules}
+              onClick={handleCreateRule}
+              isRemote={slo.remoteName != null}
+            />
             <SloRemoteBadge slo={slo} />
             <SloTagsList
               tags={slo.tags}

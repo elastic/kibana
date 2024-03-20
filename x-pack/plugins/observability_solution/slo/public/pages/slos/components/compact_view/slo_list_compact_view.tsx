@@ -226,7 +226,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       width: '5%',
       render: (_, slo: SLOWithSummaryResponse) => (
         <>
-          <SloRulesBadge rules={rulesBySlo?.[slo.id]} onClick={() => setSloToAddRule(slo)} />
+          <SloRulesBadge
+            rules={rulesBySlo?.[slo.id]}
+            onClick={() => setSloToAddRule(slo)}
+            isRemote={slo.remoteName != null}
+          />
           <SloActiveAlertsBadge
             slo={slo}
             activeAlerts={activeAlertsBySlo.get(slo)}

@@ -46,7 +46,11 @@ export function SloBadges({
           <SloIndicatorTypeBadge slo={slo} />
           <SloTimeWindowBadge slo={slo} />
           <SloRemoteBadge slo={slo} />
-          <SloRulesBadge rules={rules} onClick={onClickRuleBadge} />
+          <SloRulesBadge
+            rules={rules}
+            onClick={onClickRuleBadge}
+            isRemote={slo.remoteName != null}
+          />
           <SloTagsList tags={slo.tags} numberOfTagsToDisplay={1} color="default" ignoreEmpty />
         </>
       )}
