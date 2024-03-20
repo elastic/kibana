@@ -115,53 +115,6 @@ export const deleteTimelines = () => {
   });
 };
 
-export const deleteAllCasesItems = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      type: 'cases',
-                    },
-                  },
-                  {
-                    term: {
-                      type: 'cases-configure',
-                    },
-                  },
-                  {
-                    term: {
-                      type: 'cases-comments',
-                    },
-                  },
-                  {
-                    term: {
-                      type: 'cases-user-action',
-                    },
-                  },
-                  {
-                    term: {
-                      type: 'cases-connector-mappings',
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
-    },
-  });
-};
-
 export const deleteConnectors = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases_\*`;
   rootRequest({
