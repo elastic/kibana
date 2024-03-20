@@ -4391,6 +4391,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/deeplinks-fleet@link:packages/deeplinks/fleet":
+  version "0.0.0"
+  uid ""
+
 "@kbn/deeplinks-management@link:packages/deeplinks/management":
   version "0.0.0"
   uid ""
@@ -4404,6 +4408,14 @@
   uid ""
 
 "@kbn/deeplinks-search@link:packages/deeplinks/search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-security@link:packages/deeplinks/security":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-shared@link:packages/deeplinks/shared":
   version "0.0.0"
   uid ""
 
@@ -5288,6 +5300,10 @@
   uid ""
 
 "@kbn/ml-string-hash@link:x-pack/packages/ml/string_hash":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-time-buckets@link:x-pack/packages/ml/time_buckets":
   version "0.0.0"
   uid ""
 
