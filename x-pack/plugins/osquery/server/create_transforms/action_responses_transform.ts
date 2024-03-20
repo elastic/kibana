@@ -32,7 +32,7 @@ export const actionResponsesTransform: TransformPutTransformRequest = {
   },
   sync: {
     time: {
-      field: '@timestamp',
+      field: 'event.ingested',
       delay: '10s',
     },
   },

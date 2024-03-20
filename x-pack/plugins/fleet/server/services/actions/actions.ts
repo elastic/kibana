@@ -45,6 +45,7 @@ export const createAction = async (
         id: document.action_id,
         document,
         refresh: 'wait_for',
+        pipeline: 'set_ingest_time',
       },
       {
         meta: true,
@@ -106,6 +107,7 @@ export const bulkCreateActions = async (
     const bulkCreateActionsResponse = (await esClient.bulk({
       operations: bulkCreateActionsOperations,
       refresh: 'wait_for',
+      pipeline: 'set_ingest_time',
     })) as unknown as estypes.BulkResponse;
 
     const responseItems = bulkCreateActionsResponse.items;
