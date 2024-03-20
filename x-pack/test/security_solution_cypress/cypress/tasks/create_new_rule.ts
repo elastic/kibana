@@ -105,7 +105,7 @@ import {
   THREAT_MAPPING_COMBO_BOX_INPUT,
   THREAT_MATCH_AND_BUTTON,
   THREAT_MATCH_CUSTOM_QUERY_INPUT,
-  THREAT_MATCH_INDICATOR_INDEX,
+  CUSTOM_INDEX_PATTERN_INPUT,
   THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
   THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
@@ -657,7 +657,7 @@ export const fillIndexAndIndicatorIndexPattern = (
 ) => {
   getIndexPatternClearButton().click();
 
-  getIndicatorIndex().type(`${indexPattern}{enter}`);
+  getRuleIndexInput().type(`${indexPattern}{enter}`);
   getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
 };
 
@@ -694,9 +694,9 @@ export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 /** Returns the continue button on the step of define */
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
 
-/** Returns the indicator index pattern */
-export const getIndicatorIndex = () => {
-  return cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
+/** Returns the custom rule index pattern input */
+export const getRuleIndexInput = () => {
+  return cy.get(CUSTOM_INDEX_PATTERN_INPUT).eq(0);
 };
 
 /** Returns the indicator's indicator index */
