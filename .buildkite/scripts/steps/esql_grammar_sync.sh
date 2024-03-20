@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 synchronize_lexer_grammar () {
   license_header="$1"
@@ -6,7 +7,7 @@ synchronize_lexer_grammar () {
   destination_file="./packages/kbn-monaco/src/esql/antlr/esql_lexer.g4"
 
   # Copy the file
-  cp "$source_file" "$destination_file" || exit
+  cp "$source_file" "$destination_file" 
 
   # Insert the license header
   temp_file=$(mktemp)
@@ -14,11 +15,11 @@ synchronize_lexer_grammar () {
   mv "$temp_file" "$destination_file"
 
   # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
-  sed -i -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file" || exit
+  sed -i -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file" 
 
   # Insert "options { caseInsensitive = true; }" one line below
   sed -i -e '/lexer grammar esql_lexer;/a\
-  options { caseInsensitive = true; }' "$destination_file" || exit
+  options { caseInsensitive = true; }' "$destination_file" 
 
   echo "File copied and modified successfully."
 }
@@ -29,7 +30,7 @@ synchronize_parser_grammar () {
   destination_file="./packages/kbn-monaco/src/esql/antlr/esql_parser.g4"
 
   # Copy the file
-  cp "$source_file" "$destination_file" || exit
+  cp "$source_file" "$destination_file" 
 
   # Insert the license header
   temp_file=$(mktemp)
@@ -37,10 +38,10 @@ synchronize_parser_grammar () {
   mv "$temp_file" "$destination_file"
 
   # Replace the line containing "parser grammar" with "parser grammar esql_parser;"
-  sed -i -e 's/parser grammar.*$/parser grammar esql_parser;/' "$destination_file" || exit
+  sed -i -e 's/parser grammar.*$/parser grammar esql_parser;/' "$destination_file" 
 
   # Replace options {tokenVocab=EsqlBaseLexer;} with options {tokenVocab=esql_lexer;}
-  sed -i -e 's/options {tokenVocab=EsqlBaseLexer;}/options {tokenVocab=esql_lexer;}/' "$destination_file" || exit
+  sed -i -e 's/options {tokenVocab=EsqlBaseLexer;}/options {tokenVocab=esql_lexer;}/' "$destination_file" 
 
   echo "File copied and modified successfully."
 }
@@ -53,17 +54,17 @@ report_main_step () {
 }
 
 main () {
-  cd "$PARENT_DIR" || exit
+  cd "$PARENT_DIR" 
 
   report_main_step "Cloning repositories"
 
   rm -rf elasticsearch
-  git clone https://github.com/elastic/elasticsearch --depth 1 || exit
+  git clone https://github.com/elastic/elasticsearch --depth 1 
 
   rm -rf open-source
-  git clone https://github.com/elastic/open-source --depth 1 || exit
+  git clone https://github.com/elastic/open-source --depth 1 
 
-  cd "$KIBANA_DIR" || exit
+  cd "$KIBANA_DIR" 
 
   license_header=$(cat "$PARENT_DIR/open-source/legal/elastic-license-2.0-header.txt")
 
@@ -74,7 +75,9 @@ main () {
   synchronize_parser_grammar "$license_header"
 
   # Check for differences
+  set +e
   git diff --exit-code --quiet "$destination_file"
+  set -e
 
   if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
@@ -103,11 +106,11 @@ main () {
   report_main_step "Building ANTLR artifacts."
 
   # Bootstrap Kibana
-  yarn kbn bootstrap || exit
+  yarn kbn bootstrap 
 
   # Build ANTLR stuff
-  cd ./packages/kbn-monaco/src || exit 
-  yarn build:antlr4:esql || exit
+  cd ./packages/kbn-monaco/src  
+  yarn build:antlr4:esql 
 
   # Make a commit
   BRANCH_NAME="esql_grammar_sync_$(date +%s)"
@@ -122,7 +125,7 @@ main () {
   git push --set-upstream origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --draft --title "$PR_TITLE" --body "$PR_BODY" --base main --head "$BRANCH_NAME" --label 'release_note:skip' --label 'Team:Visualizations' || exit
+  gh pr create --draft --title "$PR_TITLE" --body "$PR_BODY" --base main --head "$BRANCH_NAME" --label 'release_note:skip' --label 'Team:Visualizations' 
 }
 
 main
