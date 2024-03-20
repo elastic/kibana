@@ -5,16 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
+import type {AgentConfigOptions, Labels} from 'elastic-apm-node';
 import {
-  packageMock,
-  mockedRootDir,
   gitRevExecMock,
+  mockedRootDir,
+  packageMock,
   readUuidFileMock,
   resetAllMocks,
 } from './config.test.mocks';
 
-import { ApmConfiguration, CENTRALIZED_SERVICE_BASE_CONFIG } from './config';
+import {ApmConfiguration, CENTRALIZED_SERVICE_BASE_CONFIG} from './config';
 
 describe('ApmConfiguration', () => {
   beforeEach(() => {
@@ -181,6 +181,21 @@ describe('ApmConfiguration', () => {
         expect(config.getConfig('serviceName')).toEqual(
           expect.objectContaining({
             environment: 'ci',
+          })
+        );
+      });
+
+      it('ELASTIC_APM_GLOBAL_LABELS', () => {
+        process.env.ELASTIC_APM_GLOBAL_LABELS = 'test1=1,test2=2';
+        const config = new ApmConfiguration(mockedRootDir, {}, true);
+
+        expect(config.getConfig('serviceName')).toEqual(
+          expect.objectContaining({
+            globalLabels: {
+              git_rev: "sha",
+              test1: "1",
+              test2: "4"
+            }
           })
         );
       });
