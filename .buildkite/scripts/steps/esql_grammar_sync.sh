@@ -1,11 +1,5 @@
 #!/bin/bash
 
-PARENT_DIR=$(pwd)
-KIBANA_DIR="$PARENT_DIR/kibana"
-
-echo "PARENT_DIR=$PARENT_DIR"
-echo "KIBANA_DIR=$KIBANA_DIR"
-
 synchronize_lexer_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseLexer.g4"
