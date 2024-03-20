@@ -76,7 +76,7 @@ function createIndexRequest(
 }
 
 interface JSONConfig {
-  testCases: Array<{ query: string; error: boolean }>;
+  testCases: Array<{ query: string; error: string[] }>;
   indexes: string[];
   policies: Array<{
     name: string;
@@ -239,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
             for (const { query, error } of queryToErrors) {
               const jsonBody = await sendESQLQuery(query);
 
-              const clientSideHasError = error;
+              const clientSideHasError = Boolean(error.length);
               const serverSideHasError = Boolean(jsonBody.error);
 
               if (clientSideHasError !== serverSideHasError) {
