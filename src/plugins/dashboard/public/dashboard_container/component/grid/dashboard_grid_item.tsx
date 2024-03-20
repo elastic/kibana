@@ -9,6 +9,7 @@
 import { EuiLoadingChart } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
+  DefaultEmbeddableApi,
   EmbeddablePanel,
   reactEmbeddableRegistryHasKey,
   ReactEmbeddableRenderer,
@@ -104,11 +105,12 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       // render React embeddable
       if (reactEmbeddableRegistryHasKey(type)) {
         return (
-          <ReactEmbeddableRenderer
+          <ReactEmbeddableRenderer<object, DefaultEmbeddableApi>
             type={type}
             maybeId={id}
             parentApi={container}
             key={`${type}_${id}`}
+            onApiAvailable={(api) => container.registerChildApi(api)}
             state={{ rawState: panel.explicitInput, version: panel.version, references }}
           />
         );

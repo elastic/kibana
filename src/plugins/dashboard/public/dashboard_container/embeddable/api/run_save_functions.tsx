@@ -38,7 +38,7 @@ const serializeAllPanelState = async (
   const panels = cloneDeep(dashboard.getInput().panels);
   for (const [uuid, panel] of Object.entries(panels)) {
     if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
-    const api = dashboard.reactEmbeddableChildren.value[uuid];
+    const api = dashboard.children$.value[uuid];
     if (api) {
       const serializedState = api.serializeState();
       panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };

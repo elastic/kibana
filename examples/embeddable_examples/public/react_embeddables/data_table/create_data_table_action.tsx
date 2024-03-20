@@ -33,8 +33,8 @@ export const registerCreateDataTableAction = (uiActions: UiActionsStart) => {
       );
     },
     getDisplayName: () =>
-      i18n.translate('embeddableExamples.discoverTable.ariaLabel', {
-        defaultMessage: 'Discover table',
+      i18n.translate('embeddableExamples.dataTable.ariaLabel', {
+        defaultMessage: 'Data table',
       }),
   });
   uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_DATA_TABLE_ACTION_ID);

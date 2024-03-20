@@ -56,7 +56,7 @@ const duplicateReactEmbeddableInput = async (
   panelToClone: DashboardPanelState,
   idToDuplicate: string
 ) => {
-  const child = dashboard.reactEmbeddableChildren.value[idToDuplicate];
+  const child = dashboard.children$.value[idToDuplicate];
   if (!child) throw new PanelNotFoundError();
 
   const lastTitle = apiPublishesPanelTitle(child) ? getPanelTitle(child) ?? '' : '';

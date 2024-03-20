@@ -107,7 +107,7 @@ export function startDiffingDashboardState(
   /**
    *  Create an observable stream of unsaved changes from all react embeddable children
    */
-  const reactEmbeddableUnsavedChanges = this.reactEmbeddableChildren.pipe(
+  const reactEmbeddableUnsavedChanges = this.children$.pipe(
     map((children) => Object.keys(children)),
     distinctUntilChanged(deepEqual),
     debounceTime(CHANGE_CHECK_DEBOUNCE),
@@ -117,7 +117,7 @@ export function startDiffingDashboardState(
       if (newChildIds.length === 0) return of([]);
       return combineLatest(
         newChildIds.map((childId) =>
-          this.reactEmbeddableChildren.value[childId].unsavedChanges.pipe(
+          this.children$.value[childId].unsavedChanges.pipe(
             map((unsavedChanges) => {
               return { childId, unsavedChanges };
             })

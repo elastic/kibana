@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { render, waitFor, screen } from '@testing-library/react';
 
 import React from 'react';
@@ -104,23 +103,5 @@ describe('react embeddable renderer', () => {
         expect.objectContaining({ uuid: expect.any(String) })
       )
     );
-  });
-
-  it('registers the API with the parent API', async () => {
-    const onApiAvailable = jest.fn();
-    const parentApi = getMockPresentationContainer();
-    render(
-      <ReactEmbeddableRenderer
-        type={'test'}
-        maybeId={'12345'}
-        parentApi={parentApi}
-        onApiAvailable={onApiAvailable}
-        state={{ rawState: { name: 'Kuni Garu' } }}
-      />
-    );
-    await waitFor(() => {
-      expect(onApiAvailable).toHaveBeenCalledWith(expect.objectContaining({ parentApi }));
-      expect(parentApi.registerPanelApi).toHaveBeenCalledWith('12345', expect.any(Object));
-    });
   });
 });

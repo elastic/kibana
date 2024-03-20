@@ -9,48 +9,36 @@
 import {
   apiHasParentApi,
   apiHasUniqueId,
-  HasParentApi,
   PublishesViewMode,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { debounceTime, switchMap } from 'rxjs/operators';
-import { useEffect, useRef, useState } from 'react';
-import { PublishesLastSavedState } from './last_saved_state';
 
 export interface PanelPackage {
   panelType: string;
   initialState?: object;
 }
 
-export type PresentationContainer = Partial<PublishesViewMode> &
-  PublishesLastSavedState & {
-    addNewPanel: <ApiType extends unknown = unknown>(
-      panel: PanelPackage,
-      displaySuccessMessage?: boolean
-    ) => Promise<ApiType | undefined>;
-    registerPanelApi: <ApiType extends unknown = unknown>(
-      panelId: string,
-      panelApi: ApiType
-    ) => void;
-    removePanel: (panelId: string) => void;
-    canRemovePanels?: () => boolean;
-    replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
-    getChild: (childId: string) => unknown;
-    untilAllChildApisAvailable: () => Promise<void>;
+export interface PresentationContainer<DefaultApiType extends unknown = unknown>
+  extends Partial<PublishesViewMode> {
+  addNewPanel: <ApiType extends DefaultApiType = DefaultApiType>(
+    panel: PanelPackage,
+    displaySuccessMessage?: boolean
+  ) => Promise<ApiType | undefined>;
+  removePanel: (panelId: string) => void;
+  canRemovePanels?: () => boolean;
+  replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
 
-    // todo consolidate these
-    childIds: PublishingSubject<string[]>;
-    getChildIds: () => string[];
-  };
+  getChildApi: (childId: string) => DefaultApiType | undefined;
+  children$: PublishingSubject<{ [key: string]: DefaultApiType }>;
+}
 
 export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {
   return Boolean(
     typeof (api as PresentationContainer)?.removePanel === 'function' &&
-      typeof (api as PresentationContainer)?.registerPanelApi === 'function' &&
       typeof (api as PresentationContainer)?.replacePanel === 'function' &&
       typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
-      typeof (api as PresentationContainer)?.getChildIds === 'function' &&
-      typeof (api as PresentationContainer)?.getChild === 'function'
+      typeof (api as PresentationContainer)?.getChildApi === 'function' &&
+      (api as PresentationContainer)?.children$
   );
 };
 
@@ -62,57 +50,32 @@ export const getContainerParentFromAPI = (
   return apiIsPresentationContainer(apiParent) ? apiParent : undefined;
 };
 
-export const useClosestCompatibleApi = <ApiType extends unknown>(
-  api: Partial<HasParentApi<PresentationContainer>>,
-  isCompatible: (api: unknown) => api is ApiType
-): ApiType | undefined => {
-  const lastId = useRef<string | undefined>();
-  const [compatibleApi, setCompatibleApi] = useState<ApiType | undefined>();
+export const listenForCompatibleApi = <ApiType extends unknown>(
+  api: unknown,
+  isCompatible: (api: unknown) => api is ApiType,
+  apiFound: (api: ApiType | undefined) => (() => void) | void
+) => {
+  const parent = getContainerParentFromAPI(api);
+  if (!parent) return () => {};
 
-  useEffect(() => {
-    const updateCompatibleApi = (nextApi: ApiType | undefined) => {
-      const nextId = apiHasUniqueId(nextApi) ? nextApi.uuid : undefined;
-      if (nextId !== lastId.current) {
-        setCompatibleApi(nextApi);
-        lastId.current = nextId;
+  let lastCleanupFunction: (() => void) | undefined;
+  let lastCompatibleUuid: string | null;
+  const subscription = parent.children$.subscribe((children) => {
+    lastCleanupFunction?.();
+    const compatibleApi = (() => {
+      for (const childId of Object.keys(children)) {
+        const child = children[childId];
+        if (isCompatible(child)) return child;
       }
-    };
-
-    let canceled = false;
-    const subscription = api.parentApi?.childIds
-      .pipe(
-        debounceTime(0),
-        switchMap((childIds) => {
-          return new Promise<string[]>((resolve) => {
-            api.parentApi?.untilAllChildApisAvailable().then(() => resolve(childIds));
-          });
-        })
-      )
-      .subscribe((childIds) => {
-        // first we check siblings to see if they are compatible
-        const siblingId = childIds.find((id) => {
-          const sibling = api.parentApi?.getChild(id);
-          return isCompatible(sibling);
-        });
-        if (siblingId) {
-          updateCompatibleApi(
-            siblingId ? (api.parentApi?.getChild(siblingId) as ApiType) : undefined
-          );
-          return;
-        }
-
-        // if the parentApi is compatible, use it.
-        if (isCompatible(api.parentApi)) {
-          updateCompatibleApi(api.parentApi);
-          return;
-        }
-        if (canceled) return;
-      });
-    return () => {
-      subscription?.unsubscribe();
-      canceled = true;
-    };
-  }, [api, isCompatible]);
-
-  return compatibleApi;
+      if (isCompatible(parent)) return parent;
+      return undefined;
+    })();
+    const nextId = apiHasUniqueId(compatibleApi) ? compatibleApi.uuid : null;
+    if (nextId === lastCompatibleUuid) return;
+    lastCleanupFunction = apiFound(compatibleApi) ?? undefined;
+  });
+  return () => {
+    subscription.unsubscribe();
+    lastCleanupFunction?.();
+  };
 };

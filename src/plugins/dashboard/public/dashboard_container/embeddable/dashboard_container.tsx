@@ -30,7 +30,11 @@ import {
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { PanelPackage } from '@kbn/presentation-containers';
+import {
+  PanelPackage,
+  PresentationContainer,
+  PublishesLastSavedState,
+} from '@kbn/presentation-containers';
 import { apiHasForceRefresh } from '@kbn/presentation-publishing';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -117,7 +121,10 @@ export const useDashboardContainer = (): DashboardContainer => {
 
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
-  implements DashboardExternallyAccessibleApi
+  implements
+    DashboardExternallyAccessibleApi,
+    PresentationContainer<DefaultEmbeddableApi>,
+    PublishesLastSavedState
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
@@ -160,8 +167,9 @@ export class DashboardContainer
     | ((type: string, eventNames: string | string[], count?: number | undefined) => void)
     | undefined;
   // new embeddable framework
-  public reactEmbeddableChildren: BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }> =
-    new BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }>({});
+  public children$: BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }> = new BehaviorSubject<{
+    [key: string]: DefaultEmbeddableApi;
+  }>({});
   public savedObjectReferences: Reference[] = [];
 
   constructor(
@@ -502,7 +510,7 @@ export class DashboardContainer
   public getDashboardPanelFromId = async (panelId: string) => {
     const panel = this.getInput().panels[panelId];
     if (reactEmbeddableRegistryHasKey(panel.type)) {
-      const child = this.reactEmbeddableChildren.value[panelId];
+      const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
       const serialized = await child.serializeState();
       return {
@@ -535,7 +543,7 @@ export class DashboardContainer
        * This is because the react embeddable children subscribe to the localFilters subject which
        * already has the control group filters included.
        */
-      for (const reactEmbeddableChild of Object.values(this.reactEmbeddableChildren.value)) {
+      for (const reactEmbeddableChild of Object.values(this.children$.value)) {
         if (apiHasForceRefresh(reactEmbeddableChild)) reactEmbeddableChild.forceRefresh();
       }
     }
@@ -672,7 +680,7 @@ export class DashboardContainer
   public getChild<E extends IEmbeddable>(id: string): E {
     const type = this.getInput().panels[id]?.type;
     if (reactEmbeddableRegistryHasKey(type)) {
-      return this.reactEmbeddableChildren.value[id] as unknown as E;
+      return this.children$.value[id] as unknown as E;
     }
     return this.children[id] as E;
   }
@@ -682,7 +690,7 @@ export class DashboardContainer
     for (const [id, panel] of Object.entries(this.getInput().panels)) {
       const title = await (async () => {
         if (reactEmbeddableRegistryHasKey(panel.type)) {
-          return getPanelTitle(this.reactEmbeddableChildren.value[id]);
+          return getPanelTitle(this.children$.value[id]);
         }
         await this.untilEmbeddableLoaded(id);
         const child: IEmbeddable<EmbeddableInput, EmbeddableOutput> = this.getChild(id);
@@ -739,39 +747,18 @@ export class DashboardContainer
   // ------------------------------------------------------------------------------------------------------
   // React Embeddable system
   // ------------------------------------------------------------------------------------------------------
-  public registerPanelApi = <ApiType extends unknown = unknown>(id: string, api: ApiType) => {
-    this.reactEmbeddableChildren.next({
-      ...this.reactEmbeddableChildren.value,
-      [id]: api as DefaultEmbeddableApi,
+  public registerChildApi = (api: DefaultEmbeddableApi) => {
+    this.children$.next({
+      ...this.children$.value,
+      [api.uuid]: api as DefaultEmbeddableApi,
     });
   };
 
-  public untilAllChildApisAvailable() {
-    const expectedReactEmbeddableIds = Object.keys(this.getInput().panels).filter((id) =>
-      reactEmbeddableRegistryHasKey(this.getInput().panels[id].type)
-    );
-    const currentIds = Object.keys(this.reactEmbeddableChildren.value);
-    if (
-      expectedReactEmbeddableIds.length === 0 ||
-      expectedReactEmbeddableIds.every((id) => currentIds.includes(id))
-    ) {
-      return Promise.resolve();
-    }
-    return new Promise<void>((resolve) => {
-      const subscription = this.reactEmbeddableChildren
-        .pipe(
-          map((children) => Object.keys(children)),
-          distinctUntilChanged(deepEqual)
-        )
-        .subscribe((ids) => {
-          if (expectedReactEmbeddableIds.every((id) => ids.includes(id))) {
-            subscription.unsubscribe();
-            resolve();
-          }
-        });
-    });
-  }
+  public getChildApi = (id: string) => {
+    return this.children$.value[id];
+  };
 
+  public lastSavedState: Subject<void> = new Subject();
   public getLastSavedStateForChild = (childId: string) => {
     const {
       componentState: {
@@ -788,20 +775,14 @@ export class DashboardContainer
     const type = this.getInput().panels[id]?.type;
     this.removeEmbeddable(id);
     if (reactEmbeddableRegistryHasKey(type)) {
-      const { [id]: childToRemove, ...otherChildren } = this.reactEmbeddableChildren.value;
-      this.reactEmbeddableChildren.next(otherChildren);
+      const { [id]: childToRemove, ...otherChildren } = this.children$.value;
+      this.children$.next(otherChildren);
     }
   }
 
   public startAuditingReactEmbeddableChildren = () => {
-    this.publishingSubscription.add(
-      this.reactEmbeddableChildren
-        .pipe(map((children) => Object.keys(children)))
-        .subscribe((ids) => this.childIds.next(ids))
-    );
-
     const auditChildren = () => {
-      const currentChildren = this.reactEmbeddableChildren.value;
+      const currentChildren = this.children$.value;
       let panelsChanged = false;
       for (const panelId of Object.keys(currentChildren)) {
         if (!this.getInput().panels[panelId]) {
@@ -809,7 +790,7 @@ export class DashboardContainer
           panelsChanged = true;
         }
       }
-      if (panelsChanged) this.reactEmbeddableChildren.next(currentChildren);
+      if (panelsChanged) this.children$.next(currentChildren);
     };
 
     // audit children when panels change
@@ -826,7 +807,7 @@ export class DashboardContainer
 
   public resetAllReactEmbeddables = () => {
     let resetChangedPanelCount = false;
-    const currentChildren = this.reactEmbeddableChildren.value;
+    const currentChildren = this.children$.value;
     for (const panelId of Object.keys(currentChildren)) {
       if (this.getInput().panels[panelId]) {
         currentChildren[panelId].resetUnsavedChanges();
@@ -836,7 +817,7 @@ export class DashboardContainer
         resetChangedPanelCount = true;
       }
     }
-    if (resetChangedPanelCount) this.reactEmbeddableChildren.next(currentChildren);
+    if (resetChangedPanelCount) this.children$.next(currentChildren);
   };
 
   public getFilters() {

@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  apiIsPresentationContainer,
-  PresentationContainer,
-  SerializedPanelState,
-} from '@kbn/presentation-containers';
+import { PresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
 import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { v4 as generateId } from 'uuid';
@@ -41,7 +37,7 @@ export const ReactEmbeddableRenderer = <
   maybeId?: string;
   type: string;
   state: SerializedPanelState<StateType>;
-  parentApi?: PresentationContainer;
+  parentApi?: PresentationContainer<ApiType>;
   onApiAvailable?: (api: ApiType) => void;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
@@ -73,9 +69,6 @@ export const ReactEmbeddableRenderer = <
             resetUnsavedChanges,
             type: factory.type,
           } as unknown as ApiType;
-          if (parentApi && apiIsPresentationContainer(parentApi)) {
-            parentApi.registerPanelApi(uuid, fullApi);
-          }
           cleanupFunction.current = () => cleanup();
           onApiAvailable?.(fullApi);
           return fullApi;

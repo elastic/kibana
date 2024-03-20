@@ -8,7 +8,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEqual, xor } from 'lodash';
-import { BehaviorSubject, EMPTY, merge, Subject, Subscription } from 'rxjs';
+import { EMPTY, merge, Subscription } from 'rxjs';
 import {
   catchError,
   combineLatestWith,
@@ -20,15 +20,9 @@ import {
   take,
 } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
-
-import {
-  PresentationContainer,
-  PanelPackage,
-  SerializedPanelState,
-} from '@kbn/presentation-containers';
-
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 import { EmbeddableStart } from '../../plugin';
+import { reactEmbeddableRegistryHasKey } from '../../react_embeddable_system';
 import {
   Embeddable,
   EmbeddableFactory,
@@ -46,7 +40,6 @@ import {
   IContainer,
   PanelState,
 } from './i_container';
-import { reactEmbeddableRegistryHasKey } from '../../react_embeddable_system';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -56,7 +49,7 @@ export abstract class Container<
     TContainerOutput extends ContainerOutput = ContainerOutput
   >
   extends Embeddable<TContainerInput, TContainerOutput>
-  implements IContainer<TChildInput, TContainerInput, TContainerOutput>, PresentationContainer
+  implements IContainer<TChildInput, TContainerInput, TContainerOutput>
 {
   public readonly isContainer: boolean = true;
   public readonly children: {
@@ -65,14 +58,6 @@ export abstract class Container<
 
   private subscription: Subscription | undefined;
   private readonly anyChildOutputChange$;
-
-  public lastSavedState: Subject<void> = new Subject();
-  public getLastSavedStateForChild: (childId: string) => SerializedPanelState | undefined = () =>
-    undefined;
-
-  public registerPanelApi = <ApiType extends unknown = unknown>(id: string, api: ApiType) => {};
-
-  public childIds: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
 
   constructor(
     input: TContainerInput,
@@ -126,33 +111,6 @@ export abstract class Container<
           )
         )
       )
-    );
-  }
-
-  public removePanel(id: string) {
-    this.removeEmbeddable(id);
-  }
-
-  public untilAllChildApisAvailable() {
-    return Promise.resolve();
-  }
-
-  public async addNewPanel<ApiType extends unknown = unknown>(
-    panelPackage: PanelPackage
-  ): Promise<ApiType | undefined> {
-    const newEmbeddable = await this.addNewEmbeddable(
-      panelPackage.panelType,
-      panelPackage.initialState as Partial<EmbeddableInput>
-    );
-    return newEmbeddable as ApiType;
-  }
-
-  public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
-    return await this.replaceEmbeddable(
-      idToRemove,
-      initialState as Partial<EmbeddableInput>,
-      panelType,
-      true
     );
   }
 

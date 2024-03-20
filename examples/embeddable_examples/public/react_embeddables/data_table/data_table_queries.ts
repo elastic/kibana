@@ -6,100 +6,156 @@
  * Side Public License, v 1.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { Filter } from '@kbn/es-query';
-import { PublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
+import { i18n } from '@kbn/i18n';
+import { listenForCompatibleApi } from '@kbn/presentation-containers';
+import { apiPublishesDataViews, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, lastValueFrom, Subject, Subscription } from 'rxjs';
 import { auditTime, map, startWith, switchMap } from 'rxjs/operators';
 import { v4 } from 'uuid';
-import { DataTableQueryState } from './types';
+import { EmbeddableExamplesStartDependencies } from '../../plugin';
+import { apiPublishesSelectedFields } from '../field_list/publishes_selected_fields';
+import { DataTableApi, DataTableQueryState } from './types';
 
-export const initializeDataTableQueries = async (data: DataPublicPluginStart) => {
+export const initializeDataTableQueries = async (services: EmbeddableExamplesStartDependencies) => {
+  // initialize services
+  const defaultDataViewPromise = services.data.dataViews.getDefault();
+  const searchSourcePromise = services.data.search.searchSource.create();
+  const [defaultDataView, searchSource] = await Promise.all([
+    defaultDataViewPromise,
+    searchSourcePromise,
+  ]);
+  if (!defaultDataView) {
+    throw new Error(
+      i18n.translate('embeddableExamples.dataTable.noDataViewError', {
+        defaultMessage: 'The parent of this data table must provide unified search state.',
+      })
+    );
+  }
+
   // set up search source
   let abortController: AbortController | undefined;
-  const searchSource = await data.search.searchSource.create();
   const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };
   searchSource.setField('fields', [fields]);
   searchSource.setField('size', 50);
 
-  // initialize state subjects
-  const rows$ = new BehaviorSubject<DataTableRecord[] | undefined>([]);
+  // initialize state for API.
   const queryLoading$ = new BehaviorSubject<boolean | undefined>(true);
   const forceRefresh$ = new Subject<void>();
-  const dataSubscription = new Subscription();
+  const forceRefresh = () => forceRefresh$.next();
 
-  let serviceStarted = false;
-  const setProviders = (
-    dataViews$: BehaviorSubject<DataView[]>,
-    unifiedSearchProvider?: PublishesLocalUnifiedSearch
-  ) => {
-    if (!unifiedSearchProvider || serviceStarted) return;
+  // start query function
+  const startQueryService = (api: DataTableApi) => {
+    // initialize query state
+    const fields$ = new BehaviorSubject<string[]>([]);
+    const dataView$ = new BehaviorSubject<DataView>(defaultDataView);
+    const rows$ = new BehaviorSubject<DataTableRecord[] | undefined>([]);
+
+    const dataSubscription = new Subscription();
+    if (!apiPublishesUnifiedSearch(api.parentApi)) {
+      throw new Error(
+        i18n.translate('embeddableExamples.dataTable.noUnifiedSearchError', {
+          defaultMessage: 'The parent of this data table must provide unified search state.',
+        })
+      );
+    }
+
+    // set up listeners - these will listen for the closest compatible api (parent or sibling)
+    const stopListeningForDataViews = listenForCompatibleApi(
+      api,
+      apiPublishesDataViews,
+      (dataViewProvider) => {
+        if (!dataViewProvider) {
+          dataView$.next(defaultDataView);
+          return;
+        }
+        const dataViewSubscription = dataViewProvider.dataViews.subscribe((dataViews) => {
+          dataView$.next(dataViews?.[0] ?? defaultDataView);
+        });
+        return () => dataViewSubscription.unsubscribe();
+      }
+    );
+    const stopListeningForFields = listenForCompatibleApi(
+      api,
+      apiPublishesSelectedFields,
+      (fieldsProvider) => {
+        if (!fieldsProvider) {
+          fields$.next([]);
+          return;
+        }
+        const fieldsSubscription = fieldsProvider.selectedFields.subscribe((nextFields) => {
+          fields$.next(nextFields ?? []);
+        });
+        return () => fieldsSubscription.unsubscribe();
+      }
+    );
+
+    // run query whenever the unified search state changes
+    const runQuery = async (unifiedSearchState: DataTableQueryState) => {
+      const { filters, query, timeRange, dataView } = unifiedSearchState;
+      if (!dataView) return;
+      queryLoading$.next(true);
+      const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(
+        dataView,
+        timeRange
+      ) as Filter;
+      searchSource.setField('filter', [...(filters ?? []), timeRangeFilter]);
+      searchSource.setField('query', query);
+      searchSource.setField('index', dataView);
+
+      abortController?.abort();
+      abortController = new AbortController();
+      const { rawResponse: resp } = await lastValueFrom(
+        searchSource.fetch$({
+          abortSignal: abortController.signal,
+          sessionId: v4(), // todo, search sessions
+          disableWarningToasts: true,
+        })
+      );
+      queryLoading$.next(false);
+      return resp.hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord, dataView));
+    };
+
     dataSubscription.add(
       combineLatest([
-        unifiedSearchProvider.localFilters,
-        unifiedSearchProvider.localTimeRange,
-        unifiedSearchProvider.localQuery,
-        dataViews$,
+        api.parentApi.filters$,
+        api.parentApi.timeRange$,
+        api.parentApi.query$,
+        dataView$,
         forceRefresh$.pipe(startWith(undefined)),
       ])
         .pipe(
           auditTime(50),
-          map(([filters, timeRange, query, dataViews]) => ({
+          map(([filters, timeRange, query, dataView]) => ({
             filters,
             timeRange,
             query,
-            dataView: dataViews[0],
+            dataView,
           })),
           switchMap((unifiedSearchState) => runQuery(unifiedSearchState))
         )
         .subscribe((rows) => rows$.next(rows))
     );
-    serviceStarted = true;
-  };
 
-  // define force refresh function
-  const forceRefresh = () => forceRefresh$.next();
-
-  // define query function
-  const runQuery = async (unifiedSearchState: DataTableQueryState) => {
-    const { filters, query, timeRange, dataView } = unifiedSearchState;
-    if (!dataView) return;
-    queryLoading$.next(true);
-    const timeRangeFilter = data.query.timefilter.timefilter.createFilter(
-      dataView,
-      timeRange
-    ) as Filter;
-    searchSource.setField('filter', [...(filters ?? []), timeRangeFilter]);
-    searchSource.setField('query', query);
-    searchSource.setField('index', dataView);
-
-    abortController?.abort();
-    abortController = new AbortController();
-    const { rawResponse: resp } = await lastValueFrom(
-      searchSource.fetch$({
-        abortSignal: abortController.signal,
-        sessionId: v4(), // todo, search sessions
-        disableWarningToasts: true,
-      })
-    );
-    queryLoading$.next(false);
-    return resp.hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord, dataView));
-  };
-
-  // clean up function
-  const onDestroy = () => {
-    dataSubscription.unsubscribe();
-    forceRefresh$.complete();
+    return {
+      rows$,
+      fields$,
+      dataView$,
+      stopQueryService: () => {
+        stopListeningForDataViews();
+        stopListeningForFields();
+        dataSubscription.unsubscribe();
+        forceRefresh$.complete();
+      },
+    };
   };
 
   return {
     forceRefresh,
-    rows$,
+    startQueryService,
     queryLoading$,
-    onDestroy,
-    setProviders,
   };
 };

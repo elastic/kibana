@@ -18,13 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useClosestCompatibleApi } from '@kbn/presentation-containers';
-import {
-  apiPublishesDataViews,
-  apiPublishesLocalUnifiedSearch,
-  useBatchedPublishingSubjects,
-  useClosestDataViewsSubject,
-} from '@kbn/presentation-publishing';
+import { apiPublishesDataViews, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import React, { useEffect } from 'react';
@@ -52,23 +46,12 @@ export const registerDataTableFactory = (
       const { titlesApi, titleComparators, serializeTitles } =
         initializeReactEmbeddableTitles(initialState);
 
-      // initialize required async services
-      const promises = [
-        services.dataViews.getDefault(),
-        initializeDataTableQueries(services.data),
-      ] as const;
-      const [defaultDataView, dataTableQueryService] = await Promise.all(promises);
-      if (!defaultDataView) {
-        throw new Error(
-          i18n.translate('embeddableExamples.dataTable.noDataViewError', {
-            defaultMessage: 'No default data view available',
-          })
-        );
-      }
-
       // initialize services
       const storage = new Storage(localStorage);
-      const fullServices = {
+      const { forceRefresh, queryLoading$, startQueryService } = await initializeDataTableQueries(
+        services
+      );
+      const allServices = {
         ...services,
         storage,
         theme: core.theme,
@@ -79,8 +62,8 @@ export const registerDataTableFactory = (
       const api = buildApi(
         {
           ...titlesApi,
-          forceRefresh: dataTableQueryService.forceRefresh,
-          dataLoading: dataTableQueryService.queryLoading$,
+          forceRefresh,
+          dataLoading: queryLoading$,
           serializeState: () => {
             return {
               rawState: serializeTitles(),
@@ -90,33 +73,25 @@ export const registerDataTableFactory = (
         titleComparators
       );
 
+      // Start the data table query service
+      const { rows$, fields$, dataView$, stopQueryService } = startQueryService(api);
+
       // Create the React Embeddable component
       return {
         api,
         Component: () => {
-          // inherit state
-          const dataViews$ = useClosestDataViewsSubject(api, defaultDataView);
-          const unifiedSearchProvider = useClosestCompatibleApi(
-            api,
-            apiPublishesLocalUnifiedSearch
-          );
-          const fieldsProvider = useClosestCompatibleApi(api, apiPublishesSelectedFields);
-
-          // start the query service.
-          dataTableQueryService.setProviders(dataViews$, unifiedSearchProvider);
-
           // unwrap publishing subjects into reactive state
-          const [inheritedFields, rows, loading, dataViews] = useBatchedPublishingSubjects(
-            fieldsProvider?.selectedFields,
-            dataTableQueryService.rows$,
-            api.dataLoading,
-            dataViews$
+          const [fields, rows, loading, dataView] = useBatchedPublishingSubjects(
+            fields$,
+            rows$,
+            queryLoading$,
+            dataView$
           );
 
-          // run on destroy functions on unmount
+          // stop query service on unmount
           useEffect(() => {
             return () => {
-              dataTableQueryService.onDestroy();
+              stopQueryService();
             };
           }, []);
 
@@ -135,7 +110,7 @@ export const registerDataTableFactory = (
                 `}
               >
                 <KibanaRenderContextProvider theme={core.theme} i18n={core.i18n}>
-                  <KibanaContextProvider services={fullServices}>
+                  <KibanaContextProvider services={allServices}>
                     <CellActionsProvider
                       getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
                     >
@@ -144,14 +119,14 @@ export const registerDataTableFactory = (
                         rows={rows}
                         showTimeCol={true}
                         onFilter={() => {}}
+                        dataView={dataView}
                         sampleSizeState={100}
+                        columns={fields ?? []}
                         useNewFieldsApi={true}
+                        services={allServices}
                         onSetColumns={() => {}}
-                        dataView={dataViews[0]}
-                        columns={inheritedFields ?? []}
                         ariaLabelledBy="dataTableReactEmbeddableAria"
                         loadingState={loading ? DataLoadingState.loading : DataLoadingState.loaded}
-                        services={fullServices}
                       />
                     </CellActionsProvider>
                   </KibanaContextProvider>

@@ -133,7 +133,11 @@ export const PresentationPanelInternal = <
         </EuiFlexGroup>
       )}
       {!initialLoadComplete && <PanelLoader />}
-      <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
+      <div
+        className={
+          blockingError || !initialLoadComplete ? 'embPanel__content--hidden' : 'embPanel__content'
+        }
+      >
         <EuiErrorBoundary>
           <Component
             {...(componentProps as React.ComponentProps<typeof Component>)}

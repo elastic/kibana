@@ -14,7 +14,7 @@ import {
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { combineLatestWith, debounceTime, map } from 'rxjs/operators';
-import { EmbeddableStateComparators } from './types';
+import { DefaultEmbeddableApi, EmbeddableStateComparators } from './types';
 
 const defaultComparator = <T>(a: T, b: T) => a === b;
 
@@ -59,9 +59,12 @@ const runComparators = <StateType extends object = object>(
   return Object.keys(latestChanges).length > 0 ? latestChanges : undefined;
 };
 
-export const startTrackingEmbeddableUnsavedChanges = <StateType extends object = object>(
+export const startTrackingEmbeddableUnsavedChanges = <
+  StateType extends object = object,
+  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
+>(
   uuid: string,
-  parentApi: PresentationContainer | undefined,
+  parentApi: PresentationContainer<ApiType> | undefined,
   comparators: EmbeddableStateComparators<StateType>,
   deserializeState: (state: SerializedPanelState<object>) => StateType
 ) => {
