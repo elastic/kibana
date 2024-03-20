@@ -108,10 +108,17 @@ export interface FieldStatisticsTableProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   searchSessionId?: string;
+  /**
+   * If true, set to support ES|QL queries
+   * @param metricType
+   * @param eventName
+   */
+  isPlainRecord?: boolean;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
+    isPlainRecord,
     dataView,
     savedSearch,
     query,
@@ -169,6 +176,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
+        esql: isPlainRecord,
         dataView,
         savedSearch,
         query,
@@ -197,6 +205,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     searchSessionId,
     totalDocuments,
     stateContainer,
+    isPlainRecord,
   ]);
 
   useEffect(() => {
