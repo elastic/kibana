@@ -534,14 +534,16 @@ describe('Trusted apps form', () => {
   describe('and a wildcard value is used with the IS operator', () => {
     beforeEach(() => render());
     it.only('shows warning callout and help text warning if the field is PATH', async () => {
-      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        entries: [createEntry(ConditionEntryField.PATH, 'match', 'asdf*')],
-      };
-      formProps.item = { ...formProps.item, ...propsItem };
-      render();
+      const conditionFieldSelect = getConditionFieldSelect(getCondition());
+      userEvent.click(conditionFieldSelect, { button: 1 });
+      userEvent.click(
+        renderResult.getByTestId(
+          `${formPrefix}-conditionsBuilder-group1-entry0-field-type-Path`
+        ) as HTMLButtonElement
+      );
+      setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
+      rerenderWithLatestProps();
 
-      expect(renderResult.container.querySelectorAll('.euiCallOut--warning').length).toBe(1);
-      // expect(renderResult.container.getByTestId('wildcardWithWrongOperatorCallout'));
       expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout'));
       expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0))).toBeTruthy();
     });
