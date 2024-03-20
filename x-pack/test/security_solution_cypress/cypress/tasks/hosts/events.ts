@@ -12,6 +12,8 @@ import {
   HOST_GEO_COUNTRY_NAME_CHECKBOX,
   INSPECT_QUERY,
   SERVER_SIDE_EVENT_COUNT,
+  EVENTS_LOADING_TRUE,
+  EVENTS_LOADING_FALSE,
 } from '../../screens/hosts/events';
 
 export const addsHostGeoCityNameToHeader = () => {
@@ -38,6 +40,6 @@ export const waitsForEventsToBeLoaded = () => {
 };
 
 export const waitForEventsDataGridToBeLoaded = () => {
-  cy.get('[data-test-subj="events-container-loading-true"]').should('not.exist');
-  cy.get('[data-test-subj="events-container-loading-false"]').should('exist');
+  cy.get(EVENTS_LOADING_TRUE).should('not.exist');
+  cy.get(EVENTS_LOADING_FALSE).should('exist');
 };
