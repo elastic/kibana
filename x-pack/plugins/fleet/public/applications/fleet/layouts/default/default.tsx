@@ -103,8 +103,10 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       href: getHref('settings'),
       'data-test-subj': 'fleet-settings-tab',
     },
-    // the filtering below is needed only for agentTamperProtectionEnabled feature flag
-  ].filter(({ isHidden }) => !isHidden);
+  ]
+    // Removed hidden tabs
+    .filter(({ isHidden }) => !isHidden)
+    .map(({ isHidden, ...tab }) => tab);
 
   return (
     <WithHeaderLayout leftColumn={<DefaultPageTitle />} rightColumn={rightColumn} tabs={tabs}>
