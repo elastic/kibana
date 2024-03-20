@@ -184,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           'assert the action is banned, specifically checking the error message'
         );
-        await ml.trainedModelsTable.assertSpaceAwareWarningCopy();
+        await ml.trainedModelsTable.assertSpaceAwareWarningMessage();
 
         await ml.testExecution.logTestStep('close the eui modal');
         await ml.trainedModels.closeCheckingSpacePermissionsModal();

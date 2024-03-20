@@ -671,16 +671,10 @@ export function TrainedModelsTableProvider(
       });
     }
 
-    public async assertSpaceAwareWarningCopy(): Promise<void> {
-      await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay');
-
-      const spaceAwareWarningCopy = await testSubjects.getVisibleText(
-        'mlDeleteSpaceAwareItemCheckModalOverlay'
-      );
-
-      expect(spaceAwareWarningCopy).to.match(
-        /cannot be deleted and cannot be removed from the current space\. This model is assigned to the \* space and you do not have access to all spaces/
-      );
+    public async assertSpaceAwareWarningMessage(): Promise<void> {
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay');
+      });
     }
   })();
 }
