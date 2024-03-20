@@ -21,6 +21,7 @@ import {
   SearchHandlerTextBased,
   fetchAndCalculateFieldStats,
 } from './field_stats_utils_text_based';
+import { ESQL_SAFE_LIMIT } from '../../constants';
 
 interface FetchFieldStatsParamsTextBased {
   services: {
@@ -93,10 +94,14 @@ export const loadFieldStatsTextBased: LoadFieldStatsTextBasedHandler = async ({
     return await fetchAndCalculateFieldStats({
       searchHandler,
       field,
-      esqlBaseQuery: baseQuery.esql,
+      esqlBaseQuery: getESQLWithSafeLimit(baseQuery.esql),
     });
   } catch (error) {
     // console.error(error);
     throw new Error('Could not provide field stats', { cause: error });
   }
 };
+
+function getESQLWithSafeLimit(esql: string): string {
+  return `${esql} | LIMIT ${ESQL_SAFE_LIMIT}`;
+}
