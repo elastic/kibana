@@ -26,12 +26,7 @@ import { addNotesToTimeline, goToNotesTab } from '../../../tasks/timeline';
 
 import { deleteTimelines } from '../../../tasks/api_calls/common';
 
-const systemIndicesSuperUserName = 'system_indices_superuser';
-const serverlessCloudUserName = Cypress.env('ELASTICSEARCH_USERNAME');
-const isCloudServerless = Cypress.env('CLOUD_SERVERLESS');
-
-const author = isCloudServerless ? serverlessCloudUserName : systemIndicesSuperuserName;
-
+const author = Cypress.env('ELASTICSEARCH_USERNAME');
 const link = 'https://www.elastic.co/';
 
 describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
