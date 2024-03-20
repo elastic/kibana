@@ -251,6 +251,10 @@
       "error": false
     },
     {
+      "query": "from *a_i*dex*",
+      "error": false
+    },
+    {
       "query": "from in*ex*",
       "error": false
     },

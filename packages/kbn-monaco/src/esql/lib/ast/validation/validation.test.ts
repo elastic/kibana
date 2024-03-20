@@ -428,6 +428,7 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings(`from ind*, other*`, []);
     testErrorsAndWarnings(`from index*`, []);
+    testErrorsAndWarnings(`from *a_i*dex*`, []);
     testErrorsAndWarnings(`from in*ex*`, []);
     testErrorsAndWarnings(`from *n*ex`, []);
     testErrorsAndWarnings(`from *n*ex*`, []);
