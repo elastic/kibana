@@ -25,6 +25,9 @@ export async function getDataViewByTextBasedQueryLang(
   }
   if ('esql' in query) {
     indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
+    if (indexPatternFromQuery === '') {
+      return new DataView({ fieldFormats: services.fieldFormats });
+    }
   }
   // we should find a better way to work with ESQL queries which dont need a dataview
   if (!indexPatternFromQuery && currentDataView) return currentDataView;
