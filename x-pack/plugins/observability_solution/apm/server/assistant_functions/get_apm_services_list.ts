@@ -45,7 +45,6 @@ export function registerGetApmServicesListFunction({
       ),
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           'service.environment': {
             ...NON_EMPTY_STRING,
@@ -65,8 +64,6 @@ export function registerGetApmServicesListFunction({
           healthStatus: {
             type: 'array',
             description: 'Filter service list by health status',
-            additionalProperties: false,
-            additionalItems: false,
             items: {
               type: 'string',
               enum: [

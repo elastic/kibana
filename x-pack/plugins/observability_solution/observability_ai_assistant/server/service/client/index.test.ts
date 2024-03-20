@@ -707,7 +707,6 @@ describe('Observability AI Assistant client', () => {
             descriptionForUser: '',
             parameters: {
               type: 'object',
-              additionalProperties: false,
               properties: {
                 foo: {
                   type: 'string',

@@ -79,7 +79,6 @@ export function registerQueryFunction({
       description: 'Display the results of an ES|QL query',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           query: {
             type: 'string',
@@ -110,7 +109,6 @@ export function registerQueryFunction({
       visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           switch: {
             type: 'boolean',
