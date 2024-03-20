@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineResponse, AllTimelinesResponse } from '@kbn/security-solution-plugin/common/api/timeline';
+import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import { CompleteTimeline, getTimeline } from '../../objects/timeline';
 import { rootRequest } from './common';
 

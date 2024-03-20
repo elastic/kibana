@@ -194,7 +194,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'query_alert');
+      cy.task('esArchiverUnload', { archiveName: 'query_alert' });
     })
 
     beforeEach(() => {
