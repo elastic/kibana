@@ -61,6 +61,7 @@ export const getPolicySettingsFormTestSubjects = (
       rulesCallout: malwareTestSubj('rulesCallout'),
       blocklistContainer: malwareTestSubj('blocklist'),
       blocklistEnableDisableSwitch: malwareTestSubj('blocklist-enableDisableSwitch'),
+      onWriteScanEnableDisableSwitch: malwareTestSubj('onWriteScan-enableDisableSwitch'),
     },
     ransomware: {
       card: ransomwareTestSubj(),
@@ -198,7 +199,8 @@ export const setMalwareMode = (
   policy: PolicyConfig,
   turnOff: boolean = false,
   includePopup: boolean = true,
-  includeBlocklist: boolean = true
+  includeBlocklist: boolean = true,
+  includeOnWriteScan: boolean = true
 ) => {
   const mode = turnOff ? ProtectionModes.off : ProtectionModes.prevent;
   const enableValue = mode !== ProtectionModes.off;
@@ -207,15 +209,21 @@ export const setMalwareMode = (
   set(policy, 'mac.malware.mode', mode);
   set(policy, 'linux.malware.mode', mode);
 
+  if (includePopup) {
+    set(policy, 'windows.popup.malware.enabled', enableValue);
+    set(policy, 'mac.popup.malware.enabled', enableValue);
+    set(policy, 'linux.popup.malware.enabled', enableValue);
+  }
+
   if (includeBlocklist) {
     set(policy, 'windows.malware.blocklist', enableValue);
     set(policy, 'mac.malware.blocklist', enableValue);
     set(policy, 'linux.malware.blocklist', enableValue);
   }
 
-  if (includePopup) {
-    set(policy, 'windows.popup.malware.enabled', enableValue);
-    set(policy, 'mac.popup.malware.enabled', enableValue);
-    set(policy, 'linux.popup.malware.enabled', enableValue);
+  if (includeOnWriteScan) {
+    set(policy, 'windows.malware.on_write_scan', enableValue);
+    set(policy, 'mac.malware.on_write_scan', enableValue);
+    set(policy, 'linux.malware.on_write_scan', enableValue);
   }
 };
