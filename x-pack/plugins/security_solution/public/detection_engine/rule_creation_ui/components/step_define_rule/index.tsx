@@ -89,6 +89,7 @@ import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { AiAssistant } from '../ai_assistant';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -868,6 +869,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               )}
             </>
           </RuleTypeEuiFormRow>
+
+          {isEsqlRule(ruleType) && <AiAssistant form={form} />}
 
           {isQueryRule(ruleType) && (
             <>
