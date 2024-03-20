@@ -14,7 +14,7 @@ const mockTimeline = getTimeline();
 /**
  * Creates a timeline saved object
  * @param {CompleteTimeline} [timeline] - configuration needed for creating a timeline. Defaults to getTimeline in security_solution_cypress/cypress/objects/timeline.ts
- * @returns undefined 
+ * @returns undefined
  */
 export const createTimeline = (timeline: CompleteTimeline = mockTimeline) =>
   rootRequest<TimelineResponse>({
@@ -65,10 +65,10 @@ export const createTimeline = (timeline: CompleteTimeline = mockTimeline) =>
     },
   });
 
-  /**
+/**
  * Creates a timeline template saved object
  * @param {CompleteTimeline} [timeline] - configuration needed for creating a timeline template. Defaults to `getTimeline` in security_solution_cypress/cypress/objects/timeline.ts
- * @returns undefined 
+ * @returns undefined
  */
 export const createTimelineTemplate = (timeline: CompleteTimeline = mockTimeline) =>
   rootRequest<TimelineResponse>({

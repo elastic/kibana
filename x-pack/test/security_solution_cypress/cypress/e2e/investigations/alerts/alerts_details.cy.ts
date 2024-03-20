@@ -195,7 +195,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
 
     after(() => {
       cy.task('esArchiverUnload', { archiveName: 'query_alert' });
-    })
+    });
 
     beforeEach(() => {
       createRule(getNewRule());
