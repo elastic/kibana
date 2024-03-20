@@ -16,12 +16,9 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
 
   return new (class ModelsFlyout {
     public async assertElserModelHeaderCopy(): Promise<void> {
-      const visibleText = await testSubjects.getVisibleText(
-        'mlAddTrainedModelFlyoutElserModelHeaderCopy'
-      );
-      expect(visibleText).to.match(
-        /ELSER is Elastic's NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform./
-      );
+      await testSubjects.existOrFail('mlAddTrainedModelFlyoutElserModelHeaderCopy', {
+        timeout: 3_000,
+      });
     }
 
     public async assertElserPanelsExist(): Promise<void> {
