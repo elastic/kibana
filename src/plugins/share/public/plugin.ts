@@ -9,6 +9,7 @@
 import './index.scss';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
 import { UrlService } from '../common/url_service';
@@ -61,8 +62,9 @@ export type SharePublicStart = ShareMenuManagerStart & {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SharePublicSetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SharePublicStartDependencies {}
+export interface SharePublicStartDependencies {
+  reportingApiClient: ReportingAPIClient;
+}
 
 export class SharePlugin
   implements
@@ -79,9 +81,11 @@ export class SharePlugin
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+  private kibanaVersion?: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(core: CoreSetup): SharePublicSetup {
@@ -139,6 +143,12 @@ export class SharePlugin
   }
 
   public start(core: CoreStart): SharePublicStart {
+    const reportingApiClient = new ReportingAPIClient(
+      core.http,
+      core.uiSettings,
+      this.kibanaVersion!
+    );
+    console.log({ reportingApiClient });
     const disableEmbed = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,
@@ -146,6 +156,7 @@ export class SharePlugin
       this.shareMenuRegistry.start(),
       disableEmbed,
       this.config.new_version.enabled ?? false,
+      reportingApiClient,
       this.anonymousAccessServiceProvider
     );
 

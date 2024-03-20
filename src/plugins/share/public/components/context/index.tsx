@@ -13,6 +13,7 @@ import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import type { JobParamsProviderOptions } from '@kbn/reporting-public/share/share_context_menu';
 import { ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
+import { InjectedIntl } from '@kbn/i18n-react';
 import type {
   ShareMenuItem,
   UrlParamExtension,
@@ -37,6 +38,7 @@ export interface IShareContext extends ShareContext {
   jobProviderOptions?: JobParamsProviderOptions;
   toasts: ToastsSetup;
   theme: ThemeServiceSetup;
+  intl: InjectedIntl;
 }
 
 export const ShareTabsContext = createContext<IShareContext | null>(null);

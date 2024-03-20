@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { linkTab } from './link';
-export { embedTab } from './embed';
-export { exportTab, ExportContent } from './export';
+export { ExportContent } from './tabs';

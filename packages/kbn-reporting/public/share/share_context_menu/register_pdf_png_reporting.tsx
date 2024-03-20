@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { ExportContent } from '@kbn/share-plugin/public';
 import React from 'react';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { ReportingAPIClient, checkLicense } from '../..';
@@ -116,7 +117,7 @@ export const reportingScreenshotShareProvider = ({
     const shareActions = [];
 
     const pngPanelTitle = i18n.translate('reporting.share.contextMenu.pngReportsButtonLabel', {
-      defaultMessage: 'PNG Reports',
+      defaultMessage: 'Exports',
     });
 
     const jobProviderOptions: JobParamsProviderOptions = {
@@ -133,8 +134,6 @@ export const reportingScreenshotShareProvider = ({
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
 
-    const pngReportType = isV2Job ? 'pngV2' : 'png';
-
     const panelPng = {
       shareMenuItem: {
         name: pngPanelTitle,
@@ -148,17 +147,15 @@ export const reportingScreenshotShareProvider = ({
         id: 'reportingPngPanel',
         title: pngPanelTitle,
         content: (
-          <ScreenCapturePanelContent
-            apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
-            reportType={pngReportType}
-            objectId={objectId}
-            requiresSavedState={requiresSavedState}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
-            isDirty={isDirty}
-            onClose={onClose}
-            theme={theme}
+          <ExportContent
+            {...{
+              isDirty,
+              apiClient,
+              objectType,
+              onClose,
+              theme,
+              toasts,
+            }}
           />
         ),
       },

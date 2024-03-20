@@ -14,7 +14,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIcon,
-  EuiModalFooter,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
@@ -47,7 +46,6 @@ type ExportProps = Pick<
   | 'theme'
   | 'onClose'
 > & {
-  setExportType: (exportType: string) => void;
   intl: InjectedIntl;
 };
 
@@ -218,6 +216,7 @@ export const ExportContentUi = ({
         }
       });
   };
+
   const handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
     setPrintLayout(evt.target.checked);
   };
@@ -375,11 +374,11 @@ export const ExportContentUi = ({
         </EuiFlexGroup>
         <EuiSpacer size="m" />
       </EuiForm>
-      <EuiModalFooter>
+      {/* <EuiModalFooter>
         {renderOptions()}
         {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
         {saveWarningMessageWithButton}
-      </EuiModalFooter>
+      </EuiModalFooter> */}
     </>
   );
 };

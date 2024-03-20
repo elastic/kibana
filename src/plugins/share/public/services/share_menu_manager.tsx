@@ -9,11 +9,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { CoreStart, IToasts, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { EuiWrappingPopover } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
+import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
@@ -32,6 +33,7 @@ export class ShareMenuManager {
     shareRegistry: ShareMenuRegistryStart,
     disableEmbed: boolean,
     newVersionEnabled: boolean,
+    reportingApiClient: ReportingAPIClient,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
   ) {
     return {
@@ -58,6 +60,8 @@ export class ShareMenuManager {
           overlays: core.overlays,
           i18n: core.i18n,
           newVersionEnabled,
+          toasts: core.notifications.toasts,
+          reportingApiClient,
         });
       },
     };
@@ -92,6 +96,8 @@ export class ShareMenuManager {
     i18n,
     isDirty,
     newVersionEnabled,
+    reportingApiClient,
+    toasts,
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
     menuItems: ShareMenuItem[];
@@ -103,6 +109,8 @@ export class ShareMenuManager {
     i18n: CoreStart['i18n'];
     isDirty: boolean;
     newVersionEnabled: boolean;
+    reportingApiClient: ReportingAPIClient;
+    toasts: IToasts;
   }) {
     if (this.isOpen) {
       onClose();
@@ -149,11 +157,16 @@ export class ShareMenuManager {
       );
       ReactDOM.render(element, this.container);
     } else if (newVersionEnabled) {
+      console.log(reportingApiClient);
       const openModal = () => {
         const session = overlays.openModal(
           toMountPoint(
             <ShareMenuV2
               shareContext={{
+                apiClient: reportingApiClient,
+                toasts,
+                intl: i18n as unknown as InjectedIntl,
+                theme,
                 allowEmbed,
                 allowShortUrl,
                 objectId,

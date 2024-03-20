@@ -9,7 +9,8 @@
     "browser": true,
     "requiredBundles": [
       "kibanaUtils",
-      "kibanaReact"
+      "kibanaReact",
+      "esUiShared"
     ]
   }
 }
