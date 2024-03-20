@@ -68,7 +68,6 @@ export interface TaskInfo {
 export interface ExecuteOptions<Source = unknown> {
   actionExecutionId: string;
   actionId: string;
-  actionInfo?: ActionInfo;
   consumer?: string;
   executionId?: string;
   isEphemeral?: boolean;
@@ -120,7 +119,6 @@ export class ActionExecutor {
   public async execute({
     actionExecutionId,
     actionId,
-    actionInfo,
     consumer,
     executionId,
     isEphemeral,
@@ -147,7 +145,6 @@ export class ActionExecutor {
     return await this.executeHelper({
       actionExecutionId,
       actionId,
-      actionInfo,
       consumer,
       currentUser,
       ensureAuthorizedFn: async (connectorTypeId: string) => {
@@ -242,7 +239,7 @@ export class ActionExecutor {
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
-      this.actionInfo = await this.getActionInfo(actionId, namespace.namespace);
+      this.actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
     }
 
     const task = taskInfo
@@ -282,7 +279,10 @@ export class ActionExecutor {
     eventLogger.logEvent(event);
   }
 
-  public async getActionInfo(actionId: string, namespace: string | undefined): Promise<ActionInfo> {
+  private async getActionInfoInternal(
+    actionId: string,
+    namespace: string | undefined
+  ): Promise<ActionInfo> {
     const { encryptedSavedObjectsClient, inMemoryConnectors } = this.actionExecutorContext!;
 
     // check to see if it's in memory connector first
@@ -341,7 +341,6 @@ export class ActionExecutor {
   private async executeHelper({
     actionExecutionId,
     actionId,
-    actionInfo: actionInfoFromTaskRunner,
     consumer,
     currentUser,
     ensureAuthorizedFn,
@@ -372,8 +371,7 @@ export class ActionExecutor {
       async (span) => {
         const { actionTypeRegistry, eventLogger } = this.actionExecutorContext!;
 
-        const actionInfo =
-          actionInfoFromTaskRunner || (await this.getActionInfo(actionId, namespace.namespace));
+        const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
         const { actionTypeId, name, config, secrets } = actionInfo;
 

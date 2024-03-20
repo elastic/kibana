@@ -1580,54 +1580,6 @@ test('writes usage data to event log for streaming OpenAI events', async () => {
   });
 });
 
-test('does not fetches actionInfo if passed as param', async () => {
-  const mockAction = {
-    id: '1',
-    type: 'action',
-    attributes: {
-      name: '1',
-      actionTypeId: 'test',
-      config: {
-        bar: true,
-      },
-      secrets: {
-        baz: true,
-      },
-      isMissingSecrets: false,
-    },
-    references: [],
-  };
-
-  const mockActionInfo = {
-    actionTypeId: mockAction.attributes.actionTypeId,
-    name: mockAction.attributes.name,
-    config: mockAction.attributes.config,
-    secrets: mockAction.attributes.secrets,
-    actionId: mockAction.id,
-    rawAction: mockAction.attributes,
-  };
-
-  connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
-  await actionExecutor.execute({
-    ...executeParams,
-    actionInfo: mockActionInfo,
-  });
-
-  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
-  expect(connectorType.executor).toHaveBeenCalledWith(
-    expect.objectContaining({
-      actionId: '1',
-      config: {
-        bar: true,
-      },
-      secrets: {
-        baz: true,
-      },
-      params: { foo: true },
-    })
-  );
-});
-
 function setupActionExecutorMock(
   actionTypeId = 'test',
   validationOverride?: ConnectorType['validate']
