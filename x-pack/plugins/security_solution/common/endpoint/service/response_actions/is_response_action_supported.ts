@@ -84,80 +84,96 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
     automated: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: true,
+      crowdstrike: true,
     },
   },
   unisolate: {
     automated: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: true,
+      crowdstrike: true,
     },
   },
   upload: {
     automated: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
   },
   'get-file': {
     automated: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
   },
   'kill-process': {
     automated: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
   },
   execute: {
     automated: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
   },
   'suspend-process': {
     automated: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
   },
   'running-processes': {
     automated: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: false,
+      crowdstrike: false,
     },
   },
 };

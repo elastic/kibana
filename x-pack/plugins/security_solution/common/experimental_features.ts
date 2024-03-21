@@ -185,9 +185,14 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneManualHostActionsEnabled: true,
 
   /**
+   * Enables Crowdstrike manual host manipulation actions
+   */
+  crowdstrikeManualHostActionsEnabled: true,
+
+  /**
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
-  crowdstrikeDataInAnalyzerEnabled: false,
+  crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.

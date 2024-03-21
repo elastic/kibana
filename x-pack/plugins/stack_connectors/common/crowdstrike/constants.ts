@@ -10,7 +10,7 @@ export const CROWDSTRIKE_CONNECTOR_ID = '.crowdstrike';
 export const API_MAX_RESULTS = 1000;
 
 export enum SUB_ACTION {
-  GET_AGENTS = 'getAgents',
+  GET_TOKEN = 'getToken',
   GET_AGENT_DETAILS = 'getAgentDetails',
   HOST_ACTIONS = 'hostActions',
 }

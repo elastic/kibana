@@ -11,6 +11,10 @@ import {
   getSentinelOneAgentId,
   isAlertFromSentinelOneEvent,
 } from '../../../common/utils/sentinelone_alert_check';
+import {
+  getCrowdstrikeAgentId,
+  isAlertFromCrowdstrikeEvent,
+} from '../../../common/utils/crowdstrike_alert_check';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
@@ -40,6 +44,10 @@ export const useHostIsolationAction = ({
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'
   );
+
+  const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'crowdstrikeManualHostActionsEnabled'
+  );
   const { canIsolateHost, canUnIsolateHost } = useUserPrivileges().endpointPrivileges;
 
   const isEndpointAlert = useMemo(
@@ -52,13 +60,20 @@ export const useHostIsolationAction = ({
     [detailsData]
   );
 
+  const isCrowdstrikeAlert = useMemo(
+    () => isAlertFromCrowdstrikeEvent({ data: detailsData || [] }),
+    [detailsData]
+  );
+
   const agentId = useMemo(
     () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
     [detailsData]
   );
 
   const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(detailsData), [detailsData]);
+  const crowdstrikeAgentId = useMemo(() => getCrowdstrikeAgentId(detailsData), [detailsData]);
 
+  console.log({ isCrowdstrikeAlert, crowdstrikeAgentId });
   const hostOsFamily = useMemo(
     () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),
     [detailsData]
@@ -172,6 +187,16 @@ export const useHostIsolationAction = ({
     }
 
     if (
+      crowdstrikeAgentId &&
+      isCrowdstrikeAlert &&
+      crowdstrikeManualHostActionsEnabled &&
+      hasActionsAllPrivileges &&
+      (canIsolateHost || (isHostIsolated && !canUnIsolateHost))
+    ) {
+      return menuItems;
+    }
+
+    if (
       isEndpointAlert &&
       doesHostSupportIsolation &&
       !loadingHostIsolationStatus &&
@@ -195,5 +220,8 @@ export const useHostIsolationAction = ({
     sentinelOneAgentStatus,
     sentinelOneAgentId,
     sentinelOneManualHostActionsEnabled,
+    crowdstrikeAgentId,
+    isCrowdstrikeAlert,
+    crowdstrikeManualHostActionsEnabled,
   ]);
 };

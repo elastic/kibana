@@ -12,6 +12,7 @@ import { EndpointActionsClient } from './endpoint/endpoint_actions_client';
 import { SentinelOneActionsClient } from './sentinelone/sentinel_one_actions_client';
 import { UnsupportedResponseActionsAgentTypeError } from './errors';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { CrowdstrikeActionsClient } from './crowdstrike/crowdstrike_actions_client';
 
 export type GetResponseActionsClientConstructorOptions = ResponseActionsClientOptions &
   SentinelOneActionsClientOptions;
@@ -32,6 +33,8 @@ export const getResponseActionsClient = (
       return new EndpointActionsClient(constructorOptions);
     case 'sentinel_one':
       return new SentinelOneActionsClient(constructorOptions);
+    case 'crowdstrike':
+      return new CrowdstrikeActionsClient(constructorOptions);
   }
 
   throw new UnsupportedResponseActionsAgentTypeError(

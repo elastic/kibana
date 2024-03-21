@@ -24,11 +24,14 @@ export const renderParameterTemplates = (
   const context = variables?.context as Context;
   const alertIds = map(context.alerts, '_id');
 
-  if (params?.subAction === SUB_ACTION.HOST_ACTIONS) {
+  console.log({ alert0: context.alets[0] });
+  // if (params?.subAction === SUB_ACTION.HOST_ACTIONS) {
+  if (params?.subAction === SUB_ACTION.GET_AGENTS) {
     return {
-      subAction: SUB_ACTION.HOST_ACTIONS,
+      // subAction: SUB_ACTION.HOST_ACTIONS,
+      subAction: SUB_ACTION.AGENTS,
       subActionParams: {
-        computerName: context.alerts[0].host?.name,
+        host: context.alerts[0].hostname,
         alertIds,
       },
     };

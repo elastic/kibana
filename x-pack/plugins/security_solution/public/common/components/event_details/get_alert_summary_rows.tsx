@@ -38,6 +38,10 @@ import {
   SENTINEL_ONE_AGENT_ID_FIELD,
   isAlertFromSentinelOneEvent,
 } from '../../utils/sentinelone_alert_check';
+import {
+  CROWDSTRIKE_AGENT_ID_FIELD,
+  isAlertFromCrowdstrikeEvent,
+} from '../../utils/crowdstrike_alert_check';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
@@ -306,6 +310,7 @@ export const getSummaryRows = ({
   isReadOnly = false,
   investigationFields,
   sentinelOneManualHostActionsEnabled,
+  crowdstrikeeManualHostActionsEnabled,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
@@ -315,6 +320,7 @@ export const getSummaryRows = ({
   isDraggable?: boolean;
   isReadOnly?: boolean;
   sentinelOneManualHostActionsEnabled?: boolean;
+  crowdstrikeeManualHostActionsEnabled?: boolean;
 }) => {
   const eventCategories = getEventCategoriesFromData(data);
 
@@ -374,6 +380,13 @@ export const getSummaryRows = ({
           field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
           sentinelOneManualHostActionsEnabled &&
           !isAlertFromSentinelOneEvent({ data })
+        ) {
+          return acc;
+        }
+        if (
+          field.id === CROWDSTRIKE_AGENT_ID_FIELD &&
+          crowdstrikeeManualHostActionsEnabled &&
+          !isAlertFromCrowdstrikeEvent({ data })
         ) {
           return acc;
         }

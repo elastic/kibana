@@ -8,17 +8,17 @@
 import { i18n } from '@kbn/i18n';
 
 // config form
-export const URL_LABEL = i18n.translate(
-  'xpack.stackConnectors.security.crowdstrike.config.urlTextFieldLabel',
+export const CLIENT_ID_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.crowdstrike.config.clientIdTextFieldLabel',
   {
-    defaultMessage: 'Crowdstrike instance URL',
+    defaultMessage: 'Crowdstrike Client ID',
   }
 );
 
-export const TOKEN_LABEL = i18n.translate(
-  'xpack.stackConnectors.security.crowdstrike.config.tokenTextFieldLabel',
+export const CLIENT_SECRET_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.crowdstrike.config.clientSecretTextFieldLabel',
   {
-    defaultMessage: 'API token',
+    defaultMessage: 'Client Secret',
   }
 );
 

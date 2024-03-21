@@ -15,44 +15,48 @@ import type {
   CrowdstrikeGetAgentsParams,
   CrowdstrikeBaseApiResponse,
   CrowdstrikeIsolateHostParams,
+  CrowdstrikeGetTokenResponse,
 } from '../../../common/crowdstrike/types';
 import {
   CrowdstrikeGetAgentsResponseSchema,
-  CrowdstrikeIsolateHostResponseSchema,
   CrowdstrikeIsolateHostParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 
-export const API_MAX_RESULTS = 1000;
-export const API_PATH = '/api.crowdstrike.com/';
+export const API_PATH = 'https://api.crowdstrike.com';
+
+const paramsSerializer = (params: Record<string, string>) => {
+  return Object.entries(params)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join('&');
+};
 
 export class CrowdstrikeConnector extends SubActionConnector<
   CrowdstrikeConfig,
   CrowdstrikeSecrets
 > {
+  private static token: string | null;
+  private static tokenExpiryTimeout: NodeJS.Timeout;
+
   private urls: {
+    getToken: string;
     agents: string;
     hostAction: string;
   };
 
   constructor(params: ServiceParams<CrowdstrikeConfig, CrowdstrikeSecrets>) {
     super(params);
-
     this.urls = {
-      hostAction: `${this.config.url}${API_PATH}/devices/entities/devices-actions/v2`,
-      agents: `${this.config.url}${API_PATH}/devices/entities/devices/v1 `,
+      getToken: `${API_PATH}/oauth2/token`,
+      hostAction: `${API_PATH}/devices/entities/devices-actions/v2`,
+      agents: `${API_PATH}/devices/entities/devices/v2 `,
     };
 
     this.registerSubActions();
   }
 
   private registerSubActions() {
-    this.registerSubAction({
-      name: SUB_ACTION.GET_AGENTS,
-      method: 'getAgents',
-      schema: CrowdstrikeGetAgentsParamsSchema,
-    });
     this.registerSubAction({
       name: SUB_ACTION.GET_AGENT_DETAILS,
       method: 'getAgentDetails',
@@ -61,62 +65,86 @@ export class CrowdstrikeConnector extends SubActionConnector<
 
     this.registerSubAction({
       name: SUB_ACTION.HOST_ACTIONS,
-      method: 'hostActions',
+      method: 'executeHostActions',
       schema: CrowdstrikeIsolateHostParamsSchema,
     });
   }
 
   public async executeHostActions({ alertIds, ...payload }: CrowdstrikeIsolateHostParams) {
-    const response = await this.getAgents(payload);
-
-    if (response.data.length === 0) {
-      const errorMessage = 'No agents found';
-
-      throw new Error(errorMessage);
-    }
-
-    if (response.data[0].networkStatus === 'disconnected') {
-      const errorMessage = 'Agent already isolated';
-
-      throw new Error(errorMessage);
-    }
-
-    const agentId = response.data[0].id;
-
     return this.crowdstrikeApiRequest({
       url: this.urls.hostAction,
       method: 'post',
-      data: {
-        filter: {
-          ids: agentId,
-        },
+      params: {
+        action_name: payload.command,
       },
-      responseSchema: CrowdstrikeIsolateHostResponseSchema,
+      data: {
+        ids: payload.ids,
+      },
+      paramsSerializer,
+      // check
+      responseSchema: CrowdstrikeGetAgentsResponseSchema,
     });
+    // TODO TC: check if we need to handle errors here
   }
 
-  public async getAgents(
+  public async getAgentDetails(
     payload: CrowdstrikeGetAgentsParams
   ): Promise<CrowdstrikeGetAgentsResponse> {
     return this.crowdstrikeApiRequest({
       url: this.urls.agents,
+      method: 'GET',
       params: {
-        ...payload,
+        ids: payload.ids,
       },
+      paramsSerializer,
       responseSchema: CrowdstrikeGetAgentsResponseSchema,
     });
   }
 
+  private async getTokenRequest() {
+    const base64encodedData = Buffer.from(
+      this.secrets.clientId + ':' + this.secrets.clientSecret
+    ).toString('base64');
+
+    // TODO TC: fix types
+    const response: CrowdstrikeGetTokenResponse = await this.request<CrowdstrikeBaseApiResponse>({
+      url: this.urls.getToken,
+      method: 'post',
+      headers: {
+        accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        authorization: 'Basic ' + base64encodedData,
+      },
+      responseSchema: CrowdstrikeGetAgentsResponseSchema,
+      // responseSchema: CrowdsrtikeGetTokenResponseSchema,
+    });
+    const token = response.data.access_token;
+    if (token) {
+      // Clear any existing timeout
+      clearTimeout(CrowdstrikeConnector.tokenExpiryTimeout);
+
+      // Set a timeout to reset the token after 29 minutes (it expires after 30 minutes)
+      CrowdstrikeConnector.tokenExpiryTimeout = setTimeout(() => {
+        CrowdstrikeConnector.token = null;
+      }, 29 * 60 * 1000);
+    }
+    return token;
+  }
   private async crowdstrikeApiRequest<R extends CrowdstrikeBaseApiResponse>(
     req: SubActionRequestParams<R>
   ): Promise<R> {
+    if (!CrowdstrikeConnector.token) {
+      CrowdstrikeConnector.token = (await this.getTokenRequest()) as string;
+    }
+
     const response = await this.request<R>({
       ...req,
-      params: {
-        ...req.params,
-        APIToken: this.secrets.token,
+      headers: {
+        ...req.headers,
+        Authorization: `Bearer ${CrowdstrikeConnector.token}`,
       },
     });
+    // TODO TC: in case of 401 error, we should retry the request with a new token
 
     return response.data;
   }

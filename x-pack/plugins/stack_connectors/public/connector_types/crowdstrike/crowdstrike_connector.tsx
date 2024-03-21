@@ -9,25 +9,23 @@ import React from 'react';
 
 import {
   ActionConnectorFieldsProps,
-  ConfigFieldSchema,
   SecretsFieldSchema,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
 
-const configFormSchema: ConfigFieldSchema[] = [
-  {
-    id: 'url',
-    label: i18n.URL_LABEL,
-    isUrlField: true,
-  },
-];
-
 const secretsFormSchema: SecretsFieldSchema[] = [
   {
-    id: 'token',
-    label: i18n.TOKEN_LABEL,
+    id: 'clientId',
+    label: i18n.CLIENT_ID_LABEL,
+    isPasswordField: false,
+    isRequired: true,
+  },
+  {
+    id: 'clientSecret',
+    label: i18n.CLIENT_SECRET_LABEL,
     isPasswordField: true,
+    isRequired: true,
   },
 ];
 
@@ -38,7 +36,7 @@ const CrowdstrikeActionConnectorFields: React.FunctionComponent<ActionConnectorF
   <SimpleConnectorForm
     isEdit={isEdit}
     readOnly={readOnly}
-    configFormSchema={configFormSchema}
+    configFormSchema={[]}
     secretsFormSchema={secretsFormSchema}
   />
 );
