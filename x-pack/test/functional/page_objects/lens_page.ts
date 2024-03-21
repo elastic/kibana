@@ -370,7 +370,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await browser.pressKeys(browserKey);
         await find.existsByCssSelector(
-          `.domDragDrop__extraDrop > [data-test-subj="domDragDrop-dropTarget-${metaToAction[metaKey]}"].domDragDrop-isActiveDropTarget`
+          `.domDroppable__extraTarget > [data-test-subj="domDragDrop-dropTarget-${metaToAction[metaKey]}"].domDroppable--hover`
         );
       });
     },
@@ -390,12 +390,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       metaKey?: 'shift' | 'alt' | 'ctrl'
     ) {
       const field = await find.byCssSelector(
-        `[data-test-subj="lnsDragDrop_draggable-${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+        `[data-test-subj="lnsFieldListPanelField-${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
       await field.focus();
       await retry.try(async () => {
         await browser.pressKeys(browser.keys.ENTER);
-        await testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+        await testSubjects.exists('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
       });
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
@@ -515,7 +515,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param endIndex - the index of drop starting from 1
      * */
     async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
-      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .domDragDrop`;
+      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .domDraggable`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await find.existsByCssSelector(dragging);
       await browser.html5DragAndDrop(dragging, dropping);
@@ -1611,7 +1611,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const from = `lnsFieldListPanelField-${field}`;
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop`),
+        testSubjects.getCssSelector(`${to} > lnsDragDrop-domDroppable`),
         testSubjects.getCssSelector(`${to} > domDragDrop-dropTarget-${type}`)
       );
       await this.waitForVisualization(visDataTestSubj);
@@ -1632,7 +1632,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     ) {
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop`),
+        testSubjects.getCssSelector(`${to} > lnsDragDrop-domDroppable`),
         testSubjects.getCssSelector(`${to} > domDragDrop-dropTarget-${type}`)
       );
       await this.waitForVisualization(visDataTestSubj);
@@ -1808,7 +1808,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .unifiedFieldListItemButton--${type}`
       );
       // map to testSubjId
-      return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));
+      return Promise.all(
+        allFieldsForType.map(async (el) => {
+          const parent = await el.findByXpath('./..');
+          return parent.getAttribute('data-test-subj');
+        })
+      );
     },
 
     async clickShareMenu() {
