@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiTextArea, useEuiTheme } from '@elastic/eui';
+import { EuiTextArea, keys, useEuiTheme } from '@elastic/eui';
 
 const MAX_HEIGHT = 200;
 
@@ -26,12 +26,22 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
   isDisabled,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      onChange(e.target.value);
 
-    e.target.style.height = 'auto';
-    e.target.style.height = `${e.target.scrollHeight}px`;
-  };
+      e.target.style.height = 'auto';
+      e.target.style.height = `${e.target.scrollHeight}px`;
+    },
+    [onChange]
+  );
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === keys.ENTER && !event.shiftKey) {
+      event.preventDefault();
+
+      event.currentTarget.form?.requestSubmit();
+    }
+  }, []);
 
   return (
     <div css={{ position: 'relative' }}>
@@ -52,6 +62,7 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
           }
         )}
         value={value}
+        onKeyDown={handleKeyDown}
         onChange={handleChange}
         disabled={isDisabled}
         resize="none"
