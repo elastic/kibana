@@ -90,7 +90,10 @@
       "packages/kbn-management"
     ],
     "monaco": "packages/kbn-monaco/src",
-    "navigation": "src/plugins/navigation",
+    "navigation": [
+      "src/plugins/navigation",
+      "packages/solution-nav"
+    ],
     "links": "src/plugins/links",
     "newsfeed": "src/plugins/newsfeed",
     "presentationUtil": "src/plugins/presentation_util",
