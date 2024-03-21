@@ -48,6 +48,7 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteCases();
+    deleteConnectors();
 
     cy.intercept('POST', '/api/actions/connector').as('createConnector');
     cy.intercept({ method: '+(POST|PATCH)', url: '/api/cases/configure' }, (req) => {
@@ -76,10 +77,6 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
         res.send(200, resBody);
       });
     });
-  });
-
-  after(() => {
-    deleteConnectors();
   });
 
   it('Configures a new connector', () => {

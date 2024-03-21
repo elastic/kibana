@@ -7,6 +7,7 @@
 
 import { DATA_VIEW_PATH, INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../../env_var_names_constants';
 import { deleteAllDocuments } from './elasticsearch';
 import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
@@ -115,24 +116,25 @@ export const deleteTimelines = () => {
   });
 };
 
-export const deleteConnectors = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'action',
-              },
-            },
-          ],
-        },
-      },
-    },
+export const getConnectors = () =>
+  rootRequest<AllConnectorsResponse[]>({
+    method: 'GET',
+    url: 'api/actions/connectors',
+  });
+
+export const deleteConnectors = async () => {
+  getConnectors().then(($response) => {
+    if ($response.body.length > 0) {
+      const ids = $response.body.map((connector) => {
+        return connector.id;
+      });
+      ids.forEach((id) => {
+        rootRequest({
+          method: 'DELETE',
+          url: `api/actions/connector/${id}`,
+        });
+      });
+    }
   });
 };
 
