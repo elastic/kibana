@@ -14,10 +14,10 @@ import type {
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
 import { wrapError } from '../error_wrapper';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
-import { AIOPS_API_ENDPOINT } from '../../../common/api';
 import type { AiopsLicense } from '../../types';
 import type { CategorizationFieldValidationSchema } from '../../../common/api/log_categorization/schema';
 
