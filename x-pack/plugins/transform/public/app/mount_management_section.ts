@@ -100,9 +100,13 @@ export async function mountManagementSection(
 
   const enabledFeatures: TransformEnabledFeatures = {
     showNodeInfo: !isServerless,
-    ruleFormV2Enabled: experimentalFeatures?.ruleFormV2Enabled ?? false,
   };
-  const unmountAppCallback = renderApp(element, appDependencies, enabledFeatures);
+  const unmountAppCallback = renderApp(
+    element,
+    appDependencies,
+    enabledFeatures,
+    experimentalFeatures
+  );
 
   return () => {
     docTitle.reset();
