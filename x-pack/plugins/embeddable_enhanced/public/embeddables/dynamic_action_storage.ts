@@ -31,7 +31,7 @@ export class DynamicActionStorage extends AbstractActionStorage {
   }
 
   public async create(event: SerializedEvent) {
-    const events = this.getEventsFromEmbeddable();
+    const events = this.getEvents();
     const exists = !!events.find(({ eventId }) => eventId === event.eventId);
 
     if (exists) {
@@ -48,7 +48,7 @@ export class DynamicActionStorage extends AbstractActionStorage {
 
   public async update(event: SerializedEvent) {
     const dynamicActionsState = this.api.dynamicActionsState$.getValue();
-    const events = this.getEventsFromEmbeddable();
+    const events = this.getEvents();
     const index = events.findIndex(({ eventId }) => eventId === event.eventId);
 
     if (index === -1) {
@@ -68,7 +68,7 @@ export class DynamicActionStorage extends AbstractActionStorage {
   public async remove(eventId: string) {
     const dynamicActionsState = this.api.dynamicActionsState$.getValue();
 
-    const events = this.getEventsFromEmbeddable();
+    const events = this.getEvents();
     const index = events.findIndex((event) => eventId === event.eventId);
 
     if (index === -1) {
@@ -86,7 +86,7 @@ export class DynamicActionStorage extends AbstractActionStorage {
   }
 
   public async read(eventId: string): Promise<SerializedEvent> {
-    const events = this.getEventsFromEmbeddable();
+    const events = this.getEvents();
     const event = events.find((ev) => eventId === ev.eventId);
 
     if (!event) {
@@ -100,10 +100,10 @@ export class DynamicActionStorage extends AbstractActionStorage {
   }
 
   public async list(): Promise<SerializedEvent[]> {
-    return this.getEventsFromEmbeddable();
+    return this.getEvents();
   }
 
-  private getEventsFromEmbeddable() {
+  private getEvents() {
     const dynamicActionsState = this.api.dynamicActionsState$.getValue();
     const events = dynamicActionsState?.dynamicActions?.events ?? [];
     return this.migrate(events);
