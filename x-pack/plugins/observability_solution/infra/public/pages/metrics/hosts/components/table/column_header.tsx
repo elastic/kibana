@@ -14,28 +14,35 @@ interface Props {
   label: string;
   toolTip?: string;
   formula?: string;
+  showDocumentationLink?: boolean;
 }
 
-export const ColumnHeader = React.memo(({ label, toolTip, formula }: Props) => {
-  return (
-    <EuiFlexGroup gutterSize="xs">
-      <div
-        css={css`
-          overflow-wrap: break-word !important;
-          word-break: break-word;
-          min-width: 0;
-          text-overflow: ellipsis;
-          overflow: hidden;
-        `}
-      >
-        {label}
-      </div>
+export const ColumnHeader = React.memo(
+  ({ label, toolTip, formula, showDocumentationLink = true }: Props) => {
+    return (
+      <EuiFlexGroup gutterSize="xs">
+        <div
+          css={css`
+            overflow-wrap: break-word !important;
+            word-break: break-word;
+            min-width: 0;
+            text-overflow: ellipsis;
+            overflow: hidden;
+          `}
+        >
+          {label}
+        </div>
 
-      {toolTip && (
-        <Popover>
-          <TooltipContent formula={formula} description={toolTip} showDocumentationLink />
-        </Popover>
-      )}
-    </EuiFlexGroup>
-  );
-});
+        {toolTip && (
+          <Popover>
+            <TooltipContent
+              formula={formula}
+              description={toolTip}
+              showDocumentationLink={showDocumentationLink}
+            />
+          </Popover>
+        )}
+      </EuiFlexGroup>
+    );
+  }
+);
