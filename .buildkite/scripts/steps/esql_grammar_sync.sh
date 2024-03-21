@@ -75,15 +75,13 @@ main () {
   synchronize_parser_grammar "$license_header"
 
   # Check for differences
-  git -P diff
   set +e
   git diff --exit-code --quiet "$destination_file"
-  set -e
-
   if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
     exit
   fi
+  set -e
 
   report_main_step "Differences found. Checking for an existing pull request."
 
