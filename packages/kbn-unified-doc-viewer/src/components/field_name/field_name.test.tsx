@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { render } from 'enzyme';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-plugin/common/stubs';
 import { FieldName } from './field_name';
 
@@ -45,6 +46,22 @@ describe('FieldName', function () {
         fieldName="test"
         fieldType="number"
         fieldMapping={dataView.getFieldByName('bytes')}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('renders a custom description icon', () => {
+    const component = render(
+      <FieldName
+        fieldType="string"
+        fieldName="test"
+        fieldMapping={
+          {
+            ...dataView.getFieldByName('bytes')!.spec,
+            customDescription: 'test description',
+          } as DataViewField
+        }
       />
     );
     expect(component).toMatchSnapshot();
