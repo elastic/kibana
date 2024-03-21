@@ -90,8 +90,7 @@ export const useSecuritySolutionUserSettings = <T>(
 
   const update = useCallback(
     async (value: T) => {
-      debugger;
-      console.log(`updating UserSettingsSecuritySolution`, { module, key, value });
+      // console.log(`updating UserSettingsSecuritySolution`, { module, key, value });
       await security.userProfiles.update({
         userSettings: {
           [APP_ID]: {
