@@ -10,6 +10,7 @@ import {
   EuiDataGrid,
   EuiDataGridColumnVisibility,
   EuiDataGridInMemory,
+  EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSchemaDetector,
   EuiDataGridStyle,
@@ -22,6 +23,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React, { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { GRID_STYLE } from '../../constants';
+import type { UnifiedDataTableRenderCustomToolbar } from '../data_table';
 import { ComparisonControls } from './comparison_controls';
 import { useComparisonCellValue } from './hooks/use_comparison_cell_value';
 import { useComparisonColumns } from './hooks/use_comparison_columns';
@@ -44,6 +46,7 @@ export interface CompareDocumentsProps {
   getDocById: (id: string) => DataTableRecord | undefined;
   setSelectedDocs: (selectedDocs: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
+  renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
 }
 
 const getStorageKey = (consumer: string, key: string) => `${consumer}:dataGrid${key}`;
@@ -64,6 +67,7 @@ const CompareDocuments = ({
   getDocById,
   setSelectedDocs,
   setIsCompareActive,
+  renderCustomToolbar,
 }: CompareDocumentsProps) => {
   const [showDiff, setShowDiff] = useLocalStorage(getStorageKey(consumer, 'ShowDiff'), true);
   const [diffMode, setDiffMode] = useLocalStorage<DocumentDiffMode>(
@@ -123,11 +127,13 @@ const CompareDocuments = ({
         setDiffMode={setDiffMode}
         setShowDiffDecorations={setShowDiffDecorations}
         setShowAllFields={setShowAllFields}
+        renderCustomToolbar={renderCustomToolbar}
       />
     ),
     [
       diffMode,
       forceShowAllFields,
+      renderCustomToolbar,
       selectedDocs,
       setDiffMode,
       setIsCompareActive,
@@ -147,6 +153,19 @@ const CompareDocuments = ({
       additionalControls,
     }),
     [additionalControls, showFullScreenButton]
+  );
+  const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
+    () =>
+      renderCustomToolbar
+        ? (toolbarProps) =>
+            renderCustomToolbar({
+              toolbarProps,
+              gridProps: {
+                additionalControls,
+              },
+            })
+        : undefined,
+    [renderCustomToolbar, additionalControls]
   );
   const ComparisonCellValue = useComparisonCellValue({
     dataView,
@@ -174,6 +193,7 @@ const CompareDocuments = ({
       inMemory={comparisonInMemory}
       schemaDetectors={schemaDetectors}
       renderCellValue={ComparisonCellValue}
+      renderCustomToolbar={renderCustomToolbarFn}
       data-test-subj="comparisonTable"
     />
   );

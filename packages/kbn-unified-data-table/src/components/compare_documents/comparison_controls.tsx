@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FC, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocumentDiffMode } from './types';
+import type { UnifiedDataTableRenderCustomToolbar } from '../data_table';
 
 export interface ComparisonControlsProps {
   selectedDocs: string[];
@@ -42,6 +43,7 @@ export interface ComparisonControlsProps {
   setDiffMode: (diffMode: DocumentDiffMode) => void;
   setShowDiffDecorations: (showDiffDecorations: boolean) => void;
   setShowAllFields: (showAllFields: boolean) => void;
+  renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
 }
 
 export const ComparisonControls = ({
@@ -56,6 +58,7 @@ export const ComparisonControls = ({
   setDiffMode,
   setShowDiffDecorations,
   setShowAllFields,
+  renderCustomToolbar,
 }: ComparisonControlsProps) => {
   const { euiTheme } = useEuiTheme();
   const backgroundSuccess = useEuiBackgroundColor('success');
@@ -65,7 +68,7 @@ export const ComparisonControls = ({
       responsive={false}
       gutterSize="s"
       alignItems="center"
-      css={{ padding: `0 ${euiTheme.size.s}` }}
+      css={renderCustomToolbar ? undefined : { padding: `0 ${euiTheme.size.s}` }}
     >
       <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.xs }}>
         <EuiText size="s">
@@ -88,8 +91,8 @@ export const ComparisonControls = ({
             setShowDiff(!showDiff);
           }}
           css={{
-            backgroundColor: showDiff ? backgroundSuccess : undefined,
-            borderColor: showDiff ? backgroundSuccess : undefined,
+            backgroundColor: showDiff ? `${backgroundSuccess} !important` : undefined,
+            borderColor: showDiff ? `${backgroundSuccess} !important` : undefined,
           }}
         >
           <FormattedMessage id="unifiedDataTable.showDiff" defaultMessage="Show diff" />

@@ -333,6 +333,12 @@ export interface UnifiedDataTableProps {
    */
   renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
   /**
+   * Optional render for the grid toolbar when in comparison mode
+   * @param toolbarProps
+   * @param gridProps
+   */
+  renderCustomComparisonToolbar?: UnifiedDataTableRenderCustomToolbar;
+  /**
    * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
    */
   trailingControlColumns?: EuiDataGridControlColumn[];
@@ -413,6 +419,7 @@ export const UnifiedDataTable = ({
   services,
   renderCustomGridBody,
   renderCustomToolbar,
+  renderCustomComparisonToolbar,
   trailingControlColumns,
   totalHits,
   onFetchMoreRecords,
@@ -1006,6 +1013,7 @@ export const UnifiedDataTable = ({
               getDocById={getDocById}
               setSelectedDocs={setSelectedDocs}
               setIsCompareActive={setIsCompareActive}
+              renderCustomToolbar={renderCustomComparisonToolbar}
             />
           ) : (
             <EuiDataGridMemoized
