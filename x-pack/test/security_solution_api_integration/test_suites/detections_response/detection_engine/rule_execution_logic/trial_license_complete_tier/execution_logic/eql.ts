@@ -657,5 +657,137 @@ export default ({ getService }: FtrProviderContext) => {
         expect(fullAlert?.['host.asset.criticality']).to.eql('high_impact');
       });
     });
+
+    describe('using data with a @timestamp field', () => {
+      const expectedWarning =
+        'This rule reached the maximum alert limit for the rule execution. Some alerts were not created.';
+
+      it('specifying only timestamp_field results in alert creation with an expected warning', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['auditbeat-*']),
+          timestamp_field: 'event.created',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.eql([expectedWarning]);
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).to.be.greaterThan(0);
+      });
+
+      it('specifying only timestamp_override results in alert creation with an expected warning', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['auditbeat-*']),
+          timestamp_override: 'event.created',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.eql([expectedWarning]);
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).to.be.greaterThan(0);
+      });
+
+      it('specifying both timestamp_override and timestamp_field results in alert creation with an expected warning', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['auditbeat-*']),
+          timestamp_field: 'event.created',
+          timestamp_override: 'event.created',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.eql([expectedWarning]);
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).to.be.greaterThan(0);
+      });
+    });
+
+    describe('using data without a @timestamp field', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/no_at_timestamp_field'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/no_at_timestamp_field'
+        );
+      });
+
+      it('specifying only timestamp_field results in a warning, and no alerts are generated', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['no_at_timestamp_field']),
+          timestamp_field: 'event.ingested',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.contain(
+          'The following indices are missing the timestamp field "@timestamp": ["no_at_timestamp_field"]'
+        );
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).to.be.empty();
+      });
+
+      it('specifying only timestamp_override results in an error, and no alerts are generated', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['no_at_timestamp_field']),
+          timestamp_override: 'event.ingested',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.contain(
+          'An error occurred during rule execution: message: "verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown column [@timestamp]"'
+        );
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).to.be.empty();
+      });
+
+      it('specifying both timestamp_override and timestamp_field results in alert creation with no warnings or errors', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['no_at_timestamp_field']),
+          timestamp_field: 'event.ingested',
+          timestamp_override: 'event.ingested',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.be.empty();
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts).to.have.length(3);
+      });
+    });
   });
 };

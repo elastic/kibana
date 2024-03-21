@@ -54,9 +54,7 @@ export const ContextualInsightProcessRow = ({ command }: { command: string }) =>
           with the arguments to the process you should then explain its arguments and how they influence the behaviour
           of the process. If I do not provide any arguments then explain the behaviour of the process when no arguments are
           provided.
-          If you do not recognise the process say "No information available for this process". If I provide an argument
-          to the process that you do not recognise then say "No information available for this argument" when explaining
-          that argument.
+          
           Here is an example with arguments.
           Process: metricbeat -c /etc/metricbeat.yml -d autodiscover,kafka -e -system.hostfs=/hostfs
           Explanation: Metricbeat is part of the Elastic Stack. It is a lightweight shipper that you can install on your
