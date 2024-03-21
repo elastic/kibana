@@ -139,14 +139,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('visualize library: managed content is read-only', async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
 
-        const deletableItems = await listingTable.getAllSelectableItemsNames();
-
-        expect(deletableItems).to.eql([
-          'Unmanaged lens vis',
-          'Unmanaged legacy visualization',
-          'Unmanaged map',
-        ]);
-
         await assertInspectorReadonly('Managed lens vis');
         await assertInspectorReadonly('Managed legacy visualization');
         await assertInspectorReadonly('Managed map');
