@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './src/api';
-export * from './src/fp_utils';
-export * from './src/list_api';
-export * from './src/list_item_api';
+import * as t from 'io-ts';
+
+export const refresh = t.union([t.literal('true'), t.literal('false')]);
+export type Refresh = t.TypeOf<typeof refresh>;

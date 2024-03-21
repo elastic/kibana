@@ -12,16 +12,10 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiBasicTable,
-  EuiSpacer,
   EuiInlineEditText,
   EuiFlexItem,
   EuiFlexGroup,
   useEuiPaddingSize,
-  EuiPopover,
-  EuiForm,
-  EuiFieldText,
-  EuiButton,
-  EuiFormRow
 } from '@elastic/eui';
 import { useFindListItems } from '../../hooks/use_find_list_items';
 import { useDeleteListItemMutation } from '../../hooks/use_delete_list_item';
@@ -29,6 +23,7 @@ import { usePatchListItemMutation } from '../../hooks/use_patch_list_item';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { AddListItemPopover } from '../add_list_item_popover';
 
 const toastOptions = {
   toastLifeTimeMs: 5000,
@@ -91,7 +86,6 @@ export const ValueListModal = ({
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState('updated_at');
   const [sortOrder, setSortOrder] = useState('desc');
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const modalStyle = css`
     overflow: hidden;
@@ -190,37 +184,7 @@ export const ValueListModal = ({
     <EuiModal maxWidth={false} css={() => ({ minHeight: '85vh' })} onClose={onCloseModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>Value list</EuiModalHeaderTitle>
-        <EuiPopover
-          button={
-            <EuiButton
-              iconSide="right"
-              fill
-              iconType="arrowDown"
-              onClick={() => setIsPopoverOpen(true)}
-            >
-              Add list item
-            </EuiButton>
-          }
-          isOpen={isPopoverOpen}
-          closePopover={() => setIsPopoverOpen(false)}
-        >
-          <div style={{ width: 500 }}>
-            <EuiForm onSubmit={(e) => e.preventDefault()}>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiFormRow label="Value">
-                    <EuiFieldText icon="user" placeholder="Type.." />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow hasEmptyLabelSpace>
-                    <EuiButton onClick={() => setIsPopoverOpen(false)}>Save</EuiButton>
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiForm>
-          </div>
-        </EuiPopover>
+        <AddListItemPopover listId={listId} />
       </EuiModalHeader>
 
       <EuiFlexGroup className={modalStyle} direction="column">

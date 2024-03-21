@@ -9,6 +9,7 @@
 import type {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
+  Refresh,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -56,14 +57,21 @@ export interface DeleteListParams extends ApiParams {
 }
 
 export interface DeleteListItemParams extends ApiParams {
-  refresh?: string;
+  refresh?: Refresh;
   id: string;
 }
 
 export interface PatchListItemParams extends ApiParams {
-  refresh?: string;
+  refresh?: Refresh;
   id: string;
   value: string;
+  _version: string;
+}
+
+export interface CreateListItemParams extends ApiParams {
+  refresh?: Refresh;
+  value: string;
+  listId: string;
 }
 
 export interface ExportListParams extends ApiParams {
