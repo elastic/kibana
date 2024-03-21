@@ -6,7 +6,6 @@
  */
 
 import { shallow } from 'enzyme';
-import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -15,7 +14,7 @@ import { TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { networkModel } from '../../store';
 import { NetworkTopNFlowTable } from '.';
-import { mockData } from './mock';
+import { mockData, mockCount } from './mock';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 jest.mock('../../../../common/lib/kibana');
@@ -27,15 +26,15 @@ describe('NetworkTopNFlow Table Component', () => {
   const mount = useMountAppended();
   const defaultProps = {
     data: mockData.edges,
-    fakeTotalCount: getOr(50, 'fakeTotalCount', mockData.pageInfo),
+    fakeTotalCount: 50,
     flowTargeted: FlowTargetSourceDest.source,
     id: 'topNFlowSource',
     isInspect: false,
     loading: false,
     loadPage,
     setQuerySkip: jest.fn(),
-    showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockData.pageInfo),
-    totalCount: mockData.totalCount,
+    showMorePagesIndicator: true,
+    totalCount: mockCount.totalCount,
     type: networkModel.NetworkType.page,
   };
 
