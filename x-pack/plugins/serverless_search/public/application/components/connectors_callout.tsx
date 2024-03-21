@@ -31,7 +31,6 @@ export const ConnectorsCallout = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             color="primary"
-            fill
             data-test-subj="connectors-callout-cta"
             onClick={() => createConnector()}
             isLoading={isLoading}
