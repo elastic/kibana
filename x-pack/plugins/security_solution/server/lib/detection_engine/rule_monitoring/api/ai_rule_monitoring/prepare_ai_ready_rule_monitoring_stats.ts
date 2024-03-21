@@ -15,7 +15,10 @@ export async function prepareAiReadyRuleMonitoringStats(
 ): Promise<string> {
   const now = moment();
   const interval = validateHealthInterval(undefined, now);
-  const clusterHealth = await healthClient.calculateClusterHealth({ interval });
+  const clusterHealth = await healthClient.calculateClusterHealth({
+    interval,
+    num_of_top_rules: 10,
+  });
   const result: string[] = [];
 
   result.push(

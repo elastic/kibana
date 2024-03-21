@@ -107,7 +107,7 @@ const handleClusterHealthRequest = async (args: HandleClusterHealthRequestArgs) 
     const params = resolveParameters();
     const { healthClient } = await resolveDependencies();
 
-    const clusterHealthParameters = { interval: params.interval };
+    const clusterHealthParameters = { interval: params.interval, num_of_top_rules: 10 };
     const clusterHealth = await healthClient.calculateClusterHealth(clusterHealthParameters);
 
     const responseBody: GetClusterHealthResponse = {
