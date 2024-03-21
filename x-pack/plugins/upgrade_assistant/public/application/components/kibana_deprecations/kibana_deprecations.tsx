@@ -65,7 +65,7 @@ const i18nTexts = {
     }),
   missingPermissionDescription: (privilegesMissing: MissingPrivileges) => (
     <FormattedMessage
-      id="xpack.upgradeAssistant.overview.logsStep.missingClusterPrivilegesDescription"
+      id="xpack.upgradeAssistant.overview.logsStep.missingPermissionDescription"
       defaultMessage="Certain issues might be missing due to missing cluster {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}."
       values={{
         missingPrivileges: (
