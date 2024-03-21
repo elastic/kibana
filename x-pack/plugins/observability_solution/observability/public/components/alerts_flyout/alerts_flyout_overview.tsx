@@ -19,7 +19,6 @@ import {
   ALERT_CASE_IDS,
   ALERT_DURATION,
   ALERT_END,
-  ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
   ALERT_FLAPPING,
   ALERT_GROUP_FIELD,
@@ -27,9 +26,11 @@ import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
+  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import moment from 'moment';
@@ -99,7 +100,7 @@ const columns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
     name: '',
     render: (value: AlertOverviewField['value'], { id, meta }: AlertOverviewField) => {
       if (!value && !meta) return <>{'-'}</>;
-      const ruleParams = meta?.ruleParams || {};
+      const ruleCriteria = meta?.ruleCriteria as CustomMetricExpressionParams[];
       switch (id) {
         case ColumnIDs.STATUS:
           const alertStatus = value as string;
@@ -143,10 +144,11 @@ const columns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
           );
         case ColumnIDs.OBSERVED_VALUE:
           const observedValues = value as number[];
+          if (!ruleCriteria.length) return <>{'-'}</>;
           return (
             <div>
               {observedValues.map((observedValue, metricIndex) => {
-                const criteria = ruleParams.criteria[metricIndex] as CustomMetricExpressionParams;
+                const criteria = ruleCriteria[metricIndex] as CustomMetricExpressionParams;
                 const field = criteria.metrics[0].field;
                 const isRangeThreshold =
                   criteria.comparator === Comparator.OUTSIDE_RANGE ||
@@ -171,10 +173,10 @@ const columns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
           );
 
         case ColumnIDs.THRESHOLD:
-          const params = ruleParams.criteria as CustomMetricExpressionParams[];
+          if (!ruleCriteria.length) return <>{'-'}</>;
           return (
             <div>
-              {params.map((criteria, metricIndex) => {
+              {ruleCriteria.map((criteria, metricIndex) => {
                 const field = criteria.metrics[0].field;
                 const isRangeThreshold =
                   criteria.comparator === Comparator.OUTSIDE_RANGE ||
@@ -249,6 +251,7 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
   const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
   const dateFormat = useUiSetting<string>('dateFormat');
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
+  const [ruleCriteria, setRuleCriteria] = useState([]);
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
   const groups = alert.fields[ALERT_GROUP_FIELD]?.map((field, index) => {
@@ -257,6 +260,19 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
       return { field, value: values[index] };
     }
   });
+  useEffect(() => {
+    const ruleParams = alert.fields[ALERT_RULE_PARAMETERS] as Record<string, any>;
+    if (alert.fields[ALERT_RULE_TYPE_ID] !== OBSERVABILITY_THRESHOLD_RULE_TYPE_ID) {
+      const metrics: Array<{ field: string; aggType: string }> = [];
+      const ruleCtr = ruleParams.criteria.map((ctr: Record<string, any>) => {
+        metrics.push({ field: ctr.metric, aggType: ctr.aggType });
+        return { ...ctr, metrics };
+      });
+      setRuleCriteria(ruleCtr);
+    } else {
+      setRuleCriteria(ruleParams.criteria);
+    }
+  }, [alert]);
   useEffect(() => {
     setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));
   }, [alertStart, alertEnd]);
@@ -309,7 +325,7 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
         }),
         value: alert.fields[ALERT_EVALUATION_VALUES],
         meta: {
-          ruleParams: alert.fields[ALERT_RULE_PARAMETERS],
+          ruleCriteria,
         },
       },
       {
@@ -317,9 +333,9 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
         key: i18n.translate('xpack.observability.alertFlyout.overviewTab.threshold', {
           defaultMessage: 'Threshold',
         }),
-        value: alert.fields[ALERT_EVALUATION_THRESHOLD],
+        value: [],
         meta: {
-          ruleParams: alert.fields[ALERT_RULE_PARAMETERS],
+          ruleCriteria,
         },
       },
       {
@@ -363,6 +379,7 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
     http.basePath,
     isLoading,
     navigateToCaseView,
+    ruleCriteria,
     timeRange,
   ]);
   return <EuiInMemoryTable width={'80%'} columns={columns} itemId="key" items={items} />;
