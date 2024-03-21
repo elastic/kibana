@@ -911,6 +911,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'linux.advanced.artifacts.user.ca_cert',
     first_supported_version: '7.9',
+    last_supported_version: '8.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.ca_cert',
       {
@@ -921,6 +922,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'windows.advanced.artifacts.user.ca_cert',
     first_supported_version: '7.9',
+    last_supported_version: '8.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.ca_cert',
       {
@@ -931,6 +933,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'mac.advanced.artifacts.user.ca_cert',
     first_supported_version: '7.9',
+    last_supported_version: '8.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.ca_cert',
       {
