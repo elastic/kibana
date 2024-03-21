@@ -7,11 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
-import { ExportContent } from '@kbn/share-plugin/public';
 import React from 'react';
+import { checkLicense, ReportingAPIClient } from '@kbn/reporting-public';
+import { ExportContent, ShareContext, ShareMenuProvider } from '../../..';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
-import { ReportingAPIClient, checkLicense } from '../..';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
 const getJobParams =

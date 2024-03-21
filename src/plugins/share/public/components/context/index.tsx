@@ -11,9 +11,8 @@ import { ReportingAPIClient } from '@kbn/reporting-public';
 
 import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import type { JobParamsProviderOptions } from '@kbn/reporting-public/share/share_context_menu';
-import { ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
-import { InjectedIntl } from '@kbn/i18n-react';
+import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
+import { BaseParams } from '@kbn/reporting-common/types';
 import type {
   ShareMenuItem,
   UrlParamExtension,
@@ -21,6 +20,7 @@ import type {
   ShareContext,
 } from '../../types';
 import { AnonymousAccessServiceContract } from '../../../common';
+import { JobParamsProviderOptions } from '../share/share_context_menu';
 
 export interface IShareContext extends ShareContext {
   allowEmbed: boolean;
@@ -34,11 +34,17 @@ export interface IShareContext extends ShareContext {
   isEmbedded: boolean;
   layoutOption?: 'print' | 'canvas';
   apiClient: ReportingAPIClient;
-  getJobParams?: JobParamsPDFV2 | JobParamsPNGV2;
+  getJobParams?:
+    | JobParamsPDFV2
+    | JobParamsPNGV2
+    | ((forShareUrl?: boolean) => Omit<BaseParams, 'browserTimezone' | 'version'>);
   jobProviderOptions?: JobParamsProviderOptions;
   toasts: ToastsSetup;
   theme: ThemeServiceSetup;
-  intl: InjectedIntl;
+  // intl: InjectedIntl;
+  uiSettings: IUiSettingsClient;
+  csvType: 'csv_v2' | 'csv_searchsource';
+  requiresSavedState: boolean;
 }
 
 export const ShareTabsContext = createContext<IShareContext | null>(null);

@@ -16,12 +16,12 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { LicenseCheckState } from '@kbn/licensing-plugin/public';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { ReportingAPIClient } from '../..';
 import {
   ActionContext,
   type PanelActionDependencies,
   ReportingCsvPanelAction,
 } from './get_csv_panel_action';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 
 const core = coreMock.createSetup();
 let apiClient: ReportingAPIClient;

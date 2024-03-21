@@ -8,8 +8,14 @@
 
 import './index.scss';
 
+import * as Rx from 'rxjs';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ReportingSetup } from '@kbn/reporting-plugin/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
 import { UrlService } from '../common/url_service';
@@ -25,6 +31,19 @@ import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 import { registrations } from './lib/registrations';
 import type { BrowserUrlService, ClientConfigType } from './types';
+import { ReportingPublicComponents } from './components/share/target/types';
+import {
+  ReportingCsvPanelAction,
+  reportingCsvShareProvider,
+  reportingScreenshotShareProvider,
+} from './components/share';
+
+export interface ShareReportingContract {
+  /**
+   * A set of React components for displaying a Reporting share menu in an application
+   */
+  components: ReportingPublicComponents;
+}
 
 /** @public */
 export type SharePublicSetup = ShareMenuRegistrySetup & {
@@ -59,11 +78,15 @@ export type SharePublicStart = ShareMenuManagerStart & {
   navigate(options: RedirectOptions): void;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SharePublicSetupDependencies {}
+export interface SharePublicSetupDependencies {
+  uiActions: UiActionsSetup;
+  reporting?: ReportingSetup;
+}
 
 export interface SharePublicStartDependencies {
-  reportingApiClient: ReportingAPIClient;
+  uiActions: UiActionsStart;
+  data: DataPublicPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export class SharePlugin
@@ -82,15 +105,56 @@ export class SharePlugin
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
   private kibanaVersion?: string;
+  private contract?: ShareReportingContract;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup): SharePublicSetup {
-    const { analytics, http } = core;
+  public setup(
+    core: CoreSetup<SharePublicSetupDependencies>,
+    { uiActions, reporting }: SharePublicSetupDependencies
+  ): SharePublicSetup {
+    const { analytics, http, getStartServices, notifications, uiSettings } = core;
     const { basePath } = http;
+    const { toasts } = notifications;
+    const apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion!);
+    const startServices$ = Rx.from(getStartServices());
+
+    if (reporting) {
+      const usesUiCapabilities = reporting?.usesUiCapabilities();
+      uiActions.addTriggerAction(
+        CONTEXT_MENU_TRIGGER,
+        new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
+      );
+
+      startServices$.subscribe(([{ application }, { licensing }]) => {
+        licensing.license$.subscribe((license: any) => {
+          reportingCsvShareProvider({
+            apiClient,
+            toasts,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+          });
+        });
+
+        if (reporting?.export_types.pdf.enabled || reporting?.export_types.png.enabled) {
+          reportingScreenshotShareProvider({
+            apiClient,
+            toasts,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+          });
+        }
+      });
+    }
 
     this.url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
       baseUrl: basePath.get(),
@@ -142,13 +206,12 @@ export class SharePlugin
     };
   }
 
-  public start(core: CoreStart): SharePublicStart {
+  public start(core: CoreStart, { licensing }: SharePublicStartDependencies): SharePublicStart {
     const reportingApiClient = new ReportingAPIClient(
       core.http,
       core.uiSettings,
       this.kibanaVersion!
     );
-    console.log({ reportingApiClient });
     const disableEmbed = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,

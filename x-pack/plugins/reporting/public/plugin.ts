@@ -16,7 +16,6 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -29,12 +28,6 @@ import { durationToNumber } from '@kbn/reporting-common';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 
-import {
-  ReportingCsvPanelAction,
-  getSharedComponents,
-  reportingCsvShareProvider,
-  reportingScreenshotShareProvider,
-} from '@kbn/reporting-public/share';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 
@@ -99,7 +92,6 @@ export class ReportingPublicPlugin
     if (core) {
       this.contract = {
         usesUiCapabilities: () => this.config.roles?.enabled === false,
-        components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
       };
     }
 
@@ -191,43 +183,43 @@ export class ReportingPublicPlugin
       visibleIn: [],
     });
 
-    uiActionsSetup.addTriggerAction(
-      CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
-    );
+    // uiActionsSetup.addTriggerAction(
+    //   CONTEXT_MENU_TRIGGER,
+    //   new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
+    // );
 
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;
 
-    startServices$.subscribe(([{ application }, { licensing }]) => {
-      licensing.license$.subscribe((license) => {
-        shareSetup.register(
-          reportingCsvShareProvider({
-            apiClient,
-            toasts,
-            uiSettings,
-            license,
-            application,
-            usesUiCapabilities,
-            theme: core.theme,
-          })
-        );
+    // startServices$.subscribe(([{ application }, { licensing }]) => {
+    //   licensing.license$.subscribe((license) => {
+    //     shareSetup.register(
+    //       reportingCsvShareProvider({
+    //         apiClient,
+    //         toasts,
+    //         uiSettings,
+    //         license,
+    //         application,
+    //         usesUiCapabilities,
+    //         theme: core.theme,
+    //       })
+    //     );
 
-        if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          shareSetup.register(
-            reportingScreenshotShareProvider({
-              apiClient,
-              toasts,
-              uiSettings,
-              license,
-              application,
-              usesUiCapabilities,
-              theme: core.theme,
-            })
-          );
-        }
-      });
-    });
+    //     if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+    //       shareSetup.register(
+    //         reportingScreenshotShareProvider({
+    //           apiClient,
+    //           toasts,
+    //           uiSettings,
+    //           license,
+    //           application,
+    //           usesUiCapabilities,
+    //           theme: core.theme,
+    //         })
+    //       );
+    //     }
+    //   });
+    // });
 
     return reportingStart;
   }

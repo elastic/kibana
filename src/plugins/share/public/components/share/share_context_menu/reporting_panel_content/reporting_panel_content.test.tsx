@@ -12,10 +12,10 @@ import {
   themeServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/public/mocks';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ReportingPanelProps as Props, ReportingPanelContent } from '.';
-import { ReportingAPIClient } from '../../..';
 import { ErrorUnsavedWorkPanel } from './components';
 import * as constants from './constants';
 

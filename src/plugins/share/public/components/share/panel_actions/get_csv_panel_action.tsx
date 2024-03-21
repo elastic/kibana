@@ -21,8 +21,7 @@ import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-acti
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
-import { checkLicense } from '../../license_check';
-import { ReportingAPIClient } from '../../reporting_api_client';
+import { checkLicense, ReportingAPIClient } from '@kbn/reporting-public';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable

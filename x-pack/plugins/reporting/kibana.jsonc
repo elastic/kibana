@@ -31,7 +31,6 @@
       "screenshotting"
     ],
     "requiredBundles": [
-      "embeddable",
       "esUiShared",
       "kibanaReact"
     ]

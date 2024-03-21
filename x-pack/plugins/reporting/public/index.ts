@@ -6,7 +6,6 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import type { ReportingPublicComponents } from '@kbn/reporting-public/share';
 import { ReportingPublicPlugin } from './plugin';
 
 /**
@@ -19,11 +18,17 @@ export interface ReportingSetup {
    * @returns boolean
    */
   usesUiCapabilities: () => boolean;
-
-  /**
-   * A set of React components for displaying a Reporting share menu in an application
-   */
-  components: ReportingPublicComponents;
+  export_types: {
+    pdf: {
+      enabled: boolean;
+    };
+    png: {
+      enabled: boolean;
+    };
+    csv: {
+      enabled: boolean;
+    };
+  };
 }
 
 /**

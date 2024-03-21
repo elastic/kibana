@@ -28,7 +28,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { BaseParams } from '@kbn/reporting-common/types';
 
-import { ReportingAPIClient } from '../../../reporting_api_client';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';
 

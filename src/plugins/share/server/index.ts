@@ -7,7 +7,7 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema, configSchema } from '../common/config';
+import { ShareConfigSchema, configSchema } from '../common/config';
 
 export type {
   SharePublicSetup as SharePluginSetup,
@@ -21,7 +21,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   return new SharePlugin(initializerContext);
 }
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
+export const config: PluginConfigDescriptor<ShareConfigSchema> = {
   exposeToBrowser: {
     new_version: { enabled: true },
   },

@@ -8,12 +8,12 @@
 
 import {
   EuiButton,
+  EuiIcon,
   EuiButtonEmpty,
   EuiCopy,
   EuiFlexGroup,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
   EuiModalFooter,
   EuiRadioGroup,
   EuiSpacer,
@@ -21,18 +21,17 @@ import {
   EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
-import { injectI18n, InjectedIntl } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { getMaxUrlLength } from '@kbn/reporting-public/share/share_context_menu/reporting_panel_content/constants';
-import { ErrorUrlTooLongPanel } from '@kbn/reporting-public/share/share_context_menu/reporting_panel_content/components';
-import type { JobParamsProviderOptions } from '@kbn/reporting-public/share/share_context_menu';
-import useMountedState from 'react-use/lib/useMountedState';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import url from 'url';
-import { BaseParams } from '@kbn/reporting-common/types';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import { BaseParams } from '@kbn/reporting-common/types';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IShareContext } from '../../context';
+import { ErrorUrlTooLongPanel } from '../../share/share_context_menu/reporting_panel_content/components';
+import { JobParamsProviderOptions } from '../../share/share_context_menu';
+import { getMaxUrlLength } from '../../share/share_context_menu/reporting_panel_content/constants';
 
 type ExportProps = Pick<
   IShareContext,
@@ -40,7 +39,6 @@ type ExportProps = Pick<
   | 'objectId'
   | 'isDirty'
   | 'apiClient'
-  | 'getJobParams'
   | 'objectType'
   | 'jobProviderOptions'
   | 'toasts'
@@ -52,37 +50,30 @@ type ExportProps = Pick<
 
 type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
 
-type AllowedImageExportType = 'pngV2' | 'printablePdfV2';
+type AllowedImageExportType = 'pngV2' | 'printablePdfV2' | 'printablePdf';
 
 export const ExportContentUi = ({
-  layoutOption,
-  objectId,
-  isDirty,
   apiClient,
-  getJobParams,
-  objectType,
-  jobProviderOptions,
+  intl,
   toasts,
   theme,
-  intl,
+  isDirty,
   onClose,
+  objectId,
+  layoutOption,
+  jobProviderOptions,
+  objectType,
 }: ExportProps) => {
-  // TODO: use share menu items to build export tab
-  const [selectedRadio, setSelectedRadio] = useState<AllowedImageExportType>('printablePdfV2');
+  const isSaved = Boolean(objectId);
+  const [isStale, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
+  const [selectedRadio, setSelectedRadio] = useState<AllowedImageExportType>('printablePdfV2');
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
-  const [isStale, setIsStale] = useState(false);
   const isMounted = useMountedState();
-  const isSaved = Boolean(objectId);
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
 
-  const markAsStale = useCallback(() => {
-    if (!isMounted) return;
-    setIsStale(true);
-  }, [isMounted]);
-
-  const getJobsParams = useCallback(
+  const getJobsParams: any = useCallback(
     (type: AllowedImageExportType, opts?: JobParamsProviderOptions) => {
       if (!opts) {
         return { ...getJobParams };
@@ -113,6 +104,11 @@ export const ExportContentUi = ({
         ''
       );
 
+      if (type === 'printablePdf') {
+        // multi URL for PDF
+        return { ...baseParams, relativeUrls: [relativeUrl] };
+      }
+
       // single URL for PNG
       return { ...baseParams, relativeUrl };
     },
@@ -120,7 +116,9 @@ export const ExportContentUi = ({
   );
 
   const getLayout = useCallback((): LayoutParams => {
-    let dimensions;
+    const { layout } = getJobsParams(selectedRadio, jobProviderOptions);
+
+    let dimensions = layout?.dimensions;
 
     if (!dimensions) {
       const el = document.querySelector('[data-shared-items-container]');
@@ -132,9 +130,9 @@ export const ExportContentUi = ({
     }
 
     return { id: 'preserve_layout', dimensions };
-  }, [usePrintLayout]);
+  }, [getJobsParams, jobProviderOptions, selectedRadio, usePrintLayout]);
 
-  const getJobParamsHelper = useCallback(
+  const getJobParams = useCallback(
     (shareableUrl?: boolean) => {
       return { ...getJobsParams(selectedRadio, jobProviderOptions), layout: getLayout() };
     },
@@ -146,13 +144,18 @@ export const ExportContentUi = ({
       if (getJobsParams(selectedRadio, jobProviderOptions) !== undefined) {
         const relativePath = apiClient.getReportingPublicJobPath(
           selectedRadio,
-          apiClient.getDecoratedJobParams(getJobParamsHelper(true) as unknown as AppParams)
+          apiClient.getDecoratedJobParams(getJobParams(true) as unknown as AppParams)
         );
         return setAbsoluteUrl(url.resolve(window.location.href, relativePath));
       }
     },
-    [apiClient, selectedRadio, jobProviderOptions, getJobParamsHelper, getJobsParams]
+    [apiClient, getJobParams, selectedRadio, getJobsParams, jobProviderOptions]
   );
+
+  const markAsStale = useCallback(() => {
+    if (!isMounted) return;
+    setIsStale(true);
+  }, [isMounted]);
 
   useEffect(() => {
     getAbsoluteReportGenerationUrl();
@@ -161,7 +164,7 @@ export const ExportContentUi = ({
 
   const generateReportingJob = () => {
     const decoratedJobParams = apiClient.getDecoratedJobParams(
-      getJobParamsHelper(false) as unknown as AppParams
+      getJobParams(false) as unknown as AppParams
     );
     setCreatingReportJob(true);
     return apiClient
@@ -252,7 +255,6 @@ export const ExportContentUi = ({
     }
     return null;
   };
-
   const renderCopyURLButton = ({
     isUnsaved,
   }: {
@@ -346,7 +348,6 @@ export const ExportContentUi = ({
         />
       </EuiButton>
     );
-
   return (
     <>
       <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">

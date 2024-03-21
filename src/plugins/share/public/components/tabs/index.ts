@@ -9,3 +9,4 @@
 export { linkTab } from './link';
 export { embedTab } from './embed';
 export { exportTab, ExportContent } from './export';
+export { csvTab, CsvContent } from './csv';

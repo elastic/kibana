@@ -11,10 +11,9 @@ import React from 'react';
 
 import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
-
-import { ReportingAPIClient } from '../../reporting_api_client';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
-import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
+import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content';
 
 /**
  * Properties for displaying a share menu with Reporting features.

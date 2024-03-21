@@ -12,10 +12,10 @@ import React from 'react';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
-import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { checkLicense } from '@kbn/reporting-public';
+import { ShareContext, ShareMenuProvider } from '../../..';
 import type { ExportPanelShareOpts } from '.';
-import { checkLicense } from '../..';
-import { ReportingPanelContent } from './reporting_panel_content_lazy';
+import { CsvContent } from '../../tabs/csv/csv_content';
 
 export const reportingCsvShareProvider = ({
   apiClient,
@@ -33,7 +33,7 @@ export const reportingCsvShareProvider = ({
 
     // only csv v2 supports esql (isTextBased) reports
     // TODO: whole csv reporting should move to v2 https://github.com/elastic/kibana/issues/151190
-    const reportType = sharingData.isTextBased ? CSV_JOB_TYPE_V2 : CSV_JOB_TYPE;
+    const csvType = sharingData.isTextBased ? CSV_JOB_TYPE_V2 : CSV_JOB_TYPE;
 
     const getSearchSource = sharingData.getSearchSource as ({
       addGlobalTimeFilter,
@@ -49,7 +49,7 @@ export const reportingCsvShareProvider = ({
     };
 
     const getJobParams = (forShareUrl?: boolean) => {
-      if (reportType === CSV_JOB_TYPE_V2) {
+      if (csvType === CSV_JOB_TYPE_V2) {
         // csv v2 uses locator params
         return {
           ...jobParams,
@@ -88,6 +88,7 @@ export const reportingCsvShareProvider = ({
         defaultMessage: 'CSV Reports',
       });
 
+      const isDirty = false;
       shareActions.push({
         shareMenuItem: {
           name: panelTitle,
@@ -101,17 +102,19 @@ export const reportingCsvShareProvider = ({
           id: 'csvReportingPanel',
           title: panelTitle,
           content: (
-            <ReportingPanelContent
-              requiresSavedState={false}
-              apiClient={apiClient}
-              toasts={toasts}
-              uiSettings={uiSettings}
-              reportType={reportType}
-              layoutId={undefined}
-              objectId={objectId}
-              getJobParams={getJobParams}
-              onClose={onClose}
-              theme={theme}
+            <CsvContent
+              {...{
+                objectType,
+                isDirty,
+                apiClient,
+                toasts,
+                uiSettings,
+                csvType,
+                objectId,
+                getJobParams,
+                onClose,
+                theme,
+              }}
             />
           ),
         },

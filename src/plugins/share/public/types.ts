@@ -111,5 +111,7 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
 }
 
 export interface ClientConfigType {
+  roles: { enabled: boolean };
+  export_types: { pdf: { enabled: boolean }; png: { enabled: boolean }; csv: { enabled: boolean } };
   new_version: { enabled: boolean };
 }

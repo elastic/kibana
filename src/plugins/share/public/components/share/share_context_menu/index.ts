@@ -13,8 +13,8 @@ import type {
   ToastsSetup,
 } from '@kbn/core/public';
 import { ILicense } from '@kbn/licensing-plugin/public';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { ReportingAPIClient } from '../../reporting_api_client';
 
 export interface ExportPanelShareOpts {
   apiClient: ReportingAPIClient;

@@ -9,28 +9,28 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
-import { ExportContent } from './export_content';
+import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { useShareTabsContext } from '../../context';
-export { ExportContent } from './export_content';
+import { CsvContent } from './csv_content';
+export { CsvContent } from './csv_content';
 
-type IExportTab = IModalTabDeclaration<{
+type ICsvTab = IModalTabDeclaration<{
   setCreatingReportJob: boolean;
-  selectedRadio: AllowedImageExportType;
-  isMounted: () => boolean;
-  usePrintLayout: boolean;
   copyUrl: string;
 }>;
 
-type AllowedImageExportType = 'pngV2' | 'printablePdfV2';
+const CsvTabContent: ICsvTab['content'] = () => {
+  const { isDirty, apiClient, objectType, toasts, theme, onClose, csvType, uiSettings } =
+    useShareTabsContext()!;
 
-const ExportTabContent: IExportTab['content'] = () => {
-  const { isDirty, apiClient, objectType, toasts, theme, onClose } = useShareTabsContext()!;
-
-  return <ExportContent {...{ isDirty, apiClient, objectType, toasts, theme, onClose }} />;
+  return (
+    <CsvContent
+      {...{ isDirty, apiClient, objectType, toasts, theme, onClose, csvType, uiSettings }}
+    />
+  );
 };
 
-export const exportTab: IExportTab = {
+export const csvTab: ICsvTab = {
   id: 'export',
   name: i18n.translate('share.contextMenu.exportsTab', {
     defaultMessage: 'Export',
@@ -41,5 +41,5 @@ export const exportTab: IExportTab = {
       defaultMessage="Share a direct link to this search."
     />
   ),
-  content: ExportTabContent,
+  content: CsvTabContent,
 };

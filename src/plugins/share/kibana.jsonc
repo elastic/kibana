@@ -8,9 +8,12 @@
     "server": true,
     "browser": true,
     "requiredBundles": [
+      "uiActions",
       "kibanaUtils",
       "kibanaReact",
-      "esUiShared"
+      "esUiShared",
+      "discover",
+      "embeddable",
     ]
   }
 }
