@@ -9,8 +9,17 @@ import type { Readable } from 'node:stream';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { Message } from '../../../../common';
-import type { ChatCompletionChunkEvent } from '../../../../common/conversation_complete';
+import type {
+  ChatCompletionChunkEvent,
+  TokenCountEvent,
+} from '../../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../../common/functions/types';
+
+export interface LlmFunction {
+  name: string;
+  description: string;
+  parameters: CompatibleJSONSchema;
+}
 
 export type LlmApiAdapterFactory = (options: {
   logger: Logger;
@@ -21,5 +30,7 @@ export type LlmApiAdapterFactory = (options: {
 
 export interface LlmApiAdapter {
   getSubAction: () => { subAction: string; subActionParams: Record<string, any> };
-  streamIntoObservable: (readable: Readable) => Observable<ChatCompletionChunkEvent>;
+  streamIntoObservable: (
+    readable: Readable
+  ) => Observable<ChatCompletionChunkEvent | TokenCountEvent>;
 }

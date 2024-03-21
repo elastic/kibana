@@ -112,8 +112,7 @@ describe('telemetry tasks', () => {
     await cleanupMockedEndpointAlerts(kibanaServer.coreStart.elasticsearch.client.asInternalUser);
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/178591
-  describe.skip('detection-rules', () => {
+  describe('detection-rules', () => {
     it('should execute when scheduled', async () => {
       await mockAndScheduleDetectionRulesTask();
 
