@@ -6,13 +6,18 @@
  */
 
 import { useMemo } from 'react';
-import { UI_SETTINGS } from '@kbn/data-service';
-import { TimeBuckets } from '../../../../common/services/time_buckets';
-import { useDataVisualizerKibana } from '../../kibana_context';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
-export const useTimeBuckets = () => {
-  const { uiSettings } = useDataVisualizerKibana().services;
+import { TimeBuckets } from './time_buckets';
 
+/**
+ * Custom hook to get `TimeBuckets` configured with settings from the `IUiSettingsClient`.
+ *
+ * @param uiSettings The UI settings client instance used to retrieve UI settings.
+ * @returns  A memoized `TimeBuckets` instance configured with relevant UI settings.
+ */
+export const useTimeBuckets = (uiSettings: IUiSettingsClient) => {
   return useMemo(() => {
     return new TimeBuckets({
       [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),

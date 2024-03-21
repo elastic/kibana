@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-//import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
-
 import moment from 'moment-timezone';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
