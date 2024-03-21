@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import fastIsEqual from 'fast-deep-equal';
 import { EuiCallOut } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -33,6 +33,7 @@ export const buildSearchEmbeddable = async (
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
     defaultDataView ? [defaultDataView] : undefined
   );
+  const dataLoading$ = new BehaviorSubject<boolean>(false);
   function setTimeRange(nextTimeRange: TimeRange | undefined) {
     timeRange$.next(nextTimeRange);
   }
@@ -42,6 +43,7 @@ export const buildSearchEmbeddable = async (
       dataViews: dataViews$,
       timeRange$,
       setTimeRange,
+      dataLoading: dataLoading$,
       serializeState: () => {
         return {
           rawState: {
@@ -56,17 +58,35 @@ export const buildSearchEmbeddable = async (
     }
   );
 
+  const appliedTimeRange$ = new BehaviorSubject(timeRange$.value ?? api.parentApi?.timeRange$?.value);
+  const subscriptions = api.timeRange$.subscribe((timeRange) => {
+    appliedTimeRange$.next(timeRange ?? api.parentApi?.timeRange$?.value);
+  });
+  if (api.parentApi?.timeRange$) {
+    subscriptions.add(api.parentApi?.timeRange$.subscribe((parentTimeRange) => {
+      if (timeRange$?.value) {
+        return;
+      }
+      appliedTimeRange$.next(parentTimeRange);
+    }));
+  }
+
   return {
     api,
     Component: () => {
       const [count, setCount] = useState<number>(0);
       const [error, setError] = useState<Error | undefined>();
-      const [filters, query, parentTimeRange, timeRange] = useBatchedPublishingSubjects(
+      const [filters, query, appliedTimeRange] = useBatchedPublishingSubjects(
         api.parentApi?.filters$,
         api.parentApi?.query$,
-        api.parentApi?.timeRange$,
-        timeRange$
+        appliedTimeRange$
       );
+
+      useEffect(() => {
+        return () => {
+          subscriptions.unsubscribe();
+        }
+      }, []);
 
       useEffect(() => {
         let ignore = false;
@@ -74,23 +94,26 @@ export const buildSearchEmbeddable = async (
         if (!defaultDataView) {
           return;
         }
-        getCount(defaultDataView, services.data, filters ?? [], query, timeRange ?? parentTimeRange)
+        dataLoading$.next(true);
+        getCount(defaultDataView, services.data, filters ?? [], query, appliedTimeRange)
           .then((nextCount: number) => {
             if (ignore) {
               return;
             }
+            dataLoading$.next(false);
             setCount(nextCount);
           })
           .catch((err) => {
             if (ignore) {
               return;
             }
+            dataLoading$.next(false);
             setError(err);
           });
         return () => {
           ignore = true;
         };
-      }, [filters, query, parentTimeRange, timeRange]);
+      }, [filters, query, appliedTimeRange]);
 
       if (!defaultDataView) {
         return (
