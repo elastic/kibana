@@ -165,6 +165,11 @@ export const configSchema = schema.object({
   offeringSettings: schema.recordOf(schema.string(), schema.boolean(), {
     defaultValue: {},
   }),
+  entityAnalytics: schema.object({
+    riskEngine: schema.object({
+      alertSampleSizePerShard: schema.number({ defaultValue: 10_000 }),
+    }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
