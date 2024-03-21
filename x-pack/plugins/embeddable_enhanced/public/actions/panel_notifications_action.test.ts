@@ -51,7 +51,7 @@ describe('PanelNotificationsAction', () => {
     });
 
     test('returns "2" if embeddable has two events', async () => {
-      const context = createContext([{}, {}]);
+      const context = createContext([{}, {}] as SerializedEvent[]);
       const action = new PanelNotificationsAction();
 
       const name = action.getDisplayName(context);
@@ -59,7 +59,7 @@ describe('PanelNotificationsAction', () => {
     });
 
     test('updates display name when dynamic actions is updated', async () => {
-      const context = createContext([{}, {}]);
+      const context = createContext([{}, {}] as SerializedEvent[]);
       const action = new PanelNotificationsAction();
 
       (context.embeddable as HasDynamicActions).setDynamicActions({
@@ -81,7 +81,7 @@ describe('PanelNotificationsAction', () => {
     });
 
     test('returns "1 drilldown" if embeddable has one event', async () => {
-      const context = createContext([{}]);
+      const context = createContext([{} as SerializedEvent]);
       const action = new PanelNotificationsAction();
 
       const name = action.getDisplayNameTooltip(context);
@@ -89,7 +89,7 @@ describe('PanelNotificationsAction', () => {
     });
 
     test('returns "2 drilldowns" if embeddable has two events', async () => {
-      const context = createContext([{}, {}]);
+      const context = createContext([{}, {}] as SerializedEvent[]);
       const action = new PanelNotificationsAction();
 
       const name = action.getDisplayNameTooltip(context);
@@ -97,7 +97,7 @@ describe('PanelNotificationsAction', () => {
     });
 
     test('returns "3 drilldowns" if embeddable has three events', async () => {
-      const context = createContext([{}, {}, {}]);
+      const context = createContext([{}, {}, {}] as SerializedEvent[]);
       const action = new PanelNotificationsAction();
 
       const name = action.getDisplayNameTooltip(context);
@@ -105,7 +105,7 @@ describe('PanelNotificationsAction', () => {
     });
 
     test('updates tooltip when dynamic actions is updated', async () => {
-      const context = createContext([{}, {}, {}]);
+      const context = createContext([{}, {}, {}] as SerializedEvent[]);
       const action = new PanelNotificationsAction();
 
       (context.embeddable as HasDynamicActions).setDynamicActions({
@@ -119,7 +119,7 @@ describe('PanelNotificationsAction', () => {
 
   describe('isCompatible', () => {
     test('returns false if not in "edit" mode', async () => {
-      const context = createContext([{}]);
+      const context = createContext([{} as SerializedEvent]);
       const action = new PanelNotificationsAction();
 
       const result = await action.isCompatible(context);
@@ -127,7 +127,7 @@ describe('PanelNotificationsAction', () => {
     });
 
     test('returns true when switching to "edit" mode', async () => {
-      const context = createContext([{}]);
+      const context = createContext([{} as SerializedEvent]);
 
       const action = new PanelNotificationsAction();
       (context.embeddable as PublishesWritableViewMode).setViewMode(ViewMode.EDIT);
