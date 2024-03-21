@@ -45,14 +45,10 @@ export async function getBurnRates({
   const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
   const sliClient = new DefaultSLIClient(esClient);
 
-  // find a way to set this based on the sloId used
-  const unsafeIsRemote = true;
   let slo: SLO | undefined;
-  if (unsafeIsRemote) {
+  if (remoteName) {
     const summarySearch = await esClient.search<EsSummaryDocument>({
-      index: remoteName
-        ? `${remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`
-        : SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: `${remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
       query: {
         bool: {
           filter: [
