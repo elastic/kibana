@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: kibana_serverless_security_solution_quality_gate_explore
+  name: buildkite-pipeline-kibana-serverless-security-solution-quality-gate-explore
   description: Runs the serverless security solution tests for the Quality Gate
 spec:
   type: buildkite-pipeline
