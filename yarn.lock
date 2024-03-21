@@ -3082,7 +3082,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aiops-common@link:x-pack/packages/ml/aiops_common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-components@link:x-pack/packages/ml/aiops_components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/aiops-log-rate-analysis@link:x-pack/packages/ml/aiops_log_rate_analysis":
   version "0.0.0"
   uid ""
 
@@ -3091,10 +3099,6 @@
   uid ""
 
 "@kbn/aiops-test-utils@link:x-pack/packages/ml/aiops_test_utils":
-  version "0.0.0"
-  uid ""
-
-"@kbn/aiops-common@link:x-pack/packages/ml/aiops_common":
   version "0.0.0"
   uid ""
 

@@ -12,12 +12,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { FieldValuePair, SignificantItem } from '@kbn/ml-agg-utils';
-import type {
-  FetchFrequentItemSetsResponse,
-  ItemSet,
-} from '@kbn/aiops-common/log_rate_analysis/types';
+import type { FetchFrequentItemSetsResponse, ItemSet } from '@kbn/aiops-log-rate-analysis/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { LOG_RATE_ANALYSIS_SETTINGS } from '@kbn/aiops-common/log_rate_analysis/constants';
+import { LOG_RATE_ANALYSIS_SETTINGS } from '@kbn/aiops-log-rate-analysis/constants';
 
 import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 import { getCategoryQuery } from '../../../../common/api/log_categorization/get_category_query';

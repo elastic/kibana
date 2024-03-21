@@ -16,7 +16,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import type { WindowParameters } from '@kbn/aiops-common';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 
 import { useDataSource } from '../../hooks/use_data_source';

@@ -17,7 +17,7 @@ import {
 import {
   LOG_RATE_ANALYSIS_SETTINGS,
   RANDOM_SAMPLER_SEED,
-} from '@kbn/aiops-common/log_rate_analysis/constants';
+} from '@kbn/aiops-log-rate-analysis/constants';
 
 import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 
