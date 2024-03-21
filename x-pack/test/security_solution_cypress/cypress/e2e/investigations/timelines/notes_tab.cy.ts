@@ -26,7 +26,7 @@ import { addNotesToTimeline, goToNotesTab } from '../../../tasks/timeline';
 
 import { deleteTimelines } from '../../../tasks/api_calls/common';
 
-const text = 'system_indices_superuser';
+const author = Cypress.env('ELASTICSEARCH_USERNAME');
 const link = 'https://www.elastic.co/';
 
 describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
@@ -69,12 +69,12 @@ describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
 
   it('should render the right author', () => {
     addNotesToTimeline(getTimelineNonValidQuery().notes);
-    cy.get(NOTES_AUTHOR).first().should('have.text', text);
+    cy.get(NOTES_AUTHOR).first().should('have.text', author);
   });
 
   it('should be able to render a link', () => {
-    addNotesToTimeline(`[${text}](${link})`);
-    cy.get(NOTES_LINK).last().should('have.text', `${text}(opens in a new tab or window)`);
+    addNotesToTimeline(`[${author}](${link})`);
+    cy.get(NOTES_LINK).last().should('have.text', `${author}(opens in a new tab or window)`);
     cy.get(NOTES_LINK).last().click();
   });
 
