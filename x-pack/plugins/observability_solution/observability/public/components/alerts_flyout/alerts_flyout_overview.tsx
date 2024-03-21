@@ -122,6 +122,7 @@ const columns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
               {ruleName}
             </EuiLink>
           );
+        case ColumnIDs.OBSERVED_VALUE:
           const observedValues = value as number[];
           return (
             <div>
