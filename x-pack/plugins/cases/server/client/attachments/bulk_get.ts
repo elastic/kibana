@@ -11,9 +11,8 @@ import {
   BulkGetAttachmentsRequestRt,
   BulkGetAttachmentsResponseRt,
 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/api';
 import { flattenCommentSavedObjects } from '../../common/utils';
-import { createCaseError } from '../../common/error';
+import { createCaseError, generateCaseErrorResponse } from '../../common/error';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { BulkGetArgs } from './types';
@@ -21,7 +20,7 @@ import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/
 import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import type { AttachmentAttributes } from '../../../common/types/domain';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>;
@@ -122,12 +121,7 @@ const constructErrors = ({
   const errors: BulkGetAttachmentsResponse['errors'] = [];
 
   for (const soError of soBulkGetErrors) {
-    errors.push({
-      error: soError.error.error,
-      message: soError.error.message,
-      status: soError.error.statusCode,
-      attachmentId: soError.id,
-    });
+    errors.push({ ...generateCaseErrorResponse(soError.error), attachmentId: soError.id });
   }
 
   for (const attachment of associationErrors) {

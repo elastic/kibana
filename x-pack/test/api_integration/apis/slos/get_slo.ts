@@ -14,7 +14,8 @@ import { SloEsClient } from './helper/es';
 import { sloData } from './fixtures/create_slo';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('Get SLOs', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/177806
+  describe.skip('Get SLOs', function () {
     this.tags('skipCloud');
 
     const supertestAPI = getService('supertest');
@@ -93,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0.5,
             errorBudget: {
@@ -151,6 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0.5,
             errorBudget: {
@@ -219,6 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0.5,
             errorBudget: {
@@ -286,6 +290,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0,
             errorBudget: {

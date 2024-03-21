@@ -19,7 +19,6 @@ import {
 } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -53,7 +52,15 @@ export const DiscoverTopNav = ({
   onCancelClick,
 }: DiscoverTopNavProps) => {
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
+  const {
+    dataViewEditor,
+    navigation,
+    dataViewFieldEditor,
+    data,
+    uiSettings,
+    dataViews,
+    setHeaderActionMenu,
+  } = services;
   const query = useAppStateSelector((state) => state.query);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
@@ -164,7 +171,6 @@ export const DiscoverTopNav = ({
   );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
-  const setMenuMountPoint = getHeaderActionMenuMounter();
   const topNavProps = useMemo(() => {
     if (stateContainer.customizationContext.inlineTopNav.enabled) {
       return undefined;
@@ -173,10 +179,10 @@ export const DiscoverTopNav = ({
     return {
       badges: topNavBadges,
       config: topNavMenu,
-      setMenuMountPoint,
+      setMenuMountPoint: setHeaderActionMenu,
     };
   }, [
-    setMenuMountPoint,
+    setHeaderActionMenu,
     stateContainer.customizationContext.inlineTopNav.enabled,
     topNavBadges,
     topNavMenu,
