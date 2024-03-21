@@ -21,6 +21,7 @@ const testProps = {
   isControlsEnabled: true,
   regenerateMessage: jest.fn(),
   transformMessage: jest.fn(),
+  connectorId: 'test',
 };
 
 const mockReader = jest.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;

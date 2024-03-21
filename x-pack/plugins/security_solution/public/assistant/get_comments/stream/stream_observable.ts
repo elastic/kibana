@@ -170,8 +170,8 @@ export const getStreamObservable = ({
       observer.complete();
     }
 
-    if (llmType === '.gen-ai') readBedrock();
-    else if (llmType === '.bedrock') readOpenAI();
+    if (llmType === '.bedrock') readBedrock();
+    else if (llmType === '.gen-ai') readOpenAI();
     else badConnector();
 
     return () => {
