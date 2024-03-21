@@ -21,6 +21,7 @@ import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/cus
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { ActionDocument } from './typings';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
