@@ -7,19 +7,15 @@
 
 import { firstValueFrom, map } from 'rxjs';
 
-import { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ICollector } from '@kbn/usage-collection-plugin/server/collector/types';
 import { ReportingCore } from '..';
+import { ReportingSchema } from './collection_schema';
 
 export interface ReportingUsageType {
   available: boolean;
   enabled: boolean;
 }
-
-export const reportingSchema: MakeSchemaFrom<ReportingUsageType> = {
-  available: { type: 'boolean' },
-  enabled: { type: 'boolean' },
-};
 
 export function registerReportingUsageCollector(
   reporting: ReportingCore,
@@ -34,32 +30,23 @@ export function registerReportingUsageCollector(
   const getLicense = async () => {
     const { licensing } = await reporting.getPluginStartDeps();
     return await firstValueFrom(
-      licensing.license$.pipe(
-        map(({ isAvailable, type }) => ({
-          isAvailable: () => isAvailable,
-          getType: () => type, // not used
-        }))
-      )
+      licensing.license$.pipe(map(({ isAvailable }) => ({ isAvailable })))
     );
   };
 
   const collector: ICollector<ReportingUsageType> =
     usageCollection.makeUsageCollector<ReportingUsageType>({
       type: 'reporting',
-      fetch: async () => {
-        const license = await getLicense();
-        return {
-          available: license.isAvailable(), // is available under all non-expired licenses
-          enabled: true, // is enabled, by nature of this code path executing
-        };
-      },
+      fetch: () =>
+        getLicense().then((license) => {
+          return {
+            available: license.isAvailable === true, // is available under all non-expired licenses
+            enabled: true, // is enabled, by nature of this code path executing
+          };
+        }),
       isReady,
-      schema: reportingSchema,
+      schema: ReportingSchema,
     });
-
-  if (!collector) {
-    return;
-  }
 
   usageCollection.registerCollector(collector);
 }
