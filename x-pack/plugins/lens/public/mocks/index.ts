@@ -55,7 +55,7 @@ export function createMockedDragDropContext(
       dataTestSubjPrefix: 'lnsDragDrop',
       dragging: undefined,
       keyboardMode: false,
-      activeDropTarget: undefined,
+      hoveredDropTarget: undefined,
       dropTargetsByOrder: undefined,
       ...partialState,
     },

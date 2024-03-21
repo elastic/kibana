@@ -75,7 +75,12 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
         });
       },
       JSXAttribute: (node: TSESTree.JSXAttribute) => {
-        if (node.name.name !== 'aria-label' && node.name.name !== 'label') return;
+        if (
+          node.name.name !== 'aria-label' &&
+          node.name.name !== 'label' &&
+          node.name.name !== 'title'
+        )
+          return;
 
         let val: string = '';
 

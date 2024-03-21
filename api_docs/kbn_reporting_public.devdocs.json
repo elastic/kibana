@@ -21,7 +21,7 @@
             "label": "payload",
             "description": [],
             "signature": [
-              "{ isDeprecated?: boolean | undefined; spaceId?: string | undefined; title: string; version: string; objectType: string; layout?: { id?: ",
+              "{ spaceId?: string | undefined; isDeprecated?: boolean | undefined; title: string; version: string; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",
@@ -31,7 +31,7 @@
               },
               " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
-              "> | undefined; zoom?: number | undefined; } | undefined; browserTimezone: string; pagingStrategy?: ",
+              "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; browserTimezone: string; pagingStrategy?: ",
               "CsvPagingStrategy",
               " | undefined; }"
             ],
