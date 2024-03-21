@@ -15,9 +15,9 @@ import {
 } from '@kbn/esql-ast-core';
 import { monaco } from '../../monaco_imports';
 import type { ESQLWorker } from '../worker/esql_worker';
+import { monacoPositionToOffset, wrapAsMonacoMessages } from './converters/positions';
 import { getHoverItem } from './hover/hover';
 import { getSignatureHelp } from './signature';
-import { monacoPositionToOffset, wrapAsMonacoMessages } from './editor_conversion_utils';
 
 export class ESQLAstAdapter {
   constructor(

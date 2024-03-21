@@ -15,7 +15,7 @@ import {
 } from '@kbn/esql-ast-core';
 import type { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
-import { wrapAsMonacoMessages } from '../lib/editor_conversion_utils';
+import { wrapAsMonacoMessages } from '../lib/converters/positions';
 
 export class ESQLWorker implements BaseWorkerDefinition {
   private readonly _ctx: monaco.worker.IWorkerContext;

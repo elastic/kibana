@@ -17,7 +17,7 @@ import {
   getCommandDefinition,
 } from '@kbn/esql-ast-core';
 import type { monaco } from '../../../monaco_imports';
-import { monacoPositionToOffset } from '../editor_conversion_utils';
+import { monacoPositionToOffset } from '../converters/positions';
 
 export async function getHoverItem(
   model: monaco.editor.ITextModel,

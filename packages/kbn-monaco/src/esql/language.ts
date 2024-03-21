@@ -16,7 +16,8 @@ import type { ESQLWorker } from './worker/esql_worker';
 
 import { WorkerProxyService } from '../common/worker_proxy';
 import { ESQLAstAdapter } from './lib/esql_ast_provider';
-import { wrapAsMonacoCodeActions, wrapAsMonacoSuggestions } from './lib/editor_conversion_utils';
+import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
+import { wrapAsMonacoCodeActions } from './lib/converters/actions';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();
 

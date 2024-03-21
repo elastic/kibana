@@ -6,15 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type {
-  CodeAction,
-  EditorError,
-  ESQLMessage,
-  SuggestionRawDefinition,
-} from '@kbn/esql-ast-core';
-import type { MonacoEditorError } from '../../types';
-import { monaco } from '../../monaco_imports';
-import type { MonacoAutocompleteCommandDefinition, MonacoCodeAction } from './types';
+import type { EditorError, ESQLMessage } from '@kbn/esql-ast-core';
+import type { MonacoEditorError } from '../../../types';
+import { monaco } from '../../../monaco_imports';
 
 // from linear offset to Monaco position
 export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
@@ -34,7 +28,7 @@ export function offsetToRowColumn(expression: string, offset: number): monaco.Po
 
 function convertSeverityToMonacoKind(severity: 'error' | 'warning' | number) {
   if (typeof severity === 'number') return severity;
-  return severity === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning;
+  return severity === 'error' ? 8 : 4; // monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning;
 }
 
 export function wrapAsMonacoMessages(
@@ -78,52 +72,4 @@ export function monacoPositionToOffset(expression: string, position: monaco.Posi
         prev + (index === position.lineNumber - 1 ? position.column - 1 : current.length + 1),
       0
     );
-}
-
-export function wrapAsMonacoCodeActions(
-  model: monaco.editor.ITextModel,
-  actions: CodeAction[]
-): MonacoCodeAction[] {
-  const queryString = model.getValue();
-  const uri = model.uri;
-  return actions.map((action) => {
-    const [error] = wrapAsMonacoMessages(queryString, action.diagnostics);
-    return {
-      title: action.title,
-      diagnostics: [error],
-      kind: action.kind,
-      edit: {
-        edits: action.edits.map((edit) => {
-          return {
-            resource: uri,
-            textEdit: {
-              range: error,
-              text: edit.text,
-            },
-            versionId: undefined,
-          };
-        }),
-      },
-    };
-  });
-}
-
-export function wrapAsMonacoSuggestions(
-  suggestions: SuggestionRawDefinition[]
-): MonacoAutocompleteCommandDefinition[] {
-  return suggestions.map(
-    ({ label, text, asSnippet, kind, detail, documentation, sortText, command }) => ({
-      label,
-      insertText: text,
-      kind,
-      detail,
-      documentation,
-      sortText,
-      command,
-      insertTextRules: asSnippet
-        ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        : undefined,
-      range: undefined as unknown as monaco.IRange,
-    })
-  );
 }
