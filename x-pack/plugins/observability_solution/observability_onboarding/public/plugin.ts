@@ -63,7 +63,7 @@ export class ObservabilityOnboardingPlugin
 {
   private locators?: ObservabilityOnboardingPluginLocators;
 
-  constructor(private ctx: PluginInitializerContext) {}
+  constructor(private readonly ctx: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup,
@@ -76,6 +76,7 @@ export class ObservabilityOnboardingPlugin
 
     const pluginSetupDeps = plugins;
 
+    const isServerless = this.ctx.env.packageInfo.buildFlavor === 'serverless';
     // set xpack.observability_onboarding.ui.enabled: true
     // and go to /app/observabilityOnboarding
     if (isObservabilityOnboardingUiEnabled) {
@@ -99,13 +100,14 @@ export class ObservabilityOnboardingPlugin
 
           createCallApi(core);
 
-          const experimentalOnboardingFlowEnabled: boolean =
-            (await (
+          const experimentalOnboardingFlowEnabled =
+            isServerless &&
+            !!(await (
               corePlugins as ObservabilityOnboardingPluginStartDeps
             ).cloudExperiments?.getVariation(
               'observability_onboarding.experimental_onboarding_flow_enabled',
               false
-            )) ?? false;
+            ));
 
           return renderApp({
             core: coreStart,
@@ -131,8 +133,8 @@ export class ObservabilityOnboardingPlugin
     };
   }
   public start(
-    core: CoreStart,
-    plugins: ObservabilityOnboardingPluginStartDeps
+    _core: CoreStart,
+    _plugins: ObservabilityOnboardingPluginStartDeps
   ) {
     return {
       locators: this.locators,
