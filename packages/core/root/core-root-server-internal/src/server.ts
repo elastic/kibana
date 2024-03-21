@@ -165,6 +165,9 @@ export class Server {
 
     const config = await firstValueFrom(this.configService.atPath<CoreConfigType>(coreConfig.path));
     const { disablePreboot } = config.lifecycle;
+    if (disablePreboot) {
+      this.log.info('preboot phase is disabled - skipping');
+    }
 
     const prebootStartUptime = performance.now();
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
