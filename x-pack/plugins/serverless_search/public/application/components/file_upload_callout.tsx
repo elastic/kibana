@@ -23,6 +23,7 @@ export const FileUploadCallout = () => {
         defaultMessage: 'Upload your data from a file',
       })}
       size="m"
+      iconType="iInCircle"
     >
       <p>
         <FormattedMessage
@@ -36,7 +37,7 @@ export const FileUploadCallout = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             color="primary"
-            fill
+            iconType="exportAction"
             data-test-subj="fileupload-callout-cta"
             onClick={() => navigateToUrl(http.basePath.prepend(FILE_UPLOAD_PATH))}
           >
