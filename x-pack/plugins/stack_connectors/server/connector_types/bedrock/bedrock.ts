@@ -13,9 +13,9 @@ import { PassThrough } from 'stream';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
-  RunActionResponseSchema,
   InvokeAIActionParamsSchema,
   StreamingResponseSchema,
+  RunApiResponseSchema,
 } from '../../../common/bedrock/schema';
 import type {
   Config,
@@ -193,12 +193,30 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       ...signed,
       url: `${this.url}${path}`,
       method: 'post',
-      responseSchema: RunActionResponseSchema,
+      responseSchema: RunApiResponseSchema,
       data: body,
       // give up to 2 minutes for response
       timeout: 120000,
     });
-    return response.data;
+    // pre Claude 3 response
+    if (response.data.completion) {
+      return {
+        completion: response.data.completion,
+        stop_reason: response.data.stop_reason,
+      };
+    }
+    // Claude 3 response
+    if (response.data.content) {
+      return {
+        completion: parseContent(response.data.content),
+        stop_reason: response.data.stop_reason,
+      };
+    }
+    // should not happen, needs error handling
+    return {
+      // TODO handle
+      completion: '',
+    };
   }
 
   /**
@@ -243,8 +261,17 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     stopSequences,
     temperature,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
+    const currentModel = model ?? this.model;
+    const usesMessagesApi =
+      currentModel.split('.')[0] === 'anthropic' &&
+      !currentModel.includes('claude-v2') &&
+      !currentModel.includes('claude-instant-v1');
     const res = (await this.streamApi({
-      body: JSON.stringify(formatBedrockBody({ messages, model, stopSequences, temperature })),
+      body: JSON.stringify(
+        usesMessagesApi
+          ? formatBedrockMessagesBody({ messages, model, stopSequences, temperature })
+          : formatBedrockBody({ messages, model, stopSequences, temperature })
+      ),
       model,
     })) as unknown as IncomingMessage;
     return res;
@@ -259,8 +286,17 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     messages,
     model,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
+    const currentModel = model ?? this.model;
+    const usesMessagesApi =
+      currentModel.split('.')[0] === 'anthropic' &&
+      !currentModel.includes('claude-v2') &&
+      !currentModel.includes('claude-instant-v1');
     const res = await this.runApi({
-      body: JSON.stringify(formatBedrockBody({ messages, model })),
+      body: JSON.stringify(
+        usesMessagesApi
+          ? formatBedrockMessagesBody({ messages, model })
+          : formatBedrockBody({ messages, model })
+      ),
       model,
     });
     return { message: res.completion.trim() };
@@ -308,3 +344,31 @@ const formatBedrockBody = ({
     stop_sequences: stopSequences,
   };
 };
+
+const formatBedrockMessagesBody = ({
+  messages,
+  stopSequences = ['\n\nHuman:'],
+  temperature = 0.5,
+}: {
+  model?: string;
+  messages: Array<{ role: string; content: string }>;
+  stopSequences?: string[];
+  temperature?: number;
+}) => ({
+  anthropic_version: 'bedrock-2023-05-31',
+  messages,
+  max_tokens: DEFAULT_TOKEN_LIMIT,
+  temperature,
+  stop_sequences: stopSequences,
+});
+
+function parseContent(content: Array<{ text?: string; type: string }>): string {
+  let parsedContent = '';
+  if (content.length === 1 && content[0].type === 'text' && content[0].text) {
+    parsedContent = content[0].text;
+  } else if (content.length > 1) {
+    // TODO need to check this code, i think it can be of type img or something else
+    parsedContent = content.reduce((acc, { text }) => (text ? `${acc}\n${text}` : acc), '');
+  }
+  return parsedContent;
+}

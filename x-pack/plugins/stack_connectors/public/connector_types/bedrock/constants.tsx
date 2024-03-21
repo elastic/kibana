@@ -17,12 +17,12 @@ import {
 import * as i18n from './translations';
 
 const human = '\n\nHuman:';
-const assistant = '\n\nAssistant:';
 
 export const DEFAULT_BODY = JSON.stringify({
-  prompt: `${human} Hello world! ${assistant}`,
-  max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
+  messages: [{ role: 'user', content: 'Hello world' }],
+  max_tokens: DEFAULT_TOKEN_LIMIT,
   stop_sequences: [human],
+  anthropic_version: 'bedrock-2023-05-31',
 });
 
 export const bedrockConfig: ConfigFieldSchema[] = [

@@ -45,6 +45,21 @@ export const StreamActionParamsSchema = schema.object({
   model: schema.maybe(schema.string()),
 });
 
+export const RunApiResponseSchema = schema.object(
+  {
+    completion: schema.maybe(schema.string()),
+    stop_reason: schema.maybe(schema.string()),
+    content: schema.maybe(
+      schema.arrayOf(
+        schema.object(
+          { type: schema.string(), text: schema.maybe(schema.string()) },
+          { unknowns: 'allow' }
+        )
+      )
+    ),
+  },
+  { unknowns: 'allow' }
+);
 export const RunActionResponseSchema = schema.object(
   {
     completion: schema.string(),

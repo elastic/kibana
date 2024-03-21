@@ -20,7 +20,6 @@ export const ACCESS_KEY_LABEL = i18n.translate(
     defaultMessage: 'Access Key',
   }
 );
-
 export const DEFAULT_MODEL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.bedrock.defaultModelTextFieldLabel',
   {
@@ -28,10 +27,11 @@ export const DEFAULT_MODEL_LABEL = i18n.translate(
   }
 );
 
-export const REGION_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.bedrock.defaultRegionTextFieldLabel',
+export const ANTHROPIC_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.bedrock.anthropicError',
   {
-    defaultMessage: 'AWS Region',
+    defaultMessage:
+      'Current support is for the Anthropic Claude models, please update this field to an Anthropic model.',
   }
 );
 

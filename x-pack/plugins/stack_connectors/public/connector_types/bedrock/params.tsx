@@ -13,13 +13,14 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DEFAULT_MESSAGES_BODY } from './constants';
 import * as i18n from './translations';
-import { DEFAULT_BODY } from './constants';
 import { SUB_ACTION } from '../../../common/bedrock/constants';
 import { BedrockActionParams } from './types';
 
 const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActionParams>> = ({
   actionParams,
+  actionConnector,
   editAction,
   index,
   messageVariables,
@@ -40,7 +41,13 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
 
   useEffect(() => {
     if (!subActionParams) {
-      editAction('subActionParams', { body: DEFAULT_BODY }, index);
+      editAction(
+        'subActionParams',
+        {
+          body: DEFAULT_MESSAGES_BODY,
+        },
+        index
+      );
     }
   }, [editAction, index, subActionParams]);
 
@@ -58,6 +65,14 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
       editAction('subActionParams', { ...subActionParams, ...params }, index);
     },
     [editAction, index, subActionParams]
+  );
+
+  const { isInvalid, errorMessage } = useMemo(
+    () => ({
+      isInvalid: model === undefined ? false : model.split('.')[0] === 'anthropic' ? false : true,
+      errorMessage: i18n.ANTHROPIC_ERROR,
+    }),
+    [model]
   );
 
   return (
@@ -99,6 +114,8 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
             }}
           />
         }
+        isInvalid={isInvalid}
+        error={errorMessage}
       >
         <EuiFieldText
           data-test-subj="bedrock-model"
