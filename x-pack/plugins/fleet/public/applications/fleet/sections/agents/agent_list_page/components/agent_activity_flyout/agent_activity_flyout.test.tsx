@@ -10,13 +10,13 @@ import { act, render, fireEvent } from '@testing-library/react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
 
-import { useActionStatus } from '../hooks';
-import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
+import { useActionStatus } from '../../hooks';
+import { useGetAgentPolicies, useStartServices } from '../../../../../hooks';
 
-import { AgentActivityFlyout } from './agent_activity_flyout';
+import { AgentActivityFlyout } from '.';
 
-jest.mock('../hooks');
-jest.mock('../../../../hooks');
+jest.mock('../../hooks');
+jest.mock('../../../../../hooks');
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   RedirectAppLinks: ({ children }: { children: React.ReactNode }) => children,

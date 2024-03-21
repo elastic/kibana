@@ -31,7 +31,20 @@ export async function getActionStatuses(
   esClient: ElasticsearchClient,
   options: ActionStatusOptions
 ): Promise<ActionStatus[]> {
-  const actions = await _getActions(esClient, options);
+  const actionResults = await getActionResults(esClient, options);
+
+  const policyChangeActions = await getPolicyChangeActions(esClient, options);
+  const actionStatuses = [...actionResults, ...policyChangeActions].sort(
+    (a: ActionStatus, b: ActionStatus) => (b.creationTime > a.creationTime ? 1 : -1)
+  );
+  return actionStatuses;
+}
+
+async function getActionResults(
+  esClient: ElasticsearchClient,
+  options: ActionStatusOptions
+): Promise<ActionStatus[]> {
+  const actions = await getActions(esClient, options);
   const cancelledActions = await getCancelledActions(esClient);
   let acks: any;
 
@@ -161,62 +174,10 @@ export async function getActionStatuses(
     });
   }
 
-  const policyChangeActions = await getPolicyChangeActions(esClient);
-  return [...results, ...policyChangeActions].sort((a: ActionStatus, b: ActionStatus) =>
-    b.creationTime > a.creationTime ? 1 : -1
-  );
+  return results;
 }
 
-async function getHostNames(esClient: ElasticsearchClient, agentIds: string[]) {
-  const agentsRes = await esClient.search({
-    index: AGENTS_INDEX,
-    query: {
-      bool: {
-        filter: {
-          terms: {
-            'agent.id': agentIds,
-          },
-        },
-      },
-    },
-    size: agentIds.length,
-    _source: ['local_metadata.host.name'],
-  });
-  const hostNames = agentsRes.hits.hits.reduce((acc: { [key: string]: string }, curr) => {
-    acc[curr._id] = (curr._source as any).local_metadata.host.name;
-    return acc;
-  }, {});
-
-  return hostNames;
-}
-
-export async function getCancelledActions(
-  esClient: ElasticsearchClient
-): Promise<Array<{ actionId: string; timestamp?: string }>> {
-  const res = await esClient.search<FleetServerAgentAction>({
-    index: AGENT_ACTIONS_INDEX,
-    ignore_unavailable: true,
-    size: SO_SEARCH_LIMIT,
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              type: 'CANCEL',
-            },
-          },
-        ],
-      },
-    },
-  });
-
-  return res.hits.hits.map((hit) => ({
-    actionId: hit._source?.data?.target_id as string,
-    timestamp: hit._source?.['@timestamp'],
-  }));
-}
-
-async function _getActions(
+async function getActions(
   esClient: ElasticsearchClient,
   options: ActionStatusOptions
 ): Promise<ActionStatus[]> {
@@ -282,6 +243,55 @@ async function _getActions(
   );
 }
 
+export async function getCancelledActions(
+  esClient: ElasticsearchClient
+): Promise<Array<{ actionId: string; timestamp?: string }>> {
+  const res = await esClient.search<FleetServerAgentAction>({
+    index: AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
+    size: SO_SEARCH_LIMIT,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              type: 'CANCEL',
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  return res.hits.hits.map((hit) => ({
+    actionId: hit._source?.data?.target_id as string,
+    timestamp: hit._source?.['@timestamp'],
+  }));
+}
+
+async function getHostNames(esClient: ElasticsearchClient, agentIds: string[]) {
+  const agentsRes = await esClient.search({
+    index: AGENTS_INDEX,
+    query: {
+      bool: {
+        filter: {
+          terms: {
+            'agent.id': agentIds,
+          },
+        },
+      },
+    },
+    size: agentIds.length,
+    _source: ['local_metadata.host.name'],
+  });
+  const hostNames = agentsRes.hits.hits.reduce((acc: { [key: string]: string }, curr) => {
+    acc[curr._id] = (curr._source as any).local_metadata.host.name;
+    return acc;
+  }, {});
+
+  return hostNames;
+}
+
 export const hasRolloutPeriodPassed = (source: FleetServerAgentAction) =>
   source.type === 'UPGRADE' && source.rollout_duration_seconds
     ? Date.now() >
@@ -290,10 +300,14 @@ export const hasRolloutPeriodPassed = (source: FleetServerAgentAction) =>
         .valueOf()
     : false;
 
-async function getPolicyChangeActions(esClient: ElasticsearchClient): Promise<ActionStatus[]> {
-  const latestAgentPoliciesRes = await esClient.search({
+async function getPolicyChangeActions(
+  esClient: ElasticsearchClient,
+  options: ActionStatusOptions
+): Promise<ActionStatus[]> {
+  const agentPoliciesRes = await esClient.search({
     index: AGENT_POLICY_INDEX,
-    size: 10,
+    from: options.page ?? 0,
+    size: options.perPage ?? 20,
     query: {
       bool: {
         filter: [
@@ -325,8 +339,8 @@ async function getPolicyChangeActions(esClient: ElasticsearchClient): Promise<Ac
     agentsOnAtLeastThisRevision: number;
   }
 
-  const latestAgentPolicies: { [key: string]: AgentPolicyRevision } =
-    latestAgentPoliciesRes.hits.hits.reduce((acc, curr) => {
+  const agentPolicies: { [key: string]: AgentPolicyRevision } = agentPoliciesRes.hits.hits.reduce(
+    (acc, curr) => {
       const hit = curr._source! as any;
       acc[`${hit.policy_id}:${hit.revision_idx}`] = {
         policyId: hit.policy_id,
@@ -336,7 +350,9 @@ async function getPolicyChangeActions(esClient: ElasticsearchClient): Promise<Ac
         agentsOnAtLeastThisRevision: 0,
       };
       return acc;
-    }, {} as { [key: string]: AgentPolicyRevision });
+    },
+    {} as { [key: string]: AgentPolicyRevision }
+  );
 
   const agentsPerPolicyRevisionRes = await esClient.search({
     index: AGENTS_INDEX,
@@ -399,7 +415,7 @@ async function getPolicyChangeActions(esClient: ElasticsearchClient): Promise<Ac
     {}
   );
 
-  Object.values(latestAgentPolicies).forEach((agentPolicyRev) => {
+  Object.values(agentPolicies).forEach((agentPolicyRev) => {
     const agentsPerPolicyRev = agentsPerPolicyRevisionMap[agentPolicyRev.policyId];
     if (agentsPerPolicyRev) {
       agentPolicyRev.agentsAssignedToPolicy = agentsPerPolicyRev.total;
@@ -411,7 +427,7 @@ async function getPolicyChangeActions(esClient: ElasticsearchClient): Promise<Ac
     }
   });
 
-  const agentPolicyUpdateActions: ActionStatus[] = Object.entries(latestAgentPolicies).map(
+  const agentPolicyUpdateActions: ActionStatus[] = Object.entries(agentPolicies).map(
     ([updateKey, updateObj]: [updateKey: string, updateObj: AgentPolicyRevision]) => {
       return {
         actionId: updateKey,

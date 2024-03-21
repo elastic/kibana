@@ -12,14 +12,20 @@ import { sendGetActionStatus, sendPostCancelAction, useStartServices } from '../
 
 import type { ActionStatus } from '../../../../types';
 
-export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity: boolean) {
+export function useActionStatus(
+  onAbortSuccess: () => void,
+  refreshAgentActivity: boolean,
+  nActions: number
+) {
   const [currentActions, setCurrentActions] = useState<ActionStatus[]>([]);
   const [isFirstLoading, setIsFirstLoading] = useState(true);
   const { notifications, overlays } = useStartServices();
 
-  const refreshActions = useCallback(async () => {
+  const loadActions = useCallback(async () => {
     try {
-      const res = await sendGetActionStatus();
+      const res = await sendGetActionStatus({
+        perPage: nActions,
+      });
       setIsFirstLoading(false);
       if (res.error) {
         throw res.error;
@@ -37,17 +43,21 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
         }),
       });
     }
-  }, [notifications.toasts]);
+  }, [notifications.toasts, nActions]);
 
   if (isFirstLoading) {
-    refreshActions();
+    loadActions();
   }
 
   useEffect(() => {
     if (refreshAgentActivity) {
-      refreshActions();
+      loadActions();
     }
-  }, [refreshActions, refreshAgentActivity]);
+  }, [loadActions, refreshAgentActivity]);
+
+  useEffect(() => {
+    loadActions();
+  }, [loadActions, nActions]);
 
   const abortUpgrade = useCallback(
     async (action: ActionStatus) => {
@@ -71,7 +81,7 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
           return;
         }
         await sendPostCancelAction(action.actionId);
-        await Promise.all([refreshActions(), onAbortSuccess()]);
+        await Promise.all([loadActions(), onAbortSuccess()]);
       } catch (err) {
         notifications.toasts.addError(err, {
           title: i18n.translate('xpack.fleet.currentUpgrade.abortRequestError', {
@@ -80,12 +90,11 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
         });
       }
     },
-    [refreshActions, notifications.toasts, overlays, onAbortSuccess]
+    [loadActions, notifications.toasts, overlays, onAbortSuccess]
   );
 
   return {
     currentActions,
-    refreshActions,
     abortUpgrade,
     isFirstLoading,
   };

@@ -33,12 +33,15 @@ import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagno
 
 import type { SelectionMode } from './components/types';
 
-import { AgentTableHeader } from './components/table_header';
-import { SearchAndFilterBar } from './components/search_and_filter_bar';
-import { TagsAddRemove } from './components/tags_add_remove';
-import { AgentActivityFlyout, AgentSoftLimitCallout } from './components';
-import { TableRowActions } from './components/table_row_actions';
-import { AgentListTable } from './components/agent_list_table';
+import {
+  AgentListTable,
+  AgentSoftLimitCallout,
+  AgentTableHeader,
+  SearchAndFilterBar,
+  TableRowActions,
+  TagsAddRemove,
+} from './components';
+import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {

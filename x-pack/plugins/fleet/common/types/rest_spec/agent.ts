@@ -233,6 +233,13 @@ export interface GetAgentIncomingDataResponse {
 export interface GetCurrentUpgradesResponse {
   items: CurrentUpgrade[];
 }
+
+export interface GetActionStatusRequest {
+  query: {
+    perPage?: number;
+    page?: number;
+  };
+}
 export interface GetActionStatusResponse {
   items: ActionStatus[];
 }
