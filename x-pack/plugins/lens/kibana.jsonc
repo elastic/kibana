@@ -57,6 +57,7 @@
       "fieldFormats",
       "charts",
       "textBasedLanguages",
+      "esUiShared",
     ],
     "extraPublicDirs": [
       "common/constants"

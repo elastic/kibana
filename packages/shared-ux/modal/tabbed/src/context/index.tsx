@@ -59,7 +59,7 @@ export interface IModalTabDeclaration<S extends IModalTabState> extends EuiTabPr
 }
 
 interface IModalContext<S extends IModalTabState = IModalTabState> {
-  tabs: Array<Exclude<IModalTabDeclaration<S>, 'reducer' | 'initialState'>>;
+  tabs: Array<Exclude<IModalTabDeclaration<S>, 'reducer' | 'initialState'>> | null;
   state: { meta: IModalMetaState } & Record<string, S>;
   dispatch: Dispatch<IDispatchAction>;
 }
@@ -112,9 +112,9 @@ export function ModalContextProvider<T extends Array<IModalTabDeclaration<IModal
 
   const reducersMap = useMemo(
     () =>
-      tabs.reduce((result, { id, reducer, initialState, ...rest }) => {
+      tabs?.reduce((result, { id, reducer, initialState, ...rest }) => {
         initialModalState.current[id] = initialState ?? {};
-        modalTabDefinitions.current.push({ id, reducer, ...rest });
+        modalTabDefinitions.current?.push({ id, reducer, ...rest });
         result[id] = reducer;
         return result;
       }, {}),

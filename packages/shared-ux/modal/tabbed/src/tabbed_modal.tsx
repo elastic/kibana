@@ -40,11 +40,8 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
     [selectedTabId, state]
   );
 
-  const {
-    content: SelectedTabContent,
-    modalActionBtn: { defaultMessage, handler, dataTestSubj, formattedMessageId },
-  } = useMemo(() => {
-    return tabs.find((obj) => obj.id === selectedTabId)!;
+  const { content: SelectedTabContent, modalActionBtn } = useMemo(() => {
+    return tabs?.find((obj) => obj.id === selectedTabId)!;
   }, [selectedTabId, tabs]);
 
   const onSelectedTabChanged = (id: string) => {
@@ -52,7 +49,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
   };
 
   const renderTabs = () => {
-    return tabs.map((tab, index) => (
+    return tabs?.map((tab, index) => (
       <EuiTab
         key={index}
         onClick={() => onSelectedTabChanged(tab.id)}
@@ -67,8 +64,8 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
   };
 
   const btnClickHandler = useCallback(() => {
-    handler({ state: selectedTabState });
-  }, [handler, selectedTabState]);
+    modalActionBtn ? modalActionBtn.handler({ state: selectedTabState }) : null;
+  }, [selectedTabState, modalActionBtn]);
 
   return (
     <EuiModal
@@ -88,16 +85,21 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
           })}
         </Fragment>
       </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButton
-          fill
-          data-test-subj={dataTestSubj}
-          data-share-url={state.url}
-          onClick={btnClickHandler}
-        >
-          <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
-        </EuiButton>
-      </EuiModalFooter>
+      {modalActionBtn && (
+        <EuiModalFooter>
+          <EuiButton
+            fill
+            data-test-subj={modalActionBtn.dataTestSubj}
+            data-share-url={state.url}
+            onClick={btnClickHandler}
+          >
+            <FormattedMessage
+              id={modalActionBtn.formattedMessageId}
+              defaultMessage={modalActionBtn.defaultMessage}
+            />
+          </EuiButton>
+        </EuiModalFooter>
+      )}
     </EuiModal>
   );
 };

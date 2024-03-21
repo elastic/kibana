@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart, HttpStart } from '@kbn/core/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
@@ -64,6 +64,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -181,6 +182,7 @@ export interface LensPluginStartDependencies {
   eventAnnotationService: EventAnnotationServiceType;
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
+  http: HttpStart;
 }
 
 export interface LensPublicSetup {
@@ -390,11 +392,19 @@ export class LensPlugin {
 
     if (share) {
       this.locator = share.url.locators.create(new LensAppLocatorDefinition());
-
+      const reportingApiClient = new ReportingAPIClient(
+        core.http,
+        core.uiSettings,
+        share.kibanaVersion
+      );
       share.register(
         downloadCsvShareProvider({
           uiSettings: core.uiSettings,
           formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+          reportingApiClient,
+          toasts: core.notifications.toasts,
+          theme: core.theme,
+          version: share.kibanaVersion,
         })
       );
     }
