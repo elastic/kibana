@@ -41,4 +41,5 @@ export type FilterGroupProps = {
   initialControls: FilterItemObj[];
   spaceId: string;
   onInit?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
+  onControlsUpdate?: (controls: FilterItemObj[]) => Promise<void>;
 } & Pick<ControlGroupInput, 'timeRange' | 'filters' | 'query' | 'chainingSystem'>;

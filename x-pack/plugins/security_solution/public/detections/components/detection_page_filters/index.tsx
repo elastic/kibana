@@ -10,6 +10,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { EuiFlexItem } from '@elastic/eui';
+import type { SecuritySolutionUserSettingPath } from '../../../common/hooks/use_user_settings';
+import { useSecuritySolutionUserSettings } from '../../../common/hooks/use_user_settings';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FilterGroupLoading } from '../../../common/components/filter_group/loading';
 import { useKibana } from '../../../common/lib/kibana';
@@ -27,8 +29,35 @@ const SECURITY_ALERT_DATA_VIEW = {
   name: 'Security Solution Alerts DataView',
 };
 
+const pageFiltersUserSetting: SecuritySolutionUserSettingPath = {
+  module: 'ALERT',
+  key: 'pageFilters',
+};
+
 const FilterItemSetComponent = (props: FilterItemSetProps) => {
   const { onFilterChange, ...restFilterItemGroupProps } = props;
+
+  const {
+    getCurrent,
+    userSettings: savedPageFilters,
+    update,
+    userSettingsLoadStatus,
+  } = useSecuritySolutionUserSettings<typeof DEFAULT_DETECTION_PAGE_FILTERS>(
+    pageFiltersUserSetting
+  );
+
+  console.log({ savedPageFilters });
+
+  useEffect(() => {
+    async function updateDefaultDetectionPageFilters() {
+      if (userSettingsLoadStatus === 'pending') return;
+      if (!(await getCurrent())) {
+        await update(DEFAULT_DETECTION_PAGE_FILTERS);
+        await getCurrent();
+      }
+    }
+    updateDefaultDetectionPageFilters();
+  }, [savedPageFilters, update, getCurrent, userSettingsLoadStatus]);
 
   const {
     indexPattern: { title },
@@ -58,8 +87,6 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
     return () => dataViewService.clearInstanceCache();
   }, [title, dataViewService, dataViewId]);
 
-  const [initialFilterControls] = useState(DEFAULT_DETECTION_PAGE_FILTERS);
-
   const filterChangesHandler = useCallback(
     (newFilters: Filter[]) => {
       if (!onFilterChange) {
@@ -80,7 +107,17 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
     [onFilterChange]
   );
 
-  if (loadingPageFilters) {
+  const isLoading = loadingPageFilters || !savedPageFilters;
+
+  const onControlsUpdate = useCallback(
+    async (newControls: typeof DEFAULT_DETECTION_PAGE_FILTERS) => {
+      await update(newControls);
+      await getCurrent();
+    },
+    [update, getCurrent]
+  );
+
+  if (isLoading) {
     return (
       <EuiFlexItem grow={true}>
         <FilterGroupLoading />
@@ -92,7 +129,8 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
     <FilterGroup
       dataViewId={SECURITY_ALERT_DATA_VIEW.id}
       onFilterChange={filterChangesHandler}
-      initialControls={initialFilterControls}
+      initialControls={savedPageFilters}
+      onControlsUpdate={onControlsUpdate}
       {...restFilterItemGroupProps}
     />
   );
