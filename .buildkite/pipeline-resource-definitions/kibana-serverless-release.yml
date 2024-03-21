@@ -20,7 +20,7 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        SLACK_NOTIFICATIONS_ENABLED: 'false'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/serverless_deployment/create_deployment_tag.yml
