@@ -112,11 +112,11 @@ describe('Table', () => {
     expect(component.state().isSearchTextValid).toBe(true);
   });
 
-  it(`prevents saved objects from being deleted`, () => {
+  it(`prevents hidden saved objects from being deleted`, () => {
     const selectedSavedObjects = [
-      { type: 'visualization', meta: { hiddenType: false } },
-      { type: 'search', meta: { hiddenType: false } },
-      { type: 'index-pattern', meta: { hiddenType: false } },
+      { type: 'visualization', meta: { hiddenType: true } },
+      { type: 'search', meta: { hiddenType: true } },
+      { type: 'index-pattern', meta: { hiddenType: true } },
     ] as any;
     const customizedProps = {
       ...defaultProps,
