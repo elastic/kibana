@@ -380,7 +380,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
     for (const testData of supportedTestSuites) {
-      describe(testData.suiteTitle, function () {
+      // FAILING ES FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/179167
+      describe.skip(testData.suiteTitle, function () {
         before(async () => {
           await ml.api.createAndRunAnomalyDetectionLookbackJob(
             testData.jobConfig,
