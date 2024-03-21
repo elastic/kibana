@@ -312,11 +312,14 @@ function convertBuildkitePipeline(
 
   const providerSettings = pipeline.provider_settings?.[0] || {};
 
+  const canonicalPipelineId =
+    `buildkite-pipeline-` + pipelineId.replace(/[^a-zA-Z0-9-]+/g, '-').toLowerCase();
+
   const pipelineObj = {
     apiVersion: 'backstage.io/v1alpha1',
     kind: 'Resource',
     metadata: {
-      name: pipelineId,
+      name: canonicalPipelineId,
       description: pipeline.description,
     },
     spec: {
