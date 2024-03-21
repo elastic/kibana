@@ -95,8 +95,6 @@ describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverle
     it('creates an exception item', () => {
       // when no exceptions exist, empty component shows with action to add exception
 
-      cy.pause();
-
       cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
       // open add exception modal
