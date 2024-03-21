@@ -7,7 +7,7 @@
  */
 
 import { join } from 'path';
-import { merge } from 'lodash';
+import { merge, isEmpty } from 'lodash';
 import { execSync } from 'child_process';
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
@@ -195,7 +195,11 @@ export class ApmConfiguration {
       );
     }
 
-    return merge(config, { servicesOverrides });
+    if (!isEmpty(servicesOverrides)) {
+      merge(config, { servicesOverrides });
+    }
+
+    return config;
   }
 
   /**
