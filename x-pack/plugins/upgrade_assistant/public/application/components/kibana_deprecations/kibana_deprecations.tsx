@@ -63,7 +63,7 @@ const i18nTexts = {
         pluginIds: pluginIds.join(', '),
       },
     }),
-  missingClusterPermissionsDescription: (privilegesMissing: MissingPrivileges) => (
+  missingPermissionDescription: (privilegesMissing: MissingPrivileges) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.logsStep.missingClusterPrivilegesDescription"
       defaultMessage="Certain issues might be missing due to missing cluster {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}."
@@ -295,7 +295,7 @@ export const KibanaDeprecationsList = ({
           >
             <>
               {!hasPrivileges && (
-                <p>{i18nTexts.missingClusterPermissionsDescription(privilegesMissing)}</p>
+                <p>{i18nTexts.missingPermissionDescription(privilegesMissing)}</p>
               )}
 
               {kibanaDeprecationErrors.length > 0 && (
