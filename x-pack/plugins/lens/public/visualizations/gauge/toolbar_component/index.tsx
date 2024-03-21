@@ -6,15 +6,14 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GaugeLabelMajorMode, GaugeShape } from '@kbn/expression-gauge-plugin/common';
+import { GaugeLabelMajorMode } from '@kbn/expression-gauge-plugin/common';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover, VisLabel } from '../../../shared_components';
 import './gauge_config_panel.scss';
 import type { GaugeVisualizationState } from '../constants';
-import { CHART_NAMES } from '../visualization';
 
 export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualizationState>) => {
   const { state, setState, frame } = props;
@@ -92,28 +91,6 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
                   });
                   setSubtitleMode(value.mode);
                 }}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              display="columnCompressed"
-              label={i18n.translate('xpack.lens.label.gauge.angleType', {
-                defaultMessage: 'Type',
-              })}
-            >
-              <EuiSelect
-                fullWidth
-                compressed
-                data-test-subj="lnsToolbarGaugeAngleType"
-                aria-label="Label"
-                onChange={({ target }) => {
-                  setState({ ...state, shape: target.value as GaugeShape });
-                }}
-                options={Object.values(CHART_NAMES).map(({ id, label }) => ({
-                  value: id,
-                  text: label,
-                }))}
-                value={state.shape}
               />
             </EuiFormRow>
           </ToolbarPopover>
