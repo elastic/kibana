@@ -12,10 +12,12 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   isFeatureEnabled: boolean;
@@ -36,6 +38,10 @@ export function TryItButton({
   icon,
   isLoading,
 }: Props) {
+  const { core } = useApmPluginContext();
+  const canEditAdvancedSettings =
+    core.application.capabilities.advancedSettings?.save;
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   function togglePopover() {
     setIsPopoverOpen((state) => !state);
@@ -93,12 +99,12 @@ export function TryItButton({
   function Popover() {
     return (
       <>
-        {popoverContent && (
+        {popoverContent || !canEditAdvancedSettings ? (
           <EuiFlexItem grow={false}>
             <EuiPopover
               button={
                 <EuiButtonIcon
-                  data-test-subj="apmTryItButtonButton"
+                  data-test-subj="apmPopoverButton"
                   iconType="questionInCircle"
                   aria-label={i18n.translate(
                     'xpack.apm.tryItButton.euiButtonIcon.tryItHelperButtonLabel',
@@ -111,10 +117,24 @@ export function TryItButton({
               closePopover={togglePopover}
               anchorPosition="upCenter"
             >
-              {popoverContent}
+              <>
+                {popoverContent}
+                {!canEditAdvancedSettings && (
+                  <>
+                    <EuiSpacer size="s" />
+                    {i18n.translate(
+                      'xpack.apm.tryItButton.euiButtonIcon.adminAccess',
+                      {
+                        defaultMessage:
+                          'Please ask your administrator to turn it on by enabling it in within settings.',
+                      }
+                    )}
+                  </>
+                )}
+              </>
             </EuiPopover>
           </EuiFlexItem>
-        )}
+        ) : null}
       </>
     );
   }
@@ -122,11 +142,11 @@ export function TryItButton({
   function Link() {
     return (
       <>
-        {linkLabel && (
+        {linkLabel && canEditAdvancedSettings && (
           <EuiFlexItem grow={false}>
             <EuiLink
+              data-test-subj="apmLink"
               disabled={isLoading}
-              data-test-subj="apmTryItButtonButton"
               onClick={onClick}
             >
               {linkLabel}
