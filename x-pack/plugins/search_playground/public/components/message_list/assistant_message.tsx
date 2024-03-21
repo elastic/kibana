@@ -19,11 +19,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { RetrievalDocsFlyout } from './retrieval_docs_flyout';
 import type { AIMessage as AIMessageType } from '../../types';
 
 import { CopyActionButton } from './copy_action_button';
 import { CitationsTable } from './citations_table';
-import { RetrievalDocsFlyout } from './retrieval_docs_flyout';
 
 type AssistantMessageProps = Pick<
   AIMessageType,
@@ -37,85 +38,108 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
   retrievalDocs,
 }) => {
   const [isDocsFlyoutOpen, setIsDocsFlyoutOpen] = useState(false);
+  const username = i18n.translate('xpack.searchPlayground.chat.message.assistant.username', {
+    defaultMessage: 'AI',
+  });
 
   return (
-    <EuiComment
-      username={i18n.translate('xpack.searchPlayground.chat.message.assistant.username', {
-        defaultMessage: 'AI',
-      })}
-      event={i18n.translate('xpack.searchPlayground.chat.message.assistant.event', {
-        defaultMessage: 'responded',
-      })}
-      timestamp={
-        createdAt &&
-        i18n.translate('xpack.searchPlayground.chat.message.assistant.createdAt', {
-          defaultMessage: 'on {date}',
-          values: {
-            date: moment(createdAt).format('MMM DD, YYYY'),
-          },
-        })
-      }
-      timelineAvatar="compute"
-      timelineAvatarAriaLabel={i18n.translate(
-        'xpack.searchPlayground.chat.message.assistant.avatarAriaLabel',
-        {
-          defaultMessage: 'AI',
-        }
-      )}
-      actions={
-        <CopyActionButton
-          copyText={String(content)}
-          ariaLabel={i18n.translate('xpack.searchPlayground.chat.message.assistant.copyLabel', {
-            defaultMessage: 'Copy assistant message',
-          })}
-        />
-      }
-    >
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiTitle size="xs">
-          <h4>
-            {i18n.translate('xpack.searchPlayground.chat.message.assistant.title', {
-              defaultMessage: 'Summary',
-            })}
-          </h4>
-        </EuiTitle>
-        {!!retrievalDocs?.length && (
-          <>
-            <EuiButtonEmpty onClick={() => setIsDocsFlyoutOpen(true)}>
-              {i18n.translate('xpack.searchPlayground.chat.message.assistant.retrievalDocButton', {
-                defaultMessage:
-                  '{count} {count, plural, one {document} other {documents}} retrieved',
-                values: { count: retrievalDocs.length },
-              })}
-            </EuiButtonEmpty>
+    <>
+      {!!retrievalDocs?.length && (
+        <EuiComment
+          username={username}
+          timelineAvatar="dot"
+          event={
+            <>
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.searchPlayground.chat.message.assistant.retrievalDocs"
+                    defaultMessage="retrieved"
+                  />
+                </p>
+              </EuiText>
+              <EuiButtonEmpty
+                css={{ blockSize: 'auto' }}
+                size="s"
+                onClick={() => setIsDocsFlyoutOpen(true)}
+              >
+                <FormattedMessage
+                  id="xpack.searchPlayground.chat.message.assistant.retrievalDocButton"
+                  defaultMessage="{count} {count, plural, one {document} other {documents}} sources"
+                  values={{ count: retrievalDocs.length }}
+                />
+              </EuiButtonEmpty>
 
-            {isDocsFlyoutOpen && (
-              <RetrievalDocsFlyout
-                onClose={() => setIsDocsFlyoutOpen(false)}
-                retrievalDocs={retrievalDocs}
+              {isDocsFlyoutOpen && (
+                <RetrievalDocsFlyout
+                  onClose={() => setIsDocsFlyoutOpen(false)}
+                  retrievalDocs={retrievalDocs}
+                />
+              )}
+            </>
+          }
+        />
+      )}
+      <EuiComment
+        username={username}
+        event={i18n.translate('xpack.searchPlayground.chat.message.assistant.event.responded', {
+          defaultMessage: 'responded',
+        })}
+        timestamp={
+          createdAt &&
+          i18n.translate('xpack.searchPlayground.chat.message.assistant.createdAt', {
+            defaultMessage: 'on {date}',
+            values: {
+              date: moment(createdAt).format('MMM DD, YYYY'),
+            },
+          })
+        }
+        timelineAvatar="compute"
+        timelineAvatarAriaLabel={i18n.translate(
+          'xpack.searchPlayground.chat.message.assistant.avatarAriaLabel',
+          {
+            defaultMessage: 'AI',
+          }
+        )}
+        actions={
+          <CopyActionButton
+            copyText={String(content)}
+            ariaLabel={i18n.translate('xpack.searchPlayground.chat.message.assistant.copyLabel', {
+              defaultMessage: 'Copy assistant message',
+            })}
+          />
+        }
+      >
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiTitle size="xs">
+            <h4>
+              <FormattedMessage
+                id="xpack.searchPlayground.chat.message.assistant.title"
+                defaultMessage="Summary"
               />
-            )}
+            </h4>
+          </EuiTitle>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiText size="s">
+          <p>{content}</p>
+        </EuiText>
+        {!!citations?.length && (
+          <>
+            <EuiSpacer size="l" />
+            <EuiTitle size="xs">
+              <p>
+                <FormattedMessage
+                  id="xpack.searchPlayground.chat.message.assistant.citations.title"
+                  defaultMessage="Citations"
+                />
+              </p>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <CitationsTable citations={citations} />
           </>
         )}
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiText size="s">
-        <p>{content}</p>
-      </EuiText>
-      {!!citations?.length && (
-        <>
-          <EuiSpacer size="l" />
-          <EuiTitle size="xs">
-            <p>
-              {i18n.translate('xpack.searchPlayground.chat.message.assistant.citations.title', {
-                defaultMessage: 'Citations',
-              })}
-            </p>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <CitationsTable citations={citations} />
-        </>
-      )}
-    </EuiComment>
+      </EuiComment>
+    </>
   );
 };
