@@ -14,38 +14,38 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  return new (class ModelsFlyout {
-    public async assertElserModelHeaderCopy(): Promise<void> {
+  return {
+    async assertElserModelHeaderCopy(): Promise<void> {
       await testSubjects.existOrFail('mlAddTrainedModelFlyoutElserModelHeaderCopy', {
         timeout: 3_000,
       });
-    }
+    },
 
-    public async assertElserPanelsExist(): Promise<void> {
+    async assertElserPanelsExist(): Promise<void> {
       await retry.tryForTime(3_000, async () => {
         await testSubjects.existOrFail('mlAddTrainedModelFlyoutModelPanel-elser-.elser_model_2');
         await testSubjects.existOrFail(
           'mlAddTrainedModelFlyoutModelPanel-elser-.elser_model_2_linux-x86_64'
         );
       });
-    }
+    },
 
-    public async assertE5PanelsExist(): Promise<void> {
+    async assertE5PanelsExist(): Promise<void> {
       await retry.tryForTime(3_000, async () => {
         await testSubjects.existOrFail('mlAddTrainedModelFlyoutModelPanel-elser-.elser_model_2');
         await testSubjects.existOrFail(
           'mlAddTrainedModelFlyoutModelPanel-e5-.multilingual-e5-small_linux-x86_64'
         );
       });
-    }
+    },
 
-    public async assertDownloadButtonExists(): Promise<void> {
+    async assertDownloadButtonExists(): Promise<void> {
       await testSubjects.existOrFail('mlAddTrainedModelFlyoutDownloadButton', {
         timeout: 3_000,
       });
-    }
+    },
 
-    public async assertOpen(expectOpen: boolean): Promise<void> {
+    async assertOpen(expectOpen: boolean): Promise<void> {
       if (expectOpen) {
         await testSubjects.existOrFail('mlAddTrainedModelFlyout', {
           timeout: 3_000,
@@ -55,23 +55,23 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
           timeout: 3_000,
         });
       }
-    }
+    },
 
-    public async open() {
+    async open() {
       await retry.tryForTime(3_000, async () => {
         await testSubjects.click('mlModelsAddTrainedModelButton');
         await this.assertOpen(true);
       });
-    }
+    },
 
-    public async close(): Promise<void> {
+    async close(): Promise<void> {
       await retry.tryForTime(3_000, async () => {
         await testSubjects.click('euiFlyoutCloseButton');
         await this.assertOpen(false);
       });
-    }
+    },
 
-    public async assertFlyoutTabs(tabs: AddModelFlyoutTabId[]): Promise<void> {
+    async assertFlyoutTabs(tabs: AddModelFlyoutTabId[]): Promise<void> {
       const expectedTabCount = tabs.length;
       const actualTabs = await testSubjects.findAll('~mlAddTrainedModelFlyoutTab', 3_000);
       const actualTabCount = actualTabs.length;
@@ -82,9 +82,9 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
         await testSubjects.existOrFail(`mlAddTrainedModelFlyoutTab ${tab}`, {
           timeout: 3_000,
         });
-    }
+    },
 
-    public async assertElandPythonClientCodeBlocks() {
+    async assertElandPythonClientCodeBlocks() {
       expect(await testSubjects.getVisibleText('mlElandPipInstallCodeBlock')).to.match(
         /python -m pip install eland/
       );
@@ -94,6 +94,6 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
       expect(await testSubjects.getVisibleText('mlElandExampleImportCodeBlock')).to.match(
         /eland_import_hub_model/
       );
-    }
-  })();
+    },
+  };
 }
