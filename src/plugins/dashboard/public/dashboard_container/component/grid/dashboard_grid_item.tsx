@@ -98,7 +98,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           pointer-events: none;
           opacity: 0.25;
         `
-      : css``;
+      : undefined;
 
     const renderedEmbeddable = useMemo(() => {
       const references = getReferencesForPanelId(id, container.savedObjectReferences);
