@@ -13,15 +13,15 @@ import { getTableItemAsKQL } from './get_table_item_as_kql';
 
 describe('getTableItemAsKQL', () => {
   it('returns a KQL syntax for a significant item', () => {
-    expect(getTableItemAsKQL(significantTerms[0])).toBe('user:Peter');
-    expect(getTableItemAsKQL(significantTerms[1])).toBe('response_code:500');
-    expect(getTableItemAsKQL(significantTerms[2])).toBe('url:home.php');
-    expect(getTableItemAsKQL(significantTerms[3])).toBe('url:login.php');
+    expect(getTableItemAsKQL(significantTerms[0])).toBe('user:"Peter"');
+    expect(getTableItemAsKQL(significantTerms[1])).toBe('response_code:"500"');
+    expect(getTableItemAsKQL(significantTerms[2])).toBe('url:"home.php"');
+    expect(getTableItemAsKQL(significantTerms[3])).toBe('url:"login.php"');
   });
   it('returns a KQL syntax for a group of significant items', () => {
     const groupTableItems = getGroupTableItems(finalSignificantItemGroups);
-    expect(getTableItemAsKQL(groupTableItems[0])).toBe('response_code:500 AND url:home.php');
-    expect(getTableItemAsKQL(groupTableItems[1])).toBe('url:login.php AND response_code:500');
-    expect(getTableItemAsKQL(groupTableItems[2])).toBe('user:Peter AND url:home.php');
+    expect(getTableItemAsKQL(groupTableItems[0])).toBe('response_code:"500" AND url:"home.php"');
+    expect(getTableItemAsKQL(groupTableItems[1])).toBe('url:"login.php" AND response_code:"500"');
+    expect(getTableItemAsKQL(groupTableItems[2])).toBe('user:"Peter" AND url:"home.php"');
   });
 });
