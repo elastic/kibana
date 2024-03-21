@@ -14,7 +14,7 @@ import { EuiLoadingChart } from '@elastic/eui';
 import type {
   ChangePointDetectionViewType,
   EmbeddableChangePointType,
-} from '@kbn/aiops-common/change_point_detection/constants';
+} from '@kbn/aiops-change-point-detection/constants';
 import type { AiopsPluginStartDeps } from '../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import type { ChangePointAnnotation } from '../components/change_point_detection/change_point_detection_context';

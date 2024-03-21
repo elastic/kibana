@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-common/change_point_detection/constants';
+import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';

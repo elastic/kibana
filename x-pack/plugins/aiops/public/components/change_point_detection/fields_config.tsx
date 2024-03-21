@@ -32,11 +32,11 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { ChangePointDetectionViewType } from '@kbn/aiops-common/change_point_detection/constants';
+import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import {
   CHANGE_POINT_DETECTION_VIEW_TYPE,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-} from '@kbn/aiops-common/change_point_detection/constants';
+} from '@kbn/aiops-change-point-detection/constants';
 import { MaxSeriesControl } from './max_series_control';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
