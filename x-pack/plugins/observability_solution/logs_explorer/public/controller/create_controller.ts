@@ -59,7 +59,7 @@ export const createLogsExplorerControllerFactory =
     });
     const discoverServices: LogsExplorerDiscoverServices = {
       data: customData,
-      history: () => customMemoryHistory,
+      history: customMemoryHistory,
       uiSettings: customUiSettings,
       filterManager: customData.query.filterManager,
       timefilter: customData.query.timefilter.timefilter,
@@ -75,6 +75,7 @@ export const createLogsExplorerControllerFactory =
       initialContext,
       query: discoverServices.data.query,
       toasts: core.notifications.toasts,
+      uiSettings: customUiSettings,
     });
 
     const service = interpret(machine, {

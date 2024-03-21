@@ -255,9 +255,6 @@ function extractCompatibleSignaturesForFunction(
   astFunction: ESQLFunction
 ) {
   return fnDef.signatures.filter((def) => {
-    if (def.infiniteParams) {
-      return astFunction.args.length > 0;
-    }
     if (def.minParams) {
       return astFunction.args.length >= def.minParams;
     }

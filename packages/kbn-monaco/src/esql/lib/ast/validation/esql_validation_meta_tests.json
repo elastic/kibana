@@ -251,7 +251,51 @@
       "error": false
     },
     {
+      "query": "from *a_i*dex*",
+      "error": false
+    },
+    {
+      "query": "from in*ex*",
+      "error": false
+    },
+    {
+      "query": "from *n*ex",
+      "error": false
+    },
+    {
+      "query": "from *n*ex*",
+      "error": false
+    },
+    {
+      "query": "from i*d*x*",
+      "error": false
+    },
+    {
+      "query": "from i*d*x",
+      "error": false
+    },
+    {
+      "query": "from i***x*",
+      "error": false
+    },
+    {
+      "query": "from i****",
+      "error": false
+    },
+    {
+      "query": "from i**",
+      "error": false
+    },
+    {
+      "query": "from index**",
+      "error": false
+    },
+    {
       "query": "from *ex",
+      "error": false
+    },
+    {
+      "query": "from *ex*",
       "error": false
     },
     {
@@ -519,11 +563,11 @@
       "error": false
     },
     {
-      "query": "row var = case(true, \"a\", \"a\", \"a\")",
+      "query": "row var = case(true, \"a\")",
       "error": false
     },
     {
-      "query": "row case(true, \"a\", \"a\", \"a\")",
+      "query": "row case(true, \"a\")",
       "error": false
     },
     {
@@ -543,19 +587,19 @@
       "error": true
     },
     {
-      "query": "row var = cidr_match(to_ip(\"127.0.0.1\"), \"a\", \"a\")",
+      "query": "row var = cidr_match(to_ip(\"127.0.0.1\"), \"a\")",
       "error": false
     },
     {
-      "query": "row cidr_match(to_ip(\"127.0.0.1\"), \"a\", \"a\")",
+      "query": "row cidr_match(to_ip(\"127.0.0.1\"), \"a\")",
       "error": false
     },
     {
-      "query": "row var = cidr_match(to_ip(\"a\"), to_string(\"a\"), to_string(\"a\"))",
+      "query": "row var = cidr_match(to_ip(\"a\"), to_string(\"a\"))",
       "error": false
     },
     {
-      "query": "row var = cidr_match(\"a\", 5, 5)",
+      "query": "row var = cidr_match(\"a\", 5)",
       "error": true
     },
     {
@@ -567,19 +611,19 @@
       "error": false
     },
     {
-      "query": "row var = concat(\"a\", \"a\", \"a\")",
+      "query": "row var = concat(\"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row concat(\"a\", \"a\", \"a\")",
+      "query": "row concat(\"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row var = concat(to_string(\"a\"), to_string(\"a\"), to_string(\"a\"))",
+      "query": "row var = concat(to_string(\"a\"), to_string(\"a\"))",
       "error": false
     },
     {
-      "query": "row var = concat(5, 5, 5)",
+      "query": "row var = concat(5, 5)",
       "error": true
     },
     {
@@ -2439,6 +2483,18 @@
       "error": false
     },
     {
+      "query": "from index | drop s**Field",
+      "error": false
+    },
+    {
+      "query": "from index | drop *Field*",
+      "error": false
+    },
+    {
+      "query": "from index | drop s*F*d",
+      "error": false
+    },
+    {
       "query": "from index | drop *Field",
       "error": false
     },
@@ -3607,11 +3663,11 @@
       "error": true
     },
     {
-      "query": "from a_index | where length(concat(stringField, stringField, stringField)) > 0",
+      "query": "from a_index | where length(concat(stringField, stringField)) > 0",
       "error": false
     },
     {
-      "query": "from a_index | where length(concat(numberField, numberField, numberField)) > 0",
+      "query": "from a_index | where length(concat(numberField, numberField)) > 0",
       "error": true
     },
     {
@@ -4815,11 +4871,11 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = case(booleanField, stringField, stringField, stringField)",
+      "query": "from a_index | eval var = case(booleanField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval case(booleanField, stringField, stringField, stringField)",
+      "query": "from a_index | eval case(booleanField, stringField)",
       "error": false
     },
     {
@@ -4847,19 +4903,19 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = cidr_match(ipField, stringField, stringField)",
+      "query": "from a_index | eval var = cidr_match(ipField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval cidr_match(ipField, stringField, stringField)",
+      "query": "from a_index | eval cidr_match(ipField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval var = cidr_match(to_ip(stringField), to_string(stringField), to_string(stringField))",
+      "query": "from a_index | eval var = cidr_match(to_ip(stringField), to_string(stringField))",
       "error": false
     },
     {
-      "query": "from a_index | eval cidr_match(stringField, numberField, numberField)",
+      "query": "from a_index | eval cidr_match(stringField, numberField)",
       "error": true
     },
     {
@@ -4871,23 +4927,19 @@
       "error": false
     },
     {
-      "query": "from a_index | eval var = coalesce(*)",
-      "error": true
-    },
-    {
-      "query": "from a_index | eval var = concat(stringField, stringField, stringField)",
+      "query": "from a_index | eval var = concat(stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval concat(stringField, stringField, stringField)",
+      "query": "from a_index | eval concat(stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval var = concat(to_string(stringField), to_string(stringField), to_string(stringField))",
+      "query": "from a_index | eval var = concat(to_string(stringField), to_string(stringField))",
       "error": false
     },
     {
-      "query": "from a_index | eval concat(numberField, numberField, numberField)",
+      "query": "from a_index | eval concat(numberField, numberField)",
       "error": true
     },
     {
@@ -5091,20 +5143,12 @@
       "error": false
     },
     {
-      "query": "from a_index | eval var = greatest(*)",
-      "error": true
-    },
-    {
       "query": "from a_index | eval var = least(stringField)",
       "error": false
     },
     {
       "query": "from a_index | eval least(stringField)",
       "error": false
-    },
-    {
-      "query": "from a_index | eval var = least(*)",
-      "error": true
     },
     {
       "query": "from a_index | eval var = left(stringField, numberField)",

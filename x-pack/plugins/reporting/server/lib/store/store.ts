@@ -7,13 +7,14 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ILM_POLICY_NAME, JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
+import { ILM_POLICY_NAME, JOB_STATUS } from '@kbn/reporting-common';
 import type {
   ExecutionError,
   ReportDocument,
   ReportOutput,
   ReportSource,
 } from '@kbn/reporting-common/types';
+import { REPORTING_SYSTEM_INDEX } from '@kbn/reporting-server';
 import moment from 'moment';
 import type { Report } from '.';
 import { SavedReport } from '.';
@@ -73,7 +74,7 @@ const sourceDoc = (doc: Partial<ReportSource>): Partial<ReportSource> => {
   };
 };
 
-const esDoc = (
+const esDocForUpdate = (
   report: SavedReport,
   doc: Partial<ReportSource>
 ): Parameters<ElasticsearchClient['update']>[0] => {
@@ -82,7 +83,7 @@ const esDoc = (
     index: report._index,
     if_seq_no: report._seq_no,
     if_primary_term: report._primary_term,
-    refresh: false,
+    refresh: 'wait_for' as estypes.Refresh,
     body: { doc },
   };
 };
@@ -178,7 +179,7 @@ export class ReportingStore {
     const doc = {
       index: report._index!,
       id: report._id,
-      refresh: false,
+      refresh: 'wait_for' as estypes.Refresh,
       body: {
         ...report.toReportSource(),
         ...sourceDoc({
@@ -309,7 +310,7 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
+      body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to processing! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -341,7 +342,7 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
+      body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -363,7 +364,7 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
+      body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -391,7 +392,7 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
+      body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to complete! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;

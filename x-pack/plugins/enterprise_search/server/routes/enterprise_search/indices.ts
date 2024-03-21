@@ -1142,7 +1142,7 @@ export function registerIndexRoutes({
         ? await ml.trainedModelsProvider(request, savedObjectsClient)
         : undefined;
 
-      const modelsResult = await fetchMlModels(trainedModelsProvider);
+      const modelsResult = await fetchMlModels(trainedModelsProvider, log);
 
       return response.ok({
         body: modelsResult,
