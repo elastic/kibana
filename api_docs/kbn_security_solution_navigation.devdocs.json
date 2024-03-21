@@ -956,7 +956,7 @@
         "tags": [],
         "label": "SecurityPageName",
         "description": [],
-        "path": "x-pack/packages/security-solution/navigation/src/constants.ts",
+        "path": "packages/deeplinks/security/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
