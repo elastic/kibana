@@ -171,10 +171,10 @@ export default function ({ getService }: FtrProviderContext) {
     async function assertOnlyConnectedToJobsAppliedDuringCreation() {
       // Assert that the Calendar Management view shows that the calendar is only connected to the jobs
       // applied at creation
-      const groupsJustAfterCreationVisibleText = await testSubjects.getVisibleText(
-        'mlCalendarListColumnJobs'
+      await ml.settingsCalendar.assertCalendarRowJobs(
+        'test_calendar_id',
+        /test_calendar_ad_1, test_calendar_ad_2/
       );
-      expect(groupsJustAfterCreationVisibleText).to.match(/test_calendar_ad_1, test_calendar_ad_2/);
 
       await ml.navigation.navigateToAnomalyDetection();
 

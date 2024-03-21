@@ -19,6 +19,13 @@ export function MachineLearningSettingsCalendarProvider(
   const comboBox = getService('comboBox');
 
   return {
+    async assertCalendarRowJobs(calendarId: string, regexp: RegExp) {
+      const rowJobsListVisibleText = await testSubjects.getVisibleText(
+        `mlCalendarListRow row-${calendarId}`
+      );
+      expect(rowJobsListVisibleText).to.match(regexp);
+    },
+
     async parseCalendarTable() {
       const table = await testSubjects.find('~mlCalendarTable');
       const $ = await table.parseDomContent();
