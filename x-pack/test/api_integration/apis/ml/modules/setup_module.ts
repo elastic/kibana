@@ -1029,7 +1029,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     for (const testData of testDataListPositive) {
-      describe('sets up module data', function () {
+      // FAILING ES FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/179169
+      describe.skip('sets up module data', function () {
         before(async () => {
           await esArchiver.loadIfNeeded(testData.sourceDataArchive);
           await ml.testResources.createIndexPatternIfNeeded(
