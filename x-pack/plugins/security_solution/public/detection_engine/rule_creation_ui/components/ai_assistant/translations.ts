@@ -17,20 +17,20 @@ export const ASK_ASSISTANT_ERROR_BUTTON = i18n.translate(
 export const ASK_ASSISTANT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantDesc',
   {
-    defaultMessage: 'ES|QL query validation and generation',
+    defaultMessage: 'Query validation and generation',
   }
 );
 
 export const ASK_ASSISTANT_USER_PROMPT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantUserPrompt',
   {
-    defaultMessage: 'Fix errors in ES|QL query',
+    defaultMessage: 'Fix errors in query',
   }
 );
 
 export const ASK_ASSISTANT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantToolTip',
   {
-    defaultMessage: 'Fix ES|QL query or generate new one',
+    defaultMessage: 'Fix query or generate new one',
   }
 );

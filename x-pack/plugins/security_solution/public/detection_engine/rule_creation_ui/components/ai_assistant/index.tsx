@@ -13,31 +13,36 @@ import * as i18n from './translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import * as i18nAssistant from '../../../../detections/pages/detection_engine/rules/translations';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import type { FormHook } from '../../../../shared_imports';
+import type { FormHook, ValidationError } from '../../../../shared_imports';
 
 interface AiAssistantProps {
   form: FormHook<DefineStepRule>;
 }
+
+const retrieveErrorMessages = (errors: ValidationError[]): string =>
+  errors
+    .flatMap(({ message, messages }) => [message, ...(Array.isArray(messages) ? messages : [])])
+    .join(', ');
 
 const AiAssistantComponent: React.FC<AiAssistantProps> = ({ form }) => {
   const { hasAssistantPrivilege } = useAssistantAvailability();
 
   const getPromptContext = async () => {
     const queryField = form.getFields().queryBar;
-    const esqlQuery = (queryField.value as DefineStepRule['queryBar'])?.query?.query;
+    const { query, language } = (queryField.value as DefineStepRule['queryBar']).query;
 
-    if (!esqlQuery) {
+    if (!query) {
       return '';
     }
 
     if (queryField.errors.length === 0) {
-      return `No errors in ES|QL query detected. Current ES|QL query: ${esqlQuery}`;
+      return `No errors in ${language} language query detected. Current query: ${query}`;
     }
 
-    return `ES|QL query written for Elastic Security Detection rules: ${esqlQuery}
-    returns validation error on form: ${queryField.errors.map((error) => error.message).join(', ')}
-    Fix ES|QL query and give an example of it in markdown format that can be copied.
-    Ensure query is valid and doesn't contain new line symbols
+    return `${language} language query written for Elastic Security Detection rules: ${query}
+    returns validation error on form: ${retrieveErrorMessages(queryField.errors)}
+    Fix ${language} language query and give an example of it in markdown format that can be copied.
+    Proposed solution should be valid and must not contain new line symbols (\\n)
     `;
   };
 

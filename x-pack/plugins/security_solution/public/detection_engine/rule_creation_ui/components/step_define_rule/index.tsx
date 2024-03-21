@@ -870,7 +870,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
 
-          {isEsqlRule(ruleType) && <AiAssistant form={form} />}
+          {!isMlRule(ruleType) && <AiAssistant form={form} />}
 
           {isQueryRule(ruleType) && (
             <>
