@@ -79,6 +79,7 @@ export function fromSummaryDocumentToSlo(
       type: summaryDoc.slo.indicator.type,
       params,
     },
+    kibanaUrl: summaryDoc.kibanaUrl,
     settings: { syncDelay: '1m', frequency: '1m' },
     enabled: true,
     createdAt: '2024-01-01T00:00:00.000Z',

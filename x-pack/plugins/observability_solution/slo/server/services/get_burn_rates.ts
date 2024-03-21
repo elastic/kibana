@@ -8,13 +8,11 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { Duration, SLO } from '../domain/models';
+import { Duration } from '../domain/models';
 import { computeBurnRate, computeSLI } from '../domain/services';
 import { DefaultSLIClient } from './sli_client';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { fromSummaryDocumentToSlo } from './unsafe_federated/helper';
+import { SloDefinitionClient } from './slo_definition_client';
 
 interface Services {
   soClient: SavedObjectsClientContract;
@@ -44,29 +42,11 @@ export async function getBurnRates({
 
   const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
   const sliClient = new DefaultSLIClient(esClient);
+  const definitionClient = new SloDefinitionClient(repository, esClient, logger);
+  const slo = await definitionClient.execute(sloId, remoteName);
 
-  let slo: SLO | undefined;
-  if (remoteName) {
-    const summarySearch = await esClient.search<EsSummaryDocument>({
-      index: `${remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
-      query: {
-        bool: {
-          filter: [
-            { term: { spaceId: 'default' } },
-            { term: { 'slo.id': sloId } },
-            { term: { 'slo.instanceId': instanceId } },
-          ],
-        },
-      },
-    });
-
-    if (summarySearch.hits.hits.length === 0) {
-      throw new Error('SLO not found');
-    }
-
-    slo = fromSummaryDocumentToSlo(summarySearch.hits.hits[0]._source!, services.logger);
-  } else {
-    slo = await repository.findById(sloId);
+  if (!slo) {
+    return [];
   }
 
   const sliData = await sliClient.fetchSLIDataFrom(slo!, instanceId, windows, remoteName);

@@ -66,6 +66,7 @@ import {
 } from '../../services/transform_generators';
 import type { SloRequestHandlerContext } from '../../types';
 import { createSloServerRoute } from '../create_slo_server_route';
+import { SloDefinitionClient } from '../../services/slo_definition_client';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -276,7 +277,8 @@ const getSLORoute = createSloServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const summaryClient = new DefaultSummaryClient(esClient);
-    const getSLO = new GetSLO(repository, summaryClient, esClient, logger);
+    const defintionClient = new SloDefinitionClient(repository, esClient, logger);
+    const getSLO = new GetSLO(defintionClient, summaryClient);
 
     return await getSLO.execute(params.path.id, params.query);
   },
