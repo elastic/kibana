@@ -18,7 +18,7 @@
       "logsShared",
       "observabilityAIAssistant",
       "observabilityShared",
-      "observability",
+      "slo",
       "share",
       "kibanaUtils",
       "datasetQuality"

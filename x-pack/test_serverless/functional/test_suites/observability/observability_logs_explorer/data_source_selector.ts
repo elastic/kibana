@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const initialPackageMap = {
@@ -652,7 +653,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
-        it('should filter the datasets list by the typed data view name', async () => {
+        it('should filter the data views list by the typed data view name', async () => {
           await retry.try(async () => {
             const panelTitleNode = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
@@ -686,7 +687,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
-        it('should navigate to Discover with the clicked data view preselected', async () => {
+        it('should load a data view allowed by the settings upon click', async () => {
+          await retry.try(async () => {
+            const panelTitleNode = await PageObjects.observabilityLogsExplorer
+              .getDataViewsContextMenu()
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
+              );
+
+            expect(
+              await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
+                panelTitleNode
+              )
+            ).to.be('Data Views');
+          });
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogsExplorer
+              .getDataViewsContextMenu()
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
+
+            expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
+            menuEntries[0].click();
+          });
+
+          await retry.try(async () => {
+            const url = await browser.getCurrentUrl();
+            expect(url).to.contain(`/app/observability-logs-explorer`);
+          });
+
+          await retry.try(async () => {
+            const selectorButton =
+              await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButton();
+
+            expect(await selectorButton.getVisibleText()).to.be(expectedDataViews[0]);
+          });
+        });
+
+        it('should navigate to Discover and load a data view not allowed by the settings upon click', async () => {
           await retry.try(async () => {
             const panelTitleNode = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
@@ -706,6 +746,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
             menuEntries[1].click();
+          });
+
+          await retry.try(async () => {
+            const url = await browser.getCurrentUrl();
+            expect(url).to.contain(`/app/discover`);
           });
 
           await retry.try(async () => {
