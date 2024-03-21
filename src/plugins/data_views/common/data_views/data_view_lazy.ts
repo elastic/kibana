@@ -306,6 +306,7 @@ export class DataViewLazy extends AbstractDataView {
     }
 
     this.setFieldCustomLabel(fieldName, config.customLabel);
+    this.setFieldCustomDescription(fieldName, config.customDescription);
 
     if (config.popularity || config.popularity === null) {
       this.setFieldCount(fieldName, config.popularity);
@@ -338,6 +339,7 @@ export class DataViewLazy extends AbstractDataView {
         searchable: true,
         readFromDocValues: false,
         customLabel: this.fieldAttrs?.[name]?.customLabel,
+        customDescription: this.fieldAttrs?.[name]?.customDescription,
         count: this.fieldAttrs?.[name]?.count,
       };
 
@@ -371,7 +373,7 @@ export class DataViewLazy extends AbstractDataView {
   private getScriptedFields({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) {
     const dataViewFields: Record<string, DataViewField> = {};
 
-    Object.values(this.scriptedFields).forEach((field) => {
+    Object.values(this.scriptedFieldsMap).forEach((field) => {
       if (!fieldMatchesFieldsRequested(field.name, fieldName)) {
         return;
       }
@@ -387,6 +389,7 @@ export class DataViewLazy extends AbstractDataView {
         aggregatable: false,
         count: this.fieldAttrs?.[field.name]?.count,
         customLabel: this.fieldAttrs?.[field.name]?.customLabel,
+        customDescription: this.fieldAttrs?.[field.name]?.customDescription,
       });
       this.fieldCache.set(field.name, fld);
       dataViewFields[field.name] = fld;
@@ -429,6 +432,7 @@ export class DataViewLazy extends AbstractDataView {
           ...field,
           count: this.fieldAttrs?.[field.name]?.count,
           customLabel: this.fieldAttrs?.[field.name]?.customLabel,
+          customDescription: this.fieldAttrs?.[field.name]?.customDescription,
           shortDotsEnable: this.shortDotsEnable,
         });
         this.fieldCache.set(field.name, fld);
@@ -440,7 +444,7 @@ export class DataViewLazy extends AbstractDataView {
   }
 
   getScriptedFieldsForQuery() {
-    return Object.values(this.scriptedFields).reduce<Record<string, estypes.ScriptField>>(
+    return Object.values(this.scriptedFieldsMap).reduce<Record<string, estypes.ScriptField>>(
       (scriptFields, field) => {
         scriptFields[field.name] = {
           script: {

@@ -40,7 +40,6 @@ export const createDataView = async ({
   usageCollection,
   spec,
   override,
-  refreshFields = true,
   counterName,
 }: CreateDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });
@@ -57,7 +56,7 @@ const registerCreateDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: 'public', enableQueryVersion: true }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -104,9 +103,12 @@ const registerCreateDataViewRouteFactory =
             counterName: `${req.route.method} ${path}`,
           });
 
+          const toSpecParams =
+            body.refresh_fields === false ? {} : { fieldParams: { fieldName: ['*'] } };
+
           const responseBody: Record<string, DataViewSpecRestResponse> = {
             [serviceKey]: {
-              ...(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
+              ...(await dataView.toSpec(toSpecParams)),
               namespaces: dataView.namespaces,
             },
           };

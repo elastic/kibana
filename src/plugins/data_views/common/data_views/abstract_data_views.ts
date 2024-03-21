@@ -127,7 +127,7 @@ export abstract class AbstractDataView {
    */
   public matchedIndices: string[] = [];
 
-  protected scriptedFields: DataViewFieldBaseSpecMap;
+  protected scriptedFieldsMap: DataViewFieldBaseSpecMap;
 
   private allowHidden: boolean = false;
 
@@ -158,7 +158,7 @@ export abstract class AbstractDataView {
 
     this.allowNoIndex = spec?.allowNoIndex || false;
 
-    this.scriptedFields = spec?.fields
+    this.scriptedFieldsMap = spec?.fields
       ? Object.values(spec.fields)
           .filter((field) => field.scripted)
           .reduce<DataViewFieldBaseSpecMap>((acc, field) => {
@@ -365,7 +365,7 @@ export abstract class AbstractDataView {
       title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: stringifyOrUndefined(this.sourceFilters),
-      fields: stringifyOrUndefined(Object.values(this.scriptedFields)),
+      fields: stringifyOrUndefined(Object.values(this.scriptedFieldsMap)),
       fieldFormatMap: stringifyOrUndefined(this.fieldFormatMap),
       type: this.type!,
       typeMeta: stringifyOrUndefined(this.typeMeta),
@@ -409,7 +409,7 @@ export abstract class AbstractDataView {
   }
 
   protected upsertScriptedFieldInternal = (field: FieldSpec) => {
-    this.scriptedFields[field.name] = {
+    this.scriptedFieldsMap[field.name] = {
       name: field.name,
       script: field.script,
       lang: field.lang,
@@ -419,11 +419,11 @@ export abstract class AbstractDataView {
   };
 
   protected deleteScriptedFieldInternal = (fieldName: string) => {
-    delete this.scriptedFields[fieldName];
+    delete this.scriptedFieldsMap[fieldName];
   };
 
   replaceAllScriptedFields(newFields: Record<string, FieldSpec>) {
-    const oldScriptedFieldNames = Object.keys(this.scriptedFields);
+    const oldScriptedFieldNames = Object.keys(this.scriptedFieldsMap);
 
     oldScriptedFieldNames.forEach((name) => {
       this.removeScriptedField(name);
