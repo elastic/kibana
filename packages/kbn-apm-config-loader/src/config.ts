@@ -8,6 +8,7 @@
 
 import { join } from 'path';
 import deepmerge from 'deepmerge';
+import { merge } from 'lodash';
 import { execSync } from 'child_process';
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
