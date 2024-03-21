@@ -11,3 +11,5 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   const { DatasetQualityServerPlugin } = await import('./plugin');
   return new DatasetQualityServerPlugin(initializerContext);
 }
+
+export { config } from '../common/plugin_config';

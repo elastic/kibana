@@ -5,5 +5,23 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DatasetQualityConfig {}
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+
+const configSchema = schema.object({
+  estimatedDataEnabled: offeringBasedSchema({
+    traditional: schema.boolean({ defaultValue: true }),
+    serverless: schema.boolean({ defaultValue: false }),
+  }),
+});
+
+export const publicConfigKeys = {
+  estimatedDataEnabled: true,
+} as const;
+
+export type DatasetQualityConfig = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<DatasetQualityConfig> = {
+  schema: configSchema,
+  exposeToBrowser: publicConfigKeys,
+};
