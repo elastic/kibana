@@ -57,4 +57,8 @@ export interface DiscoverCustomizationContext {
      */
     showLogsExplorerTabs: boolean;
   };
+  /*
+   * Whether or not to use the in-development Rule Form V2
+   */
+  ruleFormV2Enabled: boolean;
 }

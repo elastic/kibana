@@ -13,6 +13,7 @@ import { type TransformEnabledFeatures } from './serverless_context';
 import type { PluginsDependencies } from '../plugin';
 import { getMlSharedImports } from '../shared_imports';
 
+import type { ExperimentalFeatures } from '../../common/config';
 import type { AppDependencies } from './app_dependencies';
 import { breadcrumbService } from './services/navigation';
 import { docTitleService } from './services/navigation';
@@ -24,7 +25,8 @@ const localStorage = new Storage(window.localStorage);
 export async function mountManagementSection(
   coreSetup: CoreSetup<PluginsDependencies>,
   params: ManagementAppMountParams,
-  isServerless: boolean
+  isServerless: boolean,
+  experimentalFeatures: ExperimentalFeatures
 ) {
   const { element, setBreadcrumbs, history } = params;
   const { http, getStartServices } = coreSetup;
@@ -98,6 +100,7 @@ export async function mountManagementSection(
 
   const enabledFeatures: TransformEnabledFeatures = {
     showNodeInfo: !isServerless,
+    ruleFormV2Enabled: experimentalFeatures?.ruleFormV2Enabled ?? false,
   };
   const unmountAppCallback = renderApp(element, appDependencies, enabledFeatures);
 

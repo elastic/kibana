@@ -10,9 +10,11 @@ import React, { createContext, useContext, useMemo } from 'react';
 
 export interface TransformEnabledFeatures {
   showNodeInfo: boolean;
+  ruleFormV2Enabled: boolean;
 }
 export const EnabledFeaturesContext = createContext({
   showNodeInfo: true,
+  ruleFormV2Enabled: false,
 });
 
 export const EnabledFeaturesContextProvider: FC<{ enabledFeatures: TransformEnabledFeatures }> = (
