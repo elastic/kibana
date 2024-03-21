@@ -7,5 +7,3 @@
 
 export const PLUGIN_ID = 'searchPlayground';
 export const PLUGIN_NAME = 'Playground';
-
-export const CREATE_INDEX_LOCATOR_ID = 'CREATE_INDEX_LOCATOR_ID';

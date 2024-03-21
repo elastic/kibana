@@ -23,9 +23,8 @@ import type { Toolbar } from './components/toolbar';
 
 export * from '../common/types';
 
-export interface SearchPlaygroundPluginSetup {
-  createIndexLocatorId: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SearchPlaygroundPluginSetup {}
 export interface SearchPlaygroundPluginStart {
   PlaygroundProvider: React.FC<React.ComponentProps<typeof PlaygroundProviderComponent>>;
   PlaygroundToolbar: React.FC<React.ComponentProps<typeof Toolbar>>;

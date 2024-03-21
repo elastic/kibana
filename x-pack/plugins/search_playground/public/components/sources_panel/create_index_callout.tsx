@@ -10,14 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
-import { CREATE_INDEX_LOCATOR_ID } from '../../../common';
 
 export const CreateIndexCallout: React.FC = () => {
   const {
     services: { application, share },
   } = useKibana();
   const createIndexLocator = useMemo(
-    () => share.url.locators.get(CREATE_INDEX_LOCATOR_ID),
+    () => share.url.locators.get('CREATE_INDEX_LOCATOR_ID'),
     [share.url.locators]
   );
   const handleNavigateToIndex = useCallback(async () => {

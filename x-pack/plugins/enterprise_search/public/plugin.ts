@@ -25,10 +25,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
-import {
-  SearchPlaygroundPluginSetup,
-  SearchPlaygroundPluginStart,
-} from '@kbn/search-playground/public';
+import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -65,7 +62,6 @@ interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
-  searchPlayground: SearchPlaygroundPluginSetup;
   share: SharePluginSetup;
 }
 
@@ -155,7 +151,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (!config.ui?.enabled) {
       return;
     }
-    const { cloud, share, searchPlayground } = plugins;
+    const { cloud, share } = plugins;
 
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
@@ -332,9 +328,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
-    share.url.locators.create<CreatIndexLocatorParams>(
-      new CreatIndexLocatorDefinition(searchPlayground.createIndexLocatorId)
-    );
+    share.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
 
     if (config.canDeployEntSearch) {
       core.application.register({

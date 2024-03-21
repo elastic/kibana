@@ -13,7 +13,7 @@ import { CREATE_NEW_INDEX_URL, ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../const
 export type CreatIndexLocatorParams = SerializableRecord;
 
 export class CreatIndexLocatorDefinition implements LocatorDefinition<CreatIndexLocatorParams> {
-  constructor(public readonly id: string) {}
+  public readonly id = 'CREATE_INDEX_LOCATOR_ID';
 
   public readonly getLocation = async () => {
     return {
