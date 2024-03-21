@@ -22,6 +22,9 @@ import type { WindowParameters } from './window_parameters';
  * @param clickTime timestamp of the clicked log rate deviation.
  * @param minTime minimum timestamp of the time window to be analysed
  * @param maxTime maximum timestamp of the time window to be analysed
+ * @param clickTimeUpper optional timestamp to treat clicktime and clickTimeUpper
+ *                       as a time range instead of point in time
+ * @param windowGapOverride optional override for the baseline/deviation gap
  * @returns WindowParameters
  */
 export const getWindowParameters = (

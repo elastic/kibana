@@ -45,9 +45,17 @@ export interface SimpleHierarchicalTreeNode {
   addNode: (node: SimpleHierarchicalTreeNode) => void;
 }
 
+/**
+ * Represents a change point in document count statistics,
+ * identifying a significant change over time.
+ */
 export interface DocumentCountStatsChangePoint {
+  /** Key is the timestamp of the change point. */
   key: number;
+  /** The start timestamp of the change point period. */
   startTs: number;
+  /** The end timestamp of the change point period. */
   endTs: number;
+  /** The type of change point. */
   type: string;
 }

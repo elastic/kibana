@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+/** Highlighting color for charts */
 export const LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR = 'orange';
