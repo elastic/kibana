@@ -58,7 +58,7 @@ export const useConnectorSetup = ({
     data: connectors,
     isSuccess: areConnectorsFetched,
     refetch: refetchConnectors,
-  } = useLoadConnectors({ actionTypeRegistry, http });
+  } = useLoadConnectors({ http });
   const isConnectorConfigured = areConnectorsFetched && !!connectors?.length;
 
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);

@@ -55,7 +55,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       isLoading: isLoadingConnectors,
       isFetching: isFetchingConnectors,
       refetch: refetchConnectors,
-    } = useLoadConnectors({ actionTypeRegistry, http });
+    } = useLoadConnectors({ http });
 
     const isLoading = isLoadingConnectors || isFetchingConnectors;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;

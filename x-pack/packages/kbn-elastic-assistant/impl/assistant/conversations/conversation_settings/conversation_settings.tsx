@@ -47,7 +47,6 @@ export interface ConversationSettingsProps {
  */
 export const ConversationSettings: React.FC<ConversationSettingsProps> = React.memo(
   ({
-    actionTypeRegistry,
     allSystemPrompts,
     defaultConnector,
     selectedConversation,
@@ -68,7 +67,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     }, [allSystemPrompts, selectedConversation]);
 
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
-      actionTypeRegistry,
       http,
     });
 
