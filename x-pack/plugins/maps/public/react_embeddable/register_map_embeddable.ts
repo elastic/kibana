@@ -22,7 +22,9 @@ export const registerMapEmbeddable = () => {
   > = {
     type: MAP_SAVED_OBJECT_TYPE,
     deserializeState: (state) => {
-      return inject(state.rawState as EmbeddableStateWithType, state.references ?? []) as unknown as MapSerializeState;
+      return state.rawState
+        ? inject(state.rawState as EmbeddableStateWithType, state.references ?? []) as unknown as MapSerializeState
+        : {};
     },
     buildEmbeddable: async (state, buildApi) => {
       const { getMapEmbeddable } = await import('./get_map_embeddable');
