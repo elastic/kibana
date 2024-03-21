@@ -344,7 +344,7 @@ async function addPreconfiguredPolicyPackages(
           name: string;
           inputs?: InputsOverride[];
         })
-      | (Omit<SimplifiedPackagePolicy, 'package'> & { id: string });
+      | (Omit<SimplifiedPackagePolicy, 'package' | 'policy_id'> & { id: string });
   }>,
   defaultOutput: Output,
   bumpAgentPolicyRevison = false
