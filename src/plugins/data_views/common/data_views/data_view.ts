@@ -174,17 +174,24 @@ export class DataView extends AbstractDataView implements DataViewBase {
   /**
    * Creates a minimal static representation of the data view. Fields and popularity scores will be omitted.
    */
-  public toMinimalSpec(): Omit<DataViewSpec, 'fields'> {
+  public toMinimalSpec(params?: {
+    keepFieldAttrs?: Array<'customLabel' | 'customDescription'>;
+  }): Omit<DataViewSpec, 'fields'> {
+    const fieldAttrsToKeep = params?.keepFieldAttrs ?? ['customLabel', 'customDescription'];
+
     // removes `fields`
     const dataViewSpec = this.toSpec(false);
 
+    // removes `fieldAttrs` attributes that are not in `fieldAttrsToKeep`
     if (dataViewSpec.fieldAttrs) {
-      // removes everything (`count`, `customDescription`) from `fieldAttrs` except for `customLabel`
       dataViewSpec.fieldAttrs = pickBy(
-        mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => pick(fieldAttrs, 'customLabel')),
+        // removes unnecessary attributes
+        mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => pick(fieldAttrs, fieldAttrsToKeep)),
+        // removes empty objects if all attributes have been removed
         (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
       );
 
+      // removes `fieldAttrs` if it's empty
       if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
         dataViewSpec.fieldAttrs = undefined;
       }
