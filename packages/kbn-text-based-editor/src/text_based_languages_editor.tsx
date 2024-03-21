@@ -151,6 +151,7 @@ let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
 let lines = 1;
+let historyComponentIsOpen = false;
 
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
@@ -187,7 +188,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
   const [isSpaceReduced, setIsSpaceReduced] = useState(false);
   const [editorWidth, setEditorWidth] = useState(0);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(historyComponentIsOpen);
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
@@ -249,6 +250,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     useState<LanguageDocumentationSections>();
 
   const codeRef = useRef<string>(code);
+
+  const toggleHistory = useCallback((status: boolean) => {
+    setIsHistoryOpen(status);
+    historyComponentIsOpen = status;
+  }, []);
 
   // Registers a command to redirect users to the index management page
   // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
@@ -908,7 +914,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         allowQueryCancellation={allowQueryCancellation}
                         hideTimeFilterInfo={hideTimeFilterInfo}
                         isHistoryOpen={isHistoryOpen}
-                        setIsHistoryOpen={setIsHistoryOpen}
+                        setIsHistoryOpen={toggleHistory}
                         containerWidth={editorWidth}
                       />
                     )}
@@ -1011,7 +1017,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           hideTimeFilterInfo={hideTimeFilterInfo}
           {...editorMessages}
           isHistoryOpen={isHistoryOpen}
-          setIsHistoryOpen={setIsHistoryOpen}
+          setIsHistoryOpen={toggleHistory}
           containerWidth={editorWidth}
         />
       )}
