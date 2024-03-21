@@ -28,10 +28,11 @@ export interface AnomalySwimLaneComponentApi {
   updateUserInput: (input: AnomalySwimlaneEmbeddableUserInput) => void;
 }
 
-export type AnomalySwimLaneEmbeddableApi = HasType<AnomalySwimLaneEmbeddableType> &
-  PublishesWritablePanelTitle &
-  MlEmbeddableBaseApi &
-  AnomalySwimLaneComponentApi;
+export interface AnomalySwimLaneEmbeddableApi
+  extends HasType<AnomalySwimLaneEmbeddableType>,
+    PublishesWritablePanelTitle,
+    MlEmbeddableBaseApi,
+    AnomalySwimLaneComponentApi {}
 
 export interface AnomalySwimLaneActionContext {
   embeddable: AnomalySwimLaneEmbeddableApi;

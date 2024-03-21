@@ -16,6 +16,7 @@ export interface AnomalyChartsFieldSelectionApi {
   entityFields: PublishingSubject<MlEntityField[] | undefined>;
 }
 
-export type AnomalyChartsEmbeddableApi = HasType<AnomalyExplorerChartsEmbeddableType> &
-  MlEmbeddableBaseApi &
-  AnomalyChartsFieldSelectionApi;
+export interface AnomalyChartsEmbeddableApi
+  extends HasType<AnomalyExplorerChartsEmbeddableType>,
+    MlEmbeddableBaseApi,
+    AnomalyChartsFieldSelectionApi {}
