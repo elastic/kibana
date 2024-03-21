@@ -35,7 +35,7 @@ describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'host_uncommon_processes');
+      cy.task('esArchiverUnload', { archiveName: 'host_uncommon_processes' });
     });
 
     it('pagination updates results and page number', () => {
@@ -109,7 +109,7 @@ describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'all_users');
+      cy.task('esArchiverUnload', { archiveName: 'all_users' });
     });
 
     it(`reset all Hosts pagination when sorting column`, () => {

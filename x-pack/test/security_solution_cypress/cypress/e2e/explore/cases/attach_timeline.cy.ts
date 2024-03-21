@@ -18,13 +18,14 @@ import { getCase1 } from '../../../objects/case';
 import { getTimeline } from '../../../objects/timeline';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { deleteTimelines } from '../../../tasks/api_calls/common';
-import { createCase } from '../../../tasks/api_calls/cases';
+import { createCase, deleteCases } from '../../../tasks/api_calls/cases';
 
 describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
   context('without cases created', () => {
     beforeEach(() => {
       login();
       deleteTimelines();
+      deleteCases();
       createTimeline(getTimeline()).then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
       });
@@ -57,17 +58,14 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   context('with cases created', () => {
-    before(() => {
+    beforeEach(() => {
       login();
       deleteTimelines();
+      deleteCases();
       createTimeline(getTimeline()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
       createCase(getCase1()).then((response) => cy.wrap(response.body.id).as('caseId'));
-    });
-
-    beforeEach(() => {
-      login();
     });
 
     it('attach timeline to an existing case', function () {
