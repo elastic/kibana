@@ -597,24 +597,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should display a list of available data views', async () => {
-          await retry.try(async () => {
-            const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu) =>
-                Promise.all([
-                  PageObjects.observabilityLogsExplorer.getPanelTitle(menu),
-                  PageObjects.observabilityLogsExplorer.getPanelEntries(menu),
-                ])
-              );
+          const menu = await PageObjects.observabilityLogsExplorer.getDataViewsContextMenu();
+          const menuEntries = await PageObjects.observabilityLogsExplorer.getPanelEntries(menu);
 
-            expect(
-              await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
-                panelTitleNode
-              )
-            ).to.be('Data Views');
-            expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
-            expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
-          });
+          expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
+          expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
         });
 
         it('should sort the data views list by the clicked sorting option', async () => {
