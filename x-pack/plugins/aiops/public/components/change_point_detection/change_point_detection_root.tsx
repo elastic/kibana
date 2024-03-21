@@ -24,7 +24,7 @@ import {
   mlTimefilterRefresh$,
 } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-utils/constants';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';

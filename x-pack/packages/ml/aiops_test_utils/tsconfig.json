@@ -17,6 +17,6 @@
   ],
   "kbn_references": [
     "@kbn/ml-agg-utils",
-    "@kbn/aiops-utils",
+    "@kbn/aiops-common",
   ]
 }

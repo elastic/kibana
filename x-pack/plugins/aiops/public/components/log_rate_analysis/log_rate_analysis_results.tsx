@@ -30,11 +30,11 @@ import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
   type WindowParameters,
-} from '@kbn/aiops-utils';
+} from '@kbn/aiops-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-utils/constants';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';

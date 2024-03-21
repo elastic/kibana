@@ -14,7 +14,7 @@
   "kbn_references": [
     "@kbn/ace",
     "@kbn/aiops-components",
-    "@kbn/aiops-utils",
+    "@kbn/aiops-common",
     "@kbn/charts-plugin",
     "@kbn/cloud-plugin",
     "@kbn/code-editor",

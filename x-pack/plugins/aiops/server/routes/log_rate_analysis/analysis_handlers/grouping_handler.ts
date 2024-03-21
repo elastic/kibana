@@ -18,7 +18,7 @@ import {
   type SignificantItemHistogramItem,
   type NumericChartData,
 } from '@kbn/ml-agg-utils';
-import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-utils/log_rate_analysis/constants';
+import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-common/log_rate_analysis/constants';
 
 import {
   addSignificantItemsGroupAction,

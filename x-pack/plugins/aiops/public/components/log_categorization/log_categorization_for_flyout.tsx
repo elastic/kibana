@@ -29,7 +29,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-utils/constants';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 
 import type { CategorizationAdditionalFilter } from '../../../common/api/log_categorization/create_category_request';
 import type { Category } from '../../../common/api/log_categorization/types';

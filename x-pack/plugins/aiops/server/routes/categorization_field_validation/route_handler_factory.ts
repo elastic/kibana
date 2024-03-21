@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-utils/constants';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 
 import { wrapError } from '../error_wrapper';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';

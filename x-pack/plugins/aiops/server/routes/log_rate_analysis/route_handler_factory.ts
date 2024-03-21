@@ -15,7 +15,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { AIOPS_TELEMETRY_ID, AIOPS_PLUGIN_ID } from '@kbn/aiops-utils/constants';
+import { AIOPS_TELEMETRY_ID, AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 
 import type {
   AiopsLogRateAnalysisSchema,

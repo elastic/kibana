@@ -20,7 +20,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n-react",
-    "@kbn/aiops-utils",
+    "@kbn/aiops-common",
     "@kbn/i18n",
     "@kbn/core",
     "@kbn/charts-plugin",

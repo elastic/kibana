@@ -13,7 +13,7 @@
   ],
   "kbn_references": [
     "@kbn/aiops-components",
-    "@kbn/aiops-utils",
+    "@kbn/aiops-common",
     "@kbn/charts-plugin",
     "@kbn/config-schema",
     "@kbn/core-elasticsearch-server",

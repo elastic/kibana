@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { AIOPS_PLUGIN_ID } from '@kbn/aiops-utils/constants';
+import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import { isActiveLicense } from './lib/license';
 import type {
   AiopsLicense,

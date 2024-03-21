@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { decode } from '@kbn/rison';
 
-import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import type { LogRateAnalysisType } from '@kbn/aiops-common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

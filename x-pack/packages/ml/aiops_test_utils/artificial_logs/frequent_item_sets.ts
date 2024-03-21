@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ItemSet } from '@kbn/aiops-utils/log_rate_analysis/types';
+import type { ItemSet } from '@kbn/aiops-common/log_rate_analysis/types';
 
 export const frequentItemSets: ItemSet[] = [
   {

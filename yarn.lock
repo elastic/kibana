@@ -3094,7 +3094,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-utils@link:x-pack/packages/ml/aiops_utils":
+"@kbn/aiops-common@link:x-pack/packages/ml/aiops_common":
   version "0.0.0"
   uid ""
 

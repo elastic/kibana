@@ -14,7 +14,7 @@ import {
   createRandomSamplerWrapper,
   type RandomSamplerWrapper,
 } from '@kbn/ml-random-sampler-utils';
-import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-utils/log_rate_analysis/constants';
+import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-common/log_rate_analysis/constants';
 
 import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 import { createCategoryRequest } from '../../../../common/api/log_categorization/create_category_request';

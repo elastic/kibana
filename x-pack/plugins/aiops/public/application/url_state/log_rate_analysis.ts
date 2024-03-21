@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-common';
 
 import { getDefaultAiOpsListState, type AiOpsFullIndexBasedAppState } from './common';
 
