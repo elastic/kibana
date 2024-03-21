@@ -18,4 +18,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { SearchConnectorsPluginSetup, SearchConnectorsPluginStart } from './types';
-export type { ConnectorServerSideDefinition } from '../common/connectors';
+export type { CONNECTOR_DEFINITIONS, ConnectorServerSideDefinition } from '../common/connectors';
