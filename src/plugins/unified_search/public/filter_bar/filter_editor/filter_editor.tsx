@@ -21,7 +21,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  EuiBadge,
   withEuiTheme,
   EuiTextColor,
   EuiLink,
@@ -243,14 +242,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       <div>
         <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
               {this.props.mode === 'add' ? strings.getPanelTitleAdd() : strings.getPanelTitleEdit()}
-              <EuiBadge color="hollow">
-                {i18n.translate('unifiedSearch.filter.filterEditor.experimentalLabel', {
-                  defaultMessage: 'Technical preview',
-                })}
-              </EuiBadge>
-            </EuiFlexGroup>
+            </EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             {toggleEditorFlexItem}
           </EuiFlexGroup>
