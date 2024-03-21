@@ -14,7 +14,7 @@ import { firstValueFrom } from 'rxjs';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
-import { isSwimLaneEmbeddableContext } from './open_in_anomaly_explorer_action';
+import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
 
 export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
 

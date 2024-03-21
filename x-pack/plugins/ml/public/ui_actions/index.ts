@@ -53,10 +53,8 @@ export function registerMlUiActions(
   const categorizationADJobAction = createCategorizationADJobAction(core.getStartServices);
 
   // Register actions
-  uiActions.registerAction(applyInfluencerFiltersAction);
   uiActions.registerAction(applyEntityFieldFilterAction);
   uiActions.registerAction(applyTimeRangeSelectionAction);
-  uiActions.registerAction(clearSelectionAction);
   uiActions.registerAction(categorizationADJobAction);
 
   // Assign triggers

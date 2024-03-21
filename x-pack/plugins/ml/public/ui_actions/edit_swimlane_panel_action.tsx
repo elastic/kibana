@@ -11,7 +11,7 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
-import { isSwimLaneEmbeddableContext } from './open_in_anomaly_explorer_action';
+import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 

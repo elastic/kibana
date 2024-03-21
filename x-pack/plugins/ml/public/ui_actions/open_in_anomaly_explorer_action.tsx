@@ -18,13 +18,11 @@ import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import type { ExplorerAppState } from '../../common/types/locator';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { MlEmbeddableBaseApi } from '../embeddables';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-} from '../embeddables';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
 import type { AnomalyChartsEmbeddableApi } from '../embeddables/anomaly_charts/types';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
+import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
 
 export interface OpenInAnomalyExplorerSwimLaneActionContext extends EmbeddableApiContext {
   embeddable: AnomalySwimLaneEmbeddableApi;
@@ -43,15 +41,6 @@ export interface OpenInAnomalyExplorerAnomalyChartsActionContext extends Embedda
 }
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
-
-export function isSwimLaneEmbeddableContext(
-  arg: unknown
-): arg is OpenInAnomalyExplorerSwimLaneActionContext {
-  return (
-    isPopulatedObject(arg, ['embeddable']) &&
-    apiIsOfType(arg.embeddable, ANOMALY_SWIMLANE_EMBEDDABLE_TYPE)
-  );
-}
 
 export function isAnomalyChartsEmbeddableContext(
   arg: unknown

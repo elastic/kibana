@@ -10,9 +10,12 @@ import type {
   PublishesWritablePanelTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import type { JobId } from '../../shared';
 import type { AnomalySwimLaneEmbeddableType } from '../constants';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import type { AnomalySwimlaneEmbeddableUserInput, MlEmbeddableBaseApi } from '../types';
 
 export interface AnomalySwimLaneComponentApi {
@@ -29,3 +32,14 @@ export type AnomalySwimLaneEmbeddableApi = HasType<AnomalySwimLaneEmbeddableType
   PublishesWritablePanelTitle &
   MlEmbeddableBaseApi &
   AnomalySwimLaneComponentApi;
+
+export interface AnomalySwimLaneActionContext {
+  embeddable: AnomalySwimLaneEmbeddableApi;
+}
+
+export function isSwimLaneEmbeddableContext(arg: unknown): arg is AnomalySwimLaneActionContext {
+  return (
+    isPopulatedObject(arg, ['embeddable']) &&
+    apiIsOfType(arg.embeddable, ANOMALY_SWIMLANE_EMBEDDABLE_TYPE)
+  );
+}
