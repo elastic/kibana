@@ -44,7 +44,7 @@ There are 3 separate tabs you'll need for a combination of loading and viewing t
 data. Since you'll be jumping between them, it might be easiest to just open them
 upfront. Each is preceded by `https://localhost:5601/<your dev env prefix>/app/`:
 - Stack Management > Data Views: `management/kibana/dataViews`
-- Stack Management > Alerts & Actions: `management/insightsAndAlerting/triggersActions/alerts`
+- Stack Management > Rules: `management/insightsAndAlerting/triggersActions/rules`
 - Maps: `maps`
 
 ### 6 Create map to monitor alerts
