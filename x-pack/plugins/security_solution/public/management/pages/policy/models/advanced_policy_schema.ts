@@ -1640,7 +1640,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.ca_cert',
       {
         defaultMessage:
-        'PEM-encoded certificate for security artifacts server certificate authority.',
+          'PEM-encoded certificate for security artifacts server certificate authority.',
       }
     ),
   },
@@ -1651,7 +1651,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.ca_cert',
       {
         defaultMessage:
-        'PEM-encoded certificate for security artifacts server certificate authority.',
+          'PEM-encoded certificate for security artifacts server certificate authority.',
       }
     ),
   },
@@ -1662,7 +1662,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.ca_cert',
       {
         defaultMessage:
-        'PEM-encoded certificate for security artifacts server certificate authority.',
+          'PEM-encoded certificate for security artifacts server certificate authority.',
       }
     ),
   },
