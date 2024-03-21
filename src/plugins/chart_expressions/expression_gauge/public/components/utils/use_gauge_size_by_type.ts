@@ -38,6 +38,10 @@ export const useGaugeSizeByType = (type: GaugeShape, setChartSize: (d: ChartSize
           x: { value: 600, unit: 'pixels' },
           y: { value: 600, unit: 'pixels' },
         },
+        aspectRatio: {
+          x: 1,
+          y: 1,
+        },
       },
       [GaugeShapes.HORIZONTAL_BULLET]: {
         maxDimensions: {
