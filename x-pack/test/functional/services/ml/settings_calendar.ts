@@ -9,16 +9,66 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommonUI } from './common_ui';
+import { Navigation } from './navigation';
+import { MlADJobTable } from './job_table';
 
 export function MachineLearningSettingsCalendarProvider(
   { getService }: FtrProviderContext,
-  mlCommonUI: MlCommonUI
+  mlCommonUI: MlCommonUI,
+  navigation: Navigation,
+  jobTable: MlADJobTable
 ) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
 
   return {
+    async checkForCalendar(jobNumbers: number[], checkForExists: boolean = true) {
+      for await (const jobNumber of jobNumbers)
+        await jobTable.withDetailsOpen(`test_calendar_ad_${jobNumber}`, async () => {
+          await testSubjects[checkForExists ? 'existOrFail' : 'missingOrFail'](
+            jobTable.detailsSelector(
+              `test_calendar_ad_${jobNumber}`,
+              'mlJobRowDetailsSection-calendars'
+            )
+          );
+        });
+    },
+
+    async assertConnectedJobs(calendarId: string, regexp: RegExp) {
+      // Assert that the Calendar Management view shows that the calendar is only connected to the jobs
+      // applied at creation
+      await this.assertCalendarRowJobs(calendarId, regexp);
+
+      await navigation.navigateToAnomalyDetection();
+
+      // withDetailsOpen will open up the details of the specific job, and then collapse the details section afterwards
+      await this.checkForCalendar([1, 2]);
+
+      await this.checkForCalendar([3, 4], false);
+
+      await testSubjects.click('mlMainTab settings');
+      await testSubjects.click('mlCalendarsMngButton');
+      await testSubjects.click('mlEditCalendarLink');
+
+      await this.selectJobGroup('multi-metric');
+      await this.saveCalendar();
+
+      const groupsAfterAddingMultiMetricsVisibleText = await testSubjects.getVisibleText(
+        'mlCalendarListColumnJobs'
+      );
+      expect(groupsAfterAddingMultiMetricsVisibleText).to.match(/multi-metric/);
+
+      // Go back to the Anomaly Detection Jobs view
+      await navigation.navigateToAnomalyDetection();
+
+      // Assert that the calendar is now connected to the multimetric job group
+      await this.checkForCalendar([4]);
+
+      // Assert that the calendar is still not connected to the automated job group
+      await this.checkForCalendar([3], false);
+    },
+
     async assertCalendarRowJobs(calendarId: string, regexp: RegExp) {
       const rowJobsListVisibleText = await testSubjects.getVisibleText(
         `mlCalendarListRow row-${calendarId}`

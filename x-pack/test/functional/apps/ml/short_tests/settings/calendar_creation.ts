@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach, createJobConfig } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const esArchiver = getService('esArchiver');
-  const testSubjects = getService('testSubjects');
 
   const calendarId = 'test_calendar_id';
   const jobConfigs = [createJobConfig('test_calendar_ad_1'), createJobConfig('test_calendar_ad_2')];
@@ -138,15 +136,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsCalendar.saveCalendar();
       await ml.settingsCalendar.assertCalendarRowExists(calendarId);
 
-      await ml.testExecution.logTestStep(
-        'Assert that the calendar is only connected to jobs applied during creation'
+      await ml.settingsCalendar.assertConnectedJobs(
+        'test_calendar_id',
+        /test_calendar_ad_1, test_calendar_ad_2/
       );
-      await assertOnlyConnectedToJobsAppliedDuringCreation();
-
-      await ml.testExecution.logTestStep(
-        'Assert that the calendar can connect to jobs applied after creation'
-      );
-      await assertConnectedToJobsAppliedAfterCreation();
     });
 
     async function assignJobToCalendar(
@@ -166,68 +159,6 @@ export default function ({ getService }: FtrProviderContext) {
         // @ts-expect-error not full interface
         async (config) => await ml.api.createAnomalyDetectionJob(config)
       );
-    }
-
-    async function assertOnlyConnectedToJobsAppliedDuringCreation() {
-      // Assert that the Calendar Management view shows that the calendar is only connected to the jobs
-      // applied at creation
-      await ml.settingsCalendar.assertCalendarRowJobs(
-        'test_calendar_id',
-        /test_calendar_ad_1, test_calendar_ad_2/
-      );
-
-      await ml.navigation.navigateToAnomalyDetection();
-
-      // withDetailsOpen will open up the details of the specific job, and then collapse the details section afterwards
-      for await (const job of [1, 2])
-        await ml.jobTable.withDetailsOpen(`test_calendar_ad_${job}`, async () => {
-          await testSubjects.existOrFail(
-            ml.jobTable.detailsSelector(
-              `test_calendar_ad_${job}`,
-              'mlJobRowDetailsSection-calendars'
-            )
-          );
-        });
-
-      for await (const job of [3, 4])
-        await ml.jobTable.withDetailsOpen(`test_calendar_ad_${job}`, async () => {
-          await testSubjects.missingOrFail(
-            ml.jobTable.detailsSelector(
-              `test_calendar_ad_${job}`,
-              'mlJobRowDetailsSection-calendars'
-            )
-          );
-        });
-    }
-
-    async function assertConnectedToJobsAppliedAfterCreation() {
-      await testSubjects.click('mlMainTab settings');
-      await testSubjects.click('mlCalendarsMngButton');
-      await testSubjects.click('mlEditCalendarLink');
-      await ml.settingsCalendar.selectJobGroup('multi-metric');
-      await ml.settingsCalendar.saveCalendar();
-
-      const groupsAfterAddingMultiMetricsVisibleText = await testSubjects.getVisibleText(
-        'mlCalendarListColumnJobs'
-      );
-      expect(groupsAfterAddingMultiMetricsVisibleText).to.match(/multi-metric/);
-
-      // Go back to the Anomaly Detection Jobs view
-      await ml.navigation.navigateToAnomalyDetection();
-
-      // Assert that the calendar is now connected to the multimetric job group
-      await ml.jobTable.withDetailsOpen('test_calendar_ad_4', async () => {
-        await testSubjects.existOrFail(
-          ml.jobTable.detailsSelector('test_calendar_ad_4', 'mlJobRowDetailsSection-calendars')
-        );
-      });
-
-      // Assert that the calendar is still not connected to the automated job group
-      await ml.jobTable.withDetailsOpen('test_calendar_ad_3', async () => {
-        await testSubjects.missingOrFail(
-          ml.jobTable.detailsSelector('test_calendar_ad_3', 'mlJobRowDetailsSection-calendars')
-        );
-      });
     }
   });
 }
