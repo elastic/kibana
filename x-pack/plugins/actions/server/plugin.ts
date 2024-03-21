@@ -18,6 +18,7 @@ import {
   ElasticsearchServiceStart,
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
+  ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
@@ -65,6 +66,7 @@ import {
   ActionTypeSecrets,
   ActionTypeParams,
   ActionsRequestHandlerContext,
+  UnsecuredServices,
 } from './types';
 
 import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
@@ -488,6 +490,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ]);
 
       return new UnsecuredActionsClient({
+        actionExecutor: actionExecutor!,
         internalSavedObjectsRepository,
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
@@ -495,6 +498,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
         }),
+        logger: this.logger,
       });
     };
 
@@ -523,6 +527,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
       core.savedObjects.getScopedClient(request);
 
+    const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
+      core.savedObjects.createInternalRepository();
+
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
@@ -533,6 +540,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         core.elasticsearch,
         encryptedSavedObjectsClient,
         (request: KibanaRequest) => this.getUnsecuredSavedObjectsClient(core.savedObjects, request)
+      ),
+      getUnsecuredServices: this.getUnsecuredServicesFactory(
+        getInternalSavedObjectsRepositoryWithoutAccessToActions,
+        core.elasticsearch,
+        encryptedSavedObjectsClient,
+        () => core.savedObjects.createInternalRepository(includedHiddenTypes)
       ),
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
@@ -622,6 +635,25 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
         connectorTokenClient: new ConnectorTokenClient({
           unsecuredSavedObjectsClient: unsecuredSavedObjectsClient(request),
+          encryptedSavedObjectsClient,
+          logger: this.logger,
+        }),
+      };
+    };
+  }
+
+  private getUnsecuredServicesFactory(
+    getSavedObjectRepository: () => ISavedObjectsRepository,
+    elasticsearch: ElasticsearchServiceStart,
+    encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
+    unsecuredSavedObjectsRepository: () => ISavedObjectsRepository
+  ): () => UnsecuredServices {
+    return () => {
+      return {
+        savedObjectsClient: getSavedObjectRepository(),
+        scopedClusterClient: elasticsearch.client.asInternalUser,
+        connectorTokenClient: new ConnectorTokenClient({
+          unsecuredSavedObjectsClient: unsecuredSavedObjectsRepository(),
           encryptedSavedObjectsClient,
           logger: this.logger,
         }),
