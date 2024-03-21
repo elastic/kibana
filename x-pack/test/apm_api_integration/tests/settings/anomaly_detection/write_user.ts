@@ -52,7 +52,8 @@ export default function apiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('when calling create endpoint', () => {
+      // FAILING ES FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/179168
+      describe.skip('when calling create endpoint', () => {
         it('creates two jobs', async () => {
           await createJobs(['production', 'staging']);
 
