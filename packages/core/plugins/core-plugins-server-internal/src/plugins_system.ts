@@ -48,6 +48,9 @@ export class PluginsSystem<T extends PluginType> {
     }
 
     this.plugins.set(plugin.name, plugin);
+
+    // clear sorted plugin name cache on addition
+    this.sortedPluginNames = undefined;
   }
 
   public getPlugins() {
