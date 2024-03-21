@@ -17,6 +17,8 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { catchAndWrapError } from '../../../../utils';
 import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
@@ -29,6 +31,7 @@ import type {
   SentinelOneConnectorExecuteOptions,
   SentinelOneIsolationRequestMeta,
   SentinelOneActionRequestCommonMeta,
+  SentinelOneIsolationResponseMeta,
 } from './types';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
@@ -396,14 +399,131 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequests: Array<LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>>
   ): Promise<LogsEndpointActionResponse[]> {
     const completedResponses: LogsEndpointActionResponse[] = [];
-    const searchResults = this.options.esClient.search({
-      index: SENTINEL_ONE_ACTIVITY_INDEX,
-      query: {
-        // TODO:PT implement
+    const actionsByAgentId: {
+      [s1AgentId: string]: Array<
+        LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>
+      >;
+    } = {};
+
+    // TODO:PT what to do if a single agent has multiple pending response actions?
+    // TODO:PT need to ensure that we ignore when the index does not exist
+
+    const query: QueryDslQueryContainer = {
+      bool: {
+        must: [
+          {
+            term: {
+              // Activity Types can be retrieved from S1 via API: `/web/api/v2.1/activities/types`
+              'sentinel_one.activity.type': [
+                // {
+                //    "id": 1001
+                //    "action": "Agent Disconnected From Network",
+                //    "descriptionTemplate": "Agent {{ computer_name }} was disconnected from network.",
+                // },
+                1001,
+
+                // {
+                //    "id": 2010
+                //    "action": "Agent Mitigation Report Quarantine Network Failed",
+                //    "descriptionTemplate": "Agent {{ computer_name }} was unable to disconnect from network.",
+                // },
+                2010,
+              ],
+            },
+          },
+        ],
+        // Create an `OR` clause that filters for each agent id an an updated date of greater than the date when
+        // the isolate request was created
+        should: actionRequests.map((action) => {
+          const s1AgentId =
+            action.meta?.agentId ?? `missing-agent-id-for__${action.EndpointActions.action_id}`;
+
+          if (!actionsByAgentId[s1AgentId]) {
+            actionsByAgentId[s1AgentId] = [];
+          }
+
+          actionsByAgentId[s1AgentId].push(action);
+
+          return {
+            bool: {
+              filter: [
+                { term: { 'sentinel_one.activity.agent.id': s1AgentId } },
+                { range: { 'sentinel_one.activity.updated_at': { gt: action['@timestamp'] } } },
+              ],
+            },
+          };
+        }),
+        minimum_should_match: 1,
       },
-      sort: [{ 'sentinel_one.activity.updated_at': { order: 'desc' } }],
-      size: 1, // We only need the first response after the date that the request was sent
-    });
+    };
+
+    this.log.debug(
+      `searching for isolate responses from [${SENTINEL_ONE_ACTIVITY_INDEX}] with query:\n${stringify(
+        query
+      )}`
+    );
+
+    const searchResults = await this.options.esClient
+      .search({
+        index: SENTINEL_ONE_ACTIVITY_INDEX,
+        query,
+        // There may be many documents for each host/agent, so we collapse it and only get back the
+        // first one that came in after the isolate request was sent
+        collapse: {
+          field: 'sentinel_one.activity.agent.id',
+          inner_hits: {
+            name: 'first_found',
+            size: 1,
+            sort: [{ 'sentinel_one.activity.updated_at': 'asc' }],
+          },
+        },
+        _source: false,
+        sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
+        size: 1000,
+      })
+      .catch(catchAndWrapError);
+
+    this.log.debug(
+      `Search results for SentinelOne isolate activity documents:\n${stringify(searchResults)}`
+    );
+
+    for (const searchResultHit of searchResults.hits.hits) {
+      const isolateResonseDoc = searchResultHit.inner_hits.first_found.hits.hits[0];
+      const s1AgentId = searchResultHit._source.sentinel_one.activity.agent.id;
+      const elasticDocId = isolateResonseDoc._id;
+      const activityLogEntryId = searchResultHit._source.sentinel_one.activity.id;
+      const activityLogEntryType = searchResultHit._source.sentinel_one.activity.type;
+      const activityLogEntryDescription =
+        searchResultHit._source.sentinel_one.activity.description.primary;
+
+      for (const actionRequest of actionsByAgentId[s1AgentId]) {
+        completedResponses.push(
+          this.buildActionResponseEsDoc<{}, SentinelOneIsolationResponseMeta>({
+            actionId: actionRequest.EndpointActions.action_id,
+            agentId: Array.isArray(actionRequest.agent.id)
+              ? actionRequest.agent.id[0]
+              : actionRequest.agent.id,
+            data: { command: 'isolate' },
+            error:
+              activityLogEntryType === 2010
+                ? {
+                    message:
+                      activityLogEntryDescription ??
+                      `Action failed. SentinelOne activity log entry [${activityLogEntryId}] has a 'type' value of 2010 indicating a failure to disconnect`,
+                  }
+                : undefined,
+            meta: {
+              elasticDocId,
+              activityLogEntryId,
+              activityLogEntryType,
+              activityLogEntryDescription,
+            },
+          })
+        );
+      }
+    }
+
+    this.log.debug(`Isolate action responses found:\n${stringify(completedResponses)}`);
 
     return completedResponses;
   }

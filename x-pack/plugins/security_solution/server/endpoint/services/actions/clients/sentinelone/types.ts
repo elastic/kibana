@@ -34,7 +34,17 @@ export interface SentinelOneActionRequestCommonMeta {
   hostName: string;
 }
 
-/**
- * Metadata capture for the isolation actions (`isolate` and `release`)
- */
+/** Metadata capture for the isolation actions (`isolate` and `release`) */
 export type SentinelOneIsolationRequestMeta = SentinelOneActionRequestCommonMeta;
+
+/** Metadata captured when creating the isolation response document in ES for both `isolate` and `release` */
+export interface SentinelOneIsolationResponseMeta {
+  /** The document ID in the Elasticsearch S1 activity index that was used to complete the response action */
+  elasticDocId: string;
+  /** The SentinelOne activity log entry ID */
+  activityLogEntryId: string;
+  /** The SentinelOne activity log entry type */
+  activityLogEntryType: number;
+  /** The SentinelOne activity log primary discription */
+  activityLogEntryDescription: string;
+}

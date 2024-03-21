@@ -123,11 +123,12 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
   };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
 > = {
   agentId: LogsEndpointActionResponse['agent']['id'];
   actionId: string;
-} & Pick<LogsEndpointActionResponse, 'error'> &
+} & Pick<LogsEndpointActionResponse<TOutputContent, TMeta>, 'error' | 'meta'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
 
 export type ResponseActionsClientValidateRequestResponse =
@@ -415,15 +416,19 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   protected buildActionResponseEsDoc<
     // Default type purposely set to empty object in order to ensure proper types are used when calling the method
-    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
+    TMeta extends {} = {}
   >({
     actionId,
     error,
     agentId,
     data,
-  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>): LogsEndpointActionResponse<TOutputContent> {
+  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
+    TOutputContent,
+    TMeta
+  >): LogsEndpointActionResponse<TOutputContent, TMeta> {
     const timestamp = new Date().toISOString();
-    const doc: LogsEndpointActionResponse<TOutputContent> = {
+    const doc: LogsEndpointActionResponse<TOutputContent, TMeta> = {
       '@timestamp': timestamp,
       agent: {
         id: agentId,
