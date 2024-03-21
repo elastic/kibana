@@ -9,6 +9,7 @@ import { getNewRule } from '../../../objects/rule';
 import { SELECTED_ALERTS } from '../../../screens/alerts';
 import { SERVER_SIDE_EVENT_COUNT } from '../../../screens/timeline';
 import { selectAllAlerts, selectFirstPageAlerts } from '../../../tasks/alerts';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { createRule } from '../../../tasks/api_calls/rules';
 import {
   bulkInvestigateSelectedEventsInTimeline,
@@ -25,19 +26,16 @@ import { ALERTS_URL, hostsUrl } from '../../../urls/navigation';
 describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'bulk_process' });
-    login();
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'bulk_process');
+    cy.task('esArchiverUnload', { archiveName: 'bulk_process' });
   });
 
   context('Alerts', () => {
-    before(() => {
-      createRule(getNewRule());
-    });
-
     beforeEach(() => {
+      deleteAlertsAndRules();
+      createRule(getNewRule());
       login();
       visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();

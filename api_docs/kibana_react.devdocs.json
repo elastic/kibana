@@ -1052,18 +1052,6 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
             "plugin": "aiops",
             "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
           },
@@ -4931,6 +4919,14 @@
             "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
             "section": "def-common.PluginsServiceStart",
             "text": "PluginsServiceStart"
+          },
+          " | undefined; security?: ",
+          {
+            "pluginId": "@kbn/core-security-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityBrowserPluginApi",
+            "section": "def-common.SecurityServiceStart",
+            "text": "SecurityServiceStart"
           },
           " | undefined; }"
         ],
