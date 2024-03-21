@@ -151,7 +151,7 @@ export const getAllTimelines = () =>
     url: 'api/timelines?page_size=100&page_index=1&sort_field=updated&sort_order=desc&timeline_type=default',
   });
 
-export const deleteTimelines = async () => {
+export const deleteTimelines = () => {
   getAllTimelines().then(($timelines) => {
     const savedObjectIds = $timelines.body.timeline.map((timeline) => timeline.savedObjectId);
     rootRequest<AllTimelinesResponse>({
