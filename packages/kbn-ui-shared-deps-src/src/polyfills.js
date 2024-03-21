@@ -49,14 +49,14 @@ typeof window !== 'undefined' &&
   (Worker = ((BaseWorker) =>
     class Worker extends BaseWorker {
       constructor(url, options) {
-        let scriptUrl;
+        let scriptUrl = String(url);
         let objectURLRef;
 
         try {
           const isCrossOrigin = (URLObject) =>
             URLObject.protocol === 'https:' && URLObject.origin !== window.location.origin;
 
-          scriptUrl = isCrossOrigin(new URL(String(url))) // to bootstrap the actual script to work around the same origin policy.
+          scriptUrl = isCrossOrigin(new URL(scriptUrl)) // to bootstrap the actual script to work around the same origin policy.
             ? (objectURLRef = URL.createObjectURL(
                 new Blob(
                   [
@@ -73,16 +73,16 @@ typeof window !== 'undefined' &&
                     // i = original importScripts
                     // a = arguments
                     // u = URL
-                    `importScripts=((i)=>(...a)=>i(...a.map((u)=>''+new URL(u,"${url}"))))(importScripts);importScripts("${url}");`,
+                    `importScripts=((i)=>(...a)=>i(...a.map((u)=>''+new URL(u,"${scriptUrl}"))))(importScripts);importScripts("${scriptUrl}");`,
                   ],
                   {
                     type: 'text/javascript',
                   }
                 )
               ))
-            : String(url);
+            : scriptUrl;
         } catch {
-          scriptUrl = String(url);
+          // provided url doesn't match the expectation for URL constructor, it will be used as is
         }
 
         super(scriptUrl, options);
