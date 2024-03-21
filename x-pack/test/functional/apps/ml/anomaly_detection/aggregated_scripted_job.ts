@@ -363,7 +363,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('aggregated or scripted job', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/179181
+  describe.skip('aggregated or scripted job', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
