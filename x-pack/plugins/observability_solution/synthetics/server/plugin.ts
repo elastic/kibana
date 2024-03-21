@@ -34,7 +34,7 @@ import { uptimeRuleTypeFieldMap } from './alert_rules/common';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
-  private logger: Logger;
+  private readonly logger: Logger;
   private server?: SyntheticsServerSetup;
   private syntheticsService?: SyntheticsService;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
@@ -50,7 +50,6 @@ export class Plugin implements PluginType {
 
     savedObjectsAdapter.config = config;
 
-    this.logger = this.initContext.logger.get();
     const { ruleDataService } = plugins.ruleRegistry;
 
     const ruleDataClient = ruleDataService.initializeIndex({
