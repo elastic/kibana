@@ -169,12 +169,6 @@ export class Server {
     const prebootStartUptime = performance.now();
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
-    if (!disablePreboot) {
-      // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also
-      // silent deprecation warnings until `setup` stage where we'll validate config once again.
-      await ensureValidConfiguration(this.configService, { logDeprecations: false });
-    }
-
     // service required for plugin discovery
     const analyticsPreboot = this.analytics.preboot();
     const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
@@ -186,6 +180,12 @@ export class Server {
       environment: environmentPreboot,
       node: nodePreboot,
     });
+
+    if (!disablePreboot) {
+      // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also
+      // silent deprecation warnings until `setup` stage where we'll validate config once again.
+      await ensureValidConfiguration(this.configService, { logDeprecations: false });
+    }
 
     // services we need to preboot even when preboot is disabled
     const uiSettingsPreboot = await this.uiSettings.preboot();
