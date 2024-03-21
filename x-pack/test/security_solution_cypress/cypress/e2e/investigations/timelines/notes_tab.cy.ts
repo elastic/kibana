@@ -24,8 +24,6 @@ import { login } from '../../../tasks/login';
 import { visitTimeline } from '../../../tasks/navigation';
 import { addNotesToTimeline, goToNotesTab } from '../../../tasks/timeline';
 
-import { deleteTimelines } from '../../../tasks/api_calls/common';
-
 const author = Cypress.env('ELASTICSEARCH_USERNAME');
 const link = 'https://www.elastic.co/';
 
