@@ -301,6 +301,7 @@ export function getDataStateContainer({
     const currentDataView = getSavedSearch().searchSource.getField('index');
 
     if (isTextBasedQuery(query)) {
+      // this is where the dataView gets set to state, making it difficult to swap with dataViewLazy
       const nextDataView = await getDataViewByTextBasedQueryLang(query, currentDataView, services);
       if (nextDataView !== currentDataView) {
         setDataView(nextDataView);

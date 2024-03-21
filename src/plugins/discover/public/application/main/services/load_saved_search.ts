@@ -60,6 +60,7 @@ export const loadSavedSearch = async (
   let nextSavedSearch = savedSearchId
     ? await savedSearchContainer.load(savedSearchId)
     : await savedSearchContainer.new(
+        // change this to use DataViewLazy?
         await getStateDataView(params, { services, appState, internalStateContainer })
       );
 
@@ -88,6 +89,7 @@ export const loadSavedSearch = async (
     if (savedSearchId && appState.index) {
       // This is for the case appState is overwriting the loaded saved search data view
       const savedSearchDataViewId = nextSavedSearch.searchSource.getField('index')?.id;
+      // change this to use DataViewLazy?
       const stateDataView = await getStateDataView(params, {
         services,
         appState,
@@ -190,9 +192,11 @@ const getStateDataView = async (
   const query = appState?.query;
 
   if (isTextBasedQuery(query)) {
+    // also used here
     return await getDataViewByTextBasedQueryLang(query, dataView, services);
   }
 
+  // seems like it would make sense to convert this to DataViewLazy
   const result = await loadAndResolveDataView(
     {
       id: appState?.index,

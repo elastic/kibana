@@ -33,6 +33,7 @@ export async function getDataViewByTextBasedQueryLang(
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern()
   ) {
+    // I could use DataViewLazy here BUT this function returns a DataView - where is that DataView being used?
     const dataViewObj = await getESQLAdHocDataview(indexPatternFromQuery, services.dataViews);
 
     if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
