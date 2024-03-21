@@ -4,9 +4,13 @@ kind: Resource
 metadata:
   name: buildkite-pipeline-serverless-release
   description: Initiate kibana serverless releases
+  links:
+    - title: Pipeline
+      url: https://buildkite.com/elastic/kibana-serverless-release
 spec:
   type: buildkite-pipeline
   owner: 'group:kibana-operations'
+  system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
