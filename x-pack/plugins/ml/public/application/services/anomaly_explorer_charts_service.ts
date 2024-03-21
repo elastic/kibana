@@ -17,11 +17,11 @@ import type {
   MlEntityField,
   MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
 
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
-import type { TimeRangeBounds } from '../util/time_buckets';
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/swimlane_container';
 
