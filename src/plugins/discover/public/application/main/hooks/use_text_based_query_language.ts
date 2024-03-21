@@ -54,6 +54,7 @@ export function useTextBasedQueryLanguage({
     const subscription = stateContainer.dataState.data$.documents$
       .pipe(
         switchMap(async (next) => {
+          prev.current.columns = stateContainer.appState.getState().columns || [];
           const { query, recordRawType } = next;
           if (!query || next.fetchStatus === FetchStatus.ERROR) {
             return;
@@ -93,7 +94,20 @@ export function useTextBasedQueryLanguage({
               const firstRow = next.result![0];
               const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
               if (!queryHasTransformationalCommands) {
-                nextColumns = [];
+                // check whether the selected columns exist at least once in next.result[*].raw
+                const currentColumns = prev.current.columns;
+                // gather existing columns based on all rows
+                const existingColumns = new Set<string>();
+                next.result!.forEach((row) => {
+                  Object.keys(row.raw).forEach((column) => {
+                    existingColumns.add(column);
+                  });
+                });
+                const updatedColumns = currentColumns.filter((column) =>
+                  existingColumns.has(column)
+                );
+
+                nextColumns = updatedColumns;
                 initialFetch.current = false;
               } else {
                 nextColumns = firstRowColumns;
