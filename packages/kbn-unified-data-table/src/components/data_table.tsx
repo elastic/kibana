@@ -443,24 +443,19 @@ export const UnifiedDataTable = ({
   const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
-  const docMap = useMemo(() => {
-    const map = new Map<string, DataTableRecord>();
-    rows?.forEach((row) => {
-      map.set(row.id, row);
-    });
-    return map;
-  }, [rows]);
+  const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
+  const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
   const usedSelectedDocs = useMemo(() => {
     if (!selectedDocs.length || !rows?.length) {
       return [];
     }
     // filter out selected docs that are no longer part of the current data
-    const result = selectedDocs.filter((docId) => !!docMap.get(docId));
+    const result = selectedDocs.filter((docId) => !!getDocById(docId));
     if (result.length === 0 && isFilterActive) {
       setIsFilterActive(false);
     }
     return result;
-  }, [selectedDocs, rows?.length, isFilterActive, docMap]);
+  }, [selectedDocs, rows?.length, isFilterActive, getDocById]);
 
   const displayedRows = useMemo(() => {
     if (!rows) {
@@ -943,7 +938,6 @@ export const UnifiedDataTable = ({
   });
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
-  const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
@@ -1007,6 +1001,7 @@ export const UnifiedDataTable = ({
               selectedDocs={usedSelectedDocs}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}
+              showFullScreenButton={showFullScreenButton}
               fieldFormats={fieldFormats}
               getDocById={getDocById}
               setSelectedDocs={setSelectedDocs}

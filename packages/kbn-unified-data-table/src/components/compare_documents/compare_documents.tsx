@@ -39,6 +39,7 @@ export interface CompareDocumentsProps {
   selectedDocs: string[];
   schemaDetectors: EuiDataGridSchemaDetector[];
   forceShowAllFields: boolean;
+  showFullScreenButton?: boolean;
   fieldFormats: FieldFormatsStart;
   getDocById: (id: string) => DataTableRecord | undefined;
   setSelectedDocs: (selectedDocs: string[]) => void;
@@ -58,6 +59,7 @@ const CompareDocuments = ({
   selectedDocs,
   schemaDetectors,
   forceShowAllFields,
+  showFullScreenButton,
   fieldFormats,
   getDocById,
   setSelectedDocs,
@@ -107,6 +109,7 @@ const CompareDocuments = ({
   const additionalControls = useMemo(
     () => (
       <ComparisonControls
+        selectedDocs={selectedDocs}
         showDiff={showDiff}
         diffMode={diffMode}
         showDiffDecorations={showDiffDecorations}
@@ -122,6 +125,7 @@ const CompareDocuments = ({
     [
       diffMode,
       forceShowAllFields,
+      selectedDocs,
       setDiffMode,
       setIsCompareActive,
       setShowAllFields,
@@ -136,9 +140,10 @@ const CompareDocuments = ({
     () => ({
       showColumnSelector: false,
       showDisplaySelector: false,
+      showFullScreenSelector: showFullScreenButton,
       additionalControls,
     }),
-    [additionalControls]
+    [additionalControls, showFullScreenButton]
   );
   const ComparisonCellValue = useComparisonCellValue({
     dataView,

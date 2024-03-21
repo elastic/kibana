@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  tint,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
@@ -95,6 +96,7 @@ export function DataTableDocumentToolbarBtn({
   setIsCompareActive: (value: boolean) => void;
   setSelectedDocs: (value: string[]) => void;
 }) {
+  const { euiTheme } = useEuiTheme();
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
   const getMenuItems = useCallback(() => {
@@ -137,7 +139,7 @@ export function DataTableDocumentToolbarBtn({
         <EuiContextMenuItem
           data-test-subj="dscGridCompareSelectedDocuments"
           key="compareSelectedDocuments"
-          icon="kqlSelector"
+          icon="diff"
           onClick={() => {
             setIsSelectionPopoverOpen(false);
             setIsCompareActive(true);
@@ -207,6 +209,11 @@ export function DataTableDocumentToolbarBtn({
           data-test-subj="dscGridSelectionBtn"
           isSelected={isFilterActive}
           badgeContent={selectedDocs.length}
+          css={{
+            '.euiDataGridToolbarControl__badge': {
+              backgroundColor: tint(euiTheme.colors.success, 0.3),
+            },
+          }}
         >
           <FormattedMessage
             id="unifiedDataTable.selectedRowsButtonLabel"
