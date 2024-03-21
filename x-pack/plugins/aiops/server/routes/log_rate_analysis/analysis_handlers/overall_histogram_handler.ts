@@ -11,9 +11,9 @@ import {
   type NumericChartData,
   type NumericHistogramField,
 } from '@kbn/ml-agg-utils';
+import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-utils/log_rate_analysis/constants';
 
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
-import { RANDOM_SAMPLER_SEED } from '../../../../common/constants';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 

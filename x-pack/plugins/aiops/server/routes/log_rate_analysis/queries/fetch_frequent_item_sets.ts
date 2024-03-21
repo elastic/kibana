@@ -19,8 +19,10 @@ import type {
   ItemSet,
   FetchFrequentItemSetsResponse,
 } from '@kbn/aiops-utils/log_rate_analysis/types';
-
-import { RANDOM_SAMPLER_SEED, LOG_RATE_ANALYSIS_SETTINGS } from '../../../../common/constants';
+import {
+  RANDOM_SAMPLER_SEED,
+  LOG_RATE_ANALYSIS_SETTINGS,
+} from '@kbn/aiops-utils/log_rate_analysis/constants';
 
 interface FrequentItemSetsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {

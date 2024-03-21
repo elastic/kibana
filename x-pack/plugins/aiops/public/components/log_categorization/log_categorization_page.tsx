@@ -28,7 +28,7 @@ import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { stringHash } from '@kbn/ml-string-hash';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-utils/constants';
 
 import type { Category } from '../../../common/api/log_categorization/types';
 

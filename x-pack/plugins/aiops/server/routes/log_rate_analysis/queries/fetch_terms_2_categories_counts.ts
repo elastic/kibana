@@ -17,11 +17,11 @@ import type {
   ItemSet,
 } from '@kbn/aiops-utils/log_rate_analysis/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { LOG_RATE_ANALYSIS_SETTINGS } from '@kbn/aiops-utils/log_rate_analysis/constants';
 
 import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 import { getCategoryQuery } from '../../../../common/api/log_categorization/get_category_query';
 import type { Category } from '../../../../common/api/log_categorization/types';
-import { LOG_RATE_ANALYSIS_SETTINGS } from '../../../../common/constants';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 

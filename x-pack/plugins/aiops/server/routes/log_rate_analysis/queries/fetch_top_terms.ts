@@ -14,8 +14,11 @@ import {
   createRandomSamplerWrapper,
   type RandomSamplerWrapper,
 } from '@kbn/ml-random-sampler-utils';
+import {
+  LOG_RATE_ANALYSIS_SETTINGS,
+  RANDOM_SAMPLER_SEED,
+} from '@kbn/aiops-utils/log_rate_analysis/constants';
 
-import { LOG_RATE_ANALYSIS_SETTINGS, RANDOM_SAMPLER_SEED } from '../../../../common/constants';
 import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';

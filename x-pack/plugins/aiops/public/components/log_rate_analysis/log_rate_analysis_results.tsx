@@ -34,12 +34,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-utils/constants';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '../../../common/api/log_rate_analysis/schema_v2';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
   getGroupTableItems,
   LogRateAnalysisResultsTable,

@@ -15,8 +15,8 @@ import type {
   NumericChartData,
 } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
+import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-utils/log_rate_analysis/constants';
 
-import { RANDOM_SAMPLER_SEED } from '../../../../common/constants';
 import {
   addSignificantItemsHistogramAction,
   updateLoadingStateAction,
