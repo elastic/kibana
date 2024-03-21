@@ -106,6 +106,8 @@ const App: FC<AppProps> = ({
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
   };
 
+  const chromeStyle = useObservable(coreStart.chrome.getChromeStyle$(), 'classic');
+
   const services: StartServices = useMemo(() => {
     return {
       ...coreStart,
@@ -176,6 +178,7 @@ const App: FC<AppProps> = ({
                 <EnabledFeaturesContextProvider
                   isServerless={isServerless}
                   mlFeatures={mlFeatures}
+                  showMLNavMenu={chromeStyle === 'classic'}
                   experimentalFeatures={experimentalFeatures}
                 >
                   <MlRouter pageDeps={pageDeps} />
