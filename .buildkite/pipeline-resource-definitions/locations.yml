@@ -8,3 +8,4 @@ spec:
   targets:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-migration-staging.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-security-solution-quality-gate-explore.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-security-solution-quality-gate-investigations.yml
