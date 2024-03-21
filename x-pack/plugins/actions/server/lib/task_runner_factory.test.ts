@@ -52,32 +52,6 @@ let fakeTimer: sinon.SinonFakeTimers;
 let taskRunnerFactory: TaskRunnerFactory;
 let mockedTaskInstance: ConcreteTaskInstance;
 
-const mockAction = {
-  id: '1',
-  type: 'action',
-  attributes: {
-    name: '1',
-    actionTypeId: 'test',
-    config: {
-      bar: true,
-    },
-    secrets: {
-      baz: true,
-    },
-    isMissingSecrets: false,
-  },
-  references: [],
-};
-
-const mockActionInfo = {
-  actionTypeId: mockAction.attributes.actionTypeId,
-  name: mockAction.attributes.name,
-  config: mockAction.attributes.config,
-  secrets: mockAction.attributes.secrets,
-  actionId: mockAction.id,
-  rawAction: mockAction.attributes,
-};
-
 beforeAll(() => {
   fakeTimer = sinon.useFakeTimers();
   mockedTaskInstance = {
@@ -108,9 +82,15 @@ const services = {
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 
+const unsecuredServices = {
+  log: jest.fn(),
+  savedObjectsClient: savedObjectsRepositoryMock.create(),
+};
+
 const actionExecutorInitializerParams = {
   logger: loggingSystemMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
+  getUnsecuredServices: jest.fn().mockReturnValue(unsecuredServices),
   actionTypeRegistry,
   getActionsAuthorizationWithRequest: jest.fn().mockReturnValue(actionsAuthorizationMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
@@ -132,7 +112,6 @@ describe('Task Runner Factory', () => {
     jest.resetAllMocks();
     jest.clearAllMocks();
     actionExecutorInitializerParams.getServices.mockReturnValue(services);
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
   });
 
   test(`throws an error if factory isn't initialized`, () => {
