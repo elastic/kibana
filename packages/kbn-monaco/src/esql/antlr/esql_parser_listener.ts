@@ -42,7 +42,6 @@ import { QualifiedNameContext } from "./esql_parser";
 import { QualifiedNamePatternContext } from "./esql_parser";
 import { IdentifierContext } from "./esql_parser";
 import { IdentifierPatternContext } from "./esql_parser";
-import { IdPatternContext } from "./esql_parser";
 import { NullLiteralContext } from "./esql_parser";
 import { QualifiedIntegerLiteralContext } from "./esql_parser";
 import { DecimalLiteralContext } from "./esql_parser";
@@ -74,7 +73,7 @@ import { ComparisonOperatorContext } from "./esql_parser";
 import { ExplainCommandContext } from "./esql_parser";
 import { SubqueryExpressionContext } from "./esql_parser";
 import { ShowInfoContext } from "./esql_parser";
-import { ShowFunctionsContext } from "./esql_parser";
+import { MetaFunctionsContext } from "./esql_parser";
 import { EnrichCommandContext } from "./esql_parser";
 import { EnrichWithClauseContext } from "./esql_parser";
 
@@ -499,16 +498,6 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitIdentifierPattern?: (ctx: IdentifierPatternContext) => void;
 	/**
-	 * Enter a parse tree produced by `esql_parser.idPattern`.
-	 * @param ctx the parse tree
-	 */
-	enterIdPattern?: (ctx: IdPatternContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.idPattern`.
-	 * @param ctx the parse tree
-	 */
-	exitIdPattern?: (ctx: IdPatternContext) => void;
-	/**
 	 * Enter a parse tree produced by the `nullLiteral`
 	 * labeled alternative in `esql_parser.constant`.
 	 * @param ctx the parse tree
@@ -841,17 +830,17 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitShowInfo?: (ctx: ShowInfoContext) => void;
 	/**
-	 * Enter a parse tree produced by the `showFunctions`
-	 * labeled alternative in `esql_parser.showCommand`.
+	 * Enter a parse tree produced by the `metaFunctions`
+	 * labeled alternative in `esql_parser.metaCommand`.
 	 * @param ctx the parse tree
 	 */
-	enterShowFunctions?: (ctx: ShowFunctionsContext) => void;
+	enterMetaFunctions?: (ctx: MetaFunctionsContext) => void;
 	/**
-	 * Exit a parse tree produced by the `showFunctions`
-	 * labeled alternative in `esql_parser.showCommand`.
+	 * Exit a parse tree produced by the `metaFunctions`
+	 * labeled alternative in `esql_parser.metaCommand`.
 	 * @param ctx the parse tree
 	 */
-	exitShowFunctions?: (ctx: ShowFunctionsContext) => void;
+	exitMetaFunctions?: (ctx: MetaFunctionsContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.enrichCommand`.
 	 * @param ctx the parse tree
