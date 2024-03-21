@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await searchSessions.expectState('restored');
-        expect(await toasts.getToastCount()).to.be(0); // no session restoration related warnings
+        expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
       });
     });
   });

@@ -19,12 +19,14 @@ export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   existingRule: RuleAlertType | null | undefined;
   ruleUpdate: RuleUpdateProps;
+  allowMissingConnectorSecrets?: boolean;
 }
 
 export const updateRules = async ({
   rulesClient,
   existingRule,
   ruleUpdate,
+  allowMissingConnectorSecrets,
 }: UpdateRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (existingRule == null) {
     return null;
@@ -81,6 +83,7 @@ export const updateRules = async ({
   const update = await rulesClient.update({
     id: existingRule.id,
     data: newInternalRule,
+    allowMissingConnectorSecrets,
   });
 
   if (existingRule.enabled && enabled === false) {

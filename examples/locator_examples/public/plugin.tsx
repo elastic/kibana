@@ -7,7 +7,7 @@
  */
 
 import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { HelloLocator, HelloLocatorDefinition } from './locator';
 
 interface SetupDeps {
@@ -31,7 +31,7 @@ export class LocatorExamplesPlugin
     core.application.register({
       id: 'locatorExamples',
       title: 'Access links examples',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./app');
         return renderApp(

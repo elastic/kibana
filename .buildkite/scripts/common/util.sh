@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
+
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
   false
@@ -169,49 +171,4 @@ npm_install_global() {
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
-}
-
-# TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
-if [[ "${VAULT_ADDR:-}" == *"secrets.elastic.co"* ]]; then
-  VAULT_PATH_PREFIX="secret/kibana-issues/dev"
-  VAULT_KV_PREFIX="secret/kibana-issues/dev"
-  IS_LEGACY_VAULT_ADDR=true
-else
-  VAULT_PATH_PREFIX="secret/ci/elastic-kibana"
-  VAULT_KV_PREFIX="kv/ci-shared/kibana-deployments"
-  IS_LEGACY_VAULT_ADDR=false
-fi
-export IS_LEGACY_VAULT_ADDR
-
-vault_get() {
-  key_path=$1
-  field=$2
-
-  fullPath="$VAULT_PATH_PREFIX/$key_path"
-
-  if [[ -z "${2:-}" || "${2:-}" =~ ^-.* ]]; then
-    retry 5 5 vault read "$fullPath" "${@:2}"
-  else
-    retry 5 5 vault read -field="$field" "$fullPath" "${@:3}"
-  fi
-}
-
-vault_set() {
-  key_path=$1
-  shift
-  fields=("$@")
-
-
-  fullPath="$VAULT_PATH_PREFIX/$key_path"
-
-  # shellcheck disable=SC2068
-  retry 5 5 vault write "$fullPath" ${fields[@]}
-}
-
-vault_kv_set() {
-  kv_path=$1
-  shift
-  fields=("$@")
-
-  vault kv put "$VAULT_KV_PREFIX/$kv_path" "${fields[@]}"
 }

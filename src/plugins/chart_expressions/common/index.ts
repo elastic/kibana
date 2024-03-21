@@ -15,4 +15,3 @@ export {
 export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
 export { isChartSizeEvent } from './types';
 export { getColorCategories } from './color_categories';
-export { useSizeTransitionVeil } from './chart_size_transition_veil';

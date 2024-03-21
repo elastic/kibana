@@ -21,6 +21,188 @@
     "functions": [
       {
         "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.getLensAttributesFromSuggestion",
+        "type": "Function",
+        "tags": [],
+        "label": "getLensAttributesFromSuggestion",
+        "description": [],
+        "signature": [
+          "({ filters, query, suggestion, dataView, }: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; suggestion: ",
+          "Suggestion",
+          "<unknown, unknown> | undefined; dataView?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined; }) => { title: string; references: { id: string; name: string; type: string; }[]; state: { adHocDataViews?: { [x: string]: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "; } | undefined; datasourceStates: { [x: string]: {}; formBased?: undefined; } | { formBased: {}; }; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; visualization: {}; }; visualizationType: string; }"
+        ],
+        "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.getLensAttributesFromSuggestion.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  filters,\n  query,\n  suggestion,\n  dataView,\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.getLensAttributesFromSuggestion.$1.filters",
+                "type": "Array",
+                "tags": [],
+                "label": "filters",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.getLensAttributesFromSuggestion.$1.query",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.AggregateQuery",
+                    "text": "AggregateQuery"
+                  }
+                ],
+                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.getLensAttributesFromSuggestion.$1.suggestion",
+                "type": "Object",
+                "tags": [],
+                "label": "suggestion",
+                "description": [],
+                "signature": [
+                  "Suggestion",
+                  "<unknown, unknown> | undefined"
+                ],
+                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.getLensAttributesFromSuggestion.$1.dataView",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
         "id": "def-common.getTimeZone",
         "type": "Function",
         "tags": [],

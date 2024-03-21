@@ -1329,7 +1329,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<object>; }"
+              "<object>; meta?: undefined; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -1455,7 +1455,7 @@
                 "section": "def-common.SOWithMetadataPartial",
                 "text": "SOWithMetadataPartial"
               },
-              "<object>; }"
+              "<object>; meta?: undefined; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -1756,7 +1756,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<Attributes>; }"
+              "<Attributes>; meta?: undefined; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -1850,7 +1850,7 @@
                 "section": "def-common.SOWithMetadataPartial",
                 "text": "SOWithMetadataPartial"
               },
-              "<Attributes>; }"
+              "<Attributes>; meta?: undefined; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,

@@ -6,17 +6,7 @@
  */
 
 import '../../mock/match_media';
-import {
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  defaultHeaders,
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-} from '../../mock';
-
-import type { State } from '..';
-import { createStore } from '..';
-
+import { defaultHeaders, createSecuritySolutionStorageMock, createMockStore } from '../../mock';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 import { Direction } from '../../../../common/search_strategy';
 import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
@@ -37,12 +27,11 @@ jest.mock('../../../timelines/containers/local_storage');
 const addTableInStorageMock = addTableInStorage as jest.Mock;
 
 describe('DataTable localStorage middleware', () => {
-  const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createMockStore(undefined, undefined, undefined, storage);
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createMockStore(undefined, undefined, undefined, storage);
   });
 
   it('should call the storage method with the most recent table state', () => {

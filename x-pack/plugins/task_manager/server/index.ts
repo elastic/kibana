@@ -24,7 +24,7 @@ export type {
   LoadIndirectParamsResult,
 } from './task';
 
-export { TaskStatus } from './task';
+export { TaskStatus, TaskPriority } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
@@ -34,8 +34,6 @@ export {
   throwUnrecoverableError,
   throwRetryableError,
   isEphemeralTaskRejectedDueToCapacityError,
-  isSkipError,
-  createSkipError,
   createTaskRunError,
   TaskErrorSource,
 } from './task_running';

@@ -9,6 +9,7 @@
 import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
+import { add, type Duration } from 'date-fns';
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -21,6 +22,8 @@ import {
 } from '@kbn/core/server/mocks';
 import { ISearchClient, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
+import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
@@ -360,7 +363,11 @@ describe('CsvGenerator', () => {
       expect(mockDataClient.search).toHaveBeenCalledTimes(10);
       expect(mockDataClient.search).toBeCalledWith(
         { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
-        { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
+        {
+          abortSignal: expect.any(AbortSignal),
+          strategy: 'es',
+          transport: { maxRetries: 0, requestTimeout: '30s' },
+        }
       );
 
       expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledTimes(1);
@@ -370,7 +377,12 @@ describe('CsvGenerator', () => {
           index: 'logstash-*',
           keep_alive: '30s',
         },
-        { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
+        {
+          maxConcurrentShardRequests: 5,
+          maxRetries: 0,
+          requestTimeout: '30s',
+          signal: expect.any(AbortSignal),
+        }
       );
 
       expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
@@ -548,6 +560,203 @@ describe('CsvGenerator', () => {
     });
   });
 
+  describe('export behavior when scroll duration config is auto', () => {
+    const getTaskInstanceFields = (intervalFromNow: Duration) => {
+      const now = new Date(Date.now());
+      return { startedAt: now, retryAt: add(now, intervalFromNow) };
+    };
+
+    let mockConfigWithAutoScrollDuration: ReportingConfigType['csv'];
+    let mockDataClientSearchFn: jest.MockedFunction<IScopedSearchClient['search']>;
+
+    beforeEach(() => {
+      mockConfigWithAutoScrollDuration = {
+        ...mockConfig,
+        scroll: {
+          ...mockConfig.scroll,
+          duration: 'auto',
+        },
+      };
+
+      mockDataClientSearchFn = jest.fn();
+
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.clearAllTimers();
+      jest.useRealTimers();
+
+      mockDataClientSearchFn.mockRestore();
+    });
+
+    it('csv gets generated if search resolves without errors before the computed timeout value passed to the search data client elapses', async () => {
+      const timeFromNowInMs = 4 * 60 * 1000;
+
+      const taskInstanceFields = getTaskInstanceFields({
+        seconds: timeFromNowInMs / 1000,
+      });
+
+      mockDataClientSearchFn.mockImplementation((_, options) => {
+        const getSearchResult = () => {
+          const queuedAt = Date.now();
+
+          return new Promise<IKibanaSearchResponse<ReturnType<typeof getMockRawResponse>>>(
+            (resolve, reject) => {
+              setTimeout(() => {
+                if (
+                  new Date(Date.now()).getTime() - new Date(queuedAt).getTime() >
+                  Number((options?.transport?.requestTimeout! as string).replace(/ms/, ''))
+                ) {
+                  reject(
+                    new esErrors.ResponseError({ statusCode: 408, meta: {} as any, warnings: [] })
+                  );
+                } else {
+                  resolve({
+                    rawResponse: getMockRawResponse(
+                      [
+                        {
+                          fields: { a: ['a1'], b: ['b1'] },
+                        } as unknown as estypes.SearchHit,
+                      ],
+                      3
+                    ),
+                  });
+                }
+              }, timeFromNowInMs / 4);
+            }
+          );
+        };
+
+        return Rx.defer(getSearchResult);
+      });
+
+      const generateCsvPromise = new CsvGenerator(
+        createMockJob({ searchSource: {}, columns: ['a', 'b'] }),
+        mockConfigWithAutoScrollDuration,
+        taskInstanceFields,
+        {
+          es: mockEsClient,
+          data: {
+            ...mockDataClient,
+            search: mockDataClientSearchFn,
+          },
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      ).generateData();
+
+      await jest.advanceTimersByTimeAsync(timeFromNowInMs);
+
+      expect(await generateCsvPromise).toEqual(
+        expect.objectContaining({
+          warnings: [],
+        })
+      );
+
+      expect(mockDataClientSearchFn).toBeCalledWith(
+        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        {
+          abortSignal: expect.any(AbortSignal),
+          strategy: 'es',
+          transport: { maxRetries: 0, requestTimeout: `${timeFromNowInMs}ms` },
+        }
+      );
+
+      expect(content).toMatchSnapshot();
+    });
+
+    it('csv generation errors if search request does not resolve before the computed timeout value passed to the search data client elapses', async () => {
+      const timeFromNowInMs = 4 * 60 * 1000;
+
+      const taskInstanceFields = getTaskInstanceFields({
+        seconds: timeFromNowInMs / 1000,
+      });
+
+      const requestDuration = timeFromNowInMs + 1000;
+
+      mockDataClientSearchFn.mockImplementation((_, options) => {
+        const getSearchResult = () => {
+          const queuedAt = Date.now();
+
+          return new Promise<IKibanaSearchResponse<ReturnType<typeof getMockRawResponse>>>(
+            (resolve, reject) => {
+              setTimeout(() => {
+                if (
+                  new Date(Date.now()).getTime() - new Date(queuedAt).getTime() >
+                  Number((options?.transport?.requestTimeout! as string).replace(/ms/, ''))
+                ) {
+                  reject(
+                    new esErrors.ResponseError({ statusCode: 408, meta: {} as any, warnings: [] })
+                  );
+                } else {
+                  resolve({
+                    rawResponse: getMockRawResponse(
+                      [
+                        {
+                          fields: { a: ['a1'], b: ['b1'] },
+                        } as unknown as estypes.SearchHit,
+                      ],
+                      3
+                    ),
+                  });
+                }
+              }, requestDuration);
+            }
+          );
+        };
+
+        return Rx.defer(getSearchResult);
+      });
+
+      const generateCsvPromise = new CsvGenerator(
+        createMockJob({ searchSource: {}, columns: ['a', 'b'] }),
+        mockConfigWithAutoScrollDuration,
+        taskInstanceFields,
+        {
+          es: mockEsClient,
+          data: {
+            ...mockDataClient,
+            search: mockDataClientSearchFn,
+          },
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      ).generateData();
+
+      await jest.advanceTimersByTimeAsync(requestDuration);
+
+      expect(await generateCsvPromise).toEqual(
+        expect.objectContaining({
+          warnings: expect.arrayContaining([
+            expect.stringContaining('Received a 408 response from Elasticsearch'),
+          ]),
+        })
+      );
+
+      expect(mockDataClientSearchFn).toBeCalledWith(
+        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        {
+          abortSignal: expect.any(AbortSignal),
+          strategy: 'es',
+          transport: { maxRetries: 0, requestTimeout: `${timeFromNowInMs}ms` },
+        }
+      );
+    });
+  });
+
   describe('Scroll strategy', () => {
     const mockJobUsingScrollPaging = createMockJob({
       columns: ['date', 'ip', 'message'],
@@ -654,7 +863,11 @@ describe('CsvGenerator', () => {
             max_concurrent_shard_requests: 5,
           }),
         },
-        { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
+        {
+          abortSignal: expect.any(AbortSignal),
+          strategy: 'es',
+          transport: { maxRetries: 0, requestTimeout: '30s' },
+        }
       );
 
       expect(mockEsClient.asCurrentUser.openPointInTime).not.toHaveBeenCalled();
@@ -1200,17 +1413,12 @@ describe('CsvGenerator', () => {
         index: 'logstash-*',
         keep_alive: '30s',
       },
-      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
-    );
-
-    expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
       {
-        ignore_unavailable: true,
-        ignore_throttled: false,
-        index: 'logstash-*',
-        keep_alive: '30s',
-      },
-      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
+        maxConcurrentShardRequests: 5,
+        maxRetries: 0,
+        requestTimeout: '30s',
+        signal: expect.any(AbortSignal),
+      }
     );
 
     expect(mockDataClient.search).toBeCalledWith(
@@ -1220,7 +1428,11 @@ describe('CsvGenerator', () => {
           max_concurrent_shard_requests: 5,
         },
       },
-      { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
+      {
+        abortSignal: expect.any(AbortSignal),
+        strategy: 'es',
+        transport: { maxRetries: 0, requestTimeout: '30s' },
+      }
     );
   });
 

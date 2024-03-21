@@ -17,6 +17,10 @@ export interface FindingsBaseURLQuery {
    * Filters that are part of the query but not persisted in the URL or in the Filter Manager
    */
   nonPersistedFilters?: Filter[];
+  /**
+   * Grouping component selection
+   */
+  groupBy?: string[];
 }
 
 export interface FindingsBaseESQueryConfig {

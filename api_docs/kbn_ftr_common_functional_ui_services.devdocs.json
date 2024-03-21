@@ -11997,7 +11997,9 @@
             "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
-          ") => Promise<BrowserService>; }, {}, ProvidedTypeMap<{ retry: typeof ",
+          ") => Promise<BrowserService>; toasts: typeof ",
+          "ToastsService",
+          "; }, {}, ProvidedTypeMap<{ retry: typeof ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -12059,7 +12061,9 @@
             "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
-          ") => Promise<BrowserService>; }>, ProvidedTypeMap<{}>>"
+          ") => Promise<BrowserService>; toasts: typeof ",
+          "ToastsService",
+          "; }>, ProvidedTypeMap<{}>>"
         ],
         "path": "packages/kbn-ftr-common-functional-ui-services/services/ftr_provider_context.ts",
         "deprecated": false,
@@ -12508,7 +12512,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => Promise<BrowserService>; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }, {}, ProvidedTypeMap<{ retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -12570,7 +12576,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => Promise<BrowserService>; }>, ProvidedTypeMap<{}>>"
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/retry_on_stale.ts",
                 "deprecated": false,
@@ -12690,7 +12698,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => Promise<BrowserService>; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }, {}, ProvidedTypeMap<{ retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -12752,7 +12762,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => Promise<BrowserService>; }>, ProvidedTypeMap<{}>>"
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/remote/remote.ts",
                 "deprecated": false,
@@ -12862,7 +12874,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => Promise<BrowserService>; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }, {}, ProvidedTypeMap<{ retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -12924,7 +12938,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => Promise<BrowserService>; }>, ProvidedTypeMap<{}>>"
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/find.ts",
                 "deprecated": false,
@@ -13053,7 +13069,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => Promise<BrowserService>; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }, {}, ProvidedTypeMap<{ retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -13115,13 +13133,30 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => Promise<BrowserService>; }>, ProvidedTypeMap<{}>>"
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.services.toasts",
+            "type": "Object",
+            "tags": [],
+            "label": "toasts",
+            "description": [],
+            "signature": [
+              "typeof ",
+              "ToastsService"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

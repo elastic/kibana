@@ -21,6 +21,7 @@ interface Props {
   rule: RuleInfo;
   abortController: AbortController;
   searchSourceClient: ISearchStartSearchSource;
+  requestTimeout?: number;
 }
 
 interface WrapParams<T extends ISearchSource | SearchSource> {
@@ -29,6 +30,12 @@ interface WrapParams<T extends ISearchSource | SearchSource> {
   abortController: AbortController;
   pureSearchSource: T;
   logMetrics: (metrics: LogSearchMetricsOpts) => void;
+  requestTimeout?: number;
+}
+
+export interface WrappedSearchSourceClient {
+  searchSourceClient: ISearchStartSearchSource;
+  getMetrics: () => SearchMetrics;
 }
 
 export function wrapSearchSourceClient({
@@ -36,7 +43,8 @@ export function wrapSearchSourceClient({
   rule,
   abortController,
   searchSourceClient: pureSearchSourceClient,
-}: Props) {
+  requestTimeout,
+}: Props): WrappedSearchSourceClient {
   let numSearches: number = 0;
   let esSearchDurationMs: number = 0;
   let totalSearchDurationMs: number = 0;
@@ -52,6 +60,7 @@ export function wrapSearchSourceClient({
     logger,
     rule,
     abortController,
+    requestTimeout,
   };
 
   const wrappedSearchSourceClient: ISearchStartSearchSource = Object.create(pureSearchSourceClient);
@@ -137,6 +146,7 @@ function wrapFetch$({
   abortController,
   pureSearchSource,
   logMetrics,
+  requestTimeout,
 }: WrapParams<ISearchSource>) {
   return (options?: ISearchOptions) => {
     const searchOptions = options ?? {};
@@ -145,12 +155,19 @@ function wrapFetch$({
     logger.debug(
       `executing query for rule ${rule.alertTypeId}:${rule.id} in space ${
         rule.spaceId
-      } - with options ${JSON.stringify(searchOptions)}`
+      } - with options ${JSON.stringify(searchOptions)}${
+        requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+      }`
     );
 
     return pureSearchSource
       .fetch$({
         ...searchOptions,
+        ...(requestTimeout
+          ? {
+              transport: { requestTimeout },
+            }
+          : {}),
         abortSignal: abortController.signal,
       })
       .pipe(

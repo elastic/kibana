@@ -243,15 +243,21 @@ const updateIndexTemplate = async (
   try {
     await esClient.indices.putIndexTemplate({
       name: indexTemplateName,
-      index_patterns: indexPattern,
-      priority: 500,
-      template: {
-        mappings: template?.mappings,
-        settings,
-        aliases: template?.aliases,
+      body: {
+        index_patterns: indexPattern,
+        priority: 500,
+        template: {
+          mappings: template?.mappings,
+          settings,
+          aliases: template?.aliases,
+        },
+        _meta,
+        composed_of: composedOf.filter((ct) => ct !== STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS),
+        // @ts-expect-error es client do not contains this yet
+        ignore_missing_component_templates: composedOf.filter((templateName) =>
+          templateName.endsWith('@custom')
+        ),
       },
-      _meta,
-      composed_of: composedOf.filter((ct) => ct !== STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS),
     });
 
     logger.info(`Updated index template successfully [Name: ${indexTemplateName}]`);

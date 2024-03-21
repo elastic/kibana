@@ -10,11 +10,8 @@ import type { EuiTourStepProps } from '@elastic/eui';
 import { GuidedOnboardingTourStep, SecurityTourStep } from './tour_step';
 import { AlertsCasesTourSteps, SecurityStepId } from './tour_config';
 import { useTourContext } from './tour';
-import { mockGlobalState, SUB_PLUGINS_REDUCER, TestProviders } from '../../mock';
+import { mockGlobalState, TestProviders, createMockStore } from '../../mock';
 import { TimelineId } from '../../../../common/types';
-import { createStore } from '../../store';
-import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
-import { createSecuritySolutionStorageMock } from '@kbn/timelines-plugin/public/mock/mock_local_storage';
 
 jest.mock('./tour');
 const mockTourStep = jest
@@ -256,8 +253,7 @@ describe('SecurityTourStep', () => {
         },
       },
     };
-    const { storage } = createSecuritySolutionStorageMock();
-    const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const mockStore = createMockStore(mockstate);
 
     render(
       <TestProviders store={mockStore}>

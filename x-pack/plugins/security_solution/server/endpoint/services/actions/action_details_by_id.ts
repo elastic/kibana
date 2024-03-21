@@ -94,11 +94,14 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
   }
 
   // get host metadata info with queried agents
-  const agentsHostInfo = await getAgentHostNamesWithIds({
-    esClient,
-    metadataService,
-    agentIds: normalizedActionRequest.agents,
-  });
+  const agentsHostInfo =
+    normalizedActionRequest.agentType === 'endpoint'
+      ? await getAgentHostNamesWithIds({
+          esClient,
+          metadataService,
+          agentIds: normalizedActionRequest.agents,
+        })
+      : {};
 
   return createActionDetailsRecord<T>(normalizedActionRequest, actionResponses, agentsHostInfo);
 };

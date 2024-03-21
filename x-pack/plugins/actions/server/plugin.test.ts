@@ -24,7 +24,12 @@ import {
   ActionsPluginsStart,
   PluginSetupContract,
 } from './plugin';
-import { AlertHistoryEsIndexConnectorId } from '../common';
+import {
+  AlertHistoryEsIndexConnectorId,
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../common';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
@@ -51,6 +56,9 @@ function getConfig(overrides = {}) {
     maxResponseContentLength: new ByteSizeValue(1000000),
     responseTimeout: moment.duration('60s'),
     enableFooterInEmail: true,
+    microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+    microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+    microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
     ...overrides,
   };
 }
@@ -73,6 +81,9 @@ describe('Actions Plugin', () => {
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
         enableFooterInEmail: true,
+        microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+        microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+        microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -534,6 +545,9 @@ describe('Actions Plugin', () => {
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
         enableFooterInEmail: true,
+        microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+        microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+        microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();

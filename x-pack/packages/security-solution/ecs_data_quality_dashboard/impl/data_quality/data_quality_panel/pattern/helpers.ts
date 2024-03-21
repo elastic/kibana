@@ -172,6 +172,7 @@ export const getSummaryTableItems = ({
     pattern,
     patternDocsCount,
     sizeInBytes: getSizeInBytes({ stats, indexName }),
+    checkedAt: results?.[indexName]?.checkedAt,
   }));
 
   return orderBy([sortByColumn], [sortByDirection], summaryTableItems);

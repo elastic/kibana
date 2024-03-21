@@ -24,6 +24,7 @@ const getMetrics = ({
     numberOfNewAlerts: 12,
     numberOfRecoveredAlerts: 11,
     numberOfTriggeredActions: 5,
+    numberOfDelayedAlerts: 3,
     totalSearchDurationMs: 2,
     hasReachedAlertLimit,
     hasReachedQueuedActionsLimit,

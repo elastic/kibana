@@ -63,6 +63,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./jira_connector'));
     loadTestFile(require.resolve('./opsgenie_connector'));
     loadTestFile(require.resolve('./pagerduty_connector'));
+    loadTestFile(require.resolve('./sentinelone_connector'));
     loadTestFile(require.resolve('./server_log_connector'));
     loadTestFile(require.resolve('./servicenow_itom_connector'));
     loadTestFile(require.resolve('./servicenow_itsm_connector'));

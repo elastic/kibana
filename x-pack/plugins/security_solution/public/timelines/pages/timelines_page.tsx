@@ -18,7 +18,7 @@ import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { LandingPageComponent } from '../../common/components/landing_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
@@ -69,7 +69,7 @@ export const TimelinesPage = React.memo(() => {
           />
         </SecuritySolutionPageWrapper>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.timelines} />

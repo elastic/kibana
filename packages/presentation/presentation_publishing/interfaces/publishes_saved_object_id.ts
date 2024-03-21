@@ -28,4 +28,4 @@ export const apiPublishesSavedObjectId = (
  * A hook that gets this API's saved object ID as a reactive variable which will cause re-renders on change.
  */
 export const useSavedObjectId = (api: PublishesSavedObjectId | undefined) =>
-  useStateFromPublishingSubject<string | undefined>(api?.savedObjectId);
+  useStateFromPublishingSubject(api?.savedObjectId);

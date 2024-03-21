@@ -104,6 +104,7 @@ export interface FleetServerHostSOAttributes {
   host_urls: string[];
   is_default: boolean;
   is_preconfigured: boolean;
+  is_internal?: boolean;
   proxy_id?: string | null;
 }
 
@@ -196,6 +197,7 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
     hash?: string;
     random?: boolean;
   };
+  topic?: string;
   topics?: Array<{
     topic: string;
     when?: {

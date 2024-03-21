@@ -44,6 +44,9 @@ export const serviceContextMock = {
       docLinkVersion: 'NA',
       theme$: themeServiceMock.create().start().theme$,
       docLinks: docLinksServiceMock.createStartContract().links,
+      config: {
+        isMonacoEnabled: false,
+      },
     };
   },
 };

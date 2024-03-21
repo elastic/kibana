@@ -239,6 +239,7 @@ export const DiffableNewTermsFields = buildSchema({
  * NOTE: Every top-level field in a DiffableRule MUST BE LOGICALLY INDEPENDENT from other
  * top-level fields.
  */
+
 export type DiffableRule = t.TypeOf<typeof DiffableRule>;
 export const DiffableRule = t.intersection([
   DiffableCommonFields,
@@ -262,6 +263,7 @@ export type DiffableAllFields = DiffableCommonFields &
   Omit<DiffableCustomQueryFields, 'type'> &
   Omit<DiffableSavedQueryFields, 'type'> &
   Omit<DiffableEqlFields, 'type'> &
+  Omit<DiffableEsqlFields, 'type'> &
   Omit<DiffableThreatMatchFields, 'type'> &
   Omit<DiffableThresholdFields, 'type'> &
   Omit<DiffableMachineLearningFields, 'type'> &

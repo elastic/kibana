@@ -14,24 +14,27 @@ import {
   OBSERVABILITY_ONBOARDING_APP_ID,
   OBSERVABILITY_OVERVIEW_APP_ID,
   SYNTHETICS_APP_ID,
+  SLO_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
-type ObservabilityLogExplorerApp = typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID;
+type ObservabilityLogsExplorerApp = typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID;
 type ObservabilityOverviewApp = typeof OBSERVABILITY_OVERVIEW_APP_ID;
 type MetricsApp = typeof METRICS_APP_ID;
 type ApmApp = typeof APM_APP_ID;
 type SyntheticsApp = typeof SYNTHETICS_APP_ID;
 type ObservabilityOnboardingApp = typeof OBSERVABILITY_ONBOARDING_APP_ID;
+type SLO_APP = typeof SLO_APP_ID;
 
 export type AppId =
   | LogsApp
-  | ObservabilityLogExplorerApp
+  | ObservabilityLogsExplorerApp
   | ObservabilityOverviewApp
   | ObservabilityOnboardingApp
   | ApmApp
   | MetricsApp
-  | SyntheticsApp;
+  | SyntheticsApp
+  | SLO_APP;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
@@ -40,10 +43,14 @@ export type ObservabilityOverviewLinkId =
   | 'cases'
   | 'cases_configure'
   | 'cases_create'
-  | 'rules'
-  | 'slos';
+  | 'rules';
 
-export type MetricsLinkId = 'inventory' | 'metrics-explorer' | 'hosts' | 'settings';
+export type MetricsLinkId =
+  | 'inventory'
+  | 'metrics-explorer'
+  | 'hosts'
+  | 'settings'
+  | 'assetDetails';
 
 export type ApmLinkId =
   | 'services'
@@ -54,14 +61,17 @@ export type ApmLinkId =
   | 'settings'
   | 'storage-explorer';
 
-export type SyntheticsLinkId = 'overview' | 'management';
+export type SyntheticsLinkId = 'certificates' | 'overview';
+
+export type SLOLinkId = 'slo';
 
 export type LinkId =
   | LogsLinkId
   | ObservabilityOverviewLinkId
   | MetricsLinkId
   | ApmLinkId
-  | SyntheticsLinkId;
+  | SyntheticsLinkId
+  | SLOLinkId;
 
 export type DeepLinkId =
   | AppId

@@ -6,6 +6,7 @@
  */
 
 import { random, times } from 'lodash';
+import moment from 'moment';
 import { v4 } from 'uuid';
 import { Doc } from '../types';
 
@@ -18,7 +19,7 @@ export function addEphemeralProjectId(totalProjectIds: number, events: Doc[]) {
     return events;
   }
 
-  const now = Date.now();
+  const now = (events[0] && moment(events[0]['@timestamp']).valueOf()) || Date.now();
   const workingIds = projectIds.filter(([_id, expirationDate]) => expirationDate > now);
   const numberOfIdsToCreate = totalProjectIds - workingIds.length;
 

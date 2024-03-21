@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   const CHAT_API_URL = `/internal/observability_ai_assistant/chat`;
 
@@ -39,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let connectorId: string;
 
     before(async () => {
-      proxy = await createLlmProxy();
+      proxy = await createLlmProxy(log);
 
       const response = await supertest
         .post('/api/actions/connector')
@@ -69,6 +70,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .post(CHAT_API_URL)
         .set('kbn-xsrf', 'foo')
         .send({
+          name: 'my_api_call',
           messages,
           connectorId: 'does not exist',
           functions: [],
@@ -88,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         new Promise<void>((resolve, reject) => {
           async function runTest() {
             const interceptor = proxy.intercept('conversation', () => true);
-            const receivedChunks: any[] = [];
+            const receivedChunks: Array<Record<string, any>> = [];
 
             const passThrough = new PassThrough();
             supertest
@@ -96,6 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'foo')
               .on('error', reject)
               .send({
+                name: 'my_api_call',
                 messages,
                 connectorId,
                 functions: [],
@@ -105,7 +108,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const simulator = await interceptor.waitForIntercept();
 
             passThrough.on('data', (chunk) => {
-              receivedChunks.push(chunk.toString());
+              receivedChunks.push(JSON.parse(chunk.toString()));
             });
 
             for (let i = 0; i < NUM_RESPONSES; i++) {
@@ -116,9 +119,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             await new Promise<void>((innerResolve) => passThrough.on('end', () => innerResolve()));
 
-            expect(receivedChunks.length).to.eql(
+            const chatCompletionChunks = receivedChunks.filter(
+              (chunk) => chunk.type === 'chatCompletionChunk'
+            );
+            expect(chatCompletionChunks).to.have.length(
               NUM_RESPONSES,
-              'received no of chunks did not match expected. This might be because of a 4xx or 5xx'
+              `received number of chat completion chunks did not match expected. This might be because of a 4xx or 5xx: ${JSON.stringify(
+                chatCompletionChunks,
+                null,
+                2
+              )}`
+            );
+
+            const tokenCountChunk = receivedChunks.find((chunk) => chunk.type === 'tokenCount');
+            expect(tokenCountChunk).to.eql(
+              {
+                type: 'tokenCount',
+                tokens: { completion: 20, prompt: 33, total: 53 },
+              },
+              `received token count chunk did not match expected`
             );
           }
 
@@ -136,6 +155,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .post(CHAT_API_URL)
         .set('kbn-xsrf', 'foo')
         .send({
+          name: 'my_api_call',
           messages,
           connectorId,
           functions: [],
@@ -170,8 +190,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const response = JSON.parse(data);
 
-      expect(response.message).to.contain(
-        `an error occurred while running the action - Status code: 400. Message: API Error: Bad Request - This model's maximum context length is 8192 tokens. However, your messages resulted in 11036 tokens. Please reduce the length of the messages.`
+      expect(response.message).to.be(
+        `Token limit reached. Token limit is 8192, but the current conversation has 11036 tokens.`
       );
     });
 

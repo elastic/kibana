@@ -14,11 +14,16 @@ export {
 export type { AvailableControlPanels, ControlPanels } from './control_panels';
 export {
   AllDatasetSelection,
-  datasetSelectionPlainRT,
-  hydrateDatasetSelection,
+  dataSourceSelectionPlainRT,
+  DataViewSelection,
+  hydrateDataSourceSelection,
+  isDatasetSelection,
+  isDataSourceSelection,
+  isDataViewSelection,
+  isUnresolvedDatasetSelection,
   UnresolvedDatasetSelection,
-} from './dataset_selection';
-export type { DatasetSelectionPlain } from './dataset_selection';
+} from './data_source_selection';
+export type { DataSourceSelectionPlain } from './data_source_selection';
 export type {
   ChartDisplayOptions,
   DisplayOptions,
@@ -30,3 +35,10 @@ export type {
   PartialGridDisplayOptions,
   PartialGridRowsDisplayOptions,
 } from './display_options';
+
+export {
+  CONTENT_FIELD,
+  CONTENT_FIELD_CONFIGURATION,
+  RESOURCE_FIELD_CONFIGURATION,
+  SMART_FALLBACK_FIELDS,
+} from './constants';

@@ -324,6 +324,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.random, preconfiguredOutput.random) ||
       isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
       isDifferent(existingOutput.hash, preconfiguredOutput.hash) ||
+      isDifferent(existingOutput.topic, preconfiguredOutput.topic) ||
       isDifferent(existingOutput.topics, preconfiguredOutput.topics) ||
       isDifferent(existingOutput.headers, preconfiguredOutput.headers) ||
       isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||

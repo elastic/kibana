@@ -37,7 +37,7 @@ export {
   ruleSnoozeScheduleSchema as ruleSnoozeScheduleSchemaV1,
   notifyWhenSchema as notifyWhenSchemaV1,
   scheduleIdsSchema as scheduleIdsSchemaV1,
-  notificationDelaySchema as notificationDelaySchemaV1,
+  alertDelaySchema as alertDelaySchemaV1,
 } from './schemas/v1';
 
 export type {

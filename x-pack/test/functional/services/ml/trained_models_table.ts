@@ -582,6 +582,7 @@ export function TrainedModelsTableProvider(
       await mlCommonUI.assertLastToastHeader(
         `Deployment for "${modelId}" has been stopped successfully.`
       );
+      await mlCommonUI.waitForRefreshButtonEnabled();
     }
 
     public async openStartDeploymentModal(modelId: string) {

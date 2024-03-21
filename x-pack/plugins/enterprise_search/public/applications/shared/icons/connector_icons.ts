@@ -19,10 +19,12 @@ import mongodb from '../../../assets/source_icons/mongodb.svg';
 import microsoft_sql from '../../../assets/source_icons/mssql.svg';
 import mysql from '../../../assets/source_icons/mysql.svg';
 import network_drive from '../../../assets/source_icons/network_drive.svg';
+import notion from '../../../assets/source_icons/notion.svg';
 import onedrive from '../../../assets/source_icons/onedrive.svg';
 import oracle from '../../../assets/source_icons/oracle.svg';
 import outlook from '../../../assets/source_icons/outlook.svg';
 import postgresql from '../../../assets/source_icons/postgresql.svg';
+import redis from '../../../assets/source_icons/redis.svg';
 import amazon_s3 from '../../../assets/source_icons/s3.svg';
 import salesforce from '../../../assets/source_icons/salesforce.svg';
 import servicenow from '../../../assets/source_icons/servicenow.svg';
@@ -48,10 +50,12 @@ export const CONNECTOR_ICONS = {
   mongodb,
   mysql,
   network_drive,
+  notion,
   onedrive,
   oracle,
   outlook,
   postgresql,
+  redis,
   salesforce,
   servicenow,
   sharepoint,

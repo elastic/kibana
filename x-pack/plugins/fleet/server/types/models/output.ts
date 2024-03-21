@@ -26,7 +26,7 @@ export function validateLogstashHost(val: string) {
   try {
     const url = new URL(`http://${val}`);
 
-    if (url.host !== val) {
+    if (url.host !== val.toLowerCase()) {
       return 'Invalid host';
     }
   } catch (err) {
@@ -295,7 +295,8 @@ export const KafkaSchema = {
   hash: schema.maybe(
     schema.object({ hash: schema.maybe(schema.string()), random: schema.maybe(schema.boolean()) })
   ),
-  topics: KafkaTopicsSchema,
+  topic: schema.maybe(schema.string()),
+  topics: schema.maybe(KafkaTopicsSchema),
   headers: schema.maybe(
     schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }))
   ),

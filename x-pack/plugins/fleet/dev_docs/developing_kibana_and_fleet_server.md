@@ -402,11 +402,14 @@ _To do: add specific docs for enrolling Multipass agents and link here_
 
 ## Running in serverless mode
 
-If you want to run your local stack in serverless mode, you'll only need to alter the commands used to start Elasticsearch and Kibana. Fleet Server does not require any changes outside of what's listed above to run in a serverless context. From your Kibana, start a serverless Elasticsearch snapshot, and then run Kibana as either a security or observability project.
+If you want to run your local stack in serverless mode, you'll only need to alter the commands used to start Elasticsearch and Kibana. Fleet Server does not require any changes outside of what's listed above to run in a serverless context. From your Kibana, start a serverless Elasticsearch snapshot as either a security or observability project, and then run Kibana using the same project type.
 
 ```bash
-# Start Elasticsearch in serverless mode
-yarn es serverless --kill
+# Start Elasticsearch in serverless mode as a security project
+yarn es serverless --projectType=security --kill
+
+# Start Elasticsearch in serverless mode as an observability project
+yarn es serverless --projectType=oblt --kill
 
 # Run kibana as a security project
 yarn serverless-security

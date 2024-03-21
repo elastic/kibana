@@ -10,10 +10,10 @@ import type { ESQLCallbacks } from '../ast/shared/types';
 import { monaco } from '../../../monaco_imports';
 import type { ESQLWorker } from '../../worker/esql_worker';
 import { suggest } from '../ast/autocomplete/autocomplete';
-import { getHoverItem } from '../ast/hover';
+import { getHoverItem } from '../ast/hover/hover';
 import { getSignatureHelp } from '../ast/signature';
 import { validateAst } from '../ast/validation/validation';
-import { getActions } from '../ast/code_actions';
+import { getActions } from '../ast/code_actions/actions';
 import { wrapAsMonacoMessage } from '../ast/shared/monaco_utils';
 
 export class ESQLAstAdapter {

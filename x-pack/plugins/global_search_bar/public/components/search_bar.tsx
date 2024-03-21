@@ -351,7 +351,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
-        buttonRef: setButtonRef,
+        popoverRef: setButtonRef,
         panelStyle: { marginTop: '6px' },
       }}
       popoverButton={

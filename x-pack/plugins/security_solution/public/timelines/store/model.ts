@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../common/types';
@@ -101,7 +100,7 @@ export interface TimelineModel {
   deletedEventIds: string[];
   documentType: string;
   excludedRowRendererIds: RowRendererId[];
-  filterManager?: FilterManager;
+  filters?: Filter[];
   footerText?: string | React.ReactNode;
   loadingText?: string | React.ReactNode;
   queryFields: string[];
@@ -128,7 +127,6 @@ export interface TimelineModel {
   };
   /** Uniquely identifies the timeline */
   id: string;
-  filters?: Filter[];
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
@@ -142,6 +140,8 @@ export interface TimelineModel {
   isDataProviderVisible: boolean;
   /** used to mark the timeline as unsaved in the UI */
   changed?: boolean;
+  /** the note id pending deletion */
+  confirmingNoteId?: string | null;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -194,7 +194,6 @@ export type SubsetTimelineModel = Readonly<
     | 'version'
     | 'status'
     | 'filters'
-    | 'filterManager'
     | 'savedSearchId'
     | 'savedSearch'
     | 'isDiscoverSavedSearchLoaded'

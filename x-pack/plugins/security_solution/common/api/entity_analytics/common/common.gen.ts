@@ -19,6 +19,8 @@ import { z } from 'zod';
 export type EntityAnalyticsPrivileges = z.infer<typeof EntityAnalyticsPrivileges>;
 export const EntityAnalyticsPrivileges = z.object({
   has_all_required: z.boolean(),
+  has_read_permissions: z.boolean().optional(),
+  has_write_permissions: z.boolean().optional(),
   privileges: z.object({
     elasticsearch: z.object({
       cluster: z

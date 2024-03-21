@@ -6,29 +6,16 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import type {
-  EmbeddableFactory,
-  EmbeddableInput,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import type { LensPluginStartDependencies } from '../../plugin';
 
 const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';
 
-interface Context {
-  createNewEmbeddable: (
-    embeddableFactory: EmbeddableFactory,
-    initialInput?: Partial<EmbeddableInput>,
-    dismissNotification?: boolean
-  ) => Promise<undefined | IEmbeddable>;
-  deleteEmbeddable: (embeddableId: string) => void;
-  initialInput?: Partial<EmbeddableInput>;
-}
-
 export const getAsyncHelpers = async () => await import('../../async_services');
 
-export class CreateESQLPanelAction implements Action<Context> {
+export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;
   public id = ACTION_CREATE_ESQL_CHART;
   public order = 50;
@@ -49,19 +36,20 @@ export class CreateESQLPanelAction implements Action<Context> {
     return 'esqlVis';
   }
 
-  public async isCompatible() {
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    if (!apiIsPresentationContainer(embeddable)) return false;
     // compatible only when ES|QL advanced setting is enabled
     const { isCreateActionCompatible } = await getAsyncHelpers();
     return isCreateActionCompatible(this.core);
   }
 
-  public async execute({ createNewEmbeddable, deleteEmbeddable }: Context) {
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
     const { executeCreateAction } = await getAsyncHelpers();
     executeCreateAction({
       deps: this.startDependencies,
       core: this.core,
-      createNewEmbeddable,
-      deleteEmbeddable,
+      api: embeddable,
     });
   }
 }

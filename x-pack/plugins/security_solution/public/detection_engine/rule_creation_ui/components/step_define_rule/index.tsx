@@ -59,10 +59,18 @@ import { StepContentWrapper } from '../../../rule_creation/components/step_conte
 import { ThresholdInput } from '../threshold_input';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
 import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
-import { Field, Form, getUseField, UseField, UseMultiFields } from '../../../../shared_imports';
+import {
+  Field,
+  Form,
+  getUseField,
+  HiddenField,
+  UseField,
+  UseMultiFields,
+} from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
 import { getTermsAggregationFields } from './utils';
+import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
 import * as i18n from './translations';
 import {
   isEqlRule,
@@ -87,6 +95,7 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -176,6 +185,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   thresholdFields,
   enableThresholdSuppression,
 }) => {
+  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -765,14 +775,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       onOpenTimeline,
     ]
   );
+
   const onOptionsChange = useCallback(
     (field: FieldsEqlOptions, value: string | undefined) => {
-      setOptionsSelected((prevOptions) => ({
-        ...prevOptions,
-        [field]: value,
-      }));
+      setOptionsSelected((prevOptions) => {
+        const newOptions = {
+          ...prevOptions,
+          [field]: value,
+        };
+
+        setFieldValue('eqlOptions', newOptions);
+        return newOptions;
+      });
     },
-    [setOptionsSelected]
+    [setFieldValue, setOptionsSelected]
   );
 
   const optionsData = useMemo(
@@ -807,23 +823,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [isUpdateView, mlCapabilities]
   );
 
-  const isAlertSuppressionEnabled = isQueryRule(ruleType) || isThresholdRule;
-
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepDefineRule">
-          <StyledVisibleContainer isVisible={false}>
-            <UseField
-              path="dataSourceType"
-              componentProps={{
-                euiFieldProps: {
-                  fullWidth: true,
-                  placeholder: '',
-                },
-              }}
-            />
-          </StyledVisibleContainer>
+          <UseField
+            path="dataSourceType"
+            component={HiddenField}
+            componentProps={{
+              euiFieldProps: {
+                fullWidth: true,
+                placeholder: '',
+              },
+            }}
+          />
           <UseField
             path="ruleType"
             component={SelectRuleType}
@@ -837,29 +850,31 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </StyledVisibleContainer>
               <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
-                <UseField
-                  key="EqlQueryBar"
-                  path="queryBar"
-                  component={EqlQueryBar}
-                  componentProps={{
-                    optionsData,
-                    optionsSelected,
-                    isSizeOptionDisabled: true,
-                    onOptionsChange,
-                    onValidityChange: setIsQueryBarValid,
-                    idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
-                    isDisabled: isLoading,
-                    isLoading: isIndexPatternLoading,
-                    indexPattern,
-                    showFilterBar: true,
-                    // isLoading: indexPatternsLoading,
-                    dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
-                  }}
-                  config={{
-                    ...schema.queryBar,
-                    label: i18n.EQL_QUERY_BAR_LABEL,
-                  }}
-                />
+                <>
+                  <UseField
+                    key="EqlQueryBar"
+                    path="queryBar"
+                    component={EqlQueryBar}
+                    componentProps={{
+                      optionsData,
+                      optionsSelected,
+                      isSizeOptionDisabled: true,
+                      onOptionsChange,
+                      onValidityChange: setIsQueryBarValid,
+                      idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
+                      isDisabled: isLoading,
+                      isLoading: isIndexPatternLoading,
+                      indexPattern,
+                      showFilterBar: true,
+                      dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
+                    }}
+                    config={{
+                      ...schema.queryBar,
+                      label: i18n.EQL_QUERY_BAR_LABEL,
+                    }}
+                  />
+                  <UseField path="eqlOptions" component={HiddenField} />
+                </>
               ) : isEsqlRule(ruleType) ? (
                 EsqlQueryBarMemo
               ) : (
@@ -997,7 +1012,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow
-            $isVisible={isAlertSuppressionEnabled && isQueryRule(ruleType)}
+            $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
             data-test-subj="alertSuppressionInput"
           >
             <UseField
@@ -1033,8 +1048,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </IntendedRuleTypeEuiFormRow>
 
           <IntendedRuleTypeEuiFormRow
-            // only query rule has this suppression configuration
-            $isVisible={isAlertSuppressionEnabled && isQueryRule(ruleType)}
+            // threshold rule does not have this suppression configuration
+            $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
             data-test-subj="alertSuppressionMissingFields"
             label={
               <span>
@@ -1077,13 +1092,14 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
   indexPattern,
 }) => {
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
+  const transformFields = useExperimentalFeatureFieldsTransform();
 
   return (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
         schema={filterRuleFieldsForType(schema, data.ruleType)}
-        data={filterRuleFieldsForType(dataForDescription, data.ruleType)}
+        data={filterRuleFieldsForType(transformFields(dataForDescription), data.ruleType)}
         indexPatterns={indexPattern}
       />
     </StepContentWrapper>

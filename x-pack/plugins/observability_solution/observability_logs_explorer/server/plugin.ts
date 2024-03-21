@@ -7,7 +7,7 @@
 
 import { Plugin } from '@kbn/core/server';
 
-export class ObservabilityLogExplorerServerPlugin implements Plugin {
+export class ObservabilityLogsExplorerServerPlugin implements Plugin {
   setup() {}
 
   start() {}

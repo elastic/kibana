@@ -19,7 +19,7 @@ function generator(options: TemplateContext) {
     packageManager: options.baseImage === 'ubi' ? 'microdnf' : 'apt-get',
     ubi: options.baseImage === 'ubi',
     ubuntu: options.baseImage === 'ubuntu',
-    opensslLegacyProvider: !(options.cloud || options.serverless),
+    opensslLegacyProvider: !(options.cloud || options.serverless || options.fips),
     ...options,
   });
 }

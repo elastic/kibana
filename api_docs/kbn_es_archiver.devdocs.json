@@ -553,6 +553,9 @@
             "tags": [],
             "label": "batchSize",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -564,6 +567,9 @@
             "tags": [],
             "label": "concurrency",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts",
             "deprecated": false,
             "trackAdoption": false

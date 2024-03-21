@@ -62,8 +62,6 @@ import {
   ENRICHMENT_QUERY_START_INPUT,
   THREAT_INTEL_TAB,
   CELL_EXPAND_VALUE,
-  CELL_EXPANSION_POPOVER,
-  USER_DETAILS_LINK,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
 import {
@@ -419,10 +417,6 @@ export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
     interval: 500,
     timeout: 12000,
   });
-};
-
-export const openUserDetailsFlyout = () => {
-  cy.get(CELL_EXPANSION_POPOVER).find(USER_DETAILS_LINK).click();
 };
 
 export const waitForPageFilters = () => {

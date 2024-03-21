@@ -33,7 +33,8 @@ import { LogstashPageObject } from './logstash_page';
 import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { MonitoringPageObject } from './monitoring_page';
 import { NavigationalSearchPageObject } from './navigational_search';
-import { ObservabilityLogsExplorerPageObject } from './observability_log_explorer';
+import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
+import { DatasetQualityPageObject } from './dataset_quality';
 import { ObservabilityPageProvider } from './observability_page';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { ReportingPageObject } from './reporting_page';
@@ -83,6 +84,7 @@ export const pageObjects = {
   monitoring: MonitoringPageObject,
   navigationalSearch: NavigationalSearchPageObject,
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
+  datasetQuality: DatasetQualityPageObject,
   observability: ObservabilityPageProvider,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,

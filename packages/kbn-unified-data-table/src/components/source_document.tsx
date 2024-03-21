@@ -66,7 +66,7 @@ export function SourceDocument({
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
         // temporary solution for text based mode. As there are a lot of unsupported fields we want to
         // hide the empty one from the Document view
-        if (isPlainRecord && fieldName && row.flattened[fieldName] === null) return null;
+        if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) return null;
         return (
           <Fragment key={fieldDisplayName}>
             <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">

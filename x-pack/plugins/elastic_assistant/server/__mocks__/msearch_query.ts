@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslTextExpansionQuery } from '@elastic/elasticsearch/lib/api/types';
-
 import type { MsearchQueryBody } from '../lib/langchain/elasticsearch_store/helpers/get_msearch_query_body';
 
 /**
@@ -42,7 +40,7 @@ export const mSearchQueryBody: MsearchQueryBody = {
                   model_text:
                     'Generate an ESQL query that will count the number of connections made to external IP addresses, broken down by user. If the count is greater than 100 for a specific user, add a new field called "follow_up" that contains a value of "true", otherwise, it should contain "false". The user names should also be enriched with their respective group names.',
                 },
-              } as unknown as QueryDslTextExpansionQuery,
+              },
             },
           ],
         },

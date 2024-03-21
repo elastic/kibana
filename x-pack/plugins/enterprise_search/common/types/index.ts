@@ -43,6 +43,8 @@ export interface ProductFeatures {
   hasIncrementalSyncEnabled: boolean;
   hasNativeConnectors: boolean;
   hasWebCrawler: boolean;
+  // Temp Feature Flag for AI Playground page
+  showAIPlayground: boolean;
 }
 
 export interface SearchOAuth {
@@ -69,5 +71,6 @@ export interface ClientConfigType {
   };
 }
 
+export type { ConnectorStats } from './connector_stats';
 export type { ElasticsearchIndexWithPrivileges } from './indices';
 export type { KibanaDeps } from './kibana_deps';

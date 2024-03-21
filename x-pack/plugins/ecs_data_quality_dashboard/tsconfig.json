@@ -24,6 +24,7 @@
     "@kbn/data-stream-adapter",
     "@kbn/spaces-plugin",
     "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-elasticsearch-server",
   ],
   "exclude": [
     "target/**/*",

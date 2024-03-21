@@ -52,7 +52,8 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/bfetch-error",
     "@kbn/es-types",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/core-test-helpers-model-versions"
   ],
   "exclude": [
     "target/**/*",

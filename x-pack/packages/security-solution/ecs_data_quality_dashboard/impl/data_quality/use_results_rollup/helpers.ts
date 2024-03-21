@@ -140,6 +140,7 @@ export const updateResultOnCheckCompleted = ({
 
     const incompatible = partitionedFieldMetadata?.incompatible.length;
     const sameFamily = partitionedFieldMetadata?.sameFamily.length;
+    const checkedAt = partitionedFieldMetadata ? Date.now() : undefined;
 
     return {
       ...patternRollups,
@@ -156,6 +157,7 @@ export const updateResultOnCheckCompleted = ({
             markdownComments,
             pattern,
             sameFamily,
+            checkedAt,
           },
         },
       },

@@ -11,6 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
 import { GroupSelection } from './group_selection';
 import { DocLinksStart } from '@kbn/core/public';
+import { VisParams } from '../../../common';
 
 describe('GroupSelection', () => {
   const defaultVisTypeParams = {
@@ -61,7 +62,7 @@ describe('GroupSelection', () => {
 
   const visTypesRegistry = (visTypes: BaseVisType[]): TypesStart => {
     return {
-      get<T>(id: string): BaseVisType<T> {
+      get<T extends VisParams>(id: string): BaseVisType<T> {
         return visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
       },
       all: () => {

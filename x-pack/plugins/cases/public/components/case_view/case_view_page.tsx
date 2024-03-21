@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useUrlParams } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -34,7 +34,6 @@ const getActiveTabId = (tabId?: string) => {
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
-    onComponentInitialized,
     refreshRef,
     ruleDetailsNavigation,
     actionsNavigation,
@@ -49,7 +48,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
 
     const activeTabId = getActiveTabId(urlParams?.tabId);
 
-    const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
 
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
@@ -84,16 +82,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         }),
       [onUpdateField]
     );
-
-    // useEffect used for component's initialization
-    useEffect(() => {
-      if (init.current) {
-        init.current = false;
-        if (onComponentInitialized) {
-          onComponentInitialized();
-        }
-      }
-    }, [onComponentInitialized]);
 
     return (
       <>

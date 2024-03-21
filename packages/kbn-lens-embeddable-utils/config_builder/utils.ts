@@ -22,7 +22,8 @@ import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
-import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import {
   FormulaValueConfig,
   LensAnnotationLayer,

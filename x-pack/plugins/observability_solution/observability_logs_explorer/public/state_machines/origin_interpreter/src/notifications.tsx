@@ -30,7 +30,7 @@ export const createRequestFeedbackNotifier = (toasts: IToasts) => () => {
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
-                data-test-subj="observabilityLogExplorerFeedbackToastButton"
+                data-test-subj="observabilityLogsExplorerFeedbackToastButton"
                 href={LOGS_ONBOARDING_FEEDBACK_LINK}
                 size="s"
                 target="_blank"

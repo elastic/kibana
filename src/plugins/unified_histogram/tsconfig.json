@@ -30,6 +30,7 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/i18n-react",
     "@kbn/field-utils",
+    "@kbn/esql-utils",
   ],
   "exclude": [
     "target/**/*",

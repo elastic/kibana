@@ -39,15 +39,10 @@ export const apiPublishesWritablePanelDescription = (
  * A hook that gets this API's panel description as a reactive variable which will cause re-renders on change.
  */
 export const usePanelDescription = (api: Partial<PublishesPanelDescription> | undefined) =>
-  useStateFromPublishingSubject<string | undefined, PublishesPanelDescription['panelDescription']>(
-    api?.panelDescription
-  );
+  useStateFromPublishingSubject(api?.panelDescription);
 
 /**
  * A hook that gets this API's default panel description as a reactive variable which will cause re-renders on change.
  */
 export const useDefaultPanelDescription = (api: Partial<PublishesPanelDescription> | undefined) =>
-  useStateFromPublishingSubject<
-    string | undefined,
-    PublishesPanelDescription['defaultPanelDescription']
-  >(api?.defaultPanelDescription);
+  useStateFromPublishingSubject(api?.defaultPanelDescription);

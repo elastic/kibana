@@ -8,82 +8,37 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { CONNECTORS_JOBS_INDEX } from '..';
-import { ConnectorSyncJob, SyncJobType } from '../types/connectors';
+import { ConnectorsAPISyncJobResponse } from '..';
+import { ConnectorSyncJob } from '../types/connectors';
 import { Paginate } from '../types/pagination';
-import { isNotNullish } from '../utils/is_not_nullish';
 
-import { fetchWithPagination } from '../utils/fetch_with_pagination';
-import { isIndexNotFoundException } from '../utils/identify_exceptions';
-
-const defaultResult: Paginate<ConnectorSyncJob> = {
-  _meta: {
-    page: {
-      from: 0,
-      has_more_hits_than_total: false,
-      size: 10,
-      total: 0,
-    },
-  },
-  data: [],
-};
-
-export const fetchSyncJobsByConnectorId = async (
+export const fetchSyncJobs = async (
   client: ElasticsearchClient,
-  connectorId: string,
-  from: number,
-  size: number,
+  connectorId?: string,
+  from: number = 0,
+  size: number = 100,
   syncJobType: 'content' | 'access_control' | 'all' = 'all'
 ): Promise<Paginate<ConnectorSyncJob>> => {
-  try {
-    const query =
-      syncJobType === 'all'
-        ? {
-            term: {
-              'connector.id': connectorId,
-            },
-          }
-        : {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    'connector.id': connectorId,
-                  },
-                },
-                {
-                  terms: {
-                    job_type:
-                      syncJobType === 'content'
-                        ? [SyncJobType.FULL, SyncJobType.INCREMENTAL]
-                        : [SyncJobType.ACCESS_CONTROL],
-                  },
-                },
-              ],
-            },
-          };
-    const result = await fetchWithPagination(
-      async () =>
-        await client.search<ConnectorSyncJob>({
-          from,
-          index: CONNECTORS_JOBS_INDEX,
-          query,
-          size,
-          sort: { created_at: { order: 'desc' } },
-        }),
-      from,
-      size
-    );
-    return {
-      ...result,
-      data: result.data
-        .map((hit) => (hit._source ? { ...hit._source, id: hit._id } : null))
-        .filter(isNotNullish),
-    };
-  } catch (error) {
-    if (isIndexNotFoundException(error)) {
-      return defaultResult;
-    }
-    throw error;
-  }
+  const querystring = `from=${from}&size=${size}${
+    connectorId ? '&connector_id=' + connectorId : ''
+  }${syncJobType === 'content' ? '&job_type=full,incremental' : ''}${
+    syncJobType === 'access_control' ? '&job_type=access_control' : ''
+  }`;
+  const result = await client.transport.request<ConnectorsAPISyncJobResponse>({
+    method: 'GET',
+    path: `/_connector/_sync_job`,
+    querystring,
+  });
+
+  return {
+    _meta: {
+      page: {
+        from,
+        has_more_hits_than_total: result.count > from + size,
+        size,
+        total: result.count,
+      },
+    },
+    data: result.results,
+  };
 };

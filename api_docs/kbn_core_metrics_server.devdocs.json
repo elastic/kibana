@@ -774,7 +774,7 @@
             "tags": [],
             "label": "event_loop_delay",
             "description": [
-              "mean event loop delay since last collection"
+              "max event loop delay since last collection"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
             "deprecated": false,

@@ -128,7 +128,7 @@ export function useFormState<Values extends FormValues, Result>({
   const [touched, setTouched] = useState<TouchedFields<Values>>({});
   const [submitCount, setSubmitCount] = useState(0);
 
-  async function validateFormFn(formValues: Values): Promise<Result>;
+  async function validateFormFn(formValues: Values): Promise<DeepMap<Values, string>>;
   async function validateFormFn(formValues: undefined): Promise<undefined>;
   async function validateFormFn(formValues: Values | undefined) {
     // Allows resetting `useAsyncFn` state

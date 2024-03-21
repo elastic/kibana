@@ -33,6 +33,10 @@ export interface LogDocument extends DataTableRecord {
     'log.file.path'?: string;
     'data_stream.namespace': string;
     'data_stream.dataset': string;
+
+    'error.stack_trace'?: string;
+    'error.exception.stacktrace'?: string;
+    'error.log.stacktrace'?: string;
   };
 }
 
@@ -73,4 +77,10 @@ export interface ResourceFields {
   'container.name'?: string;
   'container.id'?: string;
   'cloud.instance.id'?: string;
+}
+
+export interface StackTraceFields {
+  'error.stack_trace'?: string;
+  'error.exception.stacktrace'?: string;
+  'error.log.stacktrace'?: string;
 }

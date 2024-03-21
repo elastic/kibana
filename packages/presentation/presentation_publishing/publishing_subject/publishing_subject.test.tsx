@@ -42,12 +42,12 @@ describe('useBatchedPublishingSubjects', () => {
   test('should render once when all state changes are in click handler (react batch)', async () => {
     let renderCount = 0;
     function Component() {
-      const value1 = useStateFromPublishingSubject<number>(subject1);
-      const value2 = useStateFromPublishingSubject<number>(subject2);
-      const value3 = useStateFromPublishingSubject<number>(subject3);
-      const value4 = useStateFromPublishingSubject<number>(subject4);
-      const value5 = useStateFromPublishingSubject<number>(subject5);
-      const value6 = useStateFromPublishingSubject<number>(subject6);
+      const value1 = useStateFromPublishingSubject(subject1);
+      const value2 = useStateFromPublishingSubject(subject2);
+      const value3 = useStateFromPublishingSubject(subject3);
+      const value4 = useStateFromPublishingSubject(subject4);
+      const value5 = useStateFromPublishingSubject(subject5);
+      const value6 = useStateFromPublishingSubject(subject6);
 
       renderCount++;
       return (
@@ -76,14 +76,14 @@ describe('useBatchedPublishingSubjects', () => {
   test('should batch state updates when using useBatchedPublishingSubjects', async () => {
     let renderCount = 0;
     function Component() {
-      const { value1, value2, value3, value4, value5, value6 } = useBatchedPublishingSubjects({
-        value1: subject1,
-        value2: subject2,
-        value3: subject3,
-        value4: subject4,
-        value5: subject5,
-        value6: subject6,
-      });
+      const [value1, value2, value3, value4, value5, value6] = useBatchedPublishingSubjects(
+        subject1,
+        subject2,
+        subject3,
+        subject4,
+        subject5,
+        subject6
+      );
 
       renderCount++;
       return (
@@ -117,12 +117,12 @@ describe('useBatchedPublishingSubjects', () => {
   test('should render for each state update outside of click handler', async () => {
     let renderCount = 0;
     function Component() {
-      const value1 = useStateFromPublishingSubject<number>(subject1);
-      const value2 = useStateFromPublishingSubject<number>(subject2);
-      const value3 = useStateFromPublishingSubject<number>(subject3);
-      const value4 = useStateFromPublishingSubject<number>(subject4);
-      const value5 = useStateFromPublishingSubject<number>(subject5);
-      const value6 = useStateFromPublishingSubject<number>(subject6);
+      const value1 = useStateFromPublishingSubject(subject1);
+      const value2 = useStateFromPublishingSubject(subject2);
+      const value3 = useStateFromPublishingSubject(subject3);
+      const value4 = useStateFromPublishingSubject(subject4);
+      const value5 = useStateFromPublishingSubject(subject5);
+      const value6 = useStateFromPublishingSubject(subject6);
 
       renderCount++;
       return (

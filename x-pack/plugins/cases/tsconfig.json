@@ -50,7 +50,6 @@
     "@kbn/core-saved-objects-common",
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
-    "@kbn/ecs",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-base-server-mocks",
     "@kbn/core-saved-objects-utils-server",
@@ -71,6 +70,9 @@
     "@kbn/alerting-plugin",
     "@kbn/content-management-plugin",
     "@kbn/index-management-plugin",
+    "@kbn/rison",
+    "@kbn/core-application-browser",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

@@ -4,13 +4,17 @@
 enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.infra.enabled: true
+xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
+
+## Enable the slo plugin
+xpack.slo.enabled: true
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
 
 ## Enable the Serverless Observability plugin
-xpack.serverless.observability.enabled: true
+xpack.serverless.observability.enabled: true 
 
 ## Configure plugins
 
@@ -39,7 +43,7 @@ xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
 xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
 
 # Fleet specific configuration
-xpack.fleet.internal.registry.capabilities: ['apm', 'observability']
+xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.spec.max: '3.0'
 # Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742

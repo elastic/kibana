@@ -5,27 +5,17 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
 
 import '../../../common/mock/match_media';
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 
 import { OverviewHost } from '.';
-import type { State } from '../../../common/store';
-import { createStore } from '../../../common/store';
 import { useHostOverview } from '../../containers/overview_host';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { render } from '@testing-library/react';
 
-jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/containers/query_toggle');
 
@@ -64,22 +54,16 @@ const useHostOverviewMock = useHostOverview as jest.Mock;
 const mockUseQueryToggle = useQueryToggle as jest.Mock;
 
 describe('OverviewHost', () => {
-  const state: State = mockGlobalState;
-
-  const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
-    const myState = cloneDeep(state);
+
     useHostOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   test('it renders the expected widget title', () => {
     const wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <OverviewHost {...testProps} />
       </TestProviders>
     );
@@ -92,7 +76,7 @@ describe('OverviewHost', () => {
   test('it renders an empty subtitle while loading', () => {
     useHostOverviewMock.mockReturnValueOnce([true, { overviewHost: {} }]);
     const wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <OverviewHost {...testProps} />
       </TestProviders>
     );
@@ -102,7 +86,7 @@ describe('OverviewHost', () => {
 
   test('it renders the expected event count in the subtitle after loading events', async () => {
     const wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <OverviewHost {...testProps} />
       </TestProviders>
     );
