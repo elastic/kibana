@@ -67,6 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
             pagination: {
               activePage: 0,
               cursorStart: 0,
+              fakePossibleCount: 0,
               querySize: 10,
             },
             timerange: {
@@ -95,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           options: {
             defaultIndex: ['filebeat-*'],
-            factoryQueryType: 'topNFlow',
+            factoryQueryType: NetworkQueries.topNFlow,
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
             flowTarget: FlowTargetSourceDest.source,
@@ -103,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
             pagination: {
               activePage: 0,
               cursorStart: 0,
+              fakePossibleCount: 0,
               querySize: 10,
             },
             timerange: {
@@ -139,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
             pagination: {
               activePage: 0,
               cursorStart: 0,
+              fakePossibleCount: 0,
               querySize: 10,
             },
             timerange: {
@@ -170,6 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
             pagination: {
               activePage: 1,
               cursorStart: 10,
+              fakePossibleCount: 0,
               querySize: 20,
             },
             timerange: {
