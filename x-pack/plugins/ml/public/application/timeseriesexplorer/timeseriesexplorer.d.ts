@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import type { TimeRangeBounds } from '../util/time_buckets';
+
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 
 interface Props {
   appStateHandler: (action: string, payload: any) => void;

@@ -45,6 +45,7 @@ export function DataSourceSelector({
   discoverEsqlUrlProps,
   integrations,
   integrationsError,
+  isDataViewAllowed,
   isDataViewAvailable,
   isEsqlEnabled,
   isLoadingDataViews,
@@ -164,13 +165,14 @@ export function DataSourceSelector({
 
     return dataViews.map((dataView) => ({
       'data-test-subj': getDataViewTestSubj(dataView.title),
-      name: <DataViewMenuItem dataView={dataView} />,
+      name: <DataViewMenuItem dataView={dataView} isAvailable={isDataViewAllowed(dataView)} />,
       onClick: () => selectDataView(dataView),
       disabled: !isDataViewAvailable(dataView),
     }));
   }, [
     dataViews,
     dataViewsError,
+    isDataViewAllowed,
     isDataViewAvailable,
     isLoadingDataViews,
     onDataViewsReload,
