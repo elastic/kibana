@@ -16,7 +16,6 @@ export interface DashboardEmbedSettings {
 }
 
 export interface DashboardMountContextProps {
-  restorePreviousUrl: () => void;
   scopedHistory: () => ScopedHistory;
   onAppLeave: AppMountParameters['onAppLeave'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];

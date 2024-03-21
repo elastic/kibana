@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 
 import {
   App,
@@ -32,8 +31,6 @@ import type {
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
-import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -64,7 +61,6 @@ import {
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
   LEGACY_DASHBOARD_APP_ID,
-  SEARCH_SESSION_ID,
 } from './dashboard_constants';
 import { DashboardMountContextProps } from './dashboard_app/types';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
@@ -131,7 +127,6 @@ export class DashboardPlugin
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
-  private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
   private locator?: DashboardAppLocator;
@@ -180,52 +175,6 @@ export class DashboardPlugin
       );
     }
 
-    const {
-      appMounted,
-      appUnMounted,
-      stop: stopUrlTracker,
-      restorePreviousUrl,
-    } = createKbnUrlTracker({
-      baseUrl: core.http.basePath.prepend('/app/dashboards'),
-      defaultSubUrl: `#${LANDING_PAGE_PATH}`,
-      storageKey: `lastUrl:${core.http.basePath.get()}:dashboard`,
-      navLinkUpdater$: this.appStateUpdater,
-      toastNotifications: core.notifications.toasts,
-      stateParams: [
-        {
-          kbnUrlKey: '_g',
-          stateUpdate$: data.query.state$.pipe(
-            filter(
-              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
-            ),
-            map(async ({ state }) => {
-              const { isFilterPinned } = await import('@kbn/es-query');
-              return {
-                ...state,
-                filters: state.filters?.filter(isFilterPinned),
-              };
-            })
-          ),
-        },
-      ],
-      getHistory: () => this.currentHistory!,
-      onBeforeNavLinkSaved: (newNavLink: string) => {
-        // Do not save SEARCH_SESSION_ID into nav link, because of possible edge cases
-        // that could lead to session restoration failure.
-        // see: https://github.com/elastic/kibana/issues/87149
-
-        // We also don't want to store the table list view state.
-        // The question is: what _do_ we want to save here? :)
-        const tableListUrlState = ['s', 'title', 'sort', 'sortdir'];
-        return replaceUrlHashQuery(newNavLink, (query) => {
-          [SEARCH_SESSION_ID, ...tableListUrlState].forEach((param) => {
-            delete query[param];
-          });
-          return query;
-        });
-      },
-    });
-
     core.getStartServices().then(([, deps]) => {
       const dashboardContainerFactory = new DashboardContainerFactoryDefinition(deps.embeddable);
       embeddable.registerEmbeddableFactory(
@@ -233,10 +182,6 @@ export class DashboardPlugin
         dashboardContainerFactory
       );
     });
-
-    this.stopUrlTracking = () => {
-      stopUrlTracker();
-    };
 
     const app: App = {
       id: DASHBOARD_APP_ID,
@@ -250,10 +195,8 @@ export class DashboardPlugin
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
         const { mountApp } = await import('./dashboard_app/dashboard_router');
-        appMounted();
 
         const mountContext: DashboardMountContextProps = {
-          restorePreviousUrl,
           scopedHistory: () => this.currentHistory!,
           onAppLeave: params.onAppLeave,
           setHeaderActionMenu: params.setHeaderActionMenu,
@@ -261,7 +204,6 @@ export class DashboardPlugin
 
         return mountApp({
           core,
-          appUnMounted,
           element: params.element,
           mountContext,
         });
@@ -347,9 +289,5 @@ export class DashboardPlugin
     };
   }
 
-  public stop() {
-    if (this.stopUrlTracking) {
-      this.stopUrlTracking();
-    }
-  }
+  public stop() {}
 }

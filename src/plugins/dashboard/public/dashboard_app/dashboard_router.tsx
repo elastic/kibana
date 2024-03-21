@@ -45,13 +45,12 @@ export const dashboardUrlParams = {
 };
 
 export interface DashboardMountProps {
-  appUnMounted: () => void;
   element: AppMountParameters['element'];
   core: CoreSetup<DashboardStartDependencies, DashboardStart>;
   mountContext: DashboardMountContextProps;
 }
 
-export async function mountApp({ core, element, appUnMounted, mountContext }: DashboardMountProps) {
+export async function mountApp({ core, element, mountContext }: DashboardMountProps) {
   const {
     chrome: { setBadge, docTitle, setHelpExtension },
     dashboardCapabilities: { showWriteControls },
@@ -188,6 +187,5 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     dataStart.search.session.clear();
     unlistenParentHistory();
     unmountComponentAtNode(element);
-    appUnMounted();
   };
 }

@@ -16,12 +16,10 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { LANDING_PAGE_PATH } from '../../dashboard_constants';
 import { pluginServices } from '../../services/plugin_services';
-import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 
 let bannerId: string | undefined;
 
 export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['history'] }) => {
-  const { restorePreviousUrl } = useDashboardMountContext();
   const {
     settings: {
       theme: { theme$ },
@@ -31,7 +29,6 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
   } = pluginServices.getServices();
 
   useEffect(() => {
-    restorePreviousUrl();
     const { navigated } = navigateToLegacyKibanaUrl(
       history.location.pathname + history.location.search
     );
@@ -68,7 +65,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
 
       history.replace(LANDING_PAGE_PATH);
     }
-  }, [restorePreviousUrl, navigateToLegacyKibanaUrl, banners, theme$, history]);
+  }, [navigateToLegacyKibanaUrl, banners, theme$, history]);
 
   return null;
 };
