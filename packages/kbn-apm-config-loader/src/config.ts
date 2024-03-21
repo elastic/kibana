@@ -139,18 +139,18 @@ export class ApmConfiguration {
    */
   private getConfigFromEnv(configFromKibanaConfig: AgentConfigOptions): AgentConfigOptions {
     const config: AgentConfigOptions = {};
+    const servicesOverrides: Record<string, AgentConfigOptions> = {};
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
       config.active = true;
     }
 
     if (process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE === 'false') {
-      // @ts-ignore
-      config.servicesOverrides = {
+      merge(servicesOverrides, {
         'kibana-frontend': {
           active: false,
         },
-      };
+      });
     }
 
     if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'true') {
@@ -195,7 +195,7 @@ export class ApmConfiguration {
       );
     }
 
-    return config;
+    return merge(config, { servicesOverrides });
   }
 
   /**
