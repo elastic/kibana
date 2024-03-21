@@ -26,7 +26,6 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   timestamp: '2020-04-20T15:25:31.830Z',
   apiConfig: {
     connectorId: 'c1',
-    connectorTypeTitle: 'title-c-1',
     defaultSystemPromptId: 'prompt-1',
     model: 'test',
     provider: 'Azure OpenAI',

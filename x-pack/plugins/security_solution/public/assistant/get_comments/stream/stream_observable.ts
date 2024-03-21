@@ -14,7 +14,7 @@ import { API_ERROR } from '../translations';
 const MIN_DELAY = 35;
 
 interface StreamObservable {
-  connectorTypeTitle: string;
+  llmType: string;
   reader: ReadableStreamDefaultReader<Uint8Array>;
   setLoading: Dispatch<SetStateAction<boolean>>;
   isError: boolean;
@@ -28,7 +28,7 @@ interface StreamObservable {
  * @returns {Observable<PromptObservableState>} An Observable that emits PromptObservableState
  */
 export const getStreamObservable = ({
-  connectorTypeTitle,
+  llmType,
   isError,
   reader,
   setLoading,
@@ -163,17 +163,15 @@ export const getStreamObservable = ({
     // this should never actually happen
     function badConnector() {
       observer.next({
-        chunks: [
-          `Invalid connector type - ${connectorTypeTitle} is not a supported GenAI connector.`,
-        ],
-        message: `Invalid connector type - ${connectorTypeTitle} is not a supported GenAI connector.`,
+        chunks: [`Invalid connector type - ${llmType} is not a supported GenAI connector.`],
+        message: `Invalid connector type - ${llmType} is not a supported GenAI connector.`,
         loading: false,
       });
       observer.complete();
     }
 
-    if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
-    else if (connectorTypeTitle === 'OpenAI') readOpenAI();
+    if (llmType === '.gen-ai') readBedrock();
+    else if (llmType === '.bedrock') readOpenAI();
     else badConnector();
 
     return () => {

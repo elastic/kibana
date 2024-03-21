@@ -118,7 +118,6 @@ export const transformToUpdateScheme = (
     title,
     api_config: {
       connector_id: apiConfig?.connectorId,
-      connector_type_title: apiConfig?.connectorTypeTitle,
       default_system_prompt_id: apiConfig?.defaultSystemPromptId,
       model: apiConfig?.model,
       provider: apiConfig?.provider,

@@ -30,7 +30,6 @@ export const getCreateConversationMock = (): ConversationCreateProps => ({
   title: 'test',
   apiConfig: {
     connectorId: '1',
-    connectorTypeTitle: 'test-connector',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',
@@ -47,7 +46,6 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   title: 'test',
   apiConfig: {
     connectorId: '1',
-    connectorTypeTitle: 'test-connector',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',

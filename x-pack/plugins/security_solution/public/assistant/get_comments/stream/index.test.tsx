@@ -19,7 +19,6 @@ const testProps = {
   content,
   index: 1,
   isControlsEnabled: true,
-  connectorTypeTitle: 'OpenAI',
   regenerateMessage: jest.fn(),
   transformMessage: jest.fn(),
 };

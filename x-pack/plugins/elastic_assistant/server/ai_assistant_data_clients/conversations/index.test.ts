@@ -113,7 +113,6 @@ describe('AIAssistantConversationsDataClient', () => {
     expect(result).toEqual({
       apiConfig: {
         connectorId: 'bedbf764-b991-4115-a9fc-1cfeaef21046',
-        connectorTypeTitle: 'Amazon Bedrock',
         defaultSystemPromptId: undefined,
         model: 'anthropic.claude-v2',
         provider: undefined,

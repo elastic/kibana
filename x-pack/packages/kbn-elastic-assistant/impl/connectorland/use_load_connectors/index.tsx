@@ -70,7 +70,6 @@ export const useLoadConnectors = ({
             ? [
                 {
                   ...connector,
-                  connectorTypeTitle: connectorDetails[connector.actionTypeId],
                   apiProvider:
                     !connector.isPreconfigured &&
                     !connector.isSystemAction &&
