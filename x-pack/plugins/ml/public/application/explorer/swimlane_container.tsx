@@ -48,13 +48,13 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
+import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
 import { SwimLanePagination } from './swimlane_pagination';
 import type {
   AppStateSelectedCells,
   OverallSwimlaneData,
   ViewBySwimLaneData,
 } from './explorer_utils';
-import type { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import type { SwimlaneType } from './explorer_constants';
 import { SWIMLANE_TYPE } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';

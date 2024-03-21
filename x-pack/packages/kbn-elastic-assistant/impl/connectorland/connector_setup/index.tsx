@@ -117,7 +117,7 @@ export const useConnectorSetup = ({
         conversation.messages[index].timestamp == null ||
         conversation.messages[index].timestamp.length === 0
       ) {
-        conversation.messages[index].timestamp = new Date().toLocaleString();
+        conversation.messages[index].timestamp = new Date().toISOString();
       }
       const isLastMessage = index === length - 1;
       const enableStreaming =
@@ -151,7 +151,9 @@ export const useConnectorSetup = ({
     () =>
       conversation.messages.slice(0, currentMessageIndex + 1).map((message, index) => {
         const isUser = message.role === 'user';
-
+        const timestamp = `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${new Date(
+          message.timestamp
+        ).toLocaleString()}`;
         const commentProps: EuiCommentProps = {
           username: isUser ? i18n.CONNECTOR_SETUP_USER_YOU : i18n.CONNECTOR_SETUP_USER_ASSISTANT,
           children: commentBody(message, index, conversation.messages.length),
@@ -163,7 +165,7 @@ export const useConnectorSetup = ({
               iconType={AssistantAvatar}
             />
           ),
-          timestamp: `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${message.timestamp}`,
+          timestamp,
         };
         return commentProps;
       }),
