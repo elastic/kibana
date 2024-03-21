@@ -48,7 +48,6 @@ export {
 } from './interfaces/publishes_data_loading';
 export {
   apiPublishesDataViews,
-  useClosestDataViewsSubject,
   useDataViews,
   type PublishesDataViews,
 } from './interfaces/publishes_data_views';

@@ -13,8 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { isNil } from 'lodash';
-import moment from 'moment';
-import { Moment } from 'moment';
 import {
   BehaviorSubject,
   map,
@@ -51,27 +49,6 @@ function isVisualizeEmbeddable(
   return embeddable.type === 'visualization';
 }
 
-const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
-  if (moment(time).isValid()) {
-    return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-  } else {
-    // If it's not a valid moment date, then it should be a string representing a relative time
-    // like 'now' or 'now-15m'.
-    return time as string;
-  }
-};
-
-const areTimesEqual = (
-  timeA?: string | Moment | undefined,
-  timeB?: string | Moment | undefined
-) => {
-  return convertTimeToUTCString(timeA) === convertTimeToUTCString(timeB);
-};
-
-const isTimeRangeEqual = (a: TimeRange, b: TimeRange) => {
-  return areTimesEqual(a.from, b.from) && areTimesEqual(a.to, b.to);
-};
-
 const getEventStatus = (output: EmbeddableOutput): PhaseEventType => {
   if (!isNil(output.error)) {
     return 'error';
@@ -92,8 +69,10 @@ export const legacyEmbeddableToApi = (
   /**
    * Shortcuts for creating publishing subjects from the input and output subjects
    */
-  const inputKeyToSubject = <T extends unknown = unknown>(key: keyof CommonLegacyInput) =>
-    embeddableInputToSubject<T>(subscriptions, embeddable, key);
+  const inputKeyToSubject = <T extends unknown = unknown>(
+    key: keyof CommonLegacyInput,
+    useExplicitInput?: boolean
+  ) => embeddableInputToSubject<T>(subscriptions, embeddable, key, useExplicitInput);
   const outputKeyToSubject = <T extends unknown = unknown>(key: keyof CommonLegacyOutput) =>
     embeddableOutputToSubject<T>(subscriptions, embeddable, key);
 
