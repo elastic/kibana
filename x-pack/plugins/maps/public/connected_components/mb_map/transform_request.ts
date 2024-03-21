@@ -20,8 +20,21 @@ const FONTS = getHttp().basePath.prepend(FONTS_API_PATH);
 const GETTILE = getHttp().basePath.prepend(MVT_GETTILE_API_PATH);
 const GETGRIDTILE = getHttp().basePath.prepend(MVT_GETGRIDTILE_API_PATH);
 
-export function transformRequest(url: string, resourceType: string | undefined) {
-  if (resourceType === 'Glyphs' && url.startsWith(FONTS)) {
+/**
+ * This URL could be used from inside a Worker which may have a different base
+ * URL. This function takes a string that may be a path and converts it to an
+ * absolute URL.
+ */
+function prepareAbsoluteUrl(url: string): string {
+  if (url.startsWith('/')) {
+    return new URL(url, window.location.origin).toString();
+  }
+  return url;
+}
+
+export function transformRequest(path: string, resourceType: string | undefined) {
+  const url = prepareAbsoluteUrl(path);
+  if (resourceType === 'Glyphs' && path.startsWith(FONTS)) {
     return {
       url,
       method: 'GET' as 'GET',
@@ -32,7 +45,7 @@ export function transformRequest(url: string, resourceType: string | undefined) 
     };
   }
 
-  if (resourceType === 'Tile' && url.startsWith(GETTILE)) {
+  if (resourceType === 'Tile' && path.startsWith(GETTILE)) {
     return {
       url,
       method: 'GET' as 'GET',
@@ -43,7 +56,7 @@ export function transformRequest(url: string, resourceType: string | undefined) 
     };
   }
 
-  if (resourceType === 'Tile' && url.startsWith(GETGRIDTILE)) {
+  if (resourceType === 'Tile' && path.startsWith(GETGRIDTILE)) {
     return {
       url,
       method: 'GET' as 'GET',
