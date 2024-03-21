@@ -36,14 +36,13 @@ const AiAssistantComponent: React.FC<AiAssistantProps> = ({ form }) => {
     }
 
     if (queryField.errors.length === 0) {
-      return `No errors in ${language} language query detected. Current query: ${query}`;
+      return `No errors in ${language} language query detected. Current query: ${query.trim()}`;
     }
 
-    return `${language} language query written for Elastic Security Detection rules: ${query}
-    returns validation error on form: ${retrieveErrorMessages(queryField.errors)}
-    Fix ${language} language query and give an example of it in markdown format that can be copied.
-    Proposed solution should be valid and must not contain new line symbols (\\n)
-    `;
+    return `${language} language query written for Elastic Security Detection rules: \"${query.trim()}\"
+returns validation error on form: \"${retrieveErrorMessages(queryField.errors)}\"
+Fix ${language} language query and give an example of it in markdown format that can be copied.
+Proposed solution should be valid and must not contain new line symbols (\\n)`;
   };
 
   if (!hasAssistantPrivilege) {
