@@ -239,11 +239,15 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-              <SubmitFeedbackComponent />
-              <QueryHistoryAction
-                toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
-                isHistoryOpen={isHistoryOpen}
-              />
+              {!Boolean(editorIsInline) && (
+                <>
+                  <SubmitFeedbackComponent />
+                  <QueryHistoryAction
+                    toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
+                    isHistoryOpen={isHistoryOpen}
+                  />
+                </>
+              )}
               {!hideRunQueryText && (
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">

@@ -230,7 +230,7 @@ export function QueryHistory({
     return getTableColumns(containerWidth, isOnReducedSpaceLayout, actions);
   }, [actions, containerWidth, isOnReducedSpaceLayout]);
 
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const onTableChange = ({ page, sort }: Criteria<QueryHistoryItem>) => {
     if (sort) {
