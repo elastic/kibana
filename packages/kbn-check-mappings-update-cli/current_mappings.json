@@ -1564,6 +1564,7 @@
         "type": "keyword"
       },
       "dashboardIdList": {
+        "dynamic": false,
         "properties": {
             "id": {
               "type": "keyword"
@@ -1573,9 +1574,6 @@
             }
           },
         "type": "nested"
-      },
-      "kuery": {
-        "type": "text"
       }
     }
   },

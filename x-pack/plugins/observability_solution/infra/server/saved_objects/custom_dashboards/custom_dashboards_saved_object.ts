@@ -27,17 +27,19 @@ const properties: Record<keyof InfraCustomDashboard, SavedObjectsFieldMapping> =
     },
     type: 'nested',
   },
-  kuery: {
-    type: 'text',
-  },
 };
 
-const createSchema: Record<keyof InfraCustomDashboard, Type<any>> = {
+const createV1Schema: Record<keyof InfraCustomDashboard & 'kquery', Type<any>> = {
+  dashboardIdList: schema.arrayOf(schema.string()),
+  assetType: schema.string(),
+  kuery: schema.maybe(schema.string()),
+};
+
+const createV2Schema: Record<keyof InfraCustomDashboard, Type<any>> = {
   dashboardIdList: schema.arrayOf(
     schema.object({ id: schema.string(), hostNameFilterEnabled: schema.boolean() })
   ),
   assetType: schema.string(),
-  kuery: schema.maybe(schema.string()),
 };
 
 export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
@@ -45,6 +47,7 @@ export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple',
   mappings: {
+    dynamic: false,
     properties,
   },
   management: {
@@ -59,7 +62,13 @@ export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
     '1': {
       changes: [],
       schemas: {
-        create: schema.object(createSchema),
+        create: schema.object(createV1Schema),
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        create: schema.object(createV2Schema),
       },
     },
   },

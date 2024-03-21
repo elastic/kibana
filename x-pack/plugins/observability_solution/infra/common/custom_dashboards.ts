@@ -21,5 +21,4 @@ export interface DashboardItemWithTitle extends DashboardIdItem {
 export interface InfraCustomDashboard {
   dashboardIdList: DashboardIdItem[];
   assetType: InfraCustomDashboardAssetType;
-  kuery?: string;
 }
