@@ -37,14 +37,21 @@ export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
     },
   });
 
-  const { userSettings: { darkMode: colorScheme } = { darkMode: undefined } } =
-    userProfileData ?? {};
+  const { userSettings: { darkMode: colorScheme } = { darkMode: undefined } } = userProfileData ?? {
+    userSettings: {
+      darkMode: uiSettingsClient.get('theme:darkMode') === true ? 'dark' : 'light',
+    },
+  };
 
   const toggle = useCallback(
     (on: boolean) => {
       if (isLoading) {
         return;
       }
+
+      // optimistic update
+      setIsDarkModeOn(on);
+
       update({
         userSettings: {
           darkMode: on ? 'dark' : 'light',
@@ -55,17 +62,8 @@ export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
   );
 
   useEffect(() => {
-    let updatedValue = false;
-
-    if (typeof colorScheme !== 'string') {
-      // User profile does not have yet any preference -> default to space dark mode value
-      updatedValue = uiSettingsClient.get('theme:darkMode') ?? false;
-    } else {
-      updatedValue = colorScheme === 'dark';
-    }
-
-    setIsDarkModeOn(updatedValue);
-  }, [colorScheme, uiSettingsClient]);
+    setIsDarkModeOn(colorScheme === 'dark');
+  }, [colorScheme]);
 
   return {
     isVisible: valueSetInKibanaConfig ? false : Boolean(userProfileData),
