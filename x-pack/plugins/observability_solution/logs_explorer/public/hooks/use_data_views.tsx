@@ -9,12 +9,15 @@ import { useCallback } from 'react';
 import createContainer from 'constate';
 import { useInterpret, useSelector } from '@xstate/react';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
 import { DataViewDescriptor } from '../../common/data_views/models/data_view_descriptor';
 import { SortOrder } from '../../common/latest';
 import { createDataViewsStateMachine } from '../state_machines/data_views';
 import { LogsExplorerCustomizations } from '../controller';
 
 interface DataViewsContextDeps {
+  core: CoreStart;
   dataViewsService: DataViewsPublicPluginStart;
   events: LogsExplorerCustomizations['events'];
 }
@@ -27,9 +30,10 @@ export interface SearchDataViewsParams {
 export type SearchDataViews = (params: SearchDataViewsParams) => void;
 export type LoadDataViews = () => void;
 export type ReloadDataViews = () => void;
+export type IsDataViewAllowed = (dataView: DataViewDescriptor) => boolean;
 export type IsDataViewAvailable = (dataView: DataViewDescriptor) => boolean;
 
-const useDataViews = ({ dataViewsService, events }: DataViewsContextDeps) => {
+const useDataViews = ({ core, dataViewsService, events }: DataViewsContextDeps) => {
   const dataViewsStateService = useInterpret(() =>
     createDataViewsStateMachine({
       dataViews: dataViewsService,
@@ -42,11 +46,26 @@ const useDataViews = ({ dataViewsService, events }: DataViewsContextDeps) => {
 
   const isLoading = useSelector(dataViewsStateService, (state) => state.matches('loading'));
 
-  const isDataViewAvailable: IsDataViewAvailable = useCallback(
+  // Test whether a data view can be explored in Logs Explorer based on the settings
+  const isDataViewAllowed: IsDataViewAllowed = useCallback(
     (dataView) =>
-      dataView.isLogsDataType() ||
-      (dataView.isUnknownDataType() && Boolean(events?.onUknownDataViewSelection)),
-    [events?.onUknownDataViewSelection]
+      dataView.testAgainstAllowedList(
+        core.uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+      ),
+    [core.uiSettings]
+  );
+
+  // Test whether a data view can be explored in Logs Explorer based on the settings or has fallback handler
+  const isDataViewAvailable: IsDataViewAvailable = useCallback(
+    (dataView) => {
+      const isAllowedDataView = isDataViewAllowed(dataView);
+
+      return (
+        isAllowedDataView || (!isAllowedDataView && Boolean(events?.onUknownDataViewSelection))
+      );
+    },
+
+    [isDataViewAllowed, events?.onUknownDataViewSelection]
   );
 
   const loadDataViews = useCallback(
@@ -91,6 +110,7 @@ const useDataViews = ({ dataViewsService, events }: DataViewsContextDeps) => {
     dataViews,
 
     // Actions
+    isDataViewAllowed,
     isDataViewAvailable,
     loadDataViews,
     reloadDataViews,
