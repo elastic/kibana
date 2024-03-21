@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return field ? `Maximum de ${field}` : 'Maximum';
       case 'terms':
         return field
-          ? `${values}  valeurs les plus élevées de ${field}`
+          ? `${values} valeurs les plus élevées de ${field}`
           : 'Valeurs les plus élevées';
       case 'sum':
         return 'somme';
