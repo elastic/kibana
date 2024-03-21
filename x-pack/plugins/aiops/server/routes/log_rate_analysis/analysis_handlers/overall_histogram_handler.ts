@@ -13,7 +13,7 @@ import {
 } from '@kbn/ml-agg-utils';
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 

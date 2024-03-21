@@ -14,7 +14,7 @@ import {
   resetAllAction,
   resetGroupsAction,
   updateLoadingStateAction,
-} from './log_rate_analysis/actions';
+} from './actions';
 import { initialState, streamReducer } from './stream_reducer';
 
 describe('streamReducer', () => {

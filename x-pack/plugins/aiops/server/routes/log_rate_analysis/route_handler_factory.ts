@@ -20,7 +20,7 @@ import { AIOPS_TELEMETRY_ID, AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 
 import { isRequestAbortedError } from '../../lib/is_request_aborted_error';

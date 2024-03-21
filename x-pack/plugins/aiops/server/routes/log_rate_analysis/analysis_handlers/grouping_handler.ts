@@ -24,8 +24,8 @@ import {
   addSignificantItemsGroupAction,
   addSignificantItemsGroupHistogramAction,
   updateLoadingStateAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/actions';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 

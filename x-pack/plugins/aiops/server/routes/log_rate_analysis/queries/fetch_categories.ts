@@ -16,7 +16,7 @@ import {
 } from '@kbn/ml-random-sampler-utils';
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 
-import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { createCategoryRequest } from '../../../../common/api/log_categorization/create_category_request';
 import type { Category, CategoriesAgg } from '../../../../common/api/log_categorization/types';
 

@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { FieldValuePair } from '@kbn/ml-agg-utils';
 
-import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 
 import { getRangeQuery } from './get_range_query';
 
