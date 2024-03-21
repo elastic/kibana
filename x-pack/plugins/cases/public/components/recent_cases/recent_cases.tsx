@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
@@ -24,15 +25,13 @@ import type { FilterMode as RecentCasesFilterMode } from './types';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
-const MarkdownContainer = styled.div`
-  ${({ theme }) => css`
-    max-height: 150px;
-    overflow-y: auto;
-    color: ${theme.eui.euiTextSubduedColor};
-  `}
+const getMarkdownContainerCss = (euiTheme: EuiThemeComputed<{}>) => css`
+  max-height: 150px;
+  overflow-y: auto;
+  color: ${euiTheme.colors.subduedText};
 `;
 
-const TruncateComp = styled.div`
+const getTruncateCompCss = css`
   & .euiMarkdownFormat {
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -52,6 +51,7 @@ export interface RecentCasesProps {
 export const RecentCasesComp = React.memo<RecentCasesProps>(
   ({ filterOptions, maxCasesToShow, recentCasesFilterBy }) => {
     const { owner } = useCasesContext();
+    const { euiTheme } = useEuiTheme();
     const availableSolutions = useAvailableCasesOwners(['read']);
     const hasOwner = !!owner.length;
 
@@ -76,13 +76,13 @@ export const RecentCasesComp = React.memo<RecentCasesProps>(
               </EuiText>
               <EuiSpacer size="xs" />
               {c.description && c.description.length && (
-                <MarkdownContainer>
-                  <TruncateComp>
+                <div css={getMarkdownContainerCss(euiTheme)}>
+                  <div css={getTruncateCompCss}>
                     <MarkdownRenderer disableLinks={true} textSize="relative">
                       {c.description}
                     </MarkdownRenderer>
-                  </TruncateComp>
-                </MarkdownContainer>
+                  </div>
+                </div>
               )}
               <EuiSpacer size="xs" />
               <EuiFlexGroup gutterSize="s">
