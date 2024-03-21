@@ -223,8 +223,8 @@ const hasEnablePermissions = async ({ uptimeEsClient, coreStart }: SyntheticsSer
     manage_api_key: manageApiKey,
     manage_own_api_key: manageOwnApiKey,
     monitor,
-    // this is going to be undefined in serverless mode (and break the API key flow),
-    // otherwise use the value supplied by ES
+    // `read_ilm` is going to be `undefined` when ES is in serverless mode,
+    // so we default it to the ES capabilities value.
     read_ilm: readILM = isServerlessEs,
     read_pipeline: readPipeline,
   } = cluster || {};
