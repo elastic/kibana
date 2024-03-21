@@ -1559,20 +1559,20 @@
     }
   },
   "infra-custom-dashboards": {
+    "dynamic": false,
     "properties": {
       "assetType": {
         "type": "keyword"
       },
       "dashboardIdList": {
-        "dynamic": false,
         "properties": {
-            "id": {
-              "type": "keyword"
-            },
-            "hostNameFilterEnabled": {
-              "type": "keyword"
-            }
+          "hostNameFilterEnabled": {
+            "type": "keyword"
           },
+          "id": {
+            "type": "keyword"
+          }
+        },
         "type": "nested"
       }
     }
