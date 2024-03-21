@@ -3094,6 +3094,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aiops-log-pattern-analysis@link:x-pack/packages/ml/aiops_log_pattern_analysis":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-log-rate-analysis@link:x-pack/packages/ml/aiops_log_rate_analysis":
   version "0.0.0"
   uid ""

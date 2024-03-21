@@ -17,8 +17,8 @@ import {
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
-import { createCategoryRequest } from '../../../../common/api/log_categorization/create_category_request';
-import type { Category, CategoriesAgg } from '../../../../common/api/log_categorization/types';
+import { createCategoryRequest } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import type { Category, CategoriesAgg } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 

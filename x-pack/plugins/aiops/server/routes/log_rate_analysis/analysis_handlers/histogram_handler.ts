@@ -22,7 +22,7 @@ import {
   updateLoadingStateAction,
 } from '@kbn/aiops-log-rate-analysis/api/actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
-import { getCategoryQuery } from '../../../../common/api/log_categorization/get_category_query';
+import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
 import { getHistogramQuery } from '../queries/get_histogram_query';
 

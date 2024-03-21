@@ -12,9 +12,8 @@ import type { Logger } from '@kbn/logging';
 import { criticalTableLookup, type Histogram } from '@kbn/ml-chi2test';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { LOG_RATE_ANALYSIS_SETTINGS } from '@kbn/aiops-log-rate-analysis/constants';
-
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
-import type { Category } from '../../../../common/api/log_categorization/types';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { fetchCategories } from './fetch_categories';
 import { fetchCategoryCounts } from './fetch_category_counts';

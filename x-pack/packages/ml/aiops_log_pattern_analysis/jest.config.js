@@ -4,3 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/aiops_log_pattern_analysis'],
+};

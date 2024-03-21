@@ -13,7 +13,7 @@ import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
-import { createCategorizeQuery } from '../../../common/api/log_categorization/create_categorize_query';
+import { createCategorizeQuery } from '@kbn/aiops-log-pattern-analysis/create_categorize_query';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 

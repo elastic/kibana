@@ -16,9 +16,8 @@ import type { FetchFrequentItemSetsResponse, ItemSet } from '@kbn/aiops-log-rate
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { LOG_RATE_ANALYSIS_SETTINGS } from '@kbn/aiops-log-rate-analysis/constants';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
-
-import { getCategoryQuery } from '../../../../common/api/log_categorization/get_category_query';
-import type { Category } from '../../../../common/api/log_categorization/types';
+import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 
