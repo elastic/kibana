@@ -33,6 +33,7 @@ import { AzureCredentialsType } from '../../../../common/types_old';
 import { SetupFormat, useAzureCredentialsForm } from './hooks';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
 
 interface AzureSetupInfoContentProps {
   integrationLink: string;
@@ -41,7 +42,7 @@ interface AzureSetupInfoContentProps {
 export const AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE = 'arm_template';
 export const AZURE_MANUAL_CREDENTIAL_TYPE = 'manual';
 
-const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) => {
+export const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) => {
   return (
     <>
       <EuiHorizontalRule margin="xl" />
@@ -78,16 +79,18 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
     label: 'ARM Template',
+    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
   },
   {
     id: AZURE_MANUAL_CREDENTIAL_TYPE,
     label: i18n.translate('xpack.csp.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
+    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
   },
 ];
 
-interface Props {
+export interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
@@ -97,7 +100,7 @@ interface Props {
   disabled: boolean;
 }
 
-const ARM_TEMPLATE_EXTERNAL_DOC_URL =
+export const ARM_TEMPLATE_EXTERNAL_DOC_URL =
   'https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/';
 
 const ArmTemplateSetup = ({
@@ -248,7 +251,7 @@ const TemporaryManualSetup = ({ integrationLink }: { integrationLink: string }) 
 const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
 const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
 
-const AzureInputVarFields = ({
+export const AzureInputVarFields = ({
   fields,
   onChange,
 }: {
@@ -266,6 +269,7 @@ const AzureInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
+              data-test-subj={field.testSubj}
             />
           )}
           {field.type === 'text' && (
@@ -274,6 +278,7 @@ const AzureInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
+              data-test-subj={field.testSubj}
             />
           )}
         </>
@@ -290,7 +295,7 @@ export const AzureCredentialsForm = ({
   onChange,
   setIsValid,
   disabled,
-}: Props) => {
+}: AzureCredentialsFormProps) => {
   const {
     group,
     fields,

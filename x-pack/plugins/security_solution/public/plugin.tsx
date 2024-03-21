@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subject, mergeMap } from 'rxjs';
+import { Subject, mergeMap, firstValueFrom } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -197,11 +197,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       // @ts-expect-error
       customDataService.query.filterManager._name = 'customFilterManager';
 
+      const sideNavEnabled = await this.getIsSidebarEnabled(core);
+
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
         ...this.contract.getStartServices(),
-        configSettings: this.configSettings,
+        configSettings: {
+          ...this.configSettings,
+          sideNavEnabled,
+        },
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
         setHeaderActionMenu: params.setHeaderActionMenu,
@@ -573,5 +578,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         })
       )
       .subscribe();
+  }
+
+  private async getIsSidebarEnabled(core: CoreSetup) {
+    const [coreStart] = await core.getStartServices();
+    const chromeStyle = await firstValueFrom(coreStart.chrome.getChromeStyle$());
+    return chromeStyle === 'classic';
   }
 }
