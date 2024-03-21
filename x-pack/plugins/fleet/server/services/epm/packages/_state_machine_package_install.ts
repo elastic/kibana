@@ -16,21 +16,38 @@ import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging
 
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import type { PackageInstallContext } from '../../../../common/types';
+import type { PackageAssetReference } from '../../../types';
 
 import type {
   Installation,
   InstallType,
   InstallSource,
   PackageVerificationResult,
+  EsAssetReference,
+  KibanaAssetReference,
+  IndexTemplateEntry,
 } from '../../../types';
 
-import { createRestartInstallation } from './install';
+import {
+  stepCreateRestartInstallation,
+  stepInstallKibanaAssets,
+  stepInstallILMPolicies,
+  stepInstallMlModel,
+  stepInstallIndexTemplatePipelines,
+  stepRemoveLegacyTemplates,
+  stepUpdateCurrentWriteIndices,
+  stepInstallTransforms,
+  stepDeletePreviousPipelines,
+  stepSaveArchiveEntries,
+  stepSaveSystemObject,
+} from './install_steps';
 import type { StateMachineDefinition } from './integrations_state_machine';
-import { handleStateMachine } from './integrations_state_machine';
+import { handleState } from './integrations_state_machine';
 
 export const installStateNames = [
   'create_restart_installation',
   'install_kibana_assets',
+  'install_ilm_policies',
   'install_ml_model',
   'install_index_template_pipelines',
   'remove_legacy_templates',
@@ -44,24 +61,7 @@ export const installStateNames = [
 type StateNamesTuple = typeof installStateNames;
 type StateNames = StateNamesTuple[number];
 
-export async function _stateMachineInstallPackage({
-  savedObjectsClient,
-  savedObjectsImporter,
-  savedObjectTagAssignmentService,
-  savedObjectTagClient,
-  esClient,
-  logger,
-  installedPkg,
-  packageInstallContext,
-  installType,
-  installSource,
-  spaceId,
-  force,
-  verificationResult,
-  authorizationHeader,
-  ignoreMappingUpdateErrors,
-  skipDataStreamRollover,
-}: {
+export interface InstallContext {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   savedObjectTagAssignmentService: IAssignmentService;
@@ -78,68 +78,68 @@ export async function _stateMachineInstallPackage({
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
-}) {
-  const { packageInfo, paths } = packageInstallContext;
-  const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
-  // our install states
+  indexTemplates: IndexTemplateEntry[];
+  packageAssetRefs: PackageAssetReference[];
+  // output values
+  esReferences: EsAssetReference[];
+  kibanaAssetPromise: Promise<KibanaAssetReference[]>;
+}
+
+export async function _stateMachineInstallPackage({ context }: { context: InstallContext }) {
   const installStates: StateMachineDefinition<StateNames> = {
-    context: {
-      savedObjectsClient,
-      savedObjectsImporter,
-      savedObjectTagAssignmentService,
-      savedObjectTagClient,
-      pkgName,
-      pkgTitle,
-      packageInstallContext,
-      paths,
-      installedPkg,
-      logger,
-      spaceId,
-      assetTags: packageInfo?.asset_tags,
-    },
+    context,
     states: {
       create_restart_installation: {
         nextState: 'install_kibana_assets',
-        onTransitionTo: createRestartInstallation,
+        onTransitionTo: stepCreateRestartInstallation,
       },
       install_kibana_assets: {
-        onTransitionTo: () => undefined,
+        onTransitionTo: stepInstallKibanaAssets,
+        nextState: 'install_ilm_policies',
+      },
+      install_ilm_policies: {
+        onTransitionTo: stepInstallILMPolicies,
         nextState: 'install_ml_model',
       },
       install_ml_model: {
-        onTransitionTo: () => undefined,
+        onTransitionTo: stepInstallMlModel,
         nextState: 'install_index_template_pipelines',
       },
       install_index_template_pipelines: {
-        onTransitionTo: () => undefined,
+        onTransitionTo: stepInstallIndexTemplatePipelines,
         nextState: 'remove_legacy_templates',
       },
       remove_legacy_templates: {
-        onTransitionTo: () => undefined,
+        onTransitionTo: stepRemoveLegacyTemplates,
         nextState: 'update_current_write_indices',
       },
       update_current_write_indices: {
-        onTransitionTo: () => undefined,
+        onTransitionTo: stepUpdateCurrentWriteIndices,
         nextState: 'install_transforms',
       },
       install_transforms: {
-        onTransitionTo: () => undefined,
+        onTransitionTo: stepInstallTransforms,
         nextState: 'delete_previous_pipelines',
       },
       delete_previous_pipelines: {
-        onTransitionTo: () => undefined,
+        onTransitionTo: stepDeletePreviousPipelines,
         nextState: 'save_archive_entries_from_assets_map',
       },
       save_archive_entries_from_assets_map: {
-        onTransitionTo: () => undefined,
+        onTransitionTo: stepSaveArchiveEntries,
         nextState: 'update_so',
       },
       update_so: {
-        onTransitionTo: () => undefined,
+        onTransitionTo: stepSaveSystemObject,
         nextState: 'end',
       },
     },
   };
-  await handleStateMachine('create_restart_installation', installStates);
+  const { installedKibanaAssetsRefs, esReferences } = await handleState(
+    'create_restart_installation',
+    installStates,
+    installStates.context
+  );
+  return [...installedKibanaAssetsRefs, ...esReferences];
 }

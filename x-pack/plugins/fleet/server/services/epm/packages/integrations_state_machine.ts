@@ -22,8 +22,8 @@ export interface StateMachineDefinition<T extends string> {
 export async function handleState(
   currentStateName: string,
   definition: StateMachineDefinition<string>,
-  context: any
-) {
+  context: { [key: string]: any }
+): Promise<{ [key: string]: any }> {
   const logger = appContextService.getLogger();
   const { states } = definition;
   const currentState = states[currentStateName];
