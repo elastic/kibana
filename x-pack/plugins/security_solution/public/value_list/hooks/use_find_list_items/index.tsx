@@ -11,21 +11,37 @@ import { findListItems } from '@kbn/securitysolution-list-api';
 import { useCursor } from '@kbn/securitysolution-list-hooks';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 
+const FIND_LIST_ITEMS_QUERY_KEY = 'FIND_LIST_ITEMS';
+
 export const useInvalidateListItemQuery = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {
-    queryClient.invalidateQueries('findListItems', {
+    queryClient.invalidateQueries([FIND_LIST_ITEMS_QUERY_KEY], {
       refetchType: 'active',
     });
   }, [queryClient]);
 };
 
-export const useFindListItems = ({ pageIndex, pageSize, sortField, sortOrder, listId, filter }) => {
+export const useFindListItems = ({
+  pageIndex,
+  pageSize,
+  sortField,
+  sortOrder,
+  listId,
+  filter,
+}: {
+  pageIndex: number;
+  pageSize: number;
+  sortField: string;
+  sortOrder: 'asc' | 'desc';
+  listId: string;
+  filter: string;
+}) => {
   const [cursor, setCursor] = useCursor({ pageIndex, pageSize });
   const http = useKibana().services.http;
   return useQuery(
-    ['findListItems', pageIndex, pageSize, sortField, sortOrder, listId, filter],
+    [FIND_LIST_ITEMS_QUERY_KEY, pageIndex, pageSize, sortField, sortOrder, listId, filter],
     async ({ signal }) => {
       const response = await findListItems({
         http,

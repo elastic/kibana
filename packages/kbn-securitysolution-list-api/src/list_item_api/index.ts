@@ -8,7 +8,6 @@
 
 import {
   FindListItemSchema,
-  ListSchema,
   ListItemSchema,
   deleteListItemSchema,
   patchListItemSchema,
@@ -20,6 +19,7 @@ import {
   DeleteListItemSchema,
   PatchListItemSchema,
   CreateListItemSchema,
+  Refresh,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
@@ -106,7 +106,7 @@ const deleteListItem = async ({
   id,
   signal,
   refresh,
-}: ApiParams & DeleteListItemSchema): Promise<ListSchema> =>
+}: ApiParams & DeleteListItemSchema): Promise<ListItemSchema> =>
   http.fetch<ListItemSchema>(LIST_ITEM_URL, {
     method: 'DELETE',
     query: { id, refresh },
@@ -119,9 +119,9 @@ const deleteListItemWithValidation = async ({
   id,
   signal,
   refresh,
-}: DeleteListItemParams): Promise<ListSchema> =>
+}: DeleteListItemParams): Promise<ListItemSchema> =>
   pipe(
-    { id, refresh: refresh ? refresh.toString() : undefined },
+    { id, refresh: refresh ? (refresh.toString() as Refresh) : undefined },
     (payload) => fromEither(validateEither(deleteListItemSchema, payload)),
     chain((payload) =>
       tryCatch(
@@ -148,7 +148,7 @@ const patchListItem = async ({
   signal,
   value,
   _version,
-}: ApiParams & PatchListItemSchema): Promise<ListSchema> =>
+}: ApiParams & PatchListItemSchema): Promise<ListItemSchema> =>
   http.fetch<ListItemSchema>(LIST_ITEM_URL, {
     method: 'PATCH',
     body: JSON.stringify({ id, value, _version }),
@@ -163,9 +163,9 @@ const patchListItemWithValidation = async ({
   value,
   refresh,
   _version,
-}: PatchListItemParams): Promise<ListSchema> =>
+}: PatchListItemParams): Promise<ListItemSchema> =>
   pipe(
-    { id, value, _version, refresh: refresh ? refresh.toString() : undefined },
+    { id, value, _version, refresh: refresh ? (refresh.toString() as Refresh) : undefined },
     (payload) => fromEither(validateEither(patchListItemSchema, payload)),
     chain((payload) =>
       tryCatch(
@@ -190,7 +190,7 @@ const createListItem = async ({
   value,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   list_id,
-}: ApiParams & CreateListItemSchema): Promise<ListSchema> =>
+}: ApiParams & CreateListItemSchema): Promise<ListItemSchema> =>
   http.fetch<ListItemSchema>(LIST_ITEM_URL, {
     method: 'POST',
     body: JSON.stringify({ value, list_id }),
@@ -204,9 +204,9 @@ const createListItemWithValidation = async ({
   value,
   refresh,
   listId,
-}: CreateListItemParams): Promise<ListSchema> =>
+}: CreateListItemParams): Promise<ListItemSchema> =>
   pipe(
-    { list_id: listId, value, refresh: refresh ? refresh.toString() : undefined },
+    { list_id: listId, value, refresh: refresh ? (refresh.toString() as Refresh) : undefined },
     (payload) => fromEither(validateEither(createListItemSchema, payload)),
     chain((payload) =>
       tryCatch(

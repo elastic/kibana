@@ -9,7 +9,6 @@
 import type {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-  Refresh,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -22,7 +21,7 @@ interface HttpStart {
 
 export interface ApiParams {
   http: HttpStart;
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 export type ApiPayload<T extends ApiParams> = Omit<T, 'http' | 'signal'>;
 
@@ -57,19 +56,19 @@ export interface DeleteListParams extends ApiParams {
 }
 
 export interface DeleteListItemParams extends ApiParams {
-  refresh?: Refresh;
+  refresh?: boolean;
   id: string;
 }
 
 export interface PatchListItemParams extends ApiParams {
-  refresh?: Refresh;
+  refresh?: boolean;
   id: string;
   value: string;
-  _version: string;
+  _version?: string;
 }
 
 export interface CreateListItemParams extends ApiParams {
-  refresh?: Refresh;
+  refresh?: boolean;
   value: string;
   listId: string;
 }

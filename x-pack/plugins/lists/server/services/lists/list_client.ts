@@ -909,9 +909,9 @@ export class ListClient {
       isPatch: true,
       listItemIndex: listItemName,
       meta,
+      refresh,
       user,
       value,
-      refresh,
     });
   };
 

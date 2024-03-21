@@ -52,8 +52,8 @@ export const patchListItemRoute = (router: ListsPluginRouter): void => {
             _version,
             id,
             meta,
-            value,
             refresh: shouldRefresh,
+            value,
           });
           if (listItem == null) {
             return siemResponse.error({

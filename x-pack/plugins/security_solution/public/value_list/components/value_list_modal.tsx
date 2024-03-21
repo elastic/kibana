@@ -6,24 +6,25 @@
  */
 import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/css';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
+import type { Query } from '@kbn/es-query';
 import {
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiBasicTable,
-  EuiInlineEditText,
   EuiFlexItem,
   EuiFlexGroup,
   useEuiPaddingSize,
 } from '@elastic/eui';
-import { useFindListItems } from '../../hooks/use_find_list_items';
-import { useDeleteListItemMutation } from '../../hooks/use_delete_list_item';
-import { usePatchListItemMutation } from '../../hooks/use_patch_list_item';
-import { FormattedDate } from '../../../common/components/formatted_date';
-import { useKibana } from '../../../common/lib/kibana';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { AddListItemPopover } from '../add_list_item_popover';
+import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useFindListItems } from '../hooks/use_find_list_items';
+import { useDeleteListItemMutation } from '../hooks/use_delete_list_item';
+import { FormattedDate } from '../../common/components/formatted_date';
+import { useKibana } from '../../common/lib/kibana';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { AddListItemPopover } from './add_list_item_popover';
+import { InlineEditListItemValue } from './inline_edit_list_item_value';
 
 const toastOptions = {
   toastLifeTimeMs: 5000,
@@ -33,46 +34,7 @@ const tableStyle = css`
   overflow: scroll;
 `;
 
-const InlineEditListItemValue = ({ listItem }) => {
-  const [value, setValue] = useState(listItem.value);
-  const { addSuccess, addError } = useAppToasts();
-  const patchListItemMutation = usePatchListItemMutation({
-    onSuccess: () => {
-      addSuccess('Succesfully updated list item', toastOptions);
-    },
-    onError: (error) => {
-      addError('Failed to update list item', toastOptions);
-      setValue(listItem.value);
-    },
-  });
-  console.log(patchListItemMutation.isLoading);
-  const onChange = useCallback((e) => {
-    setValue(e.target.value);
-  }, []);
-  const onCancel = useCallback(() => {
-    setValue(listItem.item);
-  }, []);
-  const onSave = useCallback(async (newValue) => {
-    await patchListItemMutation.mutateAsync({
-      id: listItem.id,
-      value: newValue,
-      _version: listItem._version,
-    });
-    return true;
-  }, []);
-
-  return (
-    <EuiInlineEditText
-      size={'s'}
-      inputAriaLabel="Edit text inline"
-      value={value}
-      onChange={onChange}
-      onSave={onSave}
-      onCancel={onCancel}
-      isLoading={patchListItemMutation.isLoading}
-    />
-  );
-};
+type SortFields = 'updated_at' | 'updated_by';
 
 export const ValueListModal = ({
   listId,
@@ -84,13 +46,10 @@ export const ValueListModal = ({
   const [filter, setFilter] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState('updated_at');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [sortField, setSortField] = useState<SortFields>('updated_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  const modalStyle = css`
-    overflow: hidden;
-    padding: ${useEuiPaddingSize('m')};
-  `;
+  const { addSuccess } = useAppToasts();
   const { data, isLoading, isError } = useFindListItems({
     listId,
     pageIndex: pageIndex + 1,
@@ -99,40 +58,24 @@ export const ValueListModal = ({
     sortOrder,
     filter,
   });
-  const { addSuccess } = useAppToasts();
+
   const deleteListItemMutation = useDeleteListItemMutation({
     onSuccess: () => {
       addSuccess('Succesfully deleted list item', toastOptions);
     },
   });
+
+  const modalStyle = css`
+    overflow: hidden;
+    padding: ${useEuiPaddingSize('m')};
+  `;
   const {
     unifiedSearch: {
       ui: { SearchBar },
     },
   } = useKibana().services;
 
-  const actions = [
-    // {
-    //   name: 'Edit',
-    //   isPrimary: true,
-    //   // available: ({ online }) => !online,
-    //   // enabled: ({ online }) => !!online,
-    //   description: 'Edit',
-    //   icon: 'pencil',
-    //   type: 'icon',
-    //   onClick: () => {},
-    // },
-    {
-      name: 'Delete',
-      icon: 'trash',
-      color: 'danger',
-      type: 'icon',
-      onClick: (item) => deleteListItemMutation.mutate({ id: item.id }),
-      isPrimary: true,
-    },
-  ];
-
-  const columns: Array<EuiBasicTableColumn<any>> = [
+  const columns: Array<EuiBasicTableColumn<ListItemSchema>> = [
     {
       field: 'value',
       name: 'Value',
@@ -141,8 +84,11 @@ export const ValueListModal = ({
     {
       field: 'updated_at',
       name: 'Updated At',
-      render: (value) => <FormattedDate value={value} fieldName="updated_at" />,
+      render: (value: ListItemSchema['updated_at']) => (
+        <FormattedDate value={value} fieldName="updated_at" />
+      ),
       width: '25%',
+      sortable: true,
     },
     {
       field: 'updated_by',
@@ -151,33 +97,39 @@ export const ValueListModal = ({
     },
     {
       name: 'Actions',
-      actions,
+      actions: [
+        {
+          name: 'Delete',
+          description: 'Delete this item',
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          onClick: (item: ListItemSchema) => deleteListItemMutation.mutate({ id: item.id }),
+          isPrimary: true,
+        },
+      ],
       width: '10%',
     },
   ];
-  console.log(data, isLoading, isError);
 
-  const sorting: EuiTableSortingType<User> = {
+  const sorting: EuiTableSortingType<Pick<ListItemSchema, SortFields>> = {
     sort: {
       field: sortField,
       direction: sortOrder,
     },
-    enableAllColumns: true,
+    enableAllColumns: false,
   };
 
   const pagination = {
     pageIndex,
     pageSize,
-    totalItemCount: data?.total,
+    totalItemCount: data?.total ?? 0,
     pageSizeOptions: [5, 10, 25],
-    // showPerPageOptions,
   };
 
-  const onQuerySubmit = useCallback((payload: { query }) => {
-    try {
-      console.log(payload);
-      setFilter(payload.query.query);
-    } catch (e) {}
+  const onQuerySubmit = useCallback((payload: { query?: Query }) => {
+    if (payload.query === undefined) return;
+    setFilter(payload.query.query.toString());
   }, []);
 
   return (
@@ -203,10 +155,7 @@ export const ValueListModal = ({
           <EuiBasicTable
             tableCaption="Demo of EuiBasicTable"
             items={data?.data ?? []}
-            //   rowHeader="firstName"
             columns={columns}
-            //   rowProps={getRowProps}
-            //   cellProps={getCellProps}
             pagination={pagination}
             sorting={sorting}
             onChange={({ page, sort }) => {
@@ -215,7 +164,7 @@ export const ValueListModal = ({
                 setPageSize(page.size);
               }
               if (sort) {
-                setSortField(sort.field);
+                setSortField(sort.field as SortFields);
                 setSortOrder(sort.direction);
               }
             }}
