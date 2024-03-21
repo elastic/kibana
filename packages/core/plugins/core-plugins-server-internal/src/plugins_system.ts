@@ -54,32 +54,31 @@ export class PluginsSystem<T extends PluginType> {
   }
 
   /**
-   * @returns a ReadonlyMap of each plugin and an Array of its available dependencies
+   * @returns a Map of each plugin and an Array of its available dependencies
    * @internal
    */
   public getPluginDependencies(): PluginDependencies {
-    const asNames = new Map(
-      [...this.plugins].map(([name, plugin]) => [
+    const asNames = new Map<string, string[]>();
+    const asOpaqueIds = new Map<symbol, symbol[]>();
+
+    for (const pluginName of this.getTopologicallySortedPluginNames()) {
+      const plugin = this.plugins.get(pluginName)!;
+      const dependencies = [
+        ...new Set([
+          ...plugin.requiredPlugins,
+          ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
+        ]),
+      ];
+
+      asNames.set(
         plugin.name,
-        [
-          ...new Set([
-            ...plugin.requiredPlugins,
-            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
-          ]),
-        ].map((depId) => this.plugins.get(depId)!.name),
-      ])
-    );
-    const asOpaqueIds = new Map(
-      [...this.plugins].map(([name, plugin]) => [
+        dependencies.map((depId) => this.plugins.get(depId)!.name)
+      );
+      asOpaqueIds.set(
         plugin.opaqueId,
-        [
-          ...new Set([
-            ...plugin.requiredPlugins,
-            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
-          ]),
-        ].map((depId) => this.plugins.get(depId)!.opaqueId),
-      ])
-    );
+        dependencies.map((depId) => this.plugins.get(depId)!.opaqueId)
+      );
+    }
 
     return { asNames, asOpaqueIds };
   }

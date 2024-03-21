@@ -296,6 +296,9 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
+    // TODO: here
+    this.discoveredPlugins!.standard
+
     const statusSetup = await this.status.setup({
       analytics: analyticsSetup,
       elasticsearch: elasticsearchServiceSetup,
