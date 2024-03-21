@@ -9,6 +9,8 @@ import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { map } from 'lodash';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getAgentTypeName } from '../../../../common/translations';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   isExecuteAction,
@@ -178,7 +180,19 @@ export const ActionsLogExpandedTray = memo<{
 }>(({ action, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
-  const { hosts, startedAt, completedAt, command: _command, comment, parameters } = action;
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
+
+  const {
+    hosts,
+    startedAt,
+    completedAt,
+    command: _command,
+    comment,
+    parameters,
+    agentType,
+  } = action;
 
   const parametersList = useMemo(
     () =>
@@ -192,45 +206,61 @@ export const ActionsLogExpandedTray = memo<{
 
   const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
 
-  const dataList = useMemo(
-    () =>
-      [
-        {
-          title: OUTPUT_MESSAGES.expandSection.placedAt,
-          description: `${startedAt}`,
-        },
-        {
-          title: OUTPUT_MESSAGES.expandSection.startedAt,
-          description: `${startedAt}`,
-        },
-        {
-          title: OUTPUT_MESSAGES.expandSection.completedAt,
-          description: `${completedAt ?? emptyValue}`,
-        },
-        {
-          title: OUTPUT_MESSAGES.expandSection.input,
-          description: `${command}`,
-        },
-        {
-          title: OUTPUT_MESSAGES.expandSection.parameters,
-          description: parametersList ? parametersList.join(', ') : emptyValue,
-        },
-        {
-          title: OUTPUT_MESSAGES.expandSection.comment,
-          description: comment ? comment : emptyValue,
-        },
-        {
-          title: OUTPUT_MESSAGES.expandSection.hostname,
-          description: map(hosts, (host) => host.name).join(', ') || emptyValue,
-        },
-      ].map(({ title, description }) => {
-        return {
-          title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
-          description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
-        };
-      }),
-    [command, comment, completedAt, hosts, parametersList, startedAt]
-  );
+  const dataList = useMemo(() => {
+    const list = [
+      {
+        title: OUTPUT_MESSAGES.expandSection.placedAt,
+        description: `${startedAt}`,
+      },
+      {
+        title: OUTPUT_MESSAGES.expandSection.startedAt,
+        description: `${startedAt}`,
+      },
+      {
+        title: OUTPUT_MESSAGES.expandSection.completedAt,
+        description: `${completedAt ?? emptyValue}`,
+      },
+      {
+        title: OUTPUT_MESSAGES.expandSection.input,
+        description: `${command}`,
+      },
+      {
+        title: OUTPUT_MESSAGES.expandSection.parameters,
+        description: parametersList ? parametersList.join(', ') : emptyValue,
+      },
+      {
+        title: OUTPUT_MESSAGES.expandSection.comment,
+        description: comment ? comment : emptyValue,
+      },
+      {
+        title: OUTPUT_MESSAGES.expandSection.hostname,
+        description: map(hosts, (host) => host.name).join(', ') || emptyValue,
+      },
+    ];
+
+    if (isSentinelOneV1Enabled) {
+      list.push({
+        title: OUTPUT_MESSAGES.expandSection.agentType,
+        description: getAgentTypeName(agentType) || emptyValue,
+      });
+    }
+
+    return list.map(({ title, description }) => {
+      return {
+        title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
+        description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
+      };
+    });
+  }, [
+    agentType,
+    command,
+    comment,
+    completedAt,
+    hosts,
+    isSentinelOneV1Enabled,
+    parametersList,
+    startedAt,
+  ]);
 
   const outputList = useMemo(
     () => [

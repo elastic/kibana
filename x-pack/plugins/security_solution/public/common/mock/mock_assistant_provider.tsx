@@ -10,6 +10,7 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import React from 'react';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
+import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
 
 interface Props {
   children: React.ReactNode;
@@ -22,7 +23,6 @@ window.HTMLElement.prototype.scrollIntoView = jest.fn();
 export const MockAssistantProviderComponent: React.FC<Props> = ({ children }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
-  mockHttp.get.mockResolvedValue([]);
   const mockAssistantAvailability: AssistantAvailability = {
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
@@ -45,11 +45,10 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({ children }) =>
       }}
       defaultAllowReplacement={[]}
       getComments={jest.fn(() => [])}
-      getInitialConversations={jest.fn(() => ({}))}
-      setConversations={jest.fn()}
       setDefaultAllow={jest.fn()}
       setDefaultAllowReplacement={jest.fn()}
       http={mockHttp}
+      baseConversations={BASE_SECURITY_CONVERSATIONS}
     >
       {children}
     </AssistantProvider>

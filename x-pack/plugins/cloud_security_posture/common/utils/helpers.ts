@@ -196,6 +196,15 @@ const CLOUD_PROVIDER_NAMES = {
   GCP: 'Google Cloud Platform',
 };
 
+export const CLOUD_PROVIDERS = {
+  AWS: 'aws',
+  AZURE: 'azure',
+  GCP: 'gcp',
+};
+
+/**
+ * Returns the cloud provider name or benchmark applicable name for the given benchmark id
+ */
 export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
   switch (benchmarkId) {
     case 'cis_k8s':
@@ -205,7 +214,7 @@ export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
     case 'cis_aws':
       return CLOUD_PROVIDER_NAMES.AWS;
     case 'cis_eks':
-      return 'Amazon Elastic Kubernetes Service';
+      return 'Amazon Elastic Kubernetes Service (EKS)';
     case 'cis_gcp':
       return CLOUD_PROVIDER_NAMES.GCP;
   }

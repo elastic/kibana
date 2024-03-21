@@ -62,11 +62,6 @@ const config: TaskManagerConfig = {
   },
   poll_interval: 6000000,
   request_capacity: 1000,
-  requeue_invalid_tasks: {
-    enabled: false,
-    delay: 3000,
-    max_attempts: 20,
-  },
   unsafe: {
     authenticate_background_task_utilization: true,
     exclude_task_types: [],
@@ -74,6 +69,9 @@ const config: TaskManagerConfig = {
   version_conflict_threshold: 80,
   worker_utilization_running_average_window: 5,
   claim_strategy: 'default',
+  request_timeouts: {
+    update_by_query: 1000,
+  },
 };
 
 describe('createAggregator', () => {
@@ -427,6 +425,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1], values: [10] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
               },
             });
@@ -440,6 +439,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1], values: [10] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -448,6 +448,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -455,6 +456,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -469,6 +471,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -477,6 +480,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -484,6 +488,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -498,6 +503,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -506,6 +512,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -513,6 +520,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -520,6 +528,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -534,6 +543,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -542,6 +552,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -549,6 +560,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -556,6 +568,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -570,6 +583,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -578,6 +592,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -585,6 +600,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -592,6 +608,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -606,6 +623,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -614,6 +632,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -621,6 +640,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -628,6 +648,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -642,6 +663,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -650,6 +672,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -657,6 +680,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 1,
@@ -664,6 +688,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -671,6 +696,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -685,6 +711,7 @@ describe('createAggregator', () => {
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -693,6 +720,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -700,6 +728,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 1,
@@ -707,6 +736,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -714,6 +744,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -728,6 +759,7 @@ describe('createAggregator', () => {
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -736,6 +768,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 2,
@@ -743,6 +776,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 1,
@@ -750,6 +784,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -757,6 +792,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -771,6 +807,7 @@ describe('createAggregator', () => {
                   delay: { counts: [4, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -779,6 +816,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 2,
@@ -786,6 +824,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 1,
@@ -793,6 +832,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -800,6 +840,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -814,6 +855,7 @@ describe('createAggregator', () => {
                   delay: { counts: [4, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -822,6 +864,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:__index-threshold': {
                     success: 1,
@@ -829,6 +872,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -836,6 +880,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 1,
@@ -843,6 +888,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -850,6 +896,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -864,6 +911,7 @@ describe('createAggregator', () => {
                   delay: { counts: [4, 2, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -872,6 +920,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:__index-threshold': {
                     success: 1,
@@ -879,6 +928,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -886,6 +936,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 1,
@@ -893,6 +944,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -900,6 +952,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -914,6 +967,7 @@ describe('createAggregator', () => {
                   delay: { counts: [4, 2, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -922,6 +976,7 @@ describe('createAggregator', () => {
                     total: 5,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:__index-threshold': {
                     success: 1,
@@ -929,6 +984,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 3,
@@ -936,6 +992,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 1,
@@ -943,6 +1000,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -950,6 +1008,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -964,6 +1023,7 @@ describe('createAggregator', () => {
                   delay: { counts: [5, 2, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -972,6 +1032,7 @@ describe('createAggregator', () => {
                     total: 5,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:__index-threshold': {
                     success: 1,
@@ -979,6 +1040,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 3,
@@ -986,6 +1048,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 1,
@@ -993,6 +1056,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1000,6 +1064,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1014,6 +1079,7 @@ describe('createAggregator', () => {
                   delay: { counts: [5, 2, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 2,
                   user_errors: 0,
+                  total_errors: 2,
                 },
                 by_type: {
                   alerting: {
@@ -1022,6 +1088,7 @@ describe('createAggregator', () => {
                     total: 6,
                     framework_errors: 2,
                     user_errors: 0,
+                    total_errors: 2,
                   },
                   'alerting:__index-threshold': {
                     success: 1,
@@ -1029,6 +1096,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 3,
@@ -1036,6 +1104,7 @@ describe('createAggregator', () => {
                     total: 5,
                     framework_errors: 2,
                     user_errors: 0,
+                    total_errors: 2,
                   },
                   report: {
                     success: 1,
@@ -1043,6 +1112,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1050,6 +1120,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1064,6 +1135,7 @@ describe('createAggregator', () => {
                   delay: { counts: [6, 2, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 2,
                   user_errors: 0,
+                  total_errors: 2,
                 },
                 by_type: {
                   alerting: {
@@ -1072,6 +1144,7 @@ describe('createAggregator', () => {
                     total: 6,
                     framework_errors: 2,
                     user_errors: 0,
+                    total_errors: 2,
                   },
                   'alerting:__index-threshold': {
                     success: 1,
@@ -1079,6 +1152,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 3,
@@ -1086,6 +1160,7 @@ describe('createAggregator', () => {
                     total: 5,
                     framework_errors: 2,
                     user_errors: 0,
+                    total_errors: 2,
                   },
                   report: {
                     success: 1,
@@ -1093,6 +1168,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1100,6 +1176,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1114,6 +1191,7 @@ describe('createAggregator', () => {
                   delay: { counts: [6, 2, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 2,
                   user_errors: 0,
+                  total_errors: 2,
                 },
                 by_type: {
                   alerting: {
@@ -1122,6 +1200,7 @@ describe('createAggregator', () => {
                     total: 7,
                     framework_errors: 2,
                     user_errors: 0,
+                    total_errors: 2,
                   },
                   'alerting:__index-threshold': {
                     success: 1,
@@ -1129,6 +1208,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 4,
@@ -1136,6 +1216,7 @@ describe('createAggregator', () => {
                     total: 6,
                     framework_errors: 2,
                     user_errors: 0,
+                    total_errors: 2,
                   },
                   report: {
                     success: 1,
@@ -1143,6 +1224,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1150,6 +1232,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1164,6 +1247,7 @@ describe('createAggregator', () => {
                   delay: { counts: [7, 2, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 2,
                   user_errors: 0,
+                  total_errors: 2,
                 },
                 by_type: {
                   alerting: {
@@ -1172,6 +1256,7 @@ describe('createAggregator', () => {
                     total: 7,
                     framework_errors: 2,
                     user_errors: 0,
+                    total_errors: 2,
                   },
                   'alerting:__index-threshold': {
                     success: 1,
@@ -1179,6 +1264,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 4,
@@ -1186,6 +1272,7 @@ describe('createAggregator', () => {
                     total: 6,
                     framework_errors: 2,
                     user_errors: 0,
+                    total_errors: 2,
                   },
                   report: {
                     success: 1,
@@ -1193,6 +1280,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1200,6 +1288,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1214,6 +1303,7 @@ describe('createAggregator', () => {
                   delay: { counts: [7, 2, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 3,
                   user_errors: 0,
+                  total_errors: 3,
                 },
                 by_type: {
                   actions: {
@@ -1222,6 +1312,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   alerting: {
                     success: 5,
@@ -1229,6 +1320,7 @@ describe('createAggregator', () => {
                     total: 7,
                     framework_errors: 2,
                     user_errors: 0,
+                    total_errors: 2,
                   },
                   'actions:webhook': {
                     success: 0,
@@ -1236,6 +1328,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:__index-threshold': {
                     success: 1,
@@ -1243,6 +1336,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 4,
@@ -1250,6 +1344,7 @@ describe('createAggregator', () => {
                     total: 6,
                     framework_errors: 2,
                     user_errors: 0,
+                    total_errors: 2,
                   },
                   report: {
                     success: 1,
@@ -1257,6 +1352,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1264,6 +1360,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1336,6 +1433,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1], values: [10] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
               },
             });
@@ -1349,6 +1447,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1], values: [10] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1357,6 +1456,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -1364,6 +1464,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1378,6 +1479,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1386,6 +1488,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -1393,6 +1496,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1407,6 +1511,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1415,6 +1520,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -1422,6 +1528,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1429,6 +1536,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1443,6 +1551,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1451,6 +1560,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -1458,6 +1568,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1465,6 +1576,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1479,6 +1591,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1487,6 +1600,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -1494,6 +1608,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1501,6 +1616,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1515,6 +1631,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1523,6 +1640,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -1530,6 +1648,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1537,6 +1656,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1551,6 +1671,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1559,6 +1680,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -1566,6 +1688,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 1,
@@ -1573,6 +1696,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1580,6 +1704,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1594,6 +1719,7 @@ describe('createAggregator', () => {
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1602,6 +1728,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -1609,6 +1736,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 1,
@@ -1616,6 +1744,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1623,6 +1752,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1637,6 +1767,7 @@ describe('createAggregator', () => {
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -1645,6 +1776,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 2,
@@ -1652,6 +1784,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 1,
@@ -1659,6 +1792,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -1666,6 +1800,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1681,6 +1816,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1], values: [10] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1689,6 +1825,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 0,
@@ -1696,6 +1833,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 0,
@@ -1703,6 +1841,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -1710,6 +1849,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1724,6 +1864,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1], values: [10] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1732,6 +1873,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -1739,6 +1881,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 0,
@@ -1746,6 +1889,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -1753,6 +1897,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1767,6 +1912,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1775,6 +1921,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -1782,6 +1929,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 0,
@@ -1789,6 +1937,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -1796,6 +1945,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1810,6 +1960,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1818,6 +1969,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -1825,6 +1977,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 0,
@@ -1832,6 +1985,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -1839,6 +1993,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1853,6 +2008,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -1861,6 +2017,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -1868,6 +2025,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 0,
@@ -1875,6 +2033,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -1882,6 +2041,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1896,6 +2056,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1], values: [10, 20] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -1904,6 +2065,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 2,
@@ -1911,6 +2073,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 0,
@@ -1918,6 +2081,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -1925,6 +2089,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1939,6 +2104,7 @@ describe('createAggregator', () => {
                   delay: { counts: [3, 1], values: [10, 20] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -1947,6 +2113,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 2,
@@ -1954,6 +2121,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 0,
@@ -1961,6 +2129,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -1968,6 +2137,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -1982,6 +2152,7 @@ describe('createAggregator', () => {
                   delay: { counts: [3, 1], values: [10, 20] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -1990,6 +2161,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 3,
@@ -1997,6 +2169,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 0,
@@ -2004,6 +2177,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2011,6 +2185,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2025,6 +2200,7 @@ describe('createAggregator', () => {
                   delay: { counts: [4, 1], values: [10, 20] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -2033,6 +2209,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 3,
@@ -2040,6 +2217,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 0,
@@ -2047,6 +2225,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2054,6 +2233,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2068,6 +2248,7 @@ describe('createAggregator', () => {
                   delay: { counts: [4, 1], values: [10, 20] },
                   framework_errors: 2,
                   user_errors: 0,
+                  total_errors: 2,
                 },
                 by_type: {
                   actions: {
@@ -2076,6 +2257,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   alerting: {
                     success: 3,
@@ -2083,6 +2265,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'actions:webhook': {
                     success: 0,
@@ -2090,6 +2273,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 3,
@@ -2097,6 +2281,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 0,
@@ -2104,6 +2289,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2111,6 +2297,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2191,6 +2378,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1], values: [10] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
               },
             });
@@ -2204,6 +2392,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1], values: [10] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2212,6 +2401,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -2219,6 +2409,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2233,6 +2424,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2241,6 +2433,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -2248,6 +2441,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2262,6 +2456,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2270,6 +2465,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -2277,6 +2473,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -2284,6 +2481,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2298,6 +2496,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2306,6 +2505,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -2313,6 +2513,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -2320,6 +2521,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2334,6 +2536,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2342,6 +2545,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -2349,6 +2553,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -2356,6 +2561,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2370,6 +2576,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2378,6 +2585,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -2385,6 +2593,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -2392,6 +2601,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2406,6 +2616,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2414,6 +2625,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -2421,6 +2633,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 1,
@@ -2428,6 +2641,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -2435,6 +2649,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2449,6 +2664,7 @@ describe('createAggregator', () => {
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2457,6 +2673,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -2464,6 +2681,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 1,
@@ -2471,6 +2689,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -2478,6 +2697,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2492,6 +2712,7 @@ describe('createAggregator', () => {
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -2500,6 +2721,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 2,
@@ -2507,6 +2729,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 1,
@@ -2514,6 +2737,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 1,
@@ -2521,6 +2745,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2536,6 +2761,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1], values: [10] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2544,6 +2770,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 0,
@@ -2551,6 +2778,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 0,
@@ -2558,6 +2786,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2565,6 +2794,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2579,6 +2809,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1], values: [10] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2587,6 +2818,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -2594,6 +2826,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 0,
@@ -2601,6 +2834,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2608,6 +2842,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2622,6 +2857,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2630,6 +2866,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 1,
@@ -2637,6 +2874,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 0,
@@ -2644,6 +2882,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2651,6 +2890,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2665,6 +2905,7 @@ describe('createAggregator', () => {
                   delay: { counts: [1, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2673,6 +2914,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -2680,6 +2922,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 0,
@@ -2687,6 +2930,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2694,6 +2938,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2708,6 +2953,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1], values: [10, 20] },
                   framework_errors: 0,
                   user_errors: 0,
+                  total_errors: 0,
                 },
                 by_type: {
                   alerting: {
@@ -2716,6 +2962,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   'alerting:example': {
                     success: 2,
@@ -2723,6 +2970,7 @@ describe('createAggregator', () => {
                     total: 2,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   report: {
                     success: 0,
@@ -2730,6 +2978,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2737,6 +2986,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2751,6 +3001,7 @@ describe('createAggregator', () => {
                   delay: { counts: [2, 1], values: [10, 20] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -2759,6 +3010,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 2,
@@ -2766,6 +3018,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 0,
@@ -2773,6 +3026,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2780,6 +3034,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2794,6 +3049,7 @@ describe('createAggregator', () => {
                   delay: { counts: [3, 1], values: [10, 20] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -2802,6 +3058,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 2,
@@ -2809,6 +3066,7 @@ describe('createAggregator', () => {
                     total: 3,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 0,
@@ -2816,6 +3074,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2823,6 +3082,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2837,6 +3097,7 @@ describe('createAggregator', () => {
                   delay: { counts: [3, 1], values: [10, 20] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -2845,6 +3106,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 3,
@@ -2852,6 +3114,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 0,
@@ -2859,6 +3122,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2866,6 +3130,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2880,6 +3145,7 @@ describe('createAggregator', () => {
                   delay: { counts: [4, 1], values: [10, 20] },
                   framework_errors: 1,
                   user_errors: 0,
+                  total_errors: 1,
                 },
                 by_type: {
                   alerting: {
@@ -2888,6 +3154,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 3,
@@ -2895,6 +3162,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 0,
@@ -2902,6 +3170,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2909,6 +3178,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },
@@ -2923,6 +3193,7 @@ describe('createAggregator', () => {
                   delay: { counts: [4, 1], values: [10, 20] },
                   framework_errors: 2,
                   user_errors: 0,
+                  total_errors: 2,
                 },
                 by_type: {
                   actions: {
@@ -2931,6 +3202,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   alerting: {
                     success: 3,
@@ -2938,6 +3210,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'actions:webhook': {
                     success: 0,
@@ -2945,6 +3218,7 @@ describe('createAggregator', () => {
                     total: 1,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   'alerting:example': {
                     success: 3,
@@ -2952,6 +3226,7 @@ describe('createAggregator', () => {
                     total: 4,
                     framework_errors: 1,
                     user_errors: 0,
+                    total_errors: 1,
                   },
                   report: {
                     success: 0,
@@ -2959,6 +3234,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                   telemetry: {
                     success: 0,
@@ -2966,6 +3242,7 @@ describe('createAggregator', () => {
                     total: 0,
                     framework_errors: 0,
                     user_errors: 0,
+                    total_errors: 0,
                   },
                 },
               },

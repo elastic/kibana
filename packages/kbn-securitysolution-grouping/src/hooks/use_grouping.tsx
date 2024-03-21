@@ -31,7 +31,7 @@ export interface UseGrouping<T> {
  */
 type StaticGroupingProps<T> = Pick<
   GroupingProps<T>,
-  'groupPanelRenderer' | 'groupStatsRenderer' | 'onGroupToggle' | 'unit'
+  'groupPanelRenderer' | 'groupStatsRenderer' | 'onGroupToggle' | 'unit' | 'groupsUnit'
 >;
 
 /** Type for dynamic grouping component props where T is the consumer `GroupingAggregation`
@@ -65,7 +65,11 @@ interface GroupingArgs<T> {
   /** for tracking
    * @param param { groupByField: string; tableId: string } selected group and table id
    */
-  onGroupChange?: (param: { groupByField: string; tableId: string }) => void;
+  onGroupChange?: (param: {
+    groupByField: string;
+    groupByFields: string[];
+    tableId: string;
+  }) => void;
   onOptionsChange?: (options: GroupOption[]) => void;
   tracker?: (
     type: UiCounterMetricType,

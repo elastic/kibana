@@ -13,7 +13,14 @@ import { i18n } from '@kbn/i18n';
 import { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { isNil } from 'lodash';
-import { BehaviorSubject, map, Subscription, distinct } from 'rxjs';
+import {
+  BehaviorSubject,
+  map,
+  Subscription,
+  distinct,
+  combineLatest,
+  distinctUntilChanged,
+} from 'rxjs';
 import { embeddableStart } from '../../../kibana_services';
 import { isFilterableEmbeddable } from '../../filterable_embeddable';
 import {
@@ -31,7 +38,7 @@ import {
 import { canLinkLegacyEmbeddable, linkLegacyEmbeddable } from './link_legacy_embeddable';
 import { canUnlinkLegacyEmbeddable, unlinkLegacyEmbeddable } from './unlink_legacy_embeddable';
 
-export type CommonLegacyInput = EmbeddableInput & { timeRange: TimeRange };
+export type CommonLegacyInput = EmbeddableInput & { savedObjectId?: string; timeRange: TimeRange };
 export type CommonLegacyOutput = EmbeddableOutput & { indexPatterns: DataView[] };
 export type CommonLegacyEmbeddable = IEmbeddable<CommonLegacyInput, CommonLegacyOutput>;
 
@@ -135,6 +142,25 @@ export const legacyEmbeddableToApi = (
   const defaultPanelTitle = outputKeyToSubject<string>('defaultTitle');
   const disabledActionIds = inputKeyToSubject<string[] | undefined>('disabledActions');
 
+  function getSavedObjectId(input: { savedObjectId?: string }, output: { savedObjectId?: string }) {
+    return output.savedObjectId ?? input.savedObjectId;
+  }
+  const savedObjectId = new BehaviorSubject<string | undefined>(
+    getSavedObjectId(embeddable.getInput(), embeddable.getOutput())
+  );
+  subscriptions.add(
+    combineLatest([embeddable.getInput$(), embeddable.getOutput$()])
+      .pipe(
+        map(([input, output]) => {
+          return getSavedObjectId(input, output);
+        }),
+        distinctUntilChanged()
+      )
+      .subscribe((nextSavedObjectId) => {
+        savedObjectId.next(nextSavedObjectId);
+      })
+  );
+
   const blockingError = new BehaviorSubject<ErrorLike | undefined>(undefined);
   subscriptions.add(
     embeddable.getOutput$().subscribe({
@@ -152,30 +178,29 @@ export const legacyEmbeddableToApi = (
    * to tell when given a legacy embeddable what it's input could contain. All existing actions treat these as optional
    * so if the Embeddable is incapable of publishing unified search state (i.e. markdown) then it will just be ignored.
    */
-  const localTimeRange = inputKeyToSubject<TimeRange | undefined>('timeRange', true);
-  const setLocalTimeRange = (timeRange?: TimeRange) => embeddable.updateInput({ timeRange });
-  const getFallbackTimeRange = () =>
-    (embeddable.parent?.getInput() as unknown as CommonLegacyInput)?.timeRange;
+  const timeRange$ = inputKeyToSubject<TimeRange | undefined>('timeRange', true);
+  const setTimeRange = (nextTimeRange?: TimeRange) =>
+    embeddable.updateInput({ timeRange: nextTimeRange });
 
-  const localFilters: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<
-    Filter[] | undefined
-  >(undefined);
-  const localQuery: BehaviorSubject<Query | AggregateQuery | undefined> = new BehaviorSubject<
+  const filters$: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<Filter[] | undefined>(
+    undefined
+  );
+  const query$: BehaviorSubject<Query | AggregateQuery | undefined> = new BehaviorSubject<
     Query | AggregateQuery | undefined
   >(undefined);
   // if this embeddable is a legacy filterable embeddable, publish changes to those filters to the panelFilters subject.
   if (isFilterableEmbeddable(embeddable)) {
     embeddable.untilInitializationFinished().then(() => {
-      localFilters.next(embeddable.getFilters());
-      localQuery.next(embeddable.getQuery());
+      filters$.next(embeddable.getFilters());
+      query$.next(embeddable.getQuery());
 
       subscriptions.add(
         embeddable.getInput$().subscribe(() => {
-          if (!compareFilters(embeddable.localFilters.getValue() ?? [], embeddable.getFilters())) {
-            localFilters.next(embeddable.getFilters());
+          if (!compareFilters(embeddable.filters$.getValue() ?? [], embeddable.getFilters())) {
+            filters$.next(embeddable.getFilters());
           }
-          if (!deepEqual(embeddable.localQuery.getValue() ?? [], embeddable.getQuery())) {
-            localQuery.next(embeddable.getQuery());
+          if (!deepEqual(embeddable.query$.getValue() ?? [], embeddable.getQuery())) {
+            query$.next(embeddable.getQuery());
           }
         })
       );
@@ -183,7 +208,7 @@ export const legacyEmbeddableToApi = (
   }
 
   const dataViews = outputKeyToSubject<DataView[]>('indexPatterns');
-  const isCompatibleWithLocalUnifiedSearch = () => {
+  const isCompatibleWithUnifiedSearch = () => {
     const isInputControl =
       isVisualizeEmbeddable(embeddable) &&
       (embeddable as unknown as VisualizeEmbeddable).getOutput().visTypeName ===
@@ -213,12 +238,11 @@ export const legacyEmbeddableToApi = (
       isEditingEnabled,
       getTypeDisplayName,
 
-      localTimeRange,
-      setLocalTimeRange,
-      localFilters,
-      localQuery,
-      getFallbackTimeRange,
-      isCompatibleWithLocalUnifiedSearch,
+      timeRange$,
+      setTimeRange,
+      filters$,
+      query$,
+      isCompatibleWithUnifiedSearch,
 
       dataViews,
       disabledActionIds,
@@ -238,6 +262,8 @@ export const legacyEmbeddableToApi = (
 
       canUnlinkFromLibrary: () => canUnlinkLegacyEmbeddable(embeddable),
       unlinkFromLibrary: () => unlinkLegacyEmbeddable(embeddable),
+
+      savedObjectId,
     },
     destroyAPI: () => {
       subscriptions.unsubscribe();

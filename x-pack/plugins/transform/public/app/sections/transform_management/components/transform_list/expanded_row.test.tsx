@@ -8,7 +8,7 @@
 import { render, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import moment from 'moment-timezone';
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 import { ExpandedRow } from './expanded_row';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';

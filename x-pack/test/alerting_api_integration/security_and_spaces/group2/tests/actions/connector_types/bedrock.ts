@@ -16,6 +16,10 @@ import { PassThrough } from 'stream';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -27,7 +31,7 @@ const secrets = {
 };
 
 const defaultConfig = {
-  defaultModel: 'anthropic.claude-v2',
+  defaultModel: 'anthropic.claude-v2:1',
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -381,12 +385,12 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                   subActionParams: {
                     messages: [
                       {
-                        role: 'user',
-                        content: 'Hello world',
-                      },
-                      {
                         role: 'system',
                         content: 'Be a good chatbot',
+                      },
+                      {
+                        role: 'user',
+                        content: 'Hello world',
                       },
                       {
                         role: 'assistant',
@@ -404,7 +408,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
 
             expect(simulator.requestData).to.eql({
               prompt:
-                '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
+                'Be a good chatbot\n\nHuman:Hello world\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
               max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
               temperature: 0.5,
               stop_sequences: ['\n\nHuman:'],
@@ -423,21 +427,16 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               supertest
                 .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
                 .set('kbn-xsrf', 'foo')
+                .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+                .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
                 .on('error', reject)
                 .send({
-                  params: {
-                    subAction: 'invokeStream',
-                    subActionParams: {
-                      messages: [
-                        {
-                          role: 'user',
-                          content: 'Hello world',
-                        },
-                      ],
-                    },
-                  },
+                  subAction: 'invokeStream',
+                  message: 'Hello world',
                   isEnabledKnowledgeBase: false,
                   isEnabledRAGAlerts: false,
+                  llmType: 'bedrock',
+                  replacements: [],
                 })
                 .pipe(passThrough);
               const responseBuffer: Uint8Array[] = [];

@@ -148,6 +148,17 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       });
     },
 
+    async assertDiscoverDocCountGreaterThan(expectedDocCount: number) {
+      await retry.tryForTime(5000, async () => {
+        const docCount = await testSubjects.getVisibleText('discoverQueryHits');
+        const formattedDocCount = docCount.replaceAll(',', '');
+        expect(formattedDocCount).to.above(
+          expectedDocCount,
+          `Expected discover document count to be above '${expectedDocCount}' (got '${formattedDocCount}')`
+        );
+      });
+    },
+
     async clickDiscoverField(fieldName: string) {
       await testSubjects.clickWhenNotDisabled(`dscFieldListPanelField-${fieldName}`, {
         timeout: 5000,

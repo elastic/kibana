@@ -40,6 +40,7 @@ import { Description } from '../../description';
 import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
+import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -93,6 +94,8 @@ export const CaseViewActivity = ({
     caseData,
   });
 
+  const { isLoading: isUpdatingCustomField, mutate: replaceCustomField } = useReplaceCustomField();
+
   const isLoadingAssigneeData =
     (isLoading && loadingKey === 'assignees') || isLoadingCaseUsers || isLoadingCurrentUserProfile;
 
@@ -143,14 +146,16 @@ export const CaseViewActivity = ({
     [onUpdateField]
   );
 
-  const onSubmitCustomFields = useCallback(
-    (customFields: CaseUICustomField[]) => {
-      onUpdateField({
-        key: 'customFields',
-        value: customFields,
+  const onSubmitCustomField = useCallback(
+    (customField: CaseUICustomField) => {
+      replaceCustomField({
+        caseId: caseData.id,
+        customFieldId: customField.key,
+        customFieldValue: customField.value,
+        caseVersion: caseData.version,
       });
     },
-    [onUpdateField]
+    [replaceCustomField, caseData]
   );
 
   const handleUserActionsActivityChanged = useCallback(
@@ -290,10 +295,10 @@ export const CaseViewActivity = ({
             />
           ) : null}
           <CustomFields
-            isLoading={isLoading && loadingKey === 'customFields'}
+            isLoading={(isLoading && loadingKey === 'customFields') || isUpdatingCustomField}
             customFields={caseData.customFields}
             customFieldsConfiguration={casesConfiguration.customFields}
-            onSubmit={onSubmitCustomFields}
+            onSubmit={onSubmitCustomField}
           />
         </EuiFlexGroup>
       </EuiFlexItem>

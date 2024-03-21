@@ -16,8 +16,15 @@ export const cspSettings: SavedObjectsType = {
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'agnostic',
-  schemas: {
-    '8.12.0': cspSettingsSchema,
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        forwardCompatibility: cspSettingsSchema.extends({}, { unknowns: 'ignore' }),
+        create: cspSettingsSchema,
+      },
+    },
   },
+  schemas: {},
   mappings: cspSettingsSavedObjectMapping,
 };

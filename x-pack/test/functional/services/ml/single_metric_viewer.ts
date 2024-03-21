@@ -73,6 +73,15 @@ export function MachineLearningSingleMetricViewerProvider(
       await testSubjects.existOrFail('mlSingleMetricViewerChart');
     },
 
+    async assertAnomalyMarkerExist() {
+      await testSubjects.existOrFail('mlAnomalyMarker');
+    },
+
+    async openAnomalyMarkerActionsPopover() {
+      await testSubjects.click('mlAnomalyMarker');
+      await testSubjects.existOrFail('mlAnomaliesListRowActionsMenu');
+    },
+
     async assertAnnotationsExists(state: string) {
       await testSubjects.existOrFail(`mlAnomalyExplorerAnnotations ${state}`, {
         timeout: 30 * 1000,

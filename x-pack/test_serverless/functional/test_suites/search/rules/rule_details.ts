@@ -298,7 +298,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
         await retry.try(async () => {
-          const resultToast = await toasts.getToastElement(1);
+          const resultToast = await toasts.getElementByIndex(1);
           const toastText = await resultToast.getVisibleText();
           expect(toastText).toEqual(`Updated '${updatedRuleName}'`);
         });
@@ -407,7 +407,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await deleteConnector(connector1.name);
 
         await retry.try(async () => {
-          const resultToast = await toasts.getToastElement(1);
+          const resultToast = await toasts.getElementByIndex(1);
           const toastText = await resultToast.getVisibleText();
           expect(toastText).toEqual('Deleted 1 connector');
         });
@@ -484,7 +484,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await deleteConnector(connector.name);
 
         await retry.try(async () => {
-          const resultToast = await toasts.getToastElement(1);
+          const resultToast = await toasts.getElementByIndex(1);
           const toastText = await resultToast.getVisibleText();
           expect(toastText).toEqual('Deleted 1 connector');
         });
@@ -618,7 +618,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
         await retry.try(async () => {
-          const resultToast = await toasts.getToastElement(1);
+          const resultToast = await toasts.getElementByIndex(1);
           const toastText = await resultToast.getVisibleText();
           expect(toastText).toEqual(`Updated '${updatedRuleName}'`);
         });

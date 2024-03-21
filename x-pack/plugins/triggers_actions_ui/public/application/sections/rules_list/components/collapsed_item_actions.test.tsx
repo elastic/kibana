@@ -224,11 +224,20 @@ describe('CollapsedItemActions', () => {
         wrapper.update();
       });
       wrapper.find('button[data-test-subj="disableButton"]').simulate('click');
+
+      const modal = wrapper.find('[data-test-subj="untrackAlertsModal"]');
+      expect(modal.exists()).toBeTruthy();
+
+      modal.find('[data-test-subj="confirmModalConfirmButton"]').last().simulate('click');
+
       await act(async () => {
         await tick(10);
         wrapper.update();
       });
-      expect(bulkDisableRules).toHaveBeenCalled();
+      expect(bulkDisableRules).toHaveBeenCalledWith({
+        ids: ['1'],
+        untrack: false,
+      });
     });
 
     test('handles case when rule is unmuted and disabled and enable is clicked', async () => {

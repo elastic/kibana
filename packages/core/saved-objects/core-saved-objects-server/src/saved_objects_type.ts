@@ -70,6 +70,7 @@ export interface SavedObjectsType<Attributes = any> {
   mappings: SavedObjectsTypeMappingDefinition;
   /**
    * An optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
+   * @deprecated Use {@link SavedObjectsType.modelVersions | modelVersions} instead.
    */
   migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
   /**
@@ -78,6 +79,7 @@ export interface SavedObjectsType<Attributes = any> {
    * When provided, calls to {@link SavedObjectsClient.create | create} will be validated against this schema.
    *
    * See {@link SavedObjectsValidationMap} for more details.
+   * @deprecated Use {@link SavedObjectsType.modelVersions | modelVersions} instead.
    */
   schemas?: SavedObjectsValidationMap | (() => SavedObjectsValidationMap);
   /**
@@ -177,7 +179,7 @@ export interface SavedObjectsType<Attributes = any> {
   modelVersions?: SavedObjectsModelVersionMap | SavedObjectsModelVersionMapProvider;
 
   /**
-   * Allows to opt-in to the new model version API.
+   * Allows to opt-in to the model version API.
    *
    * Must be a valid semver version (with the patch version being necessarily 0)
    *

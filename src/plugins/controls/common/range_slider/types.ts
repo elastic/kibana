@@ -14,6 +14,7 @@ export type RangeValue = [string, string];
 
 export interface RangeSliderEmbeddableInput extends DataControlInput {
   value?: RangeValue;
+  step?: number;
 }
 
 export type RangeSliderInputWithType = Partial<RangeSliderEmbeddableInput> & { type: string };

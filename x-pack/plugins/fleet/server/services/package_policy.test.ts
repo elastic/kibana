@@ -19,6 +19,8 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { PackagePolicyMocks } from '../mocks/package_policy.mocks';
+
 import type {
   PackageInfo,
   PackagePolicySOAttributes,
@@ -52,6 +54,8 @@ import {
 } from '../errors';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+
+import { mapPackagePolicySavedObjectToPackagePolicy } from './package_policies';
 
 import {
   preconfigurePackageInputs,
@@ -4916,6 +4920,149 @@ describe('Package policy service', () => {
       expect(
         packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
       ).rejects.toEqual(new FleetError('Package notinstalled is not installed'));
+    });
+  });
+
+  describe('fetchAllItemIds()', () => {
+    let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
+
+    beforeEach(() => {
+      soClientMock = savedObjectsClientMock.create();
+
+      soClientMock.find
+        .mockResolvedValueOnce(PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse())
+        .mockResolvedValueOnce(PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse())
+        .mockResolvedValueOnce(
+          Object.assign(PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse(), {
+            saved_objects: [],
+          })
+        );
+    });
+
+    it('should return an iterator', async () => {
+      expect(packagePolicyService.fetchAllItemIds(soClientMock)).toEqual({
+        [Symbol.asyncIterator]: expect.any(Function),
+      });
+    });
+
+    it('should provide item ids on every iteration', async () => {
+      for await (const ids of packagePolicyService.fetchAllItemIds(soClientMock)) {
+        expect(ids).toEqual(['so-123', 'so-123']);
+      }
+
+      expect(soClientMock.find).toHaveBeenCalledTimes(3);
+    });
+
+    it('should use default options', async () => {
+      for await (const ids of packagePolicyService.fetchAllItemIds(soClientMock)) {
+        expect(ids);
+      }
+
+      expect(soClientMock.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          perPage: 1000,
+          sortField: 'created_at',
+          sortOrder: 'asc',
+          fields: [],
+          filter: undefined,
+        })
+      );
+    });
+
+    it('should use custom options when defined', async () => {
+      for await (const ids of packagePolicyService.fetchAllItemIds(soClientMock, {
+        perPage: 13,
+        kuery: 'one=two',
+      })) {
+        expect(ids);
+      }
+
+      expect(soClientMock.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          perPage: 13,
+          sortField: 'created_at',
+          sortOrder: 'asc',
+          fields: [],
+          filter: 'one=two',
+        })
+      );
+    });
+  });
+
+  describe('fetchAllItems()', () => {
+    let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
+
+    beforeEach(() => {
+      soClientMock = savedObjectsClientMock.create();
+
+      soClientMock.find
+        .mockResolvedValueOnce(PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse())
+        .mockResolvedValueOnce(PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse())
+        .mockResolvedValueOnce(
+          Object.assign(PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse(), {
+            saved_objects: [],
+          })
+        );
+    });
+
+    it('should return an iterator', async () => {
+      expect(packagePolicyService.fetchAllItems(soClientMock)).toEqual({
+        [Symbol.asyncIterator]: expect.any(Function),
+      });
+    });
+
+    it('should provide items on every iteration', async () => {
+      for await (const items of packagePolicyService.fetchAllItems(soClientMock)) {
+        expect(items).toEqual(
+          PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse().saved_objects.map(
+            (soItem) => {
+              return mapPackagePolicySavedObjectToPackagePolicy(soItem);
+            }
+          )
+        );
+      }
+
+      expect(soClientMock.find).toHaveBeenCalledTimes(3);
+    });
+
+    it('should use default options', async () => {
+      for await (const ids of packagePolicyService.fetchAllItemIds(soClientMock)) {
+        expect(ids);
+      }
+
+      expect(soClientMock.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          perPage: 1000,
+          sortField: 'created_at',
+          sortOrder: 'asc',
+          fields: [],
+          filter: undefined,
+        })
+      );
+    });
+
+    it('should use custom options when defined', async () => {
+      for await (const ids of packagePolicyService.fetchAllItems(soClientMock, {
+        kuery: 'one=two',
+        perPage: 12,
+        sortOrder: 'desc',
+        sortField: 'updated_by',
+      })) {
+        expect(ids);
+      }
+
+      expect(soClientMock.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          perPage: 12,
+          sortField: 'updated_by',
+          sortOrder: 'desc',
+          filter: 'one=two',
+        })
+      );
     });
   });
 });

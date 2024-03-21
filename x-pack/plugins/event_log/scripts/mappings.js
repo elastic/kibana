@@ -134,6 +134,9 @@ exports.EcsCustomPropertyMappings = {
                           },
                         },
                       },
+                      number_of_delayed_alerts: {
+                        type: 'long',
+                      },
                       number_of_searches: {
                         type: 'long',
                       },
@@ -168,6 +171,9 @@ exports.EcsCustomPropertyMappings = {
                         type: 'long',
                       },
                       prepare_rule_duration_ms: {
+                        type: 'long',
+                      },
+                      prepare_to_run_duration_ms: {
                         type: 'long',
                       },
                       total_run_duration_ms: {

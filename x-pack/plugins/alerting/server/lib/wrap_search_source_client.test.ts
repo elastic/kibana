@@ -64,6 +64,31 @@ describe('wrapSearchSourceClient', () => {
     });
   });
 
+  test('searches with provided request timeout', async () => {
+    const abortController = new AbortController();
+    const { searchSourceMock, searchSourceClientMock } = createSearchSourceClientMock();
+
+    const { searchSourceClient } = wrapSearchSourceClient({
+      logger,
+      rule,
+      searchSourceClient: searchSourceClientMock,
+      abortController,
+      requestTimeout: 5000,
+    });
+    const wrappedSearchSource = await searchSourceClient.createEmpty();
+    await wrappedSearchSource.fetch();
+
+    expect(searchSourceMock.fetch$).toHaveBeenCalledWith({
+      abortSignal: abortController.signal,
+      transport: {
+        requestTimeout: 5000,
+      },
+    });
+    expect(logger.debug).toHaveBeenCalledWith(
+      `executing query for rule .test-rule-type:abcdefg in space my-space - with options {} and 5000ms requestTimeout`
+    );
+  });
+
   test('uses search options when specified', async () => {
     const abortController = new AbortController();
     const { searchSourceMock, searchSourceClientMock } = createSearchSourceClientMock();
@@ -73,13 +98,15 @@ describe('wrapSearchSourceClient', () => {
       rule,
       searchSourceClient: searchSourceClientMock,
       abortController,
+      requestTimeout: 5000,
     });
     const wrappedSearchSource = await searchSourceClient.create();
-    await wrappedSearchSource.fetch({ isStored: true });
+    await wrappedSearchSource.fetch({ isStored: true, transport: { requestTimeout: 10000 } });
 
     expect(searchSourceMock.fetch$).toHaveBeenCalledWith({
       isStored: true,
       abortSignal: abortController.signal,
+      transport: { requestTimeout: 5000 },
     });
   });
 

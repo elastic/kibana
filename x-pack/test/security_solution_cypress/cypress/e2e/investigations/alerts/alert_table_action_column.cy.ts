@@ -31,7 +31,7 @@ describe.skip('Alerts Table Action column', { tags: ['@ess', '@serverless'] }, (
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'process_ancestry');
+    cy.task('esArchiverUnload', { archiveName: 'process_ancestry' });
   });
 
   it('should have session viewer button visible & open session viewer on click', () => {

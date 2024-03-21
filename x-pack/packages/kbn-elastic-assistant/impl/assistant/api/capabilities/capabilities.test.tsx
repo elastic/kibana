@@ -13,7 +13,7 @@ import { API_ERROR } from '../../translations';
 jest.mock('@kbn/core-http-browser');
 
 const mockHttp = {
-  fetch: jest.fn(),
+  get: jest.fn(),
 } as unknown as HttpSetup;
 
 describe('Capabilities API tests', () => {
@@ -25,15 +25,14 @@ describe('Capabilities API tests', () => {
     it('calls the internal assistant API for fetching assistant capabilities', async () => {
       await getCapabilities({ http: mockHttp });
 
-      expect(mockHttp.fetch).toHaveBeenCalledWith('/internal/elastic_assistant/capabilities', {
-        method: 'GET',
+      expect(mockHttp.get).toHaveBeenCalledWith('/internal/elastic_assistant/capabilities', {
         signal: undefined,
         version: '1',
       });
     });
 
     it('returns API_ERROR when the response status is error', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: API_ERROR });
+      (mockHttp.get as jest.Mock).mockResolvedValue({ status: API_ERROR });
 
       const result = await getCapabilities({ http: mockHttp });
 

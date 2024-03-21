@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './log_explorer';
-export * from './observability_log_explorer';
+export * from './logs_explorer';
+export * from './observability_logs_explorer';
 export * from './observability_onboarding';
+export * from './dataset_quality';

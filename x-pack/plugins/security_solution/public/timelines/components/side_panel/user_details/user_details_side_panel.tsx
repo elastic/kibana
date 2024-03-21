@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { AssetCriticalitySelector } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import {
   ExpandableUserDetailsTitle,
   ExpandableUserDetailsPageLink,
@@ -68,7 +68,7 @@ export const UserDetailsSidePanel = ({
         <ExpandableUserDetailsPageLink userName={userName} />
       </StyledEuiFlexButtonWrapper>
       <EuiSpacer size="m" />
-      <AssetCriticalitySelector entity={entity} />
+      <AssetCriticalityAccordion entity={entity} />
       <StyledPanelContent>
         <ExpandableUserDetails
           contextID={contextID}

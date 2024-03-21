@@ -67,16 +67,34 @@ const platinumBaseColumns = [
     initialWidth: 450,
   },
   { columnHeaderType: 'not-filtered', id: 'host.name' },
-  { columnHeaderType: 'not-filtered', id: 'host.risk.calculated_level' },
   { columnHeaderType: 'not-filtered', id: 'user.name' },
-  { columnHeaderType: 'not-filtered', id: 'user.risk.calculated_level' },
-  { columnHeaderType: 'not-filtered', id: 'host.asset.criticality' },
-  { columnHeaderType: 'not-filtered', id: 'user.asset.criticality' },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'host.risk.calculated_level',
+    displayAsText: 'Host Risk Level',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'user.risk.calculated_level',
+    displayAsText: 'User Risk Level',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'host.asset.criticality',
+    displayAsText: 'Host Criticality',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'user.asset.criticality',
+    displayAsText: 'User Criticality',
+  },
   { columnHeaderType: 'not-filtered', id: 'process.name' },
   { columnHeaderType: 'not-filtered', id: 'file.name' },
   { columnHeaderType: 'not-filtered', id: 'source.ip' },
   { columnHeaderType: 'not-filtered', id: 'destination.ip' },
 ];
+
+const dataViewId = 'security-solution-default';
 
 describe('alerts default_config', () => {
   describe('buildAlertsRuleIdFilter', () => {
@@ -86,6 +104,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           negate: false,
+          index: dataViewId,
           disabled: false,
           type: 'phrase',
           key: 'kibana.alert.rule.rule_id',
@@ -110,6 +129,7 @@ describe('alerts default_config', () => {
           meta: {
             alias: null,
             disabled: false,
+            index: dataViewId,
             negate: false,
             key: 'kibana.alert.rule.type',
             type: 'term',
@@ -233,6 +253,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           disabled: false,
+          index: dataViewId,
           negate: false,
         },
         query: {

@@ -6,11 +6,11 @@
  */
 import createContainer from 'constate';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { LogExplorerDiscoverServices } from '../controller';
+import { LogsExplorerDiscoverServices } from '../controller';
 
 export interface UseVirtualColumnServices {
   services: {
-    data: LogExplorerDiscoverServices['data'];
+    data: LogsExplorerDiscoverServices['data'];
     dataView: DataView;
   };
 }

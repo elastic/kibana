@@ -42,7 +42,7 @@ describe('#toExpression', () => {
 
   beforeEach(() => {
     frame = createMockFramePublicAPI();
-    mockDatasource = createMockDatasource('testDatasource');
+    mockDatasource = createMockDatasource();
 
     mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
       { columnId: 'd', fields: [] },

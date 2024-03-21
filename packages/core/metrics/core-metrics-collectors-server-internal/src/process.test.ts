@@ -30,10 +30,10 @@ describe('ProcessMetricsCollector', () => {
     });
 
     it('collects event loop delay', () => {
-      mockEventLoopDelayMonitor.collect.mockReturnValueOnce({ mean: 13 });
+      mockEventLoopDelayMonitor.collect.mockReturnValueOnce({ mean: 13, max: 18 });
       const metrics = collector.collect();
       expect(metrics).toHaveLength(1);
-      expect(metrics[0].event_loop_delay).toBe(13);
+      expect(metrics[0].event_loop_delay).toBe(18);
       expect(mockEventLoopDelayMonitor.collect).toBeCalledTimes(1);
     });
 

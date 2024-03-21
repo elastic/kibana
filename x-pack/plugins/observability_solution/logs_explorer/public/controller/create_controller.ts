@@ -11,9 +11,9 @@ import equal from 'fast-deep-equal';
 import { distinctUntilChanged, EMPTY, from, map, shareReplay } from 'rxjs';
 import { interpret } from 'xstate';
 import { DatasetsService } from '../services/datasets';
-import { createLogExplorerControllerStateMachine } from '../state_machines/log_explorer_controller';
-import { LogExplorerStartDeps } from '../types';
-import { LogExplorerCustomizations } from '../customizations/types';
+import { createLogsExplorerControllerStateMachine } from '../state_machines/logs_explorer_controller';
+import { LogsExplorerStartDeps } from '../types';
+import { LogsExplorerCustomizations } from '../customizations/types';
 import { createDataServiceProxy } from './custom_data_service';
 import { createUiSettingsServiceProxy } from './custom_ui_settings_service';
 import {
@@ -22,27 +22,29 @@ import {
 } from './custom_url_state_storage';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
 import {
-  LogExplorerController,
-  LogExplorerDiscoverServices,
-  LogExplorerPublicStateUpdate,
+  LogsExplorerController,
+  LogsExplorerDiscoverServices,
+  LogsExplorerPublicStateUpdate,
 } from './types';
 
 interface Dependencies {
   core: CoreStart;
-  plugins: LogExplorerStartDeps;
+  plugins: LogsExplorerStartDeps;
 }
 
-type InitialState = LogExplorerPublicStateUpdate;
+type InitialState = LogsExplorerPublicStateUpdate;
 
-export const createLogExplorerControllerFactory =
-  ({ core, plugins: { data } }: Dependencies) =>
+export const createLogsExplorerControllerFactory =
+  ({ core, plugins }: Dependencies) =>
   async ({
     customizations = {},
     initialState,
   }: {
-    customizations?: LogExplorerCustomizations;
+    customizations?: LogsExplorerCustomizations;
     initialState?: InitialState;
-  }): Promise<LogExplorerController> => {
+  }): Promise<LogsExplorerController> => {
+    const { data, dataViews } = plugins;
+
     const datasetsClient = new DatasetsService().start({
       http: core.http,
     }).client;
@@ -55,9 +57,9 @@ export const createLogExplorerControllerFactory =
       http: core.http,
       uiSettings: customUiSettings,
     });
-    const discoverServices: LogExplorerDiscoverServices = {
+    const discoverServices: LogsExplorerDiscoverServices = {
       data: customData,
-      history: () => customMemoryHistory,
+      history: customMemoryHistory,
       uiSettings: customUiSettings,
       filterManager: customData.query.filterManager,
       timefilter: customData.query.timefilter.timefilter,
@@ -66,18 +68,21 @@ export const createLogExplorerControllerFactory =
 
     const initialContext = getContextFromPublicState(initialState ?? {});
 
-    const machine = createLogExplorerControllerStateMachine({
+    const machine = createLogsExplorerControllerStateMachine({
       datasetsClient,
+      dataViews,
+      events: customizations.events,
       initialContext,
       query: discoverServices.data.query,
       toasts: core.notifications.toasts,
+      uiSettings: customUiSettings,
     });
 
     const service = interpret(machine, {
       devTools: getDevToolsOptions(),
     });
 
-    const logExplorerState$ = from(service).pipe(
+    const logsExplorerState$ = from(service).pipe(
       map(({ context }) => getPublicStateFromContext(context)),
       distinctUntilChanged(equal),
       shareReplay(1)
@@ -90,10 +95,10 @@ export const createLogExplorerControllerFactory =
       discoverServices,
       event$: EMPTY,
       service,
-      state$: logExplorerState$,
+      state$: logsExplorerState$,
       stateMachine: machine,
     };
   };
 
-export type CreateLogExplorerControllerFactory = typeof createLogExplorerControllerFactory;
-export type CreateLogExplorerController = ReturnType<typeof createLogExplorerControllerFactory>;
+export type CreateLogsExplorerControllerFactory = typeof createLogsExplorerControllerFactory;
+export type CreateLogsExplorerController = ReturnType<typeof createLogsExplorerControllerFactory>;

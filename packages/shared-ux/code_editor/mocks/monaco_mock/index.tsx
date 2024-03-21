@@ -106,7 +106,9 @@ export const MockedMonacoEditor = ({
   className?: string;
   ['data-test-subj']?: string;
 }) => {
-  editorWillMount?.(monaco);
+  useComponentWillMount(() => {
+    editorWillMount?.(monaco);
+  });
 
   useEffect(() => {
     editorDidMount?.(
@@ -132,4 +134,12 @@ export const MockedMonacoEditor = ({
       />
     </div>
   );
+};
+
+const useComponentWillMount = (cb: Function) => {
+  const willMount = React.useRef(true);
+
+  if (willMount.current) cb();
+
+  willMount.current = false;
 };

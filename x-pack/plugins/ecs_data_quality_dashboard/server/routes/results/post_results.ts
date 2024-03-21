@@ -13,7 +13,7 @@ import { buildRouteValidation } from '../../schemas/common';
 import { PostResultBody } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
-import { createDocumentFromResult } from './parser';
+import { checkIndicesPrivileges } from './privileges';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 
 export const postResultsRoute = (
@@ -32,10 +32,6 @@ export const postResultsRoute = (
         validate: { request: { body: buildRouteValidation(PostResultBody) } },
       },
       async (context, request, response) => {
-        // TODO: https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
-        return response.ok({ body: { result: 'noop' } });
-
-        // eslint-disable-next-line no-unreachable
         const services = await context.resolve(['core', 'dataQualityDashboard']);
         const resp = buildResponse(response);
 
@@ -51,24 +47,35 @@ export const postResultsRoute = (
         }
 
         try {
-          // Confirm user has authorization for the pattern payload
-          const { pattern } = request.body.rollup;
-          const userEsClient = services.core.elasticsearch.client.asCurrentUser;
-          const privileges = await userEsClient.security.hasPrivileges({
-            index: [{ names: [pattern], privileges: ['all', 'read', 'view_index_metadata'] }],
+          const { client } = services.core.elasticsearch;
+          const { indexName } = request.body;
+
+          // Confirm index exists and get the data stream name if it's a data stream
+          const indicesResponse = await client.asInternalUser.indices.get({
+            index: indexName,
+            features: 'aliases',
           });
-          if (!privileges.has_all_requested) {
+          if (!indicesResponse[indexName]) {
+            return response.ok({ body: { result: 'noop' } });
+          }
+          const indexOrDataStream = indicesResponse[indexName].data_stream ?? indexName;
+
+          // Confirm user has authorization for the index name or data stream
+          const hasIndexPrivileges = await checkIndicesPrivileges({
+            client,
+            indices: [indexOrDataStream],
+          });
+          if (!hasIndexPrivileges[indexOrDataStream]) {
             return response.ok({ body: { result: 'noop' } });
           }
 
           // Index the result
-          const document = createDocumentFromResult(request.body);
-          const esClient = services.core.elasticsearch.client.asInternalUser;
-          const outcome = await esClient.index({ index, body: document });
+          const body = { '@timestamp': Date.now(), ...request.body };
+          const outcome = await client.asInternalUser.index({ index, body });
 
           return response.ok({ body: { result: outcome.result } });
         } catch (err) {
-          logger.error(JSON.stringify(err));
+          logger.error(err.message);
 
           return resp.error({
             body: err.message ?? API_DEFAULT_ERROR_MESSAGE,

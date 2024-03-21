@@ -29,6 +29,7 @@ import {
   verifyDockerInstalled,
   getESp12Volume,
   ServerlessOptions,
+  ServerlessProjectType,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { CA_CERT_PATH, ES_P12_PATH } from '@kbn/dev-utils';
@@ -66,6 +67,7 @@ const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
 
 const KIBANA_ROOT = process.cwd();
+const projectType: ServerlessProjectType = 'es';
 const baseEsPath = `${KIBANA_ROOT}/.es`;
 const serverlessDir = 'stateless';
 const serverlessObjectStorePath = `${baseEsPath}/${serverlessDir}`;
@@ -504,7 +506,10 @@ describe('setupServerlessVolumes()', () => {
       [baseEsPath]: {},
     });
 
-    const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath });
+    const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
+      basePath: baseEsPath,
+    });
 
     volumeCmdTest(volumeCmd);
     await expect(Fsp.access(serverlessObjectStorePath)).resolves.not.toThrow();
@@ -513,7 +518,7 @@ describe('setupServerlessVolumes()', () => {
   test('should use an existing object store', async () => {
     mockFs(existingObjectStore);
 
-    const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath });
+    const volumeCmd = await setupServerlessVolumes(log, { projectType, basePath: baseEsPath });
 
     volumeCmdTest(volumeCmd);
     await expect(
@@ -524,7 +529,11 @@ describe('setupServerlessVolumes()', () => {
   test('should remove an existing object store when clean is passed', async () => {
     mockFs(existingObjectStore);
 
-    const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, clean: true });
+    const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
+      basePath: baseEsPath,
+      clean: true,
+    });
 
     volumeCmdTest(volumeCmd);
     await expect(
@@ -537,6 +546,7 @@ describe('setupServerlessVolumes()', () => {
     createMockIdpMetadataMock.mockResolvedValue('<xml/>');
 
     const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
       basePath: baseEsPath,
       ssl: true,
       kibanaUrl: 'https://localhost:5603/',
@@ -561,6 +571,7 @@ describe('setupServerlessVolumes()', () => {
   test('should use resource overrides', async () => {
     mockFs(existingObjectStore);
     const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
       basePath: baseEsPath,
       resources: ['./relative/path/users', '/absolute/path/users_roles'],
     });
@@ -578,6 +589,7 @@ describe('setupServerlessVolumes()', () => {
 
     await expect(async () => {
       await setupServerlessVolumes(log, {
+        projectType,
         basePath: baseEsPath,
         resources: ['/absolute/path/invalid'],
       });
@@ -626,7 +638,7 @@ describe('runServerlessCluster()', () => {
     });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
-    await runServerlessCluster(log, { basePath: baseEsPath });
+    await runServerlessCluster(log, { projectType, basePath: baseEsPath });
 
     // setupDocker execa calls then run three nodes and attach logger
     expect(execa.mock.calls).toHaveLength(8);
@@ -639,7 +651,7 @@ describe('runServerlessCluster()', () => {
     });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
-    await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
+    await runServerlessCluster(log, { projectType, basePath: baseEsPath, waitForReady: true });
     expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
     expect(waitUntilClusterReadyMock.mock.calls[0][0].expectedStatus).toEqual('green');
     expect(waitUntilClusterReadyMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
@@ -655,6 +667,7 @@ describe('runServerlessCluster()', () => {
     createMockIdpMetadataMock.mockResolvedValue('<xml/>');
 
     await runServerlessCluster(log, {
+      projectType,
       basePath: baseEsPath,
       waitForReady: true,
       ssl: true,
@@ -672,7 +685,7 @@ describe('runServerlessCluster()', () => {
     });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
-    await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
+    await runServerlessCluster(log, { projectType, basePath: baseEsPath, waitForReady: true });
     expect(waitForSecurityIndexMock).toHaveBeenCalledTimes(1);
     expect(waitForSecurityIndexMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
   });
@@ -685,6 +698,7 @@ describe('runServerlessCluster()', () => {
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await runServerlessCluster(log, {
+      projectType,
       basePath: baseEsPath,
       waitForReady: true,
       esArgs: ['xpack.security.enabled=false'],
@@ -708,7 +722,7 @@ describe('stopServerlessCluster()', () => {
 });
 
 describe('teardownServerlessClusterSync()', () => {
-  const defaultOptions = { basePath: 'foo/bar' };
+  const defaultOptions = { projectType, basePath: 'foo/bar' };
 
   test('should kill running serverless nodes', () => {
     const nodes = ['es01', 'es02', 'es03'];

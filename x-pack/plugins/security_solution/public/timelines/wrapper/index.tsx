@@ -6,7 +6,7 @@
  */
 
 import { EuiFocusTrap, EuiWindowEvent, keys } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
 import { TimelineModal } from '../components/modal';
@@ -38,7 +38,7 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
     const dispatch = useDispatch();
-
+    const openToggleRef = useRef(null);
     const handleClose = useCallback(() => {
       dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
     }, [dispatch, timelineId]);
@@ -58,9 +58,9 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
     return (
       <>
         <EuiFocusTrap disabled={!show}>
-          <TimelineModal timelineId={timelineId} visible={show} />
+          <TimelineModal timelineId={timelineId} visible={show} openToggleRef={openToggleRef} />
         </EuiFocusTrap>
-        <TimelineBottomBar show={show} timelineId={timelineId} />
+        <TimelineBottomBar show={show} timelineId={timelineId} openToggleRef={openToggleRef} />
         <EuiWindowEvent event="keydown" handler={onKeyDown} />
       </>
     );

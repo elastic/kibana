@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import {
   createRandomSamplerWrapper,
@@ -76,7 +76,10 @@ export const getCategoryRequest = (
     timeFieldName,
     undefined,
     query,
-    wrap
+    wrap,
+    undefined,
+    undefined,
+    false
   );
 
   // In this case we're only interested in the aggregation which

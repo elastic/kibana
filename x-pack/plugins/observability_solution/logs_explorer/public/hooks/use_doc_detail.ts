@@ -7,12 +7,12 @@
 import { formatFieldValue } from '@kbn/discover-utils';
 import * as constants from '../../common/constants';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
-import { LogExplorerFlyoutContentProps } from '../customizations/types';
+import { LogsExplorerFlyoutContentProps } from '../customizations/types';
 import { FlyoutDoc, LogDocument } from '../../common/document';
 
 export function useDocDetail(
   doc: LogDocument,
-  { dataView }: Pick<LogExplorerFlyoutContentProps, 'dataView'>
+  { dataView }: Pick<LogsExplorerFlyoutContentProps, 'dataView'>
 ): FlyoutDoc {
   const { services } = useKibanaContextForPlugin();
 

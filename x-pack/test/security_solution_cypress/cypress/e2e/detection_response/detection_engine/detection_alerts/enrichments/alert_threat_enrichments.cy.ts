@@ -43,8 +43,8 @@ describe(
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'threat_indicator');
-      cy.task('esArchiverUnload', 'suspicious_source_event');
+      cy.task('esArchiverUnload', { archiveName: 'threat_indicator' });
+      cy.task('esArchiverUnload', { archiveName: 'suspicious_source_event' });
     });
 
     beforeEach(() => {
@@ -165,7 +165,7 @@ describe(
       });
 
       after(() => {
-        cy.task('esArchiverUnload', 'threat_indicator2');
+        cy.task('esArchiverUnload', { archiveName: 'threat_indicator2' });
       });
 
       it('Displays matched fields from both indicator match rules and investigation time enrichments on Threat Intel tab', () => {

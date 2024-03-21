@@ -13,7 +13,7 @@ export const paletteIds = [
   'custom',
   'status',
   'temperature',
-  'complimentary',
+  'complementary',
   'negative',
   'positive',
   'cool',

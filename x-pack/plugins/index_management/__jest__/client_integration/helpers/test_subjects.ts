@@ -113,4 +113,5 @@ export type TestSubjects =
   | 'createIndexMessage'
   | 'indicesSearch'
   | 'noIndicesMessage'
-  | 'clearIndicesSearch';
+  | 'clearIndicesSearch'
+  | 'componentTemplatesLink';

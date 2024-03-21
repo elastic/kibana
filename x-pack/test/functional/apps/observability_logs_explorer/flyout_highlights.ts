@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should load the service container with all fields', async () => {
-        await dataGrid.clickRowToggle();
+        await dataGrid.clickRowToggle({ columnIndex: 4 });
         await testSubjects.existOrFail('logsExplorerFlyoutHighlightSectionServiceInfra');
         await testSubjects.existOrFail('logsExplorerFlyoutService');
         await testSubjects.existOrFail('logsExplorerFlyoutTrace');
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should load the service container even when 1 field is missing', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 1 });
+        await dataGrid.clickRowToggle({ rowIndex: 1, columnIndex: 4 });
         await testSubjects.existOrFail('logsExplorerFlyoutHighlightSectionServiceInfra');
         await testSubjects.missingOrFail('logsExplorerFlyoutService');
         await testSubjects.existOrFail('logsExplorerFlyoutTrace');
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not load the service container if all fields are missing', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 2 });
+        await dataGrid.clickRowToggle({ rowIndex: 2, columnIndex: 4 });
         await testSubjects.missingOrFail('logsExplorerFlyoutHighlightSectionServiceInfra');
         await dataGrid.closeFlyout();
       });
@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should load the cloud container with all fields', async () => {
-        await dataGrid.clickRowToggle();
+        await dataGrid.clickRowToggle({ columnIndex: 4 });
         await testSubjects.existOrFail('logsExplorerFlyoutHighlightSectionCloud');
         await testSubjects.existOrFail('logsExplorerFlyoutCloudProvider');
         await testSubjects.existOrFail('logsExplorerFlyoutCloudRegion');
@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should load the cloud container even when some fields are missing', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 1 });
+        await dataGrid.clickRowToggle({ rowIndex: 1, columnIndex: 4 });
         await testSubjects.existOrFail('logsExplorerFlyoutHighlightSectionCloud');
 
         await testSubjects.missingOrFail('logsExplorerFlyoutCloudProvider');
@@ -179,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not load the cloud container if all fields are missing', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 2 });
+        await dataGrid.clickRowToggle({ rowIndex: 2, columnIndex: 4 });
         await testSubjects.missingOrFail('logsExplorerFlyoutHighlightSectionCloud');
         await testSubjects.missingOrFail('logsExplorerFlyoutCloudProvider');
         await testSubjects.missingOrFail('logsExplorerFlyoutCloudRegion');
@@ -225,7 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should load the other container with all fields', async () => {
-        await dataGrid.clickRowToggle();
+        await dataGrid.clickRowToggle({ columnIndex: 4 });
         await testSubjects.existOrFail('logsExplorerFlyoutHighlightSectionOther');
         await testSubjects.existOrFail('logsExplorerFlyoutLogPathFile');
         await testSubjects.existOrFail('logsExplorerFlyoutNamespace');
@@ -235,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should load the other container even when some fields are missing', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 1 });
+        await dataGrid.clickRowToggle({ rowIndex: 1, columnIndex: 4 });
         await testSubjects.existOrFail('logsExplorerFlyoutHighlightSectionOther');
 
         await testSubjects.missingOrFail('logsExplorerFlyoutLogPathFile');

@@ -10,6 +10,7 @@ import { apiCanLinkToLibrary, CanLinkToLibrary } from '@kbn/presentation-library
 import {
   apiCanAccessViewMode,
   EmbeddableApiContext,
+  getPanelTitle,
   PublishesPanelTitle,
   CanAccessViewMode,
   getInheritedViewMode,
@@ -57,7 +58,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const panelTitle = embeddable.panelTitle?.value ?? embeddable.defaultPanelTitle?.value;
+    const panelTitle = getPanelTitle(embeddable);
     try {
       await embeddable.linkToLibrary();
       this.toastsService.addSuccess({

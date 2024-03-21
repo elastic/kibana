@@ -184,6 +184,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
+  abortController?: AbortController;
 }
 
 export type LensByValueInput = {
@@ -884,7 +885,7 @@ export class Embeddable
           navigateToLensEditor={
             !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
           }
-          displayFlyoutHeader={true}
+          displayFlyoutHeader
           canEditTextBasedQuery={this.isTextBasedLanguage()}
           isNewPanel={isNewPanel}
           deletePanel={deletePanel}
@@ -912,6 +913,12 @@ export class Embeddable
       type: this.type,
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
+
+    if (this.isTextBasedLanguage()) {
+      this.updateInput({
+        disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
+      });
+    }
 
     try {
       const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
@@ -1146,6 +1153,7 @@ export class Embeddable
               className={input.className}
               style={input.style}
               executionContext={this.getExecutionContext()}
+              abortController={this.input.abortController}
               addUserMessages={(messages) => this.addUserMessages(messages)}
               onRuntimeError={(error) => {
                 this.updateOutput({ error });
@@ -1583,8 +1591,19 @@ export class Embeddable
     return this.savedVis?.state.query;
   }
 
-  public getSavedVis(): Readonly<Document | undefined> {
-    return this.savedVis;
+  public getSavedVis(): Readonly<LensSavedObjectAttributes | undefined> {
+    if (!this.savedVis) {
+      return;
+    }
+
+    // Why are 'type' and 'savedObjectId' keys being removed?
+    // Prior to removing them,
+    // this method returned 'Readonly<Document | undefined>' while consumers typed the results as 'LensSavedObjectAttributes'.
+    // Removing 'type' and 'savedObjectId' keys to align method results with consumer typing.
+    const savedVis = { ...this.savedVis };
+    delete savedVis.type;
+    delete savedVis.savedObjectId;
+    return savedVis;
   }
 
   destroy() {

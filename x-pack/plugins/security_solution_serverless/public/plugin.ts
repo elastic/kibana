@@ -55,6 +55,9 @@ export class SecuritySolutionServerlessPlugin
     ).features;
 
     setupNavigation(core, setupDeps);
+
+    setupDeps.discover.showInlineTopNav();
+
     return {};
   }
 

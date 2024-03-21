@@ -57,7 +57,12 @@ export const loadDashboardState = async ({
    * This is a newly created dashboard, so there is no saved object state to load.
    */
   if (!savedObjectId) {
-    return { dashboardInput: newDashboardState, dashboardFound: true, newDashboardCreated: true };
+    return {
+      dashboardInput: newDashboardState,
+      dashboardFound: true,
+      newDashboardCreated: true,
+      references: [],
+    };
   }
 
   /**
@@ -97,6 +102,7 @@ export const loadDashboardState = async ({
       dashboardInput: newDashboardState,
       dashboardFound: false,
       dashboardId: savedObjectId,
+      references: [],
     };
   }
 
@@ -192,6 +198,7 @@ export const loadDashboardState = async ({
 
   return {
     managed,
+    references,
     resolveMeta,
     dashboardInput,
     anyMigrationRun,

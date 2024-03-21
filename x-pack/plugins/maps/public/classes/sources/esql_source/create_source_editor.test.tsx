@@ -7,10 +7,12 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { CreateSourceEditor } from './create_source_editor';
 
 jest.mock('../../../kibana_services', () => {
-  const mockDefaultDataView = {
+  const DEFAULT_DATA_VIEW_INDEX_PATTERN = 'logs';
+  const defaultDataView = {
     fields: [
       {
         name: 'location',
@@ -23,10 +25,11 @@ jest.mock('../../../kibana_services', () => {
     ],
     timeFieldName: '@timestamp',
     getIndexPattern: () => {
-      return 'logs';
+      return DEFAULT_DATA_VIEW_INDEX_PATTERN;
     },
   };
-  const mockDataView = {
+
+  const otherDataView = {
     fields: [
       {
         name: 'geometry',
@@ -37,14 +40,21 @@ jest.mock('../../../kibana_services', () => {
       return 'world_countries';
     },
   };
+
   return {
     getIndexPatternService() {
       return {
+        create: async (spec: DataViewSpec) => {
+          return {
+            ...(spec.title === DEFAULT_DATA_VIEW_INDEX_PATTERN ? defaultDataView : otherDataView),
+            id: spec.id,
+          };
+        },
         get: async () => {
-          return mockDataView;
+          return otherDataView;
         },
         getDefaultDataView: async () => {
-          return mockDefaultDataView;
+          return defaultDataView;
         },
       };
     },
@@ -63,6 +73,7 @@ describe('CreateSourceEditor', () => {
             type: 'geo_point',
           },
         ],
+        dataViewId: '30de729e173668cbf8954aa56c4aca5b82a1005586a608b692dae478219f8c76',
         dateField: '@timestamp',
         esql: 'from logs | keep location | limit 10000',
         geoField: 'location',
@@ -89,6 +100,7 @@ describe('CreateSourceEditor', () => {
             type: 'geo_shape',
           },
         ],
+        dataViewId: 'c9f096614a62aa31893a2d6e8f43139bda7dcdb262b9373f79d0173cc152b4a4',
         dateField: undefined,
         esql: 'from world_countries | keep geometry | limit 10000',
         geoField: 'geometry',

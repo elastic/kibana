@@ -7,6 +7,7 @@
  */
 
 import { schema, Type } from '@kbn/config-schema';
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from './constants';
 import { RuntimeType } from '.';
 
 export const serializedFieldFormatSchema = schema.object({
@@ -38,6 +39,11 @@ const primitiveRuntimeFieldSchemaShared = {
   ),
   format: schema.maybe(serializedFieldFormatSchema),
   customLabel: schema.maybe(schema.string()),
+  customDescription: schema.maybe(
+    schema.string({
+      maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+    })
+  ),
   popularity: schema.maybe(
     schema.number({
       min: 0,
@@ -68,6 +74,11 @@ const compositeRuntimeFieldSchemaShared = {
         type: runtimeFieldNonCompositeFieldsSpecTypeSchema,
         format: schema.maybe(serializedFieldFormatSchema),
         customLabel: schema.maybe(schema.string()),
+        customDescription: schema.maybe(
+          schema.string({
+            maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+          })
+        ),
         popularity: schema.maybe(
           schema.number({
             min: 0,
@@ -134,6 +145,11 @@ export const fieldSpecSchemaFields = {
     })
   ),
   customLabel: schema.maybe(schema.string()),
+  customDescription: schema.maybe(
+    schema.string({
+      maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+    })
+  ),
   shortDotsEnable: schema.maybe(schema.boolean()),
   searchable: schema.maybe(schema.boolean()),
   aggregatable: schema.maybe(schema.boolean()),

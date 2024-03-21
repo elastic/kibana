@@ -11,29 +11,29 @@ import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { Observable } from 'rxjs';
 import {
   availableControlsPanels,
-  DatasetSelectionPlain,
+  DataSourceSelectionPlain,
   DisplayOptions,
   PartialDisplayOptions,
 } from '../../common';
 import { IDatasetsClient } from '../services/datasets';
 import {
-  LogExplorerControllerStateMachine,
-  LogExplorerControllerStateService,
-} from '../state_machines/log_explorer_controller';
-import { LogExplorerCustomizations } from '../customizations/types';
+  LogsExplorerControllerStateMachine,
+  LogsExplorerControllerStateService,
+} from '../state_machines/logs_explorer_controller';
+import { LogsExplorerCustomizations } from '../customizations/types';
 
-export interface LogExplorerController {
+export interface LogsExplorerController {
   actions: {};
-  customizations: LogExplorerCustomizations;
+  customizations: LogsExplorerCustomizations;
   datasetsClient: IDatasetsClient;
-  discoverServices: LogExplorerDiscoverServices;
-  event$: Observable<LogExplorerPublicEvent>;
-  service: LogExplorerControllerStateService;
-  state$: Observable<LogExplorerPublicState>;
-  stateMachine: LogExplorerControllerStateMachine;
+  discoverServices: LogsExplorerDiscoverServices;
+  event$: Observable<LogsExplorerPublicEvent>;
+  service: LogsExplorerControllerStateService;
+  state$: Observable<LogsExplorerPublicState>;
+  stateMachine: LogsExplorerControllerStateMachine;
 }
 
-export type LogExplorerDiscoverServices = Pick<
+export type LogsExplorerDiscoverServices = Pick<
   Required<DiscoverContainerProps['overrideServices']>,
   'data' | 'filterManager' | 'timefilter' | 'uiSettings' | 'history'
 > & {
@@ -59,17 +59,17 @@ export interface ControlOptions {
 }
 
 // we might want to wrap this into an object that has a "state value" laster
-export type LogExplorerPublicState = QueryState &
+export type LogsExplorerPublicState = QueryState &
   DisplayOptions & {
     controls: ControlOptions;
-    datasetSelection: DatasetSelectionPlain;
+    dataSourceSelection: DataSourceSelectionPlain;
   };
 
-export type LogExplorerPublicStateUpdate = QueryState &
+export type LogsExplorerPublicStateUpdate = QueryState &
   PartialDisplayOptions & {
     controls?: ControlOptions;
-    datasetSelection?: DatasetSelectionPlain;
+    dataSourceSelection?: DataSourceSelectionPlain;
   };
 
 // a placeholder for now
-export type LogExplorerPublicEvent = never;
+export type LogsExplorerPublicEvent = never;

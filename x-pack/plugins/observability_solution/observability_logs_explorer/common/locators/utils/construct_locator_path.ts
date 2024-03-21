@@ -14,39 +14,42 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import {
   AvailableControlPanels,
   availableControlsPanels,
-  DatasetSelectionPlain,
+  DataSourceSelectionPlain,
+  SMART_FALLBACK_FIELDS,
 } from '@kbn/logs-explorer-plugin/common';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
-  logExplorerUrlSchemaV1,
+  logsExplorerUrlSchemaV2,
 } from '../../url_schema';
 import { deepCompactObject } from '../../utils/deep_compact_object';
 
-type ControlsPageState = NonNullable<logExplorerUrlSchemaV1.UrlSchema['controls']>;
+type ControlsPageState = NonNullable<logsExplorerUrlSchemaV2.UrlSchema['controls']>;
 
 interface LocatorPathConstructionParams {
-  datasetSelection: DatasetSelectionPlain;
+  dataSourceSelection: DataSourceSelectionPlain;
   locatorParams: DatasetLocatorParams;
   useHash: boolean;
 }
 
 export const constructLocatorPath = async (params: LocatorPathConstructionParams) => {
   const {
-    datasetSelection,
+    dataSourceSelection,
     locatorParams: { filterControls, filters, query, refreshInterval, timeRange, columns, origin },
     useHash,
   } = params;
 
-  const pageState = logExplorerUrlSchemaV1.urlSchemaRT.encode(
+  const pageState = logsExplorerUrlSchemaV2.urlSchemaRT.encode(
     deepCompactObject({
-      v: 1,
-      datasetSelection,
+      v: 2,
+      dataSourceSelection,
       filters,
       query,
       refreshInterval,
       time: timeRange,
-      columns: columns?.map((field) => ({ field })),
+      columns: columns?.map((column) => {
+        return column.type === 'smart-field' ? SMART_FALLBACK_FIELDS[column.smartField] : column;
+      }),
       controls: getControlsPageStateFromFilterControlsParams(filterControls ?? {}),
     })
   );

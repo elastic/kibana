@@ -22,6 +22,4 @@ export const apiPublishesDataLoading = (
  * Gets this API's data loading state as a reactive variable which will cause re-renders on change.
  */
 export const useDataLoading = (api: Partial<PublishesDataLoading> | undefined) =>
-  useStateFromPublishingSubject<boolean | undefined, PublishesDataLoading['dataLoading']>(
-    apiPublishesDataLoading(api) ? api.dataLoading : undefined
-  );
+  useStateFromPublishingSubject(apiPublishesDataLoading(api) ? api.dataLoading : undefined);

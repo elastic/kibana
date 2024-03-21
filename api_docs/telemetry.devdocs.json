@@ -812,8 +812,8 @@
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts"
             },
             {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/telemetry/sender.ts"
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender_helpers.ts"
             },
             {
               "plugin": "fleet",
@@ -825,11 +825,15 @@
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/telemetry/sender.test.ts"
+              "path": "x-pack/plugins/observability_solution/synthetics/server/telemetry/sender.ts"
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/telemetry/sender.test.ts"
+              "path": "x-pack/plugins/observability_solution/synthetics/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/observability_solution/synthetics/server/telemetry/sender.test.ts"
             },
             {
               "plugin": "securitySolution",

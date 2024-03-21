@@ -11,7 +11,7 @@
 // If you wish for your Storybook to be built and included in CI, also add your
 // alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 export const storybookAliases = {
-  apm: 'x-pack/plugins/apm/.storybook',
+  apm: 'x-pack/plugins/observability_solution/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
   cases: 'packages/kbn-cases-components/.storybook',
   cell_actions: 'packages/kbn-cell-actions/.storybook',
@@ -42,13 +42,14 @@ export const storybookAliases = {
   fleet: 'x-pack/plugins/fleet/.storybook',
   grouping: 'packages/kbn-securitysolution-grouping/.storybook',
   home: 'src/plugins/home/.storybook',
-  infra: 'x-pack/plugins/infra/.storybook',
+  infra: 'x-pack/plugins/observability_solution/infra/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
   logs_explorer: 'x-pack/plugins/observability_solution/logs_explorer/.storybook',
   management: 'packages/kbn-management/storybook/config',
-  observability: 'x-pack/plugins/observability/.storybook',
-  observability_ai_assistant: 'x-pack/plugins/observability_ai_assistant/.storybook',
+  observability: 'x-pack/plugins/observability_solution/observability/.storybook',
+  observability_ai_assistant:
+    'x-pack/plugins/observability_solution/observability_ai_assistant/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
   text_based_editor: 'packages/kbn-text-based-editor/.storybook',
@@ -56,9 +57,10 @@ export const storybookAliases = {
   security_solution_packages: 'x-pack/packages/security-solution/storybook/config',
   serverless: 'packages/serverless/storybook/config',
   shared_ux: 'packages/shared-ux/storybook/config',
+  slo: 'x-pack/plugins/observability_solution/slo/.storybook',
   threat_intelligence: 'x-pack/plugins/threat_intelligence/.storybook',
   triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
-  profiling: 'x-pack/plugins/profiling/.storybook',
+  profiling: 'x-pack/plugins/observability_solution/profiling/.storybook',
 };

@@ -69,7 +69,8 @@
     "@kbn/chart-expressions-common",
     "@kbn/shared-ux-utility",
     "@kbn/managed-content-badge",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/shared-ux-markdown"
   ],
   "exclude": [
     "target/**/*",

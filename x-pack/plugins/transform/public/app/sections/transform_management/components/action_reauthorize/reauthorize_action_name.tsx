@@ -15,7 +15,7 @@ import { createCapabilityFailureMessage } from '../../../../../../common/utils/c
 
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import { useTransformCapabilities } from '../../../../hooks';
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 
 export const reauthorizeActionNameText = i18n.translate(
   'xpack.transform.transformList.reauthorizeActionNameText',

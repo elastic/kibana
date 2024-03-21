@@ -12,15 +12,7 @@ import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import type { Filter } from '@kbn/es-query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import {
-  TestProviders,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../common/mock';
-import type { State } from '../../../common/store';
-import { createStore } from '../../../common/store';
+import { TestProviders, createMockStore } from '../../../common/mock';
 import { inputsActions } from '../../../common/store/inputs';
 
 import { Network } from './network';
@@ -29,7 +21,7 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 
-jest.mock('../../../common/components/landing_page');
+jest.mock('../../../common/components/empty_prompt');
 jest.mock('../../../common/containers/sourcerer');
 
 // Test will fail because we will to need to mock some core services to make the test work
@@ -135,7 +127,7 @@ describe('Network page - rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="siem-landing-page"]`).exists()).toBe(true);
+    expect(wrapper.find(`[data-test-subj="empty-prompt"]`).exists()).toBe(true);
   });
 
   test('it DOES NOT render getting started page when an index is available', async () => {
@@ -228,9 +220,7 @@ describe('Network page - rendering', () => {
       indicesExist: true,
       indexPattern: { fields: [], title: 'title' },
     });
-    const myState: State = mockGlobalState;
-    const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const myStore = createMockStore();
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>

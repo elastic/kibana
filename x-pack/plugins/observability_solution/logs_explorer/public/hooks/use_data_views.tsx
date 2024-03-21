@@ -8,14 +8,18 @@
 import { useCallback } from 'react';
 import createContainer from 'constate';
 import { useInterpret, useSelector } from '@xstate/react';
-import { DataViewListItem, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
+import { DataViewDescriptor } from '../../common/data_views/models/data_view_descriptor';
 import { SortOrder } from '../../common/latest';
 import { createDataViewsStateMachine } from '../state_machines/data_views';
+import { LogsExplorerCustomizations } from '../controller';
 
 interface DataViewsContextDeps {
+  core: CoreStart;
   dataViewsService: DataViewsPublicPluginStart;
-  discoverService: DiscoverStart;
+  events: LogsExplorerCustomizations['events'];
 }
 
 export interface SearchDataViewsParams {
@@ -23,16 +27,16 @@ export interface SearchDataViewsParams {
   sortOrder: SortOrder;
 }
 
-export type DataViewSelectionHandler = (dataView: DataViewListItem) => void;
 export type SearchDataViews = (params: SearchDataViewsParams) => void;
 export type LoadDataViews = () => void;
 export type ReloadDataViews = () => void;
+export type IsDataViewAllowed = (dataView: DataViewDescriptor) => boolean;
+export type IsDataViewAvailable = (dataView: DataViewDescriptor) => boolean;
 
-const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDeps) => {
+const useDataViews = ({ core, dataViewsService, events }: DataViewsContextDeps) => {
   const dataViewsStateService = useInterpret(() =>
     createDataViewsStateMachine({
       dataViews: dataViewsService,
-      discover: discoverService,
     })
   );
 
@@ -41,6 +45,28 @@ const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDep
   const error = useSelector(dataViewsStateService, (state) => state.context.error);
 
   const isLoading = useSelector(dataViewsStateService, (state) => state.matches('loading'));
+
+  // Test whether a data view can be explored in Logs Explorer based on the settings
+  const isDataViewAllowed: IsDataViewAllowed = useCallback(
+    (dataView) =>
+      dataView.testAgainstAllowedList(
+        core.uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+      ),
+    [core.uiSettings]
+  );
+
+  // Test whether a data view can be explored in Logs Explorer based on the settings or has fallback handler
+  const isDataViewAvailable: IsDataViewAvailable = useCallback(
+    (dataView) => {
+      const isAllowedDataView = isDataViewAllowed(dataView);
+
+      return (
+        isAllowedDataView || (!isAllowedDataView && Boolean(events?.onUknownDataViewSelection))
+      );
+    },
+
+    [isDataViewAllowed, events?.onUknownDataViewSelection]
+  );
 
   const loadDataViews = useCallback(
     () => dataViewsStateService.send({ type: 'LOAD_DATA_VIEWS' }),
@@ -57,15 +83,6 @@ const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDep
       dataViewsStateService.send({
         type: 'SEARCH_DATA_VIEWS',
         search: searchParams,
-      }),
-    [dataViewsStateService]
-  );
-
-  const selectDataView: DataViewSelectionHandler = useCallback(
-    (dataView) =>
-      dataViewsStateService.send({
-        type: 'SELECT_DATA_VIEW',
-        dataView,
       }),
     [dataViewsStateService]
   );
@@ -93,10 +110,11 @@ const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDep
     dataViews,
 
     // Actions
+    isDataViewAllowed,
+    isDataViewAvailable,
     loadDataViews,
     reloadDataViews,
     searchDataViews,
-    selectDataView,
     sortDataViews,
   };
 };

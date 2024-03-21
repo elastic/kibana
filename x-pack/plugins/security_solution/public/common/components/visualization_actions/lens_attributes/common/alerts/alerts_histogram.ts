@@ -70,6 +70,7 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
                   scale: 'interval',
                   params: {
                     interval: 'auto',
+                    includeEmptyRows: true,
                   },
                 },
                 'e09e0380-0740-4105-becc-0a4ca12e3944': {
@@ -79,6 +80,7 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
                   isBucketed: false,
                   scale: 'ratio',
                   sourceField: '___records___',
+                  params: { emptyAsNull: true },
                 },
                 '34919782-4546-43a5-b668-06ac934d3acd': {
                   label: `Top values of ${stackByField}`,

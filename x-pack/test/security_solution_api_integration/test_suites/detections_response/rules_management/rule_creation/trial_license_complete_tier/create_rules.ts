@@ -19,12 +19,6 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
-  deleteAllRules,
-  waitForRuleSuccess,
-  waitForAlertToComplete,
-  waitForAlertsToBePresent,
-  waitForRulePartialFailure,
-  deleteAllAlerts,
   getActionsWithFrequencies,
   getActionsWithoutFrequencies,
   getSomeActionsWithFrequencies,
@@ -34,7 +28,15 @@ import {
   getThresholdRuleParams,
   generateEvent,
   fetchRule,
+  waitForAlertToComplete,
 } from '../../../utils';
+import {
+  deleteAllRules,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  waitForRulePartialFailure,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,

@@ -109,7 +109,7 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
     public async clickApplyButton(shouldClose: boolean = true) {
       log.debug('clickApplyButton');
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await testSubjects.click('applyCustomizeDashboardButton');
         if (shouldClose) await this.expectDashboardSettingsFlyoutClosed();
       });
@@ -118,7 +118,7 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
     public async clickCancelButton() {
       log.debug('clickCancelButton');
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await testSubjects.click('cancelCustomizeDashboardButton');
         await this.expectDashboardSettingsFlyoutClosed();
       });
@@ -127,7 +127,7 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
     public async clickCloseFlyoutButton() {
       log.debug();
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await (await this.findFlyoutTestSubject('euiFlyoutCloseButton')).click();
         await this.expectDashboardSettingsFlyoutClosed();
       });

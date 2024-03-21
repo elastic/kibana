@@ -30,31 +30,32 @@ import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import {
-  createAlertsIndex,
   fetchRule,
-  createRule,
   getSimpleRule,
-  deleteAllRules,
   createExceptionList,
   createExceptionListItem,
   getThresholdRuleForAlertTesting,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   downgradeImmutableRule,
-  waitForRuleSuccess,
   installMockPrebuiltRules,
-  waitForAlertsToBePresent,
-  getAlertsByIds,
   findImmutableRuleById,
   getPrebuiltRulesAndTimelinesStatus,
   getOpenAlerts,
   createRuleWithExceptionEntries,
   getEqlRuleForAlertTesting,
   SAMPLE_PREBUILT_RULES,
-  deleteAllAlerts,
   updateUsername,
 } from '../../../../utils';
-
+import {
+  createAlertsIndex,
+  createRule,
+  deleteAllRules,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  getAlertsByIds,
+  deleteAllAlerts,
+} from '../../../../../../../common/utils/security_solution';
 import {
   createListsIndex,
   deleteAllExceptions,
@@ -803,7 +804,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('generates no alerts when a value list exception is added for a query rule', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
             const rule: QueryRuleCreateProps = {
               name: 'Simple Rule Query',
@@ -835,7 +836,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('generates no alerts when a value list exception is added for a threat match rule', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
             const rule: ThreatMatchRuleCreateProps = {
               description: 'Detecting root and admin users',
@@ -883,7 +884,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('generates no alerts when a value list exception is added for a threshold rule', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
             const rule: ThresholdRuleCreateProps = {
               description: 'Detecting root and admin users',
@@ -920,7 +921,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('generates no alerts when a value list exception is added for an EQL rule', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
             const rule: EqlRuleCreateProps = {
               ...getEqlRuleForAlertTesting(['auditbeat-*']),
@@ -944,7 +945,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsOpen.hits.hits.length).toEqual(0);
           });
           it('should Not allow deleting value list when there are references and ignoreReferences is false', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
             const rule: QueryRuleCreateProps = {
               ...getSimpleRule(),

@@ -10,6 +10,7 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { get } from 'lodash';
+import { CONSOLE_COMMANDS } from '../../../management/common/translations';
 
 interface EndpointCallOutProps {
   basePath: string;
@@ -34,12 +35,7 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
             />
           }
         >
-          <EuiText size={'xs'}>
-            <FormattedMessage
-              id="xpack.securitySolution.responseActions.endpoint.isolateTooltip"
-              defaultMessage="Insufficient privileges to isolate hosts. Contact your Kibana administrator if you think you should have this permission."
-            />
-          </EuiText>
+          <EuiText size={'xs'}>{CONSOLE_COMMANDS.isolate.privileges}</EuiText>
         </EuiCallOut>
         <EuiSpacer size="s" />
       </>
@@ -64,6 +60,31 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
             <FormattedMessage
               id="xpack.securitySolution.responseActionsList.endpoint.cautionDescription"
               defaultMessage="Only select this option if you’re certain that you want to automatically block communication with other hosts on your network until you release this host."
+            />
+          </EuiText>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </>
+    );
+  }
+  if (currentCommand === 'kill-process' || currentCommand === 'suspend-process') {
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <EuiCallOut
+          color="warning"
+          iconType="warning"
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.responseActionsList.endpoint.cautionTitle"
+              defaultMessage="Proceed with caution"
+            />
+          }
+        >
+          <EuiText size={'xs'}>
+            <FormattedMessage
+              id="xpack.securitySolution.responseActionsList.endpoint.processesCautionDescription"
+              defaultMessage="Only select this option if you’re certain that you want to automatically terminate the process running on a host."
             />
           </EuiText>
         </EuiCallOut>

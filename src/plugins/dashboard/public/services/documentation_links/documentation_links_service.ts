@@ -24,6 +24,7 @@ export const documentationLinksServiceFactory: DocumentationLinksServiceFactory 
         kibana,
         indexPatterns: { introduction },
         dashboard,
+        query: { queryESQL },
       },
     },
   } = coreStart;
@@ -32,5 +33,6 @@ export const documentationLinksServiceFactory: DocumentationLinksServiceFactory 
     indexPatternsDocLink: introduction,
     kibanaGuideDocLink: kibana.guide,
     dashboardDocLink: dashboard.guide,
+    esqlDocLink: queryESQL,
   };
 };
