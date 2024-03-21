@@ -16,17 +16,11 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { PublishesUnifiedSearch, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiPublishesTimeRange, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';
 import { customizePanelAction } from '../panel_actions';
 
 export const CUSTOM_TIME_RANGE_BADGE = 'CUSTOM_TIME_RANGE_BADGE';
-
-const isApiCompatable = (
-  unknownApi: null | unknown
-): unknownApi is Pick<PublishesUnifiedSearch, 'timeRange$'> => {
-  return Boolean(unknownApi && (unknownApi as PublishesUnifiedSearch)?.timeRange$ !== undefined);
-};
 
 export class CustomTimeRangeBadge
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
@@ -36,7 +30,7 @@ export class CustomTimeRangeBadge
   public order = 7;
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatable(embeddable)) throw new IncompatibleActionError();
+    if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
     const timeRange = embeddable.timeRange$.value;
     if (!timeRange) return '';
     return renderToString(
@@ -49,14 +43,14 @@ export class CustomTimeRangeBadge
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return isApiCompatable(embeddable);
+    return apiPublishesTimeRange(embeddable);
   }
 
   public subscribeToCompatibilityChanges(
     { embeddable }: EmbeddableApiContext,
     onChange: (isCompatible: boolean, action: CustomTimeRangeBadge) => void
   ) {
-    if (!isApiCompatable(embeddable)) return;
+    if (!apiPublishesTimeRange(embeddable)) return;
     return embeddable.timeRange$.subscribe((timeRange) => {
       onChange(Boolean(timeRange), this);
     });
@@ -71,7 +65,7 @@ export class CustomTimeRangeBadge
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (isApiCompatable(embeddable)) {
+    if (apiPublishesTimeRange(embeddable)) {
       const timeRange = embeddable.timeRange$.value;
       return Boolean(timeRange);
     }
