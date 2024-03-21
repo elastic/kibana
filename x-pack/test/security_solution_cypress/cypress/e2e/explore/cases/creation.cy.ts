@@ -39,7 +39,7 @@ import { TIMELINE_QUERY, TIMELINE_TITLE } from '../../../screens/timeline';
 import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME } from '../../../screens/overview';
 
 import { goToCaseDetails, goToCreateNewCase } from '../../../tasks/all_cases';
-import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { openCaseTimeline } from '../../../tasks/case_details';
 import {
   attachTimeline,
@@ -53,7 +53,6 @@ import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 import { CLOUD_SERVERLESS, ELASTICSEARCH_USERNAME } from '../../../env_var_names_constants';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
 import { deleteCases } from '../../../tasks/api_calls/cases';
 
 const isCloudServerless = Cypress.env(CLOUD_SERVERLESS);
