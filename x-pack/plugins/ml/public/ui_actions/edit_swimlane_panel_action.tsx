@@ -55,6 +55,7 @@ export function createEditSwimlanePanelAction(
         });
 
         context.embeddable.updateUserInput(result);
+        context.embeddable.setPanelTitle(result.panelTitle);
       } catch (e) {
         return Promise.reject();
       }

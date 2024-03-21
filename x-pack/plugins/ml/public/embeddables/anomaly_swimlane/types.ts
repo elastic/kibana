@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { HasType, PublishingSubject } from '@kbn/presentation-publishing';
+import type {
+  HasType,
+  PublishesWritablePanelTitle,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import type { JobId } from '../../shared';
 import type { AnomalySwimLaneEmbeddableType } from '../constants';
@@ -22,5 +26,6 @@ export interface AnomalySwimLaneComponentApi {
 }
 
 export type AnomalySwimLaneEmbeddableApi = HasType<AnomalySwimLaneEmbeddableType> &
+  PublishesWritablePanelTitle &
   MlEmbeddableBaseApi &
   AnomalySwimLaneComponentApi;
