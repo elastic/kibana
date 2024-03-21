@@ -43,6 +43,9 @@ describe('SyncsContextMenu', () => {
       hasIncrementalSyncEnabled: true,
     },
     status: Status.SUCCESS,
+    connector: {
+      index_name: 'index_name',
+    },
   };
 
   beforeEach(() => {
@@ -111,5 +114,29 @@ describe('SyncsContextMenu', () => {
     );
     menuItems.at(0).simulate('click');
     expect(startSync).toHaveBeenCalled();
+  });
+
+  it('Cannot start a sync without an index name', () => {
+    setMockValues({ ...mockValues, connector: { index_name: null } });
+    const wrapper = mountWithIntl(<SyncsContextMenu />);
+    const button = wrapper.find(
+      'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
+    );
+    button.simulate('click');
+
+    const menuItems = wrapper
+      .find(EuiContextMenuPanel)
+      .find(EuiResizeObserver)
+      .find(EuiContextMenuItem);
+    expect(menuItems).toHaveLength(2);
+
+    const firstButton = menuItems.get(0);
+
+    expect(firstButton.props).toEqual(
+      expect.objectContaining({
+        children: 'Full Content',
+        disabled: true,
+      })
+    );
   });
 });

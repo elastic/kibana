@@ -23,9 +23,12 @@ import {
   CachedFetchConnectorByIdApiLogicValues,
 } from '../../api/connector/cached_fetch_connector_by_id_api_logic';
 
+import {
+  ConnectorConfigurationApiLogic,
+  PostConnectorConfigurationActions,
+} from '../../api/connector/update_connector_configuration_api_logic';
 import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex } from '../../types';
-import { IndexNameActions, IndexNameLogic } from '../search_index/index_name_logic';
 
 export interface ConnectorViewActions {
   fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];
@@ -38,10 +41,12 @@ export interface ConnectorViewActions {
   fetchIndexApiError: FetchIndexActions['apiError'];
   fetchIndexApiReset: FetchIndexActions['apiReset'];
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
-  setIndexName: IndexNameActions['setIndexName'];
+  updateConnectorConfiguration: PostConnectorConfigurationActions['makeRequest'];
+  updateConnectorConfigurationSuccess: PostConnectorConfigurationActions['apiSuccess'];
 }
 
 export interface ConnectorViewValues {
+  updateConnectorConfigurationStatus: Status;
   connector: Connector | undefined;
   connectorData: CachedFetchConnectorByIdApiLogicValues['connectorData'];
   connectorError: string | undefined;
@@ -75,8 +80,6 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
   actions: {},
   connect: {
     actions: [
-      IndexNameLogic,
-      ['setIndexName'],
       CachedFetchConnectorByIdApiLogic,
       [
         'makeRequest as fetchConnector',
@@ -93,29 +96,31 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         'apiError as fetchIndexApiError',
         'apiReset as fetchIndexApiReset',
       ],
+      ConnectorConfigurationApiLogic,
+      [
+        'makeRequest as updateConnectorConfiguration',
+        'apiSuccess as updateConnectorConfigurationSuccess',
+      ],
     ],
     values: [
       CachedFetchConnectorByIdApiLogic,
       ['status as fetchConnectorApiStatus', 'connectorData', 'isInitialLoading'],
       FetchIndexApiLogic,
       ['data as index', 'status as fetchIndexApiStatus'],
+      ConnectorConfigurationApiLogic,
+      ['status as updateConnectorConfigurationStatus'],
     ],
   },
   events: ({ actions }) => ({
-    beforeMount: () => {
-      actions.fetchConnectorApiReset();
-      actions.fetchIndexApiReset();
-    },
     beforeUnmount: () => {
-      actions.fetchConnectorApiReset();
-      actions.fetchIndexApiReset();
       actions.stopConnectorPoll();
+      actions.fetchConnectorApiReset();
     },
   }),
   listeners: ({ actions, values }) => ({
-    fetchConnectorApiSuccess: () => {
-      if (values.indexName) {
-        actions.fetchIndex({ indexName: values.indexName });
+    updateConnectorConfigurationSuccess: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
       }
     },
   }),

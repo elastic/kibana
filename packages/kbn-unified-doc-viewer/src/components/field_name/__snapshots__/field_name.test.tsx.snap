@@ -1,5 +1,63 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`FieldName renders a custom description icon 1`] = `
+Array [
+  <div
+    class="euiFlexItem kbnDocViewer__fieldIcon emotion-euiFlexItem-growZero"
+  >
+    <span
+      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+    >
+      <span
+        data-euiicon-type="tokenString"
+        title="String"
+      >
+        String
+      </span>
+    </span>
+  </div>,
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexStart-row"
+  >
+    <div
+      class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <span>
+          test
+        </span>
+      </span>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span>
+        <div
+          class="euiPopover emotion-euiPopover-inline-block"
+        >
+          <button
+            aria-label="View field description"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+            data-test-subj="fieldDescriptionPopoverButton-bytes"
+            title="View field description"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="iInCircle"
+            />
+          </button>
+        </div>
+      </span>
+    </div>
+  </div>,
+]
+`;
+
 exports[`FieldName renders a geo field 1`] = `
 Array [
   <div
@@ -17,7 +75,7 @@ Array [
     </span>
   </div>,
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-flexStart-row"
+    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexStart-row"
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
@@ -51,7 +109,7 @@ Array [
     </span>
   </div>,
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-flexStart-row"
+    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexStart-row"
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
@@ -85,7 +143,7 @@ Array [
     </span>
   </div>,
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-flexStart-row"
+    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexStart-row"
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
@@ -119,7 +177,7 @@ Array [
     </span>
   </div>,
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-flexStart-row"
+    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexStart-row"
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
@@ -153,7 +211,7 @@ Array [
     </span>
   </div>,
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-flexStart-row"
+    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexStart-row"
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
@@ -187,7 +245,7 @@ Array [
     </span>
   </div>,
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-flexStart-row"
+    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexStart-row"
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"

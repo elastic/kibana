@@ -233,12 +233,12 @@ export const NativeConnectorConfiguration: React.FC = () => {
               ]}
             />
           </EuiPanel>
-          {!connector.index_name && (
+          {
             <>
               <EuiSpacer />
               <AttachIndexBox connector={connector} />
             </>
-          )}
+          }
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column">

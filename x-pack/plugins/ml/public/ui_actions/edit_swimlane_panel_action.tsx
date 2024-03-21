@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { MlCoreSetup } from '../plugin';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, EditSwimlanePanelContext } from '../embeddables';
+import type { MlCoreSetup } from '../plugin';
+import type { EditSwimlanePanelContext } from '../embeddables';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 

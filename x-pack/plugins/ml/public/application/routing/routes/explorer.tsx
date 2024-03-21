@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
@@ -15,13 +16,16 @@ import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-r
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { basicResolvers } from '../resolvers';
 import { ML_PAGES } from '../../../locator';
-import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
+import type { NavigateToPath } from '../../contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
 
-import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
-import { createPath, MlRoute, PageLoader, PageProps } from '../router';
+import type { MlRoute, PageProps } from '../router';
+import { createPath, PageLoader } from '../router';
 import { useRefresh } from '../use_refresh';
 import { useRouteResolver } from '../use_resolver';
 import { Explorer } from '../../explorer';
@@ -35,7 +39,6 @@ import { useTableSeverity } from '../../components/controls/select_severity';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
-import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
 import { MlPageHeader } from '../../components/page_header';
 import { PageTitle } from '../../components/page_title';
 import { AnomalyResultsViewSelector } from '../../components/anomaly_results_view_selector';
@@ -102,14 +105,14 @@ interface ExplorerUrlStateManagerProps {
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
   const {
-    services: { cases, presentationUtil },
+    services: { cases, presentationUtil, uiSettings },
   } = useMlKibana();
 
   const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
-  const timeBuckets = useTimeBuckets();
+  const timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);

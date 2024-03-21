@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IndexPatternTitle } from '../../../../../common/types/kibana';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndexPatternTitle } from '../../../../../common/types/kibana';
 
 import { ml } from '../../../services/ml_api_service';
-import { FieldHistogramRequestConfig } from '../common/request';
+import type { FieldHistogramRequestConfig } from '../common/request';
 
 // Maximum number of examples to obtain for text type fields.
 const MAX_EXAMPLES_DEFAULT: number = 10;

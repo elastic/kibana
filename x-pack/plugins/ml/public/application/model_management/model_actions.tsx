@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { EuiToolTip } from '@elastic/eui';
@@ -30,7 +30,7 @@ import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable, isDfaTrainedModel } from './test_models';
-import { ModelItem } from './models_list';
+import type { ModelItem } from './models_list';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 export function useModelActions({

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { basicResolvers } from '../../resolvers';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath } from '../../../contexts/kibana';
-import { createPath, MlRoute, PageLoader } from '../../router';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import type { MlRoute } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { Page } from '../../../jobs/new_job/pages/job_type';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';

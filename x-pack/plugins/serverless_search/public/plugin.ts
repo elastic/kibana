@@ -41,7 +41,7 @@ export class ServerlessSearchPlugin
 {
   public setup(
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
-    _setupDeps: ServerlessSearchPluginSetupDependencies
+    setupDeps: ServerlessSearchPluginSetupDependencies
   ): ServerlessSearchPluginSetup {
     const queryClient = new QueryClient({
       mutationCache: new MutationCache({
@@ -111,6 +111,9 @@ export class ServerlessSearchPlugin
         return await renderApp(element, coreStart, { history, ...services }, queryClient);
       },
     });
+
+    setupDeps.discover.showInlineTopNav();
+
     return {};
   }
 
@@ -124,7 +127,6 @@ export class ServerlessSearchPlugin
     const navigationTree$ = of(navigationTree);
     serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
-    management.setIsSidebarEnabled(false);
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],

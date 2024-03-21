@@ -8,11 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { MlCoreSetup } from '../plugin';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  EditAnomalyChartsPanelContext,
-} from '../embeddables';
+import type { MlCoreSetup } from '../plugin';
+import type { EditAnomalyChartsPanelContext } from '../embeddables';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
 
 export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 
