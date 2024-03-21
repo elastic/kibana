@@ -52,12 +52,19 @@ export function RuleActions({
     );
   }
 
-  const getNotifyText = (action: RuleUiAction) =>
-    ('frequency' in action &&
-      (NOTIFY_WHEN_OPTIONS.find((options) => options.value === action.frequency?.notifyWhen)
-        ?.inputDisplay ||
-        action.frequency?.notifyWhen)) ??
-    legacyNotifyWhen;
+  const getNotifyText = (action: RuleUiAction, isSystemAction?: boolean) => {
+    if (isSystemAction) {
+      return NOTIFY_WHEN_OPTIONS[1].inputDisplay;
+    }
+
+    return (
+      ('frequency' in action &&
+        (NOTIFY_WHEN_OPTIONS.find((options) => options.value === action.frequency?.notifyWhen)
+          ?.inputDisplay ||
+          action.frequency?.notifyWhen)) ??
+      legacyNotifyWhen
+    );
+  };
 
   const getActionIconClass = (actionGroupId?: string): IconType | undefined => {
     const actionGroup = actionTypeRegistry.list().find((group) => group.id === actionGroupId);
@@ -72,6 +79,7 @@ export function RuleActions({
   };
 
   if (isLoadingActionConnectors) return <EuiLoadingSpinner size="s" />;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       {ruleActions.map((action, index) => {
@@ -95,18 +103,19 @@ export function RuleActions({
                   <EuiFlexItem grow={false}>
                     <EuiIcon size="s" type="bell" />
                   </EuiFlexItem>
-                  {!actionTypeRegistry.get(actionTypeId).isSystemActionType && (
-                    <EuiFlexItem>
-                      <EuiText
-                        data-test-subj={`actionConnectorName-${index}-${
-                          actionName || actionTypeId
-                        }`}
-                        size="xs"
-                      >
-                        {String(getNotifyText(action))}
-                      </EuiText>
-                    </EuiFlexItem>
-                  )}
+                  <EuiFlexItem>
+                    <EuiText
+                      data-test-subj={`actionConnectorName-${index}-${actionName || actionTypeId}`}
+                      size="xs"
+                    >
+                      {String(
+                        getNotifyText(
+                          action,
+                          actionTypeRegistry.get(actionTypeId).isSystemActionType
+                        )
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -25,6 +25,7 @@ export function validateBaseProperties(
   actionTypeRegistry: ActionTypeRegistryContract
 ): ValidationResult {
   const validationResult = { errors: {} };
+
   const errors = {
     name: new Array<string>(),
     'schedule.interval': new Array<string>(),
@@ -32,7 +33,9 @@ export function validateBaseProperties(
     ruleTypeId: new Array<string>(),
     actionConnectors: new Array<string>(),
   };
+
   validationResult.errors = errors;
+
   if (!ruleObject.name) {
     errors.name.push(
       i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredNameText', {
@@ -40,6 +43,7 @@ export function validateBaseProperties(
       })
     );
   }
+
   if (ruleObject.consumer === null) {
     errors.consumer.push(
       i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredConsumerText', {
@@ -47,6 +51,7 @@ export function validateBaseProperties(
       })
     );
   }
+
   if (ruleObject.schedule.interval.length < 2) {
     errors['schedule.interval'].push(
       i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredIntervalText', {
@@ -70,18 +75,22 @@ export function validateBaseProperties(
 
   const invalidThrottleActions = ruleObject.actions.filter((a) => {
     if (actionTypeRegistry.get(a.actionTypeId).isSystemActionType) return false;
+
     const defaultAction = a as SanitizedRuleAction;
     if (!defaultAction.frequency?.throttle) return false;
+
     const throttleDuration = parseDuration(defaultAction.frequency.throttle);
     const intervalDuration =
       ruleObject.schedule.interval && ruleObject.schedule.interval.length > 1
         ? parseDuration(ruleObject.schedule.interval)
         : 0;
+
     return (
       defaultAction.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
       throttleDuration < intervalDuration
     );
   });
+
   if (invalidThrottleActions.length) {
     errors['schedule.interval'].push(
       i18n.translate(
@@ -101,9 +110,11 @@ export function validateBaseProperties(
       })
     );
   }
+
   const emptyConnectorActions = ruleObject.actions.find(
     (actionItem) => /^\d+$/.test(actionItem.id) && Object.keys(actionItem.params).length > 0
   );
+
   if (emptyConnectorActions !== undefined) {
     errors.actionConnectors.push(
       i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredActionConnector', {
@@ -112,6 +123,7 @@ export function validateBaseProperties(
       })
     );
   }
+
   return validationResult;
 }
 
@@ -124,8 +136,10 @@ export function getRuleErrors(
   const ruleParamsErrors: IErrorObject = ruleTypeModel
     ? ruleTypeModel.validate(rule.params).errors
     : {};
+
   const ruleBaseErrors = validateBaseProperties(rule, config, actionTypeRegistry)
     .errors as IErrorObject;
+
   const ruleErrors = {
     ...ruleParamsErrors,
     ...ruleBaseErrors,

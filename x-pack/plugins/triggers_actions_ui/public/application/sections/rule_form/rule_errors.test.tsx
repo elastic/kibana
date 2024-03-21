@@ -147,6 +147,35 @@ describe('rule_errors', () => {
         consumer: [],
       });
     });
+
+    it('should not throw an error for system actions', () => {
+      const rule = mockRule();
+
+      rule.actions = [
+        {
+          id: '1234',
+          actionTypeId: '.test-system-action',
+          params: {},
+        },
+      ];
+
+      const actionType = {
+        id: '.test-system-action',
+        name: 'Test',
+        isSystemActionType: true,
+      } as unknown as ActionTypeModel;
+
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      const result = validateBaseProperties(rule, config, actionTypeRegistry);
+
+      expect(result.errors).toStrictEqual({
+        name: [],
+        'schedule.interval': [],
+        ruleTypeId: [],
+        actionConnectors: [],
+        consumer: [],
+      });
+    });
   });
 
   describe('getRuleErrors()', () => {

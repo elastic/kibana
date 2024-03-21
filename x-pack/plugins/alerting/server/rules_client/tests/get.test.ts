@@ -284,13 +284,6 @@ describe('get()', () => {
             },
             "uuid": undefined,
           },
-          Object {
-            "actionTypeId": undefined,
-            "group": "default",
-            "id": "system_action-id",
-            "params": Object {},
-            "uuid": undefined,
-          },
         ],
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -303,7 +296,14 @@ describe('get()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
-        "systemActions": Array [],
+        "systemActions": Array [
+          Object {
+            "actionTypeId": undefined,
+            "id": "system_action-id",
+            "params": Object {},
+            "uuid": undefined,
+          },
+        ],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);

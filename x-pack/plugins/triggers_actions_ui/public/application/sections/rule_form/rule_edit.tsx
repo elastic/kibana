@@ -7,7 +7,7 @@
 
 import React, { useReducer, useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -39,6 +39,7 @@ import {
   TriggersActionsUiConfig,
   RuleNotifyWhenType,
   RuleUiAction,
+  RuleAction,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
@@ -63,7 +64,7 @@ const defaultUpdateRuleErrorMessage = i18n.translate(
 
 // Separate function for determining if an untyped action has a group property or not, which helps determine if
 // it is a default action or a system action. Consolidated here to deal with type definition complexity
-const actionHasDefinedGroup = (action: RuleUiAction) => {
+const actionHasDefinedGroup = (action: RuleUiAction): action is RuleAction => {
   if (!('group' in action)) return false;
   // If the group property is present, ensure that it isn't null or undefined
   return Boolean(action.group);
@@ -84,14 +85,15 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
             initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
         }
       : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
+
     clonedRule.actions = clonedRule.actions.map((action: RuleUiAction) => {
       if (actionHasDefinedGroup(action)) {
         return {
           ...action,
           frequency,
-        } as SanitizedRuleAction;
+        };
       }
-      return action as SanitizedRuleAction;
+      return action;
     });
   }
   return clonedRule;

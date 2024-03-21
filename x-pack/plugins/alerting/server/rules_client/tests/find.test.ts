@@ -70,7 +70,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
   uiSettings: uiSettingsServiceMock.createStartContract(),
-  isSystemAction: jest.fn(),
+  isSystemAction: jest.fn().mockImplementation((id) => id === 'system_action-id'),
 };
 
 beforeEach(() => {
@@ -103,10 +103,12 @@ describe('find()', () => {
       validLegacyConsumers: [],
     },
   ]);
+
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
     });
+
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
       per_page: 10,
@@ -147,6 +149,7 @@ describe('find()', () => {
         },
       ],
     });
+
     ruleTypeRegistry.list.mockReturnValue(listedTypes);
     authorization.filterByRuleTypeAuthorization.mockResolvedValue(
       new Set([
@@ -374,8 +377,10 @@ describe('find()', () => {
         },
       ],
     });
+
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.find({ options: {} });
+
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Array [
@@ -390,13 +395,6 @@ describe('find()', () => {
                 },
                 "uuid": undefined,
               },
-              Object {
-                "actionTypeId": undefined,
-                "group": "default",
-                "id": "system_action-id",
-                "params": Object {},
-                "uuid": undefined,
-              },
             ],
             "alertTypeId": "myType",
             "createdAt": 2019-02-12T21:01:22.479Z,
@@ -409,7 +407,14 @@ describe('find()', () => {
               "interval": "10s",
             },
             "snoozeSchedule": Array [],
-            "systemActions": Array [],
+            "systemActions": Array [
+              Object {
+                "actionTypeId": undefined,
+                "id": "system_action-id",
+                "params": Object {},
+                "uuid": undefined,
+              },
+            ],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],

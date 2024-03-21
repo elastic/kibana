@@ -37,7 +37,7 @@ const isSystemAction = (id: string) => id === 'my-system-action-id';
 describe('transformRawActionsToDomainActions', () => {
   it('transforms the actions correctly', () => {
     const res = transformRawActionsToDomainActions({
-      actions: [defaultAction],
+      actions: [defaultAction, systemAction],
       ruleId: 'test-rule',
       references: [{ name: 'default-action-ref', id: 'default-action-id', type: 'action' }],
       isSystemAction,
@@ -71,11 +71,9 @@ describe('transformRawActionsToDomainActions', () => {
 describe('transformRawActionsToDomainSystemActions', () => {
   it('transforms the system actions correctly', () => {
     const res = transformRawActionsToDomainSystemActions({
-      actions: [systemAction],
+      actions: [defaultAction, systemAction],
       ruleId: 'test-rule',
-      references: [
-        { name: 'system_action:my-system-action-id', id: 'my-system-action-id', type: 'action' },
-      ],
+      references: [{ name: 'default-action-ref', id: 'default-action-id', type: 'action' }],
       isSystemAction,
     });
 

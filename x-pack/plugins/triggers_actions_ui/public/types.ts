@@ -128,6 +128,7 @@ type ResolvedRule = Omit<
 export type {
   Rule,
   RuleAction,
+  RuleSystemAction,
   RuleUiAction,
   RuleTaskState,
   RuleSummary,
