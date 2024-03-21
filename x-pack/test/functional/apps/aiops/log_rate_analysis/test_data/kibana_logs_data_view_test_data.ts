@@ -6,6 +6,7 @@
  */
 
 import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { kibanaSampleDataLogsSignificantTermsBase } from '@kbn/aiops-test-utils/kibana_sample_data_logs/significant_terms';
 
 import type { TestData } from '../../types';
 
@@ -62,79 +63,11 @@ export const kibanaLogsDataViewTestData: TestData = {
         docCount: '100',
       },
     ],
-    analysisTable: [
-      {
-        fieldName: 'agent.keyword',
-        fieldValue:
-          'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
-        logRate: 'Chart type:bar chart',
-        pValue: '5.82e-12',
-        impact: 'High',
-      },
-      {
-        fieldName: 'clientip',
-        fieldValue: '30.156.16.164',
-        logRate: 'Chart type:bar chart',
-        pValue: '2.81e-53',
-        impact: 'High',
-      },
-      {
-        fieldName: 'extension.keyword',
-        fieldValue: '',
-        logRate: 'Chart type:bar chart',
-        pValue: '5.72e-12',
-        impact: 'High',
-      },
-      {
-        fieldName: 'geo.dest',
-        fieldValue: 'IN',
-        logRate: 'Chart type:bar chart',
-        pValue: '8.35e-21',
-        impact: 'High',
-      },
-      {
-        fieldName: 'geo.srcdest',
-        fieldValue: 'US:IN',
-        logRate: 'Chart type:bar chart',
-        pValue: '8.35e-21',
-        impact: 'High',
-      },
-      {
-        fieldName: 'host.keyword',
-        fieldValue: 'elastic-elastic-elastic.org',
-        logRate: 'Chart type:bar chart',
-        pValue: '3.94e-45',
-        impact: 'High',
-      },
-      {
-        fieldName: 'ip',
-        fieldValue: '30.156.16.163',
-        logRate: 'Chart type:bar chart',
-        pValue: '9.50e-54',
-        impact: 'High',
-      },
-      {
-        fieldName: 'machine.os.keyword',
-        fieldValue: 'win xp',
-        logRate: 'Chart type:bar chart',
-        pValue: '4.25e-18',
-        impact: 'High',
-      },
-      {
-        fieldName: 'referer',
-        fieldValue: 'http://www.elastic-elastic-elastic.com/success/timothy-l-kopra',
-        logRate: 'Chart type:bar chart',
-        pValue: '1.41e-53',
-        impact: 'High',
-      },
-      {
-        fieldName: 'response.keyword',
-        fieldValue: '404',
-        logRate: 'Chart type:bar chart',
-        pValue: '2.10e-35',
-        impact: 'High',
-      },
-    ],
+    analysisTable: kibanaSampleDataLogsSignificantTermsBase.map((d) => ({
+      ...d,
+      logRate: 'Chart type:bar chart',
+      impact: 'High',
+    })),
     fieldSelectorPopover: [
       'agent.keyword',
       'clientip',
