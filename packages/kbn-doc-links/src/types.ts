@@ -436,7 +436,10 @@ export interface DocLinks {
   readonly alerting: Readonly<{
     guide: string;
     actionTypes: string;
-    apmRules: string;
+    apmRulesErrorCount: string;
+    apmRulesTransactionDuration: string;
+    apmRulesTransactionError: string;
+    apmRulesAnomaly: string;
     emailAction: string;
     emailActionConfig: string;
     emailExchangeClientSecretConfig: string;

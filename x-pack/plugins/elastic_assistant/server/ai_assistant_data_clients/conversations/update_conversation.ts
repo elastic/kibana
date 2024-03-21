@@ -126,7 +126,7 @@ export const transformToUpdateScheme = (
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
     replacements,
     messages: messages?.map((message) => ({
-      '@timestamp': new Date(message.timestamp).toISOString(),
+      '@timestamp': message.timestamp,
       content: message.content,
       is_error: message.isError,
       reader: message.reader,

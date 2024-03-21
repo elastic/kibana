@@ -16,11 +16,12 @@ import { useManagementLocator } from './use_management_locator';
 
 export const DslRetentionTab = () => {
   const { dataStreamStatuses = [], loading, error } = useGetDataStreamStatuses();
-  if (loading === false && dataStreamStatuses.length === 0)
-    return <ErrorEmptyPrompt error={error?.message} />;
 
   if (error && (error as unknown as IHttpFetchError<ResponseErrorBody>).body?.statusCode === 403)
     return <Unprivileged hideIlmMessage={true} />;
+
+  if (loading === false && dataStreamStatuses.length === 0)
+    return <ErrorEmptyPrompt error={error?.message} />;
 
   return (
     <EuiBasicTable
