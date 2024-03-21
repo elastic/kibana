@@ -1515,20 +1515,28 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return ingestPipeline;
     },
 
-    async deleteIngestPipeline(
-      modelId: string,
-      usePrefix: boolean = true,
-      assertStatusCode: boolean = true
-    ) {
+    async ingestPipelineExists(modelId: string, usePrefix: boolean = true): Promise<boolean> {
+      const { status } = await esSupertest.get(
+        `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
+      );
+      if (status !== 200) return false;
+      return true;
+    },
+
+    async deleteIngestPipeline(modelId: string, usePrefix: boolean = true) {
       log.debug(`Deleting ingest pipeline for trained model with id "${modelId}"`);
+
+      if (!(await this.ingestPipelineExists(modelId, usePrefix))) {
+        log.debug('> Ingest pipeline does not exist, nothing to delete');
+        return;
+      }
+
       const { body, status } = await esSupertest.delete(
         `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
       );
+      this.assertResponseStatusCode(200, status, body);
 
-      if (assertStatusCode) {
-        this.assertResponseStatusCode(200, status, body);
-        log.debug('> Ingest pipeline deleted');
-      }
+      log.debug('> Ingest pipeline deleted');
     },
 
     async assureMlStatsIndexExists(timeout: number = 60 * 1000) {

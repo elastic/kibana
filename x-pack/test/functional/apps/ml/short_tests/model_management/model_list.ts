@@ -117,10 +117,9 @@ export default function ({ getService }: FtrProviderContext) {
         modelWithPipelineAndDestIndexExpectedValues.dataViewTitle
       );
       // Delete pipelines from deploy DFA model tests
-      await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false, false);
+      await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false);
       await ml.api.deleteIngestPipeline(
         modelWithoutPipelineDataExpectedValues.duplicateName,
-        false,
         false
       );
     });
