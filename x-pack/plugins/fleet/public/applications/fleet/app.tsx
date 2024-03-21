@@ -335,7 +335,14 @@ export const AppRoutes = memo(
               // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
               const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
               if (!shouldRedirectHash) {
-                return <Redirect to={FLEET_ROUTING_PATHS.agents} />;
+                // Redirect to the first authorized tab
+                const redirectTo = authz.fleet.readAgents
+                  ? FLEET_ROUTING_PATHS.agents
+                  : authz.fleet.readAgentPolicies
+                  ? FLEET_ROUTING_PATHS.policies
+                  : FLEET_ROUTING_PATHS.settings;
+
+                return <Redirect to={redirectTo} />;
               }
               const pathname = location.hash.replace(/^#(\/fleet)?/, '');
 
