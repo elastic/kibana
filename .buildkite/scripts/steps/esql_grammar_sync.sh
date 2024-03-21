@@ -47,10 +47,7 @@ synchronize_parser_grammar () {
 }
 
 report_main_step () {
-  echo ""
-  echo "-------------------------------------------------"
-  echo "MAIN STEP: $1"
-  echo "-------------------------------------------------"
+  echo "--- $1"
 }
 
 main () {
@@ -106,7 +103,7 @@ main () {
   report_main_step "Building ANTLR artifacts."
 
   # Bootstrap Kibana
-  yarn kbn bootstrap 
+  .buildkite/scripts/bootstrap.sh
 
   # Build ANTLR stuff
   cd ./packages/kbn-monaco/src  
@@ -122,7 +119,8 @@ main () {
 
   report_main_step "Changes committed. Creating pull request."
 
-  git push --set-upstream origin "$BRANCH_NAME"
+  git remote add kibanamachine https://github.com/kibanamachine/kibana.git
+  git push kibanamachine "$BRANCH_NAME"
 
   # Create a PR
   gh pr create --draft --title "$PR_TITLE" --body "$PR_BODY" --base main --head "$BRANCH_NAME" --label 'release_note:skip' --label 'Team:Visualizations' 
