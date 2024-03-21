@@ -345,21 +345,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
         switch (actionType as ResponseActionsApiCommandNames) {
           case 'isolate':
-            addToQueue(
-              ...(await this.checkPendingIsolateActions(
-                typePendingActions as Array<
-                  LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>
-                >
-              ))
-            );
-            break;
-
           case 'unisolate':
             addToQueue(
-              ...(await this.checkPendingReleaseActions(
+              ...(await this.checkPendingIsolateOrReleaseActions(
                 typePendingActions as Array<
                   LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>
-                >
+                >,
+                actionType as 'isolate' | 'unisolate'
               ))
             );
             break;
@@ -369,13 +361,15 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   /**
-   * Checks if the provided Isolate actions are complete and if so, then it builds the Response
+   * Checks if the provided Isolate or Unisolate actions are complete and if so, then it builds the Response
    * document for them and returns it. (NOTE: the response is NOT written to ES - only returned)
    * @param actionRequests
+   * @param command
    * @private
    */
-  private async checkPendingIsolateActions(
-    actionRequests: Array<LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>>
+  private async checkPendingIsolateOrReleaseActions(
+    actionRequests: Array<LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>>,
+    command: ResponseActionsApiCommandNames & ('isolate' | 'unisolate')
   ): Promise<LogsEndpointActionResponse[]> {
     const completedResponses: LogsEndpointActionResponse[] = [];
     const actionsByAgentId: {
@@ -393,21 +387,31 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           {
             term: {
               // Activity Types can be retrieved from S1 via API: `/web/api/v2.1/activities/types`
-              'sentinel_one.activity.type': [
-                // {
-                //    "id": 1001
-                //    "action": "Agent Disconnected From Network",
-                //    "descriptionTemplate": "Agent {{ computer_name }} was disconnected from network.",
-                // },
-                1001,
+              'sentinel_one.activity.type':
+                command === 'isolate'
+                  ? [
+                      // {
+                      //    "id": 1001
+                      //    "action": "Agent Disconnected From Network",
+                      //    "descriptionTemplate": "Agent {{ computer_name }} was disconnected from network.",
+                      // },
+                      1001,
 
-                // {
-                //    "id": 2010
-                //    "action": "Agent Mitigation Report Quarantine Network Failed",
-                //    "descriptionTemplate": "Agent {{ computer_name }} was unable to disconnect from network.",
-                // },
-                2010,
-              ],
+                      // {
+                      //    "id": 2010
+                      //    "action": "Agent Mitigation Report Quarantine Network Failed",
+                      //    "descriptionTemplate": "Agent {{ computer_name }} was unable to disconnect from network.",
+                      // },
+                      2010,
+                    ]
+                  : [
+                      // {
+                      //    "id": 1002
+                      //    "action": "Agent Reconnected To Network",
+                      //    "descriptionTemplate": "Agent {{ computer_name }} was connected to network.",
+                      // },
+                      1002,
+                    ],
             },
           },
         ],
@@ -432,8 +436,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               },
             });
           } else {
+            // This is an edge case and should never happen. But just in case :-)
             warnings.push(
-              `Isolate response action ID [${action.EndpointActions.action_id}] missing SentinelOne agent ID, thus unable to check on its status. Forcing it to complete.`
+              `${command} response action ID [${action.EndpointActions.action_id}] missing SentinelOne agent ID, thus unable to check on it's status. Forcing it to complete as failure.`
             );
 
             completedResponses.push(
@@ -442,7 +447,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
                 agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
                 data: { command: 'isolate' },
                 error: {
-                  message: `Unable to very if action completed. SentinelOne agent id missing on action request!`,
+                  message: `Unable to very if action completed. SentinelOne agent id ('meta.agentId') missing on action request document!`,
                 },
               })
             );
@@ -455,7 +460,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     };
 
     this.log.debug(
-      `searching for isolate responses from [${SENTINEL_ONE_ACTIVITY_INDEX}] with query:\n${stringify(
+      `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX}] index with query:\n${stringify(
         query
       )}`
     );
@@ -481,7 +486,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       .catch(catchAndWrapError);
 
     this.log.debug(
-      `Search results for SentinelOne isolate activity documents:\n${stringify(searchResults)}`
+      `Search results for SentinelOne ${command} activity documents:\n${stringify(searchResults)}`
     );
 
     for (const searchResultHit of searchResults.hits.hits) {
@@ -504,9 +509,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               agentId: Array.isArray(actionRequest.agent.id)
                 ? actionRequest.agent.id[0]
                 : actionRequest.agent.id,
-              data: { command: 'isolate' },
+              data: { command },
               error:
-                activityLogEntryType === 2010
+                activityLogEntryType === 2010 && command === 'isolate'
                   ? {
                       message:
                         activityLogEntryDescription ??
@@ -525,27 +530,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    this.log.debug(`Isolate action responses generated:\n${stringify(completedResponses)}`);
+    this.log.debug(`${command} action responses generated:\n${stringify(completedResponses)}`);
 
     if (warnings.length > 0) {
       this.log.warn(warnings.join('\n'));
     }
-
-    return completedResponses;
-  }
-
-  /**
-   * Checks if the provided Release actions are complete and if so, then it builds the Response
-   * document for them and returns it. (NOTE: the response is NOT written to ES - only returned)
-   * @param actionRequests
-   * @private
-   */
-  private async checkPendingReleaseActions(
-    actionRequests: Array<LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>>
-  ): Promise<LogsEndpointActionResponse[]> {
-    const completedResponses: LogsEndpointActionResponse[] = [];
-
-    // TODO:PT implement
 
     return completedResponses;
   }
