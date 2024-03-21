@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'max':
         return field ? `${field} お最高値` : '最高';
       case 'terms':
-        return field ? `${field}の上位の${values} 値` : 'トップの値';
+        return field ? `${field}の上位${values} の値` : 'トップの値';
       case 'sum':
         return '合計';
       default:
