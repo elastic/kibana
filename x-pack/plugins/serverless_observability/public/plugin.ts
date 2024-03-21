@@ -52,14 +52,12 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { observabilityShared, serverless, management } = setupDeps;
-    observabilityShared.setIsSidebarEnabled(false);
+    const { serverless, management } = setupDeps;
 
     const navigationTree$ = of(navigationTree);
     serverless.setProjectHome('/app/observability/landing');
     serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
 
-    management.setIsSidebarEnabled(false);
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.RULES],

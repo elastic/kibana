@@ -654,7 +654,9 @@
             "label": "conversation",
             "description": [],
             "signature": [
-              "{ id: string; title: string; last_updated: string; }"
+              "{ id: string; title: string; last_updated: string; token_count?: ",
+              "TokenCount",
+              " | undefined; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
@@ -5936,7 +5938,9 @@
             "label": "conversation",
             "description": [],
             "signature": [
-              "{ id: string; title: string; last_updated: string; }"
+              "{ id: string; title: string; last_updated: string; token_count?: ",
+              "TokenCount",
+              " | undefined; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
@@ -6493,7 +6497,9 @@
             "section": "def-common.StreamingChatResponseEventType",
             "text": "StreamingChatResponseEventType"
           },
-          ".ConversationCreate; } & { conversation: { id: string; title: string; last_updated: string; }; }"
+          ".ConversationCreate; } & { conversation: { id: string; title: string; last_updated: string; token_count?: ",
+          "TokenCount",
+          " | undefined; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
@@ -6516,7 +6522,9 @@
             "section": "def-common.Conversation",
             "text": "Conversation"
           },
-          ", \"namespace\" | \"user\" | \"conversation\"> & { conversation: { title: string; }; }"
+          ", \"namespace\" | \"user\" | \"conversation\"> & { conversation: { title: string; token_count?: ",
+          "TokenCount",
+          " | undefined; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
@@ -6539,7 +6547,9 @@
             "section": "def-common.StreamingChatResponseEventType",
             "text": "StreamingChatResponseEventType"
           },
-          ".ConversationUpdate; } & { conversation: { id: string; title: string; last_updated: string; }; }"
+          ".ConversationUpdate; } & { conversation: { id: string; title: string; last_updated: string; token_count?: ",
+          "TokenCount",
+          " | undefined; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
