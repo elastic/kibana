@@ -178,28 +178,26 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.navigation.navigateToAnomalyDetection();
 
-      const [testCalendarAdOne, testCalendarAdTwo] = await testSubjects.findAll(
-        'mlJobListRowDetailsToggle'
-      );
+      // withDetailsOpen will open up the details of the specific job, and then collapse the details section afterwards
+      for await (const job of [1, 2])
+        await ml.jobTable.withDetailsOpen(`test_calendar_ad_${job}`, async () => {
+          await testSubjects.existOrFail(
+            ml.jobTable.detailsSelector(
+              `test_calendar_ad_${job}`,
+              'mlJobRowDetailsSection-calendars'
+            )
+          );
+        });
 
-      // assert that the created calendar IS applied to test_calendar_ad_1 and test_calendar_ad_2
-      await testCalendarAdOne.click();
-      await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdOne.click();
-      await testCalendarAdTwo.click();
-      await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdTwo.click();
-
-      const [, , testCalendarAdThree, testCalendarAdFour] = await testSubjects.findAll(
-        'mlJobListRowDetailsToggle'
-      );
-      // assert that the created calendar is NOT applied to test_calendar_ad_3 and test_calendar_ad_4
-      await testCalendarAdThree.click();
-      await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdThree.click();
-      await testCalendarAdFour.click();
-      await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdFour.click();
+      for await (const job of [3, 4])
+        await ml.jobTable.withDetailsOpen(`test_calendar_ad_${job}`, async () => {
+          await testSubjects.missingOrFail(
+            ml.jobTable.detailsSelector(
+              `test_calendar_ad_${job}`,
+              'mlJobRowDetailsSection-calendars'
+            )
+          );
+        });
     }
 
     async function assertConnectedToJobsAppliedAfterCreation() {
@@ -213,28 +211,23 @@ export default function ({ getService }: FtrProviderContext) {
         'mlCalendarListColumnJobs'
       );
       expect(groupsAfterAddingMultiMetricsVisibleText).to.match(/multi-metric/);
+
       // Go back to the Anomaly Detection Jobs view
       await ml.navigation.navigateToAnomalyDetection();
 
-      const [, , testCalendarAdThree, testCalendarAdFour] = await testSubjects.findAll(
-        'mlJobListRowDetailsToggle'
-      );
-
       // Assert that the calendar is now connected to the multimetric job group
-      await testCalendarAdFour.click();
-      await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdFour.click();
-
-      // // withDetailsOpen will open up the details of the specific job, and then collapse the details section afterwards
-      //
-      // await ml.jobTable.withDetailsOpen(jobId, async () => {
-      //   await testSubjects.existOrFail(ml.jobTable.detailsSelector(jobId, 'mlJobRowDetailsSection-calendars'), { timeout: 1000 })
-      // }
+      await ml.jobTable.withDetailsOpen('test_calendar_ad_4', async () => {
+        await testSubjects.existOrFail(
+          ml.jobTable.detailsSelector('test_calendar_ad_4', 'mlJobRowDetailsSection-calendars')
+        );
+      });
 
       // Assert that the calendar is still not connected to the automated job group
-      await testCalendarAdThree.click();
-      await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdThree.click();
+      await ml.jobTable.withDetailsOpen('test_calendar_ad_3', async () => {
+        await testSubjects.missingOrFail(
+          ml.jobTable.detailsSelector('test_calendar_ad_3', 'mlJobRowDetailsSection-calendars')
+        );
+      });
     }
   });
 }
