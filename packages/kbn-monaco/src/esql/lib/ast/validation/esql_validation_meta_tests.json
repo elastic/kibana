@@ -251,7 +251,51 @@
       "error": false
     },
     {
+      "query": "from *a_i*dex*",
+      "error": false
+    },
+    {
+      "query": "from in*ex*",
+      "error": false
+    },
+    {
+      "query": "from *n*ex",
+      "error": false
+    },
+    {
+      "query": "from *n*ex*",
+      "error": false
+    },
+    {
+      "query": "from i*d*x*",
+      "error": false
+    },
+    {
+      "query": "from i*d*x",
+      "error": false
+    },
+    {
+      "query": "from i***x*",
+      "error": false
+    },
+    {
+      "query": "from i****",
+      "error": false
+    },
+    {
+      "query": "from i**",
+      "error": false
+    },
+    {
+      "query": "from index**",
+      "error": false
+    },
+    {
       "query": "from *ex",
+      "error": false
+    },
+    {
+      "query": "from *ex*",
       "error": false
     },
     {
@@ -2436,6 +2480,18 @@
     },
     {
       "query": "from index | drop s*",
+      "error": false
+    },
+    {
+      "query": "from index | drop s**Field",
+      "error": false
+    },
+    {
+      "query": "from index | drop *Field*",
+      "error": false
+    },
+    {
+      "query": "from index | drop s*F*d",
       "error": false
     },
     {
