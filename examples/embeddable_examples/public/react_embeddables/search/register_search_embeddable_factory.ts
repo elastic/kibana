@@ -12,15 +12,15 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { Api, Services, State } from './types';
 
-export const registerEmbeddableFactory = (services: Services) => {
+export const registerSearchEmbeddableFactory = (services: Services) => {
   const factory: ReactEmbeddableFactory<State, Api> = {
     type: 'SEARCH_REACT_EMBEDDABLE',
     deserializeState: (state) => {
       return state.rawState as State;
     },
     buildEmbeddable: async (state, buildApi) => {
-      const { buildEmbeddable } = await import('./build_embeddable');
-      return buildEmbeddable(state, buildApi, services);
+      const { buildSearchEmbeddable } = await import('./build_search_embeddable');
+      return buildSearchEmbeddable(state, buildApi, services);
     },
   };
 

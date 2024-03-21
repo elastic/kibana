@@ -39,8 +39,8 @@ import { registerMarkdownEditorEmbeddable } from './react_embeddables/eui_markdo
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
 import { registerFieldListFactory } from './react_embeddables/field_list/field_list_react_embeddable';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
-import { registerEmbeddableFactory as registerSearchEmbeddableFactory } from './react_embeddables/search/register_embeddable_factory';
-import { registerCreateAction as registerCreateSearchEmbeddableAction } from './react_embeddables/search/register_create_action';
+import { registerSearchEmbeddableFactory } from './react_embeddables/search/register_search_embeddable_factory';
+import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -124,7 +124,7 @@ export class EmbeddableExamplesPlugin
       data: deps.data,
       dataViews: deps.dataViews,
     });
-    registerCreateSearchEmbeddableAction(deps.uiActions);
+    registerAddSearchPanelAction(deps.uiActions);
 
     return {
       createSampleData: async () => {},

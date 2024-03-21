@@ -20,7 +20,7 @@ import {
 import { Api, State, Services } from './types';
 import { getCount } from './get_count';
 
-export const buildEmbeddable = async (
+export const buildSearchEmbeddable = async (
   state: State,
   buildApi: (
     apiRegistration: ReactEmbeddableApiRegistration<State, Api>,

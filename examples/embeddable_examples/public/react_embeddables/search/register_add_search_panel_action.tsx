@@ -10,7 +10,7 @@ import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-export const registerCreateAction = (uiActions: UiActionsStart) => {
+export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: 'CREATE_SEARCH_REACT_EMBEDDABLE',
     getDisplayName: () => 'Unified search example',
