@@ -21,6 +21,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
@@ -116,9 +117,13 @@ export interface TextBasedLanguagesEditorProps {
 
   /** hide @timestamp info **/
   hideTimeFilterInfo?: boolean;
+
+  /** hide query history **/
+  hideQueryHistory?: boolean;
 }
 
 interface TextBasedEditorDeps {
+  core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
@@ -172,13 +177,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   dataTestSubj,
   allowQueryCancellation,
   hideTimeFilterInfo,
+  hideQueryHistory,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application, docLinks, uiSettings } =
+  const { dataViews, expressions, indexManagementApiService, application, docLinks, core } =
     kibana.services;
+  const timeZone = core?.uiSettings?.get('dateFormat:tz');
+
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -232,8 +240,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [isLoading]);
 
   useEffect(() => {
-    const timeZone = uiSettings!.get('dateFormat:tz');
-    if (isQueryLoading) {
+    if (isQueryLoading || isLoading) {
       addQueriesToCache({
         queryString,
         timeZone,
@@ -244,7 +251,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         status: serverErrors?.length ? 'error' : serverWarning ? 'warning' : 'success',
       });
     }
-  }, [isQueryLoading, queryString, serverErrors?.length, serverWarning, uiSettings]);
+  }, [isLoading, isQueryLoading, queryString, serverErrors, serverWarning, timeZone]);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
@@ -916,6 +923,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         isHistoryOpen={isHistoryOpen}
                         setIsHistoryOpen={toggleHistory}
                         containerWidth={editorWidth}
+                        hideQueryHistory={hideQueryHistory}
                       />
                     )}
                   </div>
@@ -1019,6 +1027,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           isHistoryOpen={isHistoryOpen}
           setIsHistoryOpen={toggleHistory}
           containerWidth={editorWidth}
+          hideQueryHistory={hideQueryHistory}
         />
       )}
       {isCodeEditorExpanded && (

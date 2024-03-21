@@ -170,6 +170,10 @@ export function QueryHistory({
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  // get history items from local storage
+  const historyItems: QueryHistoryItem[] = getHistoryItems(sortDirection);
 
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
@@ -230,8 +234,6 @@ export function QueryHistory({
     return getTableColumns(containerWidth, isOnReducedSpaceLayout, actions);
   }, [actions, containerWidth, isOnReducedSpaceLayout]);
 
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-
   const onTableChange = ({ page, sort }: Criteria<QueryHistoryItem>) => {
     if (sort) {
       const { direction } = sort;
@@ -246,8 +248,6 @@ export function QueryHistory({
     },
   };
   const { euiTheme } = theme;
-  // get history items from local storage
-  const items: QueryHistoryItem[] = getHistoryItems(sortDirection);
   const extraStyling = isOnReducedSpaceLayout
     ? getReducedSpaceStyling()
     : `width: ${containerWidth}px`;
@@ -265,12 +265,7 @@ export function QueryHistory({
   `;
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      data-test-subj="TextBasedLangEditor-queryHistory"
-      css={containerCSS}
-      responsive={false}
-    >
+    <div data-test-subj="TextBasedLangEditor-queryHistory" css={containerCSS}>
       <EuiInMemoryTable
         tableCaption={i18n.translate(
           'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryTable',
@@ -279,14 +274,14 @@ export function QueryHistory({
           }
         )}
         responsive={false}
-        items={items}
+        items={historyItems}
         columns={columns}
         sorting={sorting}
         onChange={onTableChange}
         css={tableStyling}
         tableLayout={containerWidth < 560 ? 'auto' : 'fixed'}
       />
-    </EuiFlexGroup>
+    </div>
   );
 }
 

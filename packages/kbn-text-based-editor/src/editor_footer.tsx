@@ -104,6 +104,7 @@ interface EditorFooterProps {
   isLoading?: boolean;
   allowQueryCancellation?: boolean;
   hideTimeFilterInfo?: boolean;
+  hideQueryHistory?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -125,6 +126,7 @@ export const EditorFooter = memo(function EditorFooter({
   isHistoryOpen,
   containerWidth,
   setIsHistoryOpen,
+  hideQueryHistory,
 }: EditorFooterProps) {
   const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
@@ -242,10 +244,12 @@ export const EditorFooter = memo(function EditorFooter({
               {!Boolean(editorIsInline) && (
                 <>
                   <SubmitFeedbackComponent />
-                  <QueryHistoryAction
-                    toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
-                    isHistoryOpen={isHistoryOpen}
-                  />
+                  {!hideQueryHistory && (
+                    <QueryHistoryAction
+                      toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
+                      isHistoryOpen={isHistoryOpen}
+                    />
+                  )}
                 </>
               )}
               {!hideRunQueryText && (
@@ -285,11 +289,13 @@ export const EditorFooter = memo(function EditorFooter({
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
                   <SubmitFeedbackComponent isSpaceReduced={true} />
-                  <QueryHistoryAction
-                    toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
-                    isHistoryOpen={isHistoryOpen}
-                    isSpaceReduced={true}
-                  />
+                  {!hideQueryHistory && (
+                    <QueryHistoryAction
+                      toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
+                      isHistoryOpen={isHistoryOpen}
+                      isSpaceReduced={true}
+                    />
+                  )}
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="text"

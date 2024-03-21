@@ -18,6 +18,7 @@ export interface QueryHistoryItem {
   timeRan?: string;
   timeZone?: string;
   duration?: string;
+  queryRunning?: boolean;
 }
 
 const MAX_QUERIES_NUMBER = 20;
@@ -60,11 +61,13 @@ export const addQueriesToCache = (item: QueryHistoryItem) => {
     const toBeDeletedQuery = localStorageQueries[MAX_QUERIES_NUMBER - 1];
     cachedQueries.delete(toBeDeletedQuery.queryString);
   }
+
   if (item.queryString) {
     const tz = getMomentTimeZone(item.timeZone);
     cachedQueries.set(trimmedQueryString, {
       ...item,
       timeRan: moment().tz(tz).format('MMM. D, YY HH:mm:ss.SSS'),
+      queryRunning: true,
     });
   }
 };
@@ -79,9 +82,12 @@ export const updateCachedQueries = (item: QueryHistoryItem) => {
     const duration = moment(now).diff(moment(query?.timeRan));
     cachedQueries.set(trimmedQueryString, {
       ...query,
-      timeRan: moment(query?.timeRan).format('MMM. D, YY HH:mm:ss'),
-      duration: `${duration}ms`,
+      timeRan: query.queryRunning
+        ? moment(query?.timeRan).format('MMM. D, YY HH:mm:ss')
+        : query.timeRan,
+      duration: query.queryRunning ? `${duration}ms` : query.duration,
       status: item.status,
+      queryRunning: false,
     });
   }
   const queriesToStore = Array.from(cachedQueries, ([name, value]) => ({ ...value }));
