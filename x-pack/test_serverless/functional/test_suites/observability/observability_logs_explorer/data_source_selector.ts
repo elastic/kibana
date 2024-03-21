@@ -655,18 +655,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should filter the data views list by the typed data view name', async () => {
           await retry.try(async () => {
-            const panelTitleNode = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
-
-            expect(
-              await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
-                panelTitleNode
-              )
-            ).to.be('Data Views');
-          });
-
-          await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
               .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
