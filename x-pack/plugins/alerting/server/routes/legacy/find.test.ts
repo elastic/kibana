@@ -160,6 +160,13 @@ describe('findAlertRoute', () => {
 
     findAlertRoute(router, licenseState, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
+    const findResult = {
+      page: 1,
+      perPage: 1,
+      total: 0,
+      data: [],
+    };
+    rulesClient.find.mockResolvedValueOnce(findResult);
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, query: {} }, [
       'ok',
     ]);
@@ -175,6 +182,14 @@ describe('findAlertRoute', () => {
 
     findAlertRoute(router, licenseState, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
+
+    const findResult = {
+      page: 1,
+      perPage: 1,
+      total: 0,
+      data: [],
+    };
+    rulesClient.find.mockResolvedValueOnce(findResult);
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
@@ -204,6 +219,13 @@ describe('findAlertRoute', () => {
 
     findAlertRoute(router, licenseState, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
+    const findResult = {
+      page: 1,
+      perPage: 1,
+      total: 0,
+      data: [],
+    };
+    rulesClient.find.mockResolvedValueOnce(findResult);
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {

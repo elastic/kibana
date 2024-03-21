@@ -221,7 +221,7 @@ describe('bulkEnableRulesRoute', () => {
       // @ts-expect-error: body exists
       expect(routeRes.body.rules[0].actions).toEqual([
         {
-          connector_type_id: 'test',
+          actionTypeId: 'test',
           group: 'default',
           id: '2',
           params: {
@@ -230,7 +230,7 @@ describe('bulkEnableRulesRoute', () => {
           uuid: '123-456',
         },
         {
-          connector_type_id: 'test-2',
+          actionTypeId: 'test-2',
           id: 'system_action-id',
           params: {
             foo: true,

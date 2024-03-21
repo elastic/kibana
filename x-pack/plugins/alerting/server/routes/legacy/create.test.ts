@@ -460,6 +460,7 @@ describe('createAlertRoute', () => {
       usageCounter: mockUsageCounter,
     });
     const [, handler] = router.post.mock.calls[0];
+    rulesClient.create.mockResolvedValueOnce(createResult);
     const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('create', mockUsageCounter);

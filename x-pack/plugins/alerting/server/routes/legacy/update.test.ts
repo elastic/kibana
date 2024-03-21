@@ -249,6 +249,7 @@ describe('updateAlertRoute', () => {
 
     updateAlertRoute(router, licenseState, mockUsageCounter);
     const [, handler] = router.put.mock.calls[0];
+    rulesClient.update.mockResolvedValueOnce(mockedResponse);
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
     ]);

@@ -81,7 +81,6 @@ import {
   transformRuleDomainToRule,
 } from '../../transforms';
 import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
-import { bulkEditOperationsSchema } from './schemas';
 import {
   bulkEditDefaultActionsSchema,
   bulkEditSystemActionsSchema,
@@ -123,12 +122,6 @@ export async function bulkEditRules<Params extends RuleParams>(
   context: RulesClientContext,
   options: BulkEditOptions<Params>
 ): Promise<BulkEditResult<Params>> {
-  try {
-    bulkEditOperationsSchema.validate(options.operations);
-  } catch (error) {
-    throw Boom.badRequest(`Error validating bulk edit rules operations - ${error.message}`);
-  }
-
   const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
   const ids = (options as BulkEditOptionsIds<Params>).ids;
   const actionsClient = await context.getActionsClient();
