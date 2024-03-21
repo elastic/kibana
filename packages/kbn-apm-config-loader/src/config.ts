@@ -296,7 +296,10 @@ export class ApmConfiguration {
     const { servicesOverrides, redactUsers, ...configFromKibanaConfig } =
       this.getConfigFromKibanaConfig();
     const configFromEnv = this.getConfigFromEnv(configFromKibanaConfig);
-    const config = deepmerge({}, configFromKibanaConfig, configFromEnv);
+    const config = [configFromKibanaConfig, configFromEnv].reduce<AgentConfigOptions>(
+      (acc, conf) => deepmerge(acc, conf),
+      {}
+    );
 
     if (config.active === false && config.contextPropagationOnly !== false) {
       throw new Error(
