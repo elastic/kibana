@@ -129,10 +129,12 @@ export const deleteConnectors = () => {
         return connector.id;
       });
       ids.forEach((id) => {
-        rootRequest({
-          method: 'DELETE',
-          url: `api/actions/connector/${id}`,
-        });
+        if (id !== 'Elastic-Cloud-SMTP') {
+          rootRequest({
+            method: 'DELETE',
+            url: `api/actions/connector/${id}`,
+          });
+        }
       });
     }
   });
