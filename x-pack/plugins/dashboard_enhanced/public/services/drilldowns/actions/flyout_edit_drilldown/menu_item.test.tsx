@@ -7,6 +7,7 @@
 
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
+import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
 import { act, render } from '@testing-library/react';
 import React from 'react';
@@ -19,7 +20,7 @@ test('<MenuItem/>', () => {
     dynamicActions: { events: [] },
   });
 
-  const state = createStateContainer<{ events: object[] }>({ events: [] });
+  const state = createStateContainer<{ events: SerializedEvent[] }>({ events: [] });
   const context = {
     embeddable: {
       enhancements: {
@@ -36,7 +37,7 @@ test('<MenuItem/>', () => {
 
   act(() => {
     dynamicActionsState$.next({
-      dynamicActions: { events: [{} as any] },
+      dynamicActions: { events: [{} as SerializedEvent] },
     });
   });
 

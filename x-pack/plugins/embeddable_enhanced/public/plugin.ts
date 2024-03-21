@@ -46,11 +46,6 @@ export interface StartDependencies {
   embeddable: EmbeddableStart;
   uiActionsEnhanced: AdvancedUiActionsStart;
 }
-export interface SerializedReactEmbeddableDynamicActions {
-  title?: string;
-  description?: string;
-  hidePanelTitles?: boolean;
-}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupContract {}

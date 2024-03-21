@@ -13,6 +13,7 @@ import { DynamicActionStorage, DynamicActionStorageApi } from './dynamic_action_
 // use real const to make test fail in case someone accidentally changes it
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { DynamicActionsSerializedState } from '../plugin';
+import { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
 
 const getApi = (): DynamicActionStorageApi => {
   const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
@@ -39,7 +40,7 @@ describe('EmbeddableActionStorage', () => {
       const event: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       const events1 = api.dynamicActionsState$.getValue()?.dynamicActions.events ?? [];
@@ -53,7 +54,7 @@ describe('EmbeddableActionStorage', () => {
             {
               eventId: 'EVENT_ID',
               triggers: ['TRIGGER-ID'],
-              action: {} as any,
+              action: {} as SerializedAction,
             },
           ],
         },
@@ -70,17 +71,17 @@ describe('EmbeddableActionStorage', () => {
       const event1: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID1',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
       const event2: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID2',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
       const event3: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID3',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       const events1 = api.dynamicActionsState$.getValue()?.dynamicActions.events ?? [];
@@ -104,7 +105,7 @@ describe('EmbeddableActionStorage', () => {
       const event: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       await storage.create(event);
@@ -132,14 +133,14 @@ describe('EmbeddableActionStorage', () => {
         triggers: ['TRIGGER-ID'],
         action: {
           name: 'foo',
-        } as any,
+        } as SerializedAction,
       };
       const event2: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID',
         triggers: ['TRIGGER-ID'],
         action: {
           name: 'bar',
-        } as any,
+        } as SerializedAction,
       };
 
       await storage.create(event1);
@@ -158,28 +159,28 @@ describe('EmbeddableActionStorage', () => {
         triggers: ['TRIGGER-ID'],
         action: {
           name: 'foo',
-        } as any,
+        } as SerializedAction,
       };
       const event2: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID2',
         triggers: ['TRIGGER-ID'],
         action: {
           name: 'bar',
-        } as any,
+        } as SerializedAction,
       };
       const event22: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID2',
         triggers: ['TRIGGER-ID'],
         action: {
           name: 'baz',
-        } as any,
+        } as SerializedAction,
       };
       const event3: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID3',
         triggers: ['TRIGGER-ID'],
         action: {
           name: 'qux',
-        } as any,
+        } as SerializedAction,
       };
 
       await storage.create(event1);
@@ -206,7 +207,7 @@ describe('EmbeddableActionStorage', () => {
       const event: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       const [, error] = await of(storage.update(event));
@@ -224,12 +225,12 @@ describe('EmbeddableActionStorage', () => {
       const event1: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID1',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
       const event2: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID2',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       await storage.create(event1);
@@ -255,7 +256,7 @@ describe('EmbeddableActionStorage', () => {
       const event: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       await storage.create(event);
@@ -274,21 +275,21 @@ describe('EmbeddableActionStorage', () => {
         triggers: ['TRIGGER-ID'],
         action: {
           name: 'foo',
-        } as any,
+        } as SerializedAction,
       };
       const event2: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID2',
         triggers: ['TRIGGER-ID'],
         action: {
           name: 'bar',
-        } as any,
+        } as SerializedAction,
       };
       const event3: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID3',
         triggers: ['TRIGGER-ID'],
         action: {
           name: 'qux',
-        } as any,
+        } as SerializedAction,
       };
 
       await storage.create(event1);
@@ -331,7 +332,7 @@ describe('EmbeddableActionStorage', () => {
       const event: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       await storage.create(event);
@@ -357,7 +358,7 @@ describe('EmbeddableActionStorage', () => {
       const event: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       await storage.create(event);
@@ -383,7 +384,7 @@ describe('EmbeddableActionStorage', () => {
       const event: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       await storage.create(event);
@@ -401,17 +402,17 @@ describe('EmbeddableActionStorage', () => {
       const event1: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID1',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
       const event2: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID2',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
       const event3: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID3',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       await storage.create(event1);
@@ -449,14 +450,14 @@ describe('EmbeddableActionStorage', () => {
       await storage.create({
         eventId: 'EVENT_ID1',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       });
       expect(await storage.count()).toBe(1);
 
       await storage.create({
         eventId: 'EVENT_ID2',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       });
       expect(await storage.count()).toBe(2);
 
@@ -486,13 +487,13 @@ describe('EmbeddableActionStorage', () => {
       const event1: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID1',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       const event2: UiActionsEnhancedSerializedEvent = {
         eventId: 'EVENT_ID2',
         triggers: ['TRIGGER-ID'],
-        action: {} as any,
+        action: {} as SerializedAction,
       };
 
       expect(await storage.list()).toEqual([]);

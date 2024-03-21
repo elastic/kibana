@@ -8,6 +8,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
@@ -39,7 +40,7 @@ function createAction(overlays = coreMock.createStart().overlays) {
   return new FlyoutEditDrilldownAction(params);
 }
 const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
-  dynamicActions: { events: [{} as any] },
+  dynamicActions: { events: [{} as SerializedEvent] },
 });
 
 const compatibleEmbeddableApi = {

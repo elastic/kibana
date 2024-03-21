@@ -7,7 +7,10 @@
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EmbeddableApiContext, PublishesWritableViewMode } from '@kbn/presentation-publishing';
-import { DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public/dynamic_actions';
+import {
+  DynamicActionManager,
+  SerializedEvent,
+} from '@kbn/ui-actions-enhanced-plugin/public/dynamic_actions';
 import { BehaviorSubject } from 'rxjs';
 import { HasDynamicActions } from '../embeddables/interfaces/has_dynamic_actions';
 import { DynamicActionsSerializedState } from '../plugin';
@@ -16,7 +19,7 @@ import {
   PanelNotificationsActionApi,
 } from './panel_notifications_action';
 
-const createContext = (events: any[] = []): EmbeddableApiContext => {
+const createContext = (events: SerializedEvent[] = []): EmbeddableApiContext => {
   const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
     dynamicActions: { events },
   });
@@ -60,7 +63,7 @@ describe('PanelNotificationsAction', () => {
       const action = new PanelNotificationsAction();
 
       (context.embeddable as HasDynamicActions).setDynamicActions({
-        dynamicActions: { events: [{}, {}, {}] as any[] },
+        dynamicActions: { events: [{}, {}, {}] as SerializedEvent[] },
       });
 
       const name = action.getDisplayName(context);
@@ -106,7 +109,7 @@ describe('PanelNotificationsAction', () => {
       const action = new PanelNotificationsAction();
 
       (context.embeddable as HasDynamicActions).setDynamicActions({
-        dynamicActions: { events: [{}, {}] as any[] },
+        dynamicActions: { events: [{}, {}] as SerializedEvent[] },
       });
 
       const name = action.getDisplayNameTooltip(context);
