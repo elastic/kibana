@@ -105,9 +105,15 @@ export const calculateAuthz = ({
         allAgentPolicies: fleet.agentPolicies?.all ?? false,
         addAgents: (fleet.agents?.all && fleet.settings?.read) ?? false,
         addFleetServers: (fleet.agents?.all && fleet.settings?.all) ?? false,
-
+        // Setup is needed to access the Fleet UI
+        setup:
+          fleet.all ||
+          fleet.read ||
+          fleet.agents?.read ||
+          fleet.agentPolicies?.read ||
+          fleet.settings?.read ||
+          fleet.setup,
         // These are currently used by Fleet Server setup
-        setup: fleet.all || fleet.read || fleet.setup,
         readEnrollmentTokens: (fleet.setup || fleet.agents?.all) ?? false,
         readAgentPolicies: (fleet.setup || fleet.agentPolicies?.read) ?? false,
       }
