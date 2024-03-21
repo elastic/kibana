@@ -40,6 +40,67 @@ export interface UseComparisonCellValueProps {
   getDocById: (id: string) => DataTableRecord | undefined;
 }
 
+export const useComparisonCellValue = ({
+  dataView,
+  comparisonFields,
+  fieldColumnId,
+  selectedDocs,
+  showDiff,
+  diffMode,
+  showDiffDecorations,
+  fieldFormats,
+  getDocById,
+}: UseComparisonCellValueProps) => {
+  const comparisonBaseDocId = selectedDocs[0];
+  const comparisonBaseDoc = useMemo(
+    () => getDocById(comparisonBaseDocId)?.flattened,
+    [comparisonBaseDocId, getDocById]
+  );
+
+  const ComparisonCellValue = useCallback(
+    (innerProps: EuiDataGridCellValueElementProps) => {
+      return (
+        <InnerCellValue
+          dataView={dataView}
+          comparisonFields={comparisonFields}
+          fieldColumnId={fieldColumnId}
+          comparisonBaseDocId={comparisonBaseDocId}
+          comparisonBaseDoc={comparisonBaseDoc}
+          showDiff={showDiff}
+          diffMode={diffMode}
+          showDiffDecorations={showDiffDecorations}
+          fieldFormats={fieldFormats}
+          getDocById={getDocById}
+          {...innerProps}
+        />
+      );
+    },
+    [
+      comparisonBaseDoc,
+      comparisonBaseDocId,
+      comparisonFields,
+      dataView,
+      diffMode,
+      fieldColumnId,
+      fieldFormats,
+      getDocById,
+      showDiff,
+      showDiffDecorations,
+    ]
+  );
+
+  return ComparisonCellValue;
+};
+
+interface InnerCellValueProps
+  extends Omit<UseComparisonCellValueProps, 'selectedDocs'>,
+    EuiDataGridCellValueElementProps {
+  comparisonBaseDocId: string;
+  comparisonBaseDoc: DataTableRecord['flattened'] | undefined;
+}
+
+const EMPTY_VALUE = '-';
+
 const matchingCellCss = css`
   .unifiedDataTable__cellValue {
     &,
@@ -57,81 +118,6 @@ const differentCellCss = css`
     }
   }
 `;
-
-export const useComparisonCellValue = ({
-  dataView,
-  comparisonFields,
-  fieldColumnId,
-  selectedDocs,
-  showDiff,
-  diffMode,
-  showDiffDecorations,
-  fieldFormats,
-  getDocById,
-}: UseComparisonCellValueProps) => {
-  const comparisonBaseDocId = selectedDocs[0];
-  const comparisonBaseDoc = useMemo(
-    () => getDocById(comparisonBaseDocId)?.flattened,
-    [comparisonBaseDocId, getDocById]
-  );
-  const matchBackgroundColor = useEuiBackgroundColor('success');
-  const diffBackgroundColor = useEuiBackgroundColor('danger');
-  const baseDocCellCss = css`
-    background-color: ${useEuiBackgroundColor('success', { method: 'transparent' })};
-  `;
-
-  const ComparisonCellValue = useCallback(
-    (innerProps: EuiDataGridCellValueElementProps) => {
-      return (
-        <InnerCellValue
-          dataView={dataView}
-          comparisonFields={comparisonFields}
-          fieldColumnId={fieldColumnId}
-          comparisonBaseDocId={comparisonBaseDocId}
-          comparisonBaseDoc={comparisonBaseDoc}
-          showDiff={showDiff}
-          diffMode={diffMode}
-          showDiffDecorations={showDiffDecorations}
-          fieldFormats={fieldFormats}
-          getDocById={getDocById}
-          baseDocCellCss={baseDocCellCss}
-          matchBackgroundColor={matchBackgroundColor}
-          diffBackgroundColor={diffBackgroundColor}
-          {...innerProps}
-        />
-      );
-    },
-    [
-      baseDocCellCss,
-      comparisonBaseDoc,
-      comparisonBaseDocId,
-      comparisonFields,
-      dataView,
-      diffBackgroundColor,
-      diffMode,
-      fieldColumnId,
-      fieldFormats,
-      getDocById,
-      matchBackgroundColor,
-      showDiff,
-      showDiffDecorations,
-    ]
-  );
-
-  return ComparisonCellValue;
-};
-
-interface InnerCellValueProps
-  extends Omit<UseComparisonCellValueProps, 'selectedDocs'>,
-    EuiDataGridCellValueElementProps {
-  comparisonBaseDocId: string;
-  comparisonBaseDoc: DataTableRecord['flattened'] | undefined;
-  baseDocCellCss: ReturnType<typeof css>;
-  matchBackgroundColor: string;
-  diffBackgroundColor: string;
-}
-
-const EMPTY_VALUE = '-';
 
 const indicatorCss = css`
   position: absolute;
@@ -171,9 +157,6 @@ const InnerCellValue = ({
   showDiffDecorations,
   fieldColumnId,
   getDocById,
-  baseDocCellCss,
-  matchBackgroundColor,
-  diffBackgroundColor,
   fieldFormats,
   rowIndex,
   columnId,
@@ -185,15 +168,17 @@ const InnerCellValue = ({
   const base = comparisonBaseDoc?.[fieldName];
   const comparison = doc?.flattened[fieldName];
   const diff = useDiff({ base, comparison, showDiff, diffMode });
+  const matchBackgroundColor = useEuiBackgroundColor('success');
+  const diffBackgroundColor = useEuiBackgroundColor('danger');
+  const baseDocCellCss = css`
+    background-color: ${useEuiBackgroundColor('subdued', { method: 'transparent' })};
+  `;
 
   useEffect(() => {
-    if (!showDiff || diffMode !== 'basic') {
-      setCellProps({ css: undefined });
-      return;
-    }
-
     if (columnId === comparisonBaseDocId) {
       setCellProps({ css: baseDocCellCss });
+    } else if (!showDiff || diffMode !== 'basic') {
+      setCellProps({ css: undefined });
     } else if (columnId !== fieldColumnId) {
       if (isEqual(base, comparison)) {
         setCellProps({ css: matchingCellCss });

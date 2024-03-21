@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiDataGridColumn, EuiListGroupItemProps } from '@elastic/eui';
+import {
+  EuiDataGridColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiListGroupItemProps,
+} from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useMemo } from 'react';
 
 export interface UseComparisonColumnsProps {
@@ -93,6 +100,15 @@ export const useComparisonColumns = ({
 
       currentColumns.push({
         id: docId,
+        display:
+          docIndex === 0 ? (
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="pinFilled" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{doc.raw._id}</EuiFlexItem>
+            </EuiFlexGroup>
+          ) : undefined,
         displayAsText: doc.raw._id,
         initialWidth: columnWidth,
         isSortable: false,

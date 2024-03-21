@@ -105,7 +105,10 @@ const CompareDocuments = ({
     []
   );
   const comparisonInMemory: EuiDataGridInMemory = useMemo(() => ({ level: 'sorting' }), []);
-  const gridStyle: EuiDataGridStyle = useMemo(() => ({ ...GRID_STYLE, rowHover: undefined }), []);
+  const gridStyle: EuiDataGridStyle = useMemo(
+    () => ({ ...GRID_STYLE, rowHover: undefined, stripes: undefined }),
+    []
+  );
   const additionalControls = useMemo(
     () => (
       <ComparisonControls
