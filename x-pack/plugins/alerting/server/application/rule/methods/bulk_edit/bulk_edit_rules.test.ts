@@ -1373,30 +1373,32 @@ describe('bulkEdit()', () => {
         },
       ]);
 
-      await expect(
-        rulesClient.bulkEdit({
-          filter: '',
-          operations: [
-            {
-              field: 'actions',
-              operation: 'add',
-              value: [action],
+      const res = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [action],
+          },
+        ],
+      });
+
+      expect(res).toEqual({
+        errors: [
+          {
+            message:
+              'Error validating bulk edit rules operations - [0.frequency]: definition for this key is missing',
+            rule: {
+              id: '1',
+              name: 'my rule name',
             },
-          ],
-        })
-      ).rejects.toMatchInlineSnapshot(`
-        [Error: Error validating bulk edit rules operations - [0]: types that failed validation:
-        - [0.0.field]: expected value to equal [tags]
-        - [0.1.value.0]: types that failed validation:
-         - [0.value.0.0.group]: expected value of type [string] but got [undefined]
-         - [0.value.0.1.frequency]: definition for this key is missing
-        - [0.2.operation]: expected value to equal [set]
-        - [0.3.operation]: expected value to equal [set]
-        - [0.4.operation]: expected value to equal [set]
-        - [0.5.operation]: expected value to equal [set]
-        - [0.6.operation]: expected value to equal [delete]
-        - [0.7.operation]: expected value to equal [set]]
-      `);
+          },
+        ],
+        rules: [],
+        skipped: [],
+        total: 1,
+      });
     });
 
     it('should throw an error if the system action contains the alertsFilter', async () => {
@@ -1423,30 +1425,32 @@ describe('bulkEdit()', () => {
         },
       ]);
 
-      await expect(
-        rulesClient.bulkEdit({
-          filter: '',
-          operations: [
-            {
-              field: 'actions',
-              operation: 'add',
-              value: [action],
+      const res = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [action],
+          },
+        ],
+      });
+
+      expect(res).toEqual({
+        errors: [
+          {
+            message:
+              'Error validating bulk edit rules operations - [0.alertsFilter]: definition for this key is missing',
+            rule: {
+              id: '1',
+              name: 'my rule name',
             },
-          ],
-        })
-      ).rejects.toMatchInlineSnapshot(`
-        [Error: Error validating bulk edit rules operations - [0]: types that failed validation:
-        - [0.0.field]: expected value to equal [tags]
-        - [0.1.value.0]: types that failed validation:
-         - [0.value.0.0.group]: expected value of type [string] but got [undefined]
-         - [0.value.0.1.alertsFilter]: definition for this key is missing
-        - [0.2.operation]: expected value to equal [set]
-        - [0.3.operation]: expected value to equal [set]
-        - [0.4.operation]: expected value to equal [set]
-        - [0.5.operation]: expected value to equal [set]
-        - [0.6.operation]: expected value to equal [delete]
-        - [0.7.operation]: expected value to equal [set]]
-      `);
+          },
+        ],
+        rules: [],
+        skipped: [],
+        total: 1,
+      });
     });
 
     it('should throw an error if the default action does not contain the group', async () => {
