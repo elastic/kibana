@@ -12,7 +12,7 @@ import type { AnomalyExplorerChartsEmbeddableType } from '../constants';
 import type { MlEmbeddableBaseApi } from '../types';
 
 export interface AnomalyChartsFieldSelectionApi {
-  jobIds: JobId[];
+  jobIds: PublishingSubject<JobId[]>;
   entityFields: PublishingSubject<MlEntityField[] | undefined>;
 }
 

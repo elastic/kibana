@@ -48,7 +48,7 @@ export function createEditSwimlanePanelAction(
         const { jobIds, viewBy, swimlaneType, panelTitle } = context.embeddable;
 
         const result = await resolveAnomalySwimlaneUserInput(coreStart, deps.data.dataViews, {
-          jobIds,
+          jobIds: jobIds.getValue(),
           swimlaneType: swimlaneType.getValue(),
           viewBy: viewBy.getValue(),
           title: panelTitle?.getValue(),

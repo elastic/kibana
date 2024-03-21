@@ -12,7 +12,7 @@ import type { AnomalySwimLaneEmbeddableType } from '../constants';
 import type { AnomalySwimlaneEmbeddableUserInput, MlEmbeddableBaseApi } from '../types';
 
 export interface AnomalySwimLaneComponentApi {
-  jobIds: JobId[];
+  jobIds: PublishingSubject<JobId[]>;
   swimlaneType: PublishingSubject<SwimlaneType>;
   viewBy: PublishingSubject<string>;
   perPage: PublishingSubject<number>;

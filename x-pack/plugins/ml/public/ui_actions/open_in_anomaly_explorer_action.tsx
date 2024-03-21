@@ -95,7 +95,7 @@ export function createOpenInExplorerAction(
         return locator.getUrl({
           page: 'explorer',
           pageState: {
-            jobIds,
+            jobIds: jobIds.getValue(),
             timeRange: getTimeRange(embeddable),
             mlExplorerSwimlane: {
               viewByFromPage: fromPage.getValue(),
@@ -148,7 +148,7 @@ export function createOpenInExplorerAction(
         return locator.getUrl({
           page: 'explorer',
           pageState: {
-            jobIds,
+            jobIds: jobIds.getValue(),
             timeRange: getTimeRange(embeddable),
             // @ts-ignore QueryDslQueryContainer is not compatible with SerializableRecord
             ...(mlExplorerFilter ? ({ mlExplorerFilter } as SerializableRecord) : {}),
