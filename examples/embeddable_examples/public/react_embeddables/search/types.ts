@@ -12,6 +12,7 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import {
   HasParentApi,
+  PublishesDataLoading,
   PublishesDataViews,
   PublishesUnifiedSearch,
   PublishesWritableUnifiedSearch,
@@ -23,6 +24,7 @@ export interface State {
 
 export type Api = DefaultEmbeddableApi<State> &
   PublishesDataViews &
+  PublishesDataLoading &
   Pick<PublishesWritableUnifiedSearch, 'timeRange$' | 'setTimeRange'> &
   Partial<HasParentApi<PublishesUnifiedSearch>>;
 
