@@ -56,9 +56,11 @@ test('generates gauge chart config', async () => {
       chartType: 'gauge',
       title: 'test',
       dataset: {
-        esql: 'from test | count=count()',
+        esql: 'from test | count=count() | eval max=1000 | eval goal=500',
       },
       value: 'count',
+      queryMaxValue: 'max',
+      queryGoalValue: 'goal',
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
@@ -87,16 +89,32 @@ test('generates gauge chart config', async () => {
                     "columnId": "metric_formula_accessor",
                     "fieldName": "count",
                   },
+                  Object {
+                    "columnId": "metric_formula_accessor_max",
+                    "fieldName": "max",
+                  },
+                  Object {
+                    "columnId": "metric_formula_accessor_goal",
+                    "fieldName": "goal",
+                  },
                 ],
                 "columns": Array [
                   Object {
                     "columnId": "metric_formula_accessor",
                     "fieldName": "count",
                   },
+                  Object {
+                    "columnId": "metric_formula_accessor_max",
+                    "fieldName": "max",
+                  },
+                  Object {
+                    "columnId": "metric_formula_accessor_goal",
+                    "fieldName": "goal",
+                  },
                 ],
                 "index": "test",
                 "query": Object {
-                  "esql": "from test | count=count()",
+                  "esql": "from test | count=count() | eval max=1000 | eval goal=500",
                 },
               },
             },
@@ -109,11 +127,14 @@ test('generates gauge chart config', async () => {
           "query": "",
         },
         "visualization": Object {
+          "goalAccessor": "metric_formula_accessor_goal",
           "labelMajorMode": "auto",
           "layerId": "layer_0",
           "layerType": "data",
+          "maxAccessor": "metric_formula_accessor_max",
           "metricAccessor": "metric_formula_accessor",
           "shape": "horizontalBullet",
+          "showBar": true,
           "ticksPosition": "auto",
         },
       },
