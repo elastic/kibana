@@ -94,7 +94,6 @@ export const getSearchConversationMock =
             exclude_from_last_conversation_storage: false,
             api_config: {
               connector_id: 'c1',
-              connector_type_title: 'title-c-1',
               default_system_prompt_id: 'prompt-1',
               model: 'test',
               provider: 'Azure OpenAI',

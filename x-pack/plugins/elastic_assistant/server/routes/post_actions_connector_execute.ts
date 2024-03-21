@@ -191,8 +191,8 @@ export const postActionsConnectorExecuteRoute = (
           }
 
           const connectorId = decodeURIComponent(request.params.connectorId);
-          const connector = await actionsClient.get({
-            id: connectorId,
+          const connectors = await actionsClient.getBulk({
+            ids: [connectorId],
             throwIfSystemAction: false,
           });
 
@@ -208,13 +208,13 @@ export const postActionsConnectorExecuteRoute = (
               actions,
               request,
               connectorId,
-              llmType: connector.actionTypeId,
+              llmType: connectors[0]?.actionTypeId,
               params: {
                 subAction: request.body.subAction,
                 subActionParams: {
                   model: request.body.model,
                   messages: [...(prevMessages ?? []), ...(newMessage ? [newMessage] : [])],
-                  ...(connector.actionTypeId === '.gen-ai'
+                  ...(connectors[0]?.actionTypeId === '.gen-ai'
                     ? { n: 1, stop: null, temperature: 0.2 }
                     : {}),
                 },

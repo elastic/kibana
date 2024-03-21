@@ -162,7 +162,6 @@ describe('transformToUpdateScheme', () => {
       title: 'test',
       api_config: {
         connector_id: '1',
-        connector_type_title: 'test-connector',
         default_system_prompt_id: 'default-system-prompt',
         model: 'test-model',
         provider: 'OpenAI',
