@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * This is an internal hard coded feature flag so we can easily turn on/off the
+ * "Change Point Detection UI" during development until the first release.
+ */
+export const CHANGE_POINT_DETECTION_ENABLED = true;
+
 export const CASES_ATTACHMENT_CHANGE_POINT_CHART = 'aiopsChangePointChart';
 
 export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart' as const;

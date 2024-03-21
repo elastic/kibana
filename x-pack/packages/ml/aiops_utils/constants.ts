@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+/**
+ * AIOPS_PLUGIN_ID is used as a unique identifier for the aiops plugin
+ */
+export const AIOPS_PLUGIN_ID = 'aiops';
+
 export const AIOPS_TELEMETRY_ID = {
   AIOPS_DEFAULT_SOURCE: 'ml_aiops_labs',
   AIOPS_ANALYSIS_RUN_ORIGIN: 'aiops-analysis-run-origin',
