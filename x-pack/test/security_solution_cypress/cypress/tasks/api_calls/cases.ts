@@ -39,12 +39,14 @@ export const getCases = () =>
 
 export const deleteCases = async () => {
   getCases().then(($response) => {
-    const ids = $response.body.cases.map((myCase) => {
-      return `"${myCase.id}"`;
-    });
-    rootRequest({
-      method: 'DELETE',
-      url: `/api/cases?ids=[${ids}]`,
-    });
+    if ($response.body.cases.length > 0) {
+      const ids = $response.body.cases.map((myCase) => {
+        return `"${myCase.id}"`;
+      });
+      rootRequest({
+        method: 'DELETE',
+        url: `/api/cases?ids=[${ids}]`,
+      });
+    }
   });
 };
