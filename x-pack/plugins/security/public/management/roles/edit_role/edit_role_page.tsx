@@ -23,6 +23,7 @@ import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'reac
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
+import type { BuildFlavor } from '@kbn/config';
 import type {
   Capabilities,
   DocLinksStart,
@@ -88,6 +89,7 @@ interface Props {
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
   spacesApiUi?: SpacesApiUi;
+  buildFlavor: BuildFlavor;
 }
 
 function useRemoteClusters(http: HttpStart) {
@@ -303,6 +305,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   notifications,
   history,
   spacesApiUi,
+  buildFlavor,
 }) => {
   const isDarkMode = useDarkMode();
 
@@ -427,7 +430,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
             />
           }
           helpText={
-            !isRoleReserved && isEditingExistingRole ? (
+            !isEditingExistingRole ? (
+              <FormattedMessage
+                id="xpack.security.management.createRole.roleNameFormRowHelpText"
+                defaultMessage="Once the role is created you can no longer edit its name."
+              />
+            ) : !isRoleReserved ? (
               <FormattedMessage
                 id="xpack.security.management.editRole.roleNameFormRowHelpText"
                 defaultMessage="A role's name cannot be changed once it has been created."
@@ -486,6 +494,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
           docLinks={docLinks}
           canUseRemoteIndices={featureCheckState.value?.canUseRemoteIndices}
           isDarkMode={isDarkMode}
+          buildFlavor={buildFlavor}
         />
       </div>
     );

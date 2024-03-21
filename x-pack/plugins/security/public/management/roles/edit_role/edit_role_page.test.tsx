@@ -9,6 +9,7 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import type { BuildFlavor } from '@kbn/config';
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -142,12 +143,14 @@ function getProps({
   canManageSpaces = true,
   spacesEnabled = true,
   canUseRemoteIndices = true,
+  buildFlavor = 'traditional',
 }: {
   action: 'edit' | 'clone';
   role?: Role;
   canManageSpaces?: boolean;
   spacesEnabled?: boolean;
   canUseRemoteIndices?: boolean;
+  buildFlavor?: BuildFlavor;
 }) {
   const rolesAPIClient = rolesAPIClientMock.create();
   rolesAPIClient.getRole.mockResolvedValue(role);
@@ -205,6 +208,7 @@ function getProps({
     uiCapabilities: buildUICapabilities(canManageSpaces),
     history: scopedHistoryMock.create(),
     spacesApiUi,
+    buildFlavor,
   };
 }
 
@@ -695,6 +699,43 @@ describe('<EditRolePage />', () => {
     expectSaveFormButtons(wrapper);
   });
 
+  it('can render for serverless buildFlavor', async () => {
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
+
+    const wrapper = mountWithIntl(
+      <KibanaContextProvider services={coreStart}>
+        <EditRolePage
+          {...{
+            ...getProps({
+              action: 'edit',
+              spacesEnabled: true,
+              role: {
+                name: 'my custom role',
+                metadata: {},
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+              },
+              buildFlavor: 'serverless',
+            }),
+            dataViews,
+          }}
+        />
+      </KibanaContextProvider>
+    );
+
+    await waitForRender(wrapper);
+
+    expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
+    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+    expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+    expect(wrapper.find('ElasticsearchPrivileges').prop('buildFlavor')).toBe('serverless');
+    expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+    expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);
+    expectSaveFormButtons(wrapper);
+  });
+
   describe('in create mode', () => {
     it('renders an error for existing role name', async () => {
       const props = getProps({ action: 'edit' });
@@ -776,6 +817,38 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
         isInvalid: false,
       });
+      expectSaveFormButtons(wrapper);
+    });
+
+    it('can render for serverless buildFlavor', async () => {
+      const props = getProps({ action: 'edit', buildFlavor: 'serverless' });
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...props} />
+        </KibanaContextProvider>
+      );
+
+      props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+
+      await waitForRender(wrapper);
+
+      const nameInput = wrapper.find('input[name="name"]');
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      nameInput.simulate('blur');
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        isInvalid: false,
+      });
+      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
+      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
+        false
+      );
+      expect(wrapper.find('ElasticsearchPrivileges').prop('buildFlavor')).toBe('serverless');
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);
       expectSaveFormButtons(wrapper);
     });
 
