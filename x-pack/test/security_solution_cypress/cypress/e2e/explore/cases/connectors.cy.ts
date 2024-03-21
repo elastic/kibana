@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../../objects/case';
+import { getJiraConnector } from '../../../objects/case';
 
-import { SERVICE_NOW_MAPPING } from '../../../screens/configure_cases';
+import { CONNECTORS_DROPDOWN, SERVICE_NOW_MAPPING } from '../../../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../../../tasks/all_cases';
 import { deleteCases } from '../../../tasks/api_calls/cases';
 import { deleteConnectors } from '../../../tasks/api_calls/common';
-import {
-  addServiceNowConnector,
-  openAddNewConnectorOption,
-  verifyNewConnectorSelected,
-} from '../../../tasks/configure_cases';
+import { addJiraConnector, openAddNewConnectorOption } from '../../../tasks/configure_cases';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
@@ -26,8 +22,8 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
   const configureResult = {
     connector: {
       id: 'e271c3b8-f702-4fbc-98e0-db942b573bbd',
-      name: 'SN',
-      type: '.servicenow',
+      name: 'Jira',
+      type: '.jira',
       fields: null,
     },
     closure_type: 'close-by-user',
@@ -38,7 +34,7 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
     updated_by: null,
     customFields: [],
     mappings: [
-      { source: 'title', target: 'short_description', action_type: 'overwrite' },
+      { source: 'title', target: 'summary', action_type: 'overwrite' },
       { source: 'description', target: 'description', action_type: 'overwrite' },
       { source: 'comments', target: 'comments', action_type: 'append' },
     ],
@@ -47,15 +43,11 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
     owner: 'securitySolution',
   };
 
-  const snConnector = getServiceNowConnector();
+  const jiraConnector = getJiraConnector();
 
   beforeEach(() => {
     login();
     deleteCases();
-    cy.intercept('GET', `${snConnector.URL}/api/x_elas2_inc_int/elastic_api/health*`, {
-      statusCode: 200,
-      body: getServiceNowITSMHealthResponse(),
-    });
 
     cy.intercept('POST', '/api/actions/connector').as('createConnector');
     cy.intercept({ method: '+(POST|PATCH)', url: '/api/cases/configure' }, (req) => {
@@ -74,7 +66,7 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
                   ...res.body[0],
                   error: null,
                   mappings: [
-                    { source: 'title', target: 'short_description', action_type: 'overwrite' },
+                    { source: 'title', target: 'summary', action_type: 'overwrite' },
                     { source: 'description', target: 'description', action_type: 'overwrite' },
                     { source: 'comments', target: 'comments', action_type: 'append' },
                   ],
@@ -94,15 +86,15 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
     visit(CASES_URL);
     goToEditExternalConnection();
     openAddNewConnectorOption();
-    addServiceNowConnector(snConnector);
+    addJiraConnector(jiraConnector);
 
     cy.wait('@createConnector').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
 
-      verifyNewConnectorSelected(snConnector);
+      cy.get(CONNECTORS_DROPDOWN).should('have.text', jiraConnector.connectorName);
 
       cy.wait('@saveConnector').its('response.statusCode').should('eql', 200);
-      cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');
+      cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'summary');
     });
   });
 });
