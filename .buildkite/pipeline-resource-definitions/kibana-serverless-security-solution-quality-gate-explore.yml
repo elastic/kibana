@@ -6,7 +6,7 @@ metadata:
   description: Runs the serverless security solution tests for the Quality Gate
 spec:
   type: buildkite-pipeline
-  owner: 'group:kibana-operations'
+  owner: 'group:security-engineering-productivity'
   implementation:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
