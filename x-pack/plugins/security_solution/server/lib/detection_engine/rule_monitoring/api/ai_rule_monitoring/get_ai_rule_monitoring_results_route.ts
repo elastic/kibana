@@ -15,6 +15,7 @@ import { handleAiRuleMonitoringResultsRequest } from './handle_ai_rule_monitorin
 type GetAiRuleMonitoringResultsRequestBody = z.infer<typeof GetAiRuleMonitoringResultsRequestBody>;
 const GetAiRuleMonitoringResultsRequestBody = z.object({
   connectorId: z.string().nonempty(),
+  interval: z.any().optional(),
 });
 
 export function getAiRuleMonitoringResultsRoute(router: SecuritySolutionPluginRouter): void {
@@ -40,6 +41,7 @@ export function getAiRuleMonitoringResultsRoute(router: SecuritySolutionPluginRo
           response,
           resolveParameters: () => ({
             connectorId: request.body.connectorId,
+            interval: request.body.interval,
           }),
           resolveDependencies: async () => {
             const { actions, securitySolution } = await context.resolve([

@@ -5,33 +5,53 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { css } from '@emotion/css';
-import type { OnTimeChangeProps } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import type { EuiCommentProps } from '@elastic/eui';
 import {
   EuiButton,
+  EuiCommentList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingChart,
   EuiLoadingSpinner,
-  EuiPanel,
+  EuiMarkdownFormat,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
 import { useAiRulesMonitoringContext } from './ai_rules_monitoring_context';
+import { RuleMonitoringIntervalSelector } from './rule_monitoring_interval_selector';
+import * as i18n from './translations';
 
 export function AiRulesMonitoringPage(): JSX.Element {
   const { isInitialLoading, isFetching, hasConnector, connectorPrompt, result, refetch } =
     useAiRulesMonitoringContext();
+  const [comments, setComments] = useState<EuiCommentProps[]>([WELCOME_COMMENT]);
 
-  const [start, setStart] = useState('now-1d');
-  const [end, setEnd] = useState('now');
-
-  const onTimeChange = ({ start: newStart, end: newEnd }: OnTimeChangeProps) => {
-    setStart(newStart);
-    setEnd(newEnd);
-  };
+  useEffect(() => {
+    if (isFetching) {
+      setComments([
+        WELCOME_COMMENT,
+        {
+          username: 'Rule Monitoring AI Assistant',
+          children: (
+            <EuiFlexGroup justifyContent="center">
+              <EuiLoadingChart size="l" />
+            </EuiFlexGroup>
+          ),
+          event: ' ',
+        },
+      ]);
+    } else if (result) {
+      setComments([
+        WELCOME_COMMENT,
+        {
+          username: 'Rule Monitoring AI Assistant',
+          children: <EuiMarkdownFormat>{result}</EuiMarkdownFormat>,
+          event: ' ',
+        },
+      ]);
+    }
+  }, [isFetching, result]);
 
   if (isInitialLoading) {
     return (
@@ -45,8 +65,7 @@ export function AiRulesMonitoringPage(): JSX.Element {
     return (
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiText>
-          {`To be able to use Gen AI assisted Rule Monitoring you need to configure an Generative AI
-          Connector. The connector will be shared with AI Assistant.`}
+          <p>{i18n.CONNECTOR_NEEDED}</p>
         </EuiText>
         {connectorPrompt}
       </EuiFlexGroup>
@@ -57,13 +76,7 @@ export function AiRulesMonitoringPage(): JSX.Element {
     <>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            isLoading={isFetching}
-            start={start}
-            end={end}
-            onTimeChange={onTimeChange}
-            showUpdateButton={false}
-          />
+          <RuleMonitoringIntervalSelector />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton isLoading={isFetching} onClick={refetch} disabled={isFetching}>
@@ -74,36 +87,23 @@ export function AiRulesMonitoringPage(): JSX.Element {
       <EuiSpacer size="xxl" />
       <EuiFlexGroup direction="column" alignItems="stretch">
         <EuiFlexItem>
-          <EuiPanel
-            className={css`
-              min-height: 150px;
-            `}
-          >
-            {isFetching && (
-              <EuiLoadingChart
-                className={css`
-                  position: relative;
-                  top: 50px;
-                  left: 50%;
-                  transform: translateX(-50%);
-                `}
-                size="l"
-              />
-            )}
-            {!isFetching && (
-              <EuiText
-                color="subdued"
-                className={css`
-                  white-space: pre-line;
-                  overflow: scroll;
-                `}
-              >
-                {`${result}`}
-              </EuiText>
-            )}
-          </EuiPanel>
+          <EuiCommentList comments={comments} aria-label="Comment list example" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
 }
+
+const WELCOME_BODY = (
+  <EuiText size="s">
+    <p>{i18n.WELCOME_GENERAL_INFO}</p>
+    <p>{i18n.WELCOME_EXPLANATION}</p>
+    <p>{i18n.WELCOME_ACTION}</p>
+  </EuiText>
+);
+
+const WELCOME_COMMENT = {
+  username: 'System',
+  children: WELCOME_BODY,
+  event: ' ',
+};

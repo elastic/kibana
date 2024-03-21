@@ -9,14 +9,16 @@ import moment from 'moment';
 import { dump } from 'js-yaml';
 import { validateHealthInterval } from '../detection_engine_health/health_interval';
 import type { IDetectionEngineHealthClient } from '../../logic/detection_engine_health';
+import type { HealthIntervalParameters } from '../../../../../../common/api/detection_engine';
 
 export async function prepareAiReadyRuleMonitoringStats(
-  healthClient: IDetectionEngineHealthClient
+  healthClient: IDetectionEngineHealthClient,
+  interval?: HealthIntervalParameters
 ): Promise<string> {
   const now = moment();
-  const interval = validateHealthInterval(undefined, now);
+  const validatedInterval = validateHealthInterval(interval, now);
   const clusterHealth = await healthClient.calculateClusterHealth({
-    interval,
+    interval: validatedInterval,
     num_of_top_rules: 10,
   });
   const result: string[] = [];
@@ -28,13 +30,13 @@ export async function prepareAiReadyRuleMonitoringStats(
   result.push();
 
   result.push(
-    `Cluster state over interval from ${interval.from} to ${interval.to}:`,
+    `Cluster state over interval from ${validatedInterval.from} to ${validatedInterval.to}:`,
     dump(normalize(clusterHealth.stats_over_interval))
   );
   result.push();
 
   result.push(
-    `Cluster state history over interval from ${interval.from} to ${interval.to} with ${interval.granularity} granularity:`,
+    `Cluster state history over interval from ${validatedInterval.from} to ${validatedInterval.to} with ${validatedInterval.granularity} granularity:`,
     dump(normalize(clusterHealth.history_over_interval))
   );
   result.push();

@@ -6,22 +6,32 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+import dateMath from '@kbn/datemath';
 import type { Conversation } from '@kbn/elastic-assistant';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import type { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useConnectorSetup } from '@kbn/elastic-assistant/impl/connectorland/connector_setup';
 import { useFetchCurrentUserConversations } from '@kbn/elastic-assistant';
+import {
+  HealthIntervalGranularity,
+  HealthIntervalType,
+} from '../../../../../common/api/detection_engine';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useFetchAiRuleMonitoringResultQuery } from '../../api/hooks/use_fetch_ai_rule_monitoring_result_query';
 
-// export interface AiRulesMonitoringProviderProps {}
+interface AnalyzedDateRange {
+  start: string;
+  end: string;
+}
 
 export interface UseAiRulesMonitoring {
   isInitialLoading: boolean;
   isFetching: boolean;
   hasConnector: boolean;
   connectorPrompt: React.ReactElement;
+  analyzedDateRange: AnalyzedDateRange;
+  setAnalyzedDateRange: (value: AnalyzedDateRange) => void;
   result?: string;
   refetch: () => void;
 }
@@ -31,6 +41,25 @@ const AiRulesMonitoringContext = React.createContext<UseAiRulesMonitoring | unde
 export function AiRulesMonitoringProvider({
   children,
 }: PropsWithChildren<{}>): JSX.Element | undefined {
+  const [analyzedDateRange, setAnalyzedDateRange] = useState({ start: 'now-1d', end: 'now' });
+  const interval = useMemo(() => {
+    const from = dateMath.parse(analyzedDateRange.start);
+    const to = dateMath.parse(analyzedDateRange.end);
+
+    if (!from || !to) {
+      return;
+    }
+
+    const diffInMinutes = to.diff(from, 'minute');
+
+    return {
+      type: HealthIntervalType.custom_range,
+      granularity: determineIntervalGranularity(diffInMinutes),
+      from: from.toISOString(),
+      to: to.toISOString(),
+    } as const;
+  }, [analyzedDateRange]);
+
   const { isLoading: isApiConfigLoading, apiConfig, refresh } = useApiConfig();
   const { prompt: connectorPrompt } = useConnectorSetup({
     conversation: RULE_MONITORING_CONVERSATION,
@@ -41,8 +70,8 @@ export function AiRulesMonitoringProvider({
     isFetching: isAiResponseFetching,
     data,
     refetch,
-  } = useFetchAiRuleMonitoringResultQuery(apiConfig?.connectorId ?? '', {
-    initialData: HINT_TEXT,
+  } = useFetchAiRuleMonitoringResultQuery(apiConfig?.connectorId ?? '', interval, {
+    initialData: '',
     enabled: Boolean(apiConfig?.connectorId),
   });
 
@@ -52,10 +81,21 @@ export function AiRulesMonitoringProvider({
       isFetching: isAiResponseFetching,
       hasConnector: Boolean(apiConfig),
       connectorPrompt,
+      analyzedDateRange,
+      setAnalyzedDateRange,
       result: data,
       refetch,
     }),
-    [isApiConfigLoading, isAiResponseFetching, connectorPrompt, apiConfig, data, refetch]
+    [
+      isApiConfigLoading,
+      isAiResponseFetching,
+      connectorPrompt,
+      apiConfig,
+      analyzedDateRange,
+      setAnalyzedDateRange,
+      data,
+      refetch,
+    ]
   );
 
   return (
@@ -121,8 +161,27 @@ function convertFetchConversationsResponseToMap(
   }, {});
 }
 
-const HINT_TEXT = `AI Rule Monitoring is a Generative AI tool to help you analyze Rule Monitoring data collected for your running rules. It might be challenging to analyze Detection Rule Monitoring dashboard or dig deep into rule execution logs to get insight on what is wrong.
+const MINUTES_IN_HOUR = 60;
+const MINUTES_IN_DAY = MINUTES_IN_HOUR * 24;
+const MINUTES_IN_WEEK = MINUTES_IN_DAY * 7;
+const MINUTES_IN_MONTH = MINUTES_IN_DAY * 30;
 
-We prepare rule monitoring data to be analyzed by AI of your choice. It helps to get insight on your current cluster health and spot potential problems impacting your protection if some rules are not running correctly.
+function determineIntervalGranularity(diffInMinutes: number): HealthIntervalGranularity {
+  if (diffInMinutes <= MINUTES_IN_HOUR) {
+    return HealthIntervalGranularity.minute;
+  }
 
-Nothing is processed without your explicit concern. To perform analysis select a desired time range you want to analyze and press "Analyze" button.`;
+  if (diffInMinutes <= MINUTES_IN_DAY) {
+    return HealthIntervalGranularity.hour;
+  }
+
+  if (diffInMinutes <= MINUTES_IN_WEEK) {
+    return HealthIntervalGranularity.day;
+  }
+
+  if (diffInMinutes <= MINUTES_IN_MONTH) {
+    return HealthIntervalGranularity.week;
+  }
+
+  return HealthIntervalGranularity.month;
+}

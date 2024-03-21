@@ -8,6 +8,7 @@
 import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { HealthIntervalParameters } from '../../../../../../common/api/detection_engine';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { IDetectionEngineHealthClient } from '../../logic/detection_engine_health';
 import { invokeAi } from './invoke_ai';
@@ -16,6 +17,7 @@ import { prepareAiRuleMonitoringMessages } from './prepare_ai_rule_monitoring_me
 
 interface AiRuleMonitoringResultsRequest {
   connectorId: string;
+  interval?: HealthIntervalParameters;
 }
 
 interface AiRuleMonitoringResultsRouteDependencies {
@@ -37,9 +39,9 @@ export async function handleAiRuleMonitoringResultsRequest({
   const siemResponse = buildSiemResponse(response);
 
   try {
-    const { connectorId } = resolveParameters();
+    const { connectorId, interval } = resolveParameters();
     const { actionsClient, healthClient } = await resolveDependencies();
-    const ruleMonitoringStats = await prepareAiReadyRuleMonitoringStats(healthClient);
+    const ruleMonitoringStats = await prepareAiReadyRuleMonitoringStats(healthClient, interval);
     const messages = prepareAiRuleMonitoringMessages(ruleMonitoringStats);
     const result = await invokeAi({ connectorId, actionsClient, messages });
 

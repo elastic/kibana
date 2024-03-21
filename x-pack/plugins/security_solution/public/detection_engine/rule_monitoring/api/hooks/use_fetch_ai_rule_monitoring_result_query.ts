@@ -7,6 +7,7 @@
 
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
+import type { HealthIntervalParameters } from '../../../../../common/api/detection_engine';
 import { GET_AI_RULE_MONITORING_RESULTS_URL } from '../../../../../common/api/detection_engine';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchAiRuleMonitoringResult } from '../fetch_ai_rule_monitoring_result';
@@ -15,13 +16,14 @@ const GET_AI_RULE_MONITORING_RESULTS_QUERY_KEY = ['POST', GET_AI_RULE_MONITORING
 
 export function useFetchAiRuleMonitoringResultQuery(
   connectorId: string,
+  interval?: HealthIntervalParameters,
   options?: UseQueryOptions<string>
 ): UseQueryResult<string> {
   const { addError } = useAppToasts();
 
   return useQuery<string>(
     [...GET_AI_RULE_MONITORING_RESULTS_QUERY_KEY],
-    ({ signal }) => fetchAiRuleMonitoringResult({ connectorId, signal }),
+    ({ signal }) => fetchAiRuleMonitoringResult({ connectorId, interval, signal }),
     {
       refetchIntervalInBackground: false,
       staleTime: Infinity,
