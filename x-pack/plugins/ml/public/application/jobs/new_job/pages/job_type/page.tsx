@@ -35,7 +35,10 @@ import { MlPageHeader } from '../../../../components/page_header';
 
 export const Page: FC = () => {
   const {
-    services: { share },
+    services: {
+      share,
+      notifications: { toasts },
+    },
   } = useMlKibana();
 
   const dataSourceContext = useDataSource();
@@ -48,7 +51,7 @@ export const Page: FC = () => {
 
   const { selectedDataView, selectedSavedSearch } = dataSourceContext;
 
-  const isTimeBasedIndex = timeBasedIndexCheck(selectedDataView);
+  const isTimeBasedIndex = timeBasedIndexCheck(selectedDataView, toasts);
   const hasGeoFields = useMemo(
     () =>
       [
