@@ -40,10 +40,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
     [selectedTabId, state]
   );
 
-  const {
-    content: SelectedTabContent,
-    modalActionBtn: { defaultMessage, handler, dataTestSubj, formattedMessageId },
-  } = useMemo(() => {
+  const { content: SelectedTabContent, modalActionBtn } = useMemo(() => {
     return tabs.find((obj) => obj.id === selectedTabId)!;
   }, [selectedTabId, tabs]);
 
@@ -67,8 +64,8 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
   };
 
   const btnClickHandler = useCallback(() => {
-    handler({ state: selectedTabState });
-  }, [handler, selectedTabState]);
+    modalActionBtn?.handler({ state: selectedTabState });
+  }, [modalActionBtn, selectedTabState]);
 
   return (
     <EuiModal
@@ -88,16 +85,21 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
           })}
         </Fragment>
       </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButton
-          fill
-          data-test-subj={dataTestSubj}
-          data-share-url={state.url}
-          onClick={btnClickHandler}
-        >
-          <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
-        </EuiButton>
-      </EuiModalFooter>
+      {modalActionBtn && (
+        <EuiModalFooter>
+          <EuiButton
+            fill
+            data-test-subj={modalActionBtn?.dataTestSubj}
+            data-share-url={state.url}
+            onClick={btnClickHandler}
+          >
+            <FormattedMessage
+              id={modalActionBtn?.formattedMessageId}
+              defaultMessage={modalActionBtn?.defaultMessage}
+            />
+          </EuiButton>
+        </EuiModalFooter>
+      )}
     </EuiModal>
   );
 };

@@ -157,7 +157,6 @@ export class ShareMenuManager {
       );
       ReactDOM.render(element, this.container);
     } else if (newVersionEnabled) {
-      console.log(reportingApiClient);
       const openModal = () => {
         const session = overlays.openModal(
           toMountPoint(

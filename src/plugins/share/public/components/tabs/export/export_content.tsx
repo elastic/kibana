@@ -14,6 +14,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIcon,
+  EuiModalFooter,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
@@ -361,7 +362,7 @@ export const ExportContentUi = ({
               { id: 'pngV2', label: 'PNG', 'data-test-subj': 'pngReportOption' },
             ]}
             onChange={(id) => {
-              setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdfV2'>);
+              setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
             }}
             name="image reporting radio group"
             idSelected={selectedRadio}
@@ -374,11 +375,11 @@ export const ExportContentUi = ({
         </EuiFlexGroup>
         <EuiSpacer size="m" />
       </EuiForm>
-      {/* <EuiModalFooter>
+      <EuiModalFooter>
         {renderOptions()}
         {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
         {saveWarningMessageWithButton}
-      </EuiModalFooter> */}
+      </EuiModalFooter>
     </>
   );
 };

@@ -55,7 +55,7 @@ export interface IModalTabDeclaration<S extends IModalTabState> extends EuiTabPr
   description?: ReactElement;
   'data-test-subj'?: string;
   content?: IModalTabContent<S>;
-  modalActionBtn: IModalTabActionBtn<S>;
+  modalActionBtn?: IModalTabActionBtn<S>;
 }
 
 interface IModalContext<S extends IModalTabState = IModalTabState> {
