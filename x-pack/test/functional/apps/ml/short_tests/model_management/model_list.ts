@@ -6,7 +6,6 @@
  */
 
 import { getDefaultOnFailureConfiguration } from '@kbn/ml-plugin/public/application/components/ml_inference/state';
-import type { AddModelFlyoutTabId } from '@kbn/ml-plugin/public/application/model_management/add_model_flyout';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../services/ml/api';
 
@@ -152,8 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsFlyout.open();
 
         await ml.testExecution.logTestStep('Assert the Manual Download tab exists');
-        const manualDownloadTab: AddModelFlyoutTabId = 'manualDownload';
-        await ml.trainedModelsFlyout.assertFlyoutTabs([manualDownloadTab]);
+        await ml.trainedModelsFlyout.assertFlyoutTabs(['manualDownload']);
 
         await ml.testExecution.logTestStep('Assert all eland code blocks exist within the flyout');
         await ml.trainedModelsFlyout.assertElandPythonClientCodeBlocks();

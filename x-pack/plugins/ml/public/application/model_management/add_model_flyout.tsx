@@ -115,7 +115,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
               key={tab.id}
               isSelected={selectedTabId === tab.id}
               onClick={setSelectedTabId.bind(null, tab.id)}
-              data-test-subj={`mlAddTrainedModelFlyoutTab-${tab.id}`}
+              data-test-subj={`mlAddTrainedModelFlyoutTab ${tab.id}`}
             >
               {tab.name}
             </EuiTab>

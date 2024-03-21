@@ -72,8 +72,14 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     }
 
     public async assertFlyoutTabs(tabs: AddModelFlyoutTabId[]): Promise<void> {
+      const expectedTabCount = tabs.length;
+      const actualTabs = await testSubjects.findAll('~mlAddTrainedModelFlyoutTab', 3_000);
+      const actualTabCount = actualTabs.length;
+
+      expect(expectedTabCount).to.be(actualTabCount);
+
       for await (const tab of tabs)
-        await testSubjects.existOrFail(`mlAddTrainedModelFlyoutTab-${tab}`, {
+        await testSubjects.existOrFail(`mlAddTrainedModelFlyoutTab ${tab}`, {
           timeout: 3_000,
         });
     }
