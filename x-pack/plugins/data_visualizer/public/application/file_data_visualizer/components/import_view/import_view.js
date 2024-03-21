@@ -620,6 +620,7 @@ export class ImportView extends Component {
                     createDataView={createDataView}
                     showFilebeatFlyout={this.showFilebeatFlyout}
                     getAdditionalLinks={this.props.getAdditionalLinks ?? []}
+                    resultLinks={this.props.resultLinks}
                   />
 
                   {isFilebeatFlyoutVisible && (

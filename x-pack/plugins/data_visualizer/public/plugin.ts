@@ -29,11 +29,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  getDataDriftComponent,
-  getFileDataVisualizerComponent,
-  getIndexDataVisualizerComponent,
-} from './api';
+import { getComponents } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
@@ -78,10 +74,17 @@ export class DataVisualizerPlugin
       DataVisualizerStartDependencies
     >
 {
+  private resultsLinks = {
+    fileBeat: {
+      enabled: true,
+    },
+  };
+
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
-    const displayFileBeatConfig = initializerContext.config.get().displayFileBeatConfig ?? true;
-    // eslint-disable-next-line no-console
-    console.log('displayFileBeatConfig', displayFileBeatConfig);
+    const resultsLinks = initializerContext.config.get().resultLinks;
+    if (resultsLinks !== undefined) {
+      this.resultsLinks.fileBeat.enabled = resultsLinks.fileBeat?.enabled ?? true;
+    }
   }
 
   public setup(
@@ -89,7 +92,7 @@ export class DataVisualizerPlugin
     plugins: DataVisualizerSetupDependencies
   ) {
     if (plugins.home) {
-      registerHomeAddData(plugins.home);
+      registerHomeAddData(plugins.home, this.resultsLinks);
       registerHomeFeatureCatalogue(plugins.home);
     }
 
@@ -99,6 +102,11 @@ export class DataVisualizerPlugin
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {
     setStartServices(core, plugins);
+    const {
+      getFileDataVisualizerComponent,
+      getIndexDataVisualizerComponent,
+      getDataDriftComponent,
+    } = getComponents(this.resultsLinks);
     return {
       getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,

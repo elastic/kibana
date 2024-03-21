@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+export interface ResultLinks {
+  fileBeat?: {
+    enabled: boolean;
+  };
+}
+export type ResultLink = keyof ResultLinks;
+
 export interface ConfigSchema {
-  displayFileBeatConfig?: boolean;
+  resultLinks?: ResultLinks;
 }

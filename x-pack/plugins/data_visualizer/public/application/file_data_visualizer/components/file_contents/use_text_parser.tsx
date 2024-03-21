@@ -42,11 +42,15 @@ export function useGrokHighlighter() {
 
         return lines.map((line) => {
           const formattedWords: JSX.Element[] = [];
-          for (const { word, field } of line) {
+          for (let j = 0; j < line.length; j++) {
+            const { word, field } = line[j];
+            const key = `word-${j}`;
             if (field) {
-              formattedWords.push(<FieldBadge type={field.type} value={word} name={field.name} />);
+              formattedWords.push(
+                <FieldBadge type={field.type} value={word} name={field.name} key={key} />
+              );
             } else {
-              formattedWords.push(<span>{word}</span>);
+              formattedWords.push(<span key={key}>{word}</span>);
             }
           }
           return (

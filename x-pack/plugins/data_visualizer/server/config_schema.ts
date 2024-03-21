@@ -7,5 +7,7 @@
 import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
-  displayFileBeatConfig: schema.maybe(schema.boolean()),
+  resultLinks: schema.maybe(
+    schema.object({ fileBeat: schema.maybe(schema.object({ enabled: schema.boolean() })) })
+  ),
 });

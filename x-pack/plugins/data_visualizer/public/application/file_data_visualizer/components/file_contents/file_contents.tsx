@@ -142,10 +142,10 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
       ) : (
         <>
           {highlightedLines.map((line, i) => (
-            <>
+            <React.Fragment key={`line-${i}`}>
               {line}
               {i === highlightedLines.length - 1 ? null : <EuiHorizontalRule margin="s" />}
-            </>
+            </React.Fragment>
           ))}
         </>
       )}

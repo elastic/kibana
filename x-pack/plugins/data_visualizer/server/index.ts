@@ -17,6 +17,6 @@ export const plugin = async (initializerContext: PluginInitializerContext<Config
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   exposeToBrowser: {
-    displayFileBeatConfig: true,
+    resultLinks: true,
   },
 };
