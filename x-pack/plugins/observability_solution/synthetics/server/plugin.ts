@@ -45,10 +45,6 @@ export class Plugin implements PluginType {
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
   }
 
-  private get _isServerless(): boolean {
-    return this.initContext.env.packageInfo.buildFlavor === 'serverless';
-  }
-
   public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
     const config = this.initContext.config.get<UptimeConfig>();
 
@@ -79,7 +75,6 @@ export class Plugin implements PluginType {
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
-      isServerless: this._isServerless,
       share: plugins.share,
     } as SyntheticsServerSetup;
 

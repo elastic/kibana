@@ -93,8 +93,8 @@ describe('getAPIKeyTest', function () {
     [false, ['monitor', 'read_pipeline', 'read_ilm']],
   ])(
     'Includes/excludes `read_ilm` priv when serverless is mode is %s',
-    (isServerless, expectedClusterPrivs) => {
-      const { cluster } = getServiceApiKeyPrivileges(isServerless);
+    (isServerlessEs, expectedClusterPrivs) => {
+      const { cluster } = getServiceApiKeyPrivileges(isServerlessEs);
 
       expect(cluster).toEqual(expectedClusterPrivs);
     }

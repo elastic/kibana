@@ -15,8 +15,10 @@ export const checkHasPrivileges = (
   server: SyntheticsServerSetup,
   apiKey: { id: string; apiKey: string }
 ) => {
-  const { isServerless } = server;
-  const { indices: index, cluster } = getServiceApiKeyPrivileges(isServerless);
+  const { coreStart } = server;
+  const { indices: index, cluster } = getServiceApiKeyPrivileges(
+    coreStart.elasticsearch.getCapabilities().serverless
+  );
   return server.coreStart.elasticsearch.client
     .asScoped(getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey }))
     .asCurrentUser.security.hasPrivileges({

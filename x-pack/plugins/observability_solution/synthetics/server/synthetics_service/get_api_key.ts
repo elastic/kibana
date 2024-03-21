@@ -19,9 +19,9 @@ import { checkHasPrivileges } from './authentication/check_has_privilege';
 
 export const syntheticsIndex = 'synthetics-*';
 
-export const getServiceApiKeyPrivileges = (isServerless: boolean) => {
+export const getServiceApiKeyPrivileges = (isServerlessEs: boolean) => {
   const cluster: SecurityClusterPrivilege[] = ['monitor', 'read_pipeline'];
-  if (isServerless === false) cluster.push('read_ilm');
+  if (isServerlessEs === false) cluster.push('read_ilm');
   return {
     cluster,
     indices: [
@@ -88,7 +88,8 @@ export const generateAPIKey = async ({
   server: SyntheticsServerSetup;
   request: KibanaRequest;
 }) => {
-  const { isServerless, security } = server;
+  const { coreStart, security } = server;
+  const isEsServerless = coreStart.elasticsearch.getCapabilities().serverless;
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
 
   if (!isApiKeysEnabled) {
@@ -104,7 +105,7 @@ export const generateAPIKey = async ({
   return security.authc.apiKeys?.grantAsInternalUser(request, {
     name: 'synthetics-api-key (required for Synthetics App)',
     role_descriptors: {
-      synthetics_writer: getServiceApiKeyPrivileges(isServerless),
+      synthetics_writer: getServiceApiKeyPrivileges(isEsServerless),
     },
     metadata: {
       description:
@@ -206,8 +207,9 @@ export const getSyntheticsEnablement = async ({ server }: { server: SyntheticsSe
   };
 };
 
-const hasEnablePermissions = async ({ uptimeEsClient, isServerless }: SyntheticsServerSetup) => {
-  const { cluster: clusterPrivs, indices: index } = getServiceApiKeyPrivileges(isServerless);
+const hasEnablePermissions = async ({ uptimeEsClient, coreStart }: SyntheticsServerSetup) => {
+  const isServerlessEs = coreStart.elasticsearch.getCapabilities().serverless;
+  const { cluster: clusterPrivs, indices: index } = getServiceApiKeyPrivileges(isServerlessEs);
   const hasPrivileges = await uptimeEsClient.baseESClient.security.hasPrivileges({
     body: {
       cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key', ...clusterPrivs],
@@ -223,7 +225,7 @@ const hasEnablePermissions = async ({ uptimeEsClient, isServerless }: Synthetics
     monitor,
     // this is going to be undefined in serverless mode (and break the API key flow),
     // otherwise use the value supplied by ES
-    read_ilm: readILM = isServerless,
+    read_ilm: readILM = isServerlessEs,
     read_pipeline: readPipeline,
   } = cluster || {};
 

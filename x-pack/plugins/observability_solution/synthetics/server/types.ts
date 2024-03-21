@@ -57,7 +57,6 @@ export interface SyntheticsServerSetup {
   uptimeEsClient: UptimeEsClient;
   basePath: IBasePath;
   isDev?: boolean;
-  isServerless: boolean;
   coreStart: CoreStart;
   pluginsStart: SyntheticsPluginsStartDependencies;
 }
