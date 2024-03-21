@@ -195,7 +195,7 @@ describe('ApmConfiguration', () => {
             globalLabels: {
               git_rev: 'sha',
               test1: '1',
-              test2: '4',
+              test2: '2',
             },
           })
         );
