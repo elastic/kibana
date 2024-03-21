@@ -47,7 +47,10 @@ synchronize_parser_grammar () {
 }
 
 report_main_step () {
-  echo "--- $1"
+  echo ""
+  echo "-------------------------------------------------"
+  echo "MAIN STEP: $1"
+  echo "-------------------------------------------------"
 }
 
 main () {
@@ -72,6 +75,7 @@ main () {
   synchronize_parser_grammar "$license_header"
 
   # Check for differences
+  git -P diff
   set +e
   git diff --exit-code --quiet "$destination_file"
   set -e
