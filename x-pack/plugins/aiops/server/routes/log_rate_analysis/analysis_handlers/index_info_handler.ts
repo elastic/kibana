@@ -12,10 +12,9 @@ import {
   setZeroDocsFallback,
 } from '@kbn/aiops-log-rate-analysis/api/actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
-import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
-
-import { fetchIndexInfo } from '../queries/fetch_index_info';
+import { fetchIndexInfo } from '@kbn/aiops-log-rate-analysis/queries/fetch_index_info';
 
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 import { LOADED_FIELD_CANDIDATES } from '../response_stream_utils/constants';

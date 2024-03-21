@@ -6,6 +6,7 @@
  */
 
 import { frequentItemSets } from '@kbn/aiops-test-utils/artificial_logs/frequent_item_sets';
+
 import { getValuesDescending } from './get_values_descending';
 
 describe('getValuesDescending', () => {

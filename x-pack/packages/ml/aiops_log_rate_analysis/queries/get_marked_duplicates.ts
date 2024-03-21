@@ -6,7 +6,8 @@
  */
 
 import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
-import type { FieldValuePairCounts } from '@kbn/aiops-log-rate-analysis/types';
+
+import type { FieldValuePairCounts } from '../types';
 
 /**
  * Analyse duplicate field/value pairs in groups.

@@ -8,7 +8,8 @@
 import { uniqWith, isEqual } from 'lodash';
 
 import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
-import type { SignificantItemDuplicateGroup } from '@kbn/aiops-log-rate-analysis/types';
+
+import type { SignificantItemDuplicateGroup } from '../types';
 
 export function getGroupsWithReaddedDuplicates(
   groups: SignificantItemGroup[],

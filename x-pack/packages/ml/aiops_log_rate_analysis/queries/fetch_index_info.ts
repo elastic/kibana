@@ -9,7 +9,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
+
+import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
 import { getTotalDocCountRequest } from './get_total_doc_count_request';
 

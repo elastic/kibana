@@ -21,8 +21,8 @@ import type {
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
-import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 

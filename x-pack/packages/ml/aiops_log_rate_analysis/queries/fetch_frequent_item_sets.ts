@@ -14,15 +14,13 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { type SignificantItem } from '@kbn/ml-agg-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+
+import { RANDOM_SAMPLER_SEED, LOG_RATE_ANALYSIS_SETTINGS } from '../constants';
 import type {
   SignificantItemDuplicateGroup,
   ItemSet,
   FetchFrequentItemSetsResponse,
-} from '@kbn/aiops-log-rate-analysis/types';
-import {
-  RANDOM_SAMPLER_SEED,
-  LOG_RATE_ANALYSIS_SETTINGS,
-} from '@kbn/aiops-log-rate-analysis/constants';
+} from '../types';
 
 interface FrequentItemSetsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {

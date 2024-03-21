@@ -14,14 +14,10 @@ import {
   createRandomSamplerWrapper,
   type RandomSamplerWrapper,
 } from '@kbn/ml-random-sampler-utils';
-import {
-  LOG_RATE_ANALYSIS_SETTINGS,
-  RANDOM_SAMPLER_SEED,
-} from '@kbn/aiops-log-rate-analysis/constants';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
-import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
-
-import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
+import { LOG_RATE_ANALYSIS_SETTINGS, RANDOM_SAMPLER_SEED } from '../constants';
+import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
 import { getNormalizedScore } from './get_normalized_score';
 import { getQueryWithParams } from './get_query_with_params';

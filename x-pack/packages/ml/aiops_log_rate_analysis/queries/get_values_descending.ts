@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ItemSet } from '@kbn/aiops-log-rate-analysis/types';
+import type { ItemSet } from '../types';
 
 import { getValueCounts } from './get_value_counts';
 

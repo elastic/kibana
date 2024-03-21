@@ -6,7 +6,8 @@
  */
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-import type { ItemSet, SimpleHierarchicalTreeNode } from '@kbn/aiops-log-rate-analysis/types';
+
+import type { ItemSet, SimpleHierarchicalTreeNode } from '../types';
 
 import { getValueCounts } from './get_value_counts';
 import { getValuesDescending } from './get_values_descending';

@@ -14,13 +14,12 @@ import {
   createRandomSamplerWrapper,
   type RandomSamplerWrapper,
 } from '@kbn/ml-random-sampler-utils';
-import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
-
-import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { createCategoryRequest } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { Category, CategoriesAgg } from '@kbn/aiops-log-pattern-analysis/types';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
-import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
+import { RANDOM_SAMPLER_SEED } from '../constants';
+import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
 import { getQueryWithParams } from './get_query_with_params';
 

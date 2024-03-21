@@ -11,9 +11,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { criticalTableLookup, type Histogram } from '@kbn/ml-chi2test';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
-import { LOG_RATE_ANALYSIS_SETTINGS } from '@kbn/aiops-log-rate-analysis/constants';
-import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
+
+import type { AiopsLogRateAnalysisSchema } from '../api/schema';
+import { LOG_RATE_ANALYSIS_SETTINGS } from '../constants';
 
 import { fetchCategories } from './fetch_categories';
 import { fetchCategoryCounts } from './fetch_category_counts';

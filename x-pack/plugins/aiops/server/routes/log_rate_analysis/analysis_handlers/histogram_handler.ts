@@ -24,7 +24,7 @@ import {
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
-import { getHistogramQuery } from '../queries/get_histogram_query';
+import { getHistogramQuery } from '@kbn/aiops-log-rate-analysis/queries/get_histogram_query';
 
 import {
   MAX_CONCURRENT_QUERIES,
