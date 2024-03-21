@@ -169,7 +169,7 @@
                 "section": "def-common.AppUpdater",
                 "text": "AppUpdater"
               },
-              ">; }) => void; setIsSidebarEnabled: (isEnabled: boolean) => void; }"
+              ">; }) => void; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability_shared/public/plugin.ts",
             "deprecated": false,
@@ -3366,7 +3366,7 @@
             "section": "def-common.AppUpdater",
             "text": "AppUpdater"
           },
-          ">; }) => void; setIsSidebarEnabled: (isEnabled: boolean) => void; }"
+          ">; }) => void; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/plugin.ts",
         "deprecated": false,
