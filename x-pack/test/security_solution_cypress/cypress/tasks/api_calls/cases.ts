@@ -37,7 +37,7 @@ export const getCases = () =>
     url: 'api/cases/_find',
   });
 
-export const deleteCases = async () => {
+export const deleteCases = () => {
   getCases().then(($response) => {
     if ($response.body.cases.length > 0) {
       const ids = $response.body.cases.map((myCase) => {

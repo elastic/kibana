@@ -122,7 +122,7 @@ export const getConnectors = () =>
     url: 'api/actions/connectors',
   });
 
-export const deleteConnectors = async () => {
+export const deleteConnectors = () => {
   getConnectors().then(($response) => {
     if ($response.body.length > 0) {
       const ids = $response.body.map((connector) => {

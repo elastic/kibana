@@ -7,7 +7,7 @@
 
 import { getJiraConnector } from '../../../objects/case';
 
-import { CONNECTORS_DROPDOWN, SERVICE_NOW_MAPPING } from '../../../screens/configure_cases';
+import { CONNECTORS_DROPDOWN, MAPPING } from '../../../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../../../tasks/all_cases';
 import { deleteCases } from '../../../tasks/api_calls/cases';
@@ -87,11 +87,11 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.wait('@createConnector').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
+      cy.wait('@saveConnector').its('response.statusCode').should('eql', 200);
 
       cy.get(CONNECTORS_DROPDOWN).should('have.text', jiraConnector.connectorName);
 
-      cy.wait('@saveConnector').its('response.statusCode').should('eql', 200);
-      cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'summary');
+      cy.get(MAPPING).first().should('have.text', 'summary');
     });
   });
 });
