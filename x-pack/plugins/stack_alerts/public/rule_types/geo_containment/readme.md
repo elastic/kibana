@@ -66,7 +66,7 @@ choice.
 - Leave this tab open, you'll come back to this
 
 ### 8. Create containment alert
-- Go to the Alerts tab and click `Create Alert` > `Tracking containment`
+- Go to the Alerts tab and click `Create rule` > `Tracking containment`
 - Fill the side bar form top to bottom. This _should_ flow somewhat logically. In the top 
 section, set both `Check every` and `Notify every` to `1 minute`.
  For `Notify`, leave
