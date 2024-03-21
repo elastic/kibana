@@ -334,6 +334,11 @@ For more about this and other rules provided in {alert-features}, go to <<alerti
 
 * <<document-explorer, Configure the chart and document table>> to better meet your needs.
 
+[float]
+=== Troubleshooting
+
+* {blog-ref}troubleshooting-guide-common-issues-kibana-discover-load[Learn how to resolve common issues with Discover.]
+
 
 --
 include::{kibana-root}/docs/discover/document-explorer.asciidoc[]
