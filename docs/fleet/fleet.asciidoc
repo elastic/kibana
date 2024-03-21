@@ -37,7 +37,7 @@ To clone a dashboard:
 . Click *Save and return* after editing the dashboard.
 . Click *Save*.
 
-To clone managed content relating to specific visualization editors, such as Lens, TSVB, and Maps, view the visualization in the editor then begin to make edits. Unlike cloning dashboards, and dashboard panels, the cloned content retains the original reference configurations. Once finished you are prompted to save the edits as a new visualization. The same applied for altering any saved searches in a managed visualization. 
+To clone managed content relating to specific visualization editors, such as Lens, TSVB, and Maps, view the visualization in the editor then begin to make edits. Unlike cloning dashboards, and dashboard panels, the cloned content retains the original reference configurations. Once finished you are prompted to save the edits as a new visualization. The same applies for altering any saved searches in a managed visualization. 
 
 [float]
 == Get started
