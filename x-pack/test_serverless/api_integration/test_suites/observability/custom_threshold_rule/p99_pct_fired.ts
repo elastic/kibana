@@ -17,7 +17,7 @@ import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ISO_DATE_REGEX } from './constants';
-import { LogsExplorerLocatorParsedParams } from './typings';
+import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action variables', async () => {
-        const resp = await alertingApi.waitForDocumentInIndex({
+        const resp = await alertingApi.waitForDocumentInIndex<ActionDocument>({
           indexName: ALERT_ACTION_INDEX,
           docCountTarget: 1,
         });
