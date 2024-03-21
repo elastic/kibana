@@ -137,7 +137,7 @@ List of agent policies that are configured when the {fleet} app starts.
   `namespace`:::: 
     String identifying this policy's namespace.
   `inputs`:::: 
-    Map of input for that integration. Follows the same schema as the package policy API inputs, with the exception that any object in `vars` can be passed `frozen: true` in order to prevent that specific `var` from being edited by the user.
+    Map of input for the integration. Follows the same schema as the package policy API inputs, with the exception that any object in `vars` can be passed `frozen: true` in order to prevent that specific `var` from being edited by the user.
 =======
 =====
 +
