@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createSelector } from 'reselect';
+import { createSelector, lruMemoize } from 'reselect';
 import type { State } from '../types';
 import type { SourcererModel } from './model';
 import { SourcererScopeName } from './model';
@@ -23,6 +23,7 @@ export const sourcererScope = createSelector(
   (state: State, scopeId: SourcererScopeName) => scopeId,
   (scopes, scopeId) => scopes[scopeId],
   {
+    memoize: lruMemoize,
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
     },
@@ -30,6 +31,7 @@ export const sourcererScope = createSelector(
 );
 
 export const sourcererScopeIsLoading = createSelector(sourcererScope, (scope) => scope.loading, {
+  memoize: lruMemoize,
   memoizeOptions: {
     maxSize: SOURCERER_SCOPE_MAX_SIZE,
   },
@@ -39,6 +41,8 @@ export const sourcererScopeSelectedDataViewId = createSelector(
   sourcererScope,
   (scope) => scope.selectedDataViewId,
   {
+    memoize: lruMemoize,
+
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
     },
@@ -49,6 +53,7 @@ export const sourcererScopeSelectedPatterns = createSelector(
   sourcererScope,
   (scope) => scope.selectedPatterns,
   {
+    memoize: lruMemoize,
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
     },
@@ -59,6 +64,7 @@ export const sourcererScopeMissingPatterns = createSelector(
   sourcererScope,
   (scope) => scope.missingPatterns,
   {
+    memoize: lruMemoize,
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
     },
@@ -69,6 +75,7 @@ export const kibanaDataViews = createSelector(
   selectSourcerer,
   (sourcerer) => sourcerer.kibanaDataViews,
   {
+    memoize: lruMemoize,
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
     },
@@ -79,6 +86,7 @@ export const defaultDataView = createSelector(
   selectSourcerer,
   (sourcerer) => sourcerer.defaultDataView,
   {
+    memoize: lruMemoize,
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
     },
@@ -89,6 +97,7 @@ export const signalIndexName = createSelector(
   selectSourcerer,
   (sourcerer) => sourcerer.signalIndexName,
   {
+    memoize: lruMemoize,
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
     },
@@ -99,6 +108,7 @@ export const signalIndexMappingOutdated = createSelector(
   selectSourcerer,
   (sourcerer) => sourcerer.signalIndexMappingOutdated,
   {
+    memoize: lruMemoize,
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
     },
