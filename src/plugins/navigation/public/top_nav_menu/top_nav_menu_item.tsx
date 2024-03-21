@@ -57,7 +57,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
       ? { onClick: undefined, href: props.href, target: props.target }
       : {};
 
-  if (props.hideLabel) {
+  if (props.hideLabel && props.iconType) {
     return (
       <EuiToolTip content={getTooltip()}>
         <EuiButtonIcon size="s" {...commonButtonProps} />
