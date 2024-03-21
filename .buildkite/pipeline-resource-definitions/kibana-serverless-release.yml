@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: serverless_release
+  name: buildkite-pipeline-serverless-release
   description: Initiate kibana serverless releases
 spec:
   type: buildkite-pipeline
