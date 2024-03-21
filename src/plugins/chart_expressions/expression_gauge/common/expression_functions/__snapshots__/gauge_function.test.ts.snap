@@ -50,7 +50,7 @@ Object {
       "palette": undefined,
       "percentageMode": false,
       "respectRanges": false,
-      "shape": "arc",
+      "shape": "semiCircle",
       "ticksPosition": "auto",
     },
     "canNavigateToLens": false,
@@ -731,7 +731,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the majorArc shape 1`] = `
+exports[`interpreter/functions#gauge returns an object with the correct structure for the semiCircle shape 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -752,7 +752,7 @@ Object {
       "palette": undefined,
       "percentageMode": false,
       "respectRanges": false,
-      "shape": "majorArc",
+      "shape": "semiCircle",
       "ticksPosition": "auto",
     },
     "canNavigateToLens": false,

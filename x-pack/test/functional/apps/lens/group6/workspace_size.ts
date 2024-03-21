@@ -219,14 +219,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('gauge size (absolute pixels) - arc', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.ARC, 'arc');
+        await PageObjects.lens.switchToVisualization(GaugeShapes.SEMI_CIRCLE, 'semi');
       });
       await assertWorkspaceDimensions('600px', '375px');
     });
 
     it('gauge size (absolute pixels) - major arc', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.MAJOR_ARC, 'gauge major arc');
+        await PageObjects.lens.switchToVisualization(GaugeShapes.ARC, 'arc');
       });
       await assertWorkspaceDimensions('600px', '400px');
     });

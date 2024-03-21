@@ -108,8 +108,8 @@ export const RANGE_MODES = {
 export const GaugeShapes = {
   HORIZONTAL_BULLET: 'horizontalBullet',
   VERTICAL_BULLET: 'verticalBullet',
+  SEMI_CIRCLE: 'semiCircle',
   ARC: 'arc',
-  MAJOR_ARC: 'majorArc',
   CIRCLE: 'circle',
 } as const;
 
