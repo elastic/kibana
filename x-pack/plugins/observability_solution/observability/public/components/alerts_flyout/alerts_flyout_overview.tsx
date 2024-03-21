@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import {
   EuiBasicTableColumn,
   EuiCallOut,
@@ -18,9 +18,12 @@ import {
   AlertStatus,
   ALERT_CASE_IDS,
   ALERT_DURATION,
+  ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
   ALERT_FLAPPING,
+  ALERT_GROUP_FIELD,
+  ALERT_GROUP_VALUE,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -33,16 +36,20 @@ import moment from 'moment';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { CaseStatuses, Tooltip as CaseTooltip } from '@kbn/cases-components';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { paths } from '../../../common/locators/paths';
 import { metricValueFormatter } from '../../../common/custom_threshold_rule/metric_value_formatter';
 import {
   Comparator,
   CustomMetricExpressionParams,
+  Group,
+  TimeRange,
 } from '../../../common/custom_threshold_rule/types';
 import { TopAlert } from '../../typings/alerts';
 import { Case, Cases, useFetchBulkCases } from '../../hooks/use_fetch_bulk_cases';
 import { NavigateToCaseView, useCaseViewNavigation } from '../../hooks/use_case_view_navigation';
 import { useKibana } from '../../utils/kibana_react';
+import { Groups } from '../custom_threshold/components/alert_details_app_section/groups';
 
 interface AlertOverviewField {
   id: string;
@@ -101,6 +108,18 @@ const columns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
             <AlertLifecycleStatusBadge
               alertStatus={alertStatus as AlertStatus}
               flapping={flapping}
+            />
+          );
+
+        case ColumnIDs.SOURCE:
+          const groups = meta?.groups as Group[];
+          if (!groups.length) return <>{'-'}</>;
+          const alertEnd = meta?.alertEnd;
+          const timeRange = meta?.timeRange;
+          return (
+            <Groups
+              groups={groups}
+              timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
             />
           );
         case ColumnIDs.TRIGGERED:
@@ -229,6 +248,18 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
   const { http } = useKibana().services;
   const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
   const dateFormat = useUiSetting<string>('dateFormat');
+  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
+  const alertStart = alert.fields[ALERT_START];
+  const alertEnd = alert.fields[ALERT_END];
+  const groups = alert.fields[ALERT_GROUP_FIELD]?.map((field, index) => {
+    const values = alert.fields[ALERT_GROUP_VALUE];
+    if (values?.length && values[index]) {
+      return { field, value: values[index] };
+    }
+  });
+  useEffect(() => {
+    setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));
+  }, [alertStart, alertEnd]);
   const { navigateToCaseView } = useCaseViewNavigation();
   const items = useMemo(() => {
     return [
@@ -247,7 +278,12 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
         key: i18n.translate('xpack.observability.alertFlyout.overviewTab.sources', {
           defaultMessage: 'Affected entity / source',
         }),
-        value: 'TODO',
+        value: [],
+        meta: {
+          alertEnd,
+          timeRange,
+          groups: groups || [],
+        },
       },
       {
         id: ColumnIDs.TRIGGERED,
@@ -318,6 +354,16 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
         },
       },
     ];
-  }, [alert.fields, cases, dateFormat, http.basePath, isLoading, navigateToCaseView]);
+  }, [
+    alert.fields,
+    alertEnd,
+    cases,
+    dateFormat,
+    groups,
+    http.basePath,
+    isLoading,
+    navigateToCaseView,
+    timeRange,
+  ]);
   return <EuiInMemoryTable width={'80%'} columns={columns} itemId="key" items={items} />;
 });
