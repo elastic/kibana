@@ -9,8 +9,8 @@ import { getSuggestions } from './suggestions';
 import {
   IconChartVerticalBullet,
   IconChartHorizontalBullet,
+  IconChartGaugeSemiCircle,
   IconChartGaugeArc,
-  IconChartGaugeMajorArc,
   IconChartGaugeCircle,
 } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -214,7 +214,7 @@ describe('shows suggestions', () => {
           layerId: 'first',
         },
         previewIcon: IconChartVerticalBullet,
-        title: 'Bullet vertical',
+        title: 'Vertical Bullet',
         hide: false, // shows suggestion when current is gauge
         incomplete: false,
         score: 1,
@@ -222,7 +222,7 @@ describe('shows suggestions', () => {
       {
         hide: false,
         incomplete: false,
-        previewIcon: IconChartGaugeArc,
+        previewIcon: IconChartGaugeSemiCircle,
         score: 0.1,
         state: {
           labelMajorMode: 'auto',
@@ -232,12 +232,12 @@ describe('shows suggestions', () => {
           shape: 'arc',
           ticksPosition: 'auto',
         },
-        title: 'Gauge arc',
+        title: 'Semi-circular Gauge',
       },
       {
         hide: false,
         incomplete: false,
-        previewIcon: IconChartGaugeMajorArc,
+        previewIcon: IconChartGaugeArc,
         score: 0.5,
         state: {
           labelMajorMode: 'auto',
@@ -247,7 +247,7 @@ describe('shows suggestions', () => {
           shape: 'majorArc',
           ticksPosition: 'auto',
         },
-        title: 'Gauge major arc',
+        title: 'Arc Gauge',
       },
       {
         hide: false,
@@ -262,7 +262,7 @@ describe('shows suggestions', () => {
           shape: 'circle',
           ticksPosition: 'auto',
         },
-        title: 'Gauge circle',
+        title: 'Circular Gauge',
       },
     ]);
   });

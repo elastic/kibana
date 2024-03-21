@@ -24,9 +24,9 @@ import {
   getValueFromAccessor,
 } from '@kbn/expression-gauge-plugin/public';
 import {
-  IconChartGaugeArc,
+  IconChartGaugeSemiCircle,
   IconChartGaugeCircle,
-  IconChartGaugeMajorArc,
+  IconChartGaugeArc,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
 } from '@kbn/chart-icons';
@@ -81,18 +81,18 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     showExperimentalBadge: true,
     sortOrder: 10,
   },
-  [GaugeShapes.ARC]: {
-    id: GaugeShapes.ARC,
-    icon: IconChartGaugeArc,
-    label: gaugeTitlesByType.arc,
+  [GaugeShapes.SEMI_CIRCLE]: {
+    id: GaugeShapes.SEMI_CIRCLE,
+    icon: IconChartGaugeSemiCircle,
+    label: gaugeTitlesByType.semiCircle,
     groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
     sortOrder: 9,
   },
-  [GaugeShapes.MAJOR_ARC]: {
-    id: GaugeShapes.MAJOR_ARC,
-    icon: IconChartGaugeMajorArc,
-    label: gaugeTitlesByType.majorArc,
+  [GaugeShapes.ARC]: {
+    id: GaugeShapes.ARC,
+    icon: IconChartGaugeArc,
+    label: gaugeTitlesByType.arc,
     groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
     sortOrder: 8,
@@ -210,8 +210,8 @@ export const getGaugeVisualization = ({
   visualizationTypes: [
     CHART_NAMES[GaugeShapes.HORIZONTAL_BULLET],
     CHART_NAMES[GaugeShapes.VERTICAL_BULLET],
+    CHART_NAMES[GaugeShapes.SEMI_CIRCLE],
     CHART_NAMES[GaugeShapes.ARC],
-    CHART_NAMES[GaugeShapes.MAJOR_ARC],
     CHART_NAMES[GaugeShapes.CIRCLE],
   ],
   getVisualizationTypeId(state) {

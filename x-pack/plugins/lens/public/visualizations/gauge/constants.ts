@@ -41,18 +41,18 @@ export type GaugeExpressionState = GaugeStateOriginal & {
 
 export const gaugeTitlesByType: Record<GaugeShape, string> = {
   [GaugeShapes.HORIZONTAL_BULLET]: i18n.translate('xpack.lens.gaugeHorizontal.gaugeLabel', {
-    defaultMessage: 'Bullet horizontal',
+    defaultMessage: 'Horizontal Bullet',
   }),
   [GaugeShapes.VERTICAL_BULLET]: i18n.translate('xpack.lens.gaugeVertical.gaugeLabel', {
-    defaultMessage: 'Bullet vertical',
+    defaultMessage: 'Vertical Bullet',
+  }),
+  [GaugeShapes.SEMI_CIRCLE]: i18n.translate('xpack.lens.gaugeSemiCircle.gaugeLabel', {
+    defaultMessage: 'Semi-circular Gauge',
   }),
   [GaugeShapes.ARC]: i18n.translate('xpack.lens.gaugeArc.gaugeLabel', {
-    defaultMessage: 'Gauge arc',
-  }),
-  [GaugeShapes.MAJOR_ARC]: i18n.translate('xpack.lens.gaugeTwoThirdsCircle.gaugeLabel', {
-    defaultMessage: 'Gauge major arc',
+    defaultMessage: 'Arc Gauge',
   }),
   [GaugeShapes.CIRCLE]: i18n.translate('xpack.lens.gaugeCircle.gaugeLabel', {
-    defaultMessage: 'Gauge circle',
+    defaultMessage: 'Circular Gauge',
   }),
 };

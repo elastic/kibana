@@ -65,7 +65,7 @@ describe('interpreter/functions#gauge', () => {
   it(`returns an object with the correct structure for the arc if centralMajor and centralMajorMode are passed`, () => {
     const actual = fn(context, {
       ...args,
-      shape: GaugeShapes.ARC,
+      shape: GaugeShapes.SEMI_CIRCLE,
       centralMajor: 'Some label',
       centralMajorMode: GaugeCentralMajorModes.CUSTOM,
     });

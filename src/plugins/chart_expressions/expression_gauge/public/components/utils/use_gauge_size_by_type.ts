@@ -13,7 +13,7 @@ import { GaugeShape, GaugeShapes } from '../../../common';
 export const useGaugeSizeByType = (type: GaugeShape, setChartSize: (d: ChartSizeSpec) => void) => {
   useEffect(() => {
     const maxDimensions: Record<GaugeShape, ChartSizeSpec> = {
-      [GaugeShapes.ARC]: {
+      [GaugeShapes.SEMI_CIRCLE]: {
         maxDimensions: {
           x: { value: 600, unit: 'pixels' },
           y: { value: 600, unit: 'pixels' },
@@ -23,7 +23,7 @@ export const useGaugeSizeByType = (type: GaugeShape, setChartSize: (d: ChartSize
           y: 1.25,
         },
       },
-      [GaugeShapes.MAJOR_ARC]: {
+      [GaugeShapes.ARC]: {
         maxDimensions: {
           x: { value: 600, unit: 'pixels' },
           y: { value: 600, unit: 'pixels' },

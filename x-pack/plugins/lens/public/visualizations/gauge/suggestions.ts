@@ -13,8 +13,8 @@ import {
 } from '@kbn/expression-gauge-plugin/common';
 import {
   IconChartGaugeCircle,
+  IconChartGaugeSemiCircle,
   IconChartGaugeArc,
-  IconChartGaugeMajorArc,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
 } from '@kbn/chart-icons';
@@ -96,23 +96,23 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
         },
         {
           ...baseSuggestion,
+          title: gaugeTitlesByType.semiCircle,
+          previewIcon: IconChartGaugeSemiCircle,
+          state: {
+            ...baseSuggestion.state,
+            ...state,
+            shape: GaugeShapes.SEMI_CIRCLE,
+          },
+          score: 0.1,
+        },
+        {
+          ...baseSuggestion,
           title: gaugeTitlesByType.arc,
           previewIcon: IconChartGaugeArc,
           state: {
             ...baseSuggestion.state,
             ...state,
             shape: GaugeShapes.ARC,
-          },
-          score: 0.1,
-        },
-        {
-          ...baseSuggestion,
-          title: gaugeTitlesByType.majorArc,
-          previewIcon: IconChartGaugeMajorArc,
-          state: {
-            ...baseSuggestion.state,
-            ...state,
-            shape: GaugeShapes.MAJOR_ARC,
           },
         },
         {

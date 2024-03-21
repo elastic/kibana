@@ -12,8 +12,8 @@ export const GAUGE_FUNCTION_RENDERER_NAME = 'gauge_renderer';
 export const GaugeShapes = {
   HORIZONTAL_BULLET: 'horizontalBullet',
   VERTICAL_BULLET: 'verticalBullet',
+  SEMI_CIRCLE: 'semiCircle',
   ARC: 'arc',
-  MAJOR_ARC: 'majorArc',
   CIRCLE: 'circle',
 } as const;
 
