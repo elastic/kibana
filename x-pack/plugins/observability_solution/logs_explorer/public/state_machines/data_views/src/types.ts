@@ -19,7 +19,7 @@ export interface DataViewsFilterParams {
 }
 
 export interface WithCache {
-  cache: IHashedCache<DataViewsSearchParams, DataViewDescriptor[]>;
+  cache: IHashedCache<WithSearch & WithFilter, DataViewDescriptor[]>;
 }
 
 export interface WithSearch {

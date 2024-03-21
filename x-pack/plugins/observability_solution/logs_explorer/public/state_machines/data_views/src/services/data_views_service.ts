@@ -15,6 +15,7 @@ import {
   DataViewsFilterParams,
   DataViewsSearchParams,
 } from '../types';
+import { getSearchCacheKey } from '../state_machine';
 
 interface LoadDataViewsServiceDeps {
   dataViews: DataViewsPublicPluginStart;
@@ -23,16 +24,14 @@ interface LoadDataViewsServiceDeps {
 export const loadDataViews =
   ({ dataViews }: LoadDataViewsServiceDeps): InvokeCreator<DataViewsContext, DataViewsEvent> =>
   async (context) => {
-    const searchParams = context.search;
-
-    if (context.cache.has(searchParams)) {
-      return context.cache.get(searchParams);
+    if (context.cache.has(getSearchCacheKey(context))) {
+      return context.cache.get(getSearchCacheKey(context));
     }
 
     return dataViews
       .getIdsWithTitle()
       .then((views) => views.map(DataViewDescriptor.create))
-      .then((views) => searchDataViews(views, searchParams, context.filter));
+      .then((views) => searchDataViews(views, context.search, context.filter));
   };
 
 export const searchDataViews = (

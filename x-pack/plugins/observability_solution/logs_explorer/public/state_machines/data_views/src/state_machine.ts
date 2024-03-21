@@ -17,6 +17,10 @@ import type {
 } from './types';
 import { loadDataViews, searchDataViews } from './services/data_views_service';
 
+export function getSearchCacheKey(context: DataViewsContext) {
+  return { search: context.search, filter: context.filter };
+}
+
 export const createPureDataViewsStateMachine = (
   initialContext: DefaultDataViewsContext = createDefaultContext()
 ) =>
@@ -110,7 +114,7 @@ export const createPureDataViewsStateMachine = (
         }),
         storeInCache: (context, event) => {
           if ('data' in event && !isError(event.data)) {
-            context.cache.set(context.search, event.data);
+            context.cache.set(getSearchCacheKey(context), event.data);
           }
         },
         storeError: assign((_context, event) =>
