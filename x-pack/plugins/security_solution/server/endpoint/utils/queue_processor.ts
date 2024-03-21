@@ -133,8 +133,10 @@ export class QueueProcessor<T = unknown> {
    * Adds an update to the queue
    */
   public addToQueue(...data: T[]) {
-    this.queue.push(...data);
-    this.processQueue();
+    if (data.length > 0) {
+      this.queue.push(...data);
+      this.processQueue();
+    }
   }
 
   /**

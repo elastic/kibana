@@ -45,6 +45,30 @@ export interface SentinelOneIsolationResponseMeta {
   activityLogEntryId: string;
   /** The SentinelOne activity log entry type */
   activityLogEntryType: number;
-  /** The SentinelOne activity log primary discription */
+  /** The SentinelOne activity log primary description */
   activityLogEntryDescription: string;
+}
+
+/**
+ * The `activity` document ingested from SentinelOne via the integration
+ *
+ * NOTE:  not all properties are currently mapped below. Check the index definition if wanting to
+ *        see what else is available and add it bellow if needed
+ */
+export interface SentinelOneActivityDoc {
+  sentinel_one: {
+    activity: {
+      agent: {
+        id: string;
+      };
+      updated_at: string;
+      description: {
+        primary: string;
+        secondary?: string;
+      };
+      id: string;
+      /** The activity type. Valid values can be retrieved from S1 via API: `/web/api/v2.1/activities/types` */
+      type: number;
+    };
+  };
 }
