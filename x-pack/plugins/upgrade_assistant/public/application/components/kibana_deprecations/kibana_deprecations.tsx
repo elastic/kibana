@@ -294,9 +294,7 @@ export const KibanaDeprecationsList = ({
             data-test-subj="kibanaDeprecationErrors"
           >
             <>
-              {!hasPrivileges && (
-                <p>{i18nTexts.missingPermissionDescription(privilegesMissing)}</p>
-              )}
+              {!hasPrivileges && <p>{i18nTexts.missingPermissionDescription(privilegesMissing)}</p>}
 
               {kibanaDeprecationErrors.length > 0 && (
                 <p>{i18nTexts.getKibanaDeprecationErrorDescription(kibanaDeprecationErrors)}</p>
