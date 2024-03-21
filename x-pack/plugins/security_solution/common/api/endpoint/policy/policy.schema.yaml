@@ -9,17 +9,18 @@ paths:
       operationId: GetAgentPolicySummary
       x-codegen-enabled: true
       parameters:
-        - name: query
+        - name: package_name
           in: query
           required: true
           schema:
-            type: object
-            properties:
-              package_name:
-                type: string
-              policy_id:
-                type: string
-                nullable: true
+            type: string
+        - name: policy_id
+          in: query
+          required: false
+          schema:
+            type: string
+
+
 
       responses:
         '200':
@@ -39,10 +40,8 @@ paths:
           in: query
           required: true
           schema:
-            type: object
-            properties:
-              agentId:
-                $ref: '../model/schema/common.schema.yaml#/components/schemas/AgentId'
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/AgentId'
+                
       responses:
         '200':
           description: OK

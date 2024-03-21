@@ -43,3 +43,6 @@ export const SetAlertAssigneesRequestBody = z.object({
   ids: AlertIds,
 });
 export type SetAlertAssigneesRequestBodyInput = z.input<typeof SetAlertAssigneesRequestBody>;
+
+export type SetAlertAssigneesResponse = z.infer<typeof SetAlertAssigneesResponse>;
+export const SetAlertAssigneesResponse = z.string();

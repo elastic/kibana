@@ -1,0 +1,47 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+/* eslint-disable @typescript-eslint/no-duplicate-imports */
+
+{{> disclaimer}}
+
+import { KibanaServices } from '../lib/kibana';
+{{#each operations}}
+import { 
+  {{operationId}}RequestQuery,
+  {{operationId}}RequestBody,
+  {{operationId}}Response
+} from '{{replace sourcePath 'schema.yaml' 'gen'}}';
+{{/each}}
+
+{{#each operations}}
+{{#if description}}
+/*
+* {{description}}
+*/
+{{/if}}
+export async const {{camelCase operationId}} = (
+{{#if requestBody}}
+params: {{operationId}}RequestBody, 
+{{/if}}
+{{#if requestQuery}}
+query: {{operationId}}RequestQuery,
+{{/if}}
+signal?: AbortSignal
+) => KibanaServices.get().http.fetch<{{operationId}}Response>(
+    '{{path}}',
+    {
+    {{#if requestBody}}
+      body: JSON.stringify(params),
+    {{/if}}
+    {{#if requestQuery}}
+    query,
+    {{/if}}
+    signal
+    }
+  );
+
+{{/each}}

@@ -28,6 +28,10 @@ paths:
       responses:
         200:
           description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: string
         400:
           description: Invalid request.
 
