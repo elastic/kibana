@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return filteredIndices;
   };
 
-  describe.only('@ess Finalizing Alerts migrations', () => {
+  describe('@ess Finalizing Alerts migrations', () => {
     let legacyAlertsIndexName: string;
     let outdatedAlertsIndexName: string;
     let createdMigrations: CreateResponse[];
