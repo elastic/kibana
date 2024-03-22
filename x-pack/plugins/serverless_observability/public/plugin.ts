@@ -62,7 +62,7 @@ export class ServerlessObservabilityPlugin
       enabled: true,
       hideLinksTo: [appIds.RULES],
       extendCardNavDefinitions: {
-        aiAssistantManagementObservability: {
+        observabilityAiAssistantManagement: {
           category: appCategories.OTHER,
           title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
             defaultMessage: 'AI assistant for Observability settings',

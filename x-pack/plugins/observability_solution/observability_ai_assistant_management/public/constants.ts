@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-
-export function getSettingsKnowledgeBaseHref(http: HttpStart) {
-  return http!.basePath.prepend(
-    `/app/management/kibana/observabilityAiAssistantManagement?tab=knowledge_base`
-  );
-}
+export const REACT_QUERY_KEYS = {
+  GET_GENAI_CONNECTORS: 'get_genai_connectors',
+  GET_KB_ENTRIES: 'get_kb_entries',
+  CREATE_KB_ENTRIES: 'create_kb_entry',
+  IMPORT_KB_ENTRIES: 'import_kb_entry',
+};
