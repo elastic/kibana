@@ -6,8 +6,8 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleTypeModal } from '@kbn/alerts-ui-shared';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -72,7 +72,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
 
   const authorizedRuleTypes = [...ruleTypes.values()];
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
+    (ruleType) => ruleType.authorizedConsumers[ALERTING_FEATURE_ID]?.all
   );
 
   const tabs = [
@@ -168,7 +168,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
         <AddRuleFlyout
           ruleTypeId={ruleTypeIdToCreate}
           canChangeTrigger={false}
-          consumer={ALERTS_FEATURE_ID}
+          consumer={ALERTING_FEATURE_ID}
           filteredRuleTypes={filteredRuleTypes}
           validConsumers={observabilityRuleCreationValidConsumers}
           initialSelectedConsumer={AlertConsumers.LOGS}
