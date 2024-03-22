@@ -151,6 +151,7 @@ export async function _installPackage({
       });
     }
 
+    logger.debug(`Package install - Installing Kibana assets`);
     const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
       installKibanaAssetsAndReferences({
         savedObjectsClient,
@@ -197,6 +198,7 @@ export async function _installPackage({
       ));
     }
 
+    // installs ml models
     logger.debug(`Package install - installing ML models`);
     esReferences = await withPackageSpan('Install ML models', () =>
       installMlModel(packageInstallContext, esClient, savedObjectsClient, logger, esReferences)
@@ -269,6 +271,7 @@ export async function _installPackage({
         skipDataStreamRollover,
       })
     );
+
     logger.debug(`Package install - Installing transforms`);
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
@@ -343,7 +346,7 @@ export async function _installPackage({
       id: pkgName,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
-    // step update_SO
+
     logger.debug(`Package install - Updating install status`);
     await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
