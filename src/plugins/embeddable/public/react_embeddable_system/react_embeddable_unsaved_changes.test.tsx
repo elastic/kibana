@@ -15,7 +15,7 @@ import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-import { EmbeddableStateComparators } from './types';
+import { DefaultEmbeddableApi, EmbeddableStateComparators } from './types';
 
 interface SuperTestStateType {
   name: string;
@@ -28,7 +28,9 @@ describe('react embeddable unsaved changes', () => {
   let lastSavedState: SuperTestStateType;
   let comparators: EmbeddableStateComparators<SuperTestStateType>;
   let deserializeState: (state: SerializedPanelState) => SuperTestStateType;
-  let parentApi: (PresentationContainer & PublishesLastSavedState) | null;
+  let parentApi:
+    | (PresentationContainer<DefaultEmbeddableApi<SuperTestStateType>> & PublishesLastSavedState)
+    | null;
 
   beforeEach(() => {
     initialState = {

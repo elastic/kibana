@@ -28,7 +28,6 @@ export interface PresentationContainer<DefaultApiType extends unknown = unknown>
   canRemovePanels?: () => boolean;
   replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
 
-  getChildApi: (childId: string) => DefaultApiType | undefined;
   children$: PublishingSubject<{ [key: string]: DefaultApiType }>;
 }
 
@@ -37,7 +36,6 @@ export const apiIsPresentationContainer = (api: unknown | null): api is Presenta
     typeof (api as PresentationContainer)?.removePanel === 'function' &&
       typeof (api as PresentationContainer)?.replacePanel === 'function' &&
       typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
-      typeof (api as PresentationContainer)?.getChildApi === 'function' &&
       (api as PresentationContainer)?.children$
   );
 };

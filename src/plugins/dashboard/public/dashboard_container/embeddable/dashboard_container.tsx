@@ -30,11 +30,7 @@ import {
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  PanelPackage,
-  PresentationContainer,
-  PublishesLastSavedState,
-} from '@kbn/presentation-containers';
+import { PanelPackage } from '@kbn/presentation-containers';
 import { apiHasForceRefresh } from '@kbn/presentation-publishing';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -121,10 +117,7 @@ export const useDashboardContainer = (): DashboardContainer => {
 
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
-  implements
-    DashboardExternallyAccessibleApi,
-    PresentationContainer<DefaultEmbeddableApi>,
-    PublishesLastSavedState
+  implements DashboardExternallyAccessibleApi
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
@@ -752,10 +745,6 @@ export class DashboardContainer
       ...this.children$.value,
       [api.uuid]: api as DefaultEmbeddableApi,
     });
-  };
-
-  public getChildApi = (id: string) => {
-    return this.children$.value[id];
   };
 
   public lastSavedState: Subject<void> = new Subject();
