@@ -51,7 +51,9 @@ export async function invokeAi({
     params: genAiConnectorParams as unknown as Record<string, unknown>,
   });
 
-  return isSuccessGenAiExecutorResult(result) ? result.data.message : `Error: ${result.data}`;
+  return isSuccessGenAiExecutorResult(result)
+    ? result.data.message
+    : `Error: ${result.message ?? ''} ${result.serviceMessage ?? ''}`;
 }
 
 async function getConnector(connectorId: string, actionsClient: ActionsClient): Promise<Connector> {
