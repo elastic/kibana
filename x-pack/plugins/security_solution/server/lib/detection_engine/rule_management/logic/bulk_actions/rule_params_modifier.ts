@@ -8,10 +8,11 @@
 import moment from 'moment';
 import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
 import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client/methods/bulk_edit';
-import type { RuleAlertType } from '../../../rule_schema';
+import type { InvestigationFieldsCombined, RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
   BulkActionEditPayloadIndexPatterns,
+  BulkActionEditPayloadInvestigationFields,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -58,6 +59,47 @@ const shouldSkipIndexPatternsBulkAction = (
 
   if (action.type === BulkActionEditTypeEnum.delete_index_patterns) {
     return hasNotIndexPattern(indexPatterns, action);
+  }
+
+  return false;
+};
+
+// Check if the investigation fields added to the rule already exist in it
+const hasInvestigationFields = (
+  investigationFields: InvestigationFieldsCombined | undefined,
+  action: BulkActionEditPayloadInvestigationFields
+) =>
+  action.value.field_names.every((field) =>
+    (Array.isArray(investigationFields)
+      ? investigationFields
+      : investigationFields?.field_names ?? []
+    ).includes(field)
+  );
+
+// Check if the investigation fields to be deleted don't exist in the rule
+const hasNotInvestigationFields = (
+  investigationFields: InvestigationFieldsCombined | undefined,
+  action: BulkActionEditPayloadInvestigationFields
+) =>
+  action.value.field_names.every(
+    (field) =>
+      !(
+        Array.isArray(investigationFields)
+          ? investigationFields
+          : investigationFields?.field_names ?? []
+      ).includes(field)
+  );
+
+const shouldSkipInvestigationFieldsBulkAction = (
+  investigationFields: InvestigationFieldsCombined | undefined,
+  action: BulkActionEditPayloadInvestigationFields
+) => {
+  if (action.type === BulkActionEditTypeEnum.add_investigation_fields) {
+    return hasInvestigationFields(investigationFields, action);
+  }
+
+  if (action.type === BulkActionEditTypeEnum.delete_investigation_fields) {
+    return hasNotInvestigationFields(investigationFields, action);
   }
 
   return false;
@@ -154,6 +196,11 @@ const applyBulkActionEditToRuleParams = (
     }
     // investigation_fields actions
     case BulkActionEditTypeEnum.add_investigation_fields: {
+      if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
+        isActionSkipped = true;
+        break;
+      }
+
       ruleParams.investigationFields = {
         field_names: addItemsToArray(
           (Array.isArray(ruleParams.investigationFields)
@@ -165,17 +212,29 @@ const applyBulkActionEditToRuleParams = (
       break;
     }
     case BulkActionEditTypeEnum.delete_investigation_fields: {
+      if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
+        isActionSkipped = true;
+        break;
+      }
+
       if (ruleParams.investigationFields) {
-        ruleParams.investigationFields = deleteItemsFromArray(
-          (Array.isArray(ruleParams.investigationFields)
-            ? ruleParams.investigationFields
-            : ruleParams.investigationFields?.field_names) ?? [],
-          action.value.field_names
-        );
+        ruleParams.investigationFields = {
+          field_names: deleteItemsFromArray(
+            (Array.isArray(ruleParams.investigationFields)
+              ? ruleParams.investigationFields
+              : ruleParams.investigationFields?.field_names) ?? [],
+            action.value.field_names
+          ),
+        };
       }
       break;
     }
     case BulkActionEditTypeEnum.set_investigation_fields: {
+      if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
+        isActionSkipped = true;
+        break;
+      }
+
       ruleParams.investigationFields = action.value;
       break;
     }

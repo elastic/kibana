@@ -413,6 +413,278 @@ describe('ruleParamsModifier', () => {
     });
   });
 
+  describe('investigation_fields', () => {
+    describe('add_investigation_fields action', () => {
+      test.each([
+        [
+          '3 existing investigation fields + 2 of them = 3 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToAdd: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            isParamsUpdateSkipped: true,
+          },
+        ],
+        [
+          '3 existing investigation fields + 2 other investigation fields (none of them) = 5 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToAdd: { field_names: ['field-4', 'field-5'] },
+            resultingInvestigationFields: {
+              field_names: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5'],
+            },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields + 1 of them + 2 other investigation fields (none of them) = 5 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToAdd: { field_names: ['field-3', 'field-4', 'field-5'] },
+            resultingInvestigationFields: {
+              field_names: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5'],
+            },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields + 0 investigation fields = 3 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToAdd: { field_names: [] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            isParamsUpdateSkipped: true,
+          },
+        ],
+        [
+          '`undefined` existing investigation fields + 1 investigation field = 1 investigation field',
+          {
+            existingInvestigationFields: undefined,
+            investigationFieldsToAdd: { field_names: ['field-1'] },
+            resultingInvestigationFields: { field_names: ['field-1'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '`undefined` existing investigation fields + 1 investigation field = 1 investigation field',
+          {
+            existingInvestigationFields: undefined,
+            investigationFieldsToAdd: { field_names: ['field-1'] },
+            resultingInvestigationFields: { field_names: ['field-1'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing `legacy` investigation fields + 2 other investigation fields (none of them) = 5 investigation fields',
+          {
+            existingInvestigationFields: ['field-1', 'field-2', 'field-3'],
+            investigationFieldsToAdd: { field_names: ['field-4', 'field-5'] },
+            resultingInvestigationFields: {
+              field_names: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5'],
+            },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+      ])(
+        'should add investigation fields to rule, case:"%s"',
+        (
+          caseName,
+          {
+            existingInvestigationFields,
+            investigationFieldsToAdd,
+            resultingInvestigationFields,
+            isParamsUpdateSkipped,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              investigationFields: existingInvestigationFields,
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.add_investigation_fields,
+                value: investigationFieldsToAdd,
+              },
+            ]
+          );
+          expect(modifiedParams).toHaveProperty(
+            'investigationFields',
+            resultingInvestigationFields
+          );
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
+      );
+    });
+
+    describe('delete_investigation_fields action', () => {
+      test.each([
+        [
+          '3 existing investigation fields - 2 of them = 1 investigation field',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToDelete: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: { field_names: ['field-1'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields - 2 other investigation fields (none of them) = 3 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToDelete: { field_names: ['field-4', 'field-5'] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            isParamsUpdateSkipped: true,
+          },
+        ],
+        [
+          '3 existing investigation fields - 1 of them - 2 other investigation fields (none of them) = 2 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToDelete: { field_names: ['field-3', 'field-4', 'field-5'] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields - 0 investigation fields = 3 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToDelete: { field_names: [] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            isParamsUpdateSkipped: true,
+          },
+        ],
+        [
+          '`undefined` existing investigation fields - 2 of them = `undeinfed` investigation fields',
+          {
+            existingInvestigationFields: undefined,
+            investigationFieldsToDelete: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: undefined,
+            isParamsUpdateSkipped: true,
+          },
+        ],
+        [
+          '3 existing `legacy` investigation fields - 2 of them = 1 investigation field',
+          {
+            existingInvestigationFields: ['field-1', 'field-2', 'field-3'],
+            investigationFieldsToDelete: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: { field_names: ['field-1'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+      ])(
+        'should delete investigation fields from rule, case:"%s"',
+        (
+          caseName,
+          {
+            existingInvestigationFields,
+            investigationFieldsToDelete,
+            resultingInvestigationFields,
+            isParamsUpdateSkipped,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              investigationFields: existingInvestigationFields,
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.delete_investigation_fields,
+                value: investigationFieldsToDelete,
+              },
+            ]
+          );
+          expect(modifiedParams).toHaveProperty(
+            'investigationFields',
+            resultingInvestigationFields
+          );
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
+      );
+    });
+
+    describe('set_investigation_fields action', () => {
+      test.each([
+        [
+          '3 existing investigation fields overwritten with 2 of them = 2 existing investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToOverwrite: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: { field_names: ['field-2', 'field-3'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields overwritten with 2 other investigation fields = 2 other investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToOverwrite: { field_names: ['field-4', 'field-5'] },
+            resultingInvestigationFields: { field_names: ['field-4', 'field-5'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields overwritten with 1 of them + 2 other investigation fields = 1 existing investigation field + 2 other investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToOverwrite: { field_names: ['field-3', 'field-4', 'field-5'] },
+            resultingInvestigationFields: { field_names: ['field-3', 'field-4', 'field-5'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '`undefined` existing investigation fields overwritten with 2 of them = 2 existing investigation fields',
+          {
+            existingInvestigationFields: undefined,
+            investigationFieldsToOverwrite: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: { field_names: ['field-2', 'field-3'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing `legacy` investigation fields overwritten with 1 of them + 2 other investigation fields = 1 existing investigation field + 2 other investigation fields',
+          {
+            existingInvestigationFields: ['field-1', 'field-2', 'field-3'],
+            investigationFieldsToOverwrite: { field_names: ['field-3', 'field-4', 'field-5'] },
+            resultingInvestigationFields: { field_names: ['field-3', 'field-4', 'field-5'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+      ])(
+        'should overwrite investigation fields in rule, case:"%s"',
+        (
+          caseName,
+          {
+            existingInvestigationFields,
+            investigationFieldsToOverwrite,
+            resultingInvestigationFields,
+            isParamsUpdateSkipped,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              investigationFields: existingInvestigationFields,
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.set_investigation_fields,
+                value: investigationFieldsToOverwrite,
+              },
+            ]
+          );
+          expect(modifiedParams).toHaveProperty(
+            'investigationFields',
+            resultingInvestigationFields
+          );
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
+      );
+    });
+  });
+
   describe('timeline', () => {
     test('should set timeline', () => {
       const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [

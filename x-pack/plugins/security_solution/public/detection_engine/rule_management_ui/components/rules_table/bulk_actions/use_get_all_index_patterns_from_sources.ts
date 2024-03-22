@@ -20,6 +20,8 @@ export const useGetAllIndexPatternsFromSources = (
   const { data } = useKibana().services;
 
   useEffect(() => {
+    const abortCtrl = new AbortController();
+
     const fetchAllIndexPatterns = async () => {
       const dataViewIndexPatterns = sources?.dataViewIds
         ? await Promise.all(
@@ -36,6 +38,10 @@ export const useGetAllIndexPatternsFromSources = (
       setIndexPatterns([...patterns]);
     };
     fetchAllIndexPatterns();
+
+    return (): void => {
+      abortCtrl.abort();
+    };
   }, [data.dataViews, sources]);
 
   return { indexPatterns };
