@@ -19,6 +19,8 @@ import {
   integrationsLabel,
   INTEGRATIONS_PANEL_ID,
   INTEGRATIONS_TAB_ID,
+  noIntegrationsDescriptionLabel,
+  noIntegrationsLabel,
 } from './constants';
 import { useDataSourceSelector } from './state_machine/use_data_source_selector';
 import { SelectorPopover } from './sub_components/selector_popover';
@@ -30,11 +32,11 @@ import {
   buildIntegrationsTree,
   createDataViewsStatusItem,
   createIntegrationStatusItem,
-  createUncategorizedStatusItem,
 } from './utils';
 import { AddDataButton } from './sub_components/add_data_button';
 import { IntegrationsList } from './sub_components/integrations_list';
 import { DataViewList } from './sub_components/data_views_list';
+import ListStatus from './sub_components/list_status';
 
 export function DataSourceSelector({
   datasets,
@@ -148,6 +150,21 @@ export function DataSourceSelector({
   //   }));
   // }, [datasets, datasetsError, isLoadingUncategorized, selectDataset, onUncategorizedReload]);
 
+  const integrationsStatusPrompt = useMemo(
+    () => (
+      <ListStatus
+        key="integrationStatusItem"
+        description={noIntegrationsDescriptionLabel}
+        title={noIntegrationsLabel}
+        data={integrations}
+        error={integrationsError}
+        isLoading={isLoadingIntegrations}
+        onRetry={onIntegrationsReload}
+      />
+    ),
+    [integrations, integrationsError, isLoadingIntegrations, onIntegrationsReload]
+  );
+
   const dataViewsItems = useMemo(() => {
     if (!dataViews || dataViews.length === 0) {
       return [
@@ -230,7 +247,11 @@ export function DataSourceSelector({
       "hiding" all the others. Unmounting mounting each tab content on change makes it feel glitchy,
       while the tradeoff of keeping the contents in memory provide a better UX. */}
       {/* Integrations tab content */}
-      <IntegrationsList items={integrations} hidden={tabId !== INTEGRATIONS_TAB_ID}>
+      <IntegrationsList
+        items={integrations}
+        hidden={tabId !== INTEGRATIONS_TAB_ID}
+        statusPrompt={integrationsStatusPrompt}
+      >
         <SearchControls
           key={INTEGRATIONS_TAB_ID}
           search={search}

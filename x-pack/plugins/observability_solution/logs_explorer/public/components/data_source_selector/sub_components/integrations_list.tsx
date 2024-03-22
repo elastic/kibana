@@ -15,6 +15,8 @@ import {
   EuiHorizontalRule,
   EuiText,
   EuiIcon,
+  EuiPanel,
+  EuiListGroup,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -28,23 +30,40 @@ interface IntegrationsListProps {
 
 const rule = <EuiHorizontalRule margin="none" />;
 
-export function IntegrationsList({ children, items, ...props }: IntegrationsListProps) {
+export function IntegrationsList({
+  children,
+  items,
+  statusPrompt,
+  ...props
+}: IntegrationsListProps) {
+  const shouldDisplayPrompt = Boolean(!items || items.length === 0);
+
   return (
-    <div {...props} id={INTEGRATIONS_PANEL_ID} data-test-subj="integrationsContextMenu">
+    <EuiPanel
+      {...props}
+      id={INTEGRATIONS_PANEL_ID}
+      data-test-subj="integrationsContextMenu"
+      paddingSize="none"
+      hasShadow={false}
+    >
       {children}
-      <Counter totalIntegrationsCount={items.length} totalDatasetsCount={50} />
+      {/* TODO: get real numbers from api */}
+      <Counter totalIntegrationsCount={items?.length ?? 0} totalDatasetsCount={50} />
       {rule}
       <Header />
       {rule}
-      <div className="eui-yScroll">
-        {items.map((integration, pos) => (
-          <>
-            <IntegrationItem integration={integration} />
-            {pos < items.length - 1 ? rule : null}
-          </>
-        ))}
-      </div>
-    </div>
+      {shouldDisplayPrompt && statusPrompt}
+      {!shouldDisplayPrompt && (
+        <IntegrationListWrapper className="eui-yScroll" paddingSize="none" hasShadow={false}>
+          {items.map((integration, pos) => (
+            <>
+              <IntegrationItem integration={integration} />
+              {pos < items.length - 1 ? rule : null}
+            </>
+          ))}
+        </IntegrationListWrapper>
+      )}
+    </EuiPanel>
   );
 }
 
@@ -126,10 +145,6 @@ function ListRow({ withIndentation = false, ...props }) {
   );
 }
 
-const ListColumn = styled(EuiFlexItem)`
-  padding: ${euiThemeVars.euiSizeS} 0;
-`;
-
 function TextWithIcon({ icon, text, ...props }) {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" {...props}>
@@ -184,6 +199,14 @@ function Counter({ totalDatasetsCount, totalIntegrationsCount }) {
     </EuiText>
   );
 }
+
+const ListColumn = styled(EuiFlexItem)`
+  padding: ${euiThemeVars.euiSizeS} 0;
+`;
+
+const IntegrationListWrapper = styled(EuiPanel)`
+  max-height: 520px;
+`;
 
 const indentationStyle = css`
   padding-left: ${euiThemeVars.euiSizeL};
