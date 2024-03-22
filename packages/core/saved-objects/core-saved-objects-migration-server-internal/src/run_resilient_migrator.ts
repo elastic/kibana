@@ -42,7 +42,6 @@ import type { AliasAction } from './actions';
  * retries. This way we get exponential back-off and logging for failed
  * actions.
  */
-export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 120_000 };
 
 export interface RunResilientMigratorParams {
   client: ElasticsearchClient;
@@ -108,12 +107,12 @@ export async function runResilientMigrator({
     logger,
     esCapabilities,
   });
-  const migrationClient = client.child(MIGRATION_CLIENT_OPTIONS);
+
   return migrationStateActionMachine({
     initialState,
     logger,
     next: next(
-      migrationClient,
+      client,
       transformRawDocs,
       readyToReindex,
       doneReindexing,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsService, CoreSavedObjectsRouteHandlerContext } from './src';
+export { MIGRATION_CLIENT_OPTIONS, SavedObjectsService, CoreSavedObjectsRouteHandlerContext } from './src';
 export type {
   InternalSavedObjectsServiceStart,
   InternalSavedObjectsServiceSetup,

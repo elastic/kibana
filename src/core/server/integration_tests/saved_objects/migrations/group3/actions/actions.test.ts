@@ -14,6 +14,7 @@ import type { TaskEither } from 'fp-ts/lib/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { MIGRATION_CLIENT_OPTIONS } from '@kbn/core-saved-objects-server-internal';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   bulkOverwriteTransformedDocuments,
@@ -42,7 +43,6 @@ import {
   cloneIndex,
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
-  MIGRATION_CLIENT_OPTIONS,
   createBulkIndexOperationTuple,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
