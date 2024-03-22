@@ -25,7 +25,6 @@ export const findDocumentsResponseMock = (): ConversationResponse => ({
   timestamp: '2020-04-20T15:25:31.830Z',
   apiConfig: {
     connectorId: 'c1',
-    connectorTypeTitle: 'title-c-1',
     defaultSystemPromptId: 'prompt-1',
     model: 'test',
     provider: 'Azure OpenAI',
@@ -70,7 +69,6 @@ export const getSearchConversationMock =
             exclude_from_last_conversation_storage: false,
             api_config: {
               connector_id: 'c1',
-              connector_type_title: 'title-c-1',
               default_system_prompt_id: 'prompt-1',
               model: 'test',
               provider: 'Azure OpenAI',
@@ -137,7 +135,6 @@ describe('findDocuments', () => {
                 '@timestamp': '2020-04-20T15:25:31.830Z',
                 api_config: {
                   connector_id: 'c1',
-                  connector_type_title: 'title-c-1',
                   default_system_prompt_id: 'prompt-1',
                   model: 'test',
                   provider: 'Azure OpenAI',
