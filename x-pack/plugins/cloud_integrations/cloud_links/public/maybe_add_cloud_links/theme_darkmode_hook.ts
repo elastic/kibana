@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { useUpdateUserProfile } from '@kbn/user-profile-components';
+import useMountedState from 'react-use/lib/useMountedState';
 
 interface Deps {
   uiSettingsClient: IUiSettingsClient;
@@ -16,6 +17,8 @@ interface Deps {
 
 export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
   const [isDarkModeOn, setIsDarkModeOn] = useState(false);
+  const isMounted = useMountedState();
+
   // If a value is set in kibana.yml (uiSettings.overrides.theme:darkMode)
   // we don't allow the user to change the theme color.
   const valueSetInKibanaConfig = uiSettingsClient.isOverridden('theme:darkMode');
@@ -62,8 +65,9 @@ export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
   );
 
   useEffect(() => {
+    if (!isMounted()) return;
     setIsDarkModeOn(colorScheme === 'dark');
-  }, [colorScheme]);
+  }, [isMounted, colorScheme]);
 
   return {
     isVisible: valueSetInKibanaConfig ? false : Boolean(userProfileData),
