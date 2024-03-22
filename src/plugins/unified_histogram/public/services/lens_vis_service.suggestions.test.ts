@@ -32,7 +32,7 @@ describe('LensVisService suggestions', () => {
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
-      UnifiedHistogramSuggestionType.localHistogramDefault
+      UnifiedHistogramSuggestionType.histogramForDataView
     );
     expect(lensVis.currentSuggestionContext?.suggestion).toBeDefined();
   });
@@ -58,7 +58,7 @@ describe('LensVisService suggestions', () => {
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
-      UnifiedHistogramSuggestionType.supportedLensSuggestion
+      UnifiedHistogramSuggestionType.lensSuggestion
     );
     expect(lensVis.currentSuggestionContext?.suggestion).toBe(allSuggestionsMock[0]);
   });
@@ -115,7 +115,7 @@ describe('LensVisService suggestions', () => {
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
-      UnifiedHistogramSuggestionType.localHistogramSuggestionForESQL
+      UnifiedHistogramSuggestionType.histogramForESQL
     );
     expect(lensVis.currentSuggestionContext?.suggestion).toBeDefined();
 
@@ -152,7 +152,7 @@ describe('LensVisService suggestions', () => {
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
-      UnifiedHistogramSuggestionType.localHistogramSuggestionForESQL
+      UnifiedHistogramSuggestionType.histogramForESQL
     );
     expect(lensVis.currentSuggestionContext?.suggestion).toBeDefined();
 

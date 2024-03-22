@@ -195,7 +195,7 @@ describe('LensVisService attributes', () => {
           "timeField": "timestamp",
           "timeInterval": "auto",
         },
-        "suggestionType": "localHistogramDefault",
+        "suggestionType": "histogramForDataView",
       }
     `);
   });
@@ -367,7 +367,7 @@ describe('LensVisService attributes', () => {
           "timeField": "timestamp",
           "timeInterval": "auto",
         },
-        "suggestionType": "localHistogramDefault",
+        "suggestionType": "histogramForDataView",
       }
     `);
   });
@@ -521,7 +521,7 @@ describe('LensVisService attributes', () => {
           "timeField": "timestamp",
           "timeInterval": "auto",
         },
-        "suggestionType": "localHistogramDefault",
+        "suggestionType": "histogramForDataView",
       }
     `);
   });
@@ -711,7 +711,7 @@ describe('LensVisService attributes', () => {
           "timeField": "timestamp",
           "timeInterval": "auto",
         },
-        "suggestionType": "supportedLensSuggestion",
+        "suggestionType": "lensSuggestion",
       }
     `);
   });

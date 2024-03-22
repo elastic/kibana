@@ -191,7 +191,7 @@ export function Chart({
       onSuggestionContextEdit({
         suggestion,
         suggestionDeps: lensVisServiceCurrentSuggestionContext?.suggestionDeps,
-        type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
+        type: UnifiedHistogramSuggestionType.lensSuggestion,
       });
     },
     [onSuggestionContextEdit, lensVisServiceCurrentSuggestionContext]
@@ -224,16 +224,15 @@ export function Chart({
   const LensSaveModalComponent = services.lens.SaveModalComponent;
   const hasLensSuggestions = Boolean(
     isPlainRecord &&
-      lensVisServiceCurrentSuggestionContext?.type ===
-        UnifiedHistogramSuggestionType.supportedLensSuggestion
+      lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
   );
 
   const canCustomizeVisualization =
     isPlainRecord &&
     currentSuggestion &&
     [
-      UnifiedHistogramSuggestionType.supportedLensSuggestion,
-      UnifiedHistogramSuggestionType.localHistogramSuggestionForESQL,
+      UnifiedHistogramSuggestionType.lensSuggestion,
+      UnifiedHistogramSuggestionType.histogramForESQL,
     ].includes(lensVisServiceCurrentSuggestionContext?.type);
 
   const canEditVisualizationOnTheFly = canCustomizeVisualization && chartVisible;

@@ -149,9 +149,9 @@ export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;
 
 export enum UnifiedHistogramSuggestionType {
   unsupported = 'unsupported',
-  supportedLensSuggestion = 'supportedLensSuggestion',
-  localHistogramSuggestionForESQL = 'localHistogramSuggestionForESQL',
-  localHistogramDefault = 'localHistogramDefault',
+  lensSuggestion = 'lensSuggestion',
+  histogramForESQL = 'histogramForESQL',
+  histogramForDataView = 'histogramForDataView',
 }
 
 export interface UnifiedHistogramSuggestionContext {

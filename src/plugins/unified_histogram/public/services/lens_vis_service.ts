@@ -264,7 +264,7 @@ export class LensVisService {
     currentSuggestionContext: UnifiedHistogramSuggestionContext;
     shouldUpdateSelectedSuggestionDueToDepsChange: boolean;
   } => {
-    let type = UnifiedHistogramSuggestionType.supportedLensSuggestion;
+    let type = UnifiedHistogramSuggestionType.lensSuggestion;
     let currentSuggestion: Suggestion | undefined = allSuggestions[0];
 
     if (suggestionContextSelectedPreviously?.suggestion) {
@@ -274,14 +274,14 @@ export class LensVisService {
 
     if (
       externalVisContext &&
-      externalVisContext?.suggestionType === UnifiedHistogramSuggestionType.supportedLensSuggestion
+      externalVisContext?.suggestionType === UnifiedHistogramSuggestionType.lensSuggestion
     ) {
       const matchingSuggestion = allSuggestions.find((suggestion) =>
         isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
       );
 
       currentSuggestion = matchingSuggestion || currentSuggestion;
-      type = UnifiedHistogramSuggestionType.supportedLensSuggestion;
+      type = UnifiedHistogramSuggestionType.lensSuggestion;
     }
 
     const prevSuggestionDeps = suggestionContextSelectedPreviously?.suggestionDeps;
@@ -300,13 +300,13 @@ export class LensVisService {
       !isEqual(prevSuggestionDeps, nextSuggestionDeps)
     ) {
       currentSuggestion = allSuggestions[0];
-      type = UnifiedHistogramSuggestionType.supportedLensSuggestion;
+      type = UnifiedHistogramSuggestionType.lensSuggestion;
       shouldUpdateSelectedSuggestionDueToDepsChange = true;
     }
 
     if (!currentSuggestion) {
       currentSuggestion = this.getHistogramSuggestionForESQL({ queryParams });
-      type = UnifiedHistogramSuggestionType.localHistogramSuggestionForESQL;
+      type = UnifiedHistogramSuggestionType.histogramForESQL;
     }
 
     if (!currentSuggestion && !queryParams.isPlainRecord) {
@@ -315,7 +315,7 @@ export class LensVisService {
         breakdownField,
         timeInterval,
       });
-      type = UnifiedHistogramSuggestionType.localHistogramDefault;
+      type = UnifiedHistogramSuggestionType.histogramForDataView;
     }
 
     return {
@@ -589,7 +589,7 @@ export class LensVisService {
     };
 
     const currentQuery =
-      suggestionType === UnifiedHistogramSuggestionType.localHistogramSuggestionForESQL &&
+      suggestionType === UnifiedHistogramSuggestionType.histogramForESQL &&
       isOfAggregateQueryType(query) &&
       timeRange
         ? {
@@ -628,7 +628,7 @@ export class LensVisService {
         dataView,
       }) as TypedLensByValueInput['attributes'];
 
-      if (suggestionType === UnifiedHistogramSuggestionType.localHistogramDefault) {
+      if (suggestionType === UnifiedHistogramSuggestionType.histogramForDataView) {
         attributes.references = [
           {
             id: dataView.id ?? '',
@@ -649,7 +649,7 @@ export class LensVisService {
       table && // already fetched data
       query &&
       isOfAggregateQueryType(query) &&
-      suggestionType === UnifiedHistogramSuggestionType.supportedLensSuggestion &&
+      suggestionType === UnifiedHistogramSuggestionType.lensSuggestion &&
       lensAttributesContext?.attributes
     ) {
       lensAttributesContext = {

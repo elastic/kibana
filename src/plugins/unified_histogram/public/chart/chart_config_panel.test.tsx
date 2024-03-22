@@ -42,7 +42,7 @@ describe('ChartConfigPanel', () => {
           },
           currentSuggestionContext: {
             suggestion: currentSuggestionMock,
-            type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
+            type: UnifiedHistogramSuggestionType.lensSuggestion,
             suggestionDeps: [undefined, undefined, undefined, undefined],
           },
         }}
@@ -70,7 +70,7 @@ describe('ChartConfigPanel', () => {
           isPlainRecord: false,
           currentSuggestionContext: {
             suggestion: currentSuggestionMock,
-            type: UnifiedHistogramSuggestionType.localHistogramDefault,
+            type: UnifiedHistogramSuggestionType.histogramForDataView,
             suggestionDeps: [undefined, undefined, undefined, undefined],
           },
         }}
