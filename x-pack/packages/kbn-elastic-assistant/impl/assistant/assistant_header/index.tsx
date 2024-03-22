@@ -65,14 +65,8 @@ export const AssistantHeader: React.FC<Props> = ({
   conversations,
   refetchConversationsState,
 }) => {
-  const { applicationService } = useAssistantContext();
+  const { currentAppId } = useAssistantContext();
 
-  // const [currentAppId, setCurrentAppId] = useState<string | undefined>();
-  let currentAppId: string | undefined;
-  applicationService?.currentAppId$.subscribe((appId) => {
-    // setCurrentAppId(appId);
-    currentAppId = appId;
-  });
   const showAnonymizedValuesChecked = useMemo(
     () =>
       currentConversation.replacements != null &&
@@ -105,7 +99,7 @@ export const AssistantHeader: React.FC<Props> = ({
             docLinks={docLinks}
             selectedConversation={currentConversation}
             onChange={onConversationChange}
-            title={`${title} ${currentAppId}`}
+            title={`${title} ${currentAppId.getValue()}`}
           />
         </EuiFlexItem>
 

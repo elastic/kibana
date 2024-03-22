@@ -55,7 +55,6 @@ export function AssistantProvider({
 
   let currentAppId: string | undefined;
   applicationService?.currentAppId$.subscribe((appId) => {
-    // setCurrentAppId(appId);
     currentAppId = appId;
   });
 
@@ -108,6 +107,7 @@ export function AssistantProvider({
         setDefaultAllow={setDefaultAllow} // remove
         setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
         title={ASSISTANT_TITLE}
+        toasts={notifications.toasts}
       >
         {children}
       </ElasticAssistantProvider>

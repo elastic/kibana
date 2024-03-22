@@ -6,6 +6,7 @@
  */
 
 import { EuiCommentProps } from '@elastic/eui';
+import * as Rx from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit, uniq } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -149,6 +150,7 @@ export interface UseAssistantContext {
   toasts: IToasts | undefined;
   unRegisterPromptContext: UnRegisterPromptContext;
   applicationService: ApplicationStart;
+  currentAppId: Rx.BehaviorSubject<string>;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -179,15 +181,16 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   toasts,
   applicationService,
 }) => {
-  // const [promptKey, setPromptKey] = useState<string | undefined>();
+  const currentAppId = useMemo(() => new Rx.BehaviorSubject(''), []);
+  if (applicationService) {
+    applicationService.currentAppId$.subscribe((appId) => {
+      if (appId) {
+        currentAppId.next(appId);
+      }
+    });
+  }
 
-  // const [currentAppId, setCurrentAppId] = useState<string | undefined>();
-  let currentAppId: string | undefined;
-  applicationService?.currentAppId$.subscribe((appId) => {
-    // setCurrentAppId(appId);
-    currentAppId = appId;
-  });
-
+  // const currentAppId = useCurrentAppId(applicationService);
   /**
    * Local storage for all quick prompts, prefixed by assistant nameSpace
    */
@@ -316,6 +319,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLastConversationTitle: setLocalStorageLastConversationTitle,
       baseConversations,
       applicationService,
+      currentAppId,
     }),
     [
       actionTypeRegistry,
@@ -356,6 +360,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLocalStorageLastConversationTitle,
       baseConversations,
       applicationService,
+      currentAppId,
     ]
   );
 

@@ -62,14 +62,9 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   setIsSettingsModalVisible,
   showTitles = false,
 }) => {
-  const { setSelectedSettingsTab, applicationService } = useAssistantContext();
+  const { setSelectedSettingsTab, currentAppId } = useAssistantContext();
   const { setApiConfig } = useConversation();
 
-  let currentAppId: string | undefined;
-  applicationService?.currentAppId$.subscribe((appId) => {
-    // setCurrentAppId(appId);
-    currentAppId = appId;
-  });
   const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
   const handleOnBlur = useCallback(() => setIsOpenLocal(false), []);
 
@@ -113,7 +108,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   const options = useMemo(
     () =>
       getOptions({
-        prompts: allSystemPrompts.filter((o) => o.consumer === currentAppId),
+        prompts: allSystemPrompts.filter((o) => o.consumer === currentAppId.getValue()),
         showTitles,
       }),
     [allSystemPrompts, currentAppId, showTitles]
@@ -183,7 +178,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
               onBlur={handleOnBlur}
               options={[...options, addNewSystemPrompt]}
               placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
-              valueOfSelected={selectedPrompt?.id ?? allSystemPrompts[0]?.id}
+              valueOfSelected={selectedPrompt?.id ?? options[0]?.value}
             />
           </EuiFormRow>
         )}

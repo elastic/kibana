@@ -43,17 +43,12 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
     onQuickPromptSelectionChange,
     selectedQuickPrompt,
   }) => {
-    const { applicationService } = useAssistantContext();
+    const { currentAppId } = useAssistantContext();
 
-    let currentAppId: string | undefined;
-    applicationService?.currentAppId$.subscribe((appId) => {
-      // setCurrentAppId(appId);
-      currentAppId = appId;
-    });
     // Form options
     const [options, setOptions] = useState<QuickPromptSelectorOption[]>(
       quickPrompts
-        .filter((p) => p.consumer === '')
+        .filter((p) => p.consumer === currentAppId.getValue())
         .map((qp) => ({
           value: {
             isDefault: qp.isDefault ?? false,

@@ -49,17 +49,12 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
     onSystemPromptSelectionChange,
     selectedSystemPrompt,
   }) => {
-    const { applicationService } = useAssistantContext();
+    const { currentAppId } = useAssistantContext();
 
-    let currentAppId: string | undefined;
-    applicationService?.currentAppId$.subscribe((appId) => {
-      // setCurrentAppId(appId);
-      currentAppId = appId;
-    });
     // Form options
     const [options, setOptions] = useState<SystemPromptSelectorOption[]>(
       systemPrompts
-        .filter((s) => s.consumer === currentAppId)
+        .filter((s) => s.consumer === currentAppId.getValue())
         .map((sp) => ({
           value: {
             isDefault: sp.isDefault ?? false,
