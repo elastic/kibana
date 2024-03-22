@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { RuleType } from '@kbn/triggers-actions-ui-types';
 
-export const NO_INDEX_PATTERNS: DataView[] = [];
-export const EMPTY_AAD_FIELDS: DataViewField[] = [];
-export * from '../common/constants';
+export type RuleTypeIndexWithDescriptions = Map<
+  string,
+  RuleType<string, string> & { description?: string }
+>;

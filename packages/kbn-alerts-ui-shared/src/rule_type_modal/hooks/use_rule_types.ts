@@ -1,0 +1,113 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { keyBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
+import { ALERTS_FEATURE_ID } from '../../common/constants';
+import { loadRuleTypes } from '../apis/load_rule_types';
+
+export interface UseRuleTypesProps {
+  http: HttpStart;
+  toasts: ToastsStart;
+  filteredRuleTypes: string[];
+  registeredRuleTypes: Array<{ id: string; description: string }>;
+  enabled?: boolean;
+}
+
+const getFilteredIndex = (
+  data: Array<RuleType<string, string>>,
+  filteredRuleTypes: string[],
+  registeredRuleTypes: UseRuleTypesProps['registeredRuleTypes']
+) => {
+  const index: RuleTypeIndex = new Map();
+  const registeredRuleTypesDictionary = keyBy(registeredRuleTypes, 'id');
+  for (const ruleType of data) {
+    const ruleTypeRecord: RuleType<string, string> & { description?: string } = { ...ruleType };
+    if (registeredRuleTypesDictionary[ruleType.id]) {
+      ruleTypeRecord.description = registeredRuleTypesDictionary[ruleType.id].description;
+    }
+    index.set(ruleType.id, ruleTypeRecord);
+  }
+  let filteredIndex = index;
+  if (filteredRuleTypes?.length) {
+    filteredIndex = new Map(
+      [...index].filter(([k, v]) => {
+        return filteredRuleTypes.includes(v.id);
+      })
+    );
+  }
+  return filteredIndex;
+};
+
+export const useRuleTypes = ({
+  http,
+  toasts,
+  filteredRuleTypes,
+  registeredRuleTypes,
+  enabled = true,
+}: UseRuleTypesProps) => {
+  const queryFn = () => {
+    return loadRuleTypes({ http });
+  };
+
+  const onErrorFn = (error: Error) => {
+    if (error) {
+      toasts.addDanger(
+        i18n.translate('alertsUiShared.hooks.useRuleTypes.errorMessage', {
+          defaultMessage: 'Unable to load rule types',
+        })
+      );
+    }
+  };
+  const { data, isSuccess, isFetching, isInitialLoading, isLoading, error } = useQuery({
+    queryKey: ['loadRuleTypes'],
+    queryFn,
+    onError: onErrorFn,
+    refetchOnWindowFocus: false,
+    // Leveraging TanStack Query's caching system to avoid duplicated requests as
+    // other state-sharing solutions turned out to be overly complex and less readable
+    staleTime: 60 * 1000,
+    enabled,
+  });
+
+  const filteredIndex = useMemo(
+    () =>
+      data
+        ? getFilteredIndex(data, filteredRuleTypes, registeredRuleTypes)
+        : new Map<string, RuleType>(),
+    [data, filteredRuleTypes, registeredRuleTypes]
+  );
+
+  const hasAnyAuthorizedRuleType = filteredIndex.size > 0;
+  const authorizedRuleTypes = useMemo(() => [...filteredIndex.values()], [filteredIndex]);
+  const authorizedToCreateAnyRules = authorizedRuleTypes.some(
+    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
+  );
+  const authorizedToReadAnyRules =
+    authorizedToCreateAnyRules ||
+    authorizedRuleTypes.some((ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.read);
+
+  return {
+    ruleTypesState: {
+      initialLoad: isLoading || isInitialLoading,
+      isLoading: isLoading || isFetching,
+      data: filteredIndex,
+      error,
+    },
+    hasAnyAuthorizedRuleType,
+    authorizedRuleTypes,
+    authorizedToReadAnyRules,
+    authorizedToCreateAnyRules,
+    isSuccess,
+  };
+};

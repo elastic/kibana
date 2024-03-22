@@ -13,6 +13,7 @@ import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
+import { RuleTypeModal } from '@kbn/alerts-ui-shared';
 import React, {
   lazy,
   useEffect,
@@ -997,19 +998,25 @@ export const RulesList = ({
           </>
         )}
         {ruleFlyoutVisible && (
-          <Suspense fallback={<div />}>
-            <RuleAdd
-              consumer={ALERTS_FEATURE_ID}
-              onClose={() => {
-                setRuleFlyoutVisibility(false);
-              }}
-              actionTypeRegistry={actionTypeRegistry}
-              ruleTypeRegistry={ruleTypeRegistry}
-              ruleTypeIndex={ruleTypesState.data}
-              onSave={refreshRules}
-              initialSelectedConsumer={initialSelectedConsumer}
-            />
-          </Suspense>
+          // <Suspense fallback={<div />}>
+          //   <RuleAdd
+          //     consumer={ALERTS_FEATURE_ID}
+          //     onClose={() => {
+          //       setRuleFlyoutVisibility(false);
+          //     }}
+          //     actionTypeRegistry={actionTypeRegistry}
+          //     ruleTypeRegistry={ruleTypeRegistry}
+          //     ruleTypeIndex={ruleTypesState.data}
+          //     onSave={refreshRules}
+          //     initialSelectedConsumer={initialSelectedConsumer}
+          //   />
+          // </Suspense>
+          <RuleTypeModal
+            onClose={() => setRuleFlyoutVisibility(false)}
+            http={http}
+            toasts={toasts}
+            registeredRuleTypes={ruleTypeRegistry.list()}
+          />
         )}
         {editFlyoutVisible && currentRuleToEdit && (
           <Suspense fallback={<div />}>
