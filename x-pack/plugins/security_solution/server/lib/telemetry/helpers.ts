@@ -302,7 +302,7 @@ export const tlog = (logger: Logger, message: string, meta?: LogMeta) => {
 };
 
 export interface TelemetryLogger extends Logger {
-  l: (message: string) => void;
+  l: (message: string, meta?: LogMeta | object | undefined) => void;
 }
 
 /**
@@ -330,7 +330,7 @@ export interface TelemetryLogger extends Logger {
 export const newTelemetryLogger = (logger: Logger): TelemetryLogger => {
   const delegated = Object.create(logger);
 
-  delegated.l = (message: string, meta?: LogMeta | undefined) =>
+  delegated.l = (message: string, meta?: LogMeta | object | undefined) =>
     tlog(logger, message, logMeta(meta));
   delegated.info = (message: string, meta?: LogMeta | undefined) =>
     logger.info(message, logMeta(meta));
