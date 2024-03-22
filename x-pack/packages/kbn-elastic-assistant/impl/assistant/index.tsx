@@ -84,8 +84,6 @@ const AssistantComponent: React.FC<Props> = ({
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
-    defaultAllow,
-    defaultAllowReplacement,
     docLinks,
     getComments,
     http,
@@ -119,6 +117,8 @@ const AssistantComponent: React.FC<Props> = ({
     isError,
     refetch,
   } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
+
+  
 
   useEffect(() => {
     if (!isLoading && !isError) {
