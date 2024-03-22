@@ -24,7 +24,7 @@ import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_st
 export const ACTION_LEGACY_UNLINK_FROM_LIBRARY = 'legacyUnlinkFromLibrary';
 
 export type LegacyUnlinkPanelFromLibraryActionApi = CanAccessViewMode &
-HasLegacyLibraryTransforms &
+  HasLegacyLibraryTransforms &
   Partial<PublishesPanelTitle>;
 
 export const legacyUnlinkActionIsCompatible = (

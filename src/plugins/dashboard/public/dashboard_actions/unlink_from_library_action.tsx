@@ -24,29 +24,28 @@ import {
   HasType,
   apiHasType,
 } from '@kbn/presentation-publishing';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
-import { PresentationContainer } from '@kbn/presentation-containers';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 
 export type UnlinkPanelFromLibraryActionApi = CanAccessViewMode &
-HasLibraryTransforms &
-  HasType & 
+  HasLibraryTransforms &
+  HasType &
   HasUniqueId &
   HasParentApi<Pick<PresentationContainer, 'replacePanel'>> &
   Partial<PublishesPanelTitle>;
 
-export const isApiCompatible = (
-  api: unknown | null
-): api is UnlinkPanelFromLibraryActionApi =>
-  Boolean(apiCanAccessViewMode(api) &&
-  apiHasLibraryTransforms(api) &&
-  apiHasUniqueId(api) &&
-  apiHasType(api) &&
-  apiHasParentApi(api) &&
-  typeof (api.parentApi as PresentationContainer)?.replacePanel === 'function'
-);
+export const isApiCompatible = (api: unknown | null): api is UnlinkPanelFromLibraryActionApi =>
+  Boolean(
+    apiCanAccessViewMode(api) &&
+      apiHasLibraryTransforms(api) &&
+      apiHasUniqueId(api) &&
+      apiHasType(api) &&
+      apiHasParentApi(api) &&
+      typeof (api.parentApi as PresentationContainer)?.replacePanel === 'function'
+  );
 
 export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_UNLINK_FROM_LIBRARY;

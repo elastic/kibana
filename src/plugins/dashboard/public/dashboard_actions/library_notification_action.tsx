@@ -15,7 +15,10 @@ import {
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { LibraryNotificationPopover } from './library_notification_popover';
-import { legacyUnlinkActionIsCompatible, LegacyUnlinkFromLibraryAction } from './legacy_unlink_from_library_action';
+import {
+  legacyUnlinkActionIsCompatible,
+  LegacyUnlinkFromLibraryAction,
+} from './legacy_unlink_from_library_action';
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';

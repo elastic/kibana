@@ -11,7 +11,7 @@ import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 export interface HasLibraryTransforms<StateT extends object = object> {
   canLinkToLibrary: () => Promise<boolean>;
   canUnlinkFromLibrary: () => Promise<boolean>;
-  saveStateToSavedObject: () => void;
+  saveStateToSavedObject: (title: string) => Promise<{ state: StateT; savedObjectId: string; }>;
   savedObjectAttributesToState: () => StateT;
   checkForDuplicateTitle: (props: OnSaveProps) => Promise<void>;
 }

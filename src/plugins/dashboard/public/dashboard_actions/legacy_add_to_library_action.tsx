@@ -23,7 +23,7 @@ import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings
 export const ACTION_LEGACY_ADD_TO_LIBRARY = 'legacySaveToLibrary';
 
 export type LegacyAddPanelToLibraryActionApi = CanAccessViewMode &
-HasLegacyLibraryTransforms &
+  HasLegacyLibraryTransforms &
   Partial<PublishesPanelTitle>;
 
 const isApiCompatible = (api: unknown | null): api is LegacyAddPanelToLibraryActionApi =>

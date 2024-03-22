@@ -14,6 +14,7 @@ import {
 } from '@kbn/saved-objects-finder-plugin/public';
 
 import { DashboardStartDependencies } from '../plugin';
+import { AddToLibraryAction } from './add_to_library_action';
 import { LegacyAddToLibraryAction } from './legacy_add_to_library_action';
 import { ClonePanelAction } from './clone_panel_action';
 import { CopyToDashboardAction } from './copy_to_dashboard_action';
@@ -67,6 +68,10 @@ export const buildAllDashboardActions = async ({
   }
 
   if (allowByValueEmbeddables) {
+    const addToLibraryAction = new AddToLibraryAction();
+    uiActions.registerAction(addToLibraryAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
+
     const legacyAddToLibraryAction = new LegacyAddToLibraryAction();
     uiActions.registerAction(legacyAddToLibraryAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, legacyAddToLibraryAction.id);
