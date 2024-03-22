@@ -7,7 +7,7 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { LensVisService, type QueryParams } from '../services/lens_vis_service';
@@ -31,6 +31,7 @@ export const getLensVisMock = async ({
   dataView,
   allSuggestions,
   hasHistogramSuggestionForESQL,
+  table,
 }: {
   filters: QueryParams['filters'];
   query: QueryParams['query'];
@@ -42,6 +43,7 @@ export const getLensVisMock = async ({
   breakdownField: DataViewField | undefined;
   allSuggestions?: Suggestion[];
   hasHistogramSuggestionForESQL?: boolean;
+  table?: Datatable;
 }): Promise<{
   lensService: LensVisService;
   visContext: UnifiedHistogramVisContext | undefined;
@@ -83,6 +85,7 @@ export const getLensVisMock = async ({
     timeInterval,
     breakdownField,
     externalVisContext: undefined,
+    table,
   });
 
   return {
