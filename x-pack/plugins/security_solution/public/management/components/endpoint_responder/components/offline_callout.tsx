@@ -10,7 +10,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useGetSentinelOneAgentStatus } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+import { useAgentStatus } from '../../../../common/hooks/use_agent_status';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useGetEndpointDetails } from '../../../hooks';
 import { HostStatus } from '../../../../../common/endpoint/types';
@@ -33,7 +33,7 @@ export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId
     enabled: isEndpointAgent,
   });
 
-  const { data } = useGetSentinelOneAgentStatus([endpointId]);
+  const { data } = useAgentStatus([endpointId], agentType);
 
   // TODO: simplify this to use the yet to be implemented agentStatus API hook
   const showOfflineCallout = useMemo(

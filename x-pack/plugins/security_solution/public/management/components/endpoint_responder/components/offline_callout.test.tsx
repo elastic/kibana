@@ -11,16 +11,16 @@ import type { HostInfo } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { useGetSentinelOneAgentStatus } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+import { useAgentStatus } from '../../../../common/hooks/use_agent_status';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
 import { mockEndpointDetailsApiResult } from '../../../pages/endpoint_hosts/store/mock_endpoint_result_list';
 import { OfflineCallout } from './offline_callout';
 
 jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
-jest.mock('../../../../detections/components/host_isolation/use_sentinelone_host_isolation');
+jest.mock('../../../../common/hooks/use_agent_status');
 
 const getEndpointDetails = useGetEndpointDetails as jest.Mock;
-const getSentinelOneAgentStatus = useGetSentinelOneAgentStatus as jest.Mock;
+const getSentinelOneAgentStatus = useAgentStatus as jest.Mock;
 
 describe('Responder offline callout', () => {
   let render: (agentType?: ResponseActionAgentType) => ReturnType<AppContextTestRender['render']>;

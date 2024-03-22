@@ -49,6 +49,7 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
         acc[agentId] = {
           agentId,
           agentType: this.agentType,
+          capabilities: [...(agentMetadata?.metadata.Endpoint.capabilities ?? [])],
           found: agentMetadata !== undefined,
           isolated: Boolean(agentMetadata?.metadata.Endpoint.state?.isolation),
           isPendingUninstall: undefined,

@@ -28,6 +28,7 @@ export interface AgentStatuses {
   [agentId: string]: {
     agentId: string;
     agentType: ResponseActionAgentType;
+    capabilities: string[];
     found: boolean;
     isolated: boolean;
     isPendingUninstall: boolean | undefined;

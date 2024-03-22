@@ -11,10 +11,11 @@ import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
-import type { AgentStatusApiResponse } from '../../../../common/endpoint/types';
-import { useHttp } from '../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import type { ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
+import { AGENT_STATUS_ROUTE } from '../../../common/endpoint/constants';
+import type { AgentStatusApiResponse } from '../../../common/endpoint/types';
+import { useHttp } from '../lib/kibana';
+import { useIsExperimentalFeatureEnabled } from './use_experimental_features';
 
 interface ErrorType {
   statusCode: number;
@@ -22,13 +23,17 @@ interface ErrorType {
   meta: ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
 }
 
-export const useGetSentinelOneAgentStatus = (
+export const useAgentStatus = (
   _agentIds: string[],
+  agentType: ResponseActionAgentType,
   options: UseQueryOptions<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>> => {
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'
   );
+
+  const isSentinelAgent = agentType === 'sentinel_one';
+  const isEndpointAgent = agentType === 'endpoint';
 
   const agentIds = _agentIds.filter((agentId) => agentId.trim().length);
 
@@ -37,7 +42,12 @@ export const useGetSentinelOneAgentStatus = (
   return useQuery<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>>({
     queryKey: ['get-agent-status', agentIds],
     ...options,
-    enabled: !(sentinelOneManualHostActionsEnabled && isEmpty(agentIds)),
+    enabled:
+      // Only fetch agent status if there are agentIds
+      // and the agent type is either endpoint
+      // or sentinel agent (when ff is enabled)
+      !isEmpty(agentIds) &&
+      (isEndpointAgent || (isSentinelAgent && sentinelOneManualHostActionsEnabled)),
     // TODO: update this to use a function instead of a number
     refetchInterval: 2000,
     queryFn: () =>
@@ -46,9 +56,7 @@ export const useGetSentinelOneAgentStatus = (
           version: '2023-10-31',
           query: {
             agentIds,
-            // TODO: update this to get it from params  also rename
-            // and move this function to a common place to be used by endpoint and sentinel_one
-            agentType: 'sentinel_one',
+            agentType,
           },
         })
         .then((response) => response.data),

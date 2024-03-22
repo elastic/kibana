@@ -14,15 +14,15 @@ import {
 } from './test_ids';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { RightPanelContext } from '../context';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { TestProviders } from '../../../../common/mock';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useGetEndpointDetails } from '../../../../management/hooks';
-import { useGetSentinelOneAgentStatus } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
-import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useAgentStatus } from '../../../../common/hooks/use_agent_status';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../management/hooks');
-jest.mock('../../../../detections/components/host_isolation/use_sentinelone_host_isolation');
+jest.mock('../../../../common/hooks/use_agent_status');
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -96,7 +96,7 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should render sentinelone agent status cell if field is agent.status and origialField is observer.serial_number', () => {
-    (useGetSentinelOneAgentStatus as jest.Mock).mockReturnValue({
+    (useAgentStatus as jest.Mock).mockReturnValue({
       isFetched: true,
       isLoading: false,
     });

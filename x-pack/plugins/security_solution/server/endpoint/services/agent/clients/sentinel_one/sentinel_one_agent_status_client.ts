@@ -101,6 +101,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
         acc[agentId] = {
           agentId,
           agentType: this.agentType,
+          capabilities: [],
           found: agentInfo?.uuid === agentId ?? false,
           isolated: agentInfo?.network_status === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTED ?? false,
           isPendingUninstall: agentInfo?.is_pending_uninstall ?? false,
