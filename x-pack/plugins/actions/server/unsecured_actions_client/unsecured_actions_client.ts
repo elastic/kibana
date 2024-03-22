@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { IClusterClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import {
   BulkUnsecuredExecutionEnqueuer,
   ExecuteOptions,
@@ -17,8 +17,10 @@ import {
   asNotificationExecutionSource,
   type RelatedSavedObjects,
 } from '../lib';
-import { ActionTypeExecutorResult } from '../types';
+import { ActionTypeExecutorResult, InMemoryConnector } from '../types';
 import { asBackgroundTaskExecutionSource } from '../lib/action_execution_source';
+import { ConnectorWithExtraFindData } from '../application/connector/types';
+import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
 
 // requests from the notification service (for system notification)
 const NOTIFICATION_REQUESTER_ID = 'notifications';
@@ -37,8 +39,11 @@ const ALLOWED_REQUESTER_IDS = [
 
 export interface UnsecuredActionsClientOpts {
   actionExecutor: ActionExecutorContract;
-  internalSavedObjectsRepository: ISavedObjectsRepository;
+  clusterClient: IClusterClient;
   executionEnqueuer: BulkUnsecuredExecutionEnqueuer<ExecutionResponse>;
+  inMemoryConnectors: InMemoryConnector[];
+  internalSavedObjectsRepository: ISavedObjectsRepository;
+  kibanaIndices: string[];
   logger: Logger;
 }
 
@@ -48,6 +53,7 @@ type UnsecuredExecuteOptions = Omit<ExecuteOptions, 'source'> & {
 };
 
 export interface IUnsecuredActionsClient {
+  getAll: (spaceId: string) => Promise<ConnectorWithExtraFindData[]>;
   execute: (opts: UnsecuredExecuteOptions) => Promise<ActionTypeExecutorResult<unknown>>;
   bulkEnqueueExecution: (
     requesterId: string,
@@ -56,17 +62,7 @@ export interface IUnsecuredActionsClient {
 }
 
 export class UnsecuredActionsClient {
-  private readonly actionExecutor: ActionExecutorContract;
-  private readonly internalSavedObjectsRepository: ISavedObjectsRepository;
-  private readonly executionEnqueuer: BulkUnsecuredExecutionEnqueuer<ExecutionResponse>;
-  private readonly logger: Logger;
-
-  constructor(params: UnsecuredActionsClientOpts) {
-    this.actionExecutor = params.actionExecutor;
-    this.executionEnqueuer = params.executionEnqueuer;
-    this.internalSavedObjectsRepository = params.internalSavedObjectsRepository;
-    this.logger = params.logger;
-  }
+  constructor(private readonly opts: UnsecuredActionsClientOpts) {}
 
   public async execute({
     requesterId,
@@ -83,14 +79,14 @@ export class UnsecuredActionsClient {
     }
 
     if (!relatedSavedObjects) {
-      this.logger.warn(
+      this.opts.logger.warn(
         `Calling "execute" in UnsecuredActionsClient without any relatedSavedObjects data. Consider including this for traceability.`
       );
     }
 
     const source = this.getSourceFromRequester(requesterId, id, relatedSavedObjects);
 
-    return this.actionExecutor.executeUnsecured({
+    return this.opts.actionExecutor.executeUnsecured({
       actionExecutionId: uuidv4(),
       actionId: id,
       params,
@@ -123,7 +119,18 @@ export class UnsecuredActionsClient {
         ...source,
       };
     });
-    return this.executionEnqueuer(this.internalSavedObjectsRepository, actionsToEnqueue);
+    return this.opts.executionEnqueuer(this.opts.internalSavedObjectsRepository, actionsToEnqueue);
+  }
+
+  public async getAll(spaceId: string): Promise<ConnectorWithExtraFindData[]> {
+    return getAllUnsecured({
+      esClient: this.opts.clusterClient.asInternalUser,
+      inMemoryConnectors: this.opts.inMemoryConnectors,
+      kibanaIndices: this.opts.kibanaIndices,
+      logger: this.opts.logger,
+      internalSavedObjectsRepository: this.opts.internalSavedObjectsRepository,
+      spaceId,
+    });
   }
 
   private getSourceFromRequester(
