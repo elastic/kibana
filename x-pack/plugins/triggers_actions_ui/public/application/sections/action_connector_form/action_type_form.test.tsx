@@ -751,7 +751,6 @@ function getActionTypeForm({
     <ActionTypeForm
       actionConnector={actionConnector ?? actionConnectorDefault}
       actionItem={actionItem ?? actionItemDefault}
-      isSystemAction={false}
       connectors={connectors ?? connectorsDefault}
       onAddConnector={onAddConnector ?? jest.fn()}
       onDeleteAction={onDeleteAction ?? jest.fn()}
