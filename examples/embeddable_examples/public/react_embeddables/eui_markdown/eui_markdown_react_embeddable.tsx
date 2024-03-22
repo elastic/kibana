@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 import {
   initializeReactEmbeddableTitles,
   ReactEmbeddableFactory,
-  registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useInheritedViewMode, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -21,7 +20,7 @@ import { BehaviorSubject } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
 import { MarkdownEditorSerializedState, MarkdownEditorApi } from './types';
 
-const markdownEmbeddableFactory: ReactEmbeddableFactory<
+export const markdownEmbeddableFactory: ReactEmbeddableFactory<
   MarkdownEditorSerializedState,
   MarkdownEditorApi
 > = {
@@ -105,11 +104,3 @@ const markdownEmbeddableFactory: ReactEmbeddableFactory<
     };
   },
 };
-
-/**
- * Register the defined Embeddable Factory - notice that this isn't defined
- * on the plugin. Instead, it's a simple imported function. I.E to register an
- * embeddable, you only need the embeddable plugin in your requiredBundles
- */
-export const registerMarkdownEditorEmbeddable = () =>
-  registerReactEmbeddableFactory(markdownEmbeddableFactory);

@@ -20,7 +20,6 @@ import {
   DefaultEmbeddableApi,
   EmbeddableStateComparators,
   ReactEmbeddableApiRegistration,
-  ReactEmbeddableFactory,
 } from './types';
 
 /**
@@ -50,10 +49,7 @@ export const ReactEmbeddableRenderer = <
     () =>
       (async () => {
         const uuid = maybeId ?? generateId();
-        const factory = getReactEmbeddableFactory(type) as ReactEmbeddableFactory<
-          StateType,
-          ApiType
-        >;
+        const factory = await getReactEmbeddableFactory<StateType, ApiType>(type);
         const registerApi = (
           apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
           comparators: EmbeddableStateComparators<StateType>

@@ -20,7 +20,6 @@ import {
 import {
   initializeReactEmbeddableTitles,
   ReactEmbeddableFactory,
-  registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +49,7 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
   };
 };
 
-export const registerFieldListFactory = (
+export const getFieldListFactory = (
   core: CoreStart,
   {
     dataViews,
@@ -226,6 +225,5 @@ export const registerFieldListFactory = (
       };
     },
   };
-
-  registerReactEmbeddableFactory(fieldListEmbeddableFactory);
+  return fieldListEmbeddableFactory;
 };
