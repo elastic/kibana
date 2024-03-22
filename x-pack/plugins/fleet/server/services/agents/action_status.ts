@@ -318,6 +318,11 @@ async function getPolicyChangeActions(
               },
             },
           },
+          {
+            term: {
+              coordinator_idx: 0, // docs created by Kibana, as opposed to Fleet Server (coordinator_idx: 1)
+            },
+          },
         ],
       },
     },
