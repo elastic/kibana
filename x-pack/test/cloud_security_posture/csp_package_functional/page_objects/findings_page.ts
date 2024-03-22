@@ -10,8 +10,6 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
 
 // Defined in CSP plugin
-const FINDINGS_INDEX = 'logs-cloud_security_posture.findings-default';
-const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 export const VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities-default';
 export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
@@ -21,7 +19,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FunctionalF
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
-  const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
 
@@ -38,52 +35,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FunctionalF
       expect(response.body).to.eql({ isPluginInitialized: true });
       log.debug('CSP plugin is initialized');
     });
-
-  const deleteByQuery = async (index: string) => {
-    await es.deleteByQuery({
-      index,
-      query: {
-        match_all: {},
-      },
-      ignore_unavailable: true,
-      refresh: true,
-    });
-  };
-
-  const insertOperation = (index: string, findingsMock: Array<Record<string, unknown>>) => {
-    return findingsMock.flatMap((doc) => [{ index: { _index: index } }, doc]);
-  };
-
-  const index = {
-    remove: () =>
-      Promise.all([deleteByQuery(FINDINGS_INDEX), deleteByQuery(FINDINGS_LATEST_INDEX)]),
-    add: async (findingsMock: Array<Record<string, unknown>>) => {
-      await es.bulk({
-        refresh: true,
-        operations: [
-          ...insertOperation(FINDINGS_INDEX, findingsMock),
-          ...insertOperation(FINDINGS_LATEST_INDEX, findingsMock),
-        ],
-      });
-    },
-  };
-
-  const vulnerabilitiesIndex = {
-    remove: () =>
-      Promise.all([
-        deleteByQuery(VULNERABILITIES_INDEX_DEFAULT_NS),
-        deleteByQuery(LATEST_VULNERABILITIES_INDEX_DEFAULT_NS),
-      ]),
-    add: async (findingsMock: Array<Record<string, unknown>>) => {
-      await es.bulk({
-        refresh: true,
-        operations: [
-          ...insertOperation(VULNERABILITIES_INDEX_DEFAULT_NS, findingsMock),
-          ...insertOperation(LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, findingsMock),
-        ],
-      });
-    },
-  };
 
   const detectionRuleApi = {
     remove: async () => {
@@ -343,8 +294,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FunctionalF
     latestVulnerabilitiesTable,
     notInstalledVulnerabilities,
     notInstalledCSP,
-    index,
-    vulnerabilitiesIndex,
     waitForPluginInitialized,
     distributionBar,
     vulnerabilityDataGrid,
