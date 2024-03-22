@@ -26,13 +26,14 @@ import type {
 } from './types';
 import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
 import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
-import { getProductProductFeaturesConfigurator } from './product_features';
+import { getProductProductFeaturesConfigurator, getSecurityProductTier } from './product_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import {
   endpointMeteringService,
   setEndpointPackagePolicyServerlessFlag,
 } from './endpoint/services';
 import { enableRuleActions } from './rules/enable_rule_actions';
+import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -46,6 +47,7 @@ export class SecuritySolutionServerlessPlugin
   private config: ServerlessSecurityConfig;
   private cloudSecurityUsageReportingTask: SecurityUsageReportingTask | undefined;
   private endpointUsageReportingTask: SecurityUsageReportingTask | undefined;
+  private nlpCleanupTask: NLPCleanupTask | undefined;
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -103,6 +105,13 @@ export class SecuritySolutionServerlessPlugin
       },
     });
 
+    this.nlpCleanupTask = new NLPCleanupTask({
+      core: coreSetup,
+      logFactory: this.initializerContext.logger,
+      productTier: getSecurityProductTier(this.config, this.logger),
+      taskManager: pluginsSetup.taskManager,
+    });
+
     pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
 
     return {};
@@ -121,6 +130,8 @@ export class SecuritySolutionServerlessPlugin
       taskManager: pluginsSetup.taskManager,
       interval: ENDPOINT_METERING_TASK.INTERVAL,
     });
+
+    this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager });
 
     setEndpointPackagePolicyServerlessFlag(
       internalSOClient,

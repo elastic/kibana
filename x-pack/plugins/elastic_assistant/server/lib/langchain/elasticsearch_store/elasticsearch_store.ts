@@ -406,6 +406,7 @@ export class ElasticsearchStore extends VectorStore {
         stats.deployment_stats?.state === 'started' &&
         stats.deployment_stats?.allocation_status.state === 'fully_allocated';
 
+      // TODO: Open issue for standardized way of checking deployment status
       const isReadyServerless = (stats: MlTrainedModelStats) =>
         (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
           (node) => node.routing_state.routing_state === 'started'
