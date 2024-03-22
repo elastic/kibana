@@ -60,8 +60,11 @@ describe('Starting root with disabled preboot', () => {
   });
 
   it('successfully boots', async () => {
-    await root.preboot();
+    const preboot = await root.preboot();
     await root.setup();
     await root.start();
+
+    // preboot contract is not returned when preboot is disabled
+    expect(preboot).toBeUndefined();
   });
 });
