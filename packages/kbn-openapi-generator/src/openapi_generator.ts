@@ -87,8 +87,14 @@ export const generate = async (config: GeneratorConfig) => {
       generationContext.operations.map((op) => ({
         ...op,
         sourcePath: sourcePath.split(`${REPO_ROOT}/`)[1],
+        version: generationContext.info.version,
       }))
     );
+
+    console.log('parsedSources');
+    console.log(parsedSources);
+    console.log('operations');
+    console.log(operations);
 
     const result = TemplateService.compileTemplate(templateName, {
       operations,

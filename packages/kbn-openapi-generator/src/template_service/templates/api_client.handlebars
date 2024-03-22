@@ -25,14 +25,14 @@ import {
 */
 {{/if}}
 export async const {{camelCase operationId}} = (
-{{#if requestBody}}
-body: {{operationId}}RequestBody, 
-{{/if}}
 {{#if requestParams}}
 params: {{operationId}}RequestParams, 
 {{/if}}
 {{#if requestQuery}}
 query: {{operationId}}RequestQuery,
+{{/if}}
+{{#if requestBody}}
+body: {{operationId}}RequestBody, 
 {{/if}}
 signal?: AbortSignal
 ) => KibanaServices.get().http.fetch<{{operationId}}Response>(
@@ -42,11 +42,13 @@ signal?: AbortSignal
     '{{path}}'
   {{/if}},
     {
-    {{#if requestBody}}
-      body: JSON.stringify(body),
-    {{/if}}
+    method: '{{upperCase method}}', 
+    version: '{{version}}',
     {{#if requestQuery}}
     query,
+    {{/if}}
+    {{#if requestBody}}
+      body: JSON.stringify(body),
     {{/if}}
     signal
     }

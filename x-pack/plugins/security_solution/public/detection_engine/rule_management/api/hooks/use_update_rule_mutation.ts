@@ -12,7 +12,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { updateRule } from '../api';
+import { updateRule } from '../../../../common/api_client/client';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
 import { useUpdateRuleByIdCache } from './use_fetch_rule_by_id_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
@@ -29,7 +29,7 @@ export const useUpdateRuleMutation = (
   const updateRuleCache = useUpdateRuleByIdCache();
 
   return useMutation<RuleResponse, Error, RuleUpdateProps>(
-    (rule: RuleUpdateProps) => updateRule({ rule: transformOutput(rule) }),
+    (rule: RuleUpdateProps) => updateRule(transformOutput(rule)),
     {
       ...options,
       mutationKey: UPDATE_RULE_MUTATION_KEY,

@@ -63,7 +63,6 @@ import type { PreviewResponse, RuleResponse } from '../../../../common/api/detec
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
 import type {
-  CreateRulesProps,
   ExportDocumentsProps,
   FetchCoverageOverviewProps,
   FetchRuleProps,
@@ -78,45 +77,7 @@ import type {
   PreviewRulesProps,
   RulesSnoozeSettingsBatchResponse,
   RulesSnoozeSettingsMap,
-  UpdateRulesProps,
 } from '../logic/types';
-
-/**
- * Create provided Rule
- *
- * @param rule RuleCreateProps to add
- * @param signal to cancel request
- *
- * @throws An error if response is not OK
- */
-export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RuleResponse> =>
-  KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
-    method: 'POST',
-    version: '2023-10-31',
-    body: JSON.stringify(rule),
-    signal,
-  });
-
-/**
- * Update provided Rule using PUT
- *
- * @param rule RuleUpdateProps to be updated
- * @param signal to cancel request
- *
- * @returns Promise<RuleResponse> An updated rule
- *
- * In fact this function should return Promise<RuleResponse> but it'd require massive refactoring.
- * It should be addressed as a part of OpenAPI schema adoption.
- *
- * @throws An error if response is not OK
- */
-export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RuleResponse> =>
-  KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
-    method: 'PUT',
-    version: '2023-10-31',
-    body: JSON.stringify(rule),
-    signal,
-  });
 
 /**
  * Patch provided rule
