@@ -1618,7 +1618,7 @@
                 "label": "resourceType",
                 "description": [],
                 "signature": [
-                  "\"index\" | \"namespace\""
+                  "\"namespace\" | \"index\""
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
                 "deprecated": false,

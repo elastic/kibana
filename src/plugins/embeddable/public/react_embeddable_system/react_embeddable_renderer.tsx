@@ -49,6 +49,7 @@ export const ReactEmbeddableRenderer = <
   const componentPromise = useMemo(
     () =>
       (async () => {
+        const uuid = maybeId ?? generateId();
         const factory = getReactEmbeddableFactory(type) as ReactEmbeddableFactory<
           StateType,
           ApiType
@@ -57,7 +58,6 @@ export const ReactEmbeddableRenderer = <
           apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
           comparators: EmbeddableStateComparators<StateType>
         ) => {
-          const uuid = maybeId ?? generateId();
           const { unsavedChanges, resetUnsavedChanges, cleanup } =
             startTrackingEmbeddableUnsavedChanges(
               uuid,
@@ -83,7 +83,9 @@ export const ReactEmbeddableRenderer = <
 
         const { api, Component } = await factory.buildEmbeddable(
           factory.deserializeState(state),
-          registerApi
+          registerApi,
+          uuid,
+          parentApi
         );
 
         return React.forwardRef<typeof api>((_, ref) => {
