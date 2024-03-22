@@ -42,7 +42,7 @@ export const DiscoverResizableLayout = ({
   const { euiTheme } = useEuiTheme();
   const minSidebarWidth = euiTheme.base * 13;
   const defaultSidebarWidth = euiTheme.base * 19;
-  const minMainPanelWidth = euiTheme.base * 30;
+  const minMainPanelWidth = euiTheme.base * 24;
 
   const [sidebarWidth, setSidebarWidth] = useLocalStorage(SIDEBAR_WIDTH_KEY, defaultSidebarWidth);
 

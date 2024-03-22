@@ -13,20 +13,14 @@ import {
   EuiFlexItem,
   EuiFieldSearch,
   EuiSpacer,
-  EuiTable,
-  EuiTableBody,
-  EuiTableRowCell,
-  EuiTableRow,
-  EuiTableHeader,
-  EuiTableHeaderCell,
-  EuiText,
   EuiTablePagination,
   EuiSelectableMessage,
   EuiI18n,
-  useIsWithinBreakpoints,
+  EuiDataGrid,
+  EuiDataGridProps,
+  EuiDataGridColumnCellActionProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
@@ -39,27 +33,26 @@ import {
   usePager,
 } from '@kbn/discover-utils';
 import { fieldNameWildcardMatcher, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
-import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { TableFieldValue } from './table_cell_value';
-import { TableActions } from './table_cell_actions';
+import {
+  type TableRow,
+  FilterIn,
+  FilterOut,
+  FilterExist,
+  ToggleColumn,
+  PinToggle,
+} from './table_cell_actions';
 
-export interface FieldRecord {
-  action: Omit<FieldRecordLegacy['action'], 'isActive'>;
-  field: {
-    pinned: boolean;
-    onTogglePinned: (field: string) => void;
-  } & FieldRecordLegacy['field'];
-  value: FieldRecordLegacy['value'];
-}
+export type FieldRecord = TableRow;
 
 interface ItemsEntry {
   pinnedItems: FieldRecord[];
   restItems: FieldRecord[];
 }
 
-const MOBILE_OPTIONS = { header: false };
 const PAGE_SIZE_OPTIONS = [25, 50, 100];
 const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
@@ -109,13 +102,10 @@ export const DocViewerTable = ({
   columnTypes,
   hit,
   dataView,
-  hideActionsColumn,
   filter,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
-
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
@@ -164,7 +154,7 @@ export const DocViewerTable = ({
   );
 
   const fieldToItem = useCallback(
-    (field: string) => {
+    (field: string): TableRow => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
       const fieldType = columnTypes
@@ -181,7 +171,6 @@ export const DocViewerTable = ({
         action: {
           onToggleColumn,
           onFilter: filter,
-          isActive: !!columns?.includes(field),
           flattenedField: flattened[field],
         },
         field: {
@@ -211,7 +200,6 @@ export const DocViewerTable = ({
       hit,
       onToggleColumn,
       filter,
-      columns,
       columnTypes,
       flattened,
       pinnedFields,
@@ -282,123 +270,52 @@ export const DocViewerTable = ({
     [changePageSize, storage]
   );
 
-  const headers = [
-    !hideActionsColumn && (
-      <EuiTableHeaderCell
-        key="header-cell-actions"
-        align="left"
-        width={showActionsInsideTableCell && filter ? 150 : 62}
-        isSorted={false}
-      >
-        <EuiText size="xs">
-          <strong>
-            <FormattedMessage
-              id="unifiedDocViewer.fieldChooser.discoverField.actions"
-              defaultMessage="Actions"
-            />
-          </strong>
-        </EuiText>
-      </EuiTableHeaderCell>
-    ),
-    <EuiTableHeaderCell key="header-cell-name" align="left" width="30%" isSorted={false}>
-      <EuiText size="xs">
-        <strong>
-          <FormattedMessage
-            id="unifiedDocViewer.fieldChooser.discoverField.name"
-            defaultMessage="Field"
-          />
-        </strong>
-      </EuiText>
-    </EuiTableHeaderCell>,
-    <EuiTableHeaderCell key="header-cell-value" align="left" isSorted={false}>
-      <EuiText size="xs">
-        <strong>
-          <FormattedMessage
-            id="unifiedDocViewer.fieldChooser.discoverField.value"
-            defaultMessage="Value"
-          />
-        </strong>
-      </EuiText>
-    </EuiTableHeaderCell>,
-  ];
-
-  const renderRows = useCallback(
-    (items: FieldRecord[]) => {
-      return items.map(
-        ({
-          action: { flattenedField, onFilter },
-          field: { field, fieldMapping, fieldType, scripted, pinned },
-          value: { formattedValue, ignored },
-        }: FieldRecord) => {
-          return (
-            <EuiTableRow key={field} className="kbnDocViewer__tableRow" isSelected={pinned}>
-              {!hideActionsColumn && (
-                <EuiTableRowCell
-                  key={field + '-actions'}
-                  align={showActionsInsideTableCell ? 'left' : 'center'}
-                  width={showActionsInsideTableCell ? undefined : 62}
-                  className="kbnDocViewer__tableActionsCell"
-                  textOnly={false}
-                  mobileOptions={MOBILE_OPTIONS}
-                >
-                  <TableActions
-                    mode={showActionsInsideTableCell ? 'inline' : 'as_popover'}
-                    field={field}
-                    pinned={pinned}
-                    fieldMapping={fieldMapping}
-                    flattenedField={flattenedField}
-                    onFilter={onFilter}
-                    onToggleColumn={onToggleColumn}
-                    ignoredValue={!!ignored}
-                    onTogglePinned={onTogglePinned}
-                  />
-                </EuiTableRowCell>
-              )}
-              <EuiTableRowCell
-                key={field + '-field-name'}
-                align="left"
-                width="30%"
-                className="kbnDocViewer__tableFieldNameCell"
-                textOnly={false}
-                mobileOptions={MOBILE_OPTIONS}
-              >
-                <FieldName
-                  fieldName={field}
-                  fieldType={fieldType}
-                  fieldMapping={fieldMapping}
-                  scripted={scripted}
-                  highlight={getFieldSearchMatchingHighlight(
-                    fieldMapping?.displayName ?? field,
-                    searchText
-                  )}
-                />
-              </EuiTableRowCell>
-              <EuiTableRowCell
-                key={field + '-value'}
-                align="left"
-                className="kbnDocViewer__tableValueCell"
-                textOnly={false}
-                mobileOptions={MOBILE_OPTIONS}
-              >
-                <TableFieldValue
-                  field={field}
-                  formattedValue={formattedValue}
-                  rawValue={flattenedField}
-                  ignoreReason={ignored}
-                />
-              </EuiTableRowCell>
-            </EuiTableRow>
-          );
-        }
-      );
+  const gridColumns: EuiDataGridProps['columns'] = [
+    {
+      id: 'name',
+      displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.name', {
+        defaultMessage: 'Field',
+      }),
+      initialWidth: 270,
+      actions: false,
+      visibleCellActions: 3,
+      cellActions: [
+        ...(filter
+          ? [
+              ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
+                return <FilterExist row={rows[rowIndex]} Component={Component} />;
+              },
+            ]
+          : []),
+        ({ Component, rowIndex }) => {
+          return <ToggleColumn row={rows[rowIndex]} Component={Component} />;
+        },
+        ({ Component, rowIndex }) => {
+          return <PinToggle row={rows[rowIndex]} Component={Component} />;
+        },
+      ],
     },
-    [hideActionsColumn, showActionsInsideTableCell, onToggleColumn, onTogglePinned, searchText]
-  );
-
-  const rowElements = [
-    ...renderRows(pinnedItems),
-    ...renderRows(restItems.slice(startIndex, pageSize + startIndex)),
+    {
+      id: 'value',
+      displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.value', {
+        defaultMessage: 'Value',
+      }),
+      actions: false,
+      visibleCellActions: 2,
+      cellActions: filter
+        ? [
+            ({ Component, rowIndex }) => {
+              return <FilterIn row={rows[rowIndex]} Component={Component} />;
+            },
+            ({ Component, rowIndex }) => {
+              return <FilterOut row={rows[rowIndex]} Component={Component} />;
+            },
+          ]
+        : [],
+    },
   ];
+
+  const rows = [...pinnedItems, ...restItems.slice(startIndex, pageSize + startIndex)];
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -417,7 +334,7 @@ export const DocViewerTable = ({
         />
       </EuiFlexItem>
 
-      {rowElements.length === 0 ? (
+      {rows.length === 0 ? (
         <EuiSelectableMessage style={{ minHeight: 300 }}>
           <p>
             <EuiI18n
@@ -427,17 +344,82 @@ export const DocViewerTable = ({
           </p>
         </EuiSelectableMessage>
       ) : (
-        <EuiFlexItem grow={false}>
-          <EuiTable responsive={false}>
-            <EuiTableHeader>{headers}</EuiTableHeader>
-            <EuiTableBody>{rowElements}</EuiTableBody>
-          </EuiTable>
-        </EuiFlexItem>
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {/* Transform props into useMemo/useCallback */}
+            <EuiDataGrid
+              aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
+                defaultMessage: 'Field values',
+              })}
+              className="kbnDocViewer__fieldsGrid"
+              columns={gridColumns}
+              columnVisibility={{
+                visibleColumns: ['name', 'value'],
+                setVisibleColumns: () => null,
+              }}
+              rowHeightsOptions={{ defaultHeight: 'auto' }}
+              toolbarVisibility={false}
+              gridStyle={{
+                border: 'horizontal',
+                stripes: true,
+                rowHover: 'highlight',
+                header: 'underline',
+                cellPadding: 's',
+                fontSize: 's',
+              }}
+              rowCount={rows.length}
+              renderCellValue={({ rowIndex, columnId }) => {
+                const row = rows[rowIndex];
+                const {
+                  action: { flattenedField },
+                  field: { field, fieldMapping, fieldType, scripted },
+                  value: { formattedValue, ignored },
+                } = row;
+
+                if (columnId === 'name') {
+                  return (
+                    <EuiFlexGroup responsive={false} gutterSize="s">
+                      <FieldName
+                        fieldName={field}
+                        fieldType={fieldType}
+                        fieldMapping={fieldMapping}
+                        scripted={scripted}
+                        highlight={getFieldSearchMatchingHighlight(
+                          fieldMapping?.displayName ?? field,
+                          searchText
+                        )}
+                      />
+                      {/* TODO: how to highlight pinned fields? */}
+                    </EuiFlexGroup>
+                  );
+                }
+
+                if (columnId === 'value') {
+                  return (
+                    <TableFieldValue
+                      field={field}
+                      formattedValue={formattedValue}
+                      rawValue={flattenedField}
+                      ignoreReason={ignored}
+                    />
+                  );
+                }
+
+                return null;
+              }}
+            />
+          </EuiFlexItem>
+        </>
       )}
 
       <EuiFlexItem grow={false}>
         <EuiSpacer size="m" />
       </EuiFlexItem>
+
+      {/* TODO: what pagination should we use? */}
 
       {showPagination && (
         <EuiFlexItem grow={false}>
