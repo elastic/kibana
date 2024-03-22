@@ -272,7 +272,7 @@ In order to introduce a new, required Saved Object field the following algorithm
 At step 6 your code that was just merged to `main` will be guaranteed to find a value for the new field in Saved Objects.
 
 <DocCallOut color="warning" title="What happens when you skip step 4?">
-  Not waiting until your `data_backfill` has been released means that none of your SO documents will have the field populated with the value you provided in the `data_backfill` function.
+  Not waiting until your `data_backfill` has been released means that none of your SO documents will have the field populated with the value you provided in the `data_backfill` function. The new field value will be `undefined` until migrations have run which only happens _after_ application code has already started running!
 </DocCallOut>
 
 
