@@ -266,6 +266,10 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     stopSequences,
     temperature,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
+    console.log('invokeStream', {
+      messages,
+      formatted: formatBedrockBody({ messages, stopSequences, temperature }).messages,
+    });
     const res = (await this.streamApi({
       body: JSON.stringify(formatBedrockBody({ messages, stopSequences, temperature })),
       model,
@@ -300,7 +304,21 @@ const formatBedrockBody = ({
   temperature?: number;
 }) => ({
   anthropic_version: 'bedrock-2023-05-31',
-  messages,
+  messages: messages.reduce(
+    (acc: Array<{ role: string; content: string }>, m) => [
+      ...acc,
+      ...(m.role === 'system'
+        ? // Bedrock only accepts assistant and user roles.
+          // If a system message is sent, transform it to a user message
+          // followed by an assistant message (as 2 user messages in a row are not allowed)
+          [
+            { ...m, role: 'user' },
+            { content: 'Ok.', role: 'assistant' },
+          ]
+        : [{ ...m, role: m.role === 'assistant' ? 'assistant' : 'user' }]),
+    ],
+    []
+  ),
   max_tokens: DEFAULT_TOKEN_LIMIT,
   temperature,
   stop_sequences: stopSequences,

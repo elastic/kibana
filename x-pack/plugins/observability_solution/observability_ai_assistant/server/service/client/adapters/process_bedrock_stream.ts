@@ -83,7 +83,7 @@ export function processBedrockStream({
           return emitTokenCountEvent(subscriber, chunkBody);
         }
 
-        let completion = chunkBody.completion;
+        let completion = prepareBedrockOutput(chunkBody);
 
         const isStartOfFunctionCall = !functionCallsBuffer && completion.includes('<function');
 
@@ -97,7 +97,7 @@ export function processBedrockStream({
           completion = before.trimEnd();
         } else if (isEndOfFunctionCall) {
           completion = '';
-          functionCallsBuffer += chunkBody.completion + chunkBody.stop;
+          functionCallsBuffer += prepareBedrockOutput(chunkBody) + chunkBody.stop;
 
           logger.debug(`Parsing xml:\n${functionCallsBuffer}`);
 
@@ -116,7 +116,7 @@ export function processBedrockStream({
           functionCallsBuffer = '';
         } else if (isInFunctionCall) {
           completion = '';
-          functionCallsBuffer += chunkBody.completion;
+          functionCallsBuffer += prepareBedrockOutput(chunkBody);
         }
 
         if (completion.trim()) {
@@ -185,4 +185,49 @@ function emitTokenCountEvent(
       total: inputTokenCount + outputTokenCount,
     },
   });
+}
+
+/**
+ * Prepare the streaming output from the bedrock API
+ * @param responseBody
+ * @returns string
+ */
+const prepareBedrockOutput = (responseBody: {
+  completion?: string;
+  type?: string;
+  delta?: { type: string; text: string };
+  message?: { content: Array<{ text?: string; type: string }> };
+}): string => {
+  // determine whether the response is of type RunApiLatestResponseSchema or RunActionResponseSchema
+  if (responseBody.completion) {
+    return responseBody.completion;
+  }
+  if (responseBody.type && responseBody.type.length) {
+    if (responseBody.type === 'message_start' && responseBody.message) {
+      return parseContent(responseBody.message.content);
+    } else if (
+      responseBody.type === 'content_block_delta' &&
+      responseBody.delta?.type === 'text_delta' &&
+      typeof responseBody.delta?.text === 'string'
+    ) {
+      return responseBody.delta.text;
+    }
+  }
+  return '';
+};
+
+/**
+ * Parse the content from the bedrock API
+ * @param content
+ * @returns string
+ */
+function parseContent(content: Array<{ text?: string; type: string }>): string {
+  let parsedContent = '';
+  if (content.length === 1 && content[0].type === 'text' && content[0].text) {
+    parsedContent = content[0].text;
+  } else if (content.length > 1) {
+    // this case should not happen, but here is a fallback
+    parsedContent = content.reduce((acc, { text }) => (text ? `${acc}\n${text}` : acc), '');
+  }
+  return parsedContent;
 }
