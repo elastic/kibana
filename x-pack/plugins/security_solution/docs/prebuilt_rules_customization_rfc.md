@@ -1,6 +1,6 @@
 # RFC: Prebuilt Rules Customization
 
-_Status_: Completed, pending correction over team's feedback.
+_Status_: Completed, pending correction after team's feedback.
 
 Covers:
 
