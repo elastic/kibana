@@ -23,7 +23,7 @@ spec:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/serverless_deployment/create_deployment_tag.yml
+      pipeline_file: .buildkite/pipelines/serverless_deployment/run_serverless_release_assistant.yml
       provider_settings:
         build_branches: false
         build_pull_requests: false
