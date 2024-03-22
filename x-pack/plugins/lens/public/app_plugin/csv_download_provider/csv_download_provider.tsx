@@ -14,6 +14,7 @@ import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import { CoreSetup, ToastsSetup } from '@kbn/core/public';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { FormatFactory } from '../../../common/types';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 import { ReportingModalContent } from './export_modal_content';
@@ -118,17 +119,22 @@ export const downloadCsvShareProvider = ({
     shareableUrl,
     shareableUrlForSavedObject,
     isDirty,
+    ...shareOpts
   }: ShareContext) => {
     if ('lens' !== objectType) {
       return [];
     }
 
-    const { title, activeData, csvEnabled, columnsSorting } = sharingData as {
-      title: string;
-      activeData: TableInspectorAdapter;
-      csvEnabled: boolean;
-      columnsSorting?: string[];
-    };
+    const { title, activeData, csvEnabled, columnsSorting, layout, locatorParams } =
+      sharingData as {
+        title: string;
+        activeData: TableInspectorAdapter;
+        csvEnabled: boolean;
+        columnsSorting?: string[];
+        layout: LayoutParams;
+        locatorParams: {};
+      };
+
     const panelTitle = i18n.translate(
       'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
       {
@@ -139,7 +145,7 @@ export const downloadCsvShareProvider = ({
     const jobProviderOptions: JobParamsProviderOptions = {
       shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
       objectType,
-      sharingData,
+      sharingData: { title, layout, locatorParams },
     };
 
     return [
@@ -164,6 +170,7 @@ export const downloadCsvShareProvider = ({
               warnings={getWarnings(activeData)}
               theme={theme}
               jobProviderOptions={jobProviderOptions}
+              isDirty={isDirty}
               downloadCsvFromLens={async () => {
                 await downloadCSVs({
                   title,

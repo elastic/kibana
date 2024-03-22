@@ -59,7 +59,6 @@ export interface ReportingModalProps {
   objectType: string;
   isDisabled: boolean;
   warnings: string[];
-
   downloadCsvFromLens: () => void;
 }
 
@@ -80,6 +79,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     jobProviderOptions,
     objectType,
     downloadCsvFromLens,
+    getJobParams,
   } = props;
   const isSaved = Boolean(objectId);
   const [isStale, setIsStale] = useState(false);
@@ -92,7 +92,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const getJobsParams = useCallback(
     (type: AllowedImageExportType, opts?: JobParamsProviderOptions) => {
       if (!opts) {
-        return { ...props.getJobParams };
+        return { ...getJobParams };
       }
 
       const {
@@ -113,14 +113,22 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         return { ...baseParams, locatorParams };
       }
     },
-    [props.getJobParams, objectType]
+    [getJobParams, objectType]
   );
+
+  const getLayout = useCallback((): LayoutParams => {
+    const el = document.querySelector('[data-shared-items-container]');
+    const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+    const dimensions = { height, width };
+
+    return { id: 'preserve_layout', dimensions };
+  }, []);
 
   const getJobParamHelper = useCallback(
     (shareableUrl?: boolean) => {
-      return { ...getJobsParams(selectedRadio, jobProviderOptions) };
+      return { ...getJobsParams(selectedRadio, jobProviderOptions), layout: getLayout() };
     },
-    [getJobsParams, jobProviderOptions, selectedRadio]
+    [getJobsParams, jobProviderOptions, selectedRadio, getLayout]
   );
 
   const getAbsoluteReportGenerationUrl = useMemo(
