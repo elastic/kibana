@@ -766,9 +766,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         }),
         options: [
           {
-            label: i18n.translate('searchConnectors.nativeConnectors.github.options.personalAccessToken', {
-              defaultMessage: 'Personal access token',
-            }),
+            label: i18n.translate(
+              'searchConnectors.nativeConnectors.github.options.personalAccessToken',
+              {
+                defaultMessage: 'Personal access token',
+              }
+            ),
             value: 'personal_access_token',
           },
           {
