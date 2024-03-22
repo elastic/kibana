@@ -24,7 +24,6 @@ export const reportingScreenshotShareProvider = ({
   application,
   usesUiCapabilities,
   theme,
-  version,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,

@@ -404,7 +404,6 @@ export class LensPlugin {
           reportingApiClient,
           toasts: core.notifications.toasts,
           theme: core.theme,
-          version: share.kibanaVersion,
         })
       );
     }

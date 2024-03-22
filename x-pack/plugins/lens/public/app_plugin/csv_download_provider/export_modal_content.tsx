@@ -53,22 +53,21 @@ export interface ReportingModalProps {
   objectId?: string;
   isDirty?: boolean;
   onClose: () => void;
-  onClick: () => void;
   theme: ThemeServiceSetup;
   jobProviderOptions?: JobParamsProviderOptions;
   getJobParams?: JobAppParamsPDFV2 | JobParamsPNGV2;
   objectType: string;
   isDisabled: boolean;
   warnings: string[];
-  columns?: string[];
-  version: string;
+
+  downloadCsvFromLens: () => void;
 }
 
 type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
 
 export type Props = ReportingModalProps & { intl: InjectedIntl };
 
-type AllowedImageExportType = 'pngV2' | 'printablePdfV2' | 'csv';
+type AllowedImageExportType = 'pngV2' | 'printablePdfV2' | 'csv_searchsource';
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const {
@@ -80,8 +79,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     objectId,
     jobProviderOptions,
     objectType,
-    columns,
-    version,
+    downloadCsvFromLens,
   } = props;
   const isSaved = Boolean(objectId);
   const [isStale, setIsStale] = useState(false);
@@ -106,13 +104,6 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         layout,
         title,
       };
-      if (type === 'csv') {
-        return {
-          title,
-          objectType,
-          locatorParams,
-        };
-      }
 
       if (type === 'printablePdfV2') {
         // multi locator for PDF V2
@@ -156,75 +147,66 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   }, [markAsStale, getAbsoluteReportGenerationUrl]);
 
   const generateReportingJob = () => {
-    const decoratedJobParams =
-      selectedRadio !== 'csv'
-        ? apiClient.getDecoratedJobParams(getJobParamHelper() as unknown as AppParams)
-        : {
-            title: props.getJobParams?.title,
-            columns: columns as string[] | undefined,
-            searchSource: {
-              addGlobalTimeFilter: true,
-              absoluteTime: !absoluteUrl,
-            },
-            objectType,
-            version,
-          };
-    setCreatingReportJob(true);
-    return (
-      apiClient
-        // @ts-ignore
-        .createReportingJob(selectedRadio, decoratedJobParams)
-        .then(() => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
-              {
-                id: 'share.modalContent.successfullyQueuedReportNotificationTitle',
-                defaultMessage: 'Queued report for {objectType}',
-              },
-              { objectType }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="share.modalContent.successfullyQueuedReportNotificationDescription"
-                defaultMessage="Track its progress in {path}."
-                values={{
-                  path: (
-                    <a href={apiClient.getManagementLink()}>
-                      <FormattedMessage
-                        id="share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                        defaultMessage="Stack Management &gt; Reporting"
-                      />
-                    </a>
-                  ),
-                }}
-              />,
-              { theme$: theme.theme$ }
-            ),
-            'data-test-subj': 'queueReportSuccess',
-          });
-          if (onClose) {
-            onClose();
-          }
-          if (isMounted()) {
-            setCreatingReportJob(false);
-          }
-        })
-        .catch((error) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
-              id: 'share.modalContent.notification.reportingErrorTitle',
-              defaultMessage: 'Unable to create report',
-            }),
-            toastMessage: (
-              // eslint-disable-next-line react/no-danger
-              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-            ) as unknown as string,
-          });
-          if (isMounted()) {
-            setCreatingReportJob(false);
-          }
-        })
+    if (selectedRadio === 'csv_searchsource') {
+      return downloadCsvFromLens();
+    }
+    const decoratedJobParams = apiClient.getDecoratedJobParams(
+      getJobParamHelper() as unknown as AppParams
     );
+
+    setCreatingReportJob(true);
+    return apiClient
+      .createReportingJob(selectedRadio, decoratedJobParams)
+      .then(() => {
+        toasts.addSuccess({
+          title: intl.formatMessage(
+            {
+              id: 'share.modalContent.successfullyQueuedReportNotificationTitle',
+              defaultMessage: 'Queued report for {objectType}',
+            },
+            { objectType }
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="share.modalContent.successfullyQueuedReportNotificationDescription"
+              defaultMessage="Track its progress in {path}."
+              values={{
+                path: (
+                  <a href={apiClient.getManagementLink()}>
+                    <FormattedMessage
+                      id="share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                      defaultMessage="Stack Management &gt; Reporting"
+                    />
+                  </a>
+                ),
+              }}
+            />,
+            { theme$: theme.theme$ }
+          ),
+          'data-test-subj': 'queueReportSuccess',
+        });
+        if (onClose) {
+          onClose();
+        }
+        if (isMounted()) {
+          setCreatingReportJob(false);
+        }
+      })
+      .catch((error) => {
+        toasts.addError(error, {
+          title: intl.formatMessage({
+            id: 'share.modalContent.notification.reportingErrorTitle',
+            defaultMessage: 'Unable to create report',
+          }),
+          toastMessage: (
+            // eslint-disable-next-line react/no-danger
+            <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
+          ) as unknown as string,
+        });
+        if (isMounted()) {
+          setCreatingReportJob(false);
+        }
+      });
   };
 
   const renderCopyURLButton = ({

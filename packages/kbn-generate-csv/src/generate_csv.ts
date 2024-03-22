@@ -223,6 +223,7 @@ export class CsvGenerator {
 
   public async generateData(): Promise<TaskRunResult> {
     const logger = this.logger;
+
     const [settings, searchSource] = await Promise.all([
       getExportSettings(
         this.clients.uiSettings,

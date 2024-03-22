@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import type { JobParamsProviderOptions } from '@kbn/reporting-public/share';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ReportingAPIClient } from '@kbn/reporting-public';
@@ -101,7 +102,6 @@ interface DownloadPanelShareOpts {
   reportingApiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   theme: CoreSetup['theme'];
-  version: string;
 }
 
 export const downloadCsvShareProvider = ({
@@ -110,9 +110,15 @@ export const downloadCsvShareProvider = ({
   reportingApiClient,
   toasts,
   theme,
-  version,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
+  const getShareMenuItems = ({
+    objectType,
+    sharingData,
+    onClose,
+    shareableUrl,
+    shareableUrlForSavedObject,
+    isDirty,
+  }: ShareContext) => {
     if ('lens' !== objectType) {
       return [];
     }
@@ -129,6 +135,12 @@ export const downloadCsvShareProvider = ({
         defaultMessage: 'Export',
       }
     );
+
+    const jobProviderOptions: JobParamsProviderOptions = {
+      shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
+      objectType,
+      sharingData,
+    };
 
     return [
       {
@@ -151,9 +163,8 @@ export const downloadCsvShareProvider = ({
               isDisabled={!csvEnabled}
               warnings={getWarnings(activeData)}
               theme={theme}
-              columns={columnsSorting}
-              version={version}
-              onClick={async () => {
+              jobProviderOptions={jobProviderOptions}
+              downloadCsvFromLens={async () => {
                 await downloadCSVs({
                   title,
                   formatFactory: formatFactoryFn(),
@@ -161,7 +172,6 @@ export const downloadCsvShareProvider = ({
                   uiSettings,
                   columnsSorting,
                 });
-                onClose?.();
               }}
             />
           ),
