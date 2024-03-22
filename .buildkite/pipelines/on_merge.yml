@@ -205,7 +205,6 @@ steps:
       queue: n2-4-virt
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 16
     retry:
