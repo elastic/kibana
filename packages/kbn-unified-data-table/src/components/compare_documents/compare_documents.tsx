@@ -96,7 +96,7 @@ const CompareDocuments = ({
     getDocById,
     setSelectedDocs,
   });
-  const comparisonColumnVisibility: EuiDataGridColumnVisibility = useMemo(
+  const comparisonColumnVisibility = useMemo<EuiDataGridColumnVisibility>(
     () => ({
       visibleColumns: comparisonColumns.map(({ id: columnId }) => columnId),
       setVisibleColumns: () => {},
@@ -104,12 +104,12 @@ const CompareDocuments = ({
     [comparisonColumns]
   );
   const comparisonRowCount = useMemo(() => comparisonFields.length, [comparisonFields.length]);
-  const comparisonRowHeight: EuiDataGridRowHeightsOptions = useMemo(
+  const comparisonRowHeight = useMemo<EuiDataGridRowHeightsOptions>(
     () => ({ defaultHeight: 'auto' }),
     []
   );
-  const comparisonInMemory: EuiDataGridInMemory = useMemo(() => ({ level: 'sorting' }), []);
-  const gridStyle: EuiDataGridStyle = useMemo(() => ({ ...GRID_STYLE, stripes: undefined }), []);
+  const comparisonInMemory = useMemo<EuiDataGridInMemory>(() => ({ level: 'sorting' }), []);
+  const gridStyle = useMemo<EuiDataGridStyle>(() => ({ ...GRID_STYLE, stripes: undefined }), []);
   const additionalControls = useMemo(
     () => (
       <ComparisonControls
@@ -142,7 +142,7 @@ const CompareDocuments = ({
       showDiffDecorations,
     ]
   );
-  const comparisonToolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
+  const comparisonToolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(
     () => ({
       showColumnSelector: false,
       showDisplaySelector: false,
@@ -151,7 +151,7 @@ const CompareDocuments = ({
     }),
     [additionalControls, showFullScreenButton]
   );
-  const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
+  const renderCustomToolbarFn = useMemo<EuiDataGridProps['renderCustomToolbar'] | undefined>(
     () =>
       renderCustomToolbar
         ? (toolbarProps) =>

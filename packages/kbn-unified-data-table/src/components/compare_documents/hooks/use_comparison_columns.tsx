@@ -39,7 +39,7 @@ export const useComparisonColumns = ({
   getDocById,
   setSelectedDocs,
 }: UseComparisonColumnsProps) => {
-  const comparisonColumns: EuiDataGridColumn[] = useMemo(() => {
+  const comparisonColumns = useMemo<EuiDataGridColumn[]>(() => {
     const fieldsColumn: EuiDataGridColumn = {
       id: fieldColumnId,
       displayAsText: fieldColumnName,
