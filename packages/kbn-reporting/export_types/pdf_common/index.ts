@@ -48,17 +48,3 @@ export interface TaskPayloadPDFV2 extends BasePayload, BaseParamsPDFV2 {
    */
   forceNow: string;
 }
-
-/**
- * @deprecated
- */
-interface BaseParamsPDF {
-  layout: LayoutParams;
-  relativeUrls: string[];
-  isDeprecated?: boolean;
-}
-
-/**
- * @deprecated
- */
-export type JobParamsPDFDeprecated = BaseParamsPDF & BaseParams;

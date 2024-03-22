@@ -17,7 +17,7 @@ const getJobParams =
   (
     apiClient: ReportingAPIClient,
     opts: JobParamsProviderOptions,
-    type: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
+    type: 'png' | 'pngV2' | 'printablePdfV2'
   ) =>
   () => {
     const {
@@ -45,11 +45,6 @@ const getJobParams =
       window.location.origin + apiClient.getServerBasePath(),
       ''
     );
-
-    if (type === 'printablePdf') {
-      // multi URL for PDF
-      return { ...baseParams, relativeUrls: [relativeUrl] };
-    }
 
     // single URL for PNG
     return { ...baseParams, relativeUrl };
@@ -168,8 +163,6 @@ export const reportingScreenshotShareProvider = ({
       defaultMessage: 'PDF Reports',
     });
 
-    const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
-
     const panelPdf = {
       shareMenuItem: {
         name: pdfPanelTitle,
@@ -187,11 +180,11 @@ export const reportingScreenshotShareProvider = ({
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
-            reportType={pdfReportType}
+            reportType={'printablePdfV2'}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
+            getJobParams={getJobParams(apiClient, jobProviderOptions, 'printablePdfV2')}
             isDirty={isDirty}
             onClose={onClose}
             theme={theme}

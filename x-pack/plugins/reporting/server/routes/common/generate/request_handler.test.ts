@@ -11,7 +11,7 @@ import rison from '@kbn/rison';
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { JobParamsPDFDeprecated, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { JobParamsPDFV2, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
 import { ReportingCore } from '../../..';
@@ -54,13 +54,13 @@ const getMockResponseFactory = () =>
   } as unknown as KibanaResponseFactory);
 
 const mockLogger = loggingSystemMock.createLogger();
-const mockJobParams: JobParamsPDFDeprecated = {
+const mockJobParams: JobParamsPDFV2 = {
   browserTimezone: 'UTC',
   objectType: 'cool_object_type',
   title: 'cool_title',
   version: 'unknown',
   layout: { id: 'preserve_layout' },
-  relativeUrls: [],
+  locatorParams: [{ id: '1.0.0', version: '1.0.0', params: {} }],
 };
 
 describe('Handle request to generate', () => {

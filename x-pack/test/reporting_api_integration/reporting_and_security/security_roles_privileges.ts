@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Dashboard: Generate PDF report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
-        const res = await reportingAPI.generatePdf(
+        const res = await reportingAPI.generatePdfV2(
           reportingAPI.DATA_ANALYST_USERNAME,
           reportingAPI.DATA_ANALYST_PASSWORD,
           {
@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does allow user with the role-based privilege', async () => {
-        const res = await reportingAPI.generatePdf(
+        const res = await reportingAPI.generatePdfV2(
           reportingAPI.REPORTING_USER_USERNAME,
           reportingAPI.REPORTING_USER_PASSWORD,
           {
@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Visualize: Generate PDF report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
-        const res = await reportingAPI.generatePdf(
+        const res = await reportingAPI.generatePdfV2(
           reportingAPI.DATA_ANALYST_USERNAME,
           reportingAPI.DATA_ANALYST_PASSWORD,
           {
@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does allow user with the role-based privilege', async () => {
-        const res = await reportingAPI.generatePdf(
+        const res = await reportingAPI.generatePdfV2(
           reportingAPI.REPORTING_USER_USERNAME,
           reportingAPI.REPORTING_USER_PASSWORD,
           {
@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Canvas: Generate PDF report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
-        const res = await reportingAPI.generatePdf(
+        const res = await reportingAPI.generatePdfV2(
           reportingAPI.DATA_ANALYST_USERNAME,
           reportingAPI.DATA_ANALYST_PASSWORD,
           {
@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does allow user with the role-based privilege', async () => {
-        const res = await reportingAPI.generatePdf(
+        const res = await reportingAPI.generatePdfV2(
           reportingAPI.REPORTING_USER_USERNAME,
           reportingAPI.REPORTING_USER_PASSWORD,
           {

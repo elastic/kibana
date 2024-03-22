@@ -9,7 +9,7 @@
 import { CoreSetup } from '@kbn/core/public';
 import React from 'react';
 
-import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
 import { ReportingAPIClient } from '../../reporting_api_client';
@@ -47,12 +47,6 @@ export interface ApplicationProps {
 export interface ReportingPublicComponents {
   /**
    * An element to display a form to export the page as PDF
-   * @deprecated
-   */
-  ReportingPanelPDF(props: ApplicationProps): JSX.Element;
-
-  /**
-   * An element to display a form to export the page as PDF
    */
   ReportingPanelPDFV2(props: ApplicationProps): JSX.Element;
 
@@ -72,19 +66,6 @@ export function getSharedComponents(
   apiClient: ReportingAPIClient
 ): ReportingPublicComponents {
   return {
-    ReportingPanelPDF(props: ApplicationProps) {
-      return (
-        <ScreenCapturePanelContent
-          requiresSavedState={false}
-          reportType={PDF_REPORT_TYPE}
-          apiClient={apiClient}
-          toasts={core.notifications.toasts}
-          uiSettings={core.uiSettings}
-          theme={core.theme}
-          {...props}
-        />
-      );
-    },
     ReportingPanelPDFV2(props: ApplicationProps) {
       return (
         <ScreenCapturePanelContent

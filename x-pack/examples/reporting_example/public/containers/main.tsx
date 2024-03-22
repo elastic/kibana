@@ -32,7 +32,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { JobParamsPDFDeprecated, JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
@@ -79,17 +79,6 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
         setLogos([...sourceLogos.slice(0, logos.length + 1)]);
       });
   });
-
-  const getPDFJobParamsDefault = (): JobParamsPDFDeprecated => {
-    return {
-      layout: { id: 'preserve_layout' },
-      relativeUrls: ['/app/reportingExample#/intended-visualization'],
-      objectType: 'develeloperExample',
-      title: 'Reporting Developer Example',
-      browserTimezone: 'UTC',
-      version: '1',
-    };
-  };
 
   const getPDFJobParamsDefaultV2 = (): JobParamsPDFV2 => {
     return {
@@ -209,22 +198,12 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       items: [{ name: 'Default layout V2', icon: 'document', panel: 5 }],
     },
     {
-      id: 2,
-      title: 'Default layout',
-      content: (
-        <reporting.components.ReportingPanelPDF
-          getJobParams={getPDFJobParamsDefault}
-          onClose={closePopover}
-        />
-      ),
-    },
-    {
       id: 3,
       title: 'Canvas Layout Option',
       content: (
         <reporting.components.ReportingPanelPDF
           layoutOption="canvas"
-          getJobParams={getPDFJobParamsDefault}
+          getJobParams={getPDFJobParamsDefaultV2}
           onClose={closePopover}
         />
       ),

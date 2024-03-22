@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import type { JobParamsCSV, JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
 import rison from '@kbn/rison';
@@ -146,15 +146,15 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send(job);
   };
-  const generatePdf = async (username: string, password: string, job: JobParamsPDFDeprecated) => {
+  const generatePdfV2 = async (username: string, password: string, job: JobParamsPDFV2) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/printablePdf`)
+      .post(`/api/reporting/generate/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generatePng = async (username: string, password: string, job: JobParamsPNGV2) => {
+  const generatePngV2 = async (username: string, password: string, job: JobParamsPNGV2) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/pngV2`)
@@ -278,8 +278,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     createTestReportingUserRole,
     createTestReportingUser,
     downloadCsv,
-    generatePdf,
-    generatePng,
+    generatePdfV2,
+    generatePngV2,
     generateCsv,
     postJob,
     postJobJSON,

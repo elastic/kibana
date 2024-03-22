@@ -25,6 +25,7 @@ export interface JobParamsDownloadCSV {
 }
 
 interface BaseParamsCSV {
+  pagingStrategy?: CsvPagingStrategy; // csv only
   searchSource: SerializedSearchSourceFields;
   columns?: string[];
 }

@@ -60,16 +60,11 @@ export interface ReportOutput extends TaskRunResult {
  */
 export type CsvPagingStrategy = 'pit' | 'scroll';
 
-/**
- * @deprecated
- */
 export interface BaseParams {
   browserTimezone: string; // to format dates in the user's time zone
-  objectType: string;
+  objectType: string; // dashboard, visualization, search, canvas, etc
   title: string;
   version: string; // to handle any state migrations
-  layout?: LayoutParams; // png & pdf only
-  pagingStrategy?: CsvPagingStrategy; // csv only
 }
 
 /**
@@ -77,12 +72,10 @@ export interface BaseParams {
  * getSharingData function.
  */
 export type BaseParamsV2 = BaseParams & {
+  layout?: LayoutParams; // png & pdf only
   locatorParams: LocatorParams[];
 };
 
-/**
- * @deprecated
- */
 export interface BasePayload extends BaseParams {
   headers: string;
   spaceId?: string;
