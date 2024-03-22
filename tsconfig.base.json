@@ -788,6 +788,8 @@
       "@kbn/esql-services/*": ["packages/kbn-esql-services/*"],
       "@kbn/esql-utils": ["packages/kbn-esql-utils"],
       "@kbn/esql-utils/*": ["packages/kbn-esql-utils/*"],
+      "@kbn/esql-validation-example-plugin": ["examples/esql_validation_example"],
+      "@kbn/esql-validation-example-plugin/*": ["examples/esql_validation_example/*"],
       "@kbn/event-annotation-common": ["packages/kbn-event-annotation-common"],
       "@kbn/event-annotation-common/*": ["packages/kbn-event-annotation-common/*"],
       "@kbn/event-annotation-components": ["packages/kbn-event-annotation-components"],

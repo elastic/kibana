@@ -437,6 +437,7 @@
     "@kbn/esql-ast": "link:packages/kbn-esql-ast",
     "@kbn/esql-services": "link:packages/kbn-esql-services",
     "@kbn/esql-utils": "link:packages/kbn-esql-utils",
+    "@kbn/esql-validation-example-plugin": "link:examples/esql_validation_example",
     "@kbn/event-annotation-common": "link:packages/kbn-event-annotation-common",
     "@kbn/event-annotation-components": "link:packages/kbn-event-annotation-components",
     "@kbn/event-annotation-listing-plugin": "link:src/plugins/event_annotation_listing",
