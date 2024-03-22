@@ -90,8 +90,8 @@ export function DashboardSelector({
         selectedDashboard
           ? [
               {
-                value: selectedDashboard?.dashboardSavedObjectId,
-                label: selectedDashboard?.title,
+                value: selectedDashboard.dashboardSavedObjectId,
+                label: selectedDashboard.title,
               },
             ]
           : []
