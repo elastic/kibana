@@ -127,7 +127,7 @@ async function getAllHelper({
     connectors: mergedResult,
   });
 
-  validateConnectors(connectors, context.logger);
+  validateConnectors(connectors, logger);
 
   return connectors;
 }
@@ -178,7 +178,7 @@ export async function getAllSystemConnectors({
 
   const connectors = await injectExtraFindData({
     kibanaIndices: context.kibanaIndices,
-    scopedClusterClient: context.scopedClusterClient,
+    esClient: context.scopedClusterClient.asInternalUser,
     connectors: transformedSystemConnectors,
   });
 
