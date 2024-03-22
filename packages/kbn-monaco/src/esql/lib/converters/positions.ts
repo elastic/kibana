@@ -28,7 +28,7 @@ export function offsetToRowColumn(expression: string, offset: number): monaco.Po
 
 function convertSeverityToMonacoKind(severity: 'error' | 'warning' | number) {
   if (typeof severity === 'number') return severity;
-  return severity === 'error' ? 8 : 4; // monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning;
+  return severity === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning;
 }
 
 export function wrapAsMonacoMessages(

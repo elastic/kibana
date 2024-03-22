@@ -7,10 +7,28 @@
  */
 
 import { CharStreams } from 'antlr4';
-import { getAstAndSyntaxErrors, getParser, ROOT_STATEMENT, ESQLErrorListener } from '@kbn/esql-ast';
+import {
+  getAstAndSyntaxErrors,
+  getParser,
+  ROOT_STATEMENT,
+  ESQLErrorListener,
+  type EditorError,
+} from '@kbn/esql-ast';
 import type { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
-import { wrapAsMonacoMessages } from '../lib/converters/positions';
+
+/**
+ * While this function looks similar to the wrapAsMonacoMessages one, it prevents from
+ * loading the whole monaco stuff within the WebWorker.
+ * Given that we're dealing only with EditorError objects here, and not other types, it is
+ * possible to use this simpler inline function to work.
+ */
+function inlineToMonacoErrors({ severity, ...error }: EditorError) {
+  return {
+    ...error,
+    severity: severity === 'error' ? 8 : 4, // monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning
+  };
+}
 
 export class ESQLWorker implements BaseWorkerDefinition {
   private readonly _ctx: monaco.worker.IWorkerContext;
@@ -37,7 +55,7 @@ export class ESQLWorker implements BaseWorkerDefinition {
 
       parser[ROOT_STATEMENT]();
 
-      return wrapAsMonacoMessages(inputStream.toString(), errorListener.getErrors());
+      return errorListener.getErrors().map(inlineToMonacoErrors);
     }
     return [];
   }
@@ -46,7 +64,7 @@ export class ESQLWorker implements BaseWorkerDefinition {
     const rawAst = await getAstAndSyntaxErrors(text);
     return {
       ast: rawAst.ast,
-      errors: wrapAsMonacoMessages(text || '', rawAst.errors),
+      errors: rawAst.errors.map(inlineToMonacoErrors),
     };
   }
 }
