@@ -26,7 +26,6 @@ import {
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   apiHasDynamicActions,
-  embeddableEnhancedDrilldownGrouping,
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';

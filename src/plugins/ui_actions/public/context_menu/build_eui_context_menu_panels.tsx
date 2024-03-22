@@ -8,7 +8,6 @@
 
 import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import type { Action, ActionExecutionContext, ActionInternal } from '../actions';
