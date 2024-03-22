@@ -110,7 +110,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
+      mergeBaseWithPersistedConversations(baseConversations.getValue(), conversationsData),
     [baseConversations]
   );
   const {

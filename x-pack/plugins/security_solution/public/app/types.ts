@@ -19,6 +19,7 @@ import type { RouteProps } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { TableState } from '@kbn/securitysolution-data-table';
+import type { ElasticAssistantPublicPluginStart } from '@kbn/elastic-assistant-plugin/public';
 import type { ExploreReducer, ExploreState } from '../explore';
 import type { StartServices } from '../types';
 
@@ -30,6 +31,7 @@ export interface RenderAppProps extends AppMountParameters {
   store: Store<State, Action>;
   subPluginRoutes: RouteProps[];
   usageCollection?: UsageCollectionSetup;
+  elasticAssistant?: ElasticAssistantPublicPluginStart;
 }
 
 import type { State, SubPluginsInitReducer } from '../common/store';

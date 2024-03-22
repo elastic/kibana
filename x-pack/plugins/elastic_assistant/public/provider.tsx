@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { createContext, useMemo } from 'react';
 import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import {
-  Conversation,
-  AssistantProvider as ElasticAssistantProvider,
-} from '@kbn/elastic-assistant';
+import { AssistantProvider as ElasticAssistantProvider } from '@kbn/elastic-assistant';
 import type { CoreTheme } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 
@@ -25,10 +22,19 @@ import { useAnonymizationStore } from './components/use_anonymization_store';
 import { getComments } from './get_comments';
 import { augmentMessageCodeBlocks } from './components/helpers';
 import { useAssistantAvailability } from './use_assistant_availability';
+import { appContextService } from './services/app_context';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
   defaultMessage: 'Elastic AI Assistant',
 });
+
+export interface IApplicationUsageTracker {
+  theme$: Observable<CoreTheme>;
+}
+
+export const AssistantProviderContext = createContext<IApplicationUsageTracker | undefined>(
+  undefined
+);
 
 /**
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
@@ -36,11 +42,9 @@ const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title',
 export function AssistantProvider({
   children,
   theme$,
-  getRegisteredBaseConversations,
 }: {
   children: React.ReactElement;
   theme$: Observable<CoreTheme>;
-  getRegisteredBaseConversations: (pluginName: string) => Record<string, Conversation>;
 }) {
   const theme = useMemo(() => {
     return { theme$ };
@@ -55,18 +59,18 @@ export function AssistantProvider({
   const basePath = http.basePath.get();
 
   const currentAppId = useMemo(() => new Rx.BehaviorSubject(''), []);
+  const baseConversations = useMemo(() => new Rx.BehaviorSubject({}), []);
   if (applicationService) {
     applicationService.currentAppId$.subscribe((appId) => {
       if (appId) {
         currentAppId.next(appId);
+        baseConversations.next(
+          appContextService.getRegisteredBaseConversations(currentAppId.getValue() ?? '')
+        );
       }
     });
   }
 
-  const baseConversations = useMemo(
-    () => getRegisteredBaseConversations(currentAppId.getValue() ?? ''),
-    [currentAppId, getRegisteredBaseConversations]
-  );
   const assistantAvailability = useAssistantAvailability();
   // const assistantTelemetry = useAssistantTelemetry();
 
@@ -91,31 +95,35 @@ export function AssistantProvider({
     useAnonymizationStore();
 
   return (
-    <KibanaThemeProvider theme={theme}>
-      <ElasticAssistantProvider
-        actionTypeRegistry={actionTypeRegistry}
-        augmentMessageCodeBlocks={augmentMessageCodeBlocks}
-        assistantAvailability={assistantAvailability}
-        defaultAllow={defaultAllow} // to server and plugin start
-        defaultAllowReplacement={defaultAllowReplacement} // to server and plugin start
-        docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
-        baseAllow={DEFAULT_ALLOW} // to server and plugin start
-        baseAllowReplacement={DEFAULT_ALLOW_REPLACEMENT} // to server and plugin start
-        basePath={basePath}
-        basePromptContexts={Object.values(PROMPT_CONTEXTS)}
-        baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS} // to server and plugin start
-        baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS} // to server and plugin start
-        baseConversations={baseConversations}
-        getComments={getComments}
-        http={http}
-        currentAppId={currentAppId}
-        setDefaultAllow={setDefaultAllow} // remove
-        setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
-        title={ASSISTANT_TITLE}
-        toasts={notifications.toasts}
-      >
-        {children}
-      </ElasticAssistantProvider>
-    </KibanaThemeProvider>
+    <AssistantProviderContext.Consumer>
+      {(value) => (
+        <KibanaThemeProvider theme={theme}>
+          <ElasticAssistantProvider
+            actionTypeRegistry={actionTypeRegistry}
+            augmentMessageCodeBlocks={augmentMessageCodeBlocks}
+            assistantAvailability={assistantAvailability}
+            defaultAllow={defaultAllow} // to server and plugin start
+            defaultAllowReplacement={defaultAllowReplacement} // to server and plugin start
+            docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
+            baseAllow={DEFAULT_ALLOW} // to server and plugin start
+            baseAllowReplacement={DEFAULT_ALLOW_REPLACEMENT} // to server and plugin start
+            basePath={basePath}
+            basePromptContexts={Object.values(PROMPT_CONTEXTS)}
+            baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS} // to server and plugin start
+            baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS} // to server and plugin start
+            baseConversations={baseConversations}
+            getComments={getComments}
+            http={http}
+            currentAppId={currentAppId}
+            setDefaultAllow={setDefaultAllow} // remove
+            setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
+            title={ASSISTANT_TITLE}
+            toasts={notifications.toasts}
+          >
+            {children}
+          </ElasticAssistantProvider>
+        </KibanaThemeProvider>
+      )}
+    </AssistantProviderContext.Consumer>
   );
 }

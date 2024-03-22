@@ -120,6 +120,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
       application,
       http,
       notifications,
+      elasticAssistant,
       storage,
       triggersActionsUi: { actionTypeRegistry },
       docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
@@ -127,15 +128,17 @@ export const AssistantProvider: React.FC = ({ children }) => {
   } = useKibana();
   const basePath = useBasePath();
 
-  const baseConversations = useBaseConversations();
+  // const baseConversationsVal = useBaseConversations();
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
 
+  const baseConversations = useMemo(() => new Rx.BehaviorSubject({}), []);
   const currentAppId = useMemo(() => new Rx.BehaviorSubject(''), []);
   if (application) {
     application.currentAppId$.subscribe((appId) => {
       if (appId) {
         currentAppId.next(appId);
+        baseConversations.next(elasticAssistant.getDefaultConversations(appId));
       }
     });
   }

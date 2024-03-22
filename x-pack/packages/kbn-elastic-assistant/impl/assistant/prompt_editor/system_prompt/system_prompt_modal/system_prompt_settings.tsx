@@ -60,19 +60,13 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
     setConversationsSettingsBulkActions,
     defaultConnector,
   }) => {
-    const { applicationService } = useAssistantContext();
+    const { currentAppId } = useAssistantContext();
 
     // Prompt
     const promptContent = useMemo(
       () => selectedSystemPrompt?.content ?? '',
       [selectedSystemPrompt?.content]
     );
-
-    let currentAppId: string | undefined;
-    applicationService?.currentAppId$.subscribe((appId) => {
-      // setCurrentAppId(appId);
-      currentAppId = appId;
-    });
 
     const handlePromptContentChange = useCallback(
       (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -260,7 +254,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
               id: systemPrompt ?? '',
               content: '',
               name: systemPrompt ?? '',
-              consumer: currentAppId ?? '',
+              consumer: currentAppId.getValue() ?? '',
               promptType: 'system',
             }
           : systemPrompt;

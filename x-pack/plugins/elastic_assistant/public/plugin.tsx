@@ -78,7 +78,7 @@ export class ElasticAssistantPublicPlugin
 
     appContextService.start();
     return {
-      getRegisteredBaseConversations: (pluginName: string) => {
+      getDefaultConversations: (pluginName: string) => {
         return appContextService.getRegisteredBaseConversations(pluginName);
       },
       registerDefaultConversations: (
@@ -109,12 +109,7 @@ export class ElasticAssistantPublicPlugin
           }}
         >
           <ReactQueryClientProvider>
-            <AssistantProvider
-              theme$={coreStart.theme.theme$}
-              getRegisteredBaseConversations={(pluginName: string) => {
-                return appContextService.getRegisteredBaseConversations(pluginName);
-              }}
-            >
+            <AssistantProvider theme$={coreStart.theme.theme$}>
               <>
                 <AssistantHeaderLink />
                 <AssistantOverlay />

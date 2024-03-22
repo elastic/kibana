@@ -85,7 +85,7 @@ export interface AssistantProviderProps {
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
-  baseConversations: Record<string, Conversation>;
+  baseConversations: Rx.BehaviorSubject<Record<string, Conversation>>;
   nameSpace?: string;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
@@ -115,7 +115,7 @@ export interface UseAssistantContext {
   basePromptContexts: PromptContextTemplate[];
   baseQuickPrompts: QuickPrompt[];
   baseSystemPrompts: Prompt[];
-  baseConversations: Record<string, Conversation>;
+  baseConversations: Rx.BehaviorSubject<Record<string, Conversation>>;
   getComments: ({
     currentConversation,
     showAnonymizedValues,

@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT = i18n.translate(
   'xpack.securitySolution.assistant.content.prompts.system.youAreAHelpfulExpertAssistant',
   {
-    defaultMessage:
-      'You are a helpful, expert assistant who answers questions.',
+    defaultMessage: 'You are a helpful, expert assistant who answers questions.',
   }
 );
 

@@ -41,5 +41,5 @@ export interface ElasticAssistantPublicPluginStart {
     pluginName: string,
     baseConversations: Record<string, Conversation>
   ) => void;
-  getRegisteredBaseConversations: GetRegisteredBaseConversations;
+  getDefaultConversations: GetRegisteredBaseConversations;
 }
