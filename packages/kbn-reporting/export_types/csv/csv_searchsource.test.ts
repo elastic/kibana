@@ -86,7 +86,6 @@ test('gets the csv content from job parameters', async () => {
   const payload = await mockCsvSearchSourceExportType.runTask(
     'cool-job-id',
     {
-      pagingStrategy: 'pit',
       headers: encryptedHeaders,
       browserTimezone: 'US/Alaska',
       searchSource: {},
@@ -113,7 +112,6 @@ test('uses the provided logger', async () => {
   await mockCsvSearchSourceExportType.runTask(
     'cool-job-id',
     {
-      pagingStrategy: 'pit',
       headers: encryptedHeaders,
       browserTimezone: 'US/Alaska',
       searchSource: {},

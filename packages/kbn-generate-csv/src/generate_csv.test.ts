@@ -254,6 +254,7 @@ describe('CsvGenerator', () => {
   describe('PIT strategy', () => {
     const mockJobUsingPitPaging = createMockJob({
       columns: ['date', 'ip', 'message'],
+      pagingStrategy: 'pit',
     });
 
     it('warns if max size was reached', async () => {
@@ -419,7 +420,7 @@ describe('CsvGenerator', () => {
         );
 
       const generateCsv = new CsvGenerator(
-        createMockJob({ searchSource: {}, columns: [] }),
+        createMockJob({ searchSource: {}, columns: [], pagingStrategy: 'pit' }),
         mockConfig,
         mockTaskInstanceFields,
         {
@@ -759,6 +760,7 @@ describe('CsvGenerator', () => {
   describe('Scroll strategy', () => {
     const mockJobUsingScrollPaging = createMockJob({
       columns: ['date', 'ip', 'message'],
+      pagingStrategy: 'scroll',
     });
 
     beforeEach(() => {
@@ -900,7 +902,7 @@ describe('CsvGenerator', () => {
         );
 
       const generateCsv = new CsvGenerator(
-        createMockJob({ searchSource: {}, columns: [] }),
+        createMockJob({ searchSource: {}, columns: [], pagingStrategy: 'scroll' }),
         getMockConfig({
           scroll: { size: 500, duration: '30s', strategy: 'scroll' },
         }),

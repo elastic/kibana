@@ -68,6 +68,7 @@ export interface BaseParams {
 
   // application-specific fields
   layout?: LayoutParams; // png & pdf only
+  pagingStrategy?: CsvPagingStrategy; // csv only
 }
 
 /**
@@ -82,9 +83,6 @@ export interface BasePayload extends BaseParams {
   headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
-
-  // application-specific fields
-  pagingStrategy?: CsvPagingStrategy; // csv only
 }
 
 /**
