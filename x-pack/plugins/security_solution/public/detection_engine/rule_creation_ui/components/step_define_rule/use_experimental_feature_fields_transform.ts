@@ -27,7 +27,7 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
         : false;
 
       // reset any alert suppression values hidden behind feature flag
-      if (isIndicatorMatchSuppressionDisabled || isNewTermsSuppressionDisabled) {
+      if (isNewTermsSuppressionDisabled) {
         return {
           ...fields,
           groupByFields: [],

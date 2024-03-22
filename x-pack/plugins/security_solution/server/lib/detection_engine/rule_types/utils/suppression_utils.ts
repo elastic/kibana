@@ -9,36 +9,22 @@ import pick from 'lodash/pick';
 import get from 'lodash/get';
 import sortBy from 'lodash/sortBy';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import objectHash from 'object-hash';
 import {
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_INSTANCE_ID,
   ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
-  TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type {
-  BaseFieldsLatest,
-  NewTermsFieldsLatest,
-  WrappedFieldsLatest,
-} from '../../../../../common/api/detection_engine/model/alerts';
-import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
-import type { ConfigType } from '../../../../config';
-import type { CompleteRule, NewTermsRuleParams } from '../../rule_schema';
-import { buildReasonMessageForNewTermsAlert } from './reason_formatters';
-import type { SignalSource } from '../types';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
-
 interface SuppressionTerm {
   field: string;
   value: string[] | number[] | null;
 }
 
+/**
+ * returns list of populated suppression fields:
+ */
 export const getSuppressionAlertFields = ({
   primaryTimestamp,
   secondaryTimestamp,
@@ -71,6 +57,9 @@ export const getSuppressionAlertFields = ({
   return suppressionFields;
 };
 
+/**
+ * retrieves suppression values from source fields based on alert suppression configuration
+ */
 export const getSuppressionTerms = ({
   alertSuppression,
   fields,
