@@ -25,11 +25,11 @@ const GETGRIDTILE = getHttp().basePath.prepend(MVT_GETGRIDTILE_API_PATH);
  * URL. This function takes a string that may be a path and converts it to an
  * absolute URL.
  */
-function prepareAbsoluteUrl(url: string): string {
-  if (url.startsWith('/')) {
-    return new URL(url, window.location.origin).toString();
+function prepareAbsoluteUrl(pathOrUrl: string): string {
+  if (pathOrUrl.startsWith('/')) {
+    return new URL(pathOrUrl, window.location.origin).toString();
   }
-  return url;
+  return pathOrUrl;
 }
 
 export function transformRequest(path: string, resourceType: string | undefined) {
