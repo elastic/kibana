@@ -180,7 +180,17 @@ export class NavigationPublicPlugin
       .pipe(takeUntil(this.stop$), debounceTime(10))
       .subscribe(([enabled, status, defaultSolution, userOptedOut]) => {
         if (enabled) {
-          this.addOptInOutUserProfile({ core, security });
+          // Add menu item in the user profile menu to opt in/out of the new navigation
+          let defaultOptOutValue = DEFAULT_OPT_OUT_NEW_NAV;
+          if (status === 'visible' && userOptedOut === undefined) {
+            defaultOptOutValue = false;
+          } else if (status === 'hidden' && userOptedOut === undefined) {
+            defaultOptOutValue = true;
+          } else if (userOptedOut !== undefined) {
+            defaultOptOutValue = userOptedOut;
+          }
+
+          this.addOptInOutUserProfile({ core, security, defaultOptOutValue });
         } else {
           // TODO. Remove the user profile menu item if the feature is disabled.
           // But first let's wait as maybe there will be a page refresh when opting out.
@@ -192,7 +202,9 @@ export class NavigationPublicPlugin
         } else {
           const changeImmediately =
             status === 'visible' || (status === 'hidden' && userOptedOut === false);
-
+          if (!changeImmediately) {
+            chrome.setChromeStyle('classic');
+          }
           chrome.project.changeActiveSolutionNavigation(
             changeImmediately ? defaultSolution : null,
             { onlyIfNotSet: true }
@@ -261,8 +273,10 @@ export class NavigationPublicPlugin
   private addOptInOutUserProfile({
     core,
     security,
+    defaultOptOutValue,
   }: {
     core: CoreStart;
+    defaultOptOutValue: boolean;
     security?: SecurityPluginStart;
   }) {
     if (!security || this.userProfileMenuItemAdded) return;
@@ -272,7 +286,7 @@ export class NavigationPublicPlugin
         <SolutionNavUserProfileToggle
           core={core}
           security={security}
-          defaultOptOutValue={DEFAULT_OPT_OUT_NEW_NAV}
+          defaultOptOutValue={defaultOptOutValue}
         />
       ),
       order: 500,

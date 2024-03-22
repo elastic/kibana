@@ -116,7 +116,7 @@ export const useUpdateUserProfile = ({
   );
 
   const update = useCallback(
-    <D extends UserProfileData>(updatedData: D) => {
+    <D extends Partial<UserProfileData>>(updatedData: D) => {
       userProfileSnapshot.current = userProfileData;
       setIsLoading(true);
       return userProfileApiClient
