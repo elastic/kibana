@@ -51,7 +51,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import { OmitMessageVariablesType } from '../../lib/action_variables';
-import { SystemActionTypeForm } from './system_action_type';
+import { SystemActionTypeForm } from './system_action_type_form';
 
 export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
   omitMessageVariables?: OmitMessageVariablesType;
