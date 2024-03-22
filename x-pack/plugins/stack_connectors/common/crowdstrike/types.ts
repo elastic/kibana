@@ -11,7 +11,7 @@ import {
   CrowdstrikeConfigSchema,
   CrowdstrikeGetAgentsParamsSchema,
   CrowdstrikeGetAgentsResponseSchema,
-  CrowdstrikeIsolateHostParamsSchema,
+  CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeSecretsSchema,
   CrowdstrikeActionParamsSchema,
   CrowdstrikeGetTokenResponseSchema,
@@ -26,6 +26,6 @@ export type CrowdstrikeGetAgentsParams = Partial<TypeOf<typeof CrowdstrikeGetAge
 export type CrowdstrikeGetAgentsResponse = TypeOf<typeof CrowdstrikeGetAgentsResponseSchema>;
 export type CrowdstrikeGetTokenResponse = TypeOf<typeof CrowdstrikeGetTokenResponseSchema>;
 
-export type CrowdstrikeIsolateHostParams = TypeOf<typeof CrowdstrikeIsolateHostParamsSchema>;
+export type CrowdstrikeHostActionsParams = TypeOf<typeof CrowdstrikeHostActionsParamsSchema>;
 
 export type CrowdstrikeActionParams = TypeOf<typeof CrowdstrikeActionParamsSchema>;

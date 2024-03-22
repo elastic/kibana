@@ -120,6 +120,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     if (actionSendResponse.status === 'error') {
       this.log.error(stringify(actionSendResponse));
 
+      // TODO TC: check if we want to handle different errors like 401
       throw new ResponseActionsClientError(
         `Attempt to send [${actionType}] to Crowdstrike failed: ${
           actionSendResponse.serviceMessage || actionSendResponse.message
@@ -199,9 +200,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     };
 
     if (!reqIndexOptions.error) {
-      const error = (await this.validateRequest(reqIndexOptions)).error;
+      let error = (await this.validateRequest(reqIndexOptions)).error;
 
-      console.log({ actionRequest });
       if (!error) {
         try {
           await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
@@ -210,10 +210,11 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
           });
         } catch (err) {
           error = err;
+          // throw new Error(err);
         }
       }
 
-      // reqIndexOptions.error = error?.message;
+      reqIndexOptions.error = error?.message;
 
       if (!this.options.isAutomated && error) {
         throw error;
@@ -260,7 +261,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     };
 
     if (!reqIndexOptions.error) {
-      const error = (await this.validateRequest(reqIndexOptions)).error;
+      let error = (await this.validateRequest(reqIndexOptions)).error;
 
       if (!error) {
         try {

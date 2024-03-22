@@ -299,8 +299,10 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     //        `getter` function), we need to include this additional validation here, since
     //        `agent_type` is included in the schema independent of the feature flag
     if (
-      req.body.agent_type === 'sentinel_one' &&
-      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled
+      (req.body.agent_type === 'sentinel_one' &&
+        !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
+      (req.body.agent_type === 'crowdstrike' &&
+        !endpointContext.experimentalFeatures.responseActionsCrowdstrikeEnabled)
     ) {
       return errorHandler(
         logger,
@@ -389,6 +391,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         },
       });
     } catch (err) {
+      console.log('responseErr', err);
       return errorHandler(logger, res, err);
     }
   };

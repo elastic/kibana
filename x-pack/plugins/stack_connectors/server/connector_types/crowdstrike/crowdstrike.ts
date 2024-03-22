@@ -14,13 +14,15 @@ import type {
   CrowdstrikeGetAgentsResponse,
   CrowdstrikeGetAgentsParams,
   CrowdstrikeBaseApiResponse,
-  CrowdstrikeIsolateHostParams,
+  CrowdstrikeHostActionsParams,
   CrowdstrikeGetTokenResponse,
 } from '../../../common/crowdstrike/types';
 import {
   CrowdstrikeGetAgentsResponseSchema,
-  CrowdstrikeIsolateHostParamsSchema,
+  CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
+  CrowdstrikeGetTokenResponseSchema,
+  CrowdstrikeHostActionsResponseSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 
@@ -66,11 +68,11 @@ export class CrowdstrikeConnector extends SubActionConnector<
     this.registerSubAction({
       name: SUB_ACTION.HOST_ACTIONS,
       method: 'executeHostActions',
-      schema: CrowdstrikeIsolateHostParamsSchema,
+      schema: CrowdstrikeHostActionsParamsSchema,
     });
   }
 
-  public async executeHostActions({ alertIds, ...payload }: CrowdstrikeIsolateHostParams) {
+  public async executeHostActions({ alertIds, ...payload }: CrowdstrikeHostActionsParams) {
     return this.crowdstrikeApiRequest({
       url: this.urls.hostAction,
       method: 'post',
@@ -81,10 +83,8 @@ export class CrowdstrikeConnector extends SubActionConnector<
         ids: payload.ids,
       },
       paramsSerializer,
-      // check
-      responseSchema: CrowdstrikeGetAgentsResponseSchema,
+      responseSchema: CrowdstrikeHostActionsResponseSchema,
     });
-    // TODO TC: check if we need to handle errors here
   }
 
   public async getAgentDetails(
@@ -106,8 +106,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
       this.secrets.clientId + ':' + this.secrets.clientSecret
     ).toString('base64');
 
-    // TODO TC: fix types
-    const response: CrowdstrikeGetTokenResponse = await this.request<CrowdstrikeBaseApiResponse>({
+    const response = await this.request<CrowdstrikeGetTokenResponse>({
       url: this.urls.getToken,
       method: 'post',
       headers: {
@@ -115,8 +114,8 @@ export class CrowdstrikeConnector extends SubActionConnector<
         'Content-Type': 'application/x-www-form-urlencoded',
         authorization: 'Basic ' + base64encodedData,
       },
-      responseSchema: CrowdstrikeGetAgentsResponseSchema,
-      // responseSchema: CrowdsrtikeGetTokenResponseSchema,
+      // responseSchema: CrowdstrikeGetAgentsResponseSchema,
+      responseSchema: CrowdstrikeGetTokenResponseSchema,
     });
     const token = response.data.access_token;
     if (token) {
@@ -130,23 +129,45 @@ export class CrowdstrikeConnector extends SubActionConnector<
     }
     return token;
   }
+
   private async crowdstrikeApiRequest<R extends CrowdstrikeBaseApiResponse>(
-    req: SubActionRequestParams<R>
+    req: SubActionRequestParams<R>,
+    retried?: boolean
   ): Promise<R> {
-    if (!CrowdstrikeConnector.token) {
-      CrowdstrikeConnector.token = (await this.getTokenRequest()) as string;
+    try {
+      if (!CrowdstrikeConnector.token) {
+        CrowdstrikeConnector.token = (await this.getTokenRequest()) as string;
+      }
+
+      const response = await this.request<R>({
+        ...req,
+        headers: {
+          ...req.headers,
+          Authorization: `Bearer ${CrowdstrikeConnector.token}`,
+        },
+      });
+
+      // TODO TC: When we have access to API - verify if we catch an error or response.errors
+      // if (response.errors.length) {
+      //   if (response.errors[0].code === 401 && response.errors[0].message === 'access denied, invalid bearer token' && !retried) {
+      //     CrowdstrikeConnector.token = null;
+      //     return this.crowdstrikeApiRequest(req, true);
+      //   }
+      // }
+
+      return response.data;
+    } catch (error) {
+      if (
+        error.code === 401 &&
+        error.message === 'access denied, invalid bearer token' &&
+        !retried
+      ) {
+        CrowdstrikeConnector.token = null;
+        return this.crowdstrikeApiRequest(req, true);
+      }
+
+      throw error;
     }
-
-    const response = await this.request<R>({
-      ...req,
-      headers: {
-        ...req.headers,
-        Authorization: `Bearer ${CrowdstrikeConnector.token}`,
-      },
-    });
-    // TODO TC: in case of 401 error, we should retry the request with a new token
-
-    return response.data;
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {
