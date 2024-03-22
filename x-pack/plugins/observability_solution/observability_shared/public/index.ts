@@ -80,6 +80,7 @@ export {
   observabilityAppId,
   casesFeatureId,
   sloFeatureId,
+  SLO_ALERTS_TABLE_CONFIG_ID,
 } from '../common';
 
 export {

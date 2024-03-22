@@ -33,7 +33,7 @@ import { DocLinksStart } from './shared_imports';
 
 type TabName = 'fields' | 'runtimeFields' | 'advanced' | 'templates';
 
-interface MappingsEditorParsedMetadata {
+export interface MappingsEditorParsedMetadata {
   parsedDefaultValue?: {
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
