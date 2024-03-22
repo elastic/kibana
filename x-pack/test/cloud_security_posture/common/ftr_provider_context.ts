@@ -22,10 +22,3 @@ export type FunctionalFtrProviderContext = GenericFtrProviderContext<
   typeof xpackFunctionalServices,
   CSPPageObjects
 >;
-
-export const cspPageObjects = {
-  cspPackageFunctionalPageObjects: {
-    ...pageObjects,
-    ...cloudSecurityPosturePageObjects,
-  },
-};
