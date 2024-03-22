@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { findListItems } from '@kbn/securitysolution-list-api';
-import { useCursor } from '@kbn/securitysolution-list-hooks';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { findListItems, ApiParams } from '@kbn/securitysolution-list-api';
+import { useCursor } from '../use_cursor';
 
 const FIND_LIST_ITEMS_QUERY_KEY = 'FIND_LIST_ITEMS';
 
@@ -30,6 +30,7 @@ export const useFindListItems = ({
   sortOrder,
   listId,
   filter,
+  http,
 }: {
   pageIndex: number;
   pageSize: number;
@@ -37,9 +38,9 @@ export const useFindListItems = ({
   sortOrder: 'asc' | 'desc';
   listId: string;
   filter: string;
+  http: ApiParams['http'];
 }) => {
   const [cursor, setCursor] = useCursor({ pageIndex, pageSize });
-  const http = useKibana().services.http;
   return useQuery(
     [FIND_LIST_ITEMS_QUERY_KEY, pageIndex, pageSize, sortField, sortOrder, listId, filter],
     async ({ signal }) => {

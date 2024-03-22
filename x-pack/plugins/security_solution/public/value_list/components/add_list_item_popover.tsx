@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFieldText,
@@ -15,12 +15,14 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { useFormik } from 'formik';
-import { useCreateListItemMutation } from '../hooks/use_create_list_item';
+import { useCreateListItemMutation } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { useKibana } from '../../common/lib/kibana/kibana_react';
 
 export const AddListItemPopover = ({ listId }: { listId: string }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { addSuccess, addError } = useAppToasts();
+  const http = useKibana().services.http;
   const createListItemMutation = useCreateListItemMutation({
     onSuccess: () => {
       addSuccess('Succesfully added list item');
@@ -39,7 +41,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
       }
     },
     onSubmit: async (values) => {
-      await createListItemMutation.mutateAsync({ listId, value: values.value });
+      await createListItemMutation.mutateAsync({ listId, value: values.value, http });
       setIsPopoverOpen(false);
       formik.resetForm();
     },

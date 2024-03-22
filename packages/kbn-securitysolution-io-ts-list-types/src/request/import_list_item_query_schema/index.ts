@@ -16,7 +16,7 @@ import { serializer } from '../../common/serializer';
 import { refresh } from '../../common/refresh';
 
 export const importListItemQuerySchema = t.exact(
-  t.partial({ deserializer, list_id, serializer, type, refresh, })
+  t.partial({ deserializer, list_id, serializer, type, refresh })
 );
 
 export type ImportListItemQuerySchema = RequiredKeepUndefined<

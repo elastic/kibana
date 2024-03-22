@@ -19,8 +19,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useFindListItems } from '../hooks/use_find_list_items';
-import { useDeleteListItemMutation } from '../hooks/use_delete_list_item';
+import { useFindListItems, useDeleteListItemMutation } from '@kbn/securitysolution-list-hooks';
 import { FormattedDate } from '../../common/components/formatted_date';
 import { useKibana } from '../../common/lib/kibana';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
@@ -40,6 +39,7 @@ type SortFields = 'updated_at' | 'updated_by';
 
 const DeleteListItemButton = ({ id }: { id: string }) => {
   const { addSuccess } = useAppToasts();
+  const http = useKibana().services.http;
   const deleteListItemMutation = useDeleteListItemMutation({
     onSuccess: () => {
       addSuccess('Succesfully deleted list item', toastOptions);
@@ -49,7 +49,7 @@ const DeleteListItemButton = ({ id }: { id: string }) => {
   return (
     <EuiButtonIcon
       color={'danger'}
-      onClick={() => deleteListItemMutation.mutate({ id })}
+      onClick={() => deleteListItemMutation.mutate({ id, http })}
       iconType="trash"
       isLoading={deleteListItemMutation.isLoading}
     />
@@ -68,6 +68,7 @@ export const ValueListModal = ({
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<SortFields>('updated_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const http = useKibana().services.http;
 
   const { data, isLoading, isError } = useFindListItems({
     listId,
@@ -76,6 +77,7 @@ export const ValueListModal = ({
     sortField,
     sortOrder,
     filter,
+    http,
   });
 
   const modalStyle = css`
@@ -149,7 +151,7 @@ export const ValueListModal = ({
           <EuiFlexItem grow={false}>
             <EuiModalHeaderTitle>Value list</EuiModalHeaderTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={true} >
+          <EuiFlexItem grow={true}>
             <EuiFlexGroup justifyContent="flexEnd">
               <AddListItemPopover listId={listId} />
               <UploadListItem listId={listId} />

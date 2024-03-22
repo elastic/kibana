@@ -8,8 +8,9 @@
 import React, { useCallback, useState } from 'react';
 import { EuiInlineEditText } from '@elastic/eui';
 import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { usePatchListItemMutation } from '../hooks/use_patch_list_item';
+import { usePatchListItemMutation } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { useKibana } from '../../common/lib/kibana/kibana_react';
 
 const toastOptions = {
   toastLifeTimeMs: 5000,
@@ -18,6 +19,7 @@ const toastOptions = {
 export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema }) => {
   const [value, setValue] = useState(listItem.value);
   const { addSuccess, addError } = useAppToasts();
+  const http = useKibana().services.http;
   const patchListItemMutation = usePatchListItemMutation({
     onSuccess: () => {
       addSuccess('Succesfully updated list item', toastOptions);
@@ -43,10 +45,11 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
         id: listItem.id,
         value: newValue,
         _version: listItem._version,
+        http,
       });
       return true;
     },
-    [listItem._version, listItem.id, patchListItemMutation]
+    [listItem._version, listItem.id, patchListItemMutation, http]
   );
 
   return (

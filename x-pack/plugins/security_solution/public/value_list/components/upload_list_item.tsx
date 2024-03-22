@@ -8,11 +8,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiButton, EuiFilePicker, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useImportList } from '@kbn/securitysolution-list-hooks';
+import { useImportList, useInvalidateListItemQuery } from '@kbn/securitysolution-list-hooks';
 import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 import { useKibana } from '../../common/lib/kibana';
-import { useInvalidateListItemQuery } from '../hooks/use_find_list_items';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
+
 const validFileTypes = ['text/csv', 'text/plain'];
 
 const toastOptions = {
