@@ -34,11 +34,9 @@ import {
 import { isEmpty, partition, some } from 'lodash';
 import {
   ActionVariable,
-  RuleAction,
   RuleActionAlertsFilterProperty,
   RuleActionParam,
   RuleNotifyWhenType,
-  RuleSystemAction,
 } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
@@ -50,6 +48,7 @@ import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimenta
 import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
+  RuleAction,
   ActionTypeIndex,
   ActionConnector,
   ActionVariables,
@@ -70,10 +69,8 @@ import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 import { validateActionFilterQuery } from '../../lib/value_validators';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
 
-export type ActionTypeFormProps = (
-  | { actionItem: RuleAction; isSystemAction: false }
-  | { actionItem: RuleSystemAction; isSystemAction: true }
-) & {
+export type ActionTypeFormProps = {
+  actionItem: RuleAction;
   actionConnector: ActionConnector;
   index: number;
   onAddConnector: () => void;
@@ -103,16 +100,16 @@ export type ActionTypeFormProps = (
   hasFieldsForAAD?: boolean;
   disableErrorMessages?: boolean;
 } & Pick<
-    ActionAccordionFormProps,
-    | 'defaultActionGroupId'
-    | 'actionGroups'
-    | 'setActionGroupIdByIndex'
-    | 'setActionParamsProperty'
-    | 'messageVariables'
-    | 'summaryMessageVariables'
-    | 'defaultActionMessage'
-    | 'defaultSummaryMessage'
-  >;
+  ActionAccordionFormProps,
+  | 'defaultActionGroupId'
+  | 'actionGroups'
+  | 'setActionGroupIdByIndex'
+  | 'setActionParamsProperty'
+  | 'messageVariables'
+  | 'summaryMessageVariables'
+  | 'defaultActionMessage'
+  | 'defaultSummaryMessage'
+>;
 
 const preconfiguredMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
@@ -154,7 +151,6 @@ export const ActionTypeForm = ({
   ruleTypeId,
   hasFieldsForAAD,
   disableErrorMessages,
-  isSystemAction,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -165,21 +161,18 @@ export const ActionTypeForm = ({
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
   const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
   const selectedActionGroup =
-    (!isSystemAction && actionGroups?.find(({ id }) => id === actionItem.group)) ||
-    defaultActionGroup;
+    actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
   const [actionGroup, setActionGroup] = useState<string>();
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
   });
   const [actionThrottle, setActionThrottle] = useState<number | null>(
-    !isSystemAction && actionItem.frequency?.throttle
+    actionItem.frequency?.throttle
       ? getDurationNumberInItsUnit(actionItem.frequency.throttle)
       : null
   );
   const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
-    !isSystemAction && actionItem.frequency?.throttle
-      ? getDurationUnitValue(actionItem.frequency?.throttle)
-      : 'h'
+    actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
   );
   const [minimumActionThrottle = -1, minimumActionThrottleUnit] = minimumThrottleInterval ?? [
     -1,
@@ -189,10 +182,10 @@ export const ActionTypeForm = ({
 
   const [useDefaultMessage, setUseDefaultMessage] = useState(false);
 
-  const isSummaryAction = !isSystemAction && actionItem.frequency?.summary;
+  const isSummaryAction = actionItem.frequency?.summary;
 
-  const [useAadTemplateFields, setUseAadTemplateField] = useState<boolean>(
-    ('useAlertDataForTemplate' in actionItem && actionItem?.useAlertDataForTemplate) ?? false
+  const [useAadTemplateFields, setUseAadTemplateField] = useState(
+    actionItem?.useAlertDataForTemplate ?? false
   );
   const [storedActionParamsForAadToggle, setStoredActionParamsForAadToggle] = useState<
     Record<string, SavedObjectAttribute>
@@ -241,7 +234,7 @@ export const ActionTypeForm = ({
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
     let defaultParams;
-    if (!isSystemAction && actionItem.group === recoveryActionGroup) {
+    if (actionItem.group === recoveryActionGroup) {
       defaultParams = connectorType.defaultRecoveredActionParams;
     }
 
@@ -271,39 +264,36 @@ export const ActionTypeForm = ({
     }
   }, [minimumActionThrottle, minimumActionThrottleUnit, actionThrottle, actionThrottleUnit]);
 
-  useEffect(
-    () => {
-      (async () => {
-        setAvailableActionVariables(
-          messageVariables
-            ? getAvailableActionVariables(
-                messageVariables,
-                summaryMessageVariables,
-                selectedActionGroup,
-                isSummaryAction
-              )
-            : []
-        );
+  useEffect(() => {
+    (async () => {
+      setAvailableActionVariables(
+        messageVariables
+          ? getAvailableActionVariables(
+              messageVariables,
+              summaryMessageVariables,
+              selectedActionGroup,
+              isSummaryAction
+            )
+          : []
+      );
 
-        const defaultParams = await getDefaultParams();
-        if (defaultParams) {
-          for (const [key, paramValue] of Object.entries(defaultParams)) {
-            const defaultAADParams: typeof defaultParams = {};
-            if (actionItem.params[key] === undefined || actionItem.params[key] === null) {
-              setActionParamsProperty(key, paramValue, index);
-              // Add default param to AAD defaults only if it does not contain any template code
-              if (typeof paramValue !== 'string' || !paramValue.match(/{{.*?}}/g)) {
-                defaultAADParams[key] = paramValue;
-              }
+      const defaultParams = await getDefaultParams();
+      if (defaultParams) {
+        for (const [key, paramValue] of Object.entries(defaultParams)) {
+          const defaultAADParams: typeof defaultParams = {};
+          if (actionItem.params[key] === undefined || actionItem.params[key] === null) {
+            setActionParamsProperty(key, paramValue, index);
+            // Add default param to AAD defaults only if it does not contain any template code
+            if (typeof paramValue !== 'string' || !paramValue.match(/{{.*?}}/g)) {
+              defaultAADParams[key] = paramValue;
             }
-            setStoredActionParamsForAadToggle(defaultAADParams);
           }
+          setStoredActionParamsForAadToggle(defaultAADParams);
         }
-      })();
-    },
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    !isSystemAction ? [actionItem.group, actionItem.frequency?.summary] : []
-  );
+  }, [actionItem.group, actionItem.frequency?.summary]);
 
   useEffect(() => {
     (async () => {
@@ -377,31 +367,40 @@ export const ActionTypeForm = ({
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
       : false;
 
-  const actionNotifyWhen = !isSystemAction && (
+  const actionNotifyWhen = (
     <ActionNotifyWhen
       frequency={actionItem.frequency}
       throttle={actionThrottle}
       throttleUnit={actionThrottleUnit}
       hasAlertsMappings={hasAlertsMappings}
-      onNotifyWhenChange={(notifyWhen) => {
-        setActionFrequencyProperty('notifyWhen', notifyWhen, index);
-      }}
-      onThrottleChange={(throttle: number | null, throttleUnit: string) => {
-        if (throttle) {
-          setActionThrottle(throttle);
-          setActionThrottleUnit(throttleUnit);
-        }
-        setActionFrequencyProperty(
-          'throttle',
-          throttle ? `${throttle}${throttleUnit}` : null,
-          index
-        );
-      }}
-      onSummaryChange={(summary: boolean) => {
-        // use the default message when a user toggles between action frequencies
-        setUseDefaultMessage(true);
-        setActionFrequencyProperty('summary', summary, index);
-      }}
+      onNotifyWhenChange={useCallback(
+        (notifyWhen) => {
+          setActionFrequencyProperty('notifyWhen', notifyWhen, index);
+        },
+        [setActionFrequencyProperty, index]
+      )}
+      onThrottleChange={useCallback(
+        (throttle: number | null, throttleUnit: string) => {
+          if (throttle) {
+            setActionThrottle(throttle);
+            setActionThrottleUnit(throttleUnit);
+          }
+          setActionFrequencyProperty(
+            'throttle',
+            throttle ? `${throttle}${throttleUnit}` : null,
+            index
+          );
+        },
+        [setActionFrequencyProperty, index]
+      )}
+      onSummaryChange={useCallback(
+        (summary: boolean) => {
+          // use the default message when a user toggles between action frequencies
+          setUseDefaultMessage(true);
+          setActionFrequencyProperty('summary', summary, index);
+        },
+        [setActionFrequencyProperty, index]
+      )}
       showMinimumThrottleWarning={showMinimumThrottleWarning}
       showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
@@ -409,8 +408,7 @@ export const ActionTypeForm = ({
     />
   );
 
-  const actionTypeRegistered =
-    actionConnector && actionTypeRegistry.get(actionConnector.actionTypeId);
+  const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
 
@@ -428,11 +426,9 @@ export const ActionTypeForm = ({
     actionGroups &&
     selectedActionGroup &&
     setActionGroupIdByIndex &&
-    !isSystemAction &&
     !actionItem.frequency?.summary;
 
-  const showActionAlertsFilter =
-    (hasFieldsForAAD || producerId === AlertConsumers.SIEM) && !isSystemAction;
+  const showActionAlertsFilter = hasFieldsForAAD || producerId === AlertConsumers.SIEM;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -440,52 +436,48 @@ export const ActionTypeForm = ({
         color="subdued"
         style={{ borderBottom: `1px solid ${euiTheme.colors.lightShade}` }}
       >
-        {!isSystemAction && (
-          <>
-            <EuiFormRow
-              fullWidth
-              label={
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.actionTypeForm.actionIdLabel"
+              defaultMessage="{connectorInstance} connector"
+              values={{
+                connectorInstance: actionTypesIndex
+                  ? actionTypesIndex[actionConnector.actionTypeId].name
+                  : actionConnector.actionTypeId,
+              }}
+            />
+          }
+          labelAppend={
+            canSave &&
+            actionTypesIndex &&
+            actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
+                onClick={onAddConnector}
+              >
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.actionTypeForm.actionIdLabel"
-                  defaultMessage="{connectorInstance} connector"
-                  values={{
-                    connectorInstance: actionTypesIndex
-                      ? actionTypesIndex[actionConnector.actionTypeId].name
-                      : actionConnector.actionTypeId,
-                  }}
+                  defaultMessage="Add connector"
+                  id="xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton"
                 />
-              }
-              labelAppend={
-                canSave &&
-                actionTypesIndex &&
-                actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
-                  <EuiButtonEmpty
-                    size="xs"
-                    data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
-                    onClick={onAddConnector}
-                  >
-                    <FormattedMessage
-                      defaultMessage="Add connector"
-                      id="xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton"
-                    />
-                  </EuiButtonEmpty>
-                ) : null
-              }
-            >
-              <ConnectorsSelection
-                allowGroupConnector={allowGroupConnector}
-                actionItem={actionItem}
-                accordionIndex={index}
-                actionTypesIndex={actionTypesIndex}
-                actionTypeRegistered={actionTypeRegistered}
-                connectors={connectors}
-                onConnectorSelected={onConnectorSelected}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="xl" />
-          </>
-        )}
-        {!hideNotifyWhen && !isSystemAction && actionNotifyWhen}
+              </EuiButtonEmpty>
+            ) : null
+          }
+        >
+          <ConnectorsSelection
+            allowGroupConnector={allowGroupConnector}
+            actionItem={actionItem}
+            accordionIndex={index}
+            actionTypesIndex={actionTypesIndex}
+            actionTypeRegistered={actionTypeRegistered}
+            connectors={connectors}
+            onConnectorSelected={onConnectorSelected}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="xl" />
+        {!hideNotifyWhen && actionNotifyWhen}
         {showSelectActionGroup && (
           <>
             {!hideNotifyWhen && <EuiSpacer size="s" />}
@@ -517,7 +509,7 @@ export const ActionTypeForm = ({
             />
           </>
         )}
-        {showActionAlertsFilter && !isSystemAction && (
+        {showActionAlertsFilter && (
           <>
             {!hideNotifyWhen && <EuiSpacer size="xl" />}
             <EuiFormRow error={queryError} isInvalid={!!queryError} fullWidth>
@@ -647,30 +639,28 @@ export const ActionTypeForm = ({
                           }}
                         />
                       </EuiFlexItem>
-                      {!isSystemAction &&
-                        (selectedActionGroup || actionItem.frequency?.summary) &&
-                        !isOpen && (
-                          <EuiFlexItem grow={false}>
-                            <EuiBadge iconType="clock">
-                              {actionItem.frequency?.summary
-                                ? i18n.translate(
-                                    'xpack.triggersActionsUI.sections.actionTypeForm.summaryGroupTitle',
-                                    {
-                                      defaultMessage: 'Summary of alerts',
-                                    }
-                                  )
-                                : i18n.translate(
-                                    'xpack.triggersActionsUI.sections.actionTypeForm.runWhenGroupTitle',
-                                    {
-                                      defaultMessage: 'Run when {groupName}',
-                                      values: {
-                                        groupName: selectedActionGroup!.name.toLocaleLowerCase(),
-                                      },
-                                    }
-                                  )}
-                            </EuiBadge>
-                          </EuiFlexItem>
-                        )}
+                      {(selectedActionGroup || actionItem.frequency?.summary) && !isOpen && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge iconType="clock">
+                            {actionItem.frequency?.summary
+                              ? i18n.translate(
+                                  'xpack.triggersActionsUI.sections.actionTypeForm.summaryGroupTitle',
+                                  {
+                                    defaultMessage: 'Summary of alerts',
+                                  }
+                                )
+                              : i18n.translate(
+                                  'xpack.triggersActionsUI.sections.actionTypeForm.runWhenGroupTitle',
+                                  {
+                                    defaultMessage: 'Run when {groupName}',
+                                    values: {
+                                      groupName: selectedActionGroup!.name.toLocaleLowerCase(),
+                                    },
+                                  }
+                                )}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
                       {warning && !isOpen && (
                         <EuiFlexItem grow={false}>
                           <EuiBadge

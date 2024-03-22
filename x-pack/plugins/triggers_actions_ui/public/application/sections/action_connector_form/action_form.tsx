@@ -27,7 +27,6 @@ import {
   RuleActionFrequency,
   RuleActionParam,
   RuleSystemAction,
-  SanitizedRuleAction,
 } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { betaBadgeProps } from './beta_badge_props';
@@ -40,6 +39,7 @@ import {
   ActionTypeRegistryContract,
   NotifyWhenSelectOptions,
   RuleUiAction,
+  RuleAction,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ActionTypeForm } from './action_type_form';
@@ -51,6 +51,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import { OmitMessageVariablesType } from '../../lib/action_variables';
+import { SystemActionTypeForm } from './system_action_type';
 
 export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
   omitMessageVariables?: OmitMessageVariablesType;
@@ -97,26 +98,6 @@ interface ActiveActionConnectorState {
   actionTypeId: string;
   indices: number[];
 }
-
-const getTypedActionItemProps: (
-  actionItem: RuleUiAction,
-  isSystemAction: boolean
-) =>
-  | {
-      actionItem: SanitizedRuleAction;
-      isSystemAction: false;
-    }
-  | { actionItem: RuleSystemAction; isSystemAction: true } = (actionItem, isSystemAction) => {
-  return isSystemAction
-    ? {
-        actionItem: actionItem as RuleSystemAction,
-        isSystemAction: true,
-      }
-    : {
-        actionItem: actionItem as SanitizedRuleAction,
-        isSystemAction: false,
-      };
-};
 
 export const ActionForm = ({
   actions,
@@ -271,14 +252,14 @@ export const ActionForm = ({
     }
     setIsAddActionPanelOpen(false);
     const allowGroupConnector = (actionTypeModel?.subtype ?? []).map((atm) => atm.id);
-    const isSystemAction = Boolean(
+    const isSystemActionType = Boolean(
       actionTypesIndex && actionTypesIndex[actionTypeModel.id]?.isSystemActionType
     );
     let actionTypeConnectors = connectors.filter(
       (field) => field.actionTypeId === actionTypeModel.id
     );
 
-    const actionToPush = isSystemAction
+    const actionToPush = isSystemActionType
       ? {
           id: '',
           actionTypeId: actionTypeModel.id,
@@ -400,11 +381,13 @@ export const ActionForm = ({
       )}
       {actionTypesIndex &&
         actions.map((actionItem: RuleUiAction, index: number) => {
-          const isSystemAction = Boolean(
+          const isSystemActionType = Boolean(
             actionTypesIndex[actionItem.actionTypeId]?.isSystemActionType
           );
+
           const actionConnector = connectors.find((field) => field.id === actionItem.id);
-          if (isSystemAction && !actionConnector) {
+
+          if (isSystemActionType && !actionConnector) {
             return (
               <EuiEmptyPrompt
                 title={
@@ -479,9 +462,44 @@ export const ActionForm = ({
             );
           }
 
+          if (isSystemActionType) {
+            return (
+              <SystemActionTypeForm
+                actionItem={actionItem as RuleSystemAction}
+                actionConnector={actionConnector}
+                index={index}
+                key={`action-form-action-at-${actionItem.uuid}`}
+                setActionParamsProperty={setActionParamsProperty}
+                actionTypesIndex={actionTypesIndex}
+                connectors={connectors}
+                defaultActionGroupId={defaultActionGroupId}
+                messageVariables={messageVariables}
+                summaryMessageVariables={summaryMessageVariables}
+                actionGroups={actionGroups}
+                defaultActionMessage={defaultActionMessage}
+                recoveryActionGroup={recoveryActionGroup}
+                actionTypeRegistry={actionTypeRegistry}
+                onDeleteAction={() => {
+                  const updatedActions = actions.filter(
+                    (_item: RuleUiAction, i: number) => i !== index
+                  );
+                  setActions(updatedActions);
+                  setIsAddActionPanelOpen(updatedActions.length === 0);
+                  setActiveActionItem(undefined);
+                }}
+                defaultSummaryMessage={defaultSummaryMessage}
+                hasAlertsMappings={hasAlertsMappings}
+                featureId={featureId}
+                producerId={producerId}
+                ruleTypeId={ruleTypeId}
+                disableErrorMessages={disableErrorMessages}
+              />
+            );
+          }
+
           return (
             <ActionTypeForm
-              {...getTypedActionItemProps(actionItem, isSystemAction)}
+              actionItem={actionItem as RuleAction}
               actionConnector={actionConnector}
               index={index}
               key={`action-form-action-at-${actionItem.uuid}`}
