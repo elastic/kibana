@@ -1921,17 +1921,23 @@ For an up-to-date discussion on the design changes needed for Milestone 3, pleas
 
 ## Upgrading Prebuilt Rules
 
-### Changes to upgrade `_review` endpoint
+### Changes to `/upgrade/_perform` endpoint
 
-The algorithm for calculating rule version diffs' core structure is [fully implemented](https://github.com/elastic/kibana/pull/148392) and operational. However, the current method for calculating field differences is basic: it currently simply compares field values across versions and flags a conflict if the base version, the current version and the target versions differ from one another. In this conflict scenario, the `mergedVersion` of the field proposed by the algorithm always equals the `targetVersion`.
+The endpoint's currently implemented contract needs to be updated as described in this [PoC](https://github.com/elastic/kibana/pull/144060).
+
+### Changes to `/upgrade/_review` endpoint
+
+The endpoint currently implemented contract needs to be updated as described in this [PoC](https://github.com/elastic/kibana/pull/144060).
+
+### Concrete field diff algorithms by type
+
+The algorithm used in the `/upgrade/_review` endpoint for calculating rule version diffs' core structure is [fully implemented](https://github.com/elastic/kibana/pull/148392) and operational. However, the current method for calculating field differences is basic: it currently simply compares field values across versions and flags a conflict if the base version, the current version and the target versions differ from one another. In this conflict scenario, the `mergedVersion` of the field proposed by the algorithm always equals the `targetVersion`.
 
 We propose developing more adaptable diff algorithms tailored to specific rule fields or rule field types. These more specific algorithms aim to minimize conflicts and automate merging of changes, doing the best effort to keep the intended customizations applied by the user, as well as the updates proposed by Elastic. Hopefully, the user will be able to simply review the proposal and accept it.
 
-#### Concrete field diff algorithms by type
-
 Depending on the specific field or type of field we might want to apply a specific merging algorithm when conflicts arise. Let's propose different types.
 
-##### Single-line string fields
+#### Single-line string fields
 
 > Examples: `name`, `query`
 
@@ -1953,7 +1959,7 @@ Reasons why we'll continue to use the simple diff algorithm for single-line stri
       <th>Current version</th>
       <th style="border-right:3px solid black">Target version</th>
       <th>Merged version (output)</th>
-      <th>Conflict?</th>
+      <th>Mark as conflict?</th>
     </tr>
   </thead>
   <tbody align="center">
@@ -2001,7 +2007,7 @@ Reasons why we'll continue to use the simple diff algorithm for single-line stri
 </table>
 
 
-##### Multi-line string fields
+#### Multi-line string fields
 
 > Examples: `description`, `setup`, `note` (Investigation guide)
 
@@ -2072,40 +2078,68 @@ Reasons why we'll continue to use the simple diff algorithm for single-line stri
 
 
 
-
-
-##### Number fields
+#### Number fields
 
 > Examples: `risk_score`, `max_signals`
 
-Number fields should be treated as a whole unit, i.e. not breakable by digits. Therefore, there is only one possibility of conflicts, the scenario (A B C). In that case, **keep the current version** with the user customization.
+Number fields should be treated as a whole unit, i.e. not breakable by digits. Therefore, there is only one possibility of conflicts, the scenario (A B C), which is not solvable. In that case, **keep the current version** with the user customization.
 
+<table>
+  <thead>
+    <tr>
+      <th style="border-right:3px solid black">Use case</th>
+      <th>Base version</th>
+      <th>Current version</th>
+      <th style="border-right:3px solid black">Target version</th>
+      <th>Merged version (output)</th>
+      <th>Mark as conflict?</th>
+    </tr>
+  </thead>
+  <tbody align="center">
+    <tr>
+      <td style="border-right:3px solid black">No customization, no updates (AAA)</td>
+      <td><code>10</code></td>
+      <td><code>10</code></td>
+      <td style="border-right:3px solid black"><code>10</code></td>
+      <td><code>10</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">User customization, no updates (ABA)</td>
+      <td><code>10</code></td>
+      <td><code>15</code></td>
+      <td style="border-right:3px solid black"><code>10</code></td>
+      <td><code>15</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">No customization, upstream update (AAB)</td>
+      <td><code>10</code></td>
+      <td><code>10</code></td>
+      <td style="border-right:3px solid black"><code>15</code></td>
+      <td><code>15</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update match (ABB)</td>
+      <td><code>10</code></td>
+      <td><code>20</code></td>
+      <td style="border-right:3px solid black"><code>20</code></td>
+      <td><code>20</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update conflict (ABC)</td>
+      <td><code>10</code></td>
+      <td><code>20</code></td>
+      <td style="border-right:3px solid black"><code>30</code></td>
+      <td><code>20</code></td>
+      <td><code>YES</code></td>
+    </tr>
+  </tbody>
+</table>
 
-
-  <table>
-    <thead>
-      <tr>
-        <th style="border-right:3px solid black">Use case</th>
-        <th>Base version</th>
-        <th>Current version</th>
-        <th style="border-right:3px solid black">Target version</th>
-        <th>Merged version (output)</th>
-      </tr>
-    </thead>
-    <tbody align="center">
-      <tr>
-        <td style="border-right:3px solid black">Keep customizations if conflict</td>
-        <td><code>50</code></td>
-        <td><code>65</code></td>
-        <td style="border-right:3px solid black"><code>20</code></td>
-        <td><code>65</code></td>
-      </tr>
-    </tbody>
-  </table>
-
-##### Array fields
-
-###### Array of strings fields
+#### Array of strings fields
 
 For **array of strings** fields, conflict resolution will take place on an element by element basis - that means that the algorithm will not consider or try to solve changes within a single element. For example:
 
@@ -2861,18 +2895,6 @@ The `threat` field has a specific [schema](https://github.com/elastic/kibana/blo
     </tbody>
   </table>
 
-#### Changes to `/upgrade/_review` endpoint contract
-
-The endpoint currently implemented contract needs to be updated as described in this [PoC](https://github.com/elastic/kibana/pull/144060).
-
-
-
-
-### Changes to `/upgrade/_perform` endpoint
-
-#### Changes to `/upgrade/_perform` endpoint contract
-
-The endpoint's currently implemented contract needs to be updated as described in this [PoC](https://github.com/elastic/kibana/pull/144060).
 
 
 
