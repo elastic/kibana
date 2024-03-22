@@ -59,6 +59,11 @@ const alwaysDisplayedFields: EventSummaryField[] = [
     overrideField: AGENT_STATUS_FIELD_NAME,
     label: i18n.AGENT_STATUS,
   },
+  {
+    id: CROWDSTRIKE_AGENT_ID_FIELD,
+    overrideField: AGENT_STATUS_FIELD_NAME,
+    label: i18n.AGENT_STATUS,
+  },
   // ** //
   { id: 'user.name' },
   { id: 'rule.name' },

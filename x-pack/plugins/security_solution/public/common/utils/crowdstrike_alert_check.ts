@@ -52,7 +52,7 @@ export const isAlertFromCrowdstrikeEvent = ({
  * sentinel_one Fleet integration
  * @param ecsData
  */
-export const isAlertFromSentinelOneAlert = ({
+export const isAlertFromCrowdstrikeAlert = ({
   ecsData,
 }: {
   ecsData: Ecs | null | undefined;
