@@ -52,14 +52,17 @@ export const getTopNavBadges = ({
           }
           await stateContainer.actions.undoSavedSearchChanges();
         },
-        onSave: !isManaged
+        onSave:
+          services.capabilities.discover.save && !isManaged
+            ? async () => {
+                await saveSearch();
+              }
+            : undefined,
+        onSaveAs: services.capabilities.discover.save
           ? async () => {
-              await saveSearch();
+              await saveSearch(true);
             }
           : undefined,
-        onSaveAs: async () => {
-          await saveSearch(true);
-        },
       }),
       order: defaultBadges?.unsavedChangesBadge?.order ?? 100,
     });

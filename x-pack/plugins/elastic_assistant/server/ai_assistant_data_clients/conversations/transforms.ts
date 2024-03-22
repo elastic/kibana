@@ -49,7 +49,7 @@ export const transformESToConversations = (
         messages:
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           conversationSchema.messages?.map((message: Record<string, any>) => ({
-            timestamp: new Date(message['@timestamp']).toLocaleString(),
+            timestamp: message['@timestamp'],
             // always return anonymized data from the client
             content: replaceOriginalValuesWithUuidValues({
               messageContent: message.content,
