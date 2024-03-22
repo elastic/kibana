@@ -151,9 +151,6 @@ Observability::
 * Refactor alert table registration and change default columns ({kibana-pull}175119[#175119]).
 * Adds customization for virtual columns and add the 1st virtual column ({kibana-pull}173732[#173732]).
 * Adds a new option, Visualize this query, to the generated {esql} quires in the Elastic Assistant ({kibana-pull}174677[#174677]).
-Security::
-* Adds context information in Risk Summary ({kibana-pull}174574[#174574]).
-* Adds the Asset Criticality selector for new entity flyouts ({kibana-pull}174438[#174438]).
 
 For more information about the features introduced in 8.13.0, refer to <<whats-new,What's new in 8.13>>.
 
@@ -267,11 +264,6 @@ Reporting::
 * Adds setting to use PIT or Scroll API ({kibana-pull}174980[#174980]).
 Security::
 * Default value of `server.securityResponseHeaders.referrerPolicy` changed to `strict-origin-when-cross-origin` ({kibana-pull}177559[#177559]).
-* Adds the asset criticality UI ({kibana-pull}173512[#173512]).
-* Show Asset Criticality in Risk Input flyout ({kibana-pull}174638[#174638]).
-* Restrict management page based on user privileges ({kibana-pull}173178[#173178]).
-* Merge risk input and asset integration expandable panels ({kibana-pull}173028[#173028]).
-* Require full risk engine privileges to enable, disable and init the risk engine ({kibana-pull}172932[#172932]).
 * Adds server side validation for uploaded file types ({kibana-pull}173960[#173960]).
 Sharing::
 * Show 'View details' UI action to open clusters inspector tab when request fails ({kibana-pull}172971[#172971]).
@@ -374,8 +366,6 @@ Observability::
 * Fixes making IDs unique to capture multiple invocations of the same query ({kibana-pull}173433[#173433]).
 Querying & Filtering::
 * Fixes autocomplete value suggestions for KQL when the corresponding index has no tier preference set ({kibana-pull}176355[#176355]).
-Security::
-* Prevents multiple duplicated calls to index_status API on alert details page ({kibana-pull}176573[#176573]).
 SharedUX::
 * Fixes how sample data test install state is determined in test ({kibana-pull}178529[#178529]).
 * Fixed a bug in Stack Management Reporting where the Delete button was not disabled after click ({kibana-pull}173707[#173707]).
