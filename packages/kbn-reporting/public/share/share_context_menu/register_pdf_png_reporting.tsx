@@ -9,23 +9,22 @@
 import { i18n } from '@kbn/i18n';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import React from 'react';
+import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
+import { LocatorParams } from '@kbn/reporting-common/url';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
-import { ReportingAPIClient, checkLicense } from '../..';
+import { checkLicense } from '../..';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
 const getJobParams =
-  (
-    apiClient: ReportingAPIClient,
-    opts: JobParamsProviderOptions,
-    type: 'png' | 'pngV2' | 'printablePdfV2'
-  ) =>
-  () => {
+  (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') =>
+  (): Omit<JobParamsPDFV2 | JobParamsPNGV2, 'browserTimezone' | 'version'> => {
     const {
       objectType,
       sharingData: { title, layout, locatorParams },
     } = opts;
 
-    const baseParams = {
+    const baseParams: Pick<JobParamsPDFV2 | JobParamsPNGV2, 'objectType' | 'layout' | 'title'> = {
       objectType,
       layout,
       title,
@@ -33,21 +32,11 @@ const getJobParams =
 
     if (type === 'printablePdfV2') {
       // multi locator for PDF V2
-      return { ...baseParams, locatorParams: [locatorParams] };
-    } else if (type === 'pngV2') {
-      // single locator for PNG V2
-      return { ...baseParams, locatorParams };
+      return { ...baseParams, locatorParams: [locatorParams as LocatorParams] };
     }
 
-    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-    // Replace hashes with original RISON values.
-    const relativeUrl = opts.shareableUrl.replace(
-      window.location.origin + apiClient.getServerBasePath(),
-      ''
-    );
-
-    // single URL for PNG
-    return { ...baseParams, relativeUrl };
+    // single locator for PNG V2
+    return { ...baseParams, locatorParams: locatorParams as LocatorParams };
   };
 
 export const reportingScreenshotShareProvider = ({
@@ -119,17 +108,6 @@ export const reportingScreenshotShareProvider = ({
       objectType,
       sharingData,
     };
-    const isJobV2Params = ({
-      sharingData: _sharingData,
-    }: {
-      sharingData: Record<string, unknown>;
-    }) => _sharingData.locatorParams != null;
-
-    const isV2Job = isJobV2Params(jobProviderOptions);
-    const requiresSavedState = !isV2Job;
-
-    const pngReportType = isV2Job ? 'pngV2' : 'png';
-
     const panelPng = {
       shareMenuItem: {
         name: pngPanelTitle,
@@ -147,10 +125,10 @@ export const reportingScreenshotShareProvider = ({
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
-            reportType={pngReportType}
+            reportType={'pngV2'}
             objectId={objectId}
-            requiresSavedState={requiresSavedState}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
+            requiresSavedState={false}
+            getJobParams={getJobParams(jobProviderOptions, 'pngV2')}
             isDirty={isDirty}
             onClose={onClose}
             theme={theme}
@@ -182,9 +160,9 @@ export const reportingScreenshotShareProvider = ({
             uiSettings={uiSettings}
             reportType={'printablePdfV2'}
             objectId={objectId}
-            requiresSavedState={requiresSavedState}
+            requiresSavedState={false}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, 'printablePdfV2')}
+            getJobParams={getJobParams(jobProviderOptions, 'printablePdfV2')}
             isDirty={isDirty}
             onClose={onClose}
             theme={theme}

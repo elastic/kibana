@@ -201,7 +201,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 3,
       title: 'Canvas Layout Option',
       content: (
-        <reporting.components.ReportingPanelPDF
+        <reporting.components.ReportingPanelPDFV2
           layoutOption="canvas"
           getJobParams={getPDFJobParamsDefaultV2}
           onClose={closePopover}

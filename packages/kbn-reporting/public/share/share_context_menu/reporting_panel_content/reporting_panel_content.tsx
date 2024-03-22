@@ -8,9 +8,13 @@
 
 import React, { Component, ReactElement } from 'react';
 
-import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
-import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
-import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+import {
+  CSV_REPORT_TYPE,
+  CSV_REPORT_TYPE_V2,
+  JobParamsCSV,
+} from '@kbn/reporting-export-types-csv-common';
+import { JobParamsPDFV2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { JobParamsPNGV2, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
 import {
   EuiAccordion,
@@ -26,7 +30,6 @@ import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/pub
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { BaseParams } from '@kbn/reporting-common/types';
 
 import { ReportingAPIClient } from '../../../reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
@@ -46,7 +49,9 @@ export interface ReportingPanelProps {
   layoutId?: string;
   objectId?: string;
 
-  getJobParams: (forShareUrl?: boolean) => Omit<BaseParams, 'browserTimezone' | 'version'>;
+  getJobParams: (
+    forShareUrl?: boolean
+  ) => Omit<JobParamsCSV | JobParamsPDFV2 | JobParamsPNGV2, 'browserTimezone' | 'version'>;
 
   options?: ReactElement | null;
   isDirty?: boolean;

@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type {
   BaseParamsV2,
+  CsvPagingStrategy,
   JobId,
   ReportApiJSON,
   ReportFields,
@@ -24,6 +25,7 @@ import type {
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 import { PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_JOB_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 
 const jobTypes = [
   // "jobTypes" for each export type
@@ -55,9 +57,10 @@ export class Job {
   public readonly isDeprecated: ReportPayload['isDeprecated'];
   public readonly spaceId: ReportPayload['spaceId'];
   public readonly browserTimezone?: ReportPayload['browserTimezone'];
-  public readonly layout: ReportPayload['layout']; // png & pdf only
-  public readonly pagingStrategy: ReportPayload['pagingStrategy']; // csv only
   public readonly version: ReportPayload['version'];
+
+  public readonly layout?: LayoutParams; // png & pdf only
+  public readonly pagingStrategy?: CsvPagingStrategy; // csv only
 
   public readonly jobtype: ReportSource['jobtype'];
   public readonly created_by: ReportSource['created_by'];
@@ -94,8 +97,6 @@ export class Job {
     this.jobtype = report.jobtype;
     this.objectType = report.payload.objectType;
     this.title = report.payload.title;
-    this.layout = report.payload.layout;
-    this.pagingStrategy = report.payload.pagingStrategy;
     this.version = report.payload.version;
     this.created_by = report.created_by;
     this.created_at = report.created_at;
@@ -122,6 +123,10 @@ export class Job {
     this.metrics = report.metrics;
     this.queue_time_ms = report.queue_time_ms;
     this.execution_time_ms = report.execution_time_ms;
+
+    // Application-specific fields
+    this.layout = report.payload.layout; // PNG & PDF
+    this.pagingStrategy = report.payload.pagingStrategy; // CSV
   }
 
   public isSearch() {

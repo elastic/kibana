@@ -8,9 +8,9 @@
 import { Stream } from 'stream';
 
 import { ResponseHeaders } from '@kbn/core-http-server';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
-import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '@kbn/reporting-export-types-csv-common';
 import { JOB_STATUS } from '@kbn/reporting-common';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
+import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 import { ExportType } from '@kbn/reporting-server';
 
 import { ReportingCore } from '../../..';
@@ -42,7 +42,7 @@ const getTitle = (exportType: ExportType, title?: string): string =>
 const getReportingHeaders = (output: TaskRunResult, exportType: ExportType) => {
   const metaDataHeaders: Record<string, boolean> = {};
 
-  if (exportType.jobType === CSV_JOB_TYPE || exportType.jobType === CSV_JOB_TYPE_DEPRECATED) {
+  if (exportType.jobType === CSV_JOB_TYPE || exportType.jobType === CSV_JOB_TYPE_V2) {
     const csvContainsFormulas = output.csv_contains_formulas ?? false;
     const maxSizedReach = output.max_size_reached ?? false;
 

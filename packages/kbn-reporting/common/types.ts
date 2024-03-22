@@ -62,9 +62,12 @@ export type CsvPagingStrategy = 'pit' | 'scroll';
 
 export interface BaseParams {
   browserTimezone: string; // to format dates in the user's time zone
-  objectType: string; // dashboard, visualization, search, canvas, etc
+  objectType: string; // "dashboard", "visualization", "search", "canvas", etc
   title: string;
   version: string; // to handle any state migrations
+
+  // application-specific fields
+  layout?: LayoutParams; // png & pdf only
 }
 
 /**
@@ -72,7 +75,6 @@ export interface BaseParams {
  * getSharingData function.
  */
 export type BaseParamsV2 = BaseParams & {
-  layout?: LayoutParams; // png & pdf only
   locatorParams: LocatorParams[];
 };
 
@@ -80,6 +82,9 @@ export interface BasePayload extends BaseParams {
   headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
+
+  // application-specific fields
+  pagingStrategy?: CsvPagingStrategy; // csv only
 }
 
 /**

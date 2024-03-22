@@ -7,6 +7,7 @@
 
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { ReportApiJSON } from '@kbn/reporting-common/types';
+import { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import type { ReportMock } from './types';
 
 const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({
@@ -24,7 +25,7 @@ const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({
     version: '7.14.0',
     isDeprecated: baseObj.payload.isDeprecated === true,
     ...baseObj.payload,
-  },
+  } as TaskPayloadPDFV2,
 });
 
 export const mockJobs: ReportApiJSON[] = [

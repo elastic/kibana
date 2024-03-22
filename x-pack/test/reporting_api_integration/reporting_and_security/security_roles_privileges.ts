@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF disallowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'hegatatanoboshush', version: '1.0.0', params: { fooyou: 1 } }],
             objectType: 'dashboard',
             version: '7.14.0',
           }
@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF allowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'hegatatanoboshush', version: '1.0.0', params: { fooyou: 1 } }],
             objectType: 'dashboard',
             version: '7.14.0',
           }
@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF disallowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'hegatatanoboshush', version: '1.0.0', params: { fooyou: 1 } }],
             objectType: 'visualization',
             version: '7.14.0',
           }
@@ -118,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF allowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'hegatatanoboshush', version: '1.0.0', params: { fooyou: 1 } }],
             objectType: 'visualization',
             version: '7.14.0',
           }
@@ -136,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF disallowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'hegatatanoboshush', version: '1.0.0', params: { fooyou: 1 } }],
             objectType: 'canvas',
             version: '7.14.0',
           }
@@ -152,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF allowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'hegatatanoboshush', version: '1.0.0', params: { fooyou: 1 } }],
             objectType: 'canvas',
             version: '7.14.0',
           }
