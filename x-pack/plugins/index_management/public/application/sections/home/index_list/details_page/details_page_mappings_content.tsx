@@ -31,7 +31,10 @@ import { useAppContext } from '../../../../app_context';
 import { DocumentFieldsSearch } from '../../../../components/mappings_editor/components/document_fields/document_fields_search';
 import { FieldsList } from '../../../../components/mappings_editor/components/document_fields/fields';
 import { SearchResult } from '../../../../components/mappings_editor/components/document_fields/search_fields';
-import { extractMappingsDefinition } from '../../../../components/mappings_editor/lib';
+import {
+  extractMappingsDefinition,
+  searchFields,
+} from '../../../../components/mappings_editor/lib';
 import { MappingsEditorParsedMetadata } from '../../../../components/mappings_editor/mappings_editor';
 import {
   useDispatch,
@@ -43,7 +46,21 @@ import { DocumentFields } from '../../../../components/mappings_editor/component
 import { deNormalize } from '../../../../components/mappings_editor/lib';
 import { updateIndexMappings } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
-import { NormalizedFields } from '../../../../components/mappings_editor/types';
+import {
+  NormalizedField,
+  NormalizedFields,
+  State,
+} from '../../../../components/mappings_editor/types';
+
+const getFieldsFromState = (state: State) => {
+  const getField = (fieldId: string, state: State) => {
+    return state.fields.byId[fieldId];
+  };
+  const fields = (state: State) => {
+    return state.fields.rootLevelFields.map((id) => getField(id, state));
+  };
+  return fields(state);
+};
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
   data: string;
@@ -55,18 +72,28 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     core: { getUrlForApp },
   } = useAppContext();
 
-  const [addFieldComponent, hideAddFieldComponent] = useState<boolean>(false);
   const state = useMappingsState();
   const dispatch = useDispatch();
+
   const indexName = index.name;
-  const [isJSONVisible, setIsJSONVisible] = useState(true);
-  const onToggleChange = () => {
-    setIsJSONVisible(!isJSONVisible);
-  };
+
+  const pendingFieldListId = useGeneratedHtmlId({
+    prefix: 'pendingFieldListId',
+  });
+
+  const [addFieldComponent, hideAddFieldComponent] = useState<boolean>(false);
   const newFieldsLength = useMemo(() => {
     return Object.keys(state.fields.byId).length;
   }, [state.fields.byId]);
 
+  const [previousState, setPreviousState] = useState<State>(state);
+  const [isUsingPreviousStateFields, setUsingPreviousStateFields] = useState<boolean>(false);
+  const [staticFields, setStaticFields] = useState<NormalizedField[]>(getFieldsFromState(state));
+
+  const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
+  const onToggleChange = () => {
+    setIsJSONVisible(!isJSONVisible);
+  };
   const mappingsDefinition = extractMappingsDefinition(jsonData);
   const { parsedDefaultValue } = useMemo<MappingsEditorParsedMetadata>(() => {
     if (mappingsDefinition === null) {
@@ -114,8 +141,12 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const addFieldButtonOnClick = useCallback(() => {
     hideAddFieldComponent(!addFieldComponent);
+    // when adding new field, save previous state. This state is then used by FieldsList component to show only saved mappings.
+    setUsingPreviousStateFields(!isUsingPreviousStateFields);
+    setStaticFields(getFieldsFromState(state));
+    setPreviousState(state);
 
-    // reset unsaved mappings and change status to create field
+    // reset mappings and change status to create field.
     dispatch({
       type: 'editor.replaceMappings',
       value: {
@@ -141,26 +172,48 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     }
   }, [state.fields, indexName, refetchMapping]);
 
-  const pendingFieldListId = useGeneratedHtmlId({
-    prefix: 'pendingFieldListId',
-  });
-
-  const getField = useCallback(
-    (fieldId: string) => state.fields.byId[fieldId],
-    [state.fields.byId]
-  );
-  const fields = useMemo(
-    () => state.fields.rootLevelFields.map(getField),
-    [state.fields.rootLevelFields, getField]
-  );
   const onSearchChange = useCallback(
     (value: string) => {
-      dispatch({ type: 'search:update', value });
+      if (isUsingPreviousStateFields) {
+        setPreviousState({
+          ...previousState,
+          search: {
+            term: value,
+            result: searchFields(value, previousState.fields.byId),
+          },
+        });
+      } else {
+        dispatch({ type: 'search:update', value });
+      }
     },
-    [dispatch]
+    [dispatch, previousState]
+  );
+  const onMultiFieldToggleExpand = useCallback(
+    (fieldId: string) => {
+      if (isUsingPreviousStateFields) {
+        const previousField = previousState.fields.byId[fieldId];
+        const nextField: NormalizedField = {
+          ...previousField,
+          isExpanded: !previousField.isExpanded,
+        };
+        setPreviousState({
+          ...previousState,
+          fields: {
+            ...previousState.fields,
+            byId: {
+              ...previousState.fields.byId,
+              [fieldId]: nextField,
+            },
+          },
+        });
+      }
+    },
+    [dispatch, previousState, state, isUsingPreviousStateFields]
   );
 
-  const searchTerm = state.search.term.trim();
+  const searchTerm = isUsingPreviousStateFields
+    ? previousState.search.term.trim()
+    : state.search.term.trim();
 
   const jsonBlock = (
     <EuiCodeBlock
@@ -174,7 +227,37 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       {data}
     </EuiCodeBlock>
   );
+  const searchResultComponent = isUsingPreviousStateFields ? (
+    <SearchResult
+      result={previousState.search.result}
+      documentFieldsState={previousState.documentFields}
+    />
+  ) : (
+    <SearchResult result={state.search.result} documentFieldsState={state.documentFields} />
+  );
 
+  const fieldsListComponent = isUsingPreviousStateFields ? (
+    <FieldsList
+      fields={staticFields}
+      staticState={previousState}
+      onMultiFieldToggleExpand={onMultiFieldToggleExpand}
+    />
+  ) : (
+    <FieldsList fields={getFieldsFromState(state)} />
+  );
+  const fieldSearchComponent = isUsingPreviousStateFields ? (
+    <DocumentFieldsSearch
+      searchValue={previousState.search.term}
+      onSearchChange={onSearchChange}
+      disabled={isJSONVisible}
+    />
+  ) : (
+    <DocumentFieldsSearch
+      searchValue={state.search.term}
+      onSearchChange={onSearchChange}
+      disabled={isJSONVisible}
+    />
+  );
   const treeViewBlock = (
     <>
       {mappingsDefinition === null ? (
@@ -199,9 +282,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           }
         />
       ) : searchTerm !== '' ? (
-        <SearchResult result={state.search.result} documentFieldsState={state.documentFields} />
+        searchResultComponent
       ) : (
-        <FieldsList fields={fields} />
+        fieldsListComponent
       )}
     </>
   );
@@ -271,42 +354,39 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         </EuiFlexItem>
         <EuiFlexGroup direction="column">
           <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
-              <DocumentFieldsSearch
-                searchValue={state.search.term}
-                onSearchChange={onSearchChange}
-                disabled={isJSONVisible}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {!addFieldComponent ? (
-                <EuiButton
-                  onClick={addFieldButtonOnClick}
-                  iconType="plusInCircle"
-                  color="text"
-                  size="m"
-                  data-test-subj="indexDetailsMappingsAddField"
-                >
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.addNewField"
-                    defaultMessage="Add field"
-                  />
-                </EuiButton>
-              ) : (
-                <EuiButton
-                  onClick={updateMappings}
-                  color="success"
-                  fill
-                  disabled={newFieldsLength === 0 ?? true}
-                  data-test-subj="indexDetailsMappingsSaveMappings"
-                >
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.saveMappings"
-                    defaultMessage="Save mappings"
-                  />
-                </EuiButton>
-              )}
-            </EuiFlexItem>
+            <EuiFlexItem>{fieldSearchComponent}</EuiFlexItem>
+            {!index.hidden && (
+              <EuiFlexItem grow={false}>
+                {!addFieldComponent ? (
+                  <EuiButton
+                    onClick={addFieldButtonOnClick}
+                    iconType="plusInCircle"
+                    color="text"
+                    size="m"
+                    data-test-subj="indexDetailsMappingsAddField"
+                  >
+                    <FormattedMessage
+                      id="xpack.idxMgmt.indexDetails.mappings.addNewField"
+                      defaultMessage="Add field"
+                    />
+                  </EuiButton>
+                ) : (
+                  <EuiButton
+                    onClick={updateMappings}
+                    color="success"
+                    fill
+                    disabled={newFieldsLength === 0 ?? true}
+                    data-test-subj="indexDetailsMappingsSaveMappings"
+                  >
+                    <FormattedMessage
+                      id="xpack.idxMgmt.indexDetails.mappings.saveMappings"
+                      defaultMessage="Save mappings"
+                    />
+                  </EuiButton>
+                )}
+              </EuiFlexItem>
+            )}
+
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="indexDetailsMappingsToggleViewButton"

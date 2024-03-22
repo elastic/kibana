@@ -230,7 +230,8 @@ describe('<IndexDetailsPage />', () => {
 
   it('changes the tab when its header is clicked', async () => {
     await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-    expect(testBed.exists('indexDetailsMappingsCodeBlock')).toBe(true);
+    expect(testBed.exists('indexDetailsMappingsCodeBlock')).toBe(false);
+    expect(testBed.exists('fieldsList')).toBe(true);
     expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
     await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
     expect(testBed.exists('indexDetailsSettingsCodeBlock')).toBe(true);
@@ -455,48 +456,48 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Mappings tab', () => {
-    it('updates the breadcrumbs to index details mappings', async () => {
+    beforeEach(async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+    });
+    it('updates the breadcrumbs to index details mappings', async () => {
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
         IndexManagementBreadcrumb.indexDetails,
         { text: 'Mappings' }
       );
     });
     it('loads mappings from the API', async () => {
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       expect(httpSetup.get).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/mapping/${testIndexName}`,
         requestOptions
       );
     });
+    it('searchbar, toggle button, add field button exists', async () => {
+      expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+      expect(testBed.exists('indexDetailsMappingsToggleViewButton')).toBe(true);
+      expect(testBed.exists('indexDetailsMappingsFieldSearch')).toBe(true);
+    });
+
+    it('displays the mappings in the table view', async () => {
+      const tabContent = testBed.actions.mappings.getTreeViewContent('@timestampField-fieldName');
+      expect(tabContent).toContain('@timestamp');
+    });
+
+    it('search bar is disabled in JSON view', async () => {
+      await testBed.actions.mappings.clickToggleViewButton();
+      expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(true);
+    });
 
     it('displays the mappings in the code block', async () => {
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-
+      await testBed.actions.mappings.clickToggleViewButton();
       const tabContent = testBed.actions.mappings.getCodeBlockContent();
       expect(tabContent).toEqual(JSON.stringify(testIndexMappings, null, 2));
     });
 
-    it('displays the mappings in the table view', async () => {
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-      await testBed.actions.mappings.clickToggleViewButton();
-      const tabContent = testBed.actions.mappings.getTreeViewContent();
-      expect(tabContent).toContain('@timestamp');
-    });
-
-    it('search bar is enabled in JSON view', async () => {
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-      expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(true);
-    });
-
-    it('search bar is disabled in Tree view', async () => {
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-      await testBed.actions.mappings.clickToggleViewButton();
+    it('search bar is enabled in Tree view', async () => {
       expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(false);
     });
 
     it('sets the docs link href from the documentation service', async () => {
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       const docsLinkHref = testBed.actions.mappings.getDocsLinkHref();
       // the url from the mocked docs mock
       expect(docsLinkHref).toEqual(
@@ -513,7 +514,6 @@ describe('<IndexDetailsPage />', () => {
           },
         },
       };
-
       beforeEach(async () => {
         httpRequestsMockHelpers.setUpdateIndexMappingsResponse(testIndexName, {
           acknowledged: true,
@@ -527,10 +527,6 @@ describe('<IndexDetailsPage />', () => {
 
         testBed.component.update();
         await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-      });
-
-      it('add field button exists', async () => {
-        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
       });
 
       it('add field button opens pending block and save mappings is disabled by default', async () => {
@@ -553,16 +549,24 @@ describe('<IndexDetailsPage />', () => {
           body: '{"name":{"type":"text"}}',
         });
 
-        expect(httpSetup.get).toHaveBeenCalledTimes(4);
+        expect(httpSetup.get).toHaveBeenCalledTimes(5);
         expect(httpSetup.get).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/mapping/${testIndexName}`,
           requestOptions
         );
 
-        // refresh mappings api calls
+        // refreshed mappings and page re-render
         expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
-        const tabContent = testBed.actions.mappings.getCodeBlockContent();
-        expect(tabContent).toEqual(JSON.stringify({ mappings: mockIndexMappingResponse }, null, 2));
+        expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(false);
+
+        const treeViewContent = testBed.actions.mappings.getTreeViewContent('nameField');
+        expect(treeViewContent).toContain('name');
+
+        await testBed.actions.mappings.clickToggleViewButton();
+        const jsonContent = testBed.actions.mappings.getCodeBlockContent();
+        expect(jsonContent).toEqual(
+          JSON.stringify({ mappings: mockIndexMappingResponse }, null, 2)
+        );
       });
     });
 
@@ -585,8 +589,8 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resends a request when reload button is clicked', async () => {
-        // already sent 3 requests while setting up the component
-        const numberOfRequests = 3;
+        // already sent 4 requests while setting up the component
+        const numberOfRequests = 4;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.mappings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);

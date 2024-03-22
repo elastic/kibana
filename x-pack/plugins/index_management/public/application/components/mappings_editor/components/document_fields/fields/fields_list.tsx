@@ -8,17 +8,26 @@
 import React from 'react';
 
 import { FieldsListItemContainer } from './fields_list_item_container';
-import { NormalizedField } from '../../../types';
+import { NormalizedField, State } from '../../../types';
+import { useMappingsState } from '../../../mappings_state_context';
 
 interface Props {
   fields?: NormalizedField[];
   treeDepth?: number;
+  staticState?: State;
+  onMultiFieldToggleExpand?: (fieldId: string) => void;
 }
 
-export const FieldsList = React.memo(function FieldsListComponent({ fields, treeDepth }: Props) {
+export const FieldsList = React.memo(function FieldsListComponent({
+  fields,
+  treeDepth,
+  staticState,
+  onMultiFieldToggleExpand,
+}: Props) {
   if (fields === undefined) {
     return null;
   }
+  const state = staticState ?? useMappingsState();
   return (
     <ul className="mappingsEditor__fieldsList" data-test-subj="fieldsList">
       {fields.map((field, index) => (
@@ -27,6 +36,8 @@ export const FieldsList = React.memo(function FieldsListComponent({ fields, tree
           fieldId={field.id}
           treeDepth={treeDepth === undefined ? 0 : treeDepth}
           isLastItem={index === fields.length - 1}
+          state={state}
+          onMultiFieldToggleExpand={onMultiFieldToggleExpand}
         />
       ))}
     </ul>

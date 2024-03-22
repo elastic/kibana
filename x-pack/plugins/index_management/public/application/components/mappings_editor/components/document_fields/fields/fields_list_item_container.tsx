@@ -7,25 +7,32 @@
 
 import React, { useMemo, useCallback, useRef } from 'react';
 
-import { useMappingsState, useDispatch } from '../../../mappings_state_context';
-import { NormalizedField } from '../../../types';
+import { useDispatch, useMappingsState } from '../../../mappings_state_context';
+import { NormalizedField, State } from '../../../types';
 import { FieldsListItem } from './fields_list_item';
 
 interface Props {
   fieldId: string;
   treeDepth: number;
   isLastItem: boolean;
+  state: State;
+  onMultiFieldToggleExpand?: (fieldId: string) => void;
 }
 
-export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Props) => {
+export const FieldsListItemContainer = ({
+  fieldId,
+  treeDepth,
+  isLastItem,
+  state,
+  onMultiFieldToggleExpand,
+}: Props) => {
   const dispatch = useDispatch();
   const listElement = useRef<HTMLLIElement | null>(null);
   const {
     documentFields: { status, fieldToAddFieldTo, fieldToEdit },
     fields: { byId, maxNestedDepth, rootLevelFields },
     runtimeFields,
-  } = useMappingsState();
-
+  } = state;
   const getField = useCallback((id: string) => byId[id], [byId]);
   const runtimeFieldNames = Object.values(runtimeFields).map((field) => field.source.name);
 
@@ -78,7 +85,10 @@ export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Prop
       maxNestedDepth={maxNestedDepth}
       addField={addField}
       editField={editField}
-      toggleExpand={toggleExpand}
+      toggleExpand={
+        onMultiFieldToggleExpand ? () => onMultiFieldToggleExpand(fieldId) : toggleExpand
+      }
+      state={state}
     />
   );
 };

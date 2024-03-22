@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NormalizedField, NormalizedFields } from '../../../types';
+import { NormalizedField, NormalizedFields, State } from '../../../types';
 import { getTypeLabelFromField } from '../../../lib';
 import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '../../../constants';
 
@@ -59,8 +59,9 @@ interface Props {
   maxNestedDepth: number;
   addField(): void;
   editField(): void;
-  toggleExpand(): void;
+  toggleExpand(fieldId?: string): void;
   treeDepth: number;
+  state?: State;
 }
 
 function FieldListItemComponent(
@@ -79,10 +80,12 @@ function FieldListItemComponent(
     editField,
     toggleExpand,
     treeDepth,
+    state,
   }: Props,
   ref: React.Ref<HTMLLIElement>
 ) {
   const {
+    id,
     source,
     isMultiField,
     canHaveChildFields,
@@ -92,7 +95,6 @@ function FieldListItemComponent(
     isExpanded,
     path,
   } = field;
-
   // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
   const substractIndentAmount = maxNestedDepth === 0 ? CHILD_FIELD_INDENT_SIZE * 0.5 : 0;
@@ -230,7 +232,7 @@ function FieldListItemComponent(
               <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__toggle">
                 <EuiButtonIcon
                   color="text"
-                  onClick={toggleExpand}
+                  onClick={() => toggleExpand(id)}
                   iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
                   data-test-subj="toggleExpandButton"
                   aria-label={
@@ -301,7 +303,7 @@ function FieldListItemComponent(
       </div>
 
       {Boolean(childFieldsArray.length) && isExpanded && (
-        <FieldsList fields={childFieldsArray} treeDepth={treeDepth + 1} />
+        <FieldsList fields={childFieldsArray} treeDepth={treeDepth + 1} staticState={state} />
       )}
 
       {renderCreateField()}

@@ -47,7 +47,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getDocsLinkHref: () => string;
       isErrorDisplayed: () => boolean;
       clickErrorReloadButton: () => Promise<void>;
-      getTreeViewContent: () => string;
+      getTreeViewContent: (fieldName: string) => string;
       clickToggleViewButton: () => Promise<void>;
       isSearchBarDisabled: () => boolean;
     };
@@ -202,28 +202,31 @@ export const setup = async ({
       });
       component.update();
     },
-    getTreeViewContent: () => {
-      return find('@timestampField-fieldName').text();
+    getTreeViewContent: (fieldName: string) => {
+      expect(exists(fieldName)).toBe(true);
+      return find(fieldName).text();
     },
+
     clickToggleViewButton: async () => {
       await act(async () => {
+        expect(exists('indexDetailsMappingsToggleViewButton')).toBe(true);
         find('indexDetailsMappingsToggleViewButton').simulate('click');
       });
       component.update();
     },
     isSearchBarDisabled: () => {
-      return find('DocumentFieldsSearch').prop('disabled');
+      return find('indexDetailsMappingsFieldSearch').prop('disabled');
     },
     clickAddFieldButton: async () => {
-      expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+      expect(exists('indexDetailsMappingsAddField')).toBe(true);
       await act(async () => {
         find('indexDetailsMappingsAddField').simulate('click');
       });
       component.update();
     },
     clickSaveMappingsButton: async () => {
-      expect(testBed.exists('indexDetailsMappingsSaveMappings')).toBe(true);
-      expect(testBed.find('indexDetailsMappingsSaveMappings').props().disabled).toBeFalsy();
+      expect(exists('indexDetailsMappingsSaveMappings')).toBe(true);
+      expect(find('indexDetailsMappingsSaveMappings').props().disabled).toBeFalsy();
       await act(async () => {
         find('indexDetailsMappingsSaveMappings').simulate('click');
       });
