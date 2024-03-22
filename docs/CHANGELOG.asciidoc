@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.19>>
 * <<release-notes-7.17.18>>
 * <<release-notes-7.17.17>>
 * <<release-notes-7.17.16>>
@@ -88,6 +89,17 @@ Review important information about the {kib} 7.17.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.17.19]]
+== {kib} 7.17.19
+
+The 7.17.19 release includes the following enhancements.
+
+[float]
+[[fixes-v7.17.19]]
+=== Enhancements
+Discover::
+* Improves the performance of `getFieldsToShow` for large data views ({kibana-pull}144672[#144672]).
+
 [[release-notes-7.17.18]]
 == {kib} 7.17.18
 
