@@ -134,7 +134,7 @@
           "section": "def-common.NonEmptyStringBrand",
           "text": "NonEmptyStringBrand"
         },
-        ">; }; }) | ({ serviceName: string; } & { dashboardId?: undefined; } & { serviceOverviewTab?: \"errors\" | \"metrics\" | \"traces\" | \"logs\" | undefined; } & { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+        ">; }; }) | ({ serviceName: string; } & { dashboardId?: undefined; } & { serviceOverviewTab?: \"errors\" | \"metrics\" | \"traces\" | \"logs\" | \"transactions\" | undefined; } & { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
         "Branded",
         "<string, ",
         {
