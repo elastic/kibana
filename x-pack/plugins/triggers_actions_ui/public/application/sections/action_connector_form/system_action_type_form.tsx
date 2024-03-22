@@ -50,16 +50,12 @@ export type SystemActionTypeFormProps = {
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
-  recoveryActionGroup?: string;
-  hasAlertsMappings?: boolean;
   featureId: string;
   producerId: string;
   ruleTypeId?: string;
   disableErrorMessages?: boolean;
 } & Pick<
   ActionAccordionFormProps,
-  | 'defaultActionGroupId'
-  | 'actionGroups'
   | 'setActionParamsProperty'
   | 'messageVariables'
   | 'summaryMessageVariables'
@@ -75,15 +71,11 @@ export const SystemActionTypeForm = ({
   setActionParamsProperty,
   actionTypesIndex,
   connectors,
-  defaultActionGroupId,
   defaultActionMessage,
   messageVariables,
   summaryMessageVariables,
-  actionGroups,
   actionTypeRegistry,
-  recoveryActionGroup,
   defaultSummaryMessage,
-  hasAlertsMappings,
   producerId,
   featureId,
   ruleTypeId,
@@ -91,8 +83,6 @@ export const SystemActionTypeForm = ({
 }: SystemActionTypeFormProps) => {
   const { http } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
-  const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
-  const selectedActionGroup = defaultActionGroup;
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
   });
@@ -110,14 +100,9 @@ export const SystemActionTypeForm = ({
   const availableActionVariables = useMemo(
     () =>
       messageVariables
-        ? getAvailableActionVariables(
-            messageVariables,
-            summaryMessageVariables,
-            selectedActionGroup,
-            true
-          )
+        ? getAvailableActionVariables(messageVariables, summaryMessageVariables, undefined, true)
         : [],
-    [messageVariables, selectedActionGroup, summaryMessageVariables]
+    [messageVariables, summaryMessageVariables]
   );
 
   useEffect(() => {
@@ -140,7 +125,6 @@ export const SystemActionTypeForm = ({
     getDefaultParams,
     index,
     messageVariables,
-    selectedActionGroup,
     setActionParamsProperty,
     summaryMessageVariables,
   ]);
@@ -194,7 +178,6 @@ export const SystemActionTypeForm = ({
                     actionParams={actionItem.params as any}
                     errors={actionParamsErrors.errors}
                     index={index}
-                    selectedActionGroupId={selectedActionGroup?.id}
                     editAction={(key: string, value: RuleActionParam, i: number) => {
                       setWarning(
                         validateParamsForWarnings(
@@ -318,6 +301,7 @@ export const SystemActionTypeForm = ({
                 }
               )}
               onClick={onDeleteAction}
+              data-test-subj="system-action-delete-button"
             />
           }
         >

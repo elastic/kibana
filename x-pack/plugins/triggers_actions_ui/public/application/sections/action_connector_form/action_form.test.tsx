@@ -668,6 +668,7 @@ describe('action_form', () => {
         wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
       ).toBeFalsy();
     });
+
     it(`does not render beta badge when isExperimental=false`, async () => {
       const wrapper = await setup(undefined, undefined, false);
       expect(wrapper.find('EuiKeyPadMenuItem EuiBetaBadge').exists()).toBeFalsy();
@@ -675,6 +676,7 @@ describe('action_form', () => {
         wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
       ).toBeFalsy();
     });
+
     it(`renders beta badge when isExperimental=true`, async () => {
       const wrapper = await setup(undefined, undefined, true);
       expect(wrapper.find('EuiKeyPadMenuItem EuiBetaBadge').exists()).toBeTruthy();

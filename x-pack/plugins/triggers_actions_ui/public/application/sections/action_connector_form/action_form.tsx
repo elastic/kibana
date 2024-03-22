@@ -298,6 +298,7 @@ export const ActionForm = ({
 
   let actionTypeNodes: Array<JSX.Element | null> | null = null;
   let hasDisabledByLicenseActionTypes = false;
+
   if (actionTypesIndex) {
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
@@ -468,16 +469,13 @@ export const ActionForm = ({
                 actionItem={actionItem as RuleSystemAction}
                 actionConnector={actionConnector}
                 index={index}
-                key={`action-form-action-at-${actionItem.uuid}`}
+                key={`system-action-form-action-at-${actionItem.uuid}`}
                 setActionParamsProperty={setActionParamsProperty}
                 actionTypesIndex={actionTypesIndex}
                 connectors={connectors}
-                defaultActionGroupId={defaultActionGroupId}
                 messageVariables={messageVariables}
                 summaryMessageVariables={summaryMessageVariables}
-                actionGroups={actionGroups}
                 defaultActionMessage={defaultActionMessage}
-                recoveryActionGroup={recoveryActionGroup}
                 actionTypeRegistry={actionTypeRegistry}
                 onDeleteAction={() => {
                   const updatedActions = actions.filter(
@@ -488,7 +486,6 @@ export const ActionForm = ({
                   setActiveActionItem(undefined);
                 }}
                 defaultSummaryMessage={defaultSummaryMessage}
-                hasAlertsMappings={hasAlertsMappings}
                 featureId={featureId}
                 producerId={producerId}
                 ruleTypeId={ruleTypeId}
