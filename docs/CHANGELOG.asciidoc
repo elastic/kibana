@@ -188,8 +188,14 @@ Dashboard::
 * Adds number field support the the Options List control({kibana-pull}172106[#172106]).
 Discover::
 * Hides the Empty fields section if there are no fields in it ({kibana-pull}172956[#172956]).
+<<<<<<< HEAD
 * Adds header row height configuration ({kibana-pull}175501[#175501]).
 * Adds new fields ingested in the background with valid mappings ({kibana-pull}172329[#172329]).
+=======
+* Adds tabs to Discover and Log Explorer ({kibana-pull}171467[#171467]).
+* Adds data table header row height configuration ({kibana-pull}175501[#175501]).
+* Adds new fields ingested in the background to the field list with valid mappings ({kibana-pull}172329[#172329]).
+>>>>>>> 17d5710bf26f90e9a8ad305e80abe3bfc0471c8e
 * Adds caching to data view field list request with a `stale-while-revalidate` strategy ({kibana-pull}168910[#168910]).
 * Distinguish among empty and available fields in Discover {esql} mode ({kibana-pull}174585[#174585]).
 Elastic Security::
@@ -243,7 +249,7 @@ Machine Learning::
 * Trained models: Adds workflow for creating an ingest pipeline for a trained model ({kibana-pull}170902[#170902]).
 * Updates alerts-as-data payload for Anomaly detection health and Transform health rules ({kibana-pull}176307[#176307]).
 Management::
-* Change the column components in the index templates table ({kibana-pull}175823[#175823]).
+* Changes the column "Components" in the index templates table to display number of component templates ({kibana-pull}175823[#175823]).
 Maps::
 * Adds support in maps for the {esql} `geo_shape` column type ({kibana-pull}175156[#175156]).
 * Adds a {esql} card to the add layer UI in maps ({kibana-pull}173481[#173481]).
