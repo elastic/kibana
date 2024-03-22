@@ -183,12 +183,11 @@ Cases::
 Dashboard::
 * Adds step setting for range slider control ({kibana-pull}174717[#174717]).
 * Adds a deprecation badge in Dashboard on legacy control panels ({kibana-pull}174302[#174302]).
-* Adds external link icon ({kibana-pull}174407[#174407]).
+* Adds external link icon to external URL links in the Links panel ({kibana-pull}174407[#174407]).
 * Re-adds filtering settings in the Control settings UI ({kibana-pull}172857[#172857]).
-* Adds numeric options list ({kibana-pull}172106[#172106]).
+* Adds number field support the the Options List control({kibana-pull}172106[#172106]).
 Discover::
 * Hides the Empty fields section if there are no fields in it ({kibana-pull}172956[#172956]).
-* Adds tabs to Discover and Log Explorer ({kibana-pull}171467[#171467]).
 * Adds header row height configuration ({kibana-pull}175501[#175501]).
 * Adds new fields ingested in the background with valid mappings ({kibana-pull}172329[#172329]).
 * Adds caching to data view field list request with a `stale-while-revalidate` strategy ({kibana-pull}168910[#168910]).
@@ -362,7 +361,6 @@ Observability::
 * Fixes SLO details path is broken when `instanceId` contains a forward slash ({kibana-pull}177843[#177843]).
 * Prevents users from picking date fields for the group-by selector ({kibana-pull}177830[#177830]).
 * Fixes undefined issue cased due row check missing ({kibana-pull}177293[#177293]).
-* Reverts changes to `useLicense` hook ({kibana-pull}174372[#174372]).
 * Fixes making IDs unique to capture multiple invocations of the same query ({kibana-pull}173433[#173433]).
 Querying & Filtering::
 * Fixes autocomplete value suggestions for KQL when the corresponding index has no tier preference set ({kibana-pull}176355[#176355]).
