@@ -93,5 +93,8 @@
     "@kbn/infra-forge",
     "@kbn/reporting-common",
     "@kbn/slo-plugin",
+    "@kbn/share-plugin",
+    "@kbn/es-query",
+    "@kbn/utility-types",
   ]
 }
