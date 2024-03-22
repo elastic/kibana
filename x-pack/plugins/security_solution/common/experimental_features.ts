@@ -174,6 +174,7 @@ export const allowedExperimentalValues = Object.freeze({
    */
   alertSuppressionForNewTermsRuleEnabled: false,
 
+  /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
   sentinelOneDataInAnalyzerEnabled: false,
