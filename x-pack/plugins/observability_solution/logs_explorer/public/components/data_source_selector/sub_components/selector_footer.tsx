@@ -30,7 +30,12 @@ interface ShowAllLogsProps {
 export const SelectorFooter = (props: SelectorFooterProps) => {
   return (
     <EuiPanel paddingSize="s" hasShadow={false} data-test-subj="dataSourceSelectorSearchFooter">
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" {...props} />
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="center"
+        responsive={false}
+        {...props}
+      />
     </EuiPanel>
   );
 };

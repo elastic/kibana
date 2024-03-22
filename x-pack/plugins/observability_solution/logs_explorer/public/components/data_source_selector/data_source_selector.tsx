@@ -14,7 +14,6 @@ import {
   dataViewsLabel,
   DATA_VIEWS_PANEL_ID,
   DATA_VIEWS_TAB_ID,
-  DATA_SOURCE_SELECTOR_WIDTH,
   integrationsLabel,
   INTEGRATIONS_TAB_ID,
   noIntegrationsDescriptionLabel,
@@ -259,7 +258,7 @@ export function DataSourceSelector({
           {
             id: DATA_VIEWS_PANEL_ID,
             title: dataViewsLabel,
-            width: DATA_SOURCE_SELECTOR_WIDTH,
+            width: '100%',
             items: dataViewsItems,
           },
         ]}

@@ -156,7 +156,7 @@ function ListRow({ withIndentation = false, ...props }) {
 
 function TextWithIcon({ icon, text, ...props }) {
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" {...props}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} {...props}>
       <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
       <EuiText size="s">{text}</EuiText>
     </EuiFlexGroup>
@@ -183,7 +183,7 @@ function NameColumn(props) {
 function Sortable({ children, isAscending = false, ...props }) {
   return (
     <button {...props}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIcon type={isAscending ? 'sortUp' : 'sortDown'} size="m" />

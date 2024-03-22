@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButtonGroup, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { SortOrder } from '../../../../common/latest';
-import { DATA_SOURCE_SELECTOR_WIDTH, sortOptions, sortOrdersLabel } from '../constants';
+import { sortOptions, sortOrdersLabel } from '../constants';
 import { DataSourceSelectorSearchHandler, DataSourceSelectorSearchParams } from '../types';
 
 interface SearchControlsProps {
@@ -36,7 +36,7 @@ export const SearchControls = ({
     <EuiPanel
       paddingSize="s"
       hasShadow={false}
-      css={{ width: DATA_SOURCE_SELECTOR_WIDTH }}
+      css={{ width: '100%' }}
       data-test-subj="dataSourceSelectorSearchControls"
     >
       <EuiFlexGroup gutterSize="xs" responsive={false}>
