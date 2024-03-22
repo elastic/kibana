@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   useEuiPaddingSize,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindListItems } from '../hooks/use_find_list_items';
@@ -25,6 +26,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { AddListItemPopover } from './add_list_item_popover';
 import { InlineEditListItemValue } from './inline_edit_list_item_value';
+import { UploadListItem } from './upload_list_item';
 
 const toastOptions = {
   toastLifeTimeMs: 5000,
@@ -35,6 +37,24 @@ const tableStyle = css`
 `;
 
 type SortFields = 'updated_at' | 'updated_by';
+
+const DeleteListItemButton = ({ id }: { id: string }) => {
+  const { addSuccess } = useAppToasts();
+  const deleteListItemMutation = useDeleteListItemMutation({
+    onSuccess: () => {
+      addSuccess('Succesfully deleted list item', toastOptions);
+    },
+  });
+
+  return (
+    <EuiButtonIcon
+      color={'danger'}
+      onClick={() => deleteListItemMutation.mutate({ id })}
+      iconType="trash"
+      isLoading={deleteListItemMutation.isLoading}
+    />
+  );
+};
 
 export const ValueListModal = ({
   listId,
@@ -49,7 +69,6 @@ export const ValueListModal = ({
   const [sortField, setSortField] = useState<SortFields>('updated_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  const { addSuccess } = useAppToasts();
   const { data, isLoading, isError } = useFindListItems({
     listId,
     pageIndex: pageIndex + 1,
@@ -57,12 +76,6 @@ export const ValueListModal = ({
     sortField,
     sortOrder,
     filter,
-  });
-
-  const deleteListItemMutation = useDeleteListItemMutation({
-    onSuccess: () => {
-      addSuccess('Succesfully deleted list item', toastOptions);
-    },
   });
 
   const modalStyle = css`
@@ -101,11 +114,8 @@ export const ValueListModal = ({
         {
           name: 'Delete',
           description: 'Delete this item',
-          icon: 'trash',
-          color: 'danger',
-          type: 'icon',
-          onClick: (item: ListItemSchema) => deleteListItemMutation.mutate({ id: item.id }),
           isPrimary: true,
+          render: (item: ListItemSchema) => <DeleteListItemButton id={item.id} />,
         },
       ],
       width: '10%',
@@ -135,8 +145,17 @@ export const ValueListModal = ({
   return (
     <EuiModal maxWidth={false} css={() => ({ minHeight: '85vh' })} onClose={onCloseModal}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Value list</EuiModalHeaderTitle>
-        <AddListItemPopover listId={listId} />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiModalHeaderTitle>Value list</EuiModalHeaderTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={true} >
+            <EuiFlexGroup justifyContent="flexEnd">
+              <AddListItemPopover listId={listId} />
+              <UploadListItem listId={listId} />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalHeader>
 
       <EuiFlexGroup className={modalStyle} direction="column">

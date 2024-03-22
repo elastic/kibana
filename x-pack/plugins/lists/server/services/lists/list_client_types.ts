@@ -183,6 +183,8 @@ export interface ImportListItemsToStreamOptions {
   meta: MetaOrUndefined;
   /** Version number of the list, typically this should be 1 unless you are re-creating a list you deleted or something unusual. */
   version: Version;
+  /** If true refresh index after import list items */
+  refresh?: boolean;
 }
 
 /**

@@ -31,6 +31,7 @@ import {
   listSchema,
   foundListsBySizeSchema,
   FoundListsBySizeSchema,
+  Refresh,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   LIST_INDEX,
@@ -158,6 +159,7 @@ const importList = async ({
   list_id,
   type,
   signal,
+  refresh,
 }: ApiParams &
   ImportListItemSchemaEncoded &
   ImportListItemQuerySchemaEncoded): Promise<ListSchema> => {
@@ -168,7 +170,7 @@ const importList = async ({
     body: formData,
     headers: { 'Content-Type': undefined },
     method: 'POST',
-    query: { list_id, type },
+    query: { list_id, type, refresh },
     signal,
     version,
   });
@@ -180,11 +182,13 @@ const importListWithValidation = async ({
   listId,
   type,
   signal,
+  refresh,
 }: ImportListParams): Promise<ListSchema> =>
   pipe(
     {
       list_id: listId,
       type,
+      refresh: refresh ? (refresh.toString() as Refresh) : undefined,
     },
     (query) => fromEither(validateEither(importListItemQuerySchema, query)),
     chain((query) =>

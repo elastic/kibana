@@ -29,6 +29,7 @@ export interface CreateListItemsBulkOptions {
   meta: MetaOrUndefined;
   dateNow?: string;
   tieBreaker?: string[];
+  refresh?: boolean;
 }
 
 export const createListItemsBulk = async ({
@@ -43,6 +44,7 @@ export const createListItemsBulk = async ({
   meta,
   dateNow,
   tieBreaker,
+  refresh = false,
 }: CreateListItemsBulkOptions): Promise<void> => {
   // It causes errors if you try to add items to bulk that do not exist within ES
   if (!value.length) {
@@ -85,7 +87,7 @@ export const createListItemsBulk = async ({
     await esClient.bulk({
       body,
       index: listItemIndex,
-      refresh: 'wait_for',
+      refresh: refresh ? refresh : 'wait_for',
     });
   } catch (error) {
     // TODO: Log out the error with return values from the bulk insert into another index or saved object

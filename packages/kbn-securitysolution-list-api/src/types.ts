@@ -47,6 +47,7 @@ export interface ImportListParams extends ApiParams {
   file: File;
   listId: string | undefined;
   type: Type | undefined;
+  refresh?: boolean;
 }
 
 export interface DeleteListParams extends ApiParams {

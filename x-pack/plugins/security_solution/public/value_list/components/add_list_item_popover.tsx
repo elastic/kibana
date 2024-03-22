@@ -41,6 +41,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
     onSubmit: async (values) => {
       await createListItemMutation.mutateAsync({ listId, value: values.value });
       setIsPopoverOpen(false);
+      formik.resetForm();
     },
   });
 
@@ -71,6 +72,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
                 error={[formik.errors.value]}
               >
                 <EuiFieldText
+                  autoComplete="off"
                   onChange={formik.handleChange}
                   value={formik.values.value}
                   name="value"

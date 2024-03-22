@@ -38,6 +38,7 @@ export interface ImportListItemsToStreamOptions {
   user: string;
   meta: MetaOrUndefined;
   version: Version;
+  refresh?: boolean;
 }
 
 export const importListItemsToStream = ({
@@ -53,6 +54,7 @@ export const importListItemsToStream = ({
   user,
   meta,
   version,
+  refresh,
 }: ImportListItemsToStreamOptions): Promise<ListSchema | null> => {
   return new Promise<ListSchema | null>((resolve, reject) => {
     const readBuffer = new BufferLines({ bufferSize: config.importBufferSize, input: stream });
@@ -97,6 +99,7 @@ export const importListItemsToStream = ({
             listId,
             listItemIndex,
             meta,
+            refresh,
             serializer,
             type,
             user,
@@ -109,6 +112,7 @@ export const importListItemsToStream = ({
             listId: fileName,
             listItemIndex,
             meta,
+            refresh,
             serializer,
             type,
             user,
@@ -135,6 +139,7 @@ export interface WriteBufferToItemsOptions {
   type: Type;
   user: string;
   meta: MetaOrUndefined;
+  refresh?: boolean;
 }
 
 export interface LinesResult {
@@ -151,6 +156,7 @@ export const writeBufferToItems = async ({
   type,
   user,
   meta,
+  refresh,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
   await createListItemsBulk({
     deserializer,
@@ -158,6 +164,7 @@ export const writeBufferToItems = async ({
     listId,
     listItemIndex,
     meta,
+    refresh,
     serializer,
     type,
     user,
