@@ -9,4 +9,4 @@
 /**
  * Defines settings for the elasticsearch-js client used for the SO migrations
  */
-export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 290_000 };
+export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 310_000 };

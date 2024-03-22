@@ -225,7 +225,7 @@ export class SavedObjectsService
     const migrator = this.createMigrator(
       this.config.migration,
       // override the default Client settings
-      elasticsearch.client.asInternalUser.child(MIGRATION_CLIENT_OPTIONS),
+      client.asInternalUser.child(MIGRATION_CLIENT_OPTIONS),
       docLinks,
       waitForMigrationCompletion,
       node,
