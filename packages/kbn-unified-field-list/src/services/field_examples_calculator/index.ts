@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  getESQLAdHocDataview,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
-  getLimitFromESQLQuery,
-  removeDropCommandsFromESQLQuery,
-  getIndexForESQLQuery,
-  getInitialESQLQuery,
-  getESQLWithSafeLimit,
-  TextBasedLanguages,
-} from './src';
+export { getFieldExampleBuckets, getFieldValues } from './field_examples_calculator';
