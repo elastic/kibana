@@ -48,7 +48,7 @@ export const EnabledFeaturesContextProvider: FC<Props> = ({
     isADEnabled: mlFeatures.ad,
     isDFAEnabled: mlFeatures.dfa,
     isNLPEnabled: mlFeatures.nlp,
-    showRuleFormV2: experimentalFeatures?.ruleFormV2,
+    showRuleFormV2: experimentalFeatures?.ruleFormV2 ?? false,
   };
 
   return (

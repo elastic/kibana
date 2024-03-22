@@ -361,8 +361,8 @@ export class DiscoverPlugin
           customizationContext: {
             displayMode: 'standalone',
             inlineTopNav: this.inlineTopNav,
-            ruleFormV2Enabled: this.experimentalFeatures?.ruleFormV2Enabled ?? false,
           },
+          experimentalFeatures: this.experimentalFeatures,
         });
 
         return () => {
