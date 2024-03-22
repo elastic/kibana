@@ -16,7 +16,6 @@ interface Props {
   treeDepth?: number;
   staticState?: State;
   setPreviousState?: (state: State) => void;
-  onMultiFieldToggleExpand?: (fieldId: string) => void;
   isUsingPreviousStateFields?: boolean;
 }
 

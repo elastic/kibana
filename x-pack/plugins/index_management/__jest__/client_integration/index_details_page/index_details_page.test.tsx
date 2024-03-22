@@ -504,7 +504,7 @@ describe('<IndexDetailsPage />', () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/mapping.html'
       );
     });
-    describe('Add field button', () => {
+    describe('Add a new field ', () => {
       const mockIndexMappingResponse: any = {
         ...testIndexMappings.mappings,
         properties: {
@@ -527,22 +527,30 @@ describe('<IndexDetailsPage />', () => {
 
         testBed.component.update();
         await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+        await testBed.actions.mappings.clickAddFieldButton();
       });
 
       it('add field button opens pending block and save mappings is disabled by default', async () => {
-        await testBed.actions.mappings.clickAddFieldButton();
         expect(testBed.exists('indexDetailsMappingsPendingBlock')).toBe(true);
         expect(testBed.find('indexDetailsMappingsSaveMappings').props().disabled);
       });
+      it('can cancel adding new field', async () => {
+        expect(testBed.exists('indexDetailsMappingsPendingBlock')).toBe(true);
+        expect(testBed.exists('cancelButton')).toBe(true);
+
+        testBed.find('cancelButton').simulate('click');
+
+        expect(testBed.exists('indexDetailsMappingsPendingBlock')).toBe(false);
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+      });
 
       it('Can add new fields and can save mappings', async () => {
-        await testBed.actions.mappings.clickAddFieldButton();
         await testBed.actions.mappings.addNewMappingFieldNameAndType([
           { name: 'name', type: 'text' },
         ]);
         await testBed.actions.mappings.clickSaveMappingsButton();
 
-        // Add field button is available again
+        // add field button is available again
         expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
 
         expect(httpSetup.put).toHaveBeenCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
