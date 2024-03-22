@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import deepEqual from 'react-fast-compare';
 
-import { isDeepEqual } from 'react-use/lib/util';
+import { kea, MakeLogicType } from 'kea';
 
 import { IngestPipelineParams } from '@kbn/search-connectors';
 
@@ -105,7 +105,7 @@ export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions
     hasNoChanges: [
       () => [selectors.pipelineState, selectors.defaultPipeline],
       (pipelineState: IngestPipelineParams, defaultPipeline: IngestPipelineParams) =>
-        isDeepEqual(pipelineState, defaultPipeline),
+        deepEqual(pipelineState, defaultPipeline),
     ],
     isLoading: [
       () => [selectors.status, selectors.fetchStatus],

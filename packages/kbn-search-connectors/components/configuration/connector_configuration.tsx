@@ -19,8 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
-import { isDeepEqual } from 'react-use/lib/util';
+import deepEqual from 'react-fast-compare';
 import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
 import {
   Connector,
@@ -103,7 +102,7 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    if (!isDeepEqual(configuration, configurationRef.current)) {
+    if (!deepEqual(configuration, configurationRef.current)) {
       configurationRef.current = configuration;
       setIsEditing(false);
     }
