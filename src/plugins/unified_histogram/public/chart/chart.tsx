@@ -119,7 +119,7 @@ export function Chart({
   const lensVisServiceCurrentSuggestionContext = useObservable(
     lensVisService.currentSuggestionContext$
   );
-  const lensAttributesContext = useObservable(lensVisService.lensAttributesContext$);
+  const visContext = useObservable(lensVisService.visContext$);
   const allSuggestions = useObservable(lensVisService.allSuggestions$);
   const currentSuggestion = lensVisServiceCurrentSuggestionContext?.suggestion;
 
@@ -131,11 +131,7 @@ export function Chart({
   });
 
   const chartVisible =
-    isChartAvailable &&
-    !!chart &&
-    !chart.hidden &&
-    !!lensAttributesContext &&
-    !!lensAttributesContext?.attributes;
+    isChartAvailable && !!chart && !chart.hidden && !!visContext && !!visContext?.attributes;
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -209,7 +205,7 @@ export function Chart({
     services,
     dataView,
     relativeTimeRange: originalRelativeTimeRange ?? relativeTimeRange,
-    lensAttributes: lensAttributesContext?.attributes,
+    lensAttributes: visContext?.attributes,
     isPlainRecord,
   });
 
@@ -387,7 +383,7 @@ export function Chart({
               chart={chart}
               getTimeRange={getTimeRange}
               refetch$={refetch$}
-              lensAttributesContext={lensAttributesContext}
+              visContext={visContext}
               isPlainRecord={isPlainRecord}
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
@@ -402,23 +398,21 @@ export function Chart({
           {appendHistogram}
         </EuiFlexItem>
       )}
-      {canSaveVisualization && isSaveModalVisible && lensAttributesContext.attributes && (
+      {canSaveVisualization && isSaveModalVisible && visContext.attributes && (
         <LensSaveModalComponent
           initialInput={
-            removeTablesFromLensAttributes(
-              lensAttributesContext.attributes
-            ) as unknown as LensEmbeddableInput
+            removeTablesFromLensAttributes(visContext.attributes) as unknown as LensEmbeddableInput
           }
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}
         />
       )}
-      {isFlyoutVisible && !!lensAttributesContext && !!lensVisServiceCurrentSuggestionContext && (
+      {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (
         <ChartConfigPanel
           {...{
             services,
-            lensAttributesContext,
+            visContext,
             lensAdapters,
             lensEmbeddableOutput$,
             isFlyoutVisible,

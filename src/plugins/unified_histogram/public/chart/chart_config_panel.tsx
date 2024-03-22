@@ -21,7 +21,7 @@ import type {
 
 export function ChartConfigPanel({
   services,
-  lensAttributesContext,
+  visContext,
   lensAdapters,
   lensEmbeddableOutput$,
   currentSuggestionContext,
@@ -32,7 +32,7 @@ export function ChartConfigPanel({
   onSuggestionContextChange,
 }: {
   services: UnifiedHistogramServices;
-  lensAttributesContext: UnifiedHistogramVisContext;
+  visContext: UnifiedHistogramVisContext;
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (flag: boolean) => void;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
@@ -73,7 +73,7 @@ export function ChartConfigPanel({
       const Component = await services.lens.EditLensConfigPanelApi();
       const panel = (
         <Component
-          attributes={lensAttributesContext.attributes}
+          attributes={visContext.attributes}
           updatePanelState={updateSuggestion}
           lensAdapters={lensAdapters}
           output$={lensEmbeddableOutput$}
@@ -103,7 +103,7 @@ export function ChartConfigPanel({
       fetchLensConfigComponent();
     }
   }, [
-    lensAttributesContext.attributes,
+    visContext.attributes,
     services.lens,
     updateSuggestion,
     isPlainRecord,

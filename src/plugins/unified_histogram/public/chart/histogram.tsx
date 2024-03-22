@@ -48,7 +48,7 @@ export interface HistogramProps {
   hasLensSuggestions: boolean;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
-  lensAttributesContext: UnifiedHistogramVisContext;
+  visContext: UnifiedHistogramVisContext;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
@@ -95,7 +95,7 @@ export function Histogram({
   hasLensSuggestions,
   getTimeRange,
   refetch$,
-  lensAttributesContext: attributesContext,
+  visContext,
   disableTriggers,
   disabledActions,
   onTotalHitsChange,
@@ -117,7 +117,7 @@ export function Histogram({
   });
   const chartRef = useRef<HTMLDivElement | null>(null);
   const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
-  const { attributes } = attributesContext;
+  const { attributes } = visContext;
 
   useEffect(() => {
     if (attributes.visualizationType === 'lnsMetric') {
@@ -178,7 +178,7 @@ export function Histogram({
     request,
     getTimeRange,
     refetch$,
-    attributesContext,
+    visContext,
     onLoad,
   });
 

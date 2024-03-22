@@ -39,7 +39,7 @@ const getMockLensAttributes = async () => {
       timeInterval: 'auto',
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
     })
-  ).lensAttributesContext;
+  ).visContext;
 };
 
 async function mountComponent(isPlainRecord = false, hasLensSuggestions = false) {
@@ -72,7 +72,7 @@ async function mountComponent(isPlainRecord = false, hasLensSuggestions = false)
       to: '2020-05-14T11:20:13.590',
     }),
     refetch$,
-    lensAttributesContext: (await getMockLensAttributes())!,
+    visContext: (await getMockLensAttributes())!,
     onTotalHitsChange: jest.fn(),
     onChartLoad: jest.fn(),
     withDefaultActions: undefined,

@@ -123,7 +123,7 @@ describe('LensVisService suggestions', () => {
       esql: 'from the-data-view | limit 100 | EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp every 30 minute`',
     };
 
-    expect(lensVis.lensAttributesContext?.attributes.state.query).toStrictEqual(histogramQuery);
+    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });
 
   test('should return histogramSuggestion even if the ESQL query contains a DROP @timestamp statement', async () => {
@@ -160,7 +160,7 @@ describe('LensVisService suggestions', () => {
       esql: 'from the-data-view | limit 100 | EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp every 30 minute`',
     };
 
-    expect(lensVis.lensAttributesContext?.attributes.state.query).toStrictEqual(histogramQuery);
+    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });
 
   test('should not return histogramSuggestion if no suggestions returned by the api and transformational commands', async () => {

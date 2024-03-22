@@ -30,7 +30,7 @@ describe('ChartConfigPanel', () => {
         {...{
           services: unifiedHistogramServicesMock,
           dataView: dataViewWithTimefieldMock,
-          lensAttributesContext: {
+          visContext: {
             attributes: lensAttributes,
           } as unknown as UnifiedHistogramVisContext,
           isFlyoutVisible: true,
@@ -62,7 +62,7 @@ describe('ChartConfigPanel', () => {
         {...{
           services: unifiedHistogramServicesMock,
           dataView: dataViewWithTimefieldMock,
-          lensAttributesContext: {
+          visContext: {
             attributes: lensAttributes,
           } as unknown as UnifiedHistogramVisContext,
           isFlyoutVisible: true,

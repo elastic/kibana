@@ -59,7 +59,7 @@ describe('LensVisService attributes', () => {
       isPlainRecord: false,
     });
 
-    expect(lensVis.lensAttributesContext).toMatchInlineSnapshot(`
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
           "references": Array [
@@ -213,7 +213,7 @@ describe('LensVisService attributes', () => {
       columns: [],
       isPlainRecord: false,
     });
-    expect(lensVis.lensAttributesContext).toMatchInlineSnapshot(`
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
           "references": Array [
@@ -385,7 +385,7 @@ describe('LensVisService attributes', () => {
       columns: [],
       isPlainRecord: false,
     });
-    expect(lensVis.lensAttributesContext).toMatchInlineSnapshot(`
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
           "references": Array [
@@ -536,7 +536,7 @@ describe('LensVisService attributes', () => {
       columns: [],
       isPlainRecord: true,
     });
-    expect(lensVis.lensAttributesContext).toMatchInlineSnapshot(`
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
           "references": Array [
@@ -730,7 +730,7 @@ describe('LensVisService attributes', () => {
       columns: [],
       isPlainRecord: true,
     });
-    expect(lensVis.lensAttributesContext?.attributes).toEqual({
+    expect(lensVis.visContext?.attributes).toEqual({
       state: expect.objectContaining({
         adHocDataViews: {
           'index-pattern-with-timefield-id': {},
@@ -758,7 +758,7 @@ describe('LensVisService attributes', () => {
       columns: [],
       isPlainRecord: true,
     });
-    expect(lensVis.lensAttributesContext?.attributes.title).toBe(currentSuggestionMock.title);
+    expect(lensVis.visContext?.attributes.title).toBe(currentSuggestionMock.title);
   });
 
   it('should use the correct histogram query when no suggestion passed', async () => {
@@ -776,6 +776,6 @@ describe('LensVisService attributes', () => {
       allSuggestions: [], // none available
       hasHistogramSuggestionForESQL: true,
     });
-    expect(lensVis.lensAttributesContext?.attributes.state.query).toStrictEqual(histogramQuery);
+    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });
 });

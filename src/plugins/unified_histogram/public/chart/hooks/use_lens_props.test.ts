@@ -33,7 +33,7 @@ describe('useLensProps', () => {
         timeInterval: 'auto',
         breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
       })
-    ).lensAttributesContext;
+    ).visContext;
     const lensProps = renderHook(() => {
       return useLensProps({
         request: {
@@ -74,7 +74,7 @@ describe('useLensProps', () => {
         timeInterval: 'auto',
         breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
       })
-    ).lensAttributesContext;
+    ).visContext;
     const lensProps = renderHook(() => {
       return useLensProps({
         request: {
@@ -115,7 +115,7 @@ describe('useLensProps', () => {
         timeInterval: 'auto',
         breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
       })
-    ).lensAttributesContext;
+    ).visContext;
     const lensProps = {
       request: {
         searchSessionId: '123',

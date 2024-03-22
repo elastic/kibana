@@ -23,17 +23,17 @@ export const useLensProps = ({
   request,
   getTimeRange,
   refetch$,
-  attributesContext,
+  visContext,
   onLoad,
 }: {
   request?: UnifiedHistogramRequestContext;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
-  attributesContext: UnifiedHistogramVisContext;
+  visContext: UnifiedHistogramVisContext;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => {
   const buildLensProps = useCallback(() => {
-    const { attributes, requestData } = attributesContext;
+    const { attributes, requestData } = visContext;
     return {
       requestData: JSON.stringify(requestData),
       lensProps: getLensProps({
@@ -43,7 +43,7 @@ export const useLensProps = ({
         onLoad,
       }),
     };
-  }, [attributesContext, getTimeRange, onLoad, request?.searchSessionId]);
+  }, [visContext, getTimeRange, onLoad, request?.searchSessionId]);
 
   const [lensPropsContext, setLensPropsContext] = useState(buildLensProps());
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));

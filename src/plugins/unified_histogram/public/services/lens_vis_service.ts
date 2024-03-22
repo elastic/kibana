@@ -51,7 +51,7 @@ interface LensVisServiceState {
   status: LensVisServiceStatus;
   allSuggestions: Suggestion[] | undefined;
   currentSuggestionContext: UnifiedHistogramSuggestionContext;
-  lensAttributesContext: UnifiedHistogramVisContext | undefined;
+  visContext: UnifiedHistogramVisContext | undefined;
 }
 
 export interface QueryParams {
@@ -79,7 +79,7 @@ export class LensVisService {
   status$: Observable<LensVisServiceState['status']>;
   currentSuggestionContext$: Observable<LensVisServiceState['currentSuggestionContext']>;
   allSuggestions$: Observable<LensVisServiceState['allSuggestions']>;
-  lensAttributesContext$: Observable<LensVisServiceState['lensAttributesContext']>;
+  visContext$: Observable<LensVisServiceState['visContext']>;
   prevUpdateContext:
     | {
         queryParams: QueryParams;
@@ -105,7 +105,7 @@ export class LensVisService {
         suggestionDeps: undefined,
         type: UnifiedHistogramSuggestionType.unsupported,
       },
-      lensAttributesContext: undefined,
+      visContext: undefined,
     });
 
     const stateSelector = stateSelectorFactory(this.state$);
@@ -115,7 +115,7 @@ export class LensVisService {
       (state) => state.currentSuggestionContext,
       isEqual
     );
-    this.lensAttributesContext$ = stateSelector((state) => state.lensAttributesContext, isEqual);
+    this.visContext$ = stateSelector((state) => state.visContext, isEqual);
     this.prevUpdateContext = undefined;
   }
 
@@ -186,16 +186,16 @@ export class LensVisService {
       // console.log(
       //   'forced to update selected suggestion and vis context',
       //   suggestionState.currentSuggestionContext.suggestion,
-      //   lensAttributesState.lensAttributesContext
+      //   lensAttributesState.visContext
       // );
-      onVisContextChanged?.(lensAttributesState.lensAttributesContext);
+      onVisContextChanged?.(lensAttributesState.visContext);
     }
 
     this.state$.next({
       status: LensVisServiceStatus.completed,
       allSuggestions,
       currentSuggestionContext: suggestionState.currentSuggestionContext,
-      lensAttributesContext: lensAttributesState.lensAttributesContext,
+      visContext: lensAttributesState.visContext,
     });
 
     this.prevUpdateContext = {
@@ -239,11 +239,11 @@ export class LensVisService {
     this.state$.next({
       ...this.state$.getValue(),
       currentSuggestionContext: editedSuggestionContext,
-      lensAttributesContext: lensAttributesState.lensAttributesContext,
+      visContext: lensAttributesState.visContext,
     });
 
     onSuggestionContextChange?.(editedSuggestionContext);
-    onVisContextChanged?.(lensAttributesState.lensAttributesContext);
+    onVisContextChanged?.(lensAttributesState.visContext);
   };
 
   private getCurrentSuggestionState = ({
@@ -569,7 +569,7 @@ export class LensVisService {
     table: Datatable | undefined;
   }): {
     shouldUpdateVisContextDueToIncompatibleSuggestion: boolean;
-    lensAttributesContext: UnifiedHistogramVisContext | undefined;
+    visContext: UnifiedHistogramVisContext | undefined;
   } => {
     const { dataView, query, filters, timeRange } = queryParams;
     const { type: suggestionType, suggestion } = currentSuggestionContext;
@@ -577,7 +577,7 @@ export class LensVisService {
     if (!suggestion || !suggestion.datasourceId || !query || !filters) {
       return {
         shouldUpdateVisContextDueToIncompatibleSuggestion: false,
-        lensAttributesContext: undefined,
+        visContext: undefined,
       };
     }
 
@@ -598,7 +598,7 @@ export class LensVisService {
         : query;
 
     let shouldUpdateVisContextDueToIncompatibleSuggestion = false;
-    let lensAttributesContext: UnifiedHistogramVisContext | undefined;
+    let visContext: UnifiedHistogramVisContext | undefined;
 
     if (externalVisContext?.attributes) {
       if (
@@ -609,7 +609,7 @@ export class LensVisService {
       ) {
         // console.log('using the external lens attributes');
         // using the external lens attributes
-        lensAttributesContext = externalVisContext;
+        visContext = externalVisContext;
       } else {
         // console.log('external vis is not compatible with the current suggestion');
         // console.log('query', currentQuery, externalVisContext.attributes?.state?.query);
@@ -620,7 +620,7 @@ export class LensVisService {
       }
     }
 
-    if (!lensAttributesContext) {
+    if (!visContext) {
       const attributes = getLensAttributesFromSuggestion({
         query: currentQuery,
         filters,
@@ -638,7 +638,7 @@ export class LensVisService {
         ];
       }
 
-      lensAttributesContext = {
+      visContext = {
         attributes,
         requestData,
         suggestionType,
@@ -650,12 +650,12 @@ export class LensVisService {
       query &&
       isOfAggregateQueryType(query) &&
       suggestionType === UnifiedHistogramSuggestionType.lensSuggestion &&
-      lensAttributesContext?.attributes
+      visContext?.attributes
     ) {
-      lensAttributesContext = {
-        ...lensAttributesContext,
+      visContext = {
+        ...visContext,
         attributes: updateTablesInLensAttributes({
-          attributes: lensAttributesContext.attributes,
+          attributes: visContext.attributes,
           table,
         }),
       };
@@ -663,7 +663,7 @@ export class LensVisService {
 
     return {
       shouldUpdateVisContextDueToIncompatibleSuggestion,
-      lensAttributesContext,
+      visContext,
     };
   };
 }
