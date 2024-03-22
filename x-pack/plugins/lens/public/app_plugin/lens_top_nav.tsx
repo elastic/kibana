@@ -536,10 +536,8 @@ export const LensTopNavMenu = ({
       !(initialInput as LensByReferenceInput)?.savedObjectId;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
-    const showSaveAndReturn =
-      !(showReplaceInDashboard || showReplaceInCanvas) &&
-      (Boolean(isLinkedToOriginatingApp && Boolean(initialInput)) ||
-        Boolean(initialContextIsEmbedded));
+
+    const showSaveAndReturn = !(showReplaceInDashboard || showReplaceInCanvas);
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -754,7 +752,6 @@ export const LensTopNavMenu = ({
     initialContext,
     initialInput,
     isLinkedToOriginatingApp,
-    initialContextIsEmbedded,
     activeData,
     isSaveable,
     application,
