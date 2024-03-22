@@ -45,7 +45,7 @@ export class RemovePanelAction implements Action<EmbeddableApiContext> {
 
   public getDisplayName() {
     return i18n.translate('presentationPanel.action.removePanel.displayName', {
-      defaultMessage: 'Delete from dashboard',
+      defaultMessage: 'Remove',
     });
   }
 

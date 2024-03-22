@@ -51,7 +51,7 @@ export const dashboardAddToLibraryActionStrings = {
 export const dashboardClonePanelActionStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.clonePanel', {
-      defaultMessage: 'Clone panel',
+      defaultMessage: 'Duplicate',
     }),
   getClonedTag: () =>
     i18n.translate('dashboard.panel.title.clonedTag', {
@@ -59,7 +59,7 @@ export const dashboardClonePanelActionStrings = {
     }),
   getSuccessMessage: () =>
     i18n.translate('dashboard.panel.clonedToast', {
-      defaultMessage: 'Cloned panel',
+      defaultMessage: 'Duplicated panel',
     }),
 };
 
@@ -70,14 +70,14 @@ export const dashboardExpandPanelActionStrings = {
     }),
   getMaximizeTitle: () =>
     i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.notExpandedDisplayName', {
-      defaultMessage: 'Maximize panel',
+      defaultMessage: 'Maximize',
     }),
 };
 
 export const dashboardExportCsvActionStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.actions.DownloadCreateDrilldownAction.displayName', {
-      defaultMessage: 'Download as CSV',
+      defaultMessage: 'Download CSV',
     }),
   getUntitledFilename: () =>
     i18n.translate('dashboard.actions.downloadOptionsUnsavedFilename', {

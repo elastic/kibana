@@ -28,7 +28,7 @@ export function createVisToADJobAction(
     },
     getDisplayName: () =>
       i18n.translate('xpack.ml.actions.createADJobFromLens', {
-        defaultMessage: 'Detect anomaly',
+        defaultMessage: 'Detect anomalies',
       }),
     async execute({ embeddable }: EmbeddableApiContext) {
       if (!embeddable) {

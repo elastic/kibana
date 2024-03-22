@@ -286,7 +286,7 @@ export const CustomizePanelEditor = ({
           <h2>
             <FormattedMessage
               id="presentationPanel.action.customizePanel.flyout.title"
-              defaultMessage="Panel settings"
+              defaultMessage="Settings"
             />
           </h2>
         </EuiTitle>
