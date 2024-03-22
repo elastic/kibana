@@ -4,10 +4,13 @@
   "owner": "@elastic/obs-knowledge-team",
   "plugin": {
     "id": "aiAssistantManagementSelection",
-    "server": false,
+    "server": true,
     "browser": true,
     "requiredPlugins": ["management"],
     "optionalPlugins": ["home", "serverless"],
-    "requiredBundles": ["kibanaReact"]
-  }
+    "requiredBundles": ["kibanaReact"],
+    "configPath": [
+      "aiAssistantManagementSelection"
+    ],
+  },
 }

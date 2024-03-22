@@ -8,6 +8,7 @@
     "browser": true,
     "configPath": ["xpack", "observabilityAIAssistantApp"],
     "requiredPlugins": [
+      "aiAssistantManagementSelection",
       "observabilityAIAssistant",
       "observabilityShared",
       "actions",
