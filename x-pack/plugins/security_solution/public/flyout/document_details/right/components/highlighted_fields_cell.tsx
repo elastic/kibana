@@ -86,8 +86,6 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   field,
   originalField,
 }) => {
-  console.log({ values, field, originalField });
-  console.log({ CROWDSTRIKE_AGENT_ID_FIELD, AGENT_STATUS_FIELD_NAME });
   return (
     <>
       {values != null &&
