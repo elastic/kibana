@@ -40,7 +40,7 @@ export const DocumentFieldsTreeEditor = ({ onCancelAddingNewFields }: Props) => 
 
     return (
       <CreateField
-        isCancelable={onCancelAddingNewFields != undefined || fields.length > 0}
+        isCancelable={onCancelAddingNewFields !== undefined || fields.length > 0}
         allFields={byId}
         isRootLevelField
         onCancelAddingNewFields={onCancelAddingNewFields}
@@ -69,7 +69,7 @@ export const DocumentFieldsTreeEditor = ({ onCancelAddingNewFields }: Props) => 
 
   return (
     <>
-      <FieldsList fields={fields} />
+      <FieldsList fields={fields} state={useMappingsState()} />
       {renderCreateField()}
       {renderAddFieldButton()}
     </>

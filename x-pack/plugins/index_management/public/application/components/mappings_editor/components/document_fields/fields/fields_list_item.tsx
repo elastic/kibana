@@ -62,7 +62,7 @@ interface Props {
   toggleExpand: () => void;
   setPreviousState?: (state: State) => void;
   treeDepth: number;
-  state?: State;
+  state: State;
   isUsingPreviousStateFields?: boolean;
 }
 
@@ -309,7 +309,7 @@ function FieldListItemComponent(
         <FieldsList
           fields={childFieldsArray}
           treeDepth={treeDepth + 1}
-          staticState={state}
+          state={state}
           isUsingPreviousStateFields={isUsingPreviousStateFields}
           setPreviousState={setPreviousState}
         />

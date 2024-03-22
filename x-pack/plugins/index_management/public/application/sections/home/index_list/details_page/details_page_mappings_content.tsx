@@ -56,10 +56,10 @@ const getFieldsFromState = (state: State) => {
   const getField = (fieldId: string) => {
     return state.fields.byId[fieldId];
   };
-  const fields = (state: State) => {
+  const fields = () => {
     return state.fields.rootLevelFields.map((id) => getField(id));
   };
-  return fields(state);
+  return fields();
 };
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
@@ -143,7 +143,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     hideAddFieldComponent(!addFieldComponent);
     setUsingPreviousStateFields(!isUsingPreviousStateFields);
 
-    //reset mappings to previous state
+    //  reset mappings to previous state
     dispatch({
       type: 'editor.replaceMappings',
       value: {
@@ -203,7 +203,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         dispatch({ type: 'search:update', value });
       }
     },
-    [dispatch, previousState]
+    [dispatch, previousState, isUsingPreviousStateFields]
   );
 
   const searchTerm = isUsingPreviousStateFields
@@ -234,12 +234,12 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const fieldsListComponent = isUsingPreviousStateFields ? (
     <FieldsList
       fields={staticFields}
-      staticState={previousState}
+      state={previousState}
       setPreviousState={setPreviousState}
       isUsingPreviousStateFields={isUsingPreviousStateFields}
     />
   ) : (
-    <FieldsList fields={getFieldsFromState(state)} />
+    <FieldsList fields={getFieldsFromState(state)} state={state} />
   );
   const fieldSearchComponent = isUsingPreviousStateFields ? (
     <DocumentFieldsSearch

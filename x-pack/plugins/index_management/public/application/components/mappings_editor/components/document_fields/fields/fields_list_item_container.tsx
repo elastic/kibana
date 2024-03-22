@@ -69,7 +69,7 @@ export const FieldsListItemContainer = ({
 
   const toggleExpand = useCallback(() => {
     // if using static state, set state manually
-    if (isUsingPreviousStateFields && setPreviousState != undefined) {
+    if (isUsingPreviousStateFields && setPreviousState !== undefined) {
       const previousField = state.fields.byId[fieldId];
       const nextField: NormalizedField = {
         ...previousField,

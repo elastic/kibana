@@ -9,12 +9,11 @@ import React from 'react';
 
 import { FieldsListItemContainer } from './fields_list_item_container';
 import { NormalizedField, State } from '../../../types';
-import { useMappingsState } from '../../../mappings_state_context';
 
 interface Props {
   fields?: NormalizedField[];
   treeDepth?: number;
-  staticState?: State;
+  state: State;
   setPreviousState?: (state: State) => void;
   isUsingPreviousStateFields?: boolean;
 }
@@ -22,14 +21,13 @@ interface Props {
 export const FieldsList = React.memo(function FieldsListComponent({
   fields,
   treeDepth,
-  staticState,
+  state,
   setPreviousState,
   isUsingPreviousStateFields,
 }: Props) {
   if (fields === undefined) {
     return null;
   }
-  const state = staticState ?? useMappingsState();
   return (
     <ul className="mappingsEditor__fieldsList" data-test-subj="fieldsList">
       {fields.map((field, index) => (
