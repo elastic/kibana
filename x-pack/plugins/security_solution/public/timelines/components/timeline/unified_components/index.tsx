@@ -24,6 +24,7 @@ import type {
 import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useGetScopedSourcererDataView } from '../../../../common/components/sourcerer/use_get_sourcerer_data_view';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
@@ -400,6 +401,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
                       activeTab={activeTab}
                       updatedAt={updatedAt}
                       isTextBasedQuery={isTextBasedQuery}
+                      onFilter={onAddFilter as DocViewFilterFn}
                     />
                   </EventDetailsWidthProvider>
                 </DropOverlayWrapper>

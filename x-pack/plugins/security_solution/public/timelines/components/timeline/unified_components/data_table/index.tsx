@@ -8,17 +8,12 @@
 import React, { memo, useMemo, useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { generateFilters } from '@kbn/data-plugin/public';
-import type { DataViewField } from '@kbn/data-plugin/common';
-import { flattenHit } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   UnifiedDataTableSettingsColumn,
   UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
-import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
@@ -44,6 +39,7 @@ import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
 import { timelineDefaults } from '../../../../store/defaults';
 import { timelineActions } from '../../../../store';
 import { useGetScopedSourcererDataView } from '../../../../../common/components/sourcerer/use_get_sourcerer_data_view';
+import { transformTimelineItemToUnifiedRows } from '../utils';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -66,7 +62,7 @@ type CommonDataTableProps = {
   dataLoadingState: DataLoadingState;
   updatedAt: number;
   isTextBasedQuery?: boolean;
-} & Pick<UnifiedDataTableProps, 'onSort' | 'onSetColumns' | 'sort'>;
+} & Pick<UnifiedDataTableProps, 'onSort' | 'onSetColumns' | 'sort' | 'onFilter'>;
 
 interface DataTableProps extends CommonDataTableProps {
   dataView: DataView;
@@ -96,6 +92,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     isTextBasedQuery = false,
     onSetColumns,
     onSort,
+    onFilter,
   }) => {
     const dispatch = useDispatch();
 
@@ -148,22 +145,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       timelineBodySelector(state, timelineId)
     );
 
-    const tableRows: Array<DataTableRecord & TimelineItem> = useMemo(
-      () =>
-        events.map(({ _id, _index, ecs, data }) => {
-          const _source = ecs as unknown as Record<string, unknown>;
-          const hit = { _id, _index: String(_index), _source };
-          return {
-            _id,
-            id: _id,
-            data,
-            ecs,
-            raw: hit,
-            flattened: flattenHit(hit, dataView, {
-              includeIgnoredValues: true,
-            }),
-          };
-        }),
+    const tableRows = useMemo(
+      () => transformTimelineItemToUnifiedRows({ events, dataView }),
       [events, dataView]
     );
 
@@ -238,24 +221,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [onColumnResize]
     );
 
-    const onAddFilter = useCallback(
-      (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-        if (dataView && timelineFilterManager) {
-          const fieldName = typeof field === 'string' ? field : field.name;
-          popularizeField(dataView, fieldName, dataViews, capabilities);
-          const newFilters = generateFilters(
-            timelineFilterManager,
-            field,
-            values,
-            operation,
-            dataView
-          );
-          return timelineFilterManager.addFilters(newFilters);
-        }
-      },
-      [timelineFilterManager, dataView, dataViews, capabilities]
-    );
-
     const onChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) =>
         dispatch(
@@ -305,7 +270,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [dispatch, rowHeight, timelineId]
     );
 
-    const services = useMemo(() => {
+    const dataGridServices = useMemo(() => {
       return {
         theme,
         fieldFormats,
@@ -325,10 +290,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       dataPluginContract,
     ]);
 
-    if (!dataView) {
-      return null;
-    }
-
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <StyledTimelineUnifiedDataTable>
@@ -344,7 +305,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             dataView={dataView}
             showColumnTokens={true}
             loadingState={dataLoadingState}
-            onFilter={onAddFilter as DocViewFilterFn}
+            onFilter={onFilter}
             onResize={onResizeDataGrid}
             onSetColumns={onSetColumns}
             onSort={!isTextBasedQuery ? onSort : undefined}
@@ -363,7 +324,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             onUpdateRowHeight={onUpdateRowHeight}
             onFieldEdited={onFieldEdited}
             cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
-            services={services}
+            services={dataGridServices}
             visibleCellActions={3}
             externalCustomRenderers={customColumnRenderers}
             renderDocumentView={() => <></>}
