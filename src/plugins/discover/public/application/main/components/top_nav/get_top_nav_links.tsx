@@ -233,8 +233,28 @@ export const getTopNavLinks = ({
     testId: 'shareTopNavButtonSm',
     run: async () => {
       if (!services.share) return;
-      getShareLink().then((res) => {
-        copyToClipboard(res.shareableUrl);
+      getShareLink().then(async (res) => {
+        let link = '';
+        if (!services.share) return;
+        if (services.capabilities.discover.createShortUrl) {
+          const shortUrls = services.share.url.shortUrls.get(null);
+          const shortUrl = await shortUrls.createWithLocator({
+            locator: res.locator,
+            params: { url: res.shareableUrl },
+          });
+          link = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
+          copyToClipboard(link);
+        } else {
+          link = res.shareableUrl;
+          copyToClipboard(res.shareableUrl);
+        }
+        // create a toast to confirm that the link has been copied to the clipboard
+        services.notifications.toasts.addSuccess({
+          title: i18n.translate('discover.localMenu.shareLinkCopied', {
+            defaultMessage: 'Link copied to clipboard',
+          }),
+          text: link,
+        });
       });
     },
   };
