@@ -680,16 +680,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createAnomalyDetectionJob(jobConfig: Job, space?: string) {
       const jobId = jobConfig.job_id;
 
-      if (await this.adJobExist(jobId)) {
-        log.debug('> Job already exists.');
-        return;
-      }
-
       log.debug(
         `Creating anomaly detection job with id '${jobId}' ${
           space ? `in space '${space}' ` : ''
         }...`
       );
+
+      if (await this.adJobExist(jobId)) {
+        log.debug('> Job already exists.');
+        return;
+      }
 
       const { body, status } = await kbnSupertest
         .put(`${space ? `/s/${space}` : ''}/internal/ml/anomaly_detectors/${jobId}`)
