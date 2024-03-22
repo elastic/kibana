@@ -26,15 +26,20 @@ const GETGRIDTILE = getHttp().basePath.prepend(MVT_GETGRIDTILE_API_PATH);
  * absolute URL.
  */
 function prepareAbsoluteUrl(pathOrUrl: string): string {
+  pathOrUrl = pathOrUrl.trim();
   if (pathOrUrl.startsWith('/')) {
     return new URL(pathOrUrl, window.location.origin).toString();
   }
   return pathOrUrl;
 }
 
-export function transformRequest(path: string, resourceType: string | undefined) {
-  const url = prepareAbsoluteUrl(path);
-  if (resourceType === 'Glyphs' && path.startsWith(FONTS)) {
+/**
+ * @param pathOrUrl - Assumed to be a full URL or a path starting with "/"
+ * @param resourceType - Indicator of what type of resource is being requested
+ */
+export function transformRequest(pathOrUrl: string, resourceType: string | undefined) {
+  const url = prepareAbsoluteUrl(pathOrUrl);
+  if (resourceType === 'Glyphs' && pathOrUrl.startsWith(FONTS)) {
     return {
       url,
       method: 'GET' as 'GET',
@@ -45,7 +50,7 @@ export function transformRequest(path: string, resourceType: string | undefined)
     };
   }
 
-  if (resourceType === 'Tile' && path.startsWith(GETTILE)) {
+  if (resourceType === 'Tile' && pathOrUrl.startsWith(GETTILE)) {
     return {
       url,
       method: 'GET' as 'GET',
@@ -56,7 +61,7 @@ export function transformRequest(path: string, resourceType: string | undefined)
     };
   }
 
-  if (resourceType === 'Tile' && path.startsWith(GETGRIDTILE)) {
+  if (resourceType === 'Tile' && pathOrUrl.startsWith(GETGRIDTILE)) {
     return {
       url,
       method: 'GET' as 'GET',
