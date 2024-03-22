@@ -7,7 +7,7 @@
  */
 
 import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -104,7 +104,7 @@ export class ElasticsearchService
       healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
       log: this.log,
       internalClient: this.client.asInternalUser,
-    }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
+    }).pipe(takeUntil(this.stop$));
 
     this.esNodesCompatibility$ = esNodesCompatibility$;
 

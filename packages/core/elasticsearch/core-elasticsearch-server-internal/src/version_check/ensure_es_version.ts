@@ -11,8 +11,17 @@
  * that defined in Kibana's package.json.
  */
 
-import { timer, of, from, Observable, BehaviorSubject } from 'rxjs';
-import { map, distinctUntilChanged, catchError, exhaustMap, switchMap, tap } from 'rxjs/operators';
+import { interval, of, from, Observable, BehaviorSubject } from 'rxjs';
+import {
+  map,
+  distinctUntilChanged,
+  catchError,
+  exhaustMap,
+  switchMap,
+  tap,
+  startWith,
+  shareReplay,
+} from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
@@ -168,7 +177,8 @@ export const pollEsNodesVersion = ({
   );
 
   return checkInterval$.pipe(
-    switchMap((checkInterval) => timer(0, checkInterval)),
+    switchMap((checkInterval) => interval(checkInterval)),
+    startWith(0),
     exhaustMap(() => {
       return from(
         internalClient.nodes.info({
@@ -189,6 +199,7 @@ export const pollEsNodesVersion = ({
       if (nodesVersionCompatibility.isCompatible) {
         isStartup$.next(false);
       }
-    })
+    }),
+    shareReplay({ refCount: true, bufferSize: 1 })
   );
 };
