@@ -2877,119 +2877,6 @@ Examples: `related_integrations,` `required_fields`
 </table>
 
 
-##### MITRE ATT&CK framework (`threat` field)
-
-The `threat` field has a specific [schema](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.gen.ts#L250) that can be handled with its own algorithm in case of conflicts, in order to try to obtain the most reasonable merge between versions. 
-
-**TODO: write algorithm specific to this field**
-
-  <table>
-    <thead>
-      <tr>
-        <th style="border-right:3px solid black">Use case</th>
-        <th>Base version</th>
-        <th>Current version</th>
-        <th style="border-right:3px solid black">Target version</th>
-        <th>Merged version (output)</th>
-      </tr>
-    </thead>
-    <tbody valign="top">
-    <tr>
-      <td style="border-right:3px solid black">Keep user customizations on conflicts, but update sections with no conflicts</td>
-      <td>
-      <pre>
-[{
-    "framework":"MITRE ATT&CK",
-    "tactic":{
-      "id":"TA0003",
-      "name":"Persistence",
-      "reference":"https://attack.mitre.org/tactics/TA0003/"
-    },
-    "technique":[
-      {
-          "id":"T1098",
-          "name":"Account Manipulation",
-          "reference":"https://attack.mitre.org/techniques/T1098/"
-      }
-    ]
-}]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[{
-    "framework":"MITRE ATT&CK",
-    "tactic":{
-      "id":"TA0003",
-      "name":"My customized name",
-      "reference":"https://attack.mitre.org/tactics/TA0003/My_custom_url"
-    },
-    "technique":[
-      {
-          "id":"T1098",
-          "name":"Account Manipulation",
-          "reference":"https://attack.mitre.org/techniques/T1098/"
-      }
-    ]
-}]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
-[{
-    "framework":"MITRE ATT&CK",
-    "tactic":{
-      "id":"TA0003",
-      "name":"Persistence",
-      "reference":"https://attack.mitre.org/tactics/TA0003/"
-    },
-    "technique":[
-      {
-          "id":"T1556",
-          "name":"Modify Authentication Process",
-          "reference":"https://attack.mitre.org/techniques/T1556/",
-          "subtechnique":[
-            {
-                "id":"T1556.006",
-                "name":"Multi-Factor Authentication",
-                "reference":"https://attack.mitre.org/techniques/T1556/006/"
-            }
-          ]
-      }
-    ]
-}]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[{
-    "framework":"MITRE ATT&CK",
-    "tactic":{
-      "id":"TA0003",
-      "name":"My customized name",
-      "reference":"https://attack.mitre.org/tactics/TA0003/My_custom_url"
-    },
-    "technique":[
-      {
-          "id":"T1556",
-          "name":"Modify Authentication Process",
-          "reference":"https://attack.mitre.org/techniques/T1556/",
-          "subtechnique":[
-            {
-                "id":"T1556.006",
-                "name":"Multi-Factor Authentication",
-                "reference":"https://attack.mitre.org/techniques/T1556/006/"
-            }
-          ]
-      }
-    ]
-}]
-        </pre>
-      </td>
-    </tr>
-    </tbody>
-  </table>
-
 
 
 
@@ -3022,7 +2909,7 @@ const performUpgradePayload = {
     .map((rule) => ({
       rule_id: rule.rule_id,
       revision: rule.revision,
-      version: rule.version,
+      version: rule.target_rule.version,
     })),
   pick_version: 'MERGE',
 };
@@ -3042,28 +2929,9 @@ Rules whose diffing algorithm resulted in a `CONFLICT` need to be manually resol
 
 > See [designs](https://www.figma.com/file/gLHm8LpTtSkAUQHrkG3RHU/%5B8.7%5D-%5BRules%5D-Rule-Immutability%2FCustomization?type=design&mode=design&t=LkauhLzUKUatF6cL-0#712870904).
 
-## Other changes to UX/UI
 
 
 
 
 
 
----- end of RFC -----
-
-
-## Scenario for bulk accepting updates
-
-- At rules table level
-  Bulk accept all rule updates that have no conflicting fields at all → This would make the request to update all these rules with no conflicts at all.
-  Accept all rule updates for non-customized rules.
-
-- At rule (filed-per-field) level
-  Accept all fields that have no conflicting changes, but still requires the user to manually solve fields with conflicts. → Once all fields are solved, the user can make the request to update the rule.
-  Accept all fields that are not customized
-
-- User Config
-  Create a user config/setting that the user can turn on to accept updates automatically if there are no conflicts.
-  Or we should more concretely how we want this setting to behave
-
-## Other open questions
