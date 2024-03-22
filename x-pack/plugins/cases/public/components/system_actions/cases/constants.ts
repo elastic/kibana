@@ -8,3 +8,10 @@
 export const DEFAULT_TIME_WINDOW_SIZE = 7;
 
 export const DEFAULT_TIME_WINDOW_UNIT = 'd';
+
+export enum TIME_UNITS {
+  DAYS = 'd',
+  WEEKS = 'w',
+  MONTHS = 'm',
+  YEARS = 'y',
+}

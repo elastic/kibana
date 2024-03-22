@@ -22,10 +22,3 @@ export type CasesActionParams = {
   subAction: string;
   subActionParams: CasesSubActionParams;
 };
-
-export enum TIME_UNITS {
-  DAYS = 'd',
-  WEEKS = 'w',
-  MONTHS = 'm',
-  YEARS = 'y',
-}

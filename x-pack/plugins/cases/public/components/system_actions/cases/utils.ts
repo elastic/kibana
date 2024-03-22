@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TIME_UNITS } from './types';
+import { TIME_UNITS } from './constants';
 import * as i18n from './translations';
 
 export const getTimeUnitOptions = (unitSize: number) =>
@@ -16,7 +16,7 @@ export const getTimeUnitOptions = (unitSize: number) =>
     };
   });
 
-export function getTimeUnitLabels(timeUnit = TIME_UNITS.DAYS, timeValue = '0') {
+export const getTimeUnitLabels = (timeUnit = TIME_UNITS.DAYS, timeValue = '0') => {
   switch (timeUnit) {
     case TIME_UNITS.DAYS:
       return i18n.DAYS(timeValue);
@@ -27,4 +27,4 @@ export function getTimeUnitLabels(timeUnit = TIME_UNITS.DAYS, timeValue = '0') {
     case TIME_UNITS.YEARS:
       return i18n.YEARS(timeValue);
   }
-}
+};

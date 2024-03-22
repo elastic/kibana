@@ -36,12 +36,15 @@ export function getConnectorType(): ConnectorTypeModel<
       const validationResult = {
         errors,
       };
-      if (
-        (actionParams.subActionParams &&
-          actionParams.subActionParams.timeWindow &&
-          parseInt(actionParams.subActionParams.timeWindow[0], 10) == 0) ||
-        Number.isNaN(parseInt(actionParams.subActionParams.timeWindow[0], 10))
-      ) {
+
+      const timeWindowData =
+        actionParams.subActionParams &&
+        actionParams.subActionParams.timeWindow &&
+        actionParams.subActionParams.timeWindow.match(/[a-zA-Z]+|[0-9]+/g);
+
+      const timeWindowSize = timeWindowData?.length && timeWindowData[0];
+
+      if (!timeWindowData?.length || timeWindowSize == '0') {
         errors['subActionParams.timeWindow.size'].push(translations.TIME_WINDOW_SIZE_ERROR);
       }
       return validationResult;

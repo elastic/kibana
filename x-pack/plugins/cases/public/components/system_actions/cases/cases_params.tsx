@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
@@ -17,12 +17,18 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiSuperSelect,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
+import { useApplication } from '../../../common/lib/kibana/use_application';
+import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
 import { CASES_CONNECTOR_SUB_ACTION } from '../../../../server/connectors/cases/constants';
 import * as i18n from './translations';
 import { CasesActionParams } from './types';
 import { DEFAULT_TIME_WINDOW_SIZE, DEFAULT_TIME_WINDOW_UNIT } from './constants';
 import { getTimeUnitOptions } from './utils';
+import { useAlertDataViews } from '../hooks/use_alert_data_view';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { isEmpty } from 'lodash';
 
 export const CasesParamsFields: React.FunctionComponent<ActionParamsProps<CasesActionParams>> = ({
   actionConnector,
@@ -30,91 +36,113 @@ export const CasesParamsFields: React.FunctionComponent<ActionParamsProps<CasesA
   editAction,
   errors,
   index,
-  messageVariables,
+  producerId,
 }) => {
-  if (!actionParams.subAction) {
-    editAction('subAction', CASES_CONNECTOR_SUB_ACTION.RUN, index);
-  }
-  if (!actionParams.subActionParams) {
-    editAction(
-      'subActionParams',
-      {
-        timeWindow: `${DEFAULT_TIME_WINDOW_SIZE}${DEFAULT_TIME_WINDOW_UNIT}`,
-      },
-      index
-    );
-  }
+  const { appId } = useApplication();
+  const owner = getCaseOwnerByAppId(appId);
 
-  const { timeWindow, reopenClosedCases } = useMemo(
+  const { dataViews, loading } = useAlertDataViews(
+    producerId ? [producerId as ValidFeatureId] : []
+  );
+
+  const { timeWindow, reopenClosedCases, groupingBy } = useMemo(
     () =>
       actionParams.subActionParams ??
       ({
         timeWindow: `${DEFAULT_TIME_WINDOW_SIZE}${DEFAULT_TIME_WINDOW_UNIT}`,
         reopenClosedCases: false,
+        groupingBy: [''],
       } as unknown as CasesActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
 
-  console.log({ actionConnector, actionParams, editAction, errors, index, messageVariables });
+  const [timeWindowSize, timeWindowUnit] = timeWindow.match(/[a-zA-Z]+|[0-9]+/g) ?? [];
 
-  const [timeWindowSize, timeWindowUnit] = timeWindow.split('');
+  useEffect(() => {
+    if (!actionParams.subAction) {
+      editAction('subAction', CASES_CONNECTOR_SUB_ACTION.RUN, index);
+    }
+
+    if (!actionParams.subActionParams || !actionParams.subActionParams?.owner) {
+      editAction(
+        'subActionParams',
+        {
+          timeWindow: `${DEFAULT_TIME_WINDOW_SIZE}${DEFAULT_TIME_WINDOW_UNIT}`,
+          reopenClosedCases: false,
+          groupingBy: [''],
+          owner,
+        },
+        index
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionParams, owner]);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
-      if (key === 'timeWindowSize') {
-        if (value === '') {
-          return;
-        }
-        const newTimeWindow = `${parseInt(value, 10)}${timeWindowUnit}`;
-
-        return editAction(
-          'subActionParams',
-          {
-            ...actionParams.subActionParams,
-            timeWindow: newTimeWindow,
-          },
-          index
-        );
-      }
-
-      if (key === 'timeWindowUnit') {
-        const newTimeWindow = `${timeWindowSize}${value}`;
-
-        return editAction(
-          'subActionParams',
-          {
-            ...actionParams.subActionParams,
-            timeWindow: newTimeWindow,
-          },
-          index
-        );
-      }
-
       return editAction(
         'subActionParams',
         { ...actionParams.subActionParams, [key]: value },
         index
       );
     },
-    [editAction, index]
+    [editAction, index, actionParams.subActionParams]
   );
+
+  const handleTimeWindowChange = (key: 'timeWindowSize' | 'timeWindowUnit', value: string) => {
+    if (!value || isEmpty(value)) {
+      return;
+    }
+
+    const newTimeWindow =
+      key === 'timeWindowSize'
+        ? `${parseInt(value, 10)}${timeWindowUnit}`
+        : `${timeWindowSize}${value}`;
+
+    editSubActionProperty('timeWindow', newTimeWindow);
+  };
+
+  const options: Array<EuiSuperSelectOption<string>> = useMemo(() => {
+    if (loading || !dataViews?.length) {
+      return [];
+    }
+    return dataViews
+      .map((dataView) => {
+        const fields = dataView.fields;
+        return fields.map((field) => ({
+          value: field.name,
+          inputDisplay: (
+            <span data-test-subj={`group-by-alert-field-${field.name}`}>{field.name}</span>
+          ),
+        }));
+      })
+      .flat();
+  }, [loading, dataViews]);
 
   return (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow>
+        <EuiFlexItem grow={true}>
+          <EuiFormRow fullWidth>
             <EuiSuperSelect
+              fullWidth
               name="groupByAlertField"
-              data-test-subj="groupByAlertField"
+              data-test-subj="group-by-alert-field"
               prepend={i18n.GROUP_BY_ALERT}
-              options={[]}
+              isLoading={loading}
+              disabled={loading}
+              options={options}
+              valueOfSelected={groupingBy[0]}
+              onChange={(value: string) => {
+                editSubActionProperty('groupingBy', [value]);
+              }}
             />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFormRow
+        fullWidth
         error={errors['subActionParams.timeWindow.size']}
         isInvalid={
           errors['subActionParams.timeWindow.size'] !== undefined &&
@@ -123,26 +151,28 @@ export const CasesParamsFields: React.FunctionComponent<ActionParamsProps<CasesA
         }
       >
         <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={2}>
             <EuiFieldNumber
               prepend={i18n.TIME_WINDOW}
               name="timeWindowSize"
-              data-test-subj="timeWindowSizeNumber"
+              data-test-subj="time-window-size-input"
+              min={0}
               value={timeWindowSize}
               onChange={(e) => {
-                editSubActionProperty('timeWindowSize', e.target.value);
+                handleTimeWindowChange('timeWindowSize', e.target.value);
               }}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={3}>
             <EuiSelect
+              fullWidth
               name="timeWindowUnit"
-              data-test-subj="timeWindowUnitSelect"
+              data-test-subj="time-window-unit-select"
               value={timeWindowUnit}
               onChange={(e) => {
-                editSubActionProperty('timeWindowUnit', e.target.value);
+                handleTimeWindowChange('timeWindowUnit', e.target.value);
               }}
-              options={getTimeUnitOptions(timeWindowSize !== '' ? parseInt(timeWindowSize, 10) : 1)}
+              options={getTimeUnitOptions(timeWindowSize ? parseInt(timeWindowSize, 10) : 1)}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -153,9 +183,12 @@ export const CasesParamsFields: React.FunctionComponent<ActionParamsProps<CasesA
           <EuiCheckbox
             id="reopenCase"
             name="reopenCase"
+            data-test-subj="reopen-case"
             checked={reopenClosedCases}
             label={i18n.REOPEN_WHEN_CASE_IS_CLOSED}
-            onChange={(e) => editSubActionProperty('reopenClosedCases', e.target.value)}
+            onChange={(e) => {
+              editSubActionProperty('reopenClosedCases', e.target.checked);
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
