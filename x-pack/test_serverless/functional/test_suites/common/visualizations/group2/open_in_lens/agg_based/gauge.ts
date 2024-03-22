@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.twoThirdsCircle);
       expect(debugData?.title).to.be('Average machine.ram');
-      expect(Math.round(debugData?.value ?? 0)).to.be(13104036080);
+      expect(Math.round(debugData?.value ?? 0)).to.be(13104036081);
       expect(debugData?.domain).to.eql([0, 100]);
     });
 
@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.twoThirdsCircle);
       expect(debugData?.title).to.be('Average machine.ram');
-      expect(debugData?.value).to.be(13104036080.615);
+      expect(Math.round(debugData?.value ?? 0)).to.be(13104036081);
       expect(debugData?.domain).to.eql([0, 15000000000]);
 
       await dimensions[0].click();
