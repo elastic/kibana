@@ -9,21 +9,13 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider_context';
-import { findingsMockData, vulnerabilityMockData } from '../fixtures/findings_ingest_status_mock';
+import { findingsMockData, vulnerabilityMockData } from '../mocks/findings_ingest_status_mock';
 import { addIndexDocs, deleteIndices } from '../../common/utils/index_api_helpers';
 import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
-
-const INDEX_ARRAY = [
-  FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
-  VULNERABILITIES_INDEX_DEFAULT_NS,
-];
+import { INDEX_ARRAY } from '../../common/utils/indices';
 
 export default function (providerContext: ApiIntegrationFtrProviderContext) {
   const { getService } = providerContext;
@@ -35,7 +27,7 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
-    describe('STATUS = INDEXED TEST', () => {
+    describe('STATUS = INDEXING TEST', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -50,10 +42,9 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
           });
 
         agentPolicyId = agentPolicyResponse.item.id;
-
         await deleteIndices(es, INDEX_ARRAY);
-        await addIndexDocs(es, findingsMockData, LATEST_FINDINGS_INDEX_DEFAULT_NS);
-        await addIndexDocs(es, vulnerabilityMockData, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
+        await addIndexDocs(es, findingsMockData, FINDINGS_INDEX_DEFAULT_NS);
+        await addIndexDocs(es, vulnerabilityMockData, VULNERABILITIES_INDEX_DEFAULT_NS);
       });
 
       afterEach(async () => {
@@ -62,7 +53,7 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
 
-      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`, async () => {
+      it(`Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new kspm documents, but has newly connected agents`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -79,12 +70,12 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
           .expect(200);
 
         expect(res.kspm.status).to.eql(
-          'indexed',
-          `expected kspm status to be indexed but got ${res.kspm.status} instead`
+          'indexing',
+          `expected kspm status to be indexing but got ${res.kspm.status} instead`
         );
       });
 
-      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`, async () => {
+      it(`Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new cspm documents, but has newly connected agents  `, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -101,12 +92,12 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
           .expect(200);
 
         expect(res.cspm.status).to.eql(
-          'indexed',
-          `expected cspm status to be indexed but got ${res.cspm.status} instead`
+          'indexing',
+          `expected cspm status to be indexing but got ${res.cspm.status} instead`
         );
       });
 
-      it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`, async () => {
+      it(`Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn't contain vuln new documents, but has newly connected agents`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -123,8 +114,8 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
           .expect(200);
 
         expect(res.vuln_mgmt.status).to.eql(
-          'indexed',
-          `expected vuln_mgmt status to be indexed but got ${res.vuln_mgmt.status} instead`
+          'indexing',
+          `expected vuln_mgmt status to be indexing but got ${res.vuln_mgmt.status} instead`
         );
       });
     });

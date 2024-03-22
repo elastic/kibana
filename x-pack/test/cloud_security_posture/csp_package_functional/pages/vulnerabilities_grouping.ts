@@ -8,7 +8,7 @@
 import { asyncForEach } from '@kbn/std';
 import expect from '@kbn/expect';
 import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
-import { vulnerabilitiesLatestMock } from '../fixtures/vulnerabilities_latest_mock';
+import { vulnerabilitiesLatestMock } from '../mocks/vulnerabilities_latest_mock';
 import {
   VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_LATEST_INDEX,

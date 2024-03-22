@@ -12,7 +12,7 @@ import type { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider
 import {
   vulnerabilitiesLatestMock,
   vulnerabilitiesLatestStatsMock,
-} from '../fixtures/vulnerabilities_latest_mock';
+} from '../mocks/vulnerabilities_latest_mock';
 import {
   addIndexDocs,
   deleteExistingIndex,

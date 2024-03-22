@@ -24,8 +24,8 @@ import {
   kspmComplianceDashboardDataMockV2,
   cspmComplianceDashboardDataMockV1,
   cspmComplianceDashboardDataMockV2,
-} from '../fixtures/benchmark_score_mock';
-import { findingsMockData } from '../fixtures/findings_mock';
+} from '../mocks/benchmark_score_mock';
+import { findingsMockData } from '../mocks/findings_mock';
 import { addIndexDocs, deleteExistingIndexByQuery } from '../../common/utils/index_api_helpers';
 import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 

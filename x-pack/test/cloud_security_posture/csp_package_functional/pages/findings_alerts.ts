@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FINDINGS_WITH_RULES } from '../fixtures/findings_rules_mock';
+import { FINDINGS_WITH_RULES } from '../mocks/findings_rules_mock';
 import { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
 import { addIndexBulkDocs, deleteIndices } from '../../common/utils/index_api_helpers';
 import { FINDINGS_INDEX, FINDINGS_LATEST_INDEX } from '../../common/utils/indices';

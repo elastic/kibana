@@ -8,12 +8,12 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(
+  const xPackBasicAPITestsConfig = await readConfigFile(
     require.resolve('../../api_integration/config.ts')
   );
 
   return {
-    ...xPackAPITestsConfig.getAll(),
+    ...xPackBasicAPITestsConfig.getAll(),
     testFiles: [require.resolve('.')],
   };
 }

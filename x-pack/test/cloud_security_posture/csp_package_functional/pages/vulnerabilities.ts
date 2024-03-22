@@ -11,7 +11,7 @@ import {
   VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_LATEST_INDEX,
 } from '../../common/utils/indices';
-import { vulnerabilitiesLatestMock } from '../fixtures/vulnerabilities_latest_mock';
+import { vulnerabilitiesLatestMock } from '../mocks/vulnerabilities_latest_mock';
 import { addIndexBulkDocs, deleteIndices } from '../../common/utils/index_api_helpers';
 
 // eslint-disable-next-line import/no-default-export

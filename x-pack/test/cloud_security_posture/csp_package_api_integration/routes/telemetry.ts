@@ -11,7 +11,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider_context';
-import { MockTelemetryFindings, telemetryFindingsMock } from '../fixtures/telemetry_findings_mock';
+import { MockTelemetryFindings, telemetryFindingsMock } from '../mocks/telemetry_findings_mock';
 import { deleteExistingIndexByQuery } from '../../common/utils/index_api_helpers';
 import { FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
 import { setupCSPPackage } from '../../common/utils/csp_package_helpers';

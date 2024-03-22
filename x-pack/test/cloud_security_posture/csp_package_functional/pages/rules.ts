@@ -12,7 +12,7 @@ import {
   RULES_BULK_ACTION_OPTION_DISABLE,
   RULES_BULK_ACTION_OPTION_ENABLE,
 } from '../page_objects/rule_page';
-import { k8sFindingsMock } from '../fixtures/latest_findings_mock';
+import { k8sFindingsMock } from '../mocks/latest_findings_mock';
 import { deleteIndices, addIndexBulkDocs } from '../../common/utils/index_api_helpers';
 import { FINDINGS_INDEX, FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
 import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
