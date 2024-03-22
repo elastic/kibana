@@ -24,7 +24,9 @@ const security = {
     bulkGet: jest.fn(),
     suggest: jest.fn(),
     update: jest.fn(),
+    partialUpdate: jest.fn(),
     userProfile$: of({}),
+    userProfileLoaded$: of(true),
   },
   uiApi: {},
 };
@@ -42,16 +44,16 @@ const wrapper: WrapperComponent<void> = ({ children }) => (
 );
 
 describe('useUpdateUserProfile() hook', () => {
-  const updateUserProfiles = jest.fn();
+  const partialUpdateUserProfiles = jest.fn();
 
   beforeEach(() => {
     security.userProfiles = {
       ...security.userProfiles,
-      update: updateUserProfiles,
+      partialUpdate: partialUpdateUserProfiles,
       userProfile$: of({}),
     };
 
-    updateUserProfiles.mockReset().mockResolvedValue({});
+    partialUpdateUserProfiles.mockReset().mockResolvedValue({});
     http.get.mockReset();
     http.post.mockReset().mockResolvedValue(undefined);
     notifications.toasts.addSuccess.mockReset();
@@ -65,12 +67,12 @@ describe('useUpdateUserProfile() hook', () => {
       update({ userSettings: { darkMode: 'dark' } });
     });
 
-    expect(updateUserProfiles).toHaveBeenCalledWith({ userSettings: { darkMode: 'dark' } });
+    expect(partialUpdateUserProfiles).toHaveBeenCalledWith({ userSettings: { darkMode: 'dark' } });
   });
 
   test('should update the isLoading state while updating', async () => {
     const updateDone = new BehaviorSubject(false);
-    updateUserProfiles.mockImplementationOnce(async () => {
+    partialUpdateUserProfiles.mockImplementationOnce(async () => {
       await lastValueFrom(updateDone.pipe(first((v) => v === true)));
     });
 

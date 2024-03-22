@@ -10,6 +10,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+import { merge } from 'lodash';
 
 import type { UserProfileData } from '../types';
 import { useUserProfiles } from '../services';
@@ -103,9 +104,9 @@ export const useUpdateUserProfile = ({
 
   const onUserProfileUpdate = useCallback(
     (updatedData: UserProfileData) => {
-      if (!isMounted.current) return;
-
-      setIsLoading(false);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
 
       if (notificationSuccessEnabled) {
         const isRefreshRequired = pageReloadChecker?.(userProfileSnapshot.current, updatedData);
@@ -117,7 +118,7 @@ export const useUpdateUserProfile = ({
 
   const update = useCallback(
     <D extends Partial<UserProfileData>>(updatedData: D) => {
-      userProfileSnapshot.current = userProfileData;
+      userProfileSnapshot.current = merge({}, userProfileData);
       setIsLoading(true);
       return userProfileApiClient
         .partialUpdate(updatedData)
