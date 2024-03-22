@@ -177,7 +177,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         saved_id: null,
       });
 
-      if (onUsingSequenceQuery) onUsingSequenceQuery(newQuery.startsWith('sequence'));
+      if (onUsingSequenceQuery) onUsingSequenceQuery(newQuery.trim().startsWith('sequence'));
     },
     [fieldValue, setFieldValue, onValiditingChange, onUsingSequenceQuery]
   );

@@ -218,9 +218,16 @@ export const getEnableThresholdSuppressionLabel = (fields: string[] | undefined)
     )
   );
 
-export const EQL_SEQUENCE_SUPPRESSION_DISABLE_TEXT = i18n.translate(
+export const EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionDisableText',
   {
-    defaultMessage: 'Suppression is not available for sequence based queries',
+    defaultMessage: 'Suppression is not enabled for EQL sequence queries',
+  }
+);
+
+export const EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionDisableText',
+  {
+    defaultMessage: `${EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP}, please reset the suppression fields`,
   }
 );
