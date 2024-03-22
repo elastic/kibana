@@ -32,6 +32,11 @@ export async function getDataStreamDetails(args: {
   }
 
   const createdOn = await getDataStreamCreatedOn(esClient, dataStream);
+
+  if (createdOn === undefined) {
+    return {};
+  }
+
   const dataStreamSummaryStats = await getDataStreamSummaryStats(esClient, dataStream, start, end);
   const avgDocSizeInBytes =
     dataStreamSummaryStats.docsCount > 0 ? await getAvgDocSizeInBytes(esClient, dataStream) : 0;

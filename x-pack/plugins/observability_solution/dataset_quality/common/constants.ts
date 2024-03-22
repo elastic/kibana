@@ -19,3 +19,6 @@ export const NONE = 'none';
 
 export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
 export const DEFAULT_DEGRADED_DOCS = { percentage: 0, count: 0 };
+
+export const NUMBER_FORMAT = '0,0.[000]';
+export const BYTE_NUMBER_FORMAT = '0.0 b';

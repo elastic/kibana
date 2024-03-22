@@ -27,7 +27,7 @@ export const useDatasetQualityFlyout = () => {
   const dataStreamDetailsLoading = useSelector(
     service,
     (state) =>
-      state.matches('datasets.loaded.flyoutOpen.fetching') ||
+      state.matches('flyout.fetching') ||
       state.matches('flyout.initializing.dataStreamDetails.fetching')
   );
 

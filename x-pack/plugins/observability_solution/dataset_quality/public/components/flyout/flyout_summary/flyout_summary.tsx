@@ -1,0 +1,84 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useState } from 'react';
+import { OnRefreshProps, OnTimeChangeProps, EuiSpacer } from '@elastic/eui';
+
+import { DegradedDocs } from '../degraded_docs_trend/degraded_docs';
+import { DataStreamDetails } from '../../../../common/api_types';
+import { DEFAULT_TIME_RANGE } from '../../../../common/constants';
+import { useDatasetQualityContext } from '../../dataset_quality/context';
+import { FlyoutDataset, TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
+import { FlyoutSummaryHeader } from './flyout_summary_header';
+import { FlyoutSummaryKpis, FlyoutSummaryKpisLoading } from './flyout_summary_kpis';
+
+const DEFAULT_REFRESH = { value: 60000, pause: false };
+
+export function FlyoutSummary({
+  dataStream,
+  dataStreamStat,
+  dataStreamDetails,
+  dataStreamDetailsLoading,
+  timeRange = { ...DEFAULT_TIME_RANGE, refresh: DEFAULT_REFRESH },
+}: {
+  dataStream: string;
+  dataStreamStat?: FlyoutDataset;
+  dataStreamDetails?: DataStreamDetails;
+  dataStreamDetailsLoading: boolean;
+  timeRange?: TimeRangeConfig;
+}) {
+  const { service } = useDatasetQualityContext();
+  const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
+
+  const handleTimeChange = useCallback(
+    ({ start, end }: Omit<OnTimeChangeProps, 'isInvalid' | 'isQuickSelection'>) => {
+      service.send({
+        type: 'UPDATE_INSIGHTS_TIME_RANGE',
+        timeRange: {
+          from: start,
+          to: end,
+          refresh: timeRange.refresh ?? DEFAULT_REFRESH,
+        },
+      });
+    },
+    [service, timeRange.refresh]
+  );
+
+  const handleRefresh = useCallback(
+    (refreshProps: OnRefreshProps) => {
+      handleTimeChange(refreshProps);
+      setLastReloadTime(Date.now());
+    },
+    [handleTimeChange]
+  );
+
+  return (
+    <>
+      <FlyoutSummaryHeader
+        timeRange={timeRange}
+        onTimeChange={handleTimeChange}
+        onRefresh={handleRefresh}
+      />
+
+      <EuiSpacer size="m" />
+
+      {dataStreamStat ? (
+        <FlyoutSummaryKpis
+          dataStreamStat={dataStreamStat}
+          dataStreamDetails={dataStreamDetails}
+          isLoading={dataStreamDetailsLoading}
+        />
+      ) : (
+        <FlyoutSummaryKpisLoading />
+      )}
+
+      <EuiSpacer />
+
+      <DegradedDocs dataStream={dataStream} timeRange={timeRange} lastReloadTime={lastReloadTime} />
+    </>
+  );
+}

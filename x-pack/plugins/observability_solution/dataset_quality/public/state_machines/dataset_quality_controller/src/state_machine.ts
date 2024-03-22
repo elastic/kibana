@@ -227,6 +227,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                   actions: ['resetFlyoutOptions'],
                 },
                 UPDATE_INSIGHTS_TIME_RANGE: {
+                  target: '#DatasetQualityController.flyout.fetching',
                   actions: ['storeFlyoutOptions'],
                 },
                 BREAKDOWN_FIELD_CHANGE: {
@@ -467,7 +468,7 @@ export const createDatasetQualityControllerStateMachine = ({
         });
       },
       loadDataStreamDetails: (context) => {
-        if (!context.flyout.dataset) {
+        if (!context.flyout.dataset || !context.flyout.insightsTimeRange) {
           fetchDatasetDetailsFailedNotifier(toasts, new Error(noDatasetSelected));
 
           return Promise.resolve({});

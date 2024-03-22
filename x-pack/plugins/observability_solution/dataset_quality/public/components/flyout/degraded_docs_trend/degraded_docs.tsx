@@ -40,10 +40,12 @@ const DEFAULT_REFRESH = { value: 60000, pause: false };
 export function DegradedDocs({
   dataStream,
   timeRange = { ...DEFAULT_TIME_RANGE, refresh: DEFAULT_REFRESH },
+  lastReloadTime,
   breakdownField,
 }: {
   dataStream?: string;
   timeRange?: TimeRangeConfig;
+  lastReloadTime: number;
   breakdownField?: string;
 }) {
   const { service } = useDatasetQualityContext();

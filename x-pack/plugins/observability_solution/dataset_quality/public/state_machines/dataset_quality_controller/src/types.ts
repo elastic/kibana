@@ -104,7 +104,7 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded.flyoutOpen.fetching';
+      value: 'datasets.loaded.flyoutOpen.fetching' | 'flyout.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
