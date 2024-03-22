@@ -38,3 +38,10 @@ export const WELCOME_ACTION = i18n.translate(
       'Nothing is processed without your explicit concern. To perform analysis select a desired time range you want to analyze and press "Analyze" button.',
   }
 );
+
+export const INLINE_CONNECTOR_LABEL = i18n.translate(
+  'xpack.securitySolution.aiRuleMonitoring.connectorSelectorLabel',
+  {
+    defaultMessage: 'Connector:',
+  }
+);

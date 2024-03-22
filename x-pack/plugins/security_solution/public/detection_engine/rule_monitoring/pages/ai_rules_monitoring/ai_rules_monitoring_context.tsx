@@ -11,6 +11,7 @@ import dateMath from '@kbn/datemath';
 import type { Conversation } from '@kbn/elastic-assistant';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import type { ApiConfig } from '@kbn/elastic-assistant-common';
+import { updateConversation } from '@kbn/elastic-assistant/impl/assistant/api';
 import { useConnectorSetup } from '@kbn/elastic-assistant/impl/connectorland/connector_setup';
 import { useFetchCurrentUserConversations } from '@kbn/elastic-assistant';
 import {
@@ -32,8 +33,10 @@ export interface UseAiRulesMonitoring {
   connectorPrompt: React.ReactElement;
   analyzedDateRange: AnalyzedDateRange;
   setAnalyzedDateRange: (value: AnalyzedDateRange) => void;
+  currentApiConfig?: ApiConfig;
   result?: string;
   refetch: () => void;
+  updateApiConfig: (apiConfig: ApiConfig) => Promise<void>;
 }
 
 const AiRulesMonitoringContext = React.createContext<UseAiRulesMonitoring | undefined>(undefined);
@@ -41,6 +44,7 @@ const AiRulesMonitoringContext = React.createContext<UseAiRulesMonitoring | unde
 export function AiRulesMonitoringProvider({
   children,
 }: PropsWithChildren<{}>): JSX.Element | undefined {
+  const { http } = useKibana().services;
   const [analyzedDateRange, setAnalyzedDateRange] = useState({ start: 'now-1d', end: 'now' });
   const interval = useMemo(() => {
     const from = dateMath.parse(analyzedDateRange.start);
@@ -60,7 +64,12 @@ export function AiRulesMonitoringProvider({
     } as const;
   }, [analyzedDateRange]);
 
-  const { isLoading: isApiConfigLoading, apiConfig, refresh } = useApiConfig();
+  const {
+    isLoading: isApiConfigLoading,
+    currentConversationId,
+    apiConfig,
+    refresh,
+  } = useApiConfig();
   const { prompt: connectorPrompt } = useConnectorSetup({
     conversation: RULE_MONITORING_CONVERSATION,
     onConversationUpdate: refresh,
@@ -72,7 +81,7 @@ export function AiRulesMonitoringProvider({
     refetch,
   } = useFetchAiRuleMonitoringResultQuery(apiConfig?.connectorId ?? '', interval, {
     initialData: '',
-    enabled: Boolean(apiConfig?.connectorId),
+    enabled: Boolean(apiConfig),
   });
 
   const value = useMemo(
@@ -83,10 +92,21 @@ export function AiRulesMonitoringProvider({
       connectorPrompt,
       analyzedDateRange,
       setAnalyzedDateRange,
+      currentApiConfig: apiConfig,
       result: data,
       refetch,
+      updateApiConfig: async (newApiConfig: ApiConfig) => {
+        await updateConversation({
+          http,
+          conversationId: currentConversationId ?? '',
+          apiConfig: newApiConfig,
+        });
+        await refresh();
+      },
     }),
     [
+      http,
+      refresh,
       isApiConfigLoading,
       isAiResponseFetching,
       connectorPrompt,
@@ -95,6 +115,7 @@ export function AiRulesMonitoringProvider({
       setAnalyzedDateRange,
       data,
       refetch,
+      currentConversationId,
     ]
   );
 
@@ -123,6 +144,7 @@ const RULE_MONITORING_CONVERSATION: Conversation = {
 
 interface UseApiConfigResult {
   isLoading: boolean;
+  currentConversationId?: string;
   apiConfig?: ApiConfig;
   refresh: () => Promise<void>;
 }
@@ -138,19 +160,22 @@ function useApiConfig(): UseApiConfigResult {
     onFetch: convertFetchConversationsResponseToMap,
   });
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    const firstConversation = conversationsData
+      ? Object.values(conversationsData).find((x) => Boolean(x.apiConfig))
+      : undefined;
+
+    return {
       isLoading,
-      apiConfig: conversationsData
-        ? Object.values(conversationsData).find((x) => Boolean(x.apiConfig))?.apiConfig
-        : undefined,
+      currentConversationId: firstConversation?.id,
+      apiConfig: firstConversation?.apiConfig,
       refresh: async () => {
         await refetch();
       },
-    }),
-    [isLoading, conversationsData, refetch]
-  );
+    };
+  }, [isLoading, conversationsData, refetch]);
 }
+
 function convertFetchConversationsResponseToMap(
   response: FetchConversationsResponse
 ): Record<string, Conversation> {
