@@ -73,7 +73,6 @@ export const useHostIsolationAction = ({
   const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(detailsData), [detailsData]);
   const crowdstrikeAgentId = useMemo(() => getCrowdstrikeAgentId(detailsData), [detailsData]);
 
-  console.log({ isCrowdstrikeAlert, crowdstrikeAgentId });
   const hostOsFamily = useMemo(
     () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),
     [detailsData]
@@ -95,18 +94,24 @@ export const useHostIsolationAction = ({
 
   const { data: sentinelOneAgentData } = useGetSentinelOneAgentStatus([sentinelOneAgentId || '']);
   const sentinelOneAgentStatus = sentinelOneAgentData?.[`${sentinelOneAgentId}`];
+  // TODO TC: Add support for Crowdstrike agent status - ongoing work by Ash :+1:
 
   const isHostIsolated = useMemo(() => {
     if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) {
       return sentinelOneAgentStatus?.isolated;
+    }
+    if (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAlert) {
+      // return crowdstrikeAgentStatus?.isolated;
     }
 
     return isIsolated;
   }, [
     isIsolated,
     isSentinelOneAlert,
+    isCrowdstrikeAlert,
     sentinelOneAgentStatus?.isolated,
     sentinelOneManualHostActionsEnabled,
+    crowdstrikeManualHostActionsEnabled,
   ]);
 
   const doesHostSupportIsolation = useMemo(() => {

@@ -17,11 +17,9 @@ import {
   RELEASING_LABEL,
 } from '../../../common/components/endpoint/endpoint_agent_status';
 
-export enum SENTINEL_ONE_NETWORK_STATUS {
-  CONNECTING = 'connecting',
-  CONNECTED = 'connected',
-  DISCONNECTING = 'disconnecting',
-  DISCONNECTED = 'disconnected',
+export enum CROWDSTRIKE_NETWORK_STATUS {
+  NORMAL = 'normal',
+  CONTAINED = 'contained',
 }
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
@@ -32,6 +30,7 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
 
 export const CrowdstrikeAgentStatus = React.memo(
   ({ agentId, 'data-test-subj': dataTestSubj }: { agentId: string; 'data-test-subj'?: string }) => {
+    // TODO TC: THIS HAS TO BE CHANGED TO USE THE CROWDSTRIKE API
     const { data, isLoading, isFetched } = useGetCrowdstrikeAgentStatus([agentId]);
     const agentStatus = data?.[`${agentId}`];
 

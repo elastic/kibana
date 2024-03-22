@@ -92,7 +92,7 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV2Enabled: false,
 
   /**
-   * Enables the ability to send Response actions to SentinelOne and persist the results
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
    */
   responseActionsCrowdstrikeEnabled: true,
