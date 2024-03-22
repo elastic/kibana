@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
+
 import { get, pick } from 'lodash';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { REPORTING_SYSTEM_INDEX } from '@kbn/reporting-server';
 import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { GetLicense } from '.';
 import {

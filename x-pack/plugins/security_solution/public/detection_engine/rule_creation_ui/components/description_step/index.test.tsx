@@ -331,6 +331,29 @@ describe('description_step', () => {
           mockQueryBar.queryBar.query.query
         );
       });
+
+      test('returns correct field name when queryBar exist', () => {
+        const mockQueryBar = {
+          ruleType: 'eql',
+          queryBar: {
+            query: {
+              query: 'user.name: root or user.name: admin',
+              language: 'kuery',
+            },
+            filters: null,
+            saved_id: null,
+          },
+        };
+        const result: ListItems[] = getDescriptionItem(
+          'queryBar',
+          'Query bar label',
+          mockQueryBar,
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result[0].title).toEqual(<>{i18n.EQL_QUERY_LABEL}</>);
+      });
     });
 
     describe('threat', () => {
