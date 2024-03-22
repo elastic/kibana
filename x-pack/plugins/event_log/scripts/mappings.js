@@ -173,9 +173,6 @@ exports.EcsCustomPropertyMappings = {
                       prepare_rule_duration_ms: {
                         type: 'long',
                       },
-                      prepare_to_run_duration_ms: {
-                        type: 'long',
-                      },
                       total_run_duration_ms: {
                         type: 'long',
                       },
