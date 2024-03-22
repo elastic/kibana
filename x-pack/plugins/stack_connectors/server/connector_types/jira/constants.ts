@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './dynamic_action_storage';
+export const MAX_OTHER_FIELDS_LENGTH = 20;
