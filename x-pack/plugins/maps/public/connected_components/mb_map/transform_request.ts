@@ -39,7 +39,7 @@ function prepareAbsoluteUrl(pathOrUrl: string): string {
  */
 export function transformRequest(pathOrUrl: string, resourceType: string | undefined) {
   const url = prepareAbsoluteUrl(pathOrUrl);
-  if (resourceType === 'Glyphs' && pathOrUrl.startsWith(FONTS)) {
+  if (resourceType === 'Glyphs' && url.includes(FONTS_API_PATH)) {
     return {
       url,
       method: 'GET' as 'GET',
@@ -50,7 +50,7 @@ export function transformRequest(pathOrUrl: string, resourceType: string | undef
     };
   }
 
-  if (resourceType === 'Tile' && pathOrUrl.startsWith(GETTILE)) {
+  if (resourceType === 'Tile' && url.includes(MVT_GETTILE_API_PATH)) {
     return {
       url,
       method: 'GET' as 'GET',
@@ -61,7 +61,7 @@ export function transformRequest(pathOrUrl: string, resourceType: string | undef
     };
   }
 
-  if (resourceType === 'Tile' && pathOrUrl.startsWith(GETGRIDTILE)) {
+  if (resourceType === 'Tile' && url.includes(MVT_GETGRIDTILE_API_PATH)) {
     return {
       url,
       method: 'GET' as 'GET',
