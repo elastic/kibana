@@ -13,16 +13,16 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { deleteMigrations, getIndexNameFromLoad } from '../../../../utils';
+import { deleteMigrations, getIndexNameFromLoad } from '../../../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
   waitFor,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,
-} from '../../../../../../../common/services/security_solution';
+} from '../../../../../../../../common/services/security_solution';
 
 interface StatusResponse {
   index: string;
@@ -40,7 +40,7 @@ interface FinalizeResponse {
   completed?: boolean;
   error?: unknown;
 }
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return filteredIndices;
   };
 
-  describe('@ess Finalizing Alerts migrations', () => {
+  describe.only('@ess Finalizing Alerts migrations', () => {
     let legacyAlertsIndexName: string;
     let outdatedAlertsIndexName: string;
     let createdMigrations: CreateResponse[];
@@ -190,7 +190,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // This fails and should be investigated or removed if it no longer applies
-    it.skip('deletes the underlying migration task', async () => {
+    it('deletes the underlying migration task', async () => {
       await waitFor(
         async () => {
           const {

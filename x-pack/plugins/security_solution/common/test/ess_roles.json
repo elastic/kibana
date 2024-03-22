@@ -58,7 +58,7 @@
         },
         {
           "names": [".alerts-security*", ".siem-signals-*"],
-          "privileges": ["read", "write"]
+          "privileges": ["read", "write", "maintenance"]
         },
         {
           "names": [".lists*", ".items*"],

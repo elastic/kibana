@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
 
-  describe('find alert with/without doc level security', () => {
+  describe('@ess find alert with/without doc level security', () => {
     before(async () => {
       await security.role.create(
         roleToAccessSecuritySolution.name,

@@ -28,7 +28,7 @@ import {
   getThresholdRuleForAlertTesting,
   startAlertsMigration,
   removeRandomValuedPropertiesFromAlert,
-} from '../../../utils';
+} from '../../../../utils';
 import {
   createRule,
   createAlertsIndex,
@@ -39,8 +39,8 @@ import {
   waitForRuleSuccess,
   waitForAlertsToBePresent,
   getRuleForAlertTesting,
-} from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+} from '../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('@ess Alerts Compatibility', function () {
+  describe('@ess alerts compatability with legacy siem signals index', function () {
     describe('CTI', () => {
       const expectedDomain = 'elastic.local';
       const expectedProvider = 'provider1';
