@@ -98,13 +98,14 @@ export const getGenAiTokenTracking = async ({
     (validatedParams.subAction === 'run' || validatedParams.subAction === 'test')
   ) {
     try {
+      const rData = result.data as unknown as {
+        completion: string;
+        usage?: { input_tokens: number; output_tokens: number };
+      };
       const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
-        response: (
-          result.data as unknown as {
-            completion: string;
-          }
-        ).completion,
+        response: rData.completion,
         body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
+        usage: rData.usage,
       });
 
       return {

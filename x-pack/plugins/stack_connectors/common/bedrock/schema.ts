@@ -48,6 +48,10 @@ export const StreamActionParamsSchema = schema.object({
 export const RunApiLatestResponseSchema = schema.object(
   {
     stop_reason: schema.maybe(schema.string()),
+    usage: schema.object({
+      input_tokens: schema.number(),
+      output_tokens: schema.number(),
+    }),
     content: schema.arrayOf(
       schema.object(
         { type: schema.string(), text: schema.maybe(schema.string()) },
@@ -57,10 +61,17 @@ export const RunApiLatestResponseSchema = schema.object(
   },
   { unknowns: 'allow' }
 );
+
 export const RunActionResponseSchema = schema.object(
   {
     completion: schema.string(),
     stop_reason: schema.maybe(schema.string()),
+    usage: schema.maybe(
+      schema.object({
+        input_tokens: schema.number(),
+        output_tokens: schema.number(),
+      })
+    ),
   },
   { unknowns: 'ignore' }
 );

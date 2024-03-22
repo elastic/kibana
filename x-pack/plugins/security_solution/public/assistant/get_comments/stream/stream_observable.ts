@@ -7,7 +7,7 @@
 
 import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
 import type { Dispatch, SetStateAction } from 'react';
-import { handleBedrockChunk } from '@kbn/elastic-assistant-common/impl/utils/bedrock';
+import { handleBedrockChunk } from '@kbn/elastic-assistant-common';
 import type { PromptObservableState } from './types';
 import { API_ERROR } from '../translations';
 const MIN_DELAY = 35;

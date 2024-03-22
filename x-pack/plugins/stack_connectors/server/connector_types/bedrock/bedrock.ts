@@ -29,11 +29,7 @@ import {
   StreamActionParams,
   RunApiLatestResponse,
 } from '../../../common/bedrock/types';
-import {
-  SUB_ACTION,
-  DEFAULT_TOKEN_LIMIT,
-  DEFAULT_BEDROCK_MODEL,
-} from '../../../common/bedrock/constants';
+import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
 import {
   DashboardActionParams,
   DashboardActionResponse,
@@ -187,6 +183,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     params: SubActionRequestParams<RunActionResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
   ): Promise<RunActionResponse> {
     const response = await this.request(params);
+    console.log('runApiDeprecated', response.data);
     return response.data;
   }
 
@@ -194,9 +191,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
   ): Promise<RunActionResponse> {
     const response = await this.request(params);
+    console.log('runApiLatest', response.data);
     return {
       completion: parseContent(response.data.content),
       stop_reason: response.data.stop_reason,
+      usage: response.data.usage,
     };
   }
 
@@ -218,11 +217,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       // give up to 2 minutes for response
       timeout: 120000,
     };
-
-    if (usesLatestApi(currentModel)) {
-      return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
+    // possible api received deprecated arguments, which will still work with the deprecated Claude 2 models
+    if (usesDeprecatedArguments(body)) {
+      return this.runApiDeprecated({ ...requestArgs, responseSchema: RunActionResponseSchema });
     }
-    return this.runApiDeprecated({ ...requestArgs, responseSchema: RunActionResponseSchema });
+    return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
   }
 
   /**
@@ -267,13 +266,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     stopSequences,
     temperature,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
-    const currentModel = model ?? this.model;
     const res = (await this.streamApi({
-      body: JSON.stringify(
-        usesLatestApi(currentModel)
-          ? formatLatestClaudeBody({ messages, model, stopSequences, temperature })
-          : formatDeprecatedClaudeBody({ messages, model, stopSequences, temperature })
-      ),
+      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, temperature })),
       model,
     })) as unknown as IncomingMessage;
     return res;
@@ -288,69 +282,19 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     messages,
     model,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const currentModel = model ?? this.model;
-
     const res = await this.runApi({
-      body: JSON.stringify(
-        usesLatestApi(currentModel)
-          ? formatLatestClaudeBody({ messages, model })
-          : formatDeprecatedClaudeBody({ messages, model })
-      ),
+      body: JSON.stringify(formatBedrockBody({ messages })),
       model,
     });
     return { message: res.completion.trim() };
   }
 }
 
-// keeping for safer backwards compatibility
-const formatDeprecatedClaudeBody = ({
-  model = DEFAULT_BEDROCK_MODEL,
+const formatBedrockBody = ({
   messages,
-  stopSequences = ['\n\nHuman:'],
+  stopSequences,
   temperature = 0.5,
 }: {
-  model?: string;
-  messages: Array<{ role: string; content: string }>;
-  stopSequences?: string[];
-  temperature?: number;
-}) => {
-  const combinedMessages = messages.reduce((acc: string, message) => {
-    const { role, content } = message;
-    const [, , modelName, majorVersion, minorVersion] =
-      (model || '').match(/(\w+)\.(.*)-v(\d+)(?::(\d+))?/) || [];
-    // Claude only has Assistant and Human, so 'user' will be converted to Human
-    let bedrockRole: string;
-
-    if (
-      role === 'system' &&
-      modelName === 'claude' &&
-      Number(majorVersion) >= 2 &&
-      Number(minorVersion) >= 1
-    ) {
-      bedrockRole = '';
-    } else {
-      bedrockRole = role === 'assistant' ? '\n\nAssistant:' : '\n\nHuman:';
-    }
-
-    return `${acc}${bedrockRole}${content}`;
-  }, '');
-
-  return {
-    // end prompt in "Assistant:" to avoid the model starting its message with "Assistant:"
-    prompt: `${combinedMessages} \n\nAssistant:`,
-    max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
-    temperature,
-    // prevent model from talking to itself
-    stop_sequences: stopSequences,
-  };
-};
-
-const formatLatestClaudeBody = ({
-  messages,
-  stopSequences = ['\n\nHuman:'],
-  temperature = 0.5,
-}: {
-  model?: string;
   messages: Array<{ role: string; content: string }>;
   stopSequences?: string[];
   temperature?: number;
@@ -367,13 +311,9 @@ function parseContent(content: Array<{ text?: string; type: string }>): string {
   if (content.length === 1 && content[0].type === 'text' && content[0].text) {
     parsedContent = content[0].text;
   } else if (content.length > 1) {
-    // TODO need to check this code, i think it can be of type img or something else
     parsedContent = content.reduce((acc, { text }) => (text ? `${acc}\n${text}` : acc), '');
   }
   return parsedContent;
 }
 
-const usesLatestApi = (model: string) =>
-  model.split('.')[0] === 'anthropic' &&
-  !model.includes('claude-v2') &&
-  !model.includes('claude-instant-v1');
+const usesDeprecatedArguments = (body: string): boolean => JSON.parse(body)?.prompt != null;

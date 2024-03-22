@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
-import { handleBedrockChunk } from '@kbn/elastic-assistant-common/impl/utils/bedrock';
+import { handleBedrockChunk } from '@kbn/elastic-assistant-common';
 
 type StreamParser = (responseStream: Readable) => Promise<string>;
 
@@ -94,7 +94,6 @@ const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
   // Map through each chunk to process the Bedrock buffer.
   return chunks
     .map((chunk) => {
-      // Concatenate the current chunk to the existing buffer.
       const processedChunk = handleBedrockChunk({ chunk, bedrockBuffer });
       bedrockBuffer = processedChunk.bedrockBuffer;
       return processedChunk.decodedChunk;

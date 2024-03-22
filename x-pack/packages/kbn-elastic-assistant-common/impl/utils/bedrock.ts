@@ -8,6 +8,13 @@
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 
+/**
+ * Handle a chunk of data from the bedrock API.
+ * @param chunk - The chunk of data to process.
+ * @param bedrockBuffer - The buffer containing the current data.
+ * @param chunkHandler - Optional function to handle the chunk once it has been processed.
+ * @returns {decodedChunk, bedrockBuffer } - The decoded chunk and the updated buffer.
+ */
 export const handleBedrockChunk = ({
   chunk,
   bedrockBuffer,
@@ -88,7 +95,7 @@ function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
  * @param responseBody
  * @returns string
  */
-export const prepareBedrockOutput = (responseBody: {
+const prepareBedrockOutput = (responseBody: {
   completion?: string;
   type?: string;
   delta?: { type: string; text: string };
@@ -99,35 +106,31 @@ export const prepareBedrockOutput = (responseBody: {
     return responseBody.completion;
   }
   if (responseBody.type && responseBody.type.length) {
-    if (responseBody.type === 'message_start') {
-      return parseMessage(responseBody.message);
+    if (responseBody.type === 'message_start' && responseBody.message) {
+      return parseContent(responseBody.message.content);
     } else if (
       responseBody.type === 'content_block_delta' &&
       responseBody.delta?.type === 'text_delta' &&
       typeof responseBody.delta?.text === 'string'
     ) {
       return responseBody.delta.text;
-    } else if (responseBody.type === 'message') {
-      debugger;
-      return parseMessage(responseBody);
-    } else {
-      return '';
     }
   }
   return '';
 };
 
-const parseMessage = (
-  res: { content: Array<{ text?: string; type: string }> } | undefined
-): string => {
-  const { content } = res ?? { content: [] };
-  let parsedContent;
-  if (Array.isArray(content) && content.length === 1 && content[0].type === 'text') {
+/**
+ * Parse the content from the bedrock API
+ * @param content
+ * @returns string
+ */
+function parseContent(content: Array<{ text?: string; type: string }>): string {
+  let parsedContent = '';
+  if (content.length === 1 && content[0].type === 'text' && content[0].text) {
     parsedContent = content[0].text;
-  } else if (Array.isArray(content) && content.length === 0) {
-    parsedContent = '';
-  } else {
-    parsedContent = content;
+  } else if (content.length > 1) {
+    // this case should not happen, but here is a fallback
+    parsedContent = content.reduce((acc, { text }) => (text ? `${acc}\n${text}` : acc), '');
   }
-  return typeof parsedContent === 'string' ? parsedContent : '';
-};
+  return parsedContent;
+}
