@@ -14,7 +14,6 @@ import {
   EuiEmptyPrompt,
   EuiImage,
   EuiImageProps,
-  useEuiTheme,
   useIsWithinBreakpoints,
   useResizeObserver,
 } from '@elastic/eui';
@@ -52,7 +51,6 @@ export function ImageViewer({
   containerCSS,
   isScreenshotMode,
 }: ImageViewerProps) {
-  const { euiTheme } = useEuiTheme();
   const { getImageDownloadHref, validateUrl } = useImageViewerContext();
 
   const isImageConfigValid = validateImageConfig(imageConfig, { validateUrl });
@@ -75,8 +73,6 @@ export function ImageViewer({
           position: relative;
           width: 100%;
           height: 100%;
-          border-radius: ${euiTheme.border.radius.medium};
-
           .visually-hidden {
             visibility: hidden;
           }

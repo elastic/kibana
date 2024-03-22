@@ -18,7 +18,8 @@ import {
   IEmbeddable,
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { apiHasUniqueId, StateComparators } from '@kbn/presentation-publishing';
+import { EmbeddableStateComparators } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
+import { apiHasUniqueId, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import {
   AdvancedUiActionsSetup,
@@ -58,6 +59,7 @@ export interface StartContract {
     dynamicActionsApi: HasDynamicActions;
     dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
     serializeDynamicActions: () => DynamicActionsSerializedState;
+    stopDynamicActions: () => void;
   };
 }
 
@@ -138,23 +140,29 @@ export class EmbeddableEnhancedPlugin
     dynamicActionsApi: HasDynamicActions;
     dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
     serializeDynamicActions: () => DynamicActionsSerializedState;
+    stopDynamicActions: () => void;
   } {
     const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(
       { dynamicActions: { events: [] }, ...(state.enhancements ?? {}) }
     );
     const api: DynamicActionStorageApi = {
       dynamicActionsState$,
-      setDynamicActions: (newState) => dynamicActionsState$.next(newState),
+      setDynamicActions: (newState) => {
+        dynamicActionsState$.next(newState);
+      },
     };
     const storage = new DynamicActionStorage(uuid, getTitle, api);
     const dynamicActions = new DynamicActionManager({
       isCompatible: async (context: unknown) => {
-        return apiHasUniqueId(context) && context.uuid === uuid;
+        if (!(context as EmbeddableApiContext).embeddable) return false;
+        const { embeddable } = context as EmbeddableApiContext;
+        return apiHasUniqueId(embeddable) && embeddable.uuid === uuid;
       },
       storage,
       uiActions: this.uiActions!,
     });
-    this.startDynamicActions(dynamicActions);
+
+    const stop = this.startDynamicActions(dynamicActions);
 
     return {
       dynamicActionsApi: { ...api, enhancements: { dynamicActions } },
@@ -170,6 +178,7 @@ export class EmbeddableEnhancedPlugin
       serializeDynamicActions: () => {
         return { enhancements: dynamicActionsState$.getValue() };
       },
+      stopDynamicActions: stop,
     };
   }
 

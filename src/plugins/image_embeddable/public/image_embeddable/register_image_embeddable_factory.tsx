@@ -10,13 +10,13 @@ import React, { useEffect, useState } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import {
   initializeReactEmbeddableTitles,
   ReactEmbeddableFactory,
   registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import { imageClickTrigger, IMAGE_CLICK_TRIGGER } from '../actions';
 import { openImageEditor } from '../image_editor/open_image_editor';
@@ -33,6 +33,8 @@ import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 import { ImageEmbeddableStrings } from './image_embeddable_strings';
 import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
+import './image_embeddable.scss';
+
 export const registerImageEmbeddableFactory = ({
   embeddableEnhanced,
 }: {
@@ -46,12 +48,12 @@ export const registerImageEmbeddableFactory = ({
     deserializeState: (state) => {
       return state.rawState as ImageEmbeddableSerializedState;
     },
-    buildEmbeddable: async (initialState, buildApi) => {
+    buildEmbeddable: async (initialState, buildApi, uuid) => {
       const { titlesApi, titleComparators, serializeTitles } =
         initializeReactEmbeddableTitles(initialState);
 
       const dynamicActionsApi = embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
-        'test',
+        uuid,
         () => titlesApi.panelTitle.getValue(),
         initialState
       );
@@ -61,7 +63,7 @@ export const registerImageEmbeddableFactory = ({
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const api = buildApi(
+      const embeddable = buildApi(
         {
           ...titlesApi,
           ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
@@ -96,10 +98,17 @@ export const registerImageEmbeddableFactory = ({
       );
 
       return {
-        api,
+        api: embeddable,
         Component: () => {
           const imageConfig = useStateFromPublishingSubject(imageConfig$);
           const [hasTriggerActions, setHasTriggerActions] = useState(false);
+
+          useEffect(() => {
+            return () => {
+              // stop the dynamic actions manager on unmount
+              dynamicActionsApi?.stopDynamicActions();
+            };
+          }, []);
 
           useEffect(() => {
             let mounted = true;
@@ -109,10 +118,9 @@ export const registerImageEmbeddableFactory = ({
               if (!mounted) return;
 
               uiActionsService
-                .getTriggerCompatibleActions(imageClickTrigger.id, { embeddable: api })
+                .getTriggerCompatibleActions(imageClickTrigger.id, { embeddable })
                 .catch(() => [])
                 .then((actions) => {
-                  // console.log('here', actions);
                   if (mounted) setHasTriggerActions(actions.length > 0);
                 });
             }, 0);
@@ -149,7 +157,7 @@ export const registerImageEmbeddableFactory = ({
                   hasTriggerActions
                     ? () => {
                         uiActionsService.executeTriggerActions(imageClickTrigger.id, {
-                          embeddable: this,
+                          embeddable,
                         });
                       }
                     : undefined
