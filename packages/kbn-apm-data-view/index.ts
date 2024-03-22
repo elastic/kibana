@@ -11,3 +11,7 @@ const APM_STATIC_DATA_VIEW_ID_PREFIX = 'apm_static_data_view_id';
 export function getDataViewId(spaceId: string) {
   return `${APM_STATIC_DATA_VIEW_ID_PREFIX}_${spaceId}`;
 }
+
+export function isAPMDataView(dataViewId: string) {
+  return dataViewId.includes(APM_STATIC_DATA_VIEW_ID_PREFIX);
+}

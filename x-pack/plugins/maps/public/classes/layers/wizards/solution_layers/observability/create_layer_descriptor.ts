@@ -39,9 +39,6 @@ import { HeatmapLayer } from '../../../heatmap_layer';
 import { getDefaultDynamicProperties } from '../../../../styles/vector/vector_style_defaults';
 import { getSpaceId } from '../../../../../kibana_services';
 
-// redefining APM constant to avoid making maps app depend on APM plugin
-export const APM_INDEX_PATTERN_TITLE = 'traces-apm*,logs-apm*,metrics-apm*,apm-*';
-
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
 function createDynamicFillColorDescriptor(
