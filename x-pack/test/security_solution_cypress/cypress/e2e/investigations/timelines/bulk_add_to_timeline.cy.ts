@@ -17,7 +17,10 @@ import {
   selectFirstPageEvents,
 } from '../../../tasks/common/event_table';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
+import {
+  waitsForEventsToBeLoaded,
+  waitForEventsDataGridToBeLoaded,
+} from '../../../tasks/hosts/events';
 import { openEvents, openSessions } from '../../../tasks/hosts/main';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
@@ -70,6 +73,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
       visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       waitsForEventsToBeLoaded();
+      waitForEventsDataGridToBeLoaded();
     });
 
     it('Adding multiple events to the timeline should be successful', () => {
@@ -101,6 +105,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
       visitWithTimeRange(hostsUrl('allHosts'));
       openSessions();
       waitsForEventsToBeLoaded();
+      waitForEventsDataGridToBeLoaded();
     });
 
     it('Adding multiple events to the timeline should be successful', () => {
