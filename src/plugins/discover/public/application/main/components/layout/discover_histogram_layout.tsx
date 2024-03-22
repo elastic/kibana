@@ -35,7 +35,6 @@ export const DiscoverHistogramLayout = ({
   const { dataState } = stateContainer;
   const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
   const hideChart = useAppStateSelector((state) => state.hideChart);
-
   const unifiedHistogramProps = useDiscoverHistogram({
     stateContainer,
     inspectorAdapters: dataState.inspectorAdapters,
@@ -77,9 +76,9 @@ export const DiscoverHistogramLayout = ({
       {...unifiedHistogramProps}
       searchSessionId={searchSessionId}
       requestAdapter={dataState.inspectorAdapters.requests}
+      table={table}
       container={container}
       css={histogramLayoutCss}
-      table={table}
       renderCustomChartToggleActions={renderCustomChartToggleActions}
       abortController={stateContainer.dataState.getAbortController()}
     >

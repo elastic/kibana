@@ -334,9 +334,7 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
       return false; // ignore when value was changed from `undefined` to `false` as it happens per app logic, not by a user action
     }
 
-    const prevValue = getSavedSearchValueForComparison(prevSavedSearch, key);
-    const nextValue = getSavedSearchValueForComparison(nextSavedSearchWithoutSearchSource, key);
-    const isSame = isEqual(prevValue, nextValue);
+    const isSame = isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
 
     if (!isSame) {
       addLog('[savedSearch] difference between initial and changed version', {
@@ -401,11 +399,4 @@ function getSearchSourceFieldValueForComparison(
   }
 
   return searchSource.getField(searchSourceFieldName);
-}
-
-function getSavedSearchValueForComparison(
-  savedSearch: Omit<SavedSearch, 'searchSource'>,
-  key: keyof Omit<SavedSearch, 'searchSource'>
-) {
-  return savedSearch[key];
 }

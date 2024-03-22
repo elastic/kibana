@@ -100,10 +100,7 @@ export const useDiscoverHistogram = ({
           interval: appState.interval,
           breakdownField: appState.breakdownField,
         };
-        const newState = {
-          ...oldState,
-          ...stateChanges,
-        };
+        const newState = { ...oldState, ...stateChanges };
 
         if ('lensRequestAdapter' in changes) {
           inspectorAdapters.lensRequests = lensRequestAdapter;
@@ -242,12 +239,12 @@ export const useDiscoverHistogram = ({
       return;
     }
 
-    const fetchStart = stateContainer.dataState.fetch$.subscribe((value) => {
+    const fetchStart = stateContainer.dataState.fetch$.subscribe(() => {
       if (!skipRefetch.current) {
         setIsSuggestionLoading(true);
       }
     });
-    const fetchComplete = textBasedFetchComplete$.subscribe((value) => {
+    const fetchComplete = textBasedFetchComplete$.subscribe(() => {
       setIsSuggestionLoading(false);
     });
 
@@ -375,9 +372,7 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
     startWith(undefined),
     pairwise(),
     map(([prev, curr]) => {
-      const changes: Partial<DiscoverAppState> & {
-        lensRequestAdapter?: RequestAdapter;
-      } = {};
+      const changes: Partial<DiscoverAppState> & { lensRequestAdapter?: RequestAdapter } = {};
 
       if (!curr) {
         return changes;
