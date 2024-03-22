@@ -16,14 +16,6 @@
  */
 
 import type {
-  SetAlertAssigneesRequestBody,
-  SetAlertAssigneesResponse,
-} from '../../../common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
-import type {
-  SuggestUserProfilesRequestQuery,
-  SuggestUserProfilesResponse,
-} from '../../../common/api/detection_engine/users/suggest_user_profiles_route.gen';
-import type {
   GetAgentPolicySummaryRequestQuery,
   GetAgentPolicySummaryResponse,
 } from '../../../common/api/endpoint/policy/policy.gen';
@@ -32,9 +24,20 @@ import type {
   GetPolicyResponseResponse,
 } from '../../../common/api/endpoint/policy/policy.gen';
 import type {
+  GetEndpointSuggestionsRequestParams,
   GetEndpointSuggestionsRequestBody,
   GetEndpointSuggestionsResponse,
 } from '../../../common/api/endpoint/suggestions/get_suggestions.gen';
+import type {
+  SetAlertAssigneesRequestBody,
+  SetAlertAssigneesResponse,
+} from '../../../common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
+import type {
+  SuggestUserProfilesRequestQuery,
+  SuggestUserProfilesResponse,
+} from '../../../common/api/detection_engine/users/suggest_user_profiles_route.gen';
+import type { GetPrebuiltRulesAndTimelinesStatusResponse } from '../../../common/api/detection_engine/prebuilt_rules/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.gen';
+import type { InstallPrebuiltRulesAndTimelinesResponse } from '../../../common/api/detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
 import type {
   PerformBulkActionRequestQuery,
   PerformBulkActionRequestBody,
@@ -54,28 +57,6 @@ import type {
   ImportRulesResponse,
 } from '../../../common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from '../../../common/api/detection_engine/rule_management/read_tags/read_tags_route.gen';
-import type { GetPrebuiltRulesAndTimelinesStatusResponse } from '../../../common/api/detection_engine/prebuilt_rules/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.gen';
-import type { InstallPrebuiltRulesAndTimelinesResponse } from '../../../common/api/detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
-import type {
-  CreateRuleRequestBody,
-  CreateRuleResponse,
-} from '../../../common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
-import type {
-  PatchRuleRequestBody,
-  PatchRuleResponse,
-} from '../../../common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
-import type {
-  DeleteRuleRequestQuery,
-  DeleteRuleResponse,
-} from '../../../common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
-import type {
-  ReadRuleRequestQuery,
-  ReadRuleResponse,
-} from '../../../common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
-import type {
-  UpdateRuleRequestBody,
-  UpdateRuleResponse,
-} from '../../../common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
 import type {
   BulkCreateRulesRequestBody,
   BulkCreateRulesResponse,
@@ -89,42 +70,40 @@ import type {
   BulkPatchRulesResponse,
 } from '../../../common/api/detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
 import type {
+  CreateRuleRequestBody,
+  CreateRuleResponse,
+} from '../../../common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import type {
   BulkUpdateRulesRequestBody,
   BulkUpdateRulesResponse,
 } from '../../../common/api/detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
 import type {
+  DeleteRuleRequestQuery,
+  DeleteRuleResponse,
+} from '../../../common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
+import type {
+  PatchRuleRequestBody,
+  PatchRuleResponse,
+} from '../../../common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
+import type {
+  ReadRuleRequestQuery,
+  ReadRuleResponse,
+} from '../../../common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
+import type {
+  UpdateRuleRequestBody,
+  UpdateRuleResponse,
+} from '../../../common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
+import type {
   GetRuleExecutionEventsRequestQuery,
+  GetRuleExecutionEventsRequestParams,
   GetRuleExecutionEventsResponse,
 } from '../../../common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
 import type {
   GetRuleExecutionResultsRequestQuery,
+  GetRuleExecutionResultsRequestParams,
   GetRuleExecutionResultsResponse,
 } from '../../../common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import { KibanaServices } from '../lib/kibana';
-
-/*
- * Assigns users to alerts.
- */
-export const setAlertAssignees = (params: SetAlertAssigneesRequestBody, signal?: AbortSignal) =>
-  KibanaServices.get().http.fetch<SetAlertAssigneesResponse>(
-    '/api/detection_engine/signals/assignees',
-    {
-      body: JSON.stringify(params),
-      signal,
-    }
-  );
-
-/*
- * Suggests user profiles.
- */
-export const suggestUserProfiles = (query: SuggestUserProfilesRequestQuery, signal?: AbortSignal) =>
-  KibanaServices.get().http.fetch<SuggestUserProfilesResponse>(
-    '/internal/detection_engine/users/_find',
-    {
-      query,
-      signal,
-    }
-  );
 
 export const getAgentPolicySummary = (
   query: GetAgentPolicySummaryRequestQuery,
@@ -142,13 +121,54 @@ export const getPolicyResponse = (query: GetPolicyResponseRequestQuery, signal?:
   });
 
 export const getEndpointSuggestions = (
-  params: GetEndpointSuggestionsRequestBody,
+  body: GetEndpointSuggestionsRequestBody,
+  params: GetEndpointSuggestionsRequestParams,
   signal?: AbortSignal
 ) =>
   KibanaServices.get().http.fetch<GetEndpointSuggestionsResponse>(
-    '/api/endpoint/suggestions/{suggestion_type}',
+    replaceParams('/api/endpoint/suggestions/{suggestion_type}', params),
     {
-      body: JSON.stringify(params),
+      body: JSON.stringify(body),
+      signal,
+    }
+  );
+
+/*
+ * Assigns users to alerts.
+ */
+export const setAlertAssignees = (body: SetAlertAssigneesRequestBody, signal?: AbortSignal) =>
+  KibanaServices.get().http.fetch<SetAlertAssigneesResponse>(
+    '/api/detection_engine/signals/assignees',
+    {
+      body: JSON.stringify(body),
+      signal,
+    }
+  );
+
+/*
+ * Suggests user profiles.
+ */
+export const suggestUserProfiles = (query: SuggestUserProfilesRequestQuery, signal?: AbortSignal) =>
+  KibanaServices.get().http.fetch<SuggestUserProfilesResponse>(
+    '/internal/detection_engine/users/_find',
+    {
+      query,
+      signal,
+    }
+  );
+
+export const getPrebuiltRulesAndTimelinesStatus = (signal?: AbortSignal) =>
+  KibanaServices.get().http.fetch<GetPrebuiltRulesAndTimelinesStatusResponse>(
+    '/api/detection_engine/rules/prepackaged/_status',
+    {
+      signal,
+    }
+  );
+
+export const installPrebuiltRulesAndTimelines = (signal?: AbortSignal) =>
+  KibanaServices.get().http.fetch<InstallPrebuiltRulesAndTimelinesResponse>(
+    '/api/detection_engine/rules/prepackaged',
+    {
       signal,
     }
   );
@@ -157,14 +177,14 @@ export const getEndpointSuggestions = (
  * The bulk action is applied to all rules that match the filter or to the list of rules by their IDs.
  */
 export const performBulkAction = (
-  params: PerformBulkActionRequestBody,
+  body: PerformBulkActionRequestBody,
   query: PerformBulkActionRequestQuery,
   signal?: AbortSignal
 ) =>
   KibanaServices.get().http.fetch<PerformBulkActionResponse>(
     '/api/detection_engine/rules/_bulk_action',
     {
-      body: JSON.stringify(params),
+      body: JSON.stringify(body),
       query,
       signal,
     }
@@ -174,12 +194,12 @@ export const performBulkAction = (
  * Exports rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file - Actions, Exception lists. Prebuilt rules cannot be exported.
  */
 export const exportRules = (
-  params: ExportRulesRequestBody,
+  body: ExportRulesRequestBody,
   query: ExportRulesRequestQuery,
   signal?: AbortSignal
 ) =>
   KibanaServices.get().http.fetch<ExportRulesResponse>('/api/detection_engine/rules/_export', {
-    body: JSON.stringify(params),
+    body: JSON.stringify(body),
     query,
     signal,
   });
@@ -207,18 +227,38 @@ export const readTags = (signal?: AbortSignal) =>
     signal,
   });
 
-export const getPrebuiltRulesAndTimelinesStatus = (signal?: AbortSignal) =>
-  KibanaServices.get().http.fetch<GetPrebuiltRulesAndTimelinesStatusResponse>(
-    '/api/detection_engine/rules/prepackaged/_status',
+/*
+ * Creates new detection rules in bulk.
+ */
+export const bulkCreateRules = (body: BulkCreateRulesRequestBody, signal?: AbortSignal) =>
+  KibanaServices.get().http.fetch<BulkCreateRulesResponse>(
+    '/api/detection_engine/rules/_bulk_create',
     {
+      body: JSON.stringify(body),
       signal,
     }
   );
 
-export const installPrebuiltRulesAndTimelines = (signal?: AbortSignal) =>
-  KibanaServices.get().http.fetch<InstallPrebuiltRulesAndTimelinesResponse>(
-    '/api/detection_engine/rules/prepackaged',
+/*
+ * Deletes multiple rules.
+ */
+export const bulkDeleteRules = (body: BulkDeleteRulesRequestBody, signal?: AbortSignal) =>
+  KibanaServices.get().http.fetch<BulkDeleteRulesResponse>(
+    '/api/detection_engine/rules/_bulk_delete',
     {
+      body: JSON.stringify(body),
+      signal,
+    }
+  );
+
+/*
+ * Updates multiple rules using the `PATCH` method.
+ */
+export const bulkPatchRules = (body: BulkPatchRulesRequestBody, signal?: AbortSignal) =>
+  KibanaServices.get().http.fetch<BulkPatchRulesResponse>(
+    '/api/detection_engine/rules/_bulk_update',
+    {
+      body: JSON.stringify(body),
       signal,
     }
   );
@@ -226,20 +266,23 @@ export const installPrebuiltRulesAndTimelines = (signal?: AbortSignal) =>
 /*
  * Create a single detection rule
  */
-export const createRule = (params: CreateRuleRequestBody, signal?: AbortSignal) =>
+export const createRule = (body: CreateRuleRequestBody, signal?: AbortSignal) =>
   KibanaServices.get().http.fetch<CreateRuleResponse>('/api/detection_engine/rules', {
-    body: JSON.stringify(params),
+    body: JSON.stringify(body),
     signal,
   });
 
 /*
- * Patch a single rule
+ * Updates multiple rules using the `PUT` method.
  */
-export const patchRule = (params: PatchRuleRequestBody, signal?: AbortSignal) =>
-  KibanaServices.get().http.fetch<PatchRuleResponse>('/api/detection_engine/rules', {
-    body: JSON.stringify(params),
-    signal,
-  });
+export const bulkUpdateRules = (body: BulkUpdateRulesRequestBody, signal?: AbortSignal) =>
+  KibanaServices.get().http.fetch<BulkUpdateRulesResponse>(
+    '/api/detection_engine/rules/_bulk_update',
+    {
+      body: JSON.stringify(body),
+      signal,
+    }
+  );
 
 /*
  * Deletes a single rule using the `rule_id` or `id` field.
@@ -247,6 +290,15 @@ export const patchRule = (params: PatchRuleRequestBody, signal?: AbortSignal) =>
 export const deleteRule = (query: DeleteRuleRequestQuery, signal?: AbortSignal) =>
   KibanaServices.get().http.fetch<DeleteRuleResponse>('/api/detection_engine/rules', {
     query,
+    signal,
+  });
+
+/*
+ * Patch a single rule
+ */
+export const patchRule = (body: PatchRuleRequestBody, signal?: AbortSignal) =>
+  KibanaServices.get().http.fetch<PatchRuleResponse>('/api/detection_engine/rules', {
+    body: JSON.stringify(body),
     signal,
   });
 
@@ -262,66 +314,19 @@ export const readRule = (query: ReadRuleRequestQuery, signal?: AbortSignal) =>
 /*
  * Update a single rule
  */
-export const updateRule = (params: UpdateRuleRequestBody, signal?: AbortSignal) =>
+export const updateRule = (body: UpdateRuleRequestBody, signal?: AbortSignal) =>
   KibanaServices.get().http.fetch<UpdateRuleResponse>('/api/detection_engine/rules', {
-    body: JSON.stringify(params),
+    body: JSON.stringify(body),
     signal,
   });
 
-/*
- * Creates new detection rules in bulk.
- */
-export const bulkCreateRules = (params: BulkCreateRulesRequestBody, signal?: AbortSignal) =>
-  KibanaServices.get().http.fetch<BulkCreateRulesResponse>(
-    '/api/detection_engine/rules/_bulk_create',
-    {
-      body: JSON.stringify(params),
-      signal,
-    }
-  );
-
-/*
- * Deletes multiple rules.
- */
-export const bulkDeleteRules = (params: BulkDeleteRulesRequestBody, signal?: AbortSignal) =>
-  KibanaServices.get().http.fetch<BulkDeleteRulesResponse>(
-    '/api/detection_engine/rules/_bulk_delete',
-    {
-      body: JSON.stringify(params),
-      signal,
-    }
-  );
-
-/*
- * Updates multiple rules using the `PATCH` method.
- */
-export const bulkPatchRules = (params: BulkPatchRulesRequestBody, signal?: AbortSignal) =>
-  KibanaServices.get().http.fetch<BulkPatchRulesResponse>(
-    '/api/detection_engine/rules/_bulk_update',
-    {
-      body: JSON.stringify(params),
-      signal,
-    }
-  );
-
-/*
- * Updates multiple rules using the `PUT` method.
- */
-export const bulkUpdateRules = (params: BulkUpdateRulesRequestBody, signal?: AbortSignal) =>
-  KibanaServices.get().http.fetch<BulkUpdateRulesResponse>(
-    '/api/detection_engine/rules/_bulk_update',
-    {
-      body: JSON.stringify(params),
-      signal,
-    }
-  );
-
 export const getRuleExecutionEvents = (
+  params: GetRuleExecutionEventsRequestParams,
   query: GetRuleExecutionEventsRequestQuery,
   signal?: AbortSignal
 ) =>
   KibanaServices.get().http.fetch<GetRuleExecutionEventsResponse>(
-    '/internal/detection_engine/rules/{ruleId}/execution/events',
+    replaceParams('/internal/detection_engine/rules/{ruleId}/execution/events', params),
     {
       query,
       signal,
@@ -329,13 +334,29 @@ export const getRuleExecutionEvents = (
   );
 
 export const getRuleExecutionResults = (
+  params: GetRuleExecutionResultsRequestParams,
   query: GetRuleExecutionResultsRequestQuery,
   signal?: AbortSignal
 ) =>
   KibanaServices.get().http.fetch<GetRuleExecutionResultsResponse>(
-    '/internal/detection_engine/rules/{ruleId}/execution/results',
+    replaceParams('/internal/detection_engine/rules/{ruleId}/execution/results', params),
     {
       query,
       signal,
     }
   );
+
+/**
+ * Replaces placeholders in a path string with provided param value
+ *
+ * @param path Path string with placeholders for params
+ * @param params Object with params to replace
+ * @returns Path string with params replaced
+ */
+function replaceParams(path: string, params: Record<string, string | number>): string {
+  let output = path;
+  Object.entries(params).forEach(([param, value]) => {
+    output = path.replace(`{${param}}`, `${value}`);
+  });
+  return output;
+}

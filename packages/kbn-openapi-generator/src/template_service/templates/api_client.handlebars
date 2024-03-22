@@ -12,6 +12,7 @@ import { KibanaServices } from '../lib/kibana';
 {{#each operations}}
 import { 
   {{operationId}}RequestQuery,
+  {{operationId}}RequestParams,
   {{operationId}}RequestBody,
   {{operationId}}Response
 } from '{{replace sourcePath 'schema.yaml' 'gen'}}';
@@ -25,17 +26,24 @@ import {
 {{/if}}
 export async const {{camelCase operationId}} = (
 {{#if requestBody}}
-params: {{operationId}}RequestBody, 
+body: {{operationId}}RequestBody, 
+{{/if}}
+{{#if requestParams}}
+params: {{operationId}}RequestParams, 
 {{/if}}
 {{#if requestQuery}}
 query: {{operationId}}RequestQuery,
 {{/if}}
 signal?: AbortSignal
 ) => KibanaServices.get().http.fetch<{{operationId}}Response>(
-    '{{path}}',
+  {{#if requestParams}}
+    replaceParams('{{path}}', params)
+    {{else}}
+    '{{path}}'
+  {{/if}},
     {
     {{#if requestBody}}
-      body: JSON.stringify(params),
+      body: JSON.stringify(body),
     {{/if}}
     {{#if requestQuery}}
     query,
@@ -45,3 +53,18 @@ signal?: AbortSignal
   );
 
 {{/each}}
+
+/**
+ * Replaces placeholders in a path string with provided param value
+ *
+ * @param path Path string with placeholders for params
+ * @param params Object with params to replace
+ * @returns Path string with params replaced
+ */
+function replaceParams(path: string, params: Record<string, string | number>): string {
+  let output = path;
+  Object.entries(params).forEach(([param, value]) => {
+    output = path.replace(`{${param}}`, `${value}`);
+  });
+  return output;
+}
