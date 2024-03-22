@@ -11,12 +11,8 @@ import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { Dataset, Integration } from '../../../common/datasets';
 import {
   DATA_SOURCE_SELECTOR_WIDTH,
-  noDatasetsDescriptionLabel,
-  noDatasetsLabel,
   noDataViewsDescriptionLabel,
   noDataViewsLabel,
-  noIntegrationsDescriptionLabel,
-  noIntegrationsLabel,
 } from './constants';
 import { DatasetSelectionHandler } from './types';
 import ListStatus, { ListStatusProps } from './sub_components/list_status';
@@ -84,38 +80,6 @@ export const createAllLogsItem = () => {
     'data-test-subj': 'dataSourceSelectorShowAllLogs',
     iconType: allLogs.iconType,
     name: allLogs.title,
-  };
-};
-
-export const createIntegrationStatusItem = (
-  props: Omit<ListStatusProps, 'description' | 'title'>
-) => {
-  return {
-    disabled: true,
-    name: (
-      <ListStatus
-        key="integrationStatusItem"
-        description={noIntegrationsDescriptionLabel}
-        title={noIntegrationsLabel}
-        {...props}
-      />
-    ),
-  };
-};
-
-export const createUncategorizedStatusItem = (
-  props: Omit<ListStatusProps, 'description' | 'title'>
-) => {
-  return {
-    disabled: true,
-    name: (
-      <ListStatus
-        key="uncategorizedStatusItem"
-        description={noDatasetsDescriptionLabel}
-        title={noDatasetsLabel}
-        {...props}
-      />
-    ),
   };
 };
 

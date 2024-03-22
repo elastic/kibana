@@ -12,7 +12,7 @@ interface IntersectionOptions {
   onIntersecting?: () => void;
 }
 
-export function useIntersectionRef<ElementType extends HTMLElement = HTMLButtonElement>({
+export function useIntersectionRef<ElementType extends HTMLElement = HTMLElement>({
   onIntersecting,
 }: IntersectionOptions = {}) {
   const [intersectionRef, setRef] = useState<ElementType | null>(null);

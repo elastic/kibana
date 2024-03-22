@@ -22,6 +22,7 @@ import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import { useIntersectionRef } from '../../../hooks/use_intersection_ref';
 import { INTEGRATIONS_PANEL_ID } from '../constants';
 
 interface IntegrationsListProps {
@@ -34,8 +35,11 @@ export function IntegrationsList({
   children,
   items,
   statusPrompt,
+  onScrollEnd,
   ...props
 }: IntegrationsListProps) {
+  const [spyRef] = useIntersectionRef({ onIntersecting: onScrollEnd });
+
   const shouldDisplayPrompt = Boolean(!items || items.length === 0);
 
   return (
@@ -55,12 +59,17 @@ export function IntegrationsList({
       {shouldDisplayPrompt && statusPrompt}
       {!shouldDisplayPrompt && (
         <IntegrationListWrapper className="eui-yScroll" paddingSize="none" hasShadow={false}>
-          {items.map((integration, pos) => (
-            <>
-              <IntegrationItem integration={integration} />
-              {pos < items.length - 1 ? rule : null}
-            </>
-          ))}
+          {items.map((integration, pos) => {
+            const isLastItem = pos === items.length - 1;
+
+            return (
+              <>
+                {isLastItem && <span ref={spyRef} />}
+                <IntegrationItem integration={integration} />
+                {isLastItem ? null : rule}
+              </>
+            );
+          })}
         </IntegrationListWrapper>
       )}
     </EuiPanel>
@@ -205,7 +214,7 @@ const ListColumn = styled(EuiFlexItem)`
 `;
 
 const IntegrationListWrapper = styled(EuiPanel)`
-  max-height: 520px;
+  max-height: 400px;
 `;
 
 const indentationStyle = css`

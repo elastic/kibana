@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiFlexGroup, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiFlexGroup, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
 import styled from '@emotion/styled';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
 import {
   dataViewsLabel,
@@ -17,7 +16,6 @@ import {
   DATA_VIEWS_TAB_ID,
   DATA_SOURCE_SELECTOR_WIDTH,
   integrationsLabel,
-  INTEGRATIONS_PANEL_ID,
   INTEGRATIONS_TAB_ID,
   noIntegrationsDescriptionLabel,
   noIntegrationsLabel,
@@ -28,11 +26,7 @@ import { DataViewMenuItem } from './sub_components/data_view_menu_item';
 import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
 import { DataSourceSelectorProps } from './types';
-import {
-  buildIntegrationsTree,
-  createDataViewsStatusItem,
-  createIntegrationStatusItem,
-} from './utils';
+import { createDataViewsStatusItem } from './utils';
 import { AddDataButton } from './sub_components/add_data_button';
 import { IntegrationsList } from './sub_components/integrations_list';
 import { DataViewList } from './sub_components/data_views_list';
@@ -100,8 +94,6 @@ export function DataSourceSelector({
     onUncategorizedReload,
     onSelectionChange,
   });
-
-  const [setSpyRef] = useIntersectionRef({ onIntersecting: scrollToIntegrationsBottom });
 
   // const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
   //   if (!integrations || integrations.length === 0) {
@@ -250,6 +242,7 @@ export function DataSourceSelector({
       <IntegrationsList
         items={integrations}
         hidden={tabId !== INTEGRATIONS_TAB_ID}
+        onScrollEnd={scrollToIntegrationsBottom}
         statusPrompt={integrationsStatusPrompt}
       >
         <SearchControls
