@@ -46,7 +46,7 @@ export function DocViewer({ docViews, ...renderProps }: DocViewerProps) {
   }
 
   return (
-    <div className="kbnDocViewer" data-test-subj="kbnDocViewer">
+    <div className="kbnDocViewer eui-fullHeight" data-test-subj="kbnDocViewer">
       <EuiTabbedContent size="s" tabs={tabs} />
     </div>
   );

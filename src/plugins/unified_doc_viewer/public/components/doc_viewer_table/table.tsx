@@ -7,13 +7,12 @@
  */
 
 import './table.scss';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
   EuiSpacer,
-  EuiTablePagination,
   EuiSelectableMessage,
   EuiI18n,
   EuiDataGrid,
@@ -85,9 +84,6 @@ const getPageSize = (storage: Storage): number => {
   const pageSize = Number(storage.get(PAGE_SIZE));
   return pageSize && PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
 };
-const updatePageSize = (newPageSize: number, storage: Storage) => {
-  storage.set(PAGE_SIZE, newPageSize);
-};
 
 const getSearchText = (storage: Storage) => {
   return storage.get(SEARCH_TEXT) || '';
@@ -109,6 +105,7 @@ export const DocViewerTable = ({
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
+  const height = useElementHeight('kbnDocViewer');
 
   const [searchText, setSearchText] = useState(getSearchText(storage));
   const [pinnedFields, setPinnedFields] = useState<string[]>(
@@ -255,20 +252,10 @@ export const DocViewerTable = ({
       }
     );
 
-  const { curPageIndex, pageSize, totalPages, startIndex, changePageIndex, changePageSize } =
-    usePager({
-      initialPageSize: getPageSize(storage),
-      totalItems: restItems.length,
-    });
-  const showPagination = totalPages !== 0;
-
-  const onChangePageSize = useCallback(
-    (newPageSize: number) => {
-      updatePageSize(newPageSize, storage);
-      changePageSize(newPageSize);
-    },
-    [changePageSize, storage]
-  );
+  const { startIndex } = usePager({
+    initialPageSize: getPageSize(storage),
+    totalItems: restItems.length,
+  });
 
   const gridColumns: EuiDataGridProps['columns'] = [
     {
@@ -315,10 +302,15 @@ export const DocViewerTable = ({
     },
   ];
 
-  const rows = [...pinnedItems, ...restItems.slice(startIndex, pageSize + startIndex)];
+  const rows = [...pinnedItems, ...restItems.slice(startIndex)];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      responsive={false}
+      className="eui-fullHeight"
+    >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
       </EuiFlexItem>
@@ -351,6 +343,8 @@ export const DocViewerTable = ({
           <EuiFlexItem grow={false}>
             {/* Transform props into useMemo/useCallback */}
             <EuiDataGrid
+              pagination={undefined}
+              height={height}
               aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
                 defaultMessage: 'Field values',
               })}
@@ -418,21 +412,41 @@ export const DocViewerTable = ({
       <EuiFlexItem grow={false}>
         <EuiSpacer size="m" />
       </EuiFlexItem>
-
-      {/* TODO: what pagination should we use? */}
-
-      {showPagination && (
-        <EuiFlexItem grow={false}>
-          <EuiTablePagination
-            activePage={curPageIndex}
-            itemsPerPage={pageSize}
-            itemsPerPageOptions={PAGE_SIZE_OPTIONS}
-            pageCount={totalPages}
-            onChangeItemsPerPage={onChangePageSize}
-            onChangePage={changePageIndex}
-          />
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 };
+
+// horrible hack, pls don't do this at home
+function useElementHeight(className: string) {
+  // State to store the element's width
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    // Select the first element with the given class name
+    const element = document.getElementsByClassName(className)[0];
+
+    if (!element) {
+      return;
+    }
+
+    // Function to update the height state
+    const updateHeight = debounce(() => {
+      const newHeight = element.getBoundingClientRect().height;
+      setHeight(newHeight); // Update the width in state
+    }, 300); // Debounce time in milliseconds
+
+    // Update width initially
+    updateHeight();
+
+    // Create a ResizeObserver instance and observe the element
+    const resizeObserver = new ResizeObserver(updateHeight);
+    resizeObserver.observe(element);
+
+    // Cleanup function to unobserve the element and cancel the debounced function
+    return () => {
+      updateHeight.cancel(); // Cancel any pending debounced function
+      resizeObserver.unobserve(element);
+    };
+  }, [className]); // Effect dependencies
+  return height - 80; // Return the current height - some padding, just a hack
+}

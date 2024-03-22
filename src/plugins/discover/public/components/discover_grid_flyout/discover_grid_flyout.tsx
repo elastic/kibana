@@ -266,7 +266,15 @@ export function DiscoverGridFlyout({
             </>
           )}
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
+        <EuiFlyoutBody
+          css={css`
+            .euiFlyoutBody__overflowContent {
+              height: 100%;
+            }
+          `}
+        >
+          {bodyContent}
+        </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
