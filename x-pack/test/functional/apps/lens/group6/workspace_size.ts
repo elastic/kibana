@@ -233,7 +233,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('gauge size (absolute pixels) - circle', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'circle');
+        await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'circular');
       });
       await assertWorkspaceDimensions('600px', '400px');
     });

@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should seamlessly switch to circular gauge chart without losing configuration', async () => {
-      await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'circle');
+      await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'circular');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.circle);
