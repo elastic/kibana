@@ -19,9 +19,6 @@ import {
   integrationsLabel,
   INTEGRATIONS_PANEL_ID,
   INTEGRATIONS_TAB_ID,
-  uncategorizedLabel,
-  UNCATEGORIZED_PANEL_ID,
-  UNCATEGORIZED_TAB_ID,
 } from './constants';
 import { useDataSourceSelector } from './state_machine/use_data_source_selector';
 import { SelectorPopover } from './sub_components/selector_popover';
@@ -37,6 +34,7 @@ import {
 } from './utils';
 import { AddDataButton } from './sub_components/add_data_button';
 import { IntegrationsList } from './sub_components/integrations_list';
+import { DataViewList } from './sub_components/data_views_list';
 
 export function DataSourceSelector({
   datasets,
@@ -71,12 +69,10 @@ export function DataSourceSelector({
   onUncategorizedTabClick,
 }: DataSourceSelectorProps) {
   const {
-    panelId,
     search,
     tabId,
     isOpen,
     isAllMode,
-    changePanel,
     closePopover,
     scrollToIntegrationsBottom,
     searchByName,
@@ -85,7 +81,6 @@ export function DataSourceSelector({
     selectDataView,
     sortByOrder,
     switchToIntegrationsTab,
-    switchToUncategorizedTab,
     switchToDataViewsTab,
     togglePopover,
   } = useDataSourceSelector({
@@ -106,52 +101,52 @@ export function DataSourceSelector({
 
   const [setSpyRef] = useIntersectionRef({ onIntersecting: scrollToIntegrationsBottom });
 
-  const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
-    if (!integrations || integrations.length === 0) {
-      return {
-        items: [
-          createIntegrationStatusItem({
-            data: integrations,
-            error: integrationsError,
-            isLoading: isLoadingIntegrations,
-            onRetry: onIntegrationsReload,
-          }),
-        ],
-        panels: [],
-      };
-    }
+  // const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
+  //   if (!integrations || integrations.length === 0) {
+  //     return {
+  //       items: [
+  //         createIntegrationStatusItem({
+  //           data: integrations,
+  //           error: integrationsError,
+  //           isLoading: isLoadingIntegrations,
+  //           onRetry: onIntegrationsReload,
+  //         }),
+  //       ],
+  //       panels: [],
+  //     };
+  //   }
 
-    return buildIntegrationsTree({
-      integrations,
-      onDatasetSelected: selectDataset,
-      spyRef: setSpyRef,
-    });
-  }, [
-    integrations,
-    integrationsError,
-    isLoadingIntegrations,
-    selectDataset,
-    onIntegrationsReload,
-    setSpyRef,
-  ]);
+  //   return buildIntegrationsTree({
+  //     integrations,
+  //     onDatasetSelected: selectDataset,
+  //     spyRef: setSpyRef,
+  //   });
+  // }, [
+  //   integrations,
+  //   integrationsError,
+  //   isLoadingIntegrations,
+  //   selectDataset,
+  //   onIntegrationsReload,
+  //   setSpyRef,
+  // ]);
 
-  const uncategorizedItems = useMemo(() => {
-    if (!datasets || datasets.length === 0) {
-      return [
-        createUncategorizedStatusItem({
-          data: datasets,
-          error: datasetsError,
-          isLoading: isLoadingUncategorized,
-          onRetry: onUncategorizedReload,
-        }),
-      ];
-    }
+  // const uncategorizedItems = useMemo(() => {
+  //   if (!datasets || datasets.length === 0) {
+  //     return [
+  //       createUncategorizedStatusItem({
+  //         data: datasets,
+  //         error: datasetsError,
+  //         isLoading: isLoadingUncategorized,
+  //         onRetry: onUncategorizedReload,
+  //       }),
+  //     ];
+  //   }
 
-    return datasets.map((dataset) => ({
-      name: dataset.title,
-      onClick: () => selectDataset(dataset),
-    }));
-  }, [datasets, datasetsError, isLoadingUncategorized, selectDataset, onUncategorizedReload]);
+  //   return datasets.map((dataset) => ({
+  //     name: dataset.title,
+  //     onClick: () => selectDataset(dataset),
+  //   }));
+  // }, [datasets, datasetsError, isLoadingUncategorized, selectDataset, onUncategorizedReload]);
 
   const dataViewsItems = useMemo(() => {
     if (!dataViews || dataViews.length === 0) {
@@ -228,32 +223,24 @@ export function DataSourceSelector({
     >
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <Tabs bottomBorder={false}>{tabEntries}</Tabs>
-        {(tabId === INTEGRATIONS_TAB_ID || tabId === UNCATEGORIZED_TAB_ID) && <AddDataButton />}
+        {tabId === INTEGRATIONS_TAB_ID && <AddDataButton />}
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="none" />
-      <SearchControls
-        key={panelId}
-        search={search}
-        onSearch={searchByName}
-        onSort={sortByOrder}
-        isLoading={isSearchingIntegrations || isLoadingUncategorized}
-      />
       <EuiHorizontalRule margin="none" />
       {/* For a smoother user experience, we keep each tab content mount and we only show the select one
       "hiding" all the others. Unmounting mounting each tab content on change makes it feel glitchy,
       while the tradeoff of keeping the contents in memory provide a better UX. */}
       {/* Integrations tab content */}
-      <IntegrationsList
-        id={INTEGRATIONS_PANEL_ID}
-        items={integrations}
-        hidden={tabId !== INTEGRATIONS_TAB_ID}
-        className="eui-yScroll"
-        data-test-subj="integrationsContextMenu"
-      />
+      <IntegrationsList items={integrations} hidden={tabId !== INTEGRATIONS_TAB_ID}>
+        <SearchControls
+          key={INTEGRATIONS_TAB_ID}
+          search={search}
+          onSearch={searchByName}
+          isLoading={isSearchingIntegrations || isLoadingUncategorized}
+        />
+      </IntegrationsList>
       {/* Data views tab content */}
-      <ContextMenu
+      <DataViewList
         hidden={tabId !== DATA_VIEWS_TAB_ID}
-        initialPanelId={DATA_VIEWS_PANEL_ID}
         panels={[
           {
             id: DATA_VIEWS_PANEL_ID,
@@ -262,10 +249,15 @@ export function DataSourceSelector({
             items: dataViewsItems,
           },
         ]}
-        className="eui-yScroll"
-        data-test-subj="dataViewsContextMenu"
-        size="s"
-      />
+      >
+        <SearchControls
+          key={DATA_VIEWS_TAB_ID}
+          search={search}
+          onSearch={searchByName}
+          onSort={sortByOrder}
+        />
+        <EuiHorizontalRule margin="none" />
+      </DataViewList>
       <EuiHorizontalRule margin="none" />
       <SelectorFooter>
         <ShowAllLogsButton isSelected={isAllMode} onClick={selectAllLogs} />
@@ -277,9 +269,4 @@ export function DataSourceSelector({
 
 const Tabs = styled(EuiTabs)`
   padding: 0 ${euiThemeVars.euiSizeS};
-`;
-
-const ContextMenu = styled(EuiContextMenu)`
-  max-height: 440px;
-  transition: none !important;
 `;

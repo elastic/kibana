@@ -9,11 +9,9 @@ import { useCallback } from 'react';
 import { useInterpret, useSelector } from '@xstate/react';
 import { isAllDatasetSelection } from '../../../../common/data_source_selection';
 import {
-  ChangePanelHandler,
   DatasetSelectionHandler,
   DataSourceSelectorSearchHandler,
   DataViewSelectionHandler,
-  PanelId,
 } from '../types';
 import { createDataSourceSelectorStateMachine } from './state_machine';
 import { DataSourceSelectorStateMachineDependencies } from './types';
@@ -55,7 +53,6 @@ export const useDataSourceSelector = ({
     state.matches('popover.open')
   );
 
-  const panelId = useSelector(dataSourceSelectorStateService, (state) => state.context.panelId);
   const search = useSelector(dataSourceSelectorStateService, (state) => state.context.search);
   const selection = useSelector(dataSourceSelectorStateService, (state) => state.context.selection);
   const tabId = useSelector(dataSourceSelectorStateService, (state) => state.context.tabId);
@@ -65,22 +62,8 @@ export const useDataSourceSelector = ({
     [dataSourceSelectorStateService]
   );
 
-  const switchToUncategorizedTab = useCallback(
-    () => dataSourceSelectorStateService.send({ type: 'SWITCH_TO_UNCATEGORIZED_TAB' }),
-    [dataSourceSelectorStateService]
-  );
-
   const switchToDataViewsTab = useCallback(
     () => dataSourceSelectorStateService.send({ type: 'SWITCH_TO_DATA_VIEWS_TAB' }),
-    [dataSourceSelectorStateService]
-  );
-
-  const changePanel = useCallback<ChangePanelHandler>(
-    (panelDetails) =>
-      dataSourceSelectorStateService.send({
-        type: 'CHANGE_PANEL',
-        panelId: panelDetails.panelId as PanelId,
-      }),
     [dataSourceSelectorStateService]
   );
 
@@ -131,7 +114,6 @@ export const useDataSourceSelector = ({
 
   return {
     // Data
-    panelId,
     search,
     selection,
     tabId,
@@ -139,7 +121,6 @@ export const useDataSourceSelector = ({
     isOpen,
     isAllMode: isAllDatasetSelection(selection),
     // Actions
-    changePanel,
     closePopover,
     scrollToIntegrationsBottom,
     searchByName,
@@ -148,7 +129,6 @@ export const useDataSourceSelector = ({
     selectDataView,
     sortByOrder,
     switchToIntegrationsTab,
-    switchToUncategorizedTab,
     switchToDataViewsTab,
     togglePopover,
   };

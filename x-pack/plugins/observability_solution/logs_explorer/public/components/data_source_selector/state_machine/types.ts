@@ -18,13 +18,12 @@ import {
   SearchIntegrations,
 } from '../../../hooks/use_integrations';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { DataSourceSelectorSearchParams, PanelId, TabId } from '../types';
+import { DataSourceSelectorSearchParams, TabId } from '../types';
 
 export interface DefaultDataSourceSelectorContext {
   selection: DataSourceSelection;
   tabId: TabId;
-  panelId: PanelId;
-  searchCache: IHashedCache<PanelId | TabId, DataSourceSelectorSearchParams>;
+  searchCache: IHashedCache<TabId, DataSourceSelectorSearchParams>;
   search: DataSourceSelectorSearchParams;
 }
 
@@ -51,14 +50,6 @@ export type DataSourceSelectorTypestate =
     }
   | {
       value: 'popover.open.integrationsTab.listingIntegrations';
-      context: DefaultDataSourceSelectorContext;
-    }
-  | {
-      value: 'popover.open.integrationsTab.listingIntegrationStreams';
-      context: DefaultDataSourceSelectorContext;
-    }
-  | {
-      value: 'popover.open.uncategorizedTab';
       context: DefaultDataSourceSelectorContext;
     }
   | {
@@ -99,14 +90,7 @@ export type DataSourceSelectorEvent =
       type: 'SWITCH_TO_INTEGRATIONS_TAB';
     }
   | {
-      type: 'SWITCH_TO_UNCATEGORIZED_TAB';
-    }
-  | {
       type: 'SWITCH_TO_DATA_VIEWS_TAB';
-    }
-  | {
-      type: 'CHANGE_PANEL';
-      panelId: PanelId;
     }
   | {
       type: 'SELECT_DATASET';

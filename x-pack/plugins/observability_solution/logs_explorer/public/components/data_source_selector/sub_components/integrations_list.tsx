@@ -20,6 +20,7 @@ import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import { INTEGRATIONS_PANEL_ID } from '../constants';
 
 interface IntegrationsListProps {
   items: unknown[];
@@ -27,28 +28,23 @@ interface IntegrationsListProps {
 
 const rule = <EuiHorizontalRule margin="none" />;
 
-export function IntegrationsList({
-  items,
-  integrationsCount,
-  datasetsCount,
-  ...props
-}: IntegrationsListProps) {
+export function IntegrationsList({ children, items, ...props }: IntegrationsListProps) {
   return (
-    <>
-      <CounterCaption
-        integrationsCount={totalIntegrationsCount}
-        datasetsCount={totalDatasetsCount}
-      />
+    <div {...props} id={INTEGRATIONS_PANEL_ID} data-test-subj="integrationsContextMenu">
+      {children}
+      <Counter totalIntegrationsCount={items.length} totalDatasetsCount={50} />
       {rule}
       <Header />
       {rule}
-      {items.map((integration, pos) => (
-        <>
-          <IntegrationItem integration={integration} />
-          {pos < items.length - 1 ? rule : null}
-        </>
-      ))}
-    </>
+      <div className="eui-yScroll">
+        {items.map((integration, pos) => (
+          <>
+            <IntegrationItem integration={integration} />
+            {pos < items.length - 1 ? rule : null}
+          </>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -173,9 +169,9 @@ function Sortable({ children, isAscending = false, ...props }) {
   );
 }
 
-function CounterCaption({ totalDatasetsCount, totalIntegrationsCount }) {
+function Counter({ totalDatasetsCount, totalIntegrationsCount }) {
   return (
-    <EuiText>
+    <EuiText size="xs" color="subdued" css={counterStyle}>
       <p>
         {i18n.translate('xpack.logsExplorer.dataSourceSelector.counter', {
           defaultMessage: '{totalIntegrationsCount} integrations, {totalDatasetsCount} datasets',
@@ -192,4 +188,9 @@ function CounterCaption({ totalDatasetsCount, totalIntegrationsCount }) {
 const indentationStyle = css`
   padding-left: ${euiThemeVars.euiSizeL};
   margin-inline-start: ${euiThemeVars.euiSizeXS};
+`;
+
+const counterStyle = css`
+  padding-left: ${euiThemeVars.euiSizeS};
+  margin-bottom: ${euiThemeVars.euiSizeS};
 `;

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type {
   DataSourceSelectionChangeHandler,
   DataSourceSelection,
 } from '../../../common/data_source_selection';
 import { SortOrder } from '../../../common/latest';
-import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
+import { Dataset, Integration } from '../../../common/datasets';
 import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
 import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
 import {
@@ -19,12 +18,7 @@ import {
   ReloadIntegrations,
   SearchIntegrations,
 } from '../../hooks/use_integrations';
-import {
-  DATA_VIEWS_TAB_ID,
-  INTEGRATIONS_PANEL_ID,
-  INTEGRATIONS_TAB_ID,
-  UNCATEGORIZED_TAB_ID,
-} from './constants';
+import { DATA_VIEWS_TAB_ID, INTEGRATIONS_TAB_ID } from './constants';
 import {
   IsDataViewAllowed,
   IsDataViewAvailable,
@@ -87,15 +81,9 @@ export interface DataSourceSelectorProps {
   onSelectionChange: DataSourceSelectionChangeHandler;
 }
 
-export type PanelId = typeof INTEGRATIONS_PANEL_ID | IntegrationId;
-
-export type TabId =
-  | typeof INTEGRATIONS_TAB_ID
-  | typeof UNCATEGORIZED_TAB_ID
-  | typeof DATA_VIEWS_TAB_ID;
+export type TabId = typeof INTEGRATIONS_TAB_ID | typeof DATA_VIEWS_TAB_ID;
 
 export interface SearchParams {
-  integrationId?: PanelId;
   name: string;
   sortOrder: SortOrder;
 }
@@ -103,8 +91,6 @@ export interface SearchParams {
 export type DataSourceSelectorSearchParams = Pick<SearchParams, 'name' | 'sortOrder'>;
 
 export type DataSourceSelectorSearchHandler = (params: DataSourceSelectorSearchParams) => void;
-
-export type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId }) => void;
 
 export type DatasetSelectionHandler = (dataset: Dataset) => void;
 

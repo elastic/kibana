@@ -13,7 +13,7 @@ import {
   isDataViewSelection,
   SingleDatasetSelection,
 } from '../../../../common/data_source_selection';
-import { DATA_VIEWS_TAB_ID, INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from '../constants';
+import { DATA_VIEWS_TAB_ID, INTEGRATIONS_TAB_ID } from '../constants';
 import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {
   DataSourceSelectorContext,
@@ -26,7 +26,7 @@ import {
 export const createPureDataSourceSelectorStateMachine = (
   initialContext: Partial<DefaultDataSourceSelectorContext> = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6AB3PoDcwaTDzsIBiAFQHkA4gIAyAUQDaABgC6iUPVgBLdIvIA7OSACeiACwAmXdQDMANmMB2UwYAcu4wEYH+gDQgAHogdmj5yU9MATmMAVmNjfQcAXyi3NExsXAJiMio6BnJmGgYwNS4AYWE+PAkZTQVlVQ0kD0QbCwtqSX1TSXNAh0lJQIsQtx0EUycmyTNRm2abSOMYuIwsHHwiUgoaeiYWahy8-iExKVkaipV1TU8EGxsHE2ddc11dBwtAyP7EEN0Q6lMLfS6Ohy6QK6eqzEDxBZJZapNYZLJbWi5LglMT5HgAfQAgsJhOiigI8OjkJieJiSjwDuUOJVTjVzjYftQLA4JsZgm1eoFTG9BlMTL1wqNAiEGfowRDEksUqt0htsoi1NRFGp0GAoJQMFVYDxUAAjZEAdQAkjx8gAJdH8dEAVQAcvkSaIBHwAEpGgBaomQlsxACFKUdqSdqqBzgBaJ6SajCwLA5n+YxTYw8pzGKNWfT6YwPX4OEIi8XzSXJFZpdaZTbbJUqtUa4PavWGk3my18IkkzHogBqRtEBsJpP9ZUDSmDZ0QkX01AM1m6jjzbI+Ke86dMmezulz+ZshYSixLMNlFfluWrqvVmvUDd11EIilgKjUUCNNYv9YKZsxtoEonRAAUv1EYQA3kIMqnHBBOkCagWn0D4bDMIIJlMGweV6a5hTZIF9CsZoWV3SEpVLWE5QRU9lXPOstR1G87wfZVn1fKir2RfIXT4HFW3RI1bR4J0XRJI0+FtQlfT4Hh+AAWRAkBjnAulEDDTMvhCCxs0cO5QhZQIeVUqcggcYJVLMCIHFMAji2hGVy3hKsKNrS81GvW970fRjKMc2BkVETEXRbX0AE10VtTFJNKQ5QNHeTQ0U+wvjaSI7BCLpLE+XQeWsaC4JQsILAZBpolicEi33KyyzhSsFTPBz6xolz6KfF8PPfPBXQxQL0VdZBRBdGS5NpGKEDDdTqBCQwfhwl4nCXbQ6nzUbmkkZ5TCGHpLAs0rpXK0i7KYzy6rotympqqo8HQSgwFQABbLzzS-H9-0A4Dh0imkQ1qSDuhgtd4MQwJkL6WaEAsfwmiGXpcr+SxzKKiVNuIo9bKq+y32ovV6qOvbgzOi7rq8kpfP8oKQrCvqwIGj6QhZb5ksTTcWgaMbdJCLKFzuYJnnsQINqhLaSOPMjFRR5inIO1yGOO1H1Bxy6buRNr0Q6rqerJqKKfOLNGkkGxY30DpYxQgxmanYEnEnRMGQMHmiMPGzKvIrG0do8XGsd6Xztl-GgNENF21JclVbeiCGRsb5-vqSQRVGbp0qBqxrhQyafoCFprYPayKpPRUAFc1BIDA1SoRQAC9IBoptTQtK0eL4gQBJ4ISRJ9IcItk8n3vDcIpyzFpujgkGQYZFM2iMUJWgZ-6swZNOyv5pHT1z-PzyL0uIHLvBjUrrjiVJbte37ZvA7HBSEEMb41zXXRxkMkIfmTIHnGFaNJ4MYIek3HdYZK3mEbtrPqEXgXKAK8y6NgJn5C0HUSbhSpGrDusUJjfAmGEFamYLBAkBgMbwZ8ngg2BCPNkPwZ580RvbHOecgEgLXmAhWSsXTdV6i9NucCIJhnpt8Kwa5fhqW6MlTBXhvCmFGq0Z4aYFymDCMQ3+mdBYAIocvSgJdQH6hRD7DEO8ySiApEw-q8CLgoTDpcR4QQ9ZDBTPYUO3R-rBB+J8FCMM5h7h-rbGRVYIDzC7IoMAAB3a8FcWzV14vxQSwkBx+iPtFD6ZgTY3x6CzdorJh6qVGn8BCV8PjOEKo4wi6dtoCzcR4rxvj16bwCW2O0Dpa6ug9F6Q+Oj24QUBCYVonwB6RzzMlVCD9DBfDuPUMIdhIgXykS4naVV3GYE8T4vx4CibBVCjAkcQcT5DCjC8EEmSuj5l6CmCI0FEx4RwtrOCmYRkZzGaeCZqApnFJoS6dqQVlaMNbroiCqyTB3BQrGOMLNXAP28NcYxa5Yx5h6HrM5eT56KiuTcmZ3tfYaL3n2CJ6s6jWGjICLoSYr71FjlgrM1xwg-HqFcewvQxRfycTbGU2BpRVGoIwVAd4JkMXTlULgKK9FhmSgncGLw1IvBwk8FM6CjD9LMDYFmeYswhAhTQWlKx6WMuZZqJ8bL1AcocC8hpJ9uV-GoGZLkkcsyCt+CmVk0YeGGDsNK0IcrqAKrIEqpligWVqqsuy8Q+htUsN1WEKMXzBEglNX8rBoomSJkyjasadrKU5Nng6j16gHUMWIN5VEGJsS4nxISDRAd6m+sGk4UOjg8orSpvYUIeURVsmaZ8Eli4hj2sdcGFNT402qIRR2fNPrlmDSUpIIwBtMo4UnMKFMEiTZjUCEtfQlxko4WbUmxUSh21gHTWov2nYezIoLX2j6SlgTTlCFmZobI0HCofh0IR2twhpjUhsuCS66XJqZYQDdXb-ZaM5RBSw0Fb4vEjihUYVhJUTsZMGzWdg7BLQccVKluT5XLuoG+j96iOxIoND+k+lhjDRi5iDE1EwDD3wGIlIRC7lJJTaM+xVyaYVFLQ1iTiOat09tgfu84xaTAin5cyemm5uRA1SUIrSeZcE-EHbRp19HCk+KY3m79e7j79rytQS4kwJVX2zJHFM16mgIUFA+q4T642WRIS2+lDH5OdvQ7vHdWHlORPDIZa4t6Z2gbypEHZwmnhCJ1hp1oHQY2yrBGocgEA4CaDhs41YHGVMHq4WDRKnwUroP4cDPDwRQhX0Hl8l49q-7xec4pVS0EEoslSyBz4E7AXhA+EtbW+WKXZPM9I0ibAOCQGK6iyCZk8NHPQYZUIXcHA8gMKPcwVhbD2DNoV1xCoetcrCG5tclXkrVYy9a6M9XctNZ1gVsz8NRn5KqgAC1cktt5anJ5U2ZGpQwZqgZEuPTlxrIdYzzYuULN2os9RXd1SCPDFXqObbxXoamDwzbOAttYFr8H40kL-rI4W+10YXYfADotzgTDTCSitTcN8eTBFDg0cIeUyeAmZF907DtmpOwxhLX78AlkJfDH8G9nQdbGMlZKuCGV0EGtS3lNk-1Cc06hdVKWf3nYNXcidd2uMbpY4+nrKcowWa-BBBrkUGVLg7Z+BI3CtNuZHdi5Cshcil6F0UavGiKv2cMnU94GxBhVJBHHd06mc6DaLga2pCXlvrO3N1A7xAplviAg6PO7Xa4UyRC+B0DBExLajGkwl15fq1OBp8DrNBoavC316dO2d87mgWHT86lVbl1XvUz-2oEeGVp5klYOqbM0sHlujPmUI2tUtwZi9StIlnk2rqgMQMPQ19V3sTNmdcykcIit6M7hodgCeTgr2bofSGX2KjfZP7MjQzANGaBIwdAG9MGCZJJro5+Vp5Ur7JyZRTJ-DSnHwiIDWWQi892R5wU5iM9Z6Z+kKUYggA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBlA9gVwCcBjMLMAGzCPRwIDoAHHJgNzHqPJ1kgGIAVAPIBxYQBkAogG0ADAF1EoJrACW6FTgB2ikAA9EADgBMAGhABPRAEYArFbozHMowHYjAFg8A2AMxuAvv5maJi4hCRklNS0jMw4bPTMYJq8AMJigljS8jrKahraSHrWVjIudEY+7n5e7gYy9T5mlgg+lXQ2Lga2Mu5eMn4+VoHBGNj4xKQUVDT0TKzsdEkpQqKSsgpFeepaOvoIVqXlldUutfWNzYh+7g5dVkZeXgCcLm5WzyMgIePhU1GzWILRIMZK8LKSVL8AD6AEExGJoRlhFgNrluPldkV9qVXhUqjU6g0BlcEJ5bp1us5nj4bGUGl8fmFJpEZjF5vFFss6CpNOgwFACBgCrB+KgAEbggDqAEl+KkABLQoTQ5Cw-iw6EANRlEilWGVsIAQmithidoVQPt3HY6AZaa8vHTurSXKS3j46FZ3DIvFYndV+r7GWNmRFptE5nEEktQZoeXyBUKLaKJeDUgAlQQI5WCaEygBy-Akwgz6plggLBqNgn4QgAsqalOaCnsSm6LIgbAZyr6jDYXjI7N2bJ8gt9QxNwwD2dGuXGE-zBcKtKnJVlYRnFdCjQBNaEF2H17KbZuqC1tg4GW4vb1HGxVGx9Gykvqep1eIwGXz9Z7VV4hqEU7-GyUbArGySLkmK6aGu4KCBmMJ7tCCHIBIGZNiA2ytti1jPEYdptL6niVP6D5NJ2rQ+hUdKOD4XguAMziAb8LIRoCHIxtyvJLsmIpiuuEiQjCaoalk-CYdhWJWtYDTHASZxEpclHuC4Nh3PULjPFYbjuB8XgsWGIGRkCnIgpBEBjFqKhgAA7nBWCyvKSoqoWxaluWlYGhqJo5Ga544TJZK2vao5nM6Viuu6RgEbUxFMZ+dguIZwGsiZnHzhZVk2fZAnghIm7bshh7HpJLbScUCD1DeNiVPRzz4U+dikqOBj4u4dRnIcBjPD2KV-GlHFzuZ8aWZg1l2Q5CFIfuqHoWVAUVfs3QEVpRgNb0n79t2r4uLcxgugYnTPL0an9WxM5gWZEGjdlk15RCEhQqq6qajqeoLZilqVaUPbtYSFwkpRamxbUDwyFYPWqcY53TqBdA8ACBR0CwqDkCoY28lAg0FLwn0XrhCCuOpEM2J0lRHRDvWkqU9EdLYnRDG8g7uLDxmAojMzI6j6OY5o2PsbjUhWKeWHld9+zEw4DNuD4lMfAYNNdDIdBOqU22PrYBnjkyqXsTEnPUNzaMY8K-M41oeNGKLUkS4gUuk+Tct0grNP9LFqkNZ7Ol9Gzg0G4LWgI1jlD5cJcI5siqJ+WeX2XopdAdbV1TOC8X6mJRtjXnQe2qVUNL9PRrM65OA36-QhsWsH-Oh49z2ibC4n44FlW1c8drGF023Q14NOeznenHZ4rxDEYfvlwjgfxqoNdgGHT0ia92q6lKzdLYgCdJx4Pip-hxg06PFSQwxVQdb6Y6jEBZeXZPSNB2j5Dz-Xr1NzHYuLXbCCbza2+7+nfd+joD4OWzsTpDCOuPG+ldkYPyfovDUy8Ppv1tpeI4BE6RnC0t0Pof4OwtG9C8RORhIae36O4XBkD4bQKDmNVAE1bJwIjoiKOa9P5oI6GUBivUCG4JpqOAiB19INWAb7EuV8LpUKnnQWh9DGEN1fjbcWqCyjoM4VgnhqkaYM2lk+Xq+FFJVEoSZaht1xo5TkUvd6q9kFKMJg8PE9JXDrRcA8MmGd8ExQpD2IwTE7AnUeIEccmgcAQDgDoXW19QLog-peAAtK4Uk8TbhOBSak5iYjWJw3SsNaJcdCbENJL4RODVer2hkNpXwPYbBGKGuBTg3BIC5IJkFSKHwOgnDqH6c4itKJyxVk+DwRwCFqWLpfTJ7NZzgWWE0lu+wXikn7KtWith6KHDlt6GpkzrrcgABYqFgOgGZ68Dh0wHIsz8TxPBtHcYYPoOiGKHAeGs4YGSjL+yulxBcPFoIpgEkcthpzEqPEeLUSoMVCkGDasOBivpuitReWMt5E8MojWkXdXKEp-nxwHO0x8-Yhx2D8NFLwqsfSMR8M8QuQxRkTnEVkjmU8sX5PcKSP87dSZeB7P6R4thNkVykTzU26hzaMv8nkoKbglaENcH6CGWk5IDj5bfLmQcZ5QEoEyoK3Y2rD1qM8WqxhyFuwaF6T2X4+j9mMNU15esoFSIfpqyqvVkllHJeQk6jEbkHE-LcD4a1IrAK6AEG1kTjFSJkTlR1OICSJxtCI7BLiGgH1qnQYRX4Hmjn9AYQJ-ggA */
   createMachine<DataSourceSelectorContext, DataSourceSelectorEvent, DataSourceSelectorTypestate>(
     {
       context: { ...DEFAULT_CONTEXT, ...initialContext },
@@ -57,68 +57,21 @@ export const createPureDataSourceSelectorStateMachine = (
                   history: 'deep',
                 },
                 integrationsTab: {
-                  initial: 'listingIntegrations',
-                  entry: ['storeIntegrationsTabId'],
-                  on: {
-                    SWITCH_TO_UNCATEGORIZED_TAB: 'uncategorizedTab',
-                    SWITCH_TO_DATA_VIEWS_TAB: 'dataViewsTab',
-                  },
-                  states: {
-                    hist: {
-                      type: 'history',
-                    },
-                    listingIntegrations: {
-                      entry: [
-                        'storePanelId',
-                        'retrieveSearchFromCache',
-                        'maybeRestoreSearchResult',
-                      ],
-                      on: {
-                        CHANGE_PANEL: 'listingIntegrationStreams',
-                        SCROLL_TO_INTEGRATIONS_BOTTOM: {
-                          actions: 'loadMoreIntegrations',
-                        },
-                        SEARCH_BY_NAME: {
-                          actions: ['storeSearch', 'searchIntegrations'],
-                        },
-                        SORT_BY_ORDER: {
-                          actions: ['storeSearch', 'sortIntegrations'],
-                        },
-                      },
-                    },
-                    listingIntegrationStreams: {
-                      entry: [
-                        'storePanelId',
-                        'retrieveSearchFromCache',
-                        'maybeRestoreSearchResult',
-                      ],
-                      on: {
-                        CHANGE_PANEL: 'listingIntegrations',
-                        SEARCH_BY_NAME: {
-                          actions: ['storeSearch', 'searchIntegrationsStreams'],
-                        },
-                        SORT_BY_ORDER: {
-                          actions: ['storeSearch', 'sortIntegrationsStreams'],
-                        },
-                        SELECT_DATASET: '#closed',
-                      },
-                    },
-                  },
-                },
-                uncategorizedTab: {
                   entry: [
-                    'storeUncategorizedTabId',
+                    'storeIntegrationsTabId',
                     'retrieveSearchFromCache',
                     'maybeRestoreSearchResult',
                   ],
                   on: {
-                    SWITCH_TO_INTEGRATIONS_TAB: 'integrationsTab.hist',
                     SWITCH_TO_DATA_VIEWS_TAB: 'dataViewsTab',
+                    SCROLL_TO_INTEGRATIONS_BOTTOM: {
+                      actions: 'loadMoreIntegrations',
+                    },
                     SEARCH_BY_NAME: {
-                      actions: ['storeSearch', 'searchUncategorized'],
+                      actions: ['storeSearch', 'searchIntegrations'],
                     },
                     SORT_BY_ORDER: {
-                      actions: ['storeSearch', 'sortUncategorized'],
+                      actions: ['storeSearch', 'sortIntegrations'],
                     },
                     SELECT_DATASET: '#closed',
                   },
@@ -130,8 +83,7 @@ export const createPureDataSourceSelectorStateMachine = (
                     'maybeRestoreSearchResult',
                   ],
                   on: {
-                    SWITCH_TO_INTEGRATIONS_TAB: 'integrationsTab.hist',
-                    SWITCH_TO_UNCATEGORIZED_TAB: 'uncategorizedTab',
+                    SWITCH_TO_INTEGRATIONS_TAB: 'integrationsTab',
                     SEARCH_BY_NAME: {
                       actions: ['storeSearch', 'searchDataViews'],
                     },
@@ -207,11 +159,7 @@ export const createPureDataSourceSelectorStateMachine = (
     {
       actions: {
         storeIntegrationsTabId: assign((_context) => ({ tabId: INTEGRATIONS_TAB_ID })),
-        storeUncategorizedTabId: assign((_context) => ({ tabId: UNCATEGORIZED_TAB_ID })),
         storeDataViewsTabId: assign((_context) => ({ tabId: DATA_VIEWS_TAB_ID })),
-        storePanelId: assign((_context, event) =>
-          'panelId' in event ? { panelId: event.panelId } : {}
-        ),
         storeSearch: assign((context, event) => {
           if ('search' in event) {
             const id = context.tabId === INTEGRATIONS_TAB_ID ? context.panelId : context.tabId;
@@ -237,14 +185,8 @@ export const createPureDataSourceSelectorStateMachine = (
             : {}
         ),
         retrieveSearchFromCache: assign((context, event) => {
-          if (event.type === 'CHANGE_PANEL' && 'panelId' in event) {
-            return { search: context.searchCache.get(event.panelId) ?? defaultSearch };
-          }
           if (event.type === 'SWITCH_TO_INTEGRATIONS_TAB' && 'panelId' in context) {
             return { search: context.searchCache.get(context.panelId) ?? defaultSearch };
-          }
-          if (event.type === 'SWITCH_TO_UNCATEGORIZED_TAB' && 'tabId' in context) {
-            return { search: context.searchCache.get(context.tabId) ?? defaultSearch };
           }
           if (event.type === 'SWITCH_TO_DATA_VIEWS_TAB' && 'tabId' in context) {
             return { search: context.searchCache.get(context.tabId) ?? defaultSearch };
@@ -252,21 +194,12 @@ export const createPureDataSourceSelectorStateMachine = (
           return {};
         }),
         maybeRestoreSearchResult: actions.pure((context, event) => {
-          const hasSearchOnChangePanel =
-            event.type === 'CHANGE_PANEL' && context.searchCache.has(event.panelId);
           const hasSearchOnIntegrationsTab =
             event.type === 'SWITCH_TO_INTEGRATIONS_TAB' && context.searchCache.has(context.panelId);
-          const hasSearchOnUncategorizedTab =
-            event.type === 'SWITCH_TO_UNCATEGORIZED_TAB' && context.searchCache.has(context.tabId);
           const hasSearchOnDataViewsTab =
             event.type === 'SWITCH_TO_DATA_VIEWS_TAB' && context.searchCache.has(context.tabId);
 
-          if (
-            hasSearchOnChangePanel ||
-            hasSearchOnIntegrationsTab ||
-            hasSearchOnUncategorizedTab ||
-            hasSearchOnDataViewsTab
-          ) {
+          if (hasSearchOnIntegrationsTab || hasSearchOnDataViewsTab) {
             return raise({ type: 'SORT_BY_ORDER', search: context.search });
           }
         }),
