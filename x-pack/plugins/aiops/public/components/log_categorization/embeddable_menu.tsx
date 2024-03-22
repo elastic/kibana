@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiSuperSelect } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiComboBox,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
@@ -17,18 +16,23 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import { useCallback } from 'react';
 import React, { useState, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { Category } from '../../../common/api/log_categorization/types';
 import type { RandomSampler } from './sampling_menu';
 import { SamplingPanel } from './sampling_menu/sampling_panel';
+import type { WidenessOption } from './log_categorization_for_embeddable';
+import { WIDENESS } from './log_categorization_for_embeddable';
 
 interface Props {
   randomSampler: RandomSampler;
   fields: DataViewField[];
   selectedField: DataViewField | null;
   setSelectedField: (field: DataViewField) => void;
+  widenessOption: WidenessOption;
+  setWidenessOption: (w: WidenessOption) => void;
+  categories: Category[] | undefined;
   reload: () => void;
 }
 
@@ -37,33 +41,23 @@ export const EmbeddableMenu: FC<Props> = ({
   fields,
   selectedField,
   setSelectedField,
+  widenessOption,
+  setWidenessOption,
+  categories,
   reload,
 }) => {
   const [showPopover, setShowPopover] = useState(false);
   const togglePopover = () => setShowPopover(!showPopover);
 
   const fieldOptions = useMemo(
-    () => fields.map((field) => ({ label: field.name, field })),
+    () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
     [fields]
   );
 
-  const onSelectedFieldChange = useCallback(
-    (selectedOptions: EuiComboBoxOptionOption[]) => {
-      if (selectedOptions.length) {
-        const field = fields.find((f) => f.name === selectedOptions[0].label);
-        if (field) {
-          setSelectedField(field);
-        }
-      }
-    },
-    [fields, setSelectedField]
-  );
-
-  const selectedFieldOptions = useMemo(() => {
-    if (selectedField) {
-      return [{ label: selectedField.name }];
-    }
-  }, [selectedField]);
+  const widenessOptions = Object.keys(WIDENESS).map((value) => ({
+    inputDisplay: value,
+    value: value as WidenessOption,
+  }));
 
   const button = (
     <EuiButtonEmpty
@@ -101,14 +95,41 @@ export const EmbeddableMenu: FC<Props> = ({
             }
           )}
         >
-          <EuiComboBox
+          <EuiSuperSelect
             aria-label="Accessible screen reader label"
             placeholder="Select a single option"
-            singleSelection={{ asPlainText: true }}
             options={fieldOptions}
-            selectedOptions={selectedFieldOptions}
-            onChange={onSelectedFieldChange}
-            isClearable={false}
+            valueOfSelected={selectedField ?? undefined}
+            onChange={setSelectedField}
+          />
+        </EuiFormRow>
+
+        <EuiHorizontalRule margin="m" />
+
+        <EuiFormRow
+          data-test-subj="aiopsRandomSamplerOptionsFormRow"
+          label={i18n.translate(
+            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerRowLabel',
+            {
+              defaultMessage: 'Wideness',
+            }
+          )}
+          helpText={
+            <>
+              {categories !== undefined ? (
+                <>
+                  Total categories in {widenessOption}: {categories.length}
+                </>
+              ) : null}
+            </>
+          }
+        >
+          <EuiSuperSelect
+            aria-label="Accessible screen reader label"
+            placeholder="Select a single option"
+            options={widenessOptions}
+            valueOfSelected={widenessOption}
+            onChange={setWidenessOption}
           />
         </EuiFormRow>
 

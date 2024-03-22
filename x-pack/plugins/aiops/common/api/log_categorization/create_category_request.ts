@@ -50,16 +50,16 @@ export function createCategoryRequest(
             _source: field,
           },
         },
-        ...(intervalMs
-          ? {
-              sparkline: {
-                date_histogram: {
-                  field: timeField,
-                  fixed_interval: `${intervalMs}ms`,
-                },
-              },
-            }
-          : {}),
+        // ...(intervalMs
+        //   ? {
+        //       sparkline: {
+        //         date_histogram: {
+        //           field: timeField,
+        //           fixed_interval: `${intervalMs}ms`,
+        //         },
+        //       },
+        //     }
+        //   : {}),
         ...(additionalFilter
           ? {
               sub_time_range: {
@@ -76,6 +76,16 @@ export function createCategoryRequest(
                       _source: field,
                     },
                   },
+                  ...(intervalMs
+                    ? {
+                        sparkline: {
+                          date_histogram: {
+                            field: timeField,
+                            fixed_interval: `${intervalMs}ms`,
+                          },
+                        },
+                      }
+                    : {}),
                   ...(additionalFilter.field
                     ? {
                         sub_field: {

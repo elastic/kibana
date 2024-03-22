@@ -7,24 +7,11 @@
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
-import {
-  // EuiTitle,
-  // EuiFlyoutHeader,
-  // EuiFlyoutBody,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  EuiTabs,
-  EuiTab,
-  EuiSpacer,
-  EuiToolTip,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
@@ -32,6 +19,10 @@ import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import { stringHash } from '@kbn/ml-string-hash';
 import useMount from 'react-use/lib/useMount';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { unitOfTime } from 'moment';
+import moment from 'moment';
+import { useStorage } from '@kbn/ml-local-storage';
+
 import type { CategorizationAdditionalFilter } from '../../../common/api/log_categorization/create_category_request';
 import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
@@ -57,12 +48,25 @@ import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import type { DocumentStats } from '../../hooks/use_document_count_stats';
 import { EmbeddableMenu } from './embeddable_menu';
-// import { CreateCategorizationJobButton } from './create_categorization_job';
+import { useWiderTimeRange } from './use_wider_time_range';
+import type { AiOpsKey, AiOpsStorageMapped } from '../../types/storage';
+import { AIOPS_PATTERN_ANALYSIS_WIDENESS_PREFERENCE } from '../../types/storage';
 
 enum SELECTED_TAB {
   BUCKET,
   FULL_TIME_RANGE,
 }
+
+export type WidenessOption = '1 week' | '1 month' | '3 months' | '6 months';
+
+type Wideness = Record<WidenessOption, { factor: number; unit: unitOfTime.Base }>;
+
+export const WIDENESS: Wideness = {
+  '1 week': { factor: 1, unit: 'w' },
+  '1 month': { factor: 1, unit: 'M' },
+  '3 months': { factor: 3, unit: 'M' },
+  '6 months': { factor: 6, unit: 'M' },
+};
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -94,8 +98,14 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     uiSettings,
   } = useAiopsAppContext();
 
+  const [widenessOption, setWidenessOption] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_PATTERN_ANALYSIS_WIDENESS_PREFERENCE>
+  >(AIOPS_PATTERN_ANALYSIS_WIDENESS_PREFERENCE, '1 week');
+
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
     useValidateFieldRequest();
+  const { getWiderTimeRange, cancelRequest: cancelWiderTimeRangeRequest } = useWiderTimeRange();
   const { euiTheme } = useEuiTheme();
   const { filters, query } = useMemo(() => getState(), [getState]);
 
@@ -113,6 +123,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   );
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedField, setSelectedField] = useState<DataViewField | null>(null);
+  // const [wideness, setWideness] = useState<WidenessOption>('1 week');
   const [fields, setFields] = useState<DataViewField[]>([]);
   const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
   const [previousDocumentStatsHash, setPreviousDocumentStatsHash] = useState<number>(0);
@@ -131,14 +142,24 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   const [selectedTab, setSelectedTab] = useState<SELECTED_TAB>(SELECTED_TAB.FULL_TIME_RANGE);
 
   const cancelRequest = useCallback(() => {
+    cancelWiderTimeRangeRequest();
     cancelValidationRequest();
     cancelCategorizationRequest();
-  }, [cancelCategorizationRequest, cancelValidationRequest]);
+  }, [cancelCategorizationRequest, cancelValidationRequest, cancelWiderTimeRangeRequest]);
 
   useMount(function loadFields() {
     const dataViewFields = dataView.fields.filter((f) => f.esTypes?.includes(ES_FIELD_TYPES.TEXT));
     setFields(dataViewFields);
-    const messageField = dataViewFields.find((f) => f.name === 'message');
+    let messageField = dataViewFields.find((f) => f.name === 'message');
+    if (messageField === undefined) {
+      messageField = dataViewFields.find((f) => f.name === 'error.message');
+    }
+    if (messageField === undefined) {
+      messageField = dataViewFields.find((f) => f.name === 'event.original ');
+    }
+    if (messageField === undefined) {
+      messageField = dataViewFields[0];
+    }
     if (messageField !== undefined) {
       setSelectedField(messageField);
     }
@@ -193,10 +214,35 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     setData(null);
     setFieldValidationResult(null);
 
-    const timeRange = {
+    const tempAdditionalFilter: CategorizationAdditionalFilter = {
       from: earliest,
       to: latest,
     };
+
+    // const timeRange: TimeRange = {
+    //   from: moment(earliest).add(-5, 'w').valueOf(),
+    //   to: latest,
+    // };
+    const timeRange = await getWiderTimeRange(
+      index,
+      timeField,
+      tempAdditionalFilter,
+      widenessOption,
+      searchQuery
+    );
+    // eslint-disable-next-line no-console
+    console.log(
+      'sub agg  s',
+      moment(tempAdditionalFilter.from).toISOString(),
+      moment(tempAdditionalFilter.to).toISOString()
+    );
+
+    // eslint-disable-next-line no-console
+    console.log(
+      'full range',
+      moment(timeRange.from).toISOString(),
+      moment(timeRange.to).toISOString()
+    );
 
     try {
       const [validationResult, categorizationResult] = await Promise.all([
@@ -210,7 +256,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
           timeRange,
           searchQuery,
           intervalMs,
-          additionalFilter
+          tempAdditionalFilter
         ),
       ]);
 
@@ -220,17 +266,22 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
 
         const hasBucketCategories = categories.some((c) => c.subTimeRangeCount !== undefined);
         let categoriesInBucket: any | null = null;
-        if (additionalFilter !== undefined) {
+        if (tempAdditionalFilter !== undefined) {
           categoriesInBucket = categorizationResult.categories
             .map((category) => ({
               ...category,
               count: category.subFieldCount ?? category.subTimeRangeCount!,
               examples: category.subFieldExamples!,
-              sparkline: undefined,
+              sparkline: category.subFieldSparkline,
             }))
             .filter((category) => category.count > 0)
             .sort((a, b) => b.count - a.count);
         }
+
+        // eslint-disable-next-line no-console
+        console.log('categories', categories);
+        // eslint-disable-next-line no-console
+        console.log('categoriesInBucket', categoriesInBucket);
 
         setData({
           categories,
@@ -258,12 +309,13 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     earliest,
     latest,
     cancelRequest,
-    runValidateFieldRequest,
+    getWiderTimeRange,
+    widenessOption,
     searchQuery,
+    runValidateFieldRequest,
     embeddingOrigin,
     runCategorizeRequest,
     intervalMs,
-    additionalFilter,
     toasts,
   ]);
 
@@ -288,7 +340,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       return;
     }
 
-    const hash = createDocumentStatsHash(documentStats, selectedField.name);
+    const hash = createDocumentStatsHash(documentStats, selectedField.name, widenessOption);
     if (hash !== previousDocumentStatsHash) {
       randomSampler.setDocCount(documentStats.totalCount);
       setEventRate(
@@ -315,10 +367,11 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     previousDocumentStatsHash,
     fieldValidationResult,
     selectedField,
+    widenessOption,
   ]);
   // console.log(viewModeToggle);
 
-  const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
+  // const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
 
   return (
     <>
@@ -331,7 +384,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">
-            <>{getViewModeToggle(data?.categories.length ?? 0)}</>
+            <>{getViewModeToggle(data?.categoriesInBucket?.length ?? 0)}</>
             <EuiFlexItem />
             <EuiFlexItem grow={false}>
               {randomSampler !== undefined ? (
@@ -341,6 +394,9 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
                   fields={fields}
                   setSelectedField={setSelectedField}
                   selectedField={selectedField}
+                  widenessOption={widenessOption}
+                  setWidenessOption={setWidenessOption}
+                  categories={data?.categories}
                 />
               ) : null}
             </EuiFlexItem>
@@ -405,76 +461,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
             data.categories.length > 0 &&
             selectedField !== null ? (
               <>
-                {showTabs ? (
-                  <>
-                    <EuiTabs>
-                      <EuiTab
-                        isSelected={selectedTab === SELECTED_TAB.BUCKET}
-                        onClick={() => setSelectedTab(SELECTED_TAB.BUCKET)}
-                      >
-                        <EuiToolTip
-                          content={i18n.translate(
-                            'xpack.aiops.logCategorization.tabs.bucket.tooltip',
-                            {
-                              defaultMessage: 'Patterns that occur in the anomalous bucket.',
-                            }
-                          )}
-                        >
-                          <EuiFlexGroup gutterSize="none">
-                            <EuiFlexItem>
-                              <FormattedMessage
-                                id="xpack.aiops.logCategorization.tabs.bucket"
-                                defaultMessage="Bucket"
-                              />
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false} css={infoIconCss}>
-                              <EuiIcon
-                                size="s"
-                                color="subdued"
-                                type="questionInCircle"
-                                className="eui-alignTop"
-                              />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiToolTip>
-                      </EuiTab>
-
-                      <EuiTab
-                        isSelected={selectedTab === SELECTED_TAB.FULL_TIME_RANGE}
-                        onClick={() => setSelectedTab(SELECTED_TAB.FULL_TIME_RANGE)}
-                      >
-                        <EuiToolTip
-                          content={i18n.translate(
-                            'xpack.aiops.logCategorization.tabs.fullTimeRange.tooltip',
-                            {
-                              defaultMessage:
-                                'Patterns that occur in the time range selected for the page.',
-                            }
-                          )}
-                        >
-                          <EuiFlexGroup gutterSize="none">
-                            <EuiFlexItem>
-                              <FormattedMessage
-                                id="xpack.aiops.logCategorization.tabs.fullTimeRange"
-                                defaultMessage="Full time range"
-                              />
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false} css={infoIconCss}>
-                              <EuiIcon
-                                size="s"
-                                color="subdued"
-                                type="questionInCircle"
-                                className="eui-alignTop"
-                              />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiToolTip>
-                      </EuiTab>
-                    </EuiTabs>
-                    <EuiSpacer size="s" />
-                  </>
-                ) : null}
-
                 <CategoryTable
                   categories={
                     selectedTab === SELECTED_TAB.BUCKET && data.categoriesInBucket !== null
@@ -514,13 +500,17 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
 /**
  * Creates a hash from the document stats to determine if the document stats have changed.
  */
-function createDocumentStatsHash(documentStats: DocumentStats, selectedFieldName: string) {
+function createDocumentStatsHash(
+  documentStats: DocumentStats,
+  selectedFieldName: string,
+  wideness: WidenessOption
+) {
   const lastTimeStampMs = documentStats.documentCountStats?.lastDocTimeStampMs;
   const totalCount = documentStats.documentCountStats?.totalCount;
   const times = Object.keys(documentStats.documentCountStats?.buckets ?? {});
   const firstBucketTimeStamp = times.length ? times[0] : undefined;
   const lastBucketTimeStamp = times.length ? times[times.length - 1] : undefined;
   return stringHash(
-    `${lastTimeStampMs}${totalCount}${firstBucketTimeStamp}${lastBucketTimeStamp}${selectedFieldName}`
+    `${lastTimeStampMs}${totalCount}${firstBucketTimeStamp}${lastBucketTimeStamp}${selectedFieldName}${wideness}`
   );
 }

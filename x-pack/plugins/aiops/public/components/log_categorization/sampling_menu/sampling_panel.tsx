@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexItem, EuiSpacer, EuiCallOut, EuiSelect, EuiFormRow } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer, EuiCallOut, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
@@ -65,11 +65,11 @@ export const SamplingPanel: FC<Props> = ({ randomSampler, reload }) => {
           }
         )}
       >
-        <EuiSelect
+        <EuiSuperSelect
           data-test-subj="aiopsRandomSamplerOptionsSelect"
           options={RANDOM_SAMPLER_SELECT_OPTIONS}
-          value={randomSamplerPreference}
-          onChange={(e) => setRandomSamplerPreference(e.target.value as RandomSamplerOption)}
+          valueOfSelected={randomSamplerPreference}
+          onChange={setRandomSamplerPreference}
         />
       </EuiFormRow>
 
