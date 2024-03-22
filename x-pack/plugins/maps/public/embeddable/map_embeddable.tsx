@@ -673,6 +673,7 @@ export class MapEmbeddable
   // remove legacy library tranform methods
   linkToLibrary = undefined;
   unlinkFromLibrary = undefined;
+  // add implemenation for library transform methods
   saveStateToSavedObject = async (title: string) => {
     const { attributes, references } = extractReferences({
       attributes: this._savedMap.getAttributes(),
