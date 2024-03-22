@@ -59,9 +59,11 @@ interface Props {
   maxNestedDepth: number;
   addField(): void;
   editField(): void;
-  toggleExpand(fieldId?: string): void;
+  toggleExpand: () => void;
+  setPreviousState?: (state: State) => void;
   treeDepth: number;
   state?: State;
+  isUsingPreviousStateFields?: boolean;
 }
 
 function FieldListItemComponent(
@@ -81,6 +83,8 @@ function FieldListItemComponent(
     toggleExpand,
     treeDepth,
     state,
+    isUsingPreviousStateFields,
+    setPreviousState,
   }: Props,
   ref: React.Ref<HTMLLIElement>
 ) {
@@ -98,7 +102,6 @@ function FieldListItemComponent(
   // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
   const substractIndentAmount = maxNestedDepth === 0 ? CHILD_FIELD_INDENT_SIZE * 0.5 : 0;
-
   const indent = treeDepth * CHILD_FIELD_INDENT_SIZE - substractIndentAmount;
 
   const indentCreateField =
@@ -232,7 +235,7 @@ function FieldListItemComponent(
               <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__toggle">
                 <EuiButtonIcon
                   color="text"
-                  onClick={() => toggleExpand(id)}
+                  onClick={toggleExpand}
                   iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
                   data-test-subj="toggleExpandButton"
                   aria-label={
@@ -303,7 +306,13 @@ function FieldListItemComponent(
       </div>
 
       {Boolean(childFieldsArray.length) && isExpanded && (
-        <FieldsList fields={childFieldsArray} treeDepth={treeDepth + 1} staticState={state} />
+        <FieldsList
+          fields={childFieldsArray}
+          treeDepth={treeDepth + 1}
+          staticState={state}
+          isUsingPreviousStateFields={isUsingPreviousStateFields}
+          setPreviousState={setPreviousState}
+        />
       )}
 
       {renderCreateField()}

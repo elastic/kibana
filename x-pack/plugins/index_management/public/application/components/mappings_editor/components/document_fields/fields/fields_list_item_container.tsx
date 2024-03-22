@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, useRef } from 'react';
 
-import { useDispatch, useMappingsState } from '../../../mappings_state_context';
+import { useDispatch } from '../../../mappings_state_context';
 import { NormalizedField, State } from '../../../types';
 import { FieldsListItem } from './fields_list_item';
 
@@ -16,7 +16,8 @@ interface Props {
   treeDepth: number;
   isLastItem: boolean;
   state: State;
-  onMultiFieldToggleExpand?: (fieldId: string) => void;
+  setPreviousState?: (state: State) => void;
+  isUsingPreviousStateFields?: boolean;
 }
 
 export const FieldsListItemContainer = ({
@@ -24,7 +25,8 @@ export const FieldsListItemContainer = ({
   treeDepth,
   isLastItem,
   state,
-  onMultiFieldToggleExpand,
+  setPreviousState,
+  isUsingPreviousStateFields,
 }: Props) => {
   const dispatch = useDispatch();
   const listElement = useRef<HTMLLIElement | null>(null);
@@ -66,8 +68,26 @@ export const FieldsListItemContainer = ({
   }, [fieldId, dispatch]);
 
   const toggleExpand = useCallback(() => {
-    dispatch({ type: 'field.toggleExpand', value: { fieldId } });
-  }, [fieldId, dispatch]);
+    if (isUsingPreviousStateFields && setPreviousState != undefined) {
+      const previousField = state.fields.byId[fieldId];
+      const nextField: NormalizedField = {
+        ...previousField,
+        isExpanded: !previousField.isExpanded,
+      };
+      setPreviousState({
+        ...state,
+        fields: {
+          ...state.fields,
+          byId: {
+            ...state.fields.byId,
+            [fieldId]: nextField,
+          },
+        },
+      });
+    } else {
+      dispatch({ type: 'field.toggleExpand', value: { fieldId } });
+    }
+  }, [fieldId, dispatch, isUsingPreviousStateFields, setPreviousState, state]);
 
   return (
     <FieldsListItem
@@ -85,10 +105,10 @@ export const FieldsListItemContainer = ({
       maxNestedDepth={maxNestedDepth}
       addField={addField}
       editField={editField}
-      toggleExpand={
-        onMultiFieldToggleExpand ? () => onMultiFieldToggleExpand(fieldId) : toggleExpand
-      }
+      setPreviousState={setPreviousState}
+      toggleExpand={toggleExpand}
       state={state}
+      isUsingPreviousStateFields={isUsingPreviousStateFields}
     />
   );
 };

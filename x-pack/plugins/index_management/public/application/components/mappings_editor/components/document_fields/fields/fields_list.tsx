@@ -15,14 +15,17 @@ interface Props {
   fields?: NormalizedField[];
   treeDepth?: number;
   staticState?: State;
+  setPreviousState?: (state: State) => void;
   onMultiFieldToggleExpand?: (fieldId: string) => void;
+  isUsingPreviousStateFields?: boolean;
 }
 
 export const FieldsList = React.memo(function FieldsListComponent({
   fields,
   treeDepth,
   staticState,
-  onMultiFieldToggleExpand,
+  setPreviousState,
+  isUsingPreviousStateFields,
 }: Props) {
   if (fields === undefined) {
     return null;
@@ -37,7 +40,8 @@ export const FieldsList = React.memo(function FieldsListComponent({
           treeDepth={treeDepth === undefined ? 0 : treeDepth}
           isLastItem={index === fields.length - 1}
           state={state}
-          onMultiFieldToggleExpand={onMultiFieldToggleExpand}
+          setPreviousState={setPreviousState}
+          isUsingPreviousStateFields={isUsingPreviousStateFields}
         />
       ))}
     </ul>

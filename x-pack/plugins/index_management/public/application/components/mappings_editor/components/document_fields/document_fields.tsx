@@ -18,65 +18,68 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface Props {
   searchComponent?: React.ReactElement;
   searchResultComponent?: React.ReactElement;
+  onCancelAddingNewFields?: () => void;
 }
-export const DocumentFields = React.memo(({ searchComponent, searchResultComponent }: Props) => {
-  const { fields, documentFields } = useMappingsState();
-  const dispatch = useDispatch();
-  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
-    useGlobalFlyout();
+export const DocumentFields = React.memo(
+  ({ searchComponent, searchResultComponent, onCancelAddingNewFields }: Props) => {
+    const { fields, documentFields } = useMappingsState();
+    const dispatch = useDispatch();
+    const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+      useGlobalFlyout();
 
-  const { editor: editorType } = documentFields;
-  const isEditing = documentFields.status === 'editingField';
+    const { editor: editorType } = documentFields;
+    const isEditing = documentFields.status === 'editingField';
 
-  const jsonEditorDefaultValue = useMemo(() => {
-    if (editorType === 'json') {
-      return deNormalize(fields);
-    }
-  }, [editorType, fields]);
-
-  const editor =
-    editorType === 'json' ? (
-      <DocumentFieldsJsonEditor defaultValue={jsonEditorDefaultValue!} />
-    ) : (
-      <DocumentFieldsTreeEditor />
-    );
-
-  const exitEdit = useCallback(() => {
-    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (isEditing) {
-      // Open the flyout with the <EditField /> content
-      addContentToGlobalFlyout<EditFieldContainerProps>({
-        id: 'mappingsEditField',
-        Component: EditFieldContainer,
-        props: { exitEdit },
-        flyoutProps: { ...defaultFlyoutProps, onClose: exitEdit },
-        cleanUpFunc: exitEdit,
-      });
-    }
-  }, [isEditing, addContentToGlobalFlyout, fields.byId, exitEdit]);
-
-  useEffect(() => {
-    if (!isEditing) {
-      removeContentFromGlobalFlyout('mappingsEditField');
-    }
-  }, [isEditing, removeContentFromGlobalFlyout]);
-
-  useEffect(() => {
-    return () => {
-      if (isEditing) {
-        // When the component unmounts, exit edit mode.
-        exitEdit();
+    const jsonEditorDefaultValue = useMemo(() => {
+      if (editorType === 'json') {
+        return deNormalize(fields);
       }
-    };
-  }, [isEditing, exitEdit]);
+    }, [editorType, fields]);
 
-  return (
-    <div data-test-subj="documentFields">
-      {searchComponent}
-      {searchResultComponent ? searchResultComponent : editor}
-    </div>
-  );
-});
+    const editor =
+      editorType === 'json' ? (
+        <DocumentFieldsJsonEditor defaultValue={jsonEditorDefaultValue!} />
+      ) : (
+        <DocumentFieldsTreeEditor onCancelAddingNewFields={onCancelAddingNewFields} />
+      );
+
+    const exitEdit = useCallback(() => {
+      dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+    }, [dispatch]);
+
+    useEffect(() => {
+      if (isEditing) {
+        // Open the flyout with the <EditField /> content
+        addContentToGlobalFlyout<EditFieldContainerProps>({
+          id: 'mappingsEditField',
+          Component: EditFieldContainer,
+          props: { exitEdit },
+          flyoutProps: { ...defaultFlyoutProps, onClose: exitEdit },
+          cleanUpFunc: exitEdit,
+        });
+      }
+    }, [isEditing, addContentToGlobalFlyout, fields.byId, exitEdit]);
+
+    useEffect(() => {
+      if (!isEditing) {
+        removeContentFromGlobalFlyout('mappingsEditField');
+      }
+    }, [isEditing, removeContentFromGlobalFlyout]);
+
+    useEffect(() => {
+      return () => {
+        if (isEditing) {
+          // When the component unmounts, exit edit mode.
+          exitEdit();
+        }
+      };
+    }, [isEditing, exitEdit]);
+
+    return (
+      <div data-test-subj="documentFields">
+        {searchComponent}
+        {searchResultComponent ? searchResultComponent : editor}
+      </div>
+    );
+  }
+);

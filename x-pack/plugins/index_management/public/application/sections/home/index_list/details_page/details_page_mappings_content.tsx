@@ -53,11 +53,11 @@ import {
 } from '../../../../components/mappings_editor/types';
 
 const getFieldsFromState = (state: State) => {
-  const getField = (fieldId: string, state: State) => {
+  const getField = (fieldId: string) => {
     return state.fields.byId[fieldId];
   };
   const fields = (state: State) => {
-    return state.fields.rootLevelFields.map((id) => getField(id, state));
+    return state.fields.rootLevelFields.map((id) => getField(id));
   };
   return fields(state);
 };
@@ -139,6 +139,23 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
 
+  const onCancelAddingNewFields = useCallback(() => {
+    hideAddFieldComponent(!addFieldComponent);
+    setUsingPreviousStateFields(!isUsingPreviousStateFields);
+
+    //reset mappings to previous state
+    dispatch({
+      type: 'editor.replaceMappings',
+      value: {
+        ...previousState,
+        documentFields: {
+          status: 'idle',
+          editor: 'default',
+        },
+      },
+    });
+  }, [addFieldComponent, isUsingPreviousStateFields, dispatch, previousState]);
+
   const addFieldButtonOnClick = useCallback(() => {
     hideAddFieldComponent(!addFieldComponent);
     // when adding new field, save previous state. This state is then used by FieldsList component to show only saved mappings.
@@ -158,7 +175,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         },
       },
     });
-  }, [dispatch, addFieldComponent, state]);
+  }, [dispatch, addFieldComponent, state, isUsingPreviousStateFields]);
 
   const updateMappings = useCallback(async () => {
     const { error } = await updateIndexMappings(indexName, deNormalize(state.fields));
@@ -187,28 +204,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       }
     },
     [dispatch, previousState]
-  );
-  const onMultiFieldToggleExpand = useCallback(
-    (fieldId: string) => {
-      if (isUsingPreviousStateFields) {
-        const previousField = previousState.fields.byId[fieldId];
-        const nextField: NormalizedField = {
-          ...previousField,
-          isExpanded: !previousField.isExpanded,
-        };
-        setPreviousState({
-          ...previousState,
-          fields: {
-            ...previousState.fields,
-            byId: {
-              ...previousState.fields.byId,
-              [fieldId]: nextField,
-            },
-          },
-        });
-      }
-    },
-    [dispatch, previousState, state, isUsingPreviousStateFields]
   );
 
   const searchTerm = isUsingPreviousStateFields
@@ -240,7 +235,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     <FieldsList
       fields={staticFields}
       staticState={previousState}
-      onMultiFieldToggleExpand={onMultiFieldToggleExpand}
+      setPreviousState={setPreviousState}
+      isUsingPreviousStateFields={isUsingPreviousStateFields}
     />
   ) : (
     <FieldsList fields={getFieldsFromState(state)} />
@@ -288,7 +284,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       )}
     </>
   );
-
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
@@ -440,7 +435,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 borders="all"
               >
                 <EuiPanel>
-                  <DocumentFields />
+                  {isUsingPreviousStateFields && newFieldsLength <= 0 ? (
+                    <DocumentFields onCancelAddingNewFields={onCancelAddingNewFields} />
+                  ) : (
+                    <DocumentFields />
+                  )}
                 </EuiPanel>
               </EuiAccordion>
             </EuiFlexItem>

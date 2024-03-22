@@ -37,6 +37,7 @@ interface Props {
   paddingLeft?: number;
   isCancelable?: boolean;
   maxNestedDepth?: number;
+  onCancelAddingNewFields?: () => void;
 }
 
 export const CreateField = React.memo(function CreateFieldComponent({
@@ -46,6 +47,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   paddingLeft,
   isCancelable,
   maxNestedDepth,
+  onCancelAddingNewFields,
 }: Props) {
   const dispatch = useDispatch();
 
@@ -65,6 +67,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
   }, [dispatch, subscribe]);
 
   const cancel = () => {
+    if (onCancelAddingNewFields && isCancelable) {
+      onCancelAddingNewFields();
+    }
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });
   };
 
