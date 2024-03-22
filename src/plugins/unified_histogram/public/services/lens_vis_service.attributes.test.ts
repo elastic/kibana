@@ -186,7 +186,7 @@ describe('LensVisService attributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "New suggestion",
+          "title": "Edit visualization",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -358,7 +358,7 @@ describe('LensVisService attributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "New suggestion",
+          "title": "Edit visualization",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -512,7 +512,7 @@ describe('LensVisService attributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "New suggestion",
+          "title": "Edit visualization",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
