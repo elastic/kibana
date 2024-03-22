@@ -593,8 +593,8 @@ function getCountsElement(
       />
     ) : (
       <FormattedMessage
-        id="unifiedFieldList.fieldStats.calculatedFromValuesLabel"
-        defaultMessage="Calculated from {sampledValuesFormatted} {sampledValues, plural, one {value} other {values}}."
+        id="unifiedFieldList.fieldStats.calculatedFromSampleValuesLabel"
+        defaultMessage="Calculated from {sampledValuesFormatted} sample {sampledValues, plural, one {value} other {values}}."
         values={{
           sampledValues,
           sampledValuesFormatted: (

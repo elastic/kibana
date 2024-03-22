@@ -167,7 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
         expect(topValuesRows.length).to.eql(10);
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '42 values'
+          '42 sample values'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -181,7 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '500 values'
+          '500 sample values'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '32 values'
+          '32 sample values'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -209,7 +209,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '500 values'
+          '500 sample values'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -275,7 +275,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
         expect(topValuesRows.length).to.eql(3);
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '3 values'
+          '3 sample values'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -296,7 +296,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'true\n100%'
         );
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '1 value'
+          '1 sample value'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
