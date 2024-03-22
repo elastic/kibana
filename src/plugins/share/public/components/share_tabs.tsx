@@ -36,6 +36,7 @@ export const ShareMenuTabs = () => {
       tabs.push({
         id: panel.id.toString(),
         name: shareMenuItem.name,
+        // @ts-ignore
         content: () => panel.content,
       });
     });
@@ -43,6 +44,7 @@ export const ShareMenuTabs = () => {
 
   return (
     <TabbedModal
+      // @ts-ignore
       tabs={tabs}
       modalWidth={483}
       onClose={onClose}
