@@ -32,7 +32,7 @@ export function SearchConnectorTab() {
 
       <EuiText>
         <FormattedMessage
-          id="observabilityAiAssistantManagement.searchConnectorTab.searchConnectorsManagementLink"
+          id="xpack.observabilityAiAssistantManagement.searchConnectorTab.searchConnectorsManagementLink"
           defaultMessage="You can manage connectors under {searchConnectorLink}."
           values={{
             searchConnectorLink: (

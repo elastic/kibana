@@ -114,7 +114,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
 
         <EuiText size="s">
           <FormattedMessage
-            id="observabilityAiAssistantManagement.knowledgeBaseBulkImportFlyout.uploadAJSONFileTextLabel"
+            id="xpack.observabilityAiAssistantManagement.knowledgeBaseBulkImportFlyout.uploadAJSONFileTextLabel"
             defaultMessage="Upload a newline delimited JSON ({ext}) file containing a list of entries to add to your Knowledge base."
             values={{
               ext: <EuiCode language="html">.ndjson</EuiCode>,
