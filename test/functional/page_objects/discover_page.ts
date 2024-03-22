@@ -807,12 +807,12 @@ export class DiscoverPageObject extends FtrService {
    * */
   public async dragFieldWithKeyboardToTable(fieldName: string) {
     const field = await this.find.byCssSelector(
-      `[data-test-subj="domDragDrop_draggable-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+      `[data-test-subj="dscFieldListPanelField-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
     );
     await field.focus();
     await this.retry.try(async () => {
       await this.browser.pressKeys(this.browser.keys.ENTER);
-      await this.testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+      await this.testSubjects.exists('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
     });
     await this.browser.pressKeys(this.browser.keys.RIGHT);
     await this.browser.pressKeys(this.browser.keys.ENTER);

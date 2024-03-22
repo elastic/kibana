@@ -49,11 +49,6 @@ export type MetricExpression = Omit<CustomMetricExpressionParams, 'timeSize' | '
   timeUnit?: BaseMetricExpressionParams['timeUnit'];
 };
 
-export interface TimeRange {
-  from?: string;
-  to?: string;
-}
-
 export interface AlertParams {
   criteria: MetricExpression[];
   groupBy?: string | string[];
