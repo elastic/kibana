@@ -1949,11 +1949,7 @@ Depending on the specific field or type of field we might want to apply a specif
 
 > Examples: `name`, `query`
 
-For single-line string fields we will continue to use the existing simple diff algorithm because:
-
-
-
-Reasons why we'll continue to use the simple diff algorithm for single-line string fields:
+For single-line string fields we will continue to use the existing simple diff algorithm, with all non-solvable scenarios in case of conflict, because:
 - Merging keywords (especially enums) should never be done, because it could generate an invalid value.
 - Changes to a rule's name might indicate some semantical changes to the whole rule (e.g. related to its source data, query/filters logic, etc). So, if both Elastic and user changed the name of the same rule, this could be an indication that the two versions of these rule are not compatible with each other, and the changes need to be reviewed by the user. Generating a conflict in this case would help the user to pay attention to all the changes.
 
@@ -2017,8 +2013,101 @@ Reasons why we'll continue to use the simple diff algorithm for single-line stri
 
 > Examples: `description`, `setup`, `note` (Investigation guide)
 
- in case of three-way conflicts, we will make a best effort to reconcile any modifications done by the user and any updates proposed by Elastic.
+For multi-line string fields, in case of scenarios where the `base`, `current` and `target` versions are different, the scenario is marked as conflict. 
+However, in some cases the merged proposal can be successfully calculated and solved, while in other cases not.
 
+These two types of scenarios are found in the last two rows of the table, but let's see an example of each in detail:
+
+**Solvable conflict**
+**BASE:** 
+```
+My description.
+This is a second line.
+```
+**CURRENT**
+```
+My GREAT description.
+This is a second line.
+```
+**TARGET**
+```
+My description.
+This is a second line, now longer.
+```
+
+Using a diffing library such as `nodeDiff3`, we can attempt to create a merge proposal out of the 3 versions:
+```ts
+const nodeDiff3 = require("node-diff3");
+const base = "My description. \nThis is a second line.";
+const current = "My GREAT description. \nThis is a second line.";
+const target = "My description. \nThis is a second line, now longer.";
+
+const nodeDiff3.diff3Merge(current, base, target) // Order is not a typo, that's how the library works
+
+// OUTPUTS:
+// [
+//   {
+//     ok: [
+//       'My',           'GREAT',
+//       'description.', 'This',
+//       'is',           'a',
+//       'second',       'line,',
+//       'now',          'longer.'
+//     ]
+//   }
+// ]
+```
+The library is able to solve the changes of the two sentences individually and produces an acceptable merge proposal. We should still mark it as a conflict to drive the user's attention to the result and allow them to decide if it makes sense or not.
+
+**Non-Solvable conflict**
+**BASE:** 
+```
+My description.
+This is a second line.
+```
+**CURRENT**
+```
+My GREAT description.
+This is a third line.
+```
+**TARGET**
+```
+My EXCELLENT description.
+This is a fourth.
+```
+
+```ts
+const base = "My description. \nThis is a second line.";
+const current = "My GREAT description. \nThis is a third line.";
+const target = "My EXCELLENT description. \nThis is a fourth line.";
+
+nodeDiff3.diff3Merge(current, base, target);
+
+// OUTPUTS:
+// [
+//   { ok: [ 'My' ] },
+//   {
+//     conflict: { a: [Array], aIndex: 1, o: [], oIndex: 1, b: [Array], bIndex: 1 }
+//   },
+//   { ok: [ 'description.', 'This', 'is', 'a' ] },
+//   {
+//     conflict: {
+//       a: [Array],
+//       aIndex: 6,
+//       o: [Array],
+//       oIndex: 5,
+//       b: [Array],
+//       bIndex: 6
+//     }
+//   },
+//   { ok: [ 'line.' ] }
+// ]
+```
+The library marks multiple sections of the string as conflicts, since the same sentences have diverged in different way in the current and target version from the original base version.
+
+Since in this kind of scenarios we cannot provide a satisfactory merge proposal, we will mark it as a conflict and propose the `current` version as the `merge` version.
+
+In summary:
 <table>
   <thead align="center">
     <tr>
