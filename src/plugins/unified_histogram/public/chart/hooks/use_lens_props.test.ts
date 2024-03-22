@@ -42,7 +42,7 @@ describe('useLensProps', () => {
         },
         getTimeRange,
         refetch$,
-        attributesContext: attributesContext!,
+        visContext: attributesContext!,
         onLoad,
       });
     });
@@ -83,7 +83,7 @@ describe('useLensProps', () => {
         },
         getTimeRange,
         refetch$,
-        attributesContext: attributesContext!,
+        visContext: attributesContext!,
         onLoad,
       });
     });
@@ -123,7 +123,7 @@ describe('useLensProps', () => {
       },
       getTimeRange,
       refetch$,
-      attributesContext: attributesContext!,
+      visContext: attributesContext!,
       onLoad,
     };
     const hook = renderHook(
