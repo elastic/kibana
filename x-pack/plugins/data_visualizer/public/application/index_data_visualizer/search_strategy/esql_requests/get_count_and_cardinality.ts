@@ -123,8 +123,7 @@ const getESQLOverallStatsInChunk = async ({
       }
       const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchReponse;
 
-      const sampleCount =
-        limitSize === 'none' || !isDefined(limitSize) ? totalCount : parseInt(limitSize, 10);
+      const sampleCount = !isDefined(limitSize) ? totalCount : parseInt(limitSize, 10);
       fieldsToFetch.forEach((field, idx) => {
         const count = esqlResultsResp.values[0][field.startIndex + aggToIndex.count] as number;
 

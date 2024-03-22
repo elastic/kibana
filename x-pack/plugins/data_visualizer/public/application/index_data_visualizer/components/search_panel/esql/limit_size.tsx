@@ -43,13 +43,6 @@ const options = [
       values: { limit: '1,000,000' },
     }),
   },
-  {
-    'data-test-subj': 'dvESQLLimitSize-none',
-    value: 'none',
-    text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.analyzeAll', {
-      defaultMessage: 'Analyze all',
-    }),
-  },
 ];
 
 export const ESQLDefaultLimitSizeSelect = ({
