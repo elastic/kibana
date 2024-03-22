@@ -12,15 +12,12 @@ import {
   RecoveredActionGroup,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { Alert } from '@kbn/alerting-plugin/server';
 import {
   CustomMetricExpressionParams,
-  Group,
   SearchConfigurationWithExtractedReferenceType,
 } from '../../../../common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { MissingGroupsRecord } from './lib/check_missing_group';
-import { AdditionalContext } from './utils';
 
 export enum AlertStates {
   OK,
@@ -62,22 +59,6 @@ export type CustomThresholdActionGroup =
   | typeof FIRED_ACTIONS_ID
   | typeof NO_DATA_ACTIONS_ID
   | typeof RecoveredActionGroup.id;
-
-export type CustomThresholdAlertFactory = (
-  id: string,
-  reason: string,
-  actionGroup: CustomThresholdActionGroup,
-  additionalContext?: AdditionalContext | null,
-  evaluationValues?: Array<number | null>,
-  threshold?: Array<number | null>,
-  group?: Group[]
-) => CustomThresholdAlert;
-
-type CustomThresholdAlert = Alert<
-  CustomThresholdAlertState,
-  CustomThresholdAlertContext,
-  CustomThresholdSpecificActionGroups
->;
 
 export interface AlertExecutionDetails {
   alertId: string;

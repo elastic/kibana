@@ -14,18 +14,9 @@ import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
-import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { Group } from '../../../../common/custom_threshold_rule/types';
 import { ObservabilityConfig } from '../../..';
 import { AlertExecutionDetails } from './types';
-
-const ALERT_CONTEXT_CONTAINER = 'container';
-const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator';
-const ALERT_CONTEXT_CLOUD = 'cloud';
-const ALERT_CONTEXT_HOST = 'host';
-const ALERT_CONTEXT_LABELS = 'labels';
-const ALERT_CONTEXT_TAGS = 'tags';
 
 const HOST_NAME = 'host.name';
 const HOST_HOSTNAME = 'host.hostname';
@@ -181,21 +172,6 @@ export const flattenAdditionalContext = (
   additionalContext: AdditionalContext | undefined | null
 ): AdditionalContext => {
   return additionalContext ? flattenObject(additionalContext) : {};
-};
-
-export const getContextForRecoveredAlerts = (
-  alertHitSource: Partial<ParsedTechnicalFields & ParsedExperimentalFields> | undefined | null
-): AdditionalContext => {
-  const alert = alertHitSource ? unflattenObject(alertHitSource) : undefined;
-
-  return {
-    cloud: alert?.[ALERT_CONTEXT_CLOUD],
-    host: alert?.[ALERT_CONTEXT_HOST],
-    orchestrator: alert?.[ALERT_CONTEXT_ORCHESTRATOR],
-    container: alert?.[ALERT_CONTEXT_CONTAINER],
-    labels: alert?.[ALERT_CONTEXT_LABELS],
-    tags: alert?.[ALERT_CONTEXT_TAGS],
-  };
 };
 
 export const unflattenObject = <T extends object = AdditionalContext>(object: object): T =>
