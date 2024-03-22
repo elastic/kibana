@@ -12,11 +12,11 @@ import {
   EuiCommentList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingChart,
   EuiLoadingSpinner,
   EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { useAiRulesMonitoringContext } from './ai_rules_monitoring_context';
 import { RuleMonitoringIntervalSelector } from './rule_monitoring_interval_selector';
@@ -35,9 +35,9 @@ export function AiRulesMonitoringPage(): JSX.Element {
         {
           username: 'Rule Monitoring AI Assistant',
           children: (
-            <EuiFlexGroup justifyContent="center">
-              <EuiLoadingChart size="l" />
-            </EuiFlexGroup>
+            <EuiSkeletonText>
+              <EuiText size="m">&nbsp;</EuiText>
+            </EuiSkeletonText>
           ),
           event: ' ',
         },
@@ -105,16 +105,14 @@ export function AiRulesMonitoringPage(): JSX.Element {
   );
 }
 
-const WELCOME_BODY = (
-  <EuiText size="s">
-    <p>{i18n.WELCOME_GENERAL_INFO}</p>
-    <p>{i18n.WELCOME_EXPLANATION}</p>
-    <p>{i18n.WELCOME_ACTION}</p>
-  </EuiText>
-);
+const WELCOME_BODY = [
+  i18n.WELCOME_GENERAL_INFO,
+  i18n.WELCOME_EXPLANATION,
+  i18n.WELCOME_ACTION,
+].join('\n\n');
 
 const WELCOME_COMMENT = {
   username: 'System',
-  children: WELCOME_BODY,
+  children: <EuiMarkdownFormat>{WELCOME_BODY}</EuiMarkdownFormat>,
   event: ' ',
 };
