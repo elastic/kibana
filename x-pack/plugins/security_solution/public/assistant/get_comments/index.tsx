@@ -96,7 +96,9 @@ export const getComments = ({
           <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
         ),
         timestamp: i18n.AT(
-          message.timestamp.length === 0 ? new Date().toLocaleString() : message.timestamp
+          message.timestamp.length === 0
+            ? new Date().toLocaleString()
+            : new Date(message.timestamp).toLocaleString()
         ),
         username: isUser ? i18n.YOU : i18n.ASSISTANT,
         eventColor: message.isError ? 'danger' : undefined,
