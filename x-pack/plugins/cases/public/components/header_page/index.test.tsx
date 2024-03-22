@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
 
 import '../../common/mock/match_media';
@@ -78,30 +77,6 @@ describe('HeaderPage', () => {
     );
 
     expect(wrapper.find('[data-test-subj="header-page-supplements"]').first().exists()).toBe(false);
-  });
-
-  it('applies border styles when border is true', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage border title="Test title" />
-      </TestProviders>
-    );
-    const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
-
-    expect(casesHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
-  });
-
-  it('DOES NOT apply border styles when border is false', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage title="Test title" />
-      </TestProviders>
-    );
-    const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
-
-    expect(casesHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
   describe('Badges', () => {

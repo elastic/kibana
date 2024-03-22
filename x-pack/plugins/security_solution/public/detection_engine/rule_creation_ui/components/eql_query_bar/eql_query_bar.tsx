@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 
 import type { FieldHook } from '../../../../shared_imports';
@@ -57,12 +57,6 @@ const StyledFormRow = styled(EuiFormRow)`
     }
   }
 `;
-
-export interface FieldValueQueryBar {
-  filters: Filter[];
-  query: Query;
-  saved_id?: string;
-}
 
 export interface EqlQueryBarProps {
   dataTestSubj: string;
