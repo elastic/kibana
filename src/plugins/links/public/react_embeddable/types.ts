@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import {
-  apiIsOfType,
-  apiPublishesUnifiedSearch,
-  apiPublishesPanelTitle,
-  HasType,
-} from '@kbn/presentation-publishing';
+import { apiIsOfType, HasType } from '@kbn/presentation-publishing';
 import {
   DefaultEmbeddableApi,
   SerializedReactEmbeddableTitles,
 } from '@kbn/embeddable-plugin/public';
-import { CanLinkToLibrary, CanUnlinkFromLibrary } from '@kbn/presentation-library';
+import {
+  apiCanLinkToLibrary,
+  apiCanUnlinkFromLibrary,
+  CanLinkToLibrary,
+  CanUnlinkFromLibrary,
+} from '@kbn/presentation-library';
 import { CONTENT_ID } from '../../common';
 import { LinksAttributes } from '../../common/content_management';
 
@@ -27,10 +27,7 @@ export type LinksApi = HasType<typeof CONTENT_ID> &
 
 export const isLinksApi = (api: unknown): api is LinksApi => {
   return Boolean(
-    api &&
-      apiIsOfType(api, CONTENT_ID) &&
-      apiPublishesPanelTitle(api) &&
-      apiPublishesUnifiedSearch(api)
+    api && apiIsOfType(api, CONTENT_ID) && apiCanUnlinkFromLibrary(api) && apiCanLinkToLibrary(api)
   );
 };
 
