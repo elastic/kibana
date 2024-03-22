@@ -404,7 +404,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "anthropic.claude-v2:1",
+        "default": "anthropic.claude-3-sonnet-20240229-v1:0",
         "error": [Function],
         "presence": "optional",
       },

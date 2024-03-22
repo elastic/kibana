@@ -13,14 +13,13 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DEFAULT_MESSAGES_BODY } from './constants';
+import { DEFAULT_BODY } from './constants';
 import * as i18n from './translations';
-import { SUB_ACTION } from '../../../common/bedrock/constants';
+import { DEFAULT_BEDROCK_MODEL, SUB_ACTION } from '../../../common/bedrock/constants';
 import { BedrockActionParams } from './types';
 
 const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActionParams>> = ({
   actionParams,
-  actionConnector,
   editAction,
   index,
   messageVariables,
@@ -44,7 +43,7 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
       editAction(
         'subActionParams',
         {
-          body: DEFAULT_MESSAGES_BODY,
+          body: DEFAULT_BODY,
         },
         index
       );
@@ -119,7 +118,7 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
       >
         <EuiFieldText
           data-test-subj="bedrock-model"
-          placeholder={'anthropic.claude-v2:1'}
+          placeholder={DEFAULT_BEDROCK_MODEL}
           value={model}
           onChange={(ev) => {
             editSubActionParams({ model: ev.target.value });

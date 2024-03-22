@@ -7,17 +7,19 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
-import type { AxiosError } from 'axios';
+import { AxiosError, Method } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
+import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
   InvokeAIActionParamsSchema,
   StreamingResponseSchema,
-  RunApiResponseSchema,
+  RunActionResponseSchema,
+  RunApiLatestResponseSchema,
 } from '../../../common/bedrock/schema';
-import type {
+import {
   Config,
   Secrets,
   RunActionParams,
@@ -25,6 +27,7 @@ import type {
   InvokeAIActionParams,
   InvokeAIActionResponse,
   StreamActionParams,
+  RunApiLatestResponse,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
@@ -180,6 +183,23 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     return { available: response.success };
   }
 
+  private async runApiDeprecated(
+    params: SubActionRequestParams<RunActionResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
+  ): Promise<RunActionResponse> {
+    const response = await this.request(params);
+    return response.data;
+  }
+
+  private async runApiLatest(
+    params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
+  ): Promise<RunActionResponse> {
+    const response = await this.request(params);
+    return {
+      completion: parseContent(response.data.content),
+      stop_reason: response.data.stop_reason,
+    };
+  }
+
   /**
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
@@ -187,36 +207,22 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    */
   public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
-    const path = `/model/${reqModel ?? this.model}/invoke`;
+    const currentModel = reqModel ?? this.model;
+    const path = `/model/${currentModel}/invoke`;
     const signed = this.signRequest(body, path, false);
-    const response = await this.request({
+    const requestArgs = {
       ...signed,
       url: `${this.url}${path}`,
-      method: 'post',
-      responseSchema: RunApiResponseSchema,
+      method: 'post' as Method,
       data: body,
       // give up to 2 minutes for response
       timeout: 120000,
-    });
-    // pre Claude 3 response
-    if (response.data.completion) {
-      return {
-        completion: response.data.completion,
-        stop_reason: response.data.stop_reason,
-      };
-    }
-    // Claude 3 response
-    if (response.data.content) {
-      return {
-        completion: parseContent(response.data.content),
-        stop_reason: response.data.stop_reason,
-      };
-    }
-    // should not happen, needs error handling
-    return {
-      // TODO handle
-      completion: '',
     };
+
+    if (usesMessagesApi(currentModel)) {
+      return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
+    }
+    return this.runApiDeprecated({ ...requestArgs, responseSchema: RunActionResponseSchema });
   }
 
   /**
@@ -262,13 +268,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     temperature,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
     const currentModel = model ?? this.model;
-    const usesMessagesApi =
-      currentModel.split('.')[0] === 'anthropic' &&
-      !currentModel.includes('claude-v2') &&
-      !currentModel.includes('claude-instant-v1');
     const res = (await this.streamApi({
       body: JSON.stringify(
-        usesMessagesApi
+        usesMessagesApi(currentModel)
           ? formatBedrockMessagesBody({ messages, model, stopSequences, temperature })
           : formatBedrockBody({ messages, model, stopSequences, temperature })
       ),
@@ -287,13 +289,10 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     model,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const currentModel = model ?? this.model;
-    const usesMessagesApi =
-      currentModel.split('.')[0] === 'anthropic' &&
-      !currentModel.includes('claude-v2') &&
-      !currentModel.includes('claude-instant-v1');
+
     const res = await this.runApi({
       body: JSON.stringify(
-        usesMessagesApi
+        usesMessagesApi(currentModel)
           ? formatBedrockMessagesBody({ messages, model })
           : formatBedrockBody({ messages, model })
       ),
@@ -372,3 +371,8 @@ function parseContent(content: Array<{ text?: string; type: string }>): string {
   }
   return parsedContent;
 }
+
+const usesMessagesApi = (model: string) =>
+  model.split('.')[0] === 'anthropic' &&
+  !model.includes('claude-v2') &&
+  !model.includes('claude-instant-v1');

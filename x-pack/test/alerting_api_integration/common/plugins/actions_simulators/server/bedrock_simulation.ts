@@ -29,7 +29,9 @@ export class BedrockSimulator extends Simulator {
       return BedrockSimulator.sendErrorResponse(response);
     }
 
-    if (request.url === '/model/anthropic.claude-v2:1/invoke-with-response-stream') {
+    if (
+      request.url === '/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke-with-response-stream'
+    ) {
       return BedrockSimulator.sendStreamResponse(response);
     }
 
