@@ -7,7 +7,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { DragDrop, type DropType, DropOverlayWrapper } from '@kbn/dom-drag-drop';
+import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -129,8 +129,7 @@ export const DiscoverMainContent = ({
   const showChart = useAppStateSelector((state) => !state.hideChart);
 
   return (
-    <DragDrop
-      draggable={false}
+    <Droppable
       dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
       value={DROP_PROPS.value}
       order={DROP_PROPS.order}
@@ -193,6 +192,6 @@ export const DiscoverMainContent = ({
           ) : null}
         </EuiFlexGroup>
       </DropOverlayWrapper>
-    </DragDrop>
+    </Droppable>
   );
 };
