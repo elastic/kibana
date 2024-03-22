@@ -20,6 +20,8 @@ import type { UserProfileData } from '@kbn/user-profile-components';
 
 import type { GetUserProfileResponse, UserProfile } from '../../../common';
 
+const DEFAULT_DATAPATHS = 'avatar,userSettings';
+
 export class UserProfileAPIClient implements UserProfileAPIClientType {
   private readonly internalDataUpdates$: Subject<UserProfileData> = new Subject();
 
@@ -30,11 +32,15 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
     this.internalDataUpdates$.asObservable();
 
   private readonly _userProfile$ = new BehaviorSubject<UserProfileData | null>(null);
+  private readonly _userProfileLoaded$ = new BehaviorSubject(false);
 
   /** Observable of the current user profile data */
   public readonly userProfile$ = this._userProfile$.asObservable();
+  public readonly userProfileLoaded$ = this._userProfileLoaded$.asObservable();
 
-  constructor(private readonly http: HttpStart) {}
+  constructor(private readonly http: HttpStart) {
+    this.getCurrent({ dataPath: DEFAULT_DATAPATHS });
+  }
 
   /**
    * Retrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or
@@ -52,6 +58,11 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
         const data = response?.data ?? {};
         const updated = merge(this._userProfile$.getValue(), data);
         this._userProfile$.next(updated);
+
+        if (this._userProfileLoaded$.getValue() === false) {
+          this._userProfileLoaded$.next(true);
+        }
+
         return response;
       });
   }
@@ -111,5 +122,14 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
         this._userProfile$.next(previous);
         return Promise.reject(err);
       });
+  }
+
+  /**
+   * Updates user profile data of the current user.
+   * @param data Application data to be written (merged with existing data).
+   */
+  public partialUpdate<D extends Partial<UserProfileData>>(data: D) {
+    const updated = merge(this._userProfile$.getValue(), data);
+    return this.update(updated);
   }
 }

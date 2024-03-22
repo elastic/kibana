@@ -31,7 +31,9 @@ function createStartMock() {
       bulkGet: jest.fn(),
       suggest: jest.fn(),
       update: jest.fn(),
+      partialUpdate: jest.fn(),
       userProfile$: of({}),
+      userProfileLoaded$: of(true),
     },
     uiApi: getUiApiMock.createStart(),
   };

@@ -10,6 +10,7 @@ import { AggregateQuery, Query } from '@kbn/es-query';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
@@ -40,11 +41,13 @@ export interface NavigationPublicStart {
 
 export interface NavigationPublicSetupDependencies {
   cloud?: CloudSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface NavigationPublicStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   cloud?: CloudStart;
+  security?: SecurityPluginStart;
 }
 
 export type SolutionNavigationOptInStatus = 'visible' | 'hidden' | 'ask';

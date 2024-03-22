@@ -7,7 +7,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
@@ -62,6 +62,7 @@ export const useUpdateUserProfile = ({
   const userProfileData = useObservable(userProfile$);
   // Keep a snapshot before updating the user profile so we can compare previous and updated values
   const userProfileSnapshot = useRef<UserProfileData | null>();
+  const isMounted = useRef(false);
 
   const showSuccessNotification = useCallback(
     ({ isRefreshRequired = false }: { isRefreshRequired?: boolean } = {}) => {
@@ -102,6 +103,8 @@ export const useUpdateUserProfile = ({
 
   const onUserProfileUpdate = useCallback(
     (updatedData: UserProfileData) => {
+      if (!isMounted.current) return;
+
       setIsLoading(false);
 
       if (notificationSuccessEnabled) {
@@ -116,10 +119,19 @@ export const useUpdateUserProfile = ({
     <D extends UserProfileData>(updatedData: D) => {
       userProfileSnapshot.current = userProfileData;
       setIsLoading(true);
-      return userProfileApiClient.update(updatedData).then(() => onUserProfileUpdate(updatedData));
+      return userProfileApiClient
+        .partialUpdate(updatedData)
+        .then(() => onUserProfileUpdate(updatedData));
     },
     [userProfileApiClient, onUserProfileUpdate, userProfileData]
   );
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   return {
     /** Update the user profile */

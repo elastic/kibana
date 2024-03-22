@@ -6,9 +6,21 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { combineLatest, debounceTime, ReplaySubject, takeUntil } from 'rxjs';
+import {
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  Observable,
+  of,
+  ReplaySubject,
+  skipWhile,
+  switchMap,
+  takeUntil,
+} from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/public';
 import type {
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
@@ -17,6 +29,7 @@ import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { definition as esDefinition } from '@kbn/solution-nav-es';
 import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
+import { UserProfileData } from '@kbn/user-profile-components';
 import {
   ENABLE_SOLUTION_NAV_UI_SETTING_ID,
   OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID,
@@ -33,6 +46,9 @@ import {
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 import { SideNavComponent } from './side_navigation';
+import { SolutionNavUserProfileToggle } from './solution_nav_userprofile_toggle';
+
+const DEFAULT_OPT_OUT_NEW_NAV = false;
 
 export class NavigationPublicPlugin
   implements
@@ -48,6 +64,8 @@ export class NavigationPublicPlugin
   private readonly stop$ = new ReplaySubject<void>(1);
   private coreStart?: CoreStart;
   private depsStart?: NavigationPublicStartDependencies;
+  private userProfileOptOut$: Observable<boolean | undefined> = of(DEFAULT_OPT_OUT_NEW_NAV);
+  private userProfileMenuItemAdded = false;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -66,9 +84,23 @@ export class NavigationPublicPlugin
     this.coreStart = core;
     this.depsStart = depsStart;
 
-    const { unifiedSearch, cloud } = depsStart;
+    const { unifiedSearch, cloud, security } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
+
+    if (security) {
+      this.userProfileOptOut$ = security.userProfiles.userProfileLoaded$.pipe(
+        skipWhile((loaded) => {
+          return !loaded;
+        }),
+        switchMap(() => {
+          return security.userProfiles.userProfile$ as Observable<UserProfileData>;
+        }),
+        map((profile) => {
+          return profile?.userSettings?.solutionNavOptOut;
+        })
+      );
+    }
 
     /*
      *
@@ -102,7 +134,7 @@ export class NavigationPublicPlugin
     if (isSolutionNavEnabled) {
       chrome.project.setCloudUrls(cloud);
       this.addDefaultSolutionNavigation({ chrome });
-      this.susbcribeToSolutionNavUiSettings(core);
+      this.susbcribeToSolutionNavUiSettings({ core, security });
     }
 
     return {
@@ -130,21 +162,37 @@ export class NavigationPublicPlugin
     this.stop$.next();
   }
 
-  private susbcribeToSolutionNavUiSettings(core: CoreStart) {
+  private susbcribeToSolutionNavUiSettings({
+    core,
+    security,
+  }: {
+    core: CoreStart;
+    security?: SecurityPluginStart;
+  }) {
     const chrome = core.chrome as InternalChromeStart;
 
     combineLatest([
       core.settings.globalClient.get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
       core.settings.globalClient.get$(OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID),
       core.settings.globalClient.get$(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
+      this.userProfileOptOut$.pipe(distinctUntilChanged()),
     ])
       .pipe(takeUntil(this.stop$), debounceTime(10))
-      .subscribe(([enabled, status, defaultSolution]) => {
-        if (!enabled) {
-          chrome.project.changeActiveSolutionNavigation(null);
+      .subscribe(([enabled, status, defaultSolution, userOptedOut]) => {
+        if (enabled) {
+          this.addOptInOutUserProfile({ core, security });
         } else {
-          // TODO: Here we will need to check if the user has opt-in or not.... (value set in their user profile)
-          const changeImmediately = status === 'visible';
+          // TODO. Remove the user profile menu item if the feature is disabled.
+          // But first let's wait as maybe there will be a page refresh when opting out.
+        }
+
+        if (!enabled || userOptedOut === true) {
+          chrome.project.changeActiveSolutionNavigation(null);
+          chrome.setChromeStyle('classic');
+        } else {
+          const changeImmediately =
+            status === 'visible' || (status === 'hidden' && userOptedOut === false);
+
           chrome.project.changeActiveSolutionNavigation(
             changeImmediately ? defaultSolution : null,
             { onlyIfNotSet: true }
@@ -208,5 +256,32 @@ export class NavigationPublicPlugin
     };
 
     chrome.project.updateSolutionNavigations(solutionNavs, true);
+  }
+
+  private addOptInOutUserProfile({
+    core,
+    security,
+  }: {
+    core: CoreStart;
+    security?: SecurityPluginStart;
+  }) {
+    if (!security || this.userProfileMenuItemAdded) return;
+
+    const menuLink: UserMenuLink = {
+      content: (
+        <SolutionNavUserProfileToggle
+          core={core}
+          security={security}
+          defaultOptOutValue={DEFAULT_OPT_OUT_NEW_NAV}
+        />
+      ),
+      order: 500,
+      label: '',
+      iconType: '',
+      href: '',
+    };
+
+    security.navControlService.addUserMenuLinks([menuLink]);
+    this.userProfileMenuItemAdded = true;
   }
 }
