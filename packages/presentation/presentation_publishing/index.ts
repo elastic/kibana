@@ -56,9 +56,11 @@ export {
   type PublishesDisabledActionIds,
 } from './interfaces/publishes_disabled_action_ids';
 export {
+  apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   apiPublishesPartialUnifiedSearch,
   apiPublishesWritableUnifiedSearch,
+  type PublishesTimeRange,
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
 } from './interfaces/publishes_unified_search';

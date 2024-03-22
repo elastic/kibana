@@ -784,12 +784,12 @@
       "warning": []
     },
     {
-      "query": "row var = case(true, \"a\", \"a\")",
+      "query": "row var = case(true, \"a\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "row case(true, \"a\", \"a\")",
+      "query": "row case(true, \"a\")",
       "error": [],
       "warning": []
     },
@@ -7017,12 +7017,12 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = case(booleanField, stringField, stringField)",
+      "query": "from a_index | eval var = case(booleanField, stringField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval case(booleanField, stringField, stringField)",
+      "query": "from a_index | eval case(booleanField, stringField)",
       "error": [],
       "warning": []
     },
