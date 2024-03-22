@@ -219,7 +219,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       timeout: 120000,
     };
 
-    if (usesMessagesApi(currentModel)) {
+    if (usesLatestApi(currentModel)) {
       return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
     }
     return this.runApiDeprecated({ ...requestArgs, responseSchema: RunActionResponseSchema });
@@ -270,9 +270,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const currentModel = model ?? this.model;
     const res = (await this.streamApi({
       body: JSON.stringify(
-        usesMessagesApi(currentModel)
-          ? formatBedrockMessagesBody({ messages, model, stopSequences, temperature })
-          : formatBedrockBody({ messages, model, stopSequences, temperature })
+        usesLatestApi(currentModel)
+          ? formatLatestClaudeBody({ messages, model, stopSequences, temperature })
+          : formatDeprecatedClaudeBody({ messages, model, stopSequences, temperature })
       ),
       model,
     })) as unknown as IncomingMessage;
@@ -292,9 +292,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
 
     const res = await this.runApi({
       body: JSON.stringify(
-        usesMessagesApi(currentModel)
-          ? formatBedrockMessagesBody({ messages, model })
-          : formatBedrockBody({ messages, model })
+        usesLatestApi(currentModel)
+          ? formatLatestClaudeBody({ messages, model })
+          : formatDeprecatedClaudeBody({ messages, model })
       ),
       model,
     });
@@ -302,7 +302,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   }
 }
 
-const formatBedrockBody = ({
+// keeping for safer backwards compatibility
+const formatDeprecatedClaudeBody = ({
   model = DEFAULT_BEDROCK_MODEL,
   messages,
   stopSequences = ['\n\nHuman:'],
@@ -344,7 +345,7 @@ const formatBedrockBody = ({
   };
 };
 
-const formatBedrockMessagesBody = ({
+const formatLatestClaudeBody = ({
   messages,
   stopSequences = ['\n\nHuman:'],
   temperature = 0.5,
@@ -372,7 +373,7 @@ function parseContent(content: Array<{ text?: string; type: string }>): string {
   return parsedContent;
 }
 
-const usesMessagesApi = (model: string) =>
+const usesLatestApi = (model: string) =>
   model.split('.')[0] === 'anthropic' &&
   !model.includes('claude-v2') &&
   !model.includes('claude-instant-v1');
