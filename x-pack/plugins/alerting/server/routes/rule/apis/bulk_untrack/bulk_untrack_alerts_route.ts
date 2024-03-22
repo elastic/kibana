@@ -32,7 +32,6 @@ export const bulkUntrackAlertsRoute = (
         try {
           await rulesClient.bulkUntrackAlerts({
             ...transformBulkUntrackAlertsBodyV1(body),
-            isUsingQuery: false,
           });
           return res.noContent();
         } catch (e) {

@@ -319,6 +319,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                   setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
                   refresh,
                   clearSelection,
+                  featureIds: props.featureIds,
                 })}
               </EuiFlexGroup>
             );
@@ -343,6 +344,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     isBulkActionsColumnActive,
     props.id,
     props.leadingControlColumns,
+    props.featureIds,
     renderCustomActionsRow,
     getSetIsActionLoadingCallback,
     refresh,

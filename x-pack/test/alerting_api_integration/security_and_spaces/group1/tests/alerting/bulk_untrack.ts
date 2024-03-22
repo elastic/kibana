@@ -103,8 +103,18 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(scenario.user.username, scenario.user.password)
             .send({
-              indices: [alertAsDataIndex],
-              alert_uuids: ids,
+              query: [
+                {
+                  bool: {
+                    should: ids.map((alertId) => ({
+                      term: {
+                        [ALERT_UUID]: { value: alertId },
+                      },
+                    })),
+                  },
+                },
+              ],
+              feature_ids: ['alertsFixture'],
             });
 
           switch (scenario.id) {
@@ -182,8 +192,22 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix('space1')}/internal/alerting/alerts/_bulk_untrack`)
         .set('kbn-xsrf', 'foo')
         .send({
-          indices: [alertAsDataIndex],
-          alert_uuids: ids,
+          query: [
+            {
+              bool: {
+                filter: {
+                  bool: {
+                    should: ids.map((alertId) => ({
+                      term: {
+                        [ALERT_UUID]: { value: alertId },
+                      },
+                    })),
+                  },
+                },
+              },
+            },
+          ],
+          feature_ids: ['alertsFixture'],
         });
 
       await runSoon(createdRule.id);
@@ -220,6 +244,107 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
 
         expect(activeAlertsRemaining.length).eql(2);
         expect(untrackedAlertsRemaining.length).eql(2);
+      });
+    });
+
+    it('should untrack individual alerts by specifying the alert UUID in the query', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.always-firing-alert-as-data',
+            schedule: { interval: '24h' },
+            throttle: undefined,
+            notify_when: undefined,
+            params: {
+              index: ES_TEST_INDEX_NAME,
+              reference: 'test',
+            },
+          })
+        )
+        .expect(200);
+
+      objectRemover.add('space1', createdRule.id, 'rule', 'alerting');
+
+      await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'space1',
+          type: 'alert',
+          id: createdRule.id,
+          provider: 'alerting',
+          actions: new Map([['active-instance', { equal: 2 }]]),
+        });
+      });
+
+      const {
+        hits: { hits: activeAlerts },
+      } = await es.search({
+        index: alertAsDataIndex,
+        body: { query: { match_all: {} } },
+      });
+
+      const ids = activeAlerts.map((activeAlert: any) => activeAlert._source[ALERT_UUID]);
+
+      await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/alerts/_bulk_untrack`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          query: [
+            {
+              bool: {
+                filter: {
+                  bool: {
+                    should: [
+                      {
+                        term: {
+                          [ALERT_UUID]: { value: ids[0] },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+          feature_ids: ['alertsFixture'],
+        });
+
+      await runSoon(createdRule.id);
+
+      await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'space1',
+          type: 'alert',
+          id: createdRule.id,
+          provider: 'alerting',
+          actions: new Map([['active-instance', { equal: 4 }]]),
+        });
+      });
+
+      await retry.try(async () => {
+        const {
+          hits: { hits: alerts },
+        } = await es.search({
+          index: alertAsDataIndex,
+          body: { query: { match_all: {} } },
+        });
+
+        const activeAlertsRemaining = [];
+        const untrackedAlertsRemaining = [];
+
+        alerts.forEach((alert: any) => {
+          if (alert._source[ALERT_STATUS] === 'active') {
+            activeAlertsRemaining.push(alert);
+          } else {
+            untrackedAlertsRemaining.push(alert);
+          }
+        });
+
+        expect(activeAlertsRemaining.length).eql(2);
+        expect(untrackedAlertsRemaining.length).eql(1);
       });
     });
   });

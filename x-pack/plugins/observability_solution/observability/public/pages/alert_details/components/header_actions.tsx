@@ -22,22 +22,36 @@ import {
 } from '@elastic/eui';
 import {
   AlertStatus,
+  AlertConsumers,
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_CONSUMER,
 } from '@kbn/rule-data-utils';
+import { useBulkUntrackAlerts } from '@kbn/alerts-ui-shared';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
 import { paths } from '../../../../common/locators/paths';
-import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
+import { observabilityFeatureId } from '../../../../common';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
   alertStatus?: AlertStatus;
   onUntrackAlert: () => void;
 }
+
+const getAlertFeatureId = (alert: TopAlert): AlertConsumers => {
+  if (alert.fields[ALERT_RULE_PRODUCER] !== AlertConsumers.STACK_ALERTS) {
+    return alert.fields[ALERT_RULE_PRODUCER] as AlertConsumers;
+  }
+  if (alert.fields[ALERT_RULE_CONSUMER] !== AlertConsumers.STACK_ALERTS) {
+    return alert.fields[ALERT_RULE_CONSUMER] as AlertConsumers;
+  }
+  return observabilityFeatureId;
+};
 
 export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActionsProps) {
   const {
@@ -46,6 +60,7 @@ export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActi
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
     http,
+    notifications: { toasts },
   } = useKibana().services;
 
   const { rule, refetch } = useFetchRule({
@@ -58,12 +73,15 @@ export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActi
 
   const selectCaseModal = useCasesAddToExistingCaseModal();
 
-  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts({
+    http,
+    toasts,
+  });
 
   const handleUntrackAlert = useCallback(async () => {
     if (alert) {
       await untrackAlerts({
-        indices: ['.internal.alerts-observability.*'],
+        featureIds: [getAlertFeatureId(alert)],
         alertUuids: [alert.fields[ALERT_UUID]],
       });
       onUntrackAlert();

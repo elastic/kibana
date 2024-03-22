@@ -5,10 +5,13 @@
  * 2.0.
  */
 import { useCallback, useContext, useEffect, useMemo } from 'react';
+import type { NotificationsStart, HttpStart } from '@kbn/core/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
+import { useBulkUntrackAlerts } from '@kbn/alerts-ui-shared';
+
+import { AlertsTableContext, AlertsTableQueryContext } from '../contexts/alerts_table_context';
 import {
   Alerts,
   AlertsTableConfigurationRegistry,
@@ -31,8 +34,6 @@ import {
   NO_ALERTS_ADDED_TO_CASE,
 } from './translations';
 import { TimelineItem } from '../bulk_actions/components/toolbar';
-import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
-import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
@@ -193,9 +194,20 @@ export const useBulkUntrackActions = ({
     clearSelection();
   }, [clearSelection, refresh]);
 
-  const { application } = useKibana().services;
-  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
-  const { mutateAsync: untrackAlertsByQuery } = useBulkUntrackAlertsByQuery();
+  const {
+    application,
+    http,
+    notifications: { toasts },
+  } = useKibana<{
+    http: HttpStart;
+    notifications: NotificationsStart;
+  }>().services;
+
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts({
+    http,
+    toasts,
+    context: AlertsTableQueryContext,
+  });
 
   // Check if at least one Observability feature is enabled
   if (!application?.capabilities) return [];
@@ -226,14 +238,13 @@ export const useBulkUntrackActions = ({
       onClick: async (alerts?: TimelineItem[]) => {
         if (!alerts) return;
         const alertUuids = alerts.map((alert) => alert._id);
-        const indices = alerts.map((alert) => alert._index ?? '');
         try {
           setIsBulkActionsLoading(true);
-          if (isAllSelected) {
-            await untrackAlertsByQuery({ query, featureIds });
-          } else {
-            await untrackAlerts({ indices, alertUuids });
-          }
+          await untrackAlerts({
+            featureIds,
+            query,
+            ...(isAllSelected ? {} : { alertUuids }),
+          });
           onSuccess();
         } finally {
           setIsBulkActionsLoading(false);
