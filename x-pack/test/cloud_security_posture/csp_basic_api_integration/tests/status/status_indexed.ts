@@ -13,10 +13,10 @@ import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider_context';
-import { findingsMockData, vulnerabilityMockData } from '../mocks/findings_ingest_status_mock';
-import { addIndexDocs, deleteIndices } from '../../common/utils/index_api_helpers';
-import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
+import { ApiIntegrationFtrProviderContext } from '../../../common/ftr_provider_context';
+import { findingsMockData, vulnerabilityMockData } from '../../mocks/findings_ingest_status_mock';
+import { addIndexDocs, deleteIndices } from '../../../common/utils/index_api_helpers';
+import { createPackagePolicy } from '../../../common/utils/csp_package_helpers';
 
 const INDEX_ARRAY = [
   FINDINGS_INDEX_DEFAULT_NS,

@@ -5,31 +5,25 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import { setupFleetAndAgents } from '../../../../fleet_api_integration/apis/agents/services';
+import { generateAgent } from '../../../../fleet_api_integration/helpers';
+import { ApiIntegrationFtrProviderContext } from '../../../common/ftr_provider_context';
+import { createPackagePolicy } from '../../../common/utils/csp_package_helpers';
 
-import { setupFleetAndAgents } from '../../../fleet_api_integration/apis/agents/services';
-import { generateAgent } from '../../../fleet_api_integration/helpers';
-import { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider_context';
-import { deleteIndices } from '../../common/utils/index_api_helpers';
-import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
-import { INDEX_ARRAY } from '../../common/utils/indices';
-
-const currentTimeMinusFourHours = new Date(Date.now() - 21600000).toISOString();
-const currentTimeMinusTenMinutes = new Date(Date.now() - 600000).toISOString();
+const currentTimeMinusNineMinutes = new Date(Date.now() - 300000).toISOString();
 
 export default function (providerContext: ApiIntegrationFtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
-    describe('STATUS = INDEX_TIMEOUT TEST', () => {
+    describe('STATUS = WAITING_FOR_RESULT TEST', () => {
       setupFleetAndAgents(providerContext);
 
       beforeEach(async () => {
@@ -66,13 +60,11 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
           .send({
             id: 'test-default-a1',
             name: 'Default',
-            is_default: false,
+            is_default: true,
             host_urls: ['https://test.com:8080', 'https://test.com:8081'],
           })
           .expect(200);
         await generateAgent(providerContext, 'healthy', `Agent policy test 2`, agentPolicyId);
-
-        await deleteIndices(es, INDEX_ARRAY);
       });
 
       afterEach(async () => {
@@ -80,7 +72,7 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
 
-      it(`Should return index-timeout when installed kspm, has findings only on logs-cloud_security_posture.findings-default* and it has been more than 10 minutes since the installation`, async () => {
+      it(`Should return waiting_for_result when installed kspm, has no findings and it has been less than 10 minutes since the installation`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -94,7 +86,7 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
           id: 'cloud_security_posture',
           type: 'epm-packages',
           attributes: {
-            install_started_at: currentTimeMinusTenMinutes,
+            install_started_at: currentTimeMinusNineMinutes,
           },
         });
 
@@ -103,14 +95,13 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-
         expect(res.kspm.status).to.eql(
-          'index-timeout',
-          `expected kspm status to be index-timeout but got ${res.kspm.status} instead`
+          'waiting_for_results',
+          `expected kspm status to be waiting_for_results but got ${res.kspm.status} instead`
         );
       });
 
-      it(`Should return index-timeout when installed cspm, has findings only on logs-cloud_security_posture.findings-default* and it has been more than 10 minutes since the installation`, async () => {
+      it(`Should return waiting_for_result when installed cspm, has no findings and it has been less than 10 minutes since the installation`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -124,7 +115,7 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
           id: 'cloud_security_posture',
           type: 'epm-packages',
           attributes: {
-            install_started_at: currentTimeMinusTenMinutes,
+            install_started_at: currentTimeMinusNineMinutes,
           },
         });
 
@@ -133,14 +124,13 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-
         expect(res.cspm.status).to.eql(
-          'index-timeout',
-          `expected cspm status to be index-timeout but got ${res.cspm.status} instead`
+          'waiting_for_results',
+          `expected cspm status to be waiting_for_results but got ${res.cspm.status} instead`
         );
       });
 
-      it(`Should return index-timeout when installed cnvm, has findings only on logs-cloud_security_posture.vulnerabilities-default* and it has been more than 4 hours minutes since the installation`, async () => {
+      it(`Should return waiting_for_result when installed cnvm, has no findings and it has been less than 4 hours minutes since the installation`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -154,7 +144,7 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
           id: 'cloud_security_posture',
           type: 'epm-packages',
           attributes: {
-            install_started_at: currentTimeMinusFourHours,
+            install_started_at: currentTimeMinusNineMinutes,
           },
         });
 
@@ -163,10 +153,9 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-
         expect(res.vuln_mgmt.status).to.eql(
-          'index-timeout',
-          `expected vuln_mgmt status to be index-timeout but got ${res.vuln_mgmt.status} instead`
+          'waiting_for_results',
+          `expected vuln_mgmt status to be waiting_for_results but got ${res.vuln_mgmt.status} instead`
         );
       });
     });

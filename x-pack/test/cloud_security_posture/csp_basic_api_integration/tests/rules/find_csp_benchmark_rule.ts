@@ -10,8 +10,8 @@ import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-plugin/common/types/rules/v3';
-import { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider_context';
-import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
+import { ApiIntegrationFtrProviderContext } from '../../../common/ftr_provider_context';
+import { createPackagePolicy } from '../../../common/utils/csp_package_helpers';
 
 export default function ({ getService }: ApiIntegrationFtrProviderContext) {
   const supertest = getService('supertest');

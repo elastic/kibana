@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider_context';
-import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
+import { ApiIntegrationFtrProviderContext } from '../../../common/ftr_provider_context';
+import { createPackagePolicy } from '../../../common/utils/csp_package_helpers';
 
 export default function (providerContext: ApiIntegrationFtrProviderContext) {
   const { getService } = providerContext;

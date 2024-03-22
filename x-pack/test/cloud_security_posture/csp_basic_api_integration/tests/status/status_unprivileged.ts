@@ -16,15 +16,15 @@ import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider_context';
+import { ApiIntegrationFtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   createUser,
   createCSPOnlyRole,
   deleteRole,
   deleteUser,
-} from '../../common/utils/security_user_helpers';
-import { deleteIndices } from '../../common/utils/index_api_helpers';
-import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
+} from '../../../common/utils/security_user_helpers';
+import { deleteIndices } from '../../../common/utils/index_api_helpers';
+import { createPackagePolicy } from '../../../common/utils/csp_package_helpers';
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
 const UNPRIVILEGED_USERNAME = 'unprivileged_test_user';
