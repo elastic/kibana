@@ -88,8 +88,7 @@ export const generateAPIKey = async ({
   server: SyntheticsServerSetup;
   request: KibanaRequest;
 }) => {
-  const { coreStart, security } = server;
-  const isEsServerless = coreStart.elasticsearch.getCapabilities().serverless;
+  const { isElasticsearchServerless, security } = server;
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
 
   if (!isApiKeysEnabled) {
@@ -105,7 +104,7 @@ export const generateAPIKey = async ({
   return security.authc.apiKeys?.grantAsInternalUser(request, {
     name: 'synthetics-api-key (required for Synthetics App)',
     role_descriptors: {
-      synthetics_writer: getServiceApiKeyPrivileges(isEsServerless),
+      synthetics_writer: getServiceApiKeyPrivileges(isElasticsearchServerless),
     },
     metadata: {
       description:
@@ -207,9 +206,12 @@ export const getSyntheticsEnablement = async ({ server }: { server: SyntheticsSe
   };
 };
 
-const hasEnablePermissions = async ({ uptimeEsClient, coreStart }: SyntheticsServerSetup) => {
-  const isServerlessEs = coreStart.elasticsearch.getCapabilities().serverless;
-  const { cluster: clusterPrivs, indices: index } = getServiceApiKeyPrivileges(isServerlessEs);
+const hasEnablePermissions = async ({
+  uptimeEsClient,
+  isElasticsearchServerless,
+}: SyntheticsServerSetup) => {
+  const { cluster: clusterPrivs, indices: index } =
+    getServiceApiKeyPrivileges(isElasticsearchServerless);
   const hasPrivileges = await uptimeEsClient.baseESClient.security.hasPrivileges({
     body: {
       cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key', ...clusterPrivs],
@@ -225,7 +227,7 @@ const hasEnablePermissions = async ({ uptimeEsClient, coreStart }: SyntheticsSer
     monitor,
     // `read_ilm` is going to be `undefined` when ES is in serverless mode,
     // so we default it to the ES capabilities value.
-    read_ilm: readILM = isServerlessEs,
+    read_ilm: readILM = isElasticsearchServerless,
     read_pipeline: readPipeline,
   } = cluster || {};
 

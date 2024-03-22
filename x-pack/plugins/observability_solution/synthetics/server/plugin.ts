@@ -107,6 +107,7 @@ export class Plugin implements PluginType {
       this.server.encryptedSavedObjects = pluginsStart.encryptedSavedObjects;
       this.server.savedObjectsClient = this.savedObjectsClient;
       this.server.spaces = pluginsStart.spaces;
+      this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
     }
 
     this.syntheticsService?.start(pluginsStart.taskManager);
