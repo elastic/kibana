@@ -23,6 +23,8 @@ export const API_HEADERS = Object.freeze({
   [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
 });
 
+export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
+
 export const rootRequest = <T = unknown>({
   headers: optionHeaders,
   ...restOptions
@@ -108,10 +110,12 @@ export const deleteConnectors = () => {
         return connector.id;
       });
       ids.forEach((id) => {
-        rootRequest({
-          method: 'DELETE',
-          url: `api/actions/connector/${id}`,
-        });
+        if (!INTERNAL_CLOUD_CONNECTORS.includes(id)) {
+          rootRequest({
+            method: 'DELETE',
+            url: `api/actions/connector/${id}`,
+          });
+        }
       });
     }
   });
