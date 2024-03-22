@@ -59,7 +59,7 @@ export interface StartContract {
     dynamicActionsApi: HasDynamicActions;
     dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
     serializeDynamicActions: () => DynamicActionsSerializedState;
-    stopDynamicActions: () => void;
+    startDynamicActions: () => { stopDynamicActions: () => void };
   };
 }
 
@@ -140,7 +140,7 @@ export class EmbeddableEnhancedPlugin
     dynamicActionsApi: HasDynamicActions;
     dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
     serializeDynamicActions: () => DynamicActionsSerializedState;
-    stopDynamicActions: () => void;
+    startDynamicActions: () => { stopDynamicActions: () => void };
   } {
     const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(
       { dynamicActions: { events: [] }, ...(state.enhancements ?? {}) }
@@ -162,8 +162,6 @@ export class EmbeddableEnhancedPlugin
       uiActions: this.uiActions!,
     });
 
-    const stop = this.startDynamicActions(dynamicActions);
-
     return {
       dynamicActionsApi: { ...api, enhancements: { dynamicActions } },
       dynamicActionsComparator: {
@@ -178,7 +176,10 @@ export class EmbeddableEnhancedPlugin
       serializeDynamicActions: () => {
         return { enhancements: dynamicActionsState$.getValue() };
       },
-      stopDynamicActions: stop,
+      startDynamicActions: () => {
+        const stop = this.startDynamicActions(dynamicActions);
+        return { stopDynamicActions: stop };
+      },
     };
   }
 

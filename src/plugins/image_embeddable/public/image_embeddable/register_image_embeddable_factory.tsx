@@ -104,9 +104,12 @@ export const registerImageEmbeddableFactory = ({
           const [hasTriggerActions, setHasTriggerActions] = useState(false);
 
           useEffect(() => {
+            if (!dynamicActionsApi) return;
+            // start the dynamic actions manager on mount
+            const { stopDynamicActions } = dynamicActionsApi.startDynamicActions();
             return () => {
               // stop the dynamic actions manager on unmount
-              dynamicActionsApi?.stopDynamicActions();
+              stopDynamicActions();
             };
           }, []);
 
