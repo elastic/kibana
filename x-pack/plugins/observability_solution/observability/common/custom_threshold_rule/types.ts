@@ -116,6 +116,11 @@ export interface Group {
   value: string;
 }
 
+export interface TimeRange {
+  from?: string;
+  to?: string;
+}
+
 export interface SearchConfigurationType {
   index: SerializedSearchSourceFields;
   query: {
@@ -138,7 +143,7 @@ export interface SearchConfigurationWithExtractedReferenceType {
 // Custom threshold alert types
 
 // Alert fields['kibana.alert.group] type
-export type GroupBy = Array<{ field: string; value: string }>;
+export type GroupBy = Group[];
 
 /*
  * Utils

@@ -6933,7 +6933,7 @@
             "section": "def-common.RawControlGroupAttributes",
             "text": "RawControlGroupAttributes"
           },
-          ", \"type\" | \"id\">"
+          ", \"id\" | \"type\">"
         ],
         "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
         "deprecated": false,
