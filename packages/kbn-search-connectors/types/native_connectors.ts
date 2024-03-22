@@ -766,10 +766,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         }),
         options: [
           {
-            label: i18n.translate('searchConnectors.nativeConnectors.github.options.pat', {
+            label: i18n.translate('searchConnectors.nativeConnectors.github.options.personalAccessToken', {
               defaultMessage: 'Personal access token',
             }),
-            value: 'pat',
+            value: 'personal_access_token',
           },
           {
             label: i18n.translate('searchConnectors.nativeConnectors.github.options.githubApp', {
@@ -785,14 +785,14 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
-        value: 'pat',
+        value: 'personal_access_token',
       },
       token: {
         default_value: null,
         depends_on: [
           {
             field: 'auth_method',
-            value: 'pat',
+            value: 'personal_access_token',
           },
         ],
         display: DisplayType.TEXTBOX,
@@ -847,7 +847,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [
           {
             field: 'auth_method',
-            value: 'pat',
+            value: 'personal_access_token',
           },
           {
             field: 'repo_type',
