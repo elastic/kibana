@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
-import { FlyoutEditDrilldownAction, FlyoutEditDrilldownParams } from './flyout_edit_drilldown';
 import { coreMock } from '@kbn/core/public/mocks';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import {
-  UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
+  UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { FlyoutEditDrilldownAction, FlyoutEditDrilldownParams } from './flyout_edit_drilldown';
 
 function createAction(overlays = coreMock.createStart().overlays) {
   const uiActionsPlugin = uiActionsEnhancedPluginMock.createPlugin();
@@ -37,6 +39,9 @@ function createAction(overlays = coreMock.createStart().overlays) {
   };
   return new FlyoutEditDrilldownAction(params);
 }
+const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
+  dynamicActions: { events: [{} as SerializedEvent] },
+});
 
 const compatibleEmbeddableApi = {
   enhancements: {
@@ -46,6 +51,10 @@ const compatibleEmbeddableApi = {
       uiActions: uiActionsEnhancedPluginMock.createStartContract(),
     }),
   },
+  setDynamicActions: (newDynamicActions: DynamicActionsSerializedState['enhancements']) => {
+    dynamicActionsState$.next(newDynamicActions);
+  },
+  dynamicActionsState$,
   supportedTriggers: () => {
     return ['VALUE_CLICK_TRIGGER'];
   },
@@ -82,14 +91,17 @@ describe('isCompatible', () => {
   });
 
   test('not compatible if no drilldowns', async () => {
+    const newDynamicActionsState$ = new BehaviorSubject<
+      DynamicActionsSerializedState['enhancements']
+    >({
+      dynamicActions: { events: [] },
+    });
+
     const embeddableApi = {
       ...compatibleEmbeddableApi,
-      enhancements: {
-        dynamicActions: new DynamicActionManager({
-          storage: new MemoryActionStorage(),
-          isCompatible: async () => true,
-          uiActions: uiActionsEnhancedPluginMock.createStartContract(),
-        }),
+      dynamicActionsState$: newDynamicActionsState$,
+      setDynamicActions: (newDynamicActions: DynamicActionsSerializedState['enhancements']) => {
+        newDynamicActionsState$.next(newDynamicActions);
       },
     };
     const action = createAction();
