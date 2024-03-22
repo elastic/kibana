@@ -8,12 +8,8 @@
 
 import { monaco } from '../../../monaco_imports';
 import { getHoverItem } from './hover';
-import {
-  ENRICH_MODES,
-  getAstAndSyntaxErrors,
-  getFunctionDefinition,
-  getFunctionSignatures,
-} from '@kbn/esql-ast-core';
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { ENRICH_MODES, getFunctionDefinition, getFunctionSignatures } from '@kbn/esql-services';
 
 const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
   ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({

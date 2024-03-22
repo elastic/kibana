@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CodeAction } from '@kbn/esql-ast-core';
+import type { CodeAction } from '@kbn/esql-services';
 import { monaco } from '../../../monaco_imports';
 import { MonacoCodeAction } from '../types';
 import { wrapAsMonacoMessages } from './positions';

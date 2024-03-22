@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SuggestionRawDefinition } from '@kbn/esql-ast-core';
-import { monaco } from '../../../monaco_imports';
+import type { SuggestionRawDefinition } from '@kbn/esql-services';
+import type { monaco } from '../../../monaco_imports';
 import { MonacoAutocompleteCommandDefinition } from '../types';
 
 export function wrapAsMonacoSuggestions(
@@ -23,7 +23,7 @@ export function wrapAsMonacoSuggestions(
       sortText,
       command,
       insertTextRules: asSnippet
-        ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+        ? 4 // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
         : undefined,
       range: undefined as unknown as monaco.IRange,
     })

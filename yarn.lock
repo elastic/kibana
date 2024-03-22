@@ -4611,15 +4611,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-ast-core@link:packages/kbn-esql-ast-core":
+"@kbn/esql-ast@link:packages/kbn-esql-ast":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-services@link:packages/kbn-esql-services":
   version "0.0.0"
   uid ""
 
 "@kbn/esql-utils@link:packages/kbn-esql-utils":
-  version "0.0.0"
-  uid ""
-
-"@kbn/esql-validation@link:packages/kbn-esql-validation":
   version "0.0.0"
   uid ""
 

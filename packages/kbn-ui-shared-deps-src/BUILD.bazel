@@ -44,7 +44,8 @@ webpack_cli(
     "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
-    "--stats=errors-only"
+    "--json",
+    "$(@D)/stats.json"
   ],
   env = select({
     "//:dist": {

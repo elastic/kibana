@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { EditorError, ESQLMessage } from '@kbn/esql-ast-core';
+import type { EditorError, ESQLMessage } from '@kbn/esql-ast';
 import type { MonacoEditorError } from '../../../types';
 import { monaco } from '../../../monaco_imports';
 
@@ -60,16 +60,4 @@ export function wrapAsMonacoMessages(
       code: e.code,
     };
   });
-}
-
-// From Monaco position to linear offset
-export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
-  const lines = expression.split(/\n/);
-  return lines
-    .slice(0, position.lineNumber)
-    .reduce(
-      (prev, current, index) =>
-        prev + (index === position.lineNumber - 1 ? position.column - 1 : current.length + 1),
-      0
-    );
 }

@@ -19,7 +19,7 @@ function getConfigPath() {
   return Path.resolve(
     REPO_ROOT,
     'packages',
-    'kbn-esql-ast-core',
+    'kbn-esql-services',
     'src',
     'lib',
     'ast',

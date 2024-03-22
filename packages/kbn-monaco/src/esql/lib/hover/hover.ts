@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AstProviderFn, ESQLCallbacks, getPolicyHelper } from '@kbn/esql-ast-core';
+import type { AstProviderFn } from '@kbn/esql-ast';
 import {
   getAstContext,
   getFunctionDefinition,
@@ -15,9 +15,11 @@ import {
   isSourceItem,
   isSettingItem,
   getCommandDefinition,
-} from '@kbn/esql-ast-core';
+  type ESQLCallbacks,
+  getPolicyHelper,
+} from '@kbn/esql-services';
 import type { monaco } from '../../../monaco_imports';
-import { monacoPositionToOffset } from '../converters/positions';
+import { monacoPositionToOffset } from '../shared/utils';
 
 export async function getHoverItem(
   model: monaco.editor.ITextModel,

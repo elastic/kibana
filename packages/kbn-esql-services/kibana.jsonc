@@ -1,0 +1,5 @@
+{
+    "type": "shared-common",
+    "id": "@kbn/esql-services",
+    "owner": "@elastic/kibana-visualizations"
+  }

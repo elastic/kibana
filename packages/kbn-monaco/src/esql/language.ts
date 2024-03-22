@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQLCallbacks } from '@kbn/esql-ast-core';
+import type { ESQLCallbacks } from '@kbn/esql-services';
 import { monaco } from '../monaco_imports';
 
 import { ESQL_LANG_ID } from './lib/constants';

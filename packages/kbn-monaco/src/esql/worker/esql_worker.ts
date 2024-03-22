@@ -7,12 +7,7 @@
  */
 
 import { CharStreams } from 'antlr4';
-import {
-  getAstAndSyntaxErrors,
-  getParser,
-  ROOT_STATEMENT,
-  ESQLErrorListener,
-} from '@kbn/esql-ast-core';
+import { getAstAndSyntaxErrors, getParser, ROOT_STATEMENT, ESQLErrorListener } from '@kbn/esql-ast';
 import type { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
 import { wrapAsMonacoMessages } from '../lib/converters/positions';

@@ -26,7 +26,8 @@ SRCS = glob(
 SHARED_DEPS = [
   "//packages/kbn-i18n",
   "//packages/kbn-ui-theme",
-  "//packages/kbn-esql-ast-core",
+  "//packages/kbn-esql-services",
+  "//packages/kbn-esql-ast",
   "@npm//antlr4",
   "@npm//monaco-editor",
   "@npm//monaco-yaml",

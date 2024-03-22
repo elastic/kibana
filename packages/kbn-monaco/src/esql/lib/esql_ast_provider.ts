@@ -5,18 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  type ESQLCallbacks,
-  getActions,
-  suggest,
-  validateAst,
-  EditorError,
-} from '@kbn/esql-ast-core';
+import type { EditorError } from '@kbn/esql-ast';
+import { type ESQLCallbacks, getActions, suggest, validateQuery } from '@kbn/esql-services';
 import { monaco } from '../../monaco_imports';
 import type { ESQLWorker } from '../worker/esql_worker';
-import { monacoPositionToOffset, wrapAsMonacoMessages } from './converters/positions';
+import { wrapAsMonacoMessages } from './converters/positions';
 import { getHoverItem } from './hover/hover';
+import { monacoPositionToOffset } from './shared/utils';
 import { getSignatureHelp } from './signature';
 
 export class ESQLAstAdapter {
@@ -38,7 +33,7 @@ export class ESQLAstAdapter {
   async validate(model: monaco.editor.ITextModel, code: string) {
     const getAstFn = await this.getAstWorker(model);
     const text = code ?? model.getValue();
-    const { errors, warnings } = await validateAst(text, getAstFn, this.callbacks);
+    const { errors, warnings } = await validateQuery(text, getAstFn, undefined, this.callbacks);
     const monacoErrors = wrapAsMonacoMessages(text, errors);
     const monacoWarnings = wrapAsMonacoMessages(text, warnings);
     return { errors: monacoErrors, warnings: monacoWarnings };
