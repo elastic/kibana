@@ -70,7 +70,7 @@ export const ComparisonControls = ({
       alignItems="center"
       css={renderCustomToolbar ? undefined : { padding: `0 ${euiTheme.size.s}` }}
     >
-      <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.xs }}>
+      <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.s }}>
         <EuiText size="s">
           <strong>
             <FormattedMessage
