@@ -603,6 +603,9 @@ export class LensVisService {
       }) as TypedLensByValueInput['attributes'];
 
       if (suggestionType === UnifiedHistogramSuggestionType.histogramForDataView) {
+        attributes.title = i18n.translate('unifiedHistogram.lensTitle', {
+          defaultMessage: 'Edit visualization',
+        });
         attributes.references = [
           {
             id: dataView.id ?? '',
