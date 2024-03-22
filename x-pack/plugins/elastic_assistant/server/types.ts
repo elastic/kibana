@@ -19,7 +19,6 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -31,6 +30,7 @@ import {
   ExecuteConnectorRequestBody,
   Replacement,
 } from '@kbn/elastic-assistant-common';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
@@ -82,11 +82,12 @@ export interface ElasticAssistantPluginStart {
 
 export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
-  ml: MlPluginSetup;
+  licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
 }
 export interface ElasticAssistantPluginStartDependencies {
+  licensing: LicensingPluginStart;
   actions: ActionsPluginStart;
   spaces?: SpacesPluginStart;
   security: SecurityPluginStart;

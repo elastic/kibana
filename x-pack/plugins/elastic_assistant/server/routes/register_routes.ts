@@ -8,9 +8,10 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { once } from 'lodash/fp';
+import { firstValueFrom } from 'rxjs';
 import {
+  ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginRouter,
-  ElasticAssistantPluginSetupDependencies,
   GetElser,
 } from '../types';
 import { createConversationRoute } from './user_conversations/create_route';
@@ -35,7 +36,7 @@ import { findAnonymizationFieldsRoute } from './anonymization_fields/find_route'
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  plugins: ElasticAssistantPluginSetupDependencies
+  core: ElasticAssistantPluginCoreSetupDependencies
 ) => {
   // Capabilities
   getCapabilitiesRoute(router);
@@ -57,8 +58,35 @@ export const registerRoutes = (
   deleteKnowledgeBaseRoute(router);
   const getElserId: GetElser = once(
     async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
-      return (await plugins.ml.trainedModelsProvider(request, savedObjectsClient).getELSER())
-        .model_id;
+      try {
+        // Wait for the ML plugin's dependency on the internal saved objects client to be ready
+        const [_, pluginsStart] = await core.getStartServices();
+
+        const { ml } = await core.plugins.onSetup('ml');
+
+        if (!ml.found) {
+          throw new Error('Could not find ML plugin');
+        }
+        // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
+        await firstValueFrom(pluginsStart.licensing.license$);
+        return (
+          await (
+            ml.contract as {
+              trainedModelsProvider: (
+                request: {},
+                soClient: {}
+              ) => { getELSER: () => Promise<{ model_id: string }> };
+            }
+          )
+            .trainedModelsProvider(request, savedObjectsClient)
+            .getELSER()
+        ).model_id;
+      } catch (error) {
+        logger.error(`Failed to resolve ELSER model definition: ${error}`);
+
+        // Fallback to ELSER v2
+        return '.elser_model_2';
+      }
     }
   );
   getKnowledgeBaseStatusRoute(router, getElserId);

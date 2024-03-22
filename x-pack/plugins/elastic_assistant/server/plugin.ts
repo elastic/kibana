@@ -77,7 +77,7 @@ export class ElasticAssistantPlugin
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
     // this.assistantService registerKBTask
-    registerRoutes(router, this.logger, plugins);
+    registerRoutes(router, this.logger, core);
     return {
       actions: plugins.actions,
       getRegisteredFeatures: (pluginName: string) => {
