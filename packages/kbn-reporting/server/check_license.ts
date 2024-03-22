@@ -8,6 +8,7 @@
 
 import { ILicense } from '@kbn/licensing-plugin/server';
 import type { ExportType } from '.';
+import { REMOVED_JOB_TYPES } from './constants';
 import { ExportTypesRegistry } from './export_types_registry';
 
 export interface LicenseCheckResult {
@@ -46,14 +47,14 @@ const makeManagementFeature = (exportTypes: ExportType[]) => {
         };
       }
 
-      const validJobTypes = exportTypes
+      const currentJobTypes = exportTypes
         .filter((exportType) => exportType.validLicenses.includes(license.type!))
         .map((exportType) => exportType.jobType);
 
       return {
-        showLinks: validJobTypes.length > 0,
-        enableLinks: validJobTypes.length > 0,
-        jobTypes: validJobTypes,
+        showLinks: currentJobTypes.length > 0,
+        enableLinks: currentJobTypes.length > 0,
+        jobTypes: [...currentJobTypes, ...REMOVED_JOB_TYPES],
       };
     },
   };

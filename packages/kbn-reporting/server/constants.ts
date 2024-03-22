@@ -63,3 +63,15 @@ export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
 // automation that have no version value in the job params, we assume the
 // intended version is 7.14.0
 export const UNVERSIONED_VERSION = '7.14.0';
+
+/*
+ * Removed types
+ */
+
+// Job types that have been deprecated and then removed from the export type
+// registry. Support only exists for download
+export const REMOVED_JOB_TYPES = [
+  'csv', // replaced with 'csv_searchsource'
+  'PNG', // replaced with 'PNGV2'
+  'printable_pdf', // replaced with 'printable_pdf_v2'
+];

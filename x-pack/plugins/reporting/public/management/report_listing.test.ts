@@ -119,7 +119,7 @@ describe('ReportListing', () => {
     });
 
     it('shows the enabled "Download" button in the actions menu for a job is done', async () => {
-      const [, , jobJson] = mockJobs;
+      const [, jobJson] = mockJobs;
       jobUnderTest = new Job(jobJson);
       const { actions } = testBed;
 

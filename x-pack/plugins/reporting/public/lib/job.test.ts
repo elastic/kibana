@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { jobTypes } from '../../common/constants';
+import { ALL_JOB_TYPES } from '../../common/constants';
 import { mockJobs } from '../../common/test';
 import { Job } from '@kbn/reporting-public/job';
 
 describe('Job', () => {
   it('should provide a pretty name for all known job types', () => {
-    for (const jobType of Object.values(jobTypes)) {
+    for (const jobType of Object.values(ALL_JOB_TYPES)) {
       const job = new Job({ ...mockJobs[0], jobtype: jobType });
       expect(job.prettyJobTypeName).toEqual(expect.any(String));
     }

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { jobTypes, reportTypes } from './constants';
+import { ALL_JOB_TYPES, ALL_REPORT_TYPES } from './constants';
 
-type ReportTypeDeclaration = typeof reportTypes;
+type ReportTypeDeclaration = typeof ALL_REPORT_TYPES;
 export type ReportTypes = ReportTypeDeclaration[keyof ReportTypeDeclaration];
 
-type JobTypeDeclaration = typeof jobTypes;
+type JobTypeDeclaration = typeof ALL_JOB_TYPES;
 export type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];

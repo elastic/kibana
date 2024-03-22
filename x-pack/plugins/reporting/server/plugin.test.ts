@@ -100,7 +100,7 @@ describe('Reporting Plugin', () => {
 
     it('expect all report types to be in registry', async () => {
       // check the spy function
-      expect(registerSpy).toHaveBeenCalledTimes(5);
+      expect(registerSpy).toHaveBeenCalledTimes(4);
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE }));
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE_V2 }));
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: PDF_REPORT_TYPE_V2 }));

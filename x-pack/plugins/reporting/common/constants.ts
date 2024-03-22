@@ -15,13 +15,13 @@ import { PDF_JOB_TYPE_V2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types
 import { PNG_JOB_TYPE_V2, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
 // Export Type Sets
-export const reportTypes = [
+export const ALL_REPORT_TYPES = [
   CSV_REPORT_TYPE,
   CSV_REPORT_TYPE_V2,
   PDF_REPORT_TYPE_V2,
   PNG_REPORT_TYPE_V2,
 ];
 
-export const jobTypes = [CSV_JOB_TYPE, CSV_JOB_TYPE_V2, PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2];
+export const ALL_JOB_TYPES = [CSV_JOB_TYPE, CSV_JOB_TYPE_V2, PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2];
 
 export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2];

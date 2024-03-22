@@ -145,9 +145,14 @@ describe('Handle request to generate', () => {
           "layout": Object {
             "id": "preserve_layout",
           },
-          "locatorParams": undefined,
+          "locatorParams": Array [
+            Object {
+              "id": "1.0.0",
+              "params": Object {},
+              "version": "1.0.0",
+            },
+          ],
           "objectType": "cool_object_type",
-          "relativeUrls": Array [],
           "spaceId": undefined,
           "title": "cool_title",
           "version": "unknown",
