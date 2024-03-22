@@ -64,7 +64,7 @@ export function Settings() {
   } = useProfilingDependencies();
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings('profiling', [...co2Settings, ...costSettings, ...miscSettings]);
+    useEditableSettings([...co2Settings, ...costSettings, ...miscSettings]);
 
   async function handleSave() {
     try {

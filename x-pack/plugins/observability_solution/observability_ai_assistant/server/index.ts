@@ -17,6 +17,12 @@ export type {
   ObservabilityAIAssistantServerSetup,
 } from './types';
 
+export {
+  aiAssistantResponseLanguage,
+  aiAssistantDefaultConnector,
+  aiAssistantLogsIndexPattern,
+} from '../common/utils/advanced_settings';
+
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
   deprecations: ({ unusedFromRoot }) => [
     unusedFromRoot('xpack.observability.aiAssistant.enabled', {

@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
-import { render } from '../../helpers/test_helper';
-import { useAppContext } from '../../hooks/use_app_context';
+import { render } from '../../../helpers/test_helper';
+import { useAppContext } from '../../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab';
 
-jest.mock('../../hooks/use_app_context');
+jest.mock('../../../hooks/use_app_context');
 
 const useAppContextMock = useAppContext as jest.Mock;
 
