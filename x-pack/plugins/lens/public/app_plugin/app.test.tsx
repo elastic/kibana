@@ -653,7 +653,6 @@ describe('Lens App', () => {
       it('Shows Save and Return and Save As buttons in create by value mode with originating app', async () => {
         const props = makeDefaultProps();
         const services = makeDefaultServicesForApp();
-        services.dashboardFeatureFlag = { allowByValueEmbeddables: true };
         props.incomingState = {
           originatingApp: 'ultraDashboard',
           valueInput: {
