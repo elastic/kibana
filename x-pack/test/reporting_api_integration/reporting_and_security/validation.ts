@@ -86,8 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/179001
-    describe.skip('pngV2', () => {
+    describe('pngV2', () => {
       it('fails if width or height are non-numeric', async () => {
         const downloadReportPath = await reportingAPI.postJobJSON('/api/reporting/generate/pngV2', {
           jobParams: createPngV2Params('cucucachoo'),
