@@ -96,15 +96,10 @@ function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
  * @returns string
  */
 const prepareBedrockOutput = (responseBody: {
-  completion?: string;
   type?: string;
   delta?: { type: string; text: string };
   message?: { content: Array<{ text?: string; type: string }> };
 }): string => {
-  // determine whether the response is of type RunApiLatestResponseSchema or RunActionResponseSchema
-  if (responseBody.completion) {
-    return responseBody.completion;
-  }
   if (responseBody.type && responseBody.type.length) {
     if (responseBody.type === 'message_start' && responseBody.message) {
       return parseContent(responseBody.message.content);

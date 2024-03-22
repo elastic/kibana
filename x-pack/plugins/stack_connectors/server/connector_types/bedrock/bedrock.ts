@@ -183,7 +183,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     params: SubActionRequestParams<RunActionResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
   ): Promise<RunActionResponse> {
     const response = await this.request(params);
-    console.log('runApiDeprecated', response.data);
     return response.data;
   }
 
@@ -191,7 +190,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
   ): Promise<RunActionResponse> {
     const response = await this.request(params);
-    console.log('runApiLatest', response.data);
     return {
       completion: parseContent(response.data.content),
       stop_reason: response.data.stop_reason,
@@ -266,10 +264,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     stopSequences,
     temperature,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
-    console.log('invokeStream', {
-      messages,
-      formatted: formatBedrockBody({ messages, stopSequences, temperature }).messages,
-    });
     const res = (await this.streamApi({
       body: JSON.stringify(formatBedrockBody({ messages, stopSequences, temperature })),
       model,
