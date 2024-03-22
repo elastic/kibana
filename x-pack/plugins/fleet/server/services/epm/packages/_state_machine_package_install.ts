@@ -26,6 +26,7 @@ import type {
   EsAssetReference,
   KibanaAssetReference,
   IndexTemplateEntry,
+  AssetReference,
 } from '../../../types';
 
 import {
@@ -79,14 +80,16 @@ export interface InstallContext {
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
 
-  indexTemplates: IndexTemplateEntry[];
-  packageAssetRefs: PackageAssetReference[];
+  indexTemplates?: IndexTemplateEntry[];
+  packageAssetRefs?: PackageAssetReference[];
   // output values
-  esReferences: EsAssetReference[];
-  kibanaAssetPromise: Promise<KibanaAssetReference[]>;
+  esReferences?: EsAssetReference[];
+  kibanaAssetPromise?: Promise<KibanaAssetReference[]>;
 }
 
-export async function _stateMachineInstallPackage({ context }: { context: InstallContext }) {
+export async function _stateMachineInstallPackage(
+  context: InstallContext
+): Promise<AssetReference[]> {
   const installStates: StateMachineDefinition<StateNames> = {
     context,
     states: {
@@ -141,5 +144,8 @@ export async function _stateMachineInstallPackage({ context }: { context: Instal
     installStates,
     installStates.context
   );
-  return [...installedKibanaAssetsRefs, ...esReferences];
+  return [
+    ...(installedKibanaAssetsRefs as KibanaAssetReference[]),
+    ...(esReferences as EsAssetReference[]),
+  ];
 }

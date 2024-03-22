@@ -162,7 +162,13 @@ export async function stepInstallILMPolicies({ context }: { context: InstallCont
     appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
   if (!isILMPoliciesDisabled) {
     updatedEsReferences = await withPackageSpan('Install ILM policies', () =>
-      installILMPolicy(packageInstallContext, esClient, savedObjectsClient, logger, esReferences)
+      installILMPolicy(
+        packageInstallContext,
+        esClient,
+        savedObjectsClient,
+        logger,
+        esReferences || []
+      )
     );
     logger.debug(`Package install - Installing Data Stream ILM policies`);
     ({ esReferences: updatedEsReferences } = await withPackageSpan(
@@ -173,7 +179,7 @@ export async function stepInstallILMPolicies({ context }: { context: InstallCont
           esClient,
           savedObjectsClient,
           logger,
-          esReferences
+          esReferences || []
         )
     ));
   }
@@ -186,7 +192,7 @@ export async function stepInstallMlModel({ context }: { context: InstallContext 
   // installs ml models
   logger.debug(`Package install - installing ML models`);
   const updatedEsReferences = await withPackageSpan('Install ML models', () =>
-    installMlModel(packageInstallContext, esClient, savedObjectsClient, logger, esReferences)
+    installMlModel(packageInstallContext, esClient, savedObjectsClient, logger, esReferences || [])
   );
   return { esReferences: updatedEsReferences };
 }
@@ -213,7 +219,7 @@ export async function stepInstallIndexTemplatePipelines({ context }: { context: 
         esClient,
         savedObjectsClient,
         logger,
-        esReferences,
+        esReferences: esReferences || [],
       });
     return { esReferences: templateEsReferences, indexTemplates: installedTemplates };
   }
@@ -243,7 +249,7 @@ export async function stepInstallIndexTemplatePipelines({ context }: { context: 
           esClient,
           savedObjectsClient,
           logger,
-          esReferences,
+          esReferences: esReferences || [],
           onlyForDataStreams: dataStreams,
         });
       return { esReferences: templateEsReferences, indexTemplates: installedTemplates };
@@ -269,7 +275,7 @@ export async function stepUpdateCurrentWriteIndices({ context }: { context: Inst
   // update current backing indices of each data stream
   logger.debug(`Package install - Updating backing indices of each data stream`);
   await withPackageSpan('Update write indices', () =>
-    updateCurrentWriteIndices(esClient, logger, indexTemplates, {
+    updateCurrentWriteIndices(esClient, logger, indexTemplates || [], {
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
     })
@@ -331,7 +337,7 @@ export async function stepDeletePreviousPipelines({ context }: { context: Instal
         savedObjectsClient,
         pkgName,
         installedPkg!.attributes.version,
-        esReferences
+        esReferences || []
       )
     );
   }
@@ -344,7 +350,7 @@ export async function stepDeletePreviousPipelines({ context }: { context: Instal
         savedObjectsClient,
         pkgName,
         installedPkg!.attributes.install_version,
-        esReferences
+        esReferences || []
       )
     );
   }

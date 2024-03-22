@@ -37,6 +37,7 @@ export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'in
 export type InstallSource = 'registry' | 'upload' | 'bundled' | 'custom';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
+export type InstallResultStatus = 'installed' | 'already_installed';
 
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
