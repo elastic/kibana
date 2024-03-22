@@ -44,7 +44,7 @@ export const Chat = () => {
     resetField,
     handleSubmit,
   } = useFormContext<ChatForm>();
-  const { messages, append, stop: stopRequest, setMessages } = useChat();
+  const { messages, append, stop: stopRequest, setMessages, reload } = useChat();
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
   const messagesRef = useAutoBottomScroll([showStartPage]);
 
@@ -80,6 +80,10 @@ export const Chat = () => {
 
   const onClear = () => {
     setMessages([]);
+  }
+
+  const regenerateMessages = () => {
+    reload();
   }
 
   if (showStartPage) {
@@ -124,12 +128,24 @@ export const Chat = () => {
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    iconType="sparkles"
+                    disabled={chatMessages.length <= 1}
+                    onClick={regenerateMessages}
+                  >
+                    <FormattedMessage
+                      id="xpack.searchPlayground.chat.regenerateBtn"
+                      defaultMessage="Regenerate"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
                     iconType="refresh"
-                    disabled={messages.length <= 1}
+                    disabled={chatMessages.length <= 1}
                     onClick={onClear}
                   >
                     <FormattedMessage
-                      id="xpack.searchPlayground.startNewChat.startBtn"
+                      id="xpack.searchPlayground.chat.clearChatBtn"
                       defaultMessage="Clear chat"
                     />
                   </EuiButtonEmpty>
