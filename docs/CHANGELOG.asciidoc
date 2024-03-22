@@ -190,7 +190,7 @@ Discover::
 * Hides the Empty fields section if there are no fields in it ({kibana-pull}172956[#172956]).
 * Adds tabs to Discover and Log Explorer ({kibana-pull}171467[#171467]).
 * Adds data table header row height configuration ({kibana-pull}175501[#175501]).
-* Adds new fields ingested in the background with valid mappings ({kibana-pull}172329[#172329]).
+* Adds new fields ingested in the background to the field list with valid mappings ({kibana-pull}172329[#172329]).
 * Adds caching to data view field list request with a `stale-while-revalidate` strategy ({kibana-pull}168910[#168910]).
 * Distinguish among empty and available fields in Discover {esql} mode ({kibana-pull}174585[#174585]).
 Elastic Security::
