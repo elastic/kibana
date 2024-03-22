@@ -291,6 +291,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           <RelatedUsersManage
             id={relatedUsersQueryId}
             inspect={inspectRelatedUsers}
+            loading={isRelatedUsersLoading}
             setQuery={setQuery}
             deleteQuery={deleteQuery}
             refetch={refetchRelatedUsers}
