@@ -58,7 +58,7 @@ export const policyFields: EntityTableRows<ObservedEntityData<HostItem>> = [
     render: (hostData: ObservedEntityData<HostItem>) =>
       hostData.details.endpoint?.hostInfo ? (
         <EndpointAgentStatus
-          endpointHostInfo={hostData.details.endpoint?.hostInfo}
+          agentId={hostData.details.endpoint.hostInfo.metadata.agent.id}
           data-test-subj="endpointHostAgentStatus"
         />
       ) : (

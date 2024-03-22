@@ -6,6 +6,8 @@
  */
 
 import React, { memo } from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
+import { DEFAULT_POLL_INTERVAL } from '../../../../../common/constants';
 import { useAgentStatus } from '../../../../../../common/hooks/use_agent_status';
 import { SentinelOneAgentStatus } from '../../../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import type { ThirdPartyAgentInfo } from '../../../../../../../common/types';
@@ -20,7 +22,14 @@ interface HeaderSentinelOneInfoProps {
 
 export const HeaderSentinelOneInfo = memo<HeaderSentinelOneInfoProps>(
   ({ agentId, platform, hostName }) => {
-    const { data } = useAgentStatus([agentId], 'sentinel_one');
+    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+      'responseActionsSentinelOneV1Enabled'
+    );
+
+    const { data } = useAgentStatus([agentId], 'sentinel_one', {
+      refetchInterval: DEFAULT_POLL_INTERVAL,
+      enabled: isSentinelOneV1Enabled,
+    });
     const agentStatus = data?.[agentId];
     const lastCheckin = agentStatus ? agentStatus.lastSeen : '';
 

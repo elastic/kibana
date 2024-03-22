@@ -21,11 +21,7 @@ import { EndpointAgentStatus } from '../../../../../common/components/endpoint/e
 import { isPolicyOutOfDate } from '../../utils';
 import type { HostInfo } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
-import {
-  getEndpointPendingActionsCallback,
-  nonExistingPolicies,
-  uiQueryParams,
-} from '../../store/selectors';
+import { nonExistingPolicies, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
@@ -59,7 +55,6 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
       () => hostInfo.metadata.Endpoint.policy.applied.status,
       [hostInfo]
     );
-    const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
     const missingPolicies = useEndpointSelector(nonExistingPolicies);
 
     const policyResponseRoutePath = useMemo(() => {
@@ -95,12 +90,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
               />
             </ColumnTitle>
           ),
-          description: (
-            <EndpointAgentStatus
-              pendingActions={getHostPendingActions(hostInfo.metadata.agent.id)}
-              endpointHostInfo={hostInfo}
-            />
-          ),
+          description: <EndpointAgentStatus agentId={hostInfo.metadata.agent.id} />,
         },
         {
           title: (
@@ -218,14 +208,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
           ),
         },
       ];
-    }, [
-      hostInfo,
-      getHostPendingActions,
-      missingPolicies,
-      policyInfo,
-      policyStatus,
-      policyStatusClickHandler,
-    ]);
+    }, [hostInfo, missingPolicies, policyInfo, policyStatus, policyStatusClickHandler]);
 
     return (
       <EndpointDetailsContentStyled>

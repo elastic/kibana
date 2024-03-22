@@ -24,11 +24,11 @@ import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   type ResponseActionsApiCommandNames,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { useGetEndpointPendingActionsSummary } from '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
-import type { EndpointPendingActions, HostInfo } from '../../../../../common/endpoint/types';
+import { HostStatus, type EndpointPendingActions } from '../../../../../common/endpoint/types';
 import { useGetEndpointDetails } from '../../../../management/hooks';
 import { getAgentStatusText } from '../agent_status_text';
+import { useAgentStatus } from '../../../hooks/use_agent_status';
 
 const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
 export const ISOLATING_LABEL = i18n.translate(
@@ -51,19 +51,13 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
 `;
 
 export interface EndpointAgentStatusProps {
-  endpointHostInfo: HostInfo;
+  agentId: string;
   /**
    * If set to `true` (Default), then the endpoint isolation state and response actions count
    * will be kept up to date by querying the API periodically.
    * Only used if `pendingActions` is not defined.
    */
   autoRefresh?: boolean;
-  /**
-   * The pending actions for the host (as return by the pending actions summary api).
-   * If undefined, then this component will call the API to retrieve that list of pending actions.
-   * NOTE: if this prop is defined, it will invalidate `autoRefresh` prop.
-   */
-  pendingActions?: EndpointPendingActions['pending_actions'];
   'data-test-subj'?: string;
 }
 
@@ -75,32 +69,29 @@ export interface EndpointAgentStatusProps {
  * which will call the needed APIs to get the information necessary to display the status.
  */
 export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
-  ({ endpointHostInfo, autoRefresh = true, pendingActions, 'data-test-subj': dataTestSubj }) => {
+  ({ agentId, autoRefresh = true, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary(
-      [endpointHostInfo.metadata.agent.id],
-      {
-        refetchInterval: autoRefresh ? DEFAULT_POLL_INTERVAL : false,
-        enabled: !pendingActions,
-      }
-    );
+
+    const { data: agentStatus } = useAgentStatus([agentId], 'endpoint', {
+      refetchInterval: autoRefresh ? DEFAULT_POLL_INTERVAL : false,
+    });
+
+    const endpointAgentStatus = agentStatus?.[agentId];
 
     const [hasPendingActions, hostPendingActions] = useMemo<
       [boolean, EndpointPendingActions['pending_actions']]
     >(() => {
-      if (!endpointPendingActions && !pendingActions) {
+      if (!endpointAgentStatus) {
         return [false, {}];
       }
 
-      const pending = pendingActions
-        ? pendingActions
-        : endpointPendingActions?.data[0].pending_actions ?? {};
+      const pending = endpointAgentStatus.pendingActions;
 
       return [Object.keys(pending).length > 0, pending];
-    }, [endpointPendingActions, pendingActions]);
+    }, [endpointAgentStatus]);
 
-    const status = endpointHostInfo.host_status;
-    const isIsolated = Boolean(endpointHostInfo.metadata.Endpoint.state?.isolation);
+    const status = endpointAgentStatus ? endpointAgentStatus.status : HostStatus.UNHEALTHY;
+    const isIsolated = endpointAgentStatus?.isolated ?? false;
 
     return (
       <EuiFlexGroupStyled
@@ -168,7 +159,7 @@ export const EndpointAgentStatusById = memo<EndpointAgentStatusByIdProps>(
 
     return (
       <EndpointAgentStatus
-        endpointHostInfo={data}
+        agentId={endpointAgentId}
         data-test-subj={dataTestSubj}
         autoRefresh={autoRefresh}
       />

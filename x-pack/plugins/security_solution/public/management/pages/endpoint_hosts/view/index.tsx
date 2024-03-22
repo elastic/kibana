@@ -154,8 +154,7 @@ const getEndpointListColumns = ({
       render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
         return (
           <EndpointAgentStatus
-            endpointHostInfo={endpointInfo}
-            pendingActions={getHostPendingActions(endpointInfo.metadata.agent.id)}
+            agentId={endpointInfo.metadata.agent.id}
             data-test-subj="rowHostStatus"
           />
         );

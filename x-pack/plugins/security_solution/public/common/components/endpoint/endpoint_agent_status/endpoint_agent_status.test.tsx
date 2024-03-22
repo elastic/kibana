@@ -81,7 +81,7 @@ describe('When showing Endpoint Agent Status', () => {
     beforeEach(() => {
       renderProps = {
         'data-test-subj': 'test',
-        endpointHostInfo: endpointDetails,
+        agentId: endpointDetails.metadata.agent.id,
       };
 
       render = () => {

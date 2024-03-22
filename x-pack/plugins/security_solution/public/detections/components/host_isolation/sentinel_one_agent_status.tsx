@@ -8,6 +8,8 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { DEFAULT_POLL_INTERVAL } from '../../../management/common/constants';
 import { getAgentStatusText } from '../../../common/components/endpoint/agent_status_text';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../management/pages/endpoint_hosts/view/host_constants';
 import { useAgentStatus } from '../../../common/hooks/use_agent_status';
@@ -31,8 +33,23 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
 `;
 
 export const SentinelOneAgentStatus = React.memo(
-  ({ agentId, 'data-test-subj': dataTestSubj }: { agentId: string; 'data-test-subj'?: string }) => {
-    const { data, isLoading, isFetched } = useAgentStatus([agentId], 'sentinel_one');
+  ({
+    agentId,
+    autoRefresh = true,
+    'data-test-subj': dataTestSubj,
+  }: {
+    agentId: string;
+    autoRefresh?: boolean;
+    'data-test-subj'?: string;
+  }) => {
+    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+      'responseActionsSentinelOneV1Enabled'
+    );
+
+    const { data, isLoading, isFetched } = useAgentStatus([agentId], 'sentinel_one', {
+      refetchInterval: autoRefresh ? DEFAULT_POLL_INTERVAL : false,
+      enabled: isSentinelOneV1Enabled,
+    });
     const agentStatus = data?.[`${agentId}`];
 
     const label = useMemo(() => {

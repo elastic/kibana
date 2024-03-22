@@ -95,7 +95,7 @@ describe('<HighlightedFieldsCell />', () => {
     expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render sentinelone agent status cell if field is agent.status and origialField is observer.serial_number', () => {
+  it('should render SentinelOne agent status cell if field is agent.status and originalField is observer.serial_number', () => {
     (useAgentStatus as jest.Mock).mockReturnValue({
       isFetched: true,
       isLoading: false,

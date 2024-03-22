@@ -36,7 +36,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
       lastCheckin={endpointDetails.last_checkin}
     >
       <EndpointAgentStatus
-        endpointHostInfo={endpointDetails}
+        agentId={endpointId}
         data-test-subj="responderHeaderEndpointAgentIsolationStatus"
       />
     </HeaderAgentInfo>

@@ -108,11 +108,14 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
           isUninstalled: agentInfo?.is_uninstalled ?? false,
           lastSeen: agentInfo?.last_active_date || '',
           status: agentInfo?.is_active ? HostStatus.HEALTHY : HostStatus.OFFLINE,
-          pendingActions: {
-            isolate:
-              agentInfo?.network_status === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTING ? 1 : 0,
-            unisolate: agentInfo?.network_status === SENTINEL_ONE_NETWORK_STATUS.CONNECTING ? 1 : 0,
-          },
+          pendingActions: agentInfo
+            ? {
+                isolate:
+                  agentInfo.network_status === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTING ? 1 : 0,
+                unisolate:
+                  agentInfo?.network_status === SENTINEL_ONE_NETWORK_STATUS.CONNECTING ? 1 : 0,
+              }
+            : {},
         };
 
         return acc;

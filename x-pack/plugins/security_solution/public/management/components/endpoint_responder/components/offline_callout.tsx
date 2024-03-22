@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAgentStatus } from '../../../../common/hooks/use_agent_status';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import { useGetEndpointDetails } from '../../../hooks';
 import { HostStatus } from '../../../../../common/endpoint/types';
+import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 
 interface OfflineCalloutProps {
   agentType: ResponseActionAgentType;
@@ -22,31 +22,23 @@ interface OfflineCalloutProps {
 }
 
 export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId, hostName }) => {
-  const isEndpointAgent = agentType === 'endpoint';
-  const isSentinelOneAgent = agentType === 'sentinel_one';
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
     'responseActionsSentinelOneV1Enabled'
   );
 
-  const { data: endpointDetails } = useGetEndpointDetails(endpointId, {
-    refetchInterval: 10000,
-    enabled: isEndpointAgent,
+  const { data } = useAgentStatus([endpointId], agentType, {
+    refetchInterval: DEFAULT_POLL_INTERVAL,
+    enabled: agentType === 'endpoint' || (agentType === 'sentinel_one' && isSentinelOneV1Enabled),
   });
 
-  const { data } = useAgentStatus([endpointId], agentType);
+  const agentStatus = data?.[endpointId];
 
-  // TODO: simplify this to use the yet to be implemented agentStatus API hook
   const showOfflineCallout = useMemo(
-    () =>
-      (isEndpointAgent && endpointDetails?.host_status === HostStatus.OFFLINE) ||
-      (isSentinelOneAgent && data?.[endpointId].status === HostStatus.OFFLINE),
-    [data, endpointDetails?.host_status, endpointId, isEndpointAgent, isSentinelOneAgent]
+    () => agentStatus?.status === HostStatus.OFFLINE,
+    [agentStatus]
   );
 
-  if (
-    (isEndpointAgent && !endpointDetails) ||
-    (isSentinelOneV1Enabled && isSentinelOneAgent && !data)
-  ) {
+  if (!agentStatus) {
     return null;
   }
 

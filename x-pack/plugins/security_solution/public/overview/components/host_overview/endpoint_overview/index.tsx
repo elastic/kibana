@@ -9,14 +9,16 @@ import { EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
+import {
+  type EndpointFields,
+  HostPolicyResponseActionStatus,
+} from '../../../../../common/search_strategy';
 import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import * as i18n from './translations';
-import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
-import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
 import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 interface Props {
@@ -80,7 +82,7 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data, sourcererS
           description:
             data != null && data.hostInfo ? (
               <EndpointAgentStatus
-                endpointHostInfo={data.hostInfo}
+                agentId={data.hostInfo.metadata.agent.id}
                 data-test-subj="endpointHostAgentStatus"
               />
             ) : (

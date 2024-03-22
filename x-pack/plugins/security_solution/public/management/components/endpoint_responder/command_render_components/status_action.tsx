@@ -10,9 +10,9 @@ import { EuiDescriptionList } from '@elastic/eui';
 import { v4 as uuidV4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { HostInfo, PendingActionsResponse } from '../../../../../common/endpoint/types';
+import { useAgentStatus } from '../../../../common/hooks/use_agent_status';
+import type { AgentStatusApiResponse, HostInfo } from '../../../../../common/endpoint/types';
 import type { EndpointCommandDefinitionMeta } from '../types';
-import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useGetEndpointDetails } from '../../../hooks';
 import type { CommandExecutionComponentProps } from '../../console/types';
@@ -28,13 +28,13 @@ export const EndpointStatusActionResult = memo<
       apiCalled?: boolean;
       endpointDetails?: HostInfo;
       detailsFetchError?: IHttpFetchError;
-      endpointPendingActions?: PendingActionsResponse;
+      endpointStatus?: AgentStatusApiResponse['data'];
     },
     EndpointCommandDefinitionMeta
   >
 >(({ command, status, setStatus, store, setStore, ResultComponent }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId as string;
-  const { endpointPendingActions, endpointDetails, detailsFetchError, apiCalled } = store;
+  const { endpointStatus, endpointDetails, detailsFetchError, apiCalled } = store;
   const isPending = status === 'pending';
   const queryKey = useMemo(() => {
     return uuidV4();
@@ -47,17 +47,17 @@ export const EndpointStatusActionResult = memo<
     isFetched,
   } = useGetEndpointDetails(endpointId, { enabled: isPending, queryKey: [queryKey] });
 
-  const { data: fetchedPendingActionsSummary } = useGetEndpointPendingActionsSummary([endpointId], {
+  const { data: endpointAgentStatus } = useAgentStatus([endpointId], 'endpoint', {
     enabled: isPending,
-    queryKey: [queryKey, endpointId],
+    refetchInterval: 2000,
   });
 
   const pendingIsolationActions = useMemo<{
     pendingIsolate: number;
     pendingUnIsolate: number;
   }>(() => {
-    if (endpointPendingActions?.data.length) {
-      const pendingActions = endpointPendingActions.data[0].pending_actions;
+    if (endpointStatus) {
+      const pendingActions = endpointStatus[endpointId].pendingActions;
 
       return {
         pendingIsolate: pendingActions.isolate ?? 0,
@@ -68,7 +68,7 @@ export const EndpointStatusActionResult = memo<
       pendingIsolate: 0,
       pendingUnIsolate: 0,
     };
-  }, [endpointPendingActions?.data]);
+  }, [endpointStatus, endpointId]);
 
   useEffect(() => {
     if (!apiCalled) {
@@ -104,23 +104,24 @@ export const EndpointStatusActionResult = memo<
   ]);
 
   // Update the store once we get back pending actions for this endpoint
+  // from agent status API
   useEffect(() => {
-    if (fetchedPendingActionsSummary && !endpointPendingActions) {
+    if (endpointAgentStatus && !endpointStatus) {
       setStore((prevState) => {
         return {
           ...prevState,
-          endpointPendingActions: fetchedPendingActionsSummary,
+          endpointStatus: endpointAgentStatus,
         };
       });
     }
-  }, [fetchedPendingActionsSummary, setStore, endpointPendingActions]);
+  }, [endpointAgentStatus, endpointStatus, setStore]);
 
   const getStatusDescriptionList = useCallback(() => {
     if (!endpointDetails) {
       return undefined;
     }
 
-    const agentStatus = () => {
+    const agentStatusInfoText = () => {
       let isolateStatus = '';
 
       if (pendingIsolationActions.pendingIsolate > 0) {
@@ -160,7 +161,7 @@ export const EndpointStatusActionResult = memo<
             })}
           </ConsoleCodeBlock>
         ),
-        description: <ConsoleCodeBlock>{agentStatus()}</ConsoleCodeBlock>,
+        description: <ConsoleCodeBlock>{agentStatusInfoText()}</ConsoleCodeBlock>,
       },
       {
         title: (

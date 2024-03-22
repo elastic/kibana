@@ -34,11 +34,7 @@ export interface AgentStatuses {
     isPendingUninstall: boolean | undefined;
     isUninstalled: boolean | undefined;
     lastSeen: string; // ISO date
-    pendingActions:
-      | Record<ResponseActionsApiCommandNames, number>
-      | {
-          [key: string]: number;
-        };
+    pendingActions: Record<ResponseActionsApiCommandNames | string, number>;
     status: HostStatus;
   };
 }
