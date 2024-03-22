@@ -111,13 +111,7 @@ export async function runResilientMigrator({
   return migrationStateActionMachine({
     initialState,
     logger,
-    next: next(
-      client,
-      transformRawDocs,
-      readyToReindex,
-      doneReindexing,
-      updateRelocationAliases
-    ),
+    next: next(client, transformRawDocs, readyToReindex, doneReindexing, updateRelocationAliases),
     model,
     abort: async (state?: State) => {
       // At this point, we could reject this migrator's defers and unblock other migrators
