@@ -77,3 +77,7 @@ export interface CreateListItemParams extends ApiParams {
 export interface ExportListParams extends ApiParams {
   listId: string;
 }
+
+export interface GetListByIdParams extends ApiParams {
+  id: string;
+}

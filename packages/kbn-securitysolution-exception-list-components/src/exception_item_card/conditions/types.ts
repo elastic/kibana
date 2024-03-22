@@ -29,4 +29,5 @@ export interface CriteriaConditionsProps {
   entries: Entries;
   dataTestSubj: string;
   os?: ExceptionListItemSchema['os_types'];
+  React.ComponentType<{ listId: string; children: React.ReactNode }>;
 }

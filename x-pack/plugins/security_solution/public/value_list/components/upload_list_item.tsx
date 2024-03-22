@@ -42,27 +42,32 @@ export const UploadListItem = ({ listId, type }: { listId: string; type: Type })
         listId,
         http,
         signal: ctrl.current.signal,
-        type: 'keyword',
+        type,
         refresh: true,
       });
     }
-  }, [importState.loading, file, importList, http, type]);
+  }, [importState.loading, file, importList, http, type, listId]);
 
   const fileIsValid = !file || validFileTypes.some((fileType) => file.type === fileType);
 
   useEffect(() => {
     if (!importState.loading && importState.result) {
       addSuccess('Succesfully upload list items', toastOptions);
-      console.log(importState.result);
     } else if (!importState.loading && importState.error) {
       addError('Failed to upload list item', {
         title: 'error',
         ...toastOptions,
       });
-      console.log(importState.error as Error);
     }
     invalidateListItemQuery();
-  }, [importState.error, importState.loading, importState.result]);
+  }, [
+    importState.error,
+    importState.loading,
+    importState.result,
+    addSuccess,
+    addError,
+    invalidateListItemQuery,
+  ]);
 
   return (
     <>

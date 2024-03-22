@@ -86,6 +86,7 @@ export interface EntryItemProps {
   operatorsList?: OperatorOption[];
   allowCustomOptions?: boolean;
   getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
+  ShowValueListModal: React.ComponentType<{ listId: string; children: React.ReactNode }>;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -106,6 +107,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   allowCustomOptions = false,
   getExtendedFields,
   exceptionItemIndex,
+  ShowValueListModal,
 }): JSX.Element => {
   const sPaddingSize = useEuiPaddingSize('s');
 
@@ -499,6 +501,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             data-test-subj="exceptionBuilderEntryFieldList"
             allowLargeValueLists={allowLargeValueLists}
             aria-label={ariaLabel}
+            ShowValueListModal={ShowValueListModal}
           />
         );
       case OperatorTypeEnum.EXISTS:

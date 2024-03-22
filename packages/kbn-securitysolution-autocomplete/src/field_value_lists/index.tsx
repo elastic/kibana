@@ -36,6 +36,7 @@ interface AutocompleteFieldListsProps {
   selectedValue: string | undefined;
   allowLargeValueLists?: boolean;
   'aria-label'?: string;
+  ShowValueListModal: React.ComponentType<{ listId: string; children: React.ReactNode }>;
 }
 
 export interface AutocompleteListsData {
@@ -55,6 +56,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   selectedValue,
   allowLargeValueLists = false,
   'aria-label': ariaLabel,
+  ShowValueListModal,
 }): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [listData, setListData] = useState<AutocompleteListsData>({
@@ -121,26 +123,30 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
 
   const helpText = useMemo(() => {
     return (
-      !allowLargeValueLists && (
-        <EuiText size="xs">
-          {i18n.LISTS_TOOLTIP_INFO}{' '}
-          <EuiLink
-            external
-            target="_blank"
-            href={
-              getDocLinks({
-                kibanaBranch: 'main',
-                buildFlavor: 'traditional',
-              }).securitySolution.exceptions.value_lists
-            }
-          >
-            {i18n.SEE_DOCUMENTATION}
-          </EuiLink>
-        </EuiText>
-      )
+      <>
+        {selectedValue && (
+          <ShowValueListModal listId={selectedValue}>Show value list</ShowValueListModal>
+        )}
+        {!allowLargeValueLists && (
+          <EuiText size="xs">
+            {i18n.LISTS_TOOLTIP_INFO}{' '}
+            <EuiLink
+              external
+              target="_blank"
+              href={
+                getDocLinks({
+                  kibanaBranch: 'main',
+                  buildFlavor: 'traditional',
+                }).securitySolution.exceptions.value_lists
+              }
+            >
+              {i18n.SEE_DOCUMENTATION}
+            </EuiLink>
+          </EuiText>
+        )}
+      </>
     );
-  }, [allowLargeValueLists]);
-
+  }, [allowLargeValueLists, selectedValue, ShowValueListModal]);
   return (
     <EuiFormRow
       label={rowLabel}
@@ -149,23 +155,25 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
       helpText={helpText}
       fullWidth
     >
-      <EuiComboBox
-        async
-        data-test-subj="valuesAutocompleteComboBox listsComboxBox"
-        fullWidth
-        isClearable={isClearable}
-        isDisabled={isDisabled}
-        isInvalid={error != null}
-        isLoading={isLoadingState}
-        onBlur={setIsTouchedValue}
-        onChange={handleValuesChange}
-        options={comboOptions}
-        placeholder={placeholder}
-        selectedOptions={selectedComboOptions}
-        singleSelection={SINGLE_SELECTION}
-        sortMatchesBy="startsWith"
-        aria-label={ariaLabel}
-      />
+      <>
+        <EuiComboBox
+          async
+          data-test-subj="valuesAutocompleteComboBox listsComboxBox"
+          fullWidth
+          isClearable={isClearable}
+          isDisabled={isDisabled}
+          isInvalid={error != null}
+          isLoading={isLoadingState}
+          onBlur={setIsTouchedValue}
+          onChange={handleValuesChange}
+          options={comboOptions}
+          placeholder={placeholder}
+          selectedOptions={selectedComboOptions}
+          singleSelection={SINGLE_SELECTION}
+          sortMatchesBy="startsWith"
+          aria-label={ariaLabel}
+        />
+      </>
     </EuiFormRow>
   );
 };

@@ -27,8 +27,11 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
     onSuccess: () => {
       addSuccess('Succesfully added list item');
     },
-    onError: () => {
-      addError('Failed to add list item');
+    onError: (error) => {
+      addError(error, {
+        title: error.message,
+        toastMessage: error?.body?.message ?? error.message,
+      });
     },
   });
   const formik = useFormik({

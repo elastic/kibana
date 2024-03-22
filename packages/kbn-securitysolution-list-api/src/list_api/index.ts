@@ -20,8 +20,10 @@ import {
   ImportListItemSchemaEncoded,
   ListItemIndexExistSchema,
   ListSchema,
+  ReadListSchema,
   acknowledgeSchema,
   deleteListSchema,
+  readListSchema,
   exportListItemQuerySchema,
   findListSchema,
   foundListSchema,
@@ -48,6 +50,7 @@ import {
   ExportListParams,
   FindListsParams,
   ImportListParams,
+  GetListByIdParams,
 } from '../types';
 
 export type {
@@ -307,3 +310,35 @@ const createListIndexWithValidation = async ({
   )();
 
 export { createListIndexWithValidation as createListIndex };
+
+const getListById = async ({
+  http,
+  signal,
+  id,
+}: ApiParams & ReadListSchema): Promise<ListSchema> => {
+  return http.fetch(`${LIST_URL}`, {
+    method: 'GET',
+    query: {
+      id,
+    },
+    signal,
+    version,
+  });
+};
+
+const getListByIdWithValidation = async ({
+  http,
+  signal,
+  id,
+}: GetListByIdParams): Promise<ListSchema> =>
+  pipe(
+    {
+      id,
+    },
+    (payload) => fromEither(validateEither(readListSchema, payload)),
+    chain((payload) => tryCatch(() => getListById({ http, signal, ...payload }), toError)),
+    chain((response) => fromEither(validateEither(listSchema, response))),
+    flow(toPromise)
+  );
+
+export { getListByIdWithValidation as getListById };

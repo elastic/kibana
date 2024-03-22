@@ -56,6 +56,7 @@ interface ExceptionItemsProps {
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
   onPaginationChange: (arg: GetExceptionItemProps) => void;
+  ShowValueListModal: React.ComponentType<{ listId: string; children: React.ReactNode }>;
 }
 
 const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
@@ -80,6 +81,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
   onDeleteException,
   onEditExceptionItem,
   onCreateExceptionListItem,
+  ShowValueListModal,
 }) => {
   const ExceptionsUtility = exceptionsUtilityComponent;
   if (!exceptions.length || viewerStatus)
@@ -128,6 +130,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
                   securityLinkAnchorComponent={securityLinkAnchorComponent}
                   formattedDateComponent={formattedDateComponent}
                   getFormattedComments={getFormattedComments}
+                  ShowValueListModal={ShowValueListModal}
                 />
               </EuiFlexItem>
             ))}

@@ -25,11 +25,10 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
       addSuccess('Succesfully updated list item', toastOptions);
     },
     onError: (error) => {
-      addError('Failed to update list item', {
+      addError(error, {
         title: error.message,
-        ...toastOptions,
+        toastMessage: error?.body?.message ?? error.message,
       });
-      setValue(listItem.value);
     },
   });
   const onChange = useCallback((e) => {

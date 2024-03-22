@@ -23,3 +23,4 @@ export * from './src/use_find_list_items';
 export * from './src/use_create_list_item';
 export * from './src/use_delete_list_item';
 export * from './src/use_patch_list_item';
+export * from './src/use_get_list_by_id';

@@ -16,45 +16,40 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   useEuiPaddingSize,
-  EuiButtonIcon,
+  EuiText,
+  EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useFindListItems, useDeleteListItemMutation } from '@kbn/securitysolution-list-hooks';
+import { useFindListItems, useGetListById } from '@kbn/securitysolution-list-hooks';
 import { FormattedDate } from '../../common/components/formatted_date';
 import { useKibana } from '../../common/lib/kibana';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { AddListItemPopover } from './add_list_item_popover';
 import { InlineEditListItemValue } from './inline_edit_list_item_value';
 import { UploadListItem } from './upload_list_item';
-
-const toastOptions = {
-  toastLifeTimeMs: 5000,
-};
+import { DeleteListItem } from './delete_list_item';
 
 const tableStyle = css`
   overflow: scroll;
 `;
+const info = css`
+  margin-right: 16px;
+`;
+const infoLabel = css`
+  margin-right: 8px;
+`;
+
+const searchWrapper = css`
+  // z-index: 20000;
+`;
 
 type SortFields = 'updated_at' | 'updated_by';
 
-const DeleteListItemButton = ({ id }: { id: string }) => {
-  const { addSuccess } = useAppToasts();
-  const http = useKibana().services.http;
-  const deleteListItemMutation = useDeleteListItemMutation({
-    onSuccess: () => {
-      addSuccess('Succesfully deleted list item', toastOptions);
-    },
-  });
-
-  return (
-    <EuiButtonIcon
-      color={'danger'}
-      onClick={() => deleteListItemMutation.mutate({ id, http })}
-      iconType="trash"
-      isLoading={deleteListItemMutation.isLoading}
-    />
-  );
-};
+const Info = ({ label, value }: { value: React.ReactNode; label: string }) => (
+  <EuiText size="xs" className={info}>
+    <b className={infoLabel}>{label} </b> {value}
+  </EuiText>
+);
 
 export const ValueListModal = ({
   listId,
@@ -70,7 +65,11 @@ export const ValueListModal = ({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const http = useKibana().services.http;
 
-  const { data, isLoading, isError } = useFindListItems({
+  const {
+    data: listItems,
+    isLoading,
+    isError,
+  } = useFindListItems({
     listId,
     pageIndex: pageIndex + 1,
     pageSize,
@@ -79,6 +78,8 @@ export const ValueListModal = ({
     filter,
     http,
   });
+
+  const { data: list, isLoading: isListLoading } = useGetListById({ http, id: listId });
 
   const modalStyle = css`
     overflow: hidden;
@@ -117,7 +118,7 @@ export const ValueListModal = ({
           name: 'Delete',
           description: 'Delete this item',
           isPrimary: true,
-          render: (item: ListItemSchema) => <DeleteListItemButton id={item.id} />,
+          render: (item: ListItemSchema) => <DeleteListItem id={item.id} />,
         },
       ],
       width: '10%',
@@ -135,7 +136,7 @@ export const ValueListModal = ({
   const pagination = {
     pageIndex,
     pageSize,
-    totalItemCount: data?.total ?? 0,
+    totalItemCount: listItems?.total ?? 0,
     pageSizeOptions: [5, 10, 25],
   };
 
@@ -146,52 +147,72 @@ export const ValueListModal = ({
 
   return (
     <EuiModal maxWidth={false} css={() => ({ minHeight: '85vh' })} onClose={onCloseModal}>
-      <EuiModalHeader>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiModalHeaderTitle>Value list</EuiModalHeaderTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <AddListItemPopover listId={listId} />
-              <UploadListItem listId={listId} />
+      {isListLoading || !list ? (
+        <EuiLoadingSpinner size="xxl" />
+      ) : (
+        <>
+          <EuiModalHeader>
+            <EuiFlexGroup justifyContent="spaceBetween" wrap>
+              <EuiFlexItem grow={false}>
+                <EuiModalHeaderTitle>{list.id}</EuiModalHeaderTitle>
+                <EuiSpacer size="s" />
+                {list.description && (
+                  <>
+                    <EuiText size="s">{list.description}</EuiText>
+                    <EuiSpacer size="xs" />
+                  </>
+                )}
+                <EuiFlexGroup justifyContent="flexStart">
+                  <Info label="Type:" value={list.type} />
+                  <Info
+                    label="Update at:"
+                    value={<FormattedDate value={list.updated_at} fieldName="updated_at" />}
+                  />
+                  <Info label="Updated by:" value={list.updated_by} />
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <AddListItemPopover listId={listId} />
+                  <UploadListItem listId={listId} type={list.type} />
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiModalHeader>
-
-      <EuiFlexGroup className={modalStyle} direction="column">
-        <EuiFlexItem grow={false}>
-          <SearchBar
-            appName="siem"
-            isLoading={isLoading}
-            onQuerySubmit={onQuerySubmit}
-            showFilterBar={false}
-            showDatePicker={false}
-            displayStyle={'inPage'}
-            submitButtonStyle={'iconOnly'}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true} className={tableStyle}>
-          <EuiBasicTable
-            tableCaption="Demo of EuiBasicTable"
-            items={data?.data ?? []}
-            columns={columns}
-            pagination={pagination}
-            sorting={sorting}
-            onChange={({ page, sort }) => {
-              if (page) {
-                setPageIndex(page.index);
-                setPageSize(page.size);
-              }
-              if (sort) {
-                setSortField(sort.field as SortFields);
-                setSortOrder(sort.direction);
-              }
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiModalHeader>
+          <EuiFlexGroup className={modalStyle} direction="column">
+            <EuiFlexItem grow={false} className={searchWrapper}>
+              <SearchBar
+                appName="siem"
+                isLoading={isLoading}
+                onQuerySubmit={onQuerySubmit}
+                showFilterBar={false}
+                showDatePicker={false}
+                displayStyle={'inPage'}
+                submitButtonStyle={'iconOnly'}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true} className={tableStyle}>
+              <EuiBasicTable
+                tableCaption="Demo of EuiBasicTable"
+                items={listItems?.data ?? []}
+                columns={columns}
+                pagination={pagination}
+                sorting={sorting}
+                onChange={({ page, sort }) => {
+                  if (page) {
+                    setPageIndex(page.index);
+                    setPageSize(page.size);
+                  }
+                  if (sort) {
+                    setSortField(sort.field as SortFields);
+                    setSortOrder(sort.direction);
+                  }
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </EuiModal>
   );
 };

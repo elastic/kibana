@@ -13,13 +13,19 @@ import { ValueWithSpaceWarning } from '../../../..';
 import { OPERATOR_TYPE_LABELS_EXCLUDED, OPERATOR_TYPE_LABELS_INCLUDED } from '../conditions.config';
 import type { Entry } from '../types';
 
-const getEntryValue = (type: string, value?: string | string[]) => {
+const getEntryValue = (
+  type: string,
+  value: string | string[],
+  ShowValueListModal: React.ComponentType<{ listId: string; children: React.ReactNode }>
+) => {
   if (type === 'match_any' && Array.isArray(value)) {
     return value.map((currentValue, index) => (
       <EuiBadge key={index} data-test-subj={`matchAnyBadge${index}`} color="hollow">
         {currentValue}
       </EuiBadge>
     ));
+  } else if (type === 'list' && value) {
+    return <ShowValueListModal listId={value.toString()}>{value}</ShowValueListModal>;
   }
   return value ?? '';
 };
@@ -40,12 +46,13 @@ export const getValue = (entry: Entry) => {
 export const getValueExpression = (
   type: ListOperatorTypeEnum,
   operator: string,
-  value: string | string[]
+  value: string | string[],
+  ShowValueListModal: React.ComponentType<{ listId: string; children: React.ReactNode }>
 ) => (
   <>
     <EuiExpression
       description={getEntryOperator(type, operator)}
-      value={getEntryValue(type, value)}
+      value={getEntryValue(type, value, ShowValueListModal)}
       data-test-subj="entryValueExpression"
     />
     <ValueWithSpaceWarning value={value} />
