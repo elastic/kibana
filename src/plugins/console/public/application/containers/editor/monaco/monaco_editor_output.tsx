@@ -13,9 +13,15 @@ import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
+import { CONSOLE_OUTPUT_THEME_ID, XJsonLang } from '@kbn/monaco';
 import { useEditorReadContext, useRequestReadContext } from '../../../contexts';
 import { convertMapboxVectorTileToJson } from '../legacy/console_editor/mapbox_vector_tile';
-import { isJSONContentType, isMapboxVectorTile, safeExpandLiteralStrings } from '../utilities';
+import {
+  isJSONContentType,
+  isMapboxVectorTile,
+  safeExpandLiteralStrings,
+  languageForContentType,
+} from '../utilities';
 
 export const MonacoEditorOutput: FunctionComponent = () => {
   const { settings: readOnlySettings } = useEditorReadContext();
@@ -23,9 +29,11 @@ export const MonacoEditorOutput: FunctionComponent = () => {
     lastResult: { data },
   } = useRequestReadContext();
   const [value, setValue] = useState('');
+  const [mode, setMode] = useState('text');
 
   useEffect(() => {
     if (data) {
+      setMode(languageForContentType(data[0].response.contentType));
       setValue(
         data
           .map((result) => {
@@ -64,7 +72,12 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           })}
         </label>
       </EuiScreenReaderOnly>
-      <CodeEditor languageId={'json'} value={value} fullWidth={true} />
+      <CodeEditor
+        languageId={mode}
+        value={value}
+        fullWidth={true}
+        options={{ theme: mode === XJsonLang.ID ? CONSOLE_OUTPUT_THEME_ID : undefined }}
+      />
     </div>
   );
 };

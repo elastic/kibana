@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { YAML_LANG_ID, XJsonLang } from '@kbn/monaco';
 import { expandLiteralStrings } from '../../../../shared_imports';
 
 export const isJSONContentType = (contentType?: string) =>
@@ -23,4 +24,17 @@ export const safeExpandLiteralStrings = (data: string): string => {
   } catch (e) {
     return data;
   }
+};
+
+export const languageForContentType = (contentType?: string) => {
+  if (!contentType) {
+    return 'text';
+  }
+  if (isJSONContentType(contentType) || isMapboxVectorTile(contentType)) {
+    // Using hjson will allow us to use comments in editor output and solves the problem with error markers
+    return XJsonLang.ID;
+  } else if (contentType.indexOf('application/yaml') >= 0) {
+    return YAML_LANG_ID;
+  }
+  return 'text';
 };

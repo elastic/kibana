@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export const CONSOLE_LANG_ID = 'console';
-export const CONSOLE_OUTPUT_THEME_ID = 'consoleOutputTheme';
+export const globals = {
+  escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
+};
