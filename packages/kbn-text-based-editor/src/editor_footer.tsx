@@ -366,6 +366,7 @@ export const EditorFooter = memo(function EditorFooter({
             containerCSS={styles.historyContainer}
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={containerWidth}
+            refetchHistoryItems={refetchHistoryItems}
           />
         </EuiFlexItem>
       )}

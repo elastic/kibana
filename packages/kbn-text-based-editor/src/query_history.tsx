@@ -162,18 +162,25 @@ export const getTableColumns = (
 export function QueryHistory({
   containerCSS,
   containerWidth,
+  refetchHistoryItems,
   onUpdateAndSubmit,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string) => void;
+  refetchHistoryItems?: boolean;
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [historyItems, setHistoryItems] = useState<QueryHistoryItem[]>([]);
 
-  // get history items from local storage
-  const historyItems: QueryHistoryItem[] = getHistoryItems(sortDirection);
+  useEffect(() => {
+    if (refetchHistoryItems) {
+      // get history items from local storage
+      setHistoryItems(getHistoryItems(sortDirection));
+    }
+  }, [refetchHistoryItems, sortDirection]);
 
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
