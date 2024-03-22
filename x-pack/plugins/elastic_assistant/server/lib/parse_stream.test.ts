@@ -77,7 +77,7 @@ describe('handleStreamStorage', () => {
       expect(onMessageSent).toHaveBeenCalledWith('Simple.');
     });
     it('saves the error message on a failed streaming event', async () => {
-      const tokenPromise = handleStreamStorage(stream.transform, 'bedrock', onMessageSent);
+      const tokenPromise = handleStreamStorage(stream.transform, '.bedrock', onMessageSent);
 
       stream.fail();
       await expect(tokenPromise).resolves.not.toThrow();
