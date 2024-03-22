@@ -8,21 +8,48 @@
 
 import { i18n } from '@kbn/i18n';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 
-type SOToEmbeddable = (container: PresentationContainer, so: SavedObjectMetaData) => void;
+type SOToEmbeddable<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = (
+  container: PresentationContainer,
+  savedObject: SavedObjectCommon<TSavedObjectAttributes>
+) => void;
 
-const registry: { [key: string]: SOToEmbeddable } = {};
+export type ReactEmbeddableSavedObject<
+  TSavedObjectAttributes extends FinderAttributes = FinderAttributes
+> = {
+  method: SOToEmbeddable<TSavedObjectAttributes>;
+  savedObjectMetaData: SavedObjectMetaData;
+};
 
-export const registerReactEmbeddableSavedObjectMeta = (method: SOToEmbeddable, type: string) => {
-  if (registry[type] !== undefined) {
+const registry: Map<string, ReactEmbeddableSavedObject<any>> = new Map();
+
+export const registerReactEmbeddableSavedObject = <TSavedObjectAttributes extends FinderAttributes>(
+  type: string,
+  method: SOToEmbeddable<TSavedObjectAttributes>,
+  savedObjectMetaData: SavedObjectMetaData
+) => {
+  if (registry.has(type)) {
     throw new Error(
       i18n.translate('embeddableApi.embeddableSavedObjectRegistry.keyAlreadyExistsError', {
-        defaultMessage: `Saved object meta for embeddable type {type} already exists`,
+        defaultMessage: `Embeddable saved object type {type} already exists`,
         values: { type },
       })
     );
   }
 
-  registry[type] = method;
+  registry.set(type, { method, savedObjectMetaData });
+};
+
+export const getReactEmbeddableSavedObjects = <
+  TSavedObjectAttributes extends FinderAttributes
+>() => {
+  return registry.entries() as IterableIterator<
+    [string, ReactEmbeddableSavedObject<TSavedObjectAttributes>]
+  >;
+};
+
+export const getReactEmbeddableSavedObject = (type: string) => {
+  return registry.get(type);
 };

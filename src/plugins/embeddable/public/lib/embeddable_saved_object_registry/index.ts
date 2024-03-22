@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { registerReactEmbeddableSavedObjectMeta } from './embeddable_saved_object_registry';
+export { registerReactEmbeddableSavedObject } from './embeddable_saved_object_registry';
