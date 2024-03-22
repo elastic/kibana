@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const NUM_OF_CONTROLS = {
-  MIN: 0,
-  MAX: 4,
-};
+export * from './alerts_filter_controls';

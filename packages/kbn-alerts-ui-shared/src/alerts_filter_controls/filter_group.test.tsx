@@ -1,25 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { FilterGroup } from '.';
+import { FilterGroup } from './filter_group';
 import type { ComponentProps, FC } from 'react';
 import React from 'react';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
-import { TestProviders } from '../../mock';
-import type {
+import {
   ControlGroupOutput,
   ControlGroupInput,
   ControlGroupContainer,
+  ControlGroupRenderer,
 } from '@kbn/controls-plugin/public';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import { initialInputData, sampleOutputData } from './mocks/data';
-import { useGetInitialUrlParamValue } from '../../utils/global_query_string/helpers';
-import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS } from './constants';
+import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, DEFAULT_CONTROLS, TEST_IDS } from './constants';
 import {
   controlGroupFilterInputMock$,
   controlGroupFilterOutputMock$,
@@ -27,25 +26,10 @@ import {
 } from './mocks/control_group';
 import { getMockedControlGroupRenderer } from './mocks/control_group_renderer';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
-
-jest.mock('../../utils/global_query_string/helpers', () => {
-  return {
-    ...jest.requireActual('../../utils/global_query_string/helpers'),
-    useGetInitialUrlParamValue: jest.fn().mockImplementation(() => () => null),
-  };
-});
-
-jest.mock('../../utils/global_query_string', () => {
-  return {
-    ...jest.requireActual('../../utils/global_query_string'),
-  };
-});
-
-jest.mock('../../hooks/use_space_id', () => {
-  return {
-    useSpaceId: jest.fn(() => 'test_space_id'),
-  };
-});
+import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
+import { useGetInitialUrlParamValue } from '@kbn/security-solution-plugin/public/common/utils/global_query_string/helpers';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 const LOCAL_STORAGE_KEY = 'securitySolution.test_space_id.pageFilters';
 
@@ -81,21 +65,20 @@ jest.mock('@kbn/controls-plugin/public/control_group/external_api/control_group_
 const onFilterChangeMock = jest.fn();
 const onInitMock = jest.fn();
 
-const TestComponent: FC<
-  ComponentProps<typeof TestProviders> & {
-    filterGroupProps?: Partial<ComponentProps<typeof FilterGroup>>;
-  }
-> = (props) => (
-  <TestProviders {...props}>
-    <FilterGroup
-      initialControls={DEFAULT_DETECTION_PAGE_FILTERS}
-      dataViewId="security-solution-default"
-      chainingSystem="HIERARCHICAL"
-      onFilterChange={onFilterChangeMock}
-      onInit={onInitMock}
-      {...props.filterGroupProps}
-    />
-  </TestProviders>
+const TestComponent: FC<{
+  filterGroupProps?: Partial<ComponentProps<typeof FilterGroup>>;
+}> = (props) => (
+  <FilterGroup
+    featureIds={[AlertConsumers.STACK_ALERTS]}
+    defaultControls={DEFAULT_CONTROLS}
+    dataViewId="security-solution-default"
+    chainingSystem="HIERARCHICAL"
+    onFilterChange={onFilterChangeMock}
+    onInit={onInitMock}
+    ControlGroupRenderer={ControlGroupRenderer}
+    Storage={Storage}
+    {...props.filterGroupProps}
+  />
 );
 
 const openContextMenu = async () => {

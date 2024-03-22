@@ -9,7 +9,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
-import { AlertsFilters } from '../alerts_filters';
+import { AlertsFilterControls } from '@kbn/alerts-ui-shared';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
@@ -43,11 +45,13 @@ export const UrlSyncedAlertsSearchBar = ({
   ...rest
 }: UrlSyncedAlertsSearchBarProps) => {
   const {
+    http,
     data: { query: queryService },
-    notifications: { toasts },
-    dataViews: dataViewsService,
+    notifications,
+    dataViews,
     spaces,
   } = useKibana().services;
+  const { toasts } = notifications;
   const {
     timefilter: { timefilter: timeFilterService },
   } = queryService;
@@ -136,13 +140,22 @@ export const UrlSyncedAlertsSearchBar = ({
         onClearSavedQuery={clearSavedQuery}
         {...rest}
       />
-      <AlertsFilters
-        dataViewsService={dataViewsService}
+      <AlertsFilterControls
+        dataViewSpec={{
+          id: 'unified-alerts-dv',
+        }}
         spaceId={spaceId}
         chainingSystem="HIERARCHICAL"
-        controlsFromUrl={filterControls}
+        controlsUrlState={filterControls}
         filters={filters}
         onFilterChange={onFiltersChange}
+        dependencies={{
+          http,
+          notifications,
+          dataViews,
+        }}
+        ControlGroupRenderer={ControlGroupRenderer}
+        Storage={Storage}
       />
     </>
   );

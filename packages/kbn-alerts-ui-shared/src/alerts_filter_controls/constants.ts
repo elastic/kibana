@@ -7,32 +7,30 @@
  */
 
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
+import { ALERT_DURATION, ALERT_RULE_UUID, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 
-export const DEFAULT_FILTERS: Array<
+export const DEFAULT_CONTROLS: Array<
   Omit<AddOptionsListControlProps, 'dataViewId'> & { persist?: boolean }
 > = [
   {
     title: 'Status',
-    fieldName: 'kibana.alert.status',
+    fieldName: ALERT_STATUS,
     selectedOptions: ['active'],
     hideActionBar: true,
     persist: true,
     hideExists: true,
   },
   {
-    title: 'Service',
-    fieldName: 'service.name',
-    selectedOptions: [],
-    hideActionBar: true,
-    hideExists: true,
+    title: 'Rule',
+    fieldName: ALERT_RULE_UUID,
   },
   {
-    title: 'Container',
-    fieldName: 'container.name',
+    title: 'Started at',
+    fieldName: ALERT_START,
   },
   {
-    title: 'Host',
-    fieldName: 'host.name',
+    title: 'Duration',
+    fieldName: ALERT_DURATION,
   },
 ];
 

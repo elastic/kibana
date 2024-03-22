@@ -174,6 +174,12 @@ const PageContent = () => {
                     defaultMessage="Technical preview"
                   />
                 }
+                tooltipContent={
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.technicalPreviewBadgeDescription"
+                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features"
+                  />
+                }
               />
             </EuiFlexItem>
           </EuiFlexGroup>
