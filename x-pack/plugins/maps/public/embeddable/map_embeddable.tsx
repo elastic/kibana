@@ -39,6 +39,7 @@ import {
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
@@ -113,7 +114,6 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 
 async function getChartsPaletteServiceGetColor(): Promise<((value: string) => string) | null> {
   const chartsService = getCharts();
@@ -681,19 +681,19 @@ export class MapEmbeddable
 
     const {
       item: { id: savedObjectId },
-    } = await getMapClient().create({ 
+    } = await getMapClient().create({
       data: {
         ...attributes,
         title,
       },
-      options: { references }
+      options: { references },
     });
     return {
       state: {
         ..._.omit(this.getExplicitInput(), 'attributes'),
         savedObjectId,
       },
-      savedObjectId
+      savedObjectId,
     };
   };
   savedObjectAttributesToState = () => {
