@@ -168,7 +168,6 @@ For detailed information about the 8.13.0 release, review the enhancements and b
 Alerting::
 * Improve default AlertsTable columns configuration ({kibana-pull}176137[#176137]).
 * Evenly distribute bulk-enabled alerting rules ({kibana-pull}172742[#172742]).
-* Enables the alerts table for cases in the Stack Management ({kibana-pull}172217[#172217]).
 * Implement a mechanism to copy source data into the alerts-as-data documents for ES Query rules ({kibana-pull}171129[#171129]).
 APM::
 * Adds detectors for anomaly rules creation ({kibana-pull}171901[#171901]).
@@ -181,9 +180,9 @@ APM::
 * Updates Indices API to support sourcemap parameters ({kibana-pull}177847[#177847]).
 * Fixes sorting instances table results on server-side ({kibana-pull}174164[#174164]).
 Cases::
-* Adds support default values for required custom fields ({kibana-pull}175961[#175961]).
-* Collects custom fields telemetry metrics for cases plugin in {kib} ({kibana-pull}175425[#175425]).
-* Persists all filter options of the cases table in the URL ({kibana-pull}175237[#175237]).
+* Required custom fields now support default values, which will be used to automatically populate the custom fields if they are not defined when creating and updating cases ({kibana-pull}175961[#175961]).
+* Persists all filter options of the cases table, including custom fields, in the URL. The filtering is also persisted when navigating back and forth between pages ({kibana-pull}175237[#175237]).
+* Enables the alerts table for cases in the Stack Management ({kibana-pull}172217[#172217]).
 Dashboard::
 * Adds step setting for range slider control ({kibana-pull}174717[#174717]).
 * Adds a deprecation badge in Dashboard on legacy control panels ({kibana-pull}174302[#174302]).
@@ -294,7 +293,7 @@ APM::
 * Fixes inconsistencies on Service Overview page ({kibana-pull}176293[#176293]).
 * Fixes occurrences cut off value to be fully visible ({kibana-pull}175307[#175307]).
 Cases::
-* Update UI to use custom field internal API ({kibana-pull}176574[#176574]).
+* Fixes a bug where if there are required custom fields on a case whose values are empty, it is not possible to update any of those fields ({kibana-pull}176574[#176574]).
 Dashboard::
 * Fixes hidden add panel popover on smaller viewports ({kibana-pull}178593[#178593]).
 * Fixes form validation when saving Links to library ({kibana-pull}176021[#176021]).
