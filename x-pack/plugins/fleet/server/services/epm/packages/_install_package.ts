@@ -98,6 +98,7 @@ export async function _installPackage({
 
   try {
     if (installedPkg) {
+      // if some installation already exists
       const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
       const hasExceededTimeout =
         Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
@@ -150,7 +151,6 @@ export async function _installPackage({
         verificationResult,
       });
     }
-
     logger.debug(`Package install - Installing Kibana assets`);
     const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
       installKibanaAssetsAndReferences({
@@ -271,9 +271,7 @@ export async function _installPackage({
         skipDataStreamRollover,
       })
     );
-
     logger.debug(`Package install - Installing transforms`);
-
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
       installTransforms({
         packageInstallContext,
@@ -346,7 +344,6 @@ export async function _installPackage({
       id: pkgName,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
-
     logger.debug(`Package install - Updating install status`);
     await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {

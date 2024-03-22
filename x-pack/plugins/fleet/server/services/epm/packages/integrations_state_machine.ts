@@ -6,7 +6,7 @@
  */
 import { appContextService } from '../../app_context';
 export interface State {
-  onTransitionTo: any;
+  onTransition: any;
   nextState?: string;
   currentStatus?: string;
   onPostTransition?: any;
@@ -30,9 +30,9 @@ export async function handleState(
   let currentStatus = 'pending';
   let stateResult;
   let updatedContext = { ...context };
-  if (typeof currentState.onTransitionTo === 'function') {
+  if (typeof currentState.onTransition === 'function') {
     try {
-      stateResult = await currentState.onTransitionTo.call(undefined, updatedContext);
+      stateResult = await currentState.onTransition.call(undefined, updatedContext);
       // check if is a function/promise
       if (typeof stateResult === 'function') {
         const promiseName = `${currentStateName}Result`;

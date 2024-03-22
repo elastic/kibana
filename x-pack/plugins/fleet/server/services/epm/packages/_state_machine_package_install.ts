@@ -92,46 +92,46 @@ export async function _stateMachineInstallPackage({ context }: { context: Instal
     states: {
       create_restart_installation: {
         nextState: 'install_kibana_assets',
-        onTransitionTo: stepCreateRestartInstallation,
+        onTransition: stepCreateRestartInstallation,
       },
       install_kibana_assets: {
-        onTransitionTo: stepInstallKibanaAssets,
+        onTransition: stepInstallKibanaAssets,
         nextState: 'install_ilm_policies',
       },
       install_ilm_policies: {
-        onTransitionTo: stepInstallILMPolicies,
+        onTransition: stepInstallILMPolicies,
         nextState: 'install_ml_model',
       },
       install_ml_model: {
-        onTransitionTo: stepInstallMlModel,
+        onTransition: stepInstallMlModel,
         nextState: 'install_index_template_pipelines',
       },
       install_index_template_pipelines: {
-        onTransitionTo: stepInstallIndexTemplatePipelines,
+        onTransition: stepInstallIndexTemplatePipelines,
         nextState: 'remove_legacy_templates',
       },
       remove_legacy_templates: {
-        onTransitionTo: stepRemoveLegacyTemplates,
+        onTransition: stepRemoveLegacyTemplates,
         nextState: 'update_current_write_indices',
       },
       update_current_write_indices: {
-        onTransitionTo: stepUpdateCurrentWriteIndices,
+        onTransition: stepUpdateCurrentWriteIndices,
         nextState: 'install_transforms',
       },
       install_transforms: {
-        onTransitionTo: stepInstallTransforms,
+        onTransition: stepInstallTransforms,
         nextState: 'delete_previous_pipelines',
       },
       delete_previous_pipelines: {
-        onTransitionTo: stepDeletePreviousPipelines,
+        onTransition: stepDeletePreviousPipelines,
         nextState: 'save_archive_entries_from_assets_map',
       },
       save_archive_entries_from_assets_map: {
-        onTransitionTo: stepSaveArchiveEntries,
+        onTransition: stepSaveArchiveEntries,
         nextState: 'update_so',
       },
       update_so: {
-        onTransitionTo: stepSaveSystemObject,
+        onTransition: stepSaveSystemObject,
         nextState: 'end',
       },
     },
