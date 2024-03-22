@@ -50,7 +50,7 @@ export const registerImageEmbeddableFactory = ({
       const { titlesApi, titleComparators, serializeTitles } =
         initializeReactEmbeddableTitles(initialState);
 
-      const embeddableEnhancedApi = embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
+      const dynamicActionsApi = embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
         'test',
         () => titlesApi.panelTitle.getValue(),
         initialState
@@ -64,7 +64,7 @@ export const registerImageEmbeddableFactory = ({
       const api = buildApi(
         {
           ...titlesApi,
-          ...(embeddableEnhancedApi?.dynamicActionsApi ?? {}),
+          ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
           dataLoading: dataLoading$,
           blockingError: blockingError$,
           supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
@@ -78,7 +78,7 @@ export const registerImageEmbeddableFactory = ({
             return {
               rawState: {
                 ...serializeTitles(),
-                ...(embeddableEnhancedApi?.serializeDynamicActions() ?? {}),
+                ...(dynamicActionsApi?.serializeDynamicActions() ?? {}),
                 imageConfig: imageConfig$.getValue(),
               },
             };
@@ -86,7 +86,7 @@ export const registerImageEmbeddableFactory = ({
         },
         {
           ...titleComparators,
-          ...(embeddableEnhancedApi?.dynamicActionsComparator ?? {}),
+          ...(dynamicActionsApi?.dynamicActionsComparator ?? {}),
           imageConfig: [
             imageConfig$,
             (value) => imageConfig$.next(value),
