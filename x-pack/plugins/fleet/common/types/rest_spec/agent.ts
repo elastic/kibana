@@ -238,6 +238,7 @@ export interface GetActionStatusRequest {
   query: {
     perPage?: number;
     page?: number;
+    date?: string;
   };
 }
 export interface GetActionStatusResponse {

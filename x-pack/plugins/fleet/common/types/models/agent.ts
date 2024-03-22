@@ -442,6 +442,7 @@ export interface ActionStatusOptions {
   errorSize: number;
   page?: number;
   perPage?: number;
+  date?: string;
 }
 
 export interface AgentUpgradeDetails {

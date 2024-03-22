@@ -41,6 +41,7 @@ import { AGENT_STATUSES } from '../../../services/agent_status';
 import { getTodayActions, getOtherDaysActions } from '../agent_activity_helper';
 
 import { ActivitySection } from './activity_section';
+import { JumpToDate } from './jump_to_date';
 
 const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -65,10 +66,12 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   });
 
   const [nActions, setNActions] = useState(20);
+  const [dateFilter, setDateFilter] = useState<moment.Moment | null>(null);
   const { currentActions, abortUpgrade, isFirstLoading } = useActionStatus(
     onAbortSuccess,
     refreshAgentActivity,
-    nActions
+    nActions,
+    dateFilter
   );
 
   const getAgentPolicyName = useCallback(
@@ -249,18 +252,10 @@ export const AgentActivityFlyout: React.FunctionComponent<{
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="m"
-                  onClick={() => {}}
-                  flush="left"
-                  data-test-subj="agentActivityFlyout.jumpToButton"
-                  disabled={false}
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.agentActivityFlyout.jumpToButton"
-                    defaultMessage="Jump to..."
-                  />
-                </EuiButtonEmpty>
+                <JumpToDate
+                  selectedDate={dateFilter}
+                  onChangeSelectedDate={(date: moment.Moment | null) => setDateFilter(date)}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexGroup>

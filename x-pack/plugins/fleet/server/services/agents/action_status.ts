@@ -195,6 +195,20 @@ async function getActions(
             },
           },
         ],
+        ...(options.date
+          ? {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: options.date,
+                      lte: moment(options.date).add(1, 'days').toISOString(),
+                    },
+                  },
+                },
+              ],
+            }
+          : {}),
       },
     },
     body: {
@@ -323,6 +337,18 @@ async function getPolicyChangeActions(
               coordinator_idx: 0, // docs created by Kibana, as opposed to Fleet Server (coordinator_idx: 1)
             },
           },
+          ...(options.date
+            ? [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: options.date,
+                      lte: moment(options.date).add(1, 'days').toISOString(),
+                    },
+                  },
+                },
+              ]
+            : []),
         ],
       },
     },

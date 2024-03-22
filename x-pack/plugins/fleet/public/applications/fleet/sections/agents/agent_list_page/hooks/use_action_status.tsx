@@ -15,7 +15,8 @@ import type { ActionStatus } from '../../../../types';
 export function useActionStatus(
   onAbortSuccess: () => void,
   refreshAgentActivity: boolean,
-  nActions: number
+  nActions: number,
+  dateFilter: moment.Moment | null
 ) {
   const [currentActions, setCurrentActions] = useState<ActionStatus[]>([]);
   const [isFirstLoading, setIsFirstLoading] = useState(true);
@@ -25,6 +26,7 @@ export function useActionStatus(
     try {
       const res = await sendGetActionStatus({
         perPage: nActions,
+        date: dateFilter?.toISOString(),
       });
       setIsFirstLoading(false);
       if (res.error) {
@@ -43,7 +45,7 @@ export function useActionStatus(
         }),
       });
     }
-  }, [notifications.toasts, nActions]);
+  }, [notifications.toasts, nActions, dateFilter]);
 
   if (isFirstLoading) {
     loadActions();
