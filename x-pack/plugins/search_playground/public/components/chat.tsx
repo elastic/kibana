@@ -89,6 +89,10 @@ export const Chat = () => {
     });
   };
 
+  const regenerateMessages = () => {
+    reload();
+  };
+
   if (showStartPage) {
     return <StartNewChat onStartClick={() => setShowStartPage(false)} />;
   }
