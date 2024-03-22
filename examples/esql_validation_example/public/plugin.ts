@@ -11,6 +11,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
+import image from './esql_validation_app.png';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
@@ -36,10 +37,11 @@ export class ESQLValidationExamplePlugin
       appId: 'esql_validation_example',
       title: 'ES|QL Validation',
       description: 'Validate ES|QL queries using the @kbn/esql-services package.',
+      image,
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/main/examples/esql_validation_example',
+          href: 'https://github.com/elastic/kibana/tree/main/packages/kbn-esql-services/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
