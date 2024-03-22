@@ -10,7 +10,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { DragDrop } from '@kbn/dom-drag-drop';
+import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SearchMode } from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
@@ -334,8 +334,8 @@ function UnifiedFieldListItemComponent({
     <FieldPopover
       isOpen={infoIsOpen}
       button={
-        <DragDrop
-          draggable
+        <Draggable
+          dragType="copy"
           dragClassName="unifiedFieldListItemButton__dragging"
           order={order}
           value={value}
@@ -362,7 +362,7 @@ function UnifiedFieldListItemComponent({
               size,
             })}
           />
-        </DragDrop>
+        </Draggable>
       }
       closePopover={closePopover}
       data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemPopoverDataTestSubj}

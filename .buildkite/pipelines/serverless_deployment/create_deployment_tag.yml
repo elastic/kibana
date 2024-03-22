@@ -1,7 +1,10 @@
 ## Creates deploy@<timestamp> tag on Kibana
 
 agents:
- queue: kibana-default
+  image: family/kibana-ubuntu-2004
+  imageProject: elastic-images-qa
+  provider: gcp
+  machineType: n2-standard-2
 
 steps:
   - label: "List potential commits"
