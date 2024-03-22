@@ -244,7 +244,7 @@ Machine Learning::
 * Trained models: Adds workflow for creating an ingest pipeline for a trained model ({kibana-pull}170902[#170902]).
 * Updates alerts-as-data payload for Anomaly detection health and Transform health rules ({kibana-pull}176307[#176307]).
 Management::
-* Change the column components in the index templates table ({kibana-pull}175823[#175823]).
+* Changes the column "Components" in the index templates table to display number of component templates ({kibana-pull}175823[#175823]).
 Maps::
 * Adds support in maps for the {esql} `geo_shape` column type ({kibana-pull}175156[#175156]).
 * Adds a {esql} card to the add layer UI in maps ({kibana-pull}173481[#173481]).
