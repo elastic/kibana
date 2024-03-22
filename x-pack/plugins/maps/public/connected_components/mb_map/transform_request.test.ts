@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { httpServiceMock as mockHttpService } from '@kbn/core-http-browser-mocks';
-jest.mock('../../kibana_services', () => ({
-  getHttp: jest.fn(() => mockHttpService.createSetupContract()),
-}));
-
 import { transformRequest } from './transform_request';
 
 describe('transformRequest', () => {

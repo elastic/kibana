@@ -14,11 +14,6 @@ import {
   MVT_GETTILE_API_PATH,
   MVT_GETGRIDTILE_API_PATH,
 } from '../../../common/constants';
-import { getHttp } from '../../kibana_services';
-
-const FONTS = getHttp().basePath.prepend(FONTS_API_PATH);
-const GETTILE = getHttp().basePath.prepend(MVT_GETTILE_API_PATH);
-const GETGRIDTILE = getHttp().basePath.prepend(MVT_GETGRIDTILE_API_PATH);
 
 /**
  * This URL could be used from inside a Worker which may have a different base
