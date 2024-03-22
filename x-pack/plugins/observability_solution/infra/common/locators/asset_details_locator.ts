@@ -7,13 +7,11 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
-import type { InfraClientCoreSetup } from '../../public/types';
+import { InfraLocatorDependencies } from '.';
 
 export type AssetDetailsLocator = LocatorPublic<AssetDetailsLocatorParams>;
 
-export interface AssetDetailsLocatorDependencies {
-  core: InfraClientCoreSetup;
-}
+export type AssetDetailsLocatorDependencies = InfraLocatorDependencies;
 
 export interface AssetDetailsLocatorParams extends SerializableRecord {
   assetType: string;

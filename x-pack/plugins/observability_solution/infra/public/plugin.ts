@@ -30,6 +30,7 @@ import {
   InfraLogsLocatorDefinition,
   InfraNodeLogsLocatorDefinition,
   AssetDetailsLocatorDefinition,
+  AssetDetailsFlyoutLocatorDefinition,
 } from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
@@ -45,7 +46,6 @@ import type {
   InfraClientStartExports,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
-
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private inventoryViews: InventoryViewsService;
@@ -189,7 +189,9 @@ export class Plugin implements InfraClientPluginClass {
     const assetDetailsLocator = pluginsSetup.share.url.locators.create(
       new AssetDetailsLocatorDefinition({ core })
     );
-
+    const assetDetailsFlyoutLocator = pluginsSetup.share.url.locators.create(
+      new AssetDetailsFlyoutLocatorDefinition({ core })
+    );
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdRuleType(core, pluginsSetup.share.url)
     );
@@ -374,6 +376,7 @@ export class Plugin implements InfraClientPluginClass {
       logsLocator,
       nodeLogsLocator,
       assetDetailsLocator,
+      assetDetailsFlyoutLocator,
     };
 
     return {

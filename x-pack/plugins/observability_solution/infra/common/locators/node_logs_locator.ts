@@ -11,11 +11,11 @@ import {
   NodeLogsLocatorParams,
   createNodeLogsQuery,
 } from '@kbn/logs-shared-plugin/common';
-import type { InfraLogsLocatorDependencies } from './logs_locator';
+import { InfraLocatorDependencies } from '.';
 
 export type InfraNodeLogsLocator = LocatorPublic<NodeLogsLocatorParams>;
 
-export type InfraNodeLogsLocatorDependencies = InfraLogsLocatorDependencies;
+export type InfraNodeLogsLocatorDependencies = InfraLocatorDependencies;
 
 export class InfraNodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLocatorParams> {
   public readonly id = INFRA_NODE_LOGS_LOCATOR_ID;
