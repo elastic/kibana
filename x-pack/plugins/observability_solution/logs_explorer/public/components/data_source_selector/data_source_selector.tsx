@@ -8,6 +8,7 @@
 import { EuiContextMenu, EuiFlexGroup, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
 import styled from '@emotion/styled';
 import React, { useMemo } from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
 import {
@@ -35,6 +36,7 @@ import {
   createUncategorizedStatusItem,
 } from './utils';
 import { AddDataButton } from './sub_components/add_data_button';
+import { IntegrationsList } from './sub_components/integrations_list';
 
 export function DataSourceSelector({
   datasets,
@@ -186,15 +188,15 @@ export function DataSourceSelector({
       onClick: switchToIntegrationsTab,
       'data-test-subj': 'dataSourceSelectorIntegrationsTab',
     },
-    {
-      id: UNCATEGORIZED_TAB_ID,
-      name: uncategorizedLabel,
-      onClick: () => {
-        onUncategorizedTabClick(); // Lazy-load uncategorized datasets only when accessing the Uncategorized tab
-        switchToUncategorizedTab();
-      },
-      'data-test-subj': 'dataSourceSelectorUncategorizedTab',
-    },
+    // {
+    //   id: UNCATEGORIZED_TAB_ID,
+    //   name: uncategorizedLabel,
+    //   onClick: () => {
+    //     onUncategorizedTabClick(); // Lazy-load uncategorized datasets only when accessing the Uncategorized tab
+    //     switchToUncategorizedTab();
+    //   },
+    //   'data-test-subj': 'dataSourceSelectorUncategorizedTab',
+    // },
     {
       id: DATA_VIEWS_TAB_ID,
       name: dataViewsLabel,
@@ -241,38 +243,12 @@ export function DataSourceSelector({
       "hiding" all the others. Unmounting mounting each tab content on change makes it feel glitchy,
       while the tradeoff of keeping the contents in memory provide a better UX. */}
       {/* Integrations tab content */}
-      <ContextMenu
+      <IntegrationsList
+        id={INTEGRATIONS_PANEL_ID}
+        items={integrations}
         hidden={tabId !== INTEGRATIONS_TAB_ID}
-        initialPanelId={panelId}
-        panels={[
-          {
-            id: INTEGRATIONS_PANEL_ID,
-            title: integrationsLabel,
-            width: DATA_SOURCE_SELECTOR_WIDTH,
-            items: integrationItems,
-          },
-          ...integrationPanels,
-        ]}
-        onPanelChange={changePanel}
         className="eui-yScroll"
         data-test-subj="integrationsContextMenu"
-        size="s"
-      />
-      {/* Uncategorized tab content */}
-      <ContextMenu
-        hidden={tabId !== UNCATEGORIZED_TAB_ID}
-        initialPanelId={UNCATEGORIZED_PANEL_ID}
-        panels={[
-          {
-            id: UNCATEGORIZED_PANEL_ID,
-            title: uncategorizedLabel,
-            width: DATA_SOURCE_SELECTOR_WIDTH,
-            items: uncategorizedItems,
-          },
-        ]}
-        className="eui-yScroll"
-        data-test-subj="uncategorizedContextMenu"
-        size="s"
       />
       {/* Data views tab content */}
       <ContextMenu
@@ -300,7 +276,7 @@ export function DataSourceSelector({
 }
 
 const Tabs = styled(EuiTabs)`
-  padding: 0 8px;
+  padding: 0 ${euiThemeVars.euiSizeS};
 `;
 
 const ContextMenu = styled(EuiContextMenu)`
