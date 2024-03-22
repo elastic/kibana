@@ -69,7 +69,7 @@ export const UNVERSIONED_VERSION = '7.14.0';
  */
 
 // Job types that have been deprecated and then removed from the export type
-// registry. Support only exists for download
+// registry. Support for these types only exists for download.
 export const REMOVED_JOB_TYPES = [
   'csv', // replaced with 'csv_searchsource'
   'PNG', // replaced with 'PNGV2'

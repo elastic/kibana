@@ -9,35 +9,31 @@
 import { i18n } from '@kbn/i18n';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import React from 'react';
-import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import { LocatorParams } from '@kbn/reporting-common/url';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { checkLicense } from '../..';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
-const getJobParams =
-  (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') =>
-  (): Omit<JobParamsPDFV2 | JobParamsPNGV2, 'browserTimezone' | 'version'> => {
-    const {
-      objectType,
-      sharingData: { title, layout, locatorParams },
-    } = opts;
+const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') => () => {
+  const {
+    objectType,
+    sharingData: { title, layout, locatorParams },
+  } = opts;
 
-    const baseParams: Pick<JobParamsPDFV2 | JobParamsPNGV2, 'objectType' | 'layout' | 'title'> = {
-      objectType,
-      layout,
-      title,
-    };
-
-    if (type === 'printablePdfV2') {
-      // multi locator for PDF V2
-      return { ...baseParams, locatorParams: [locatorParams as LocatorParams] };
-    }
-
-    // single locator for PNG V2
-    return { ...baseParams, locatorParams: locatorParams as LocatorParams };
+  const baseParams = {
+    objectType,
+    layout,
+    title,
   };
+
+  if (type === 'printablePdfV2') {
+    // multi locator for PDF V2
+    return { ...baseParams, locatorParams: [locatorParams as LocatorParams] };
+  }
+
+  // single locator for PNG V2
+  return { ...baseParams, locatorParams: locatorParams as LocatorParams };
+};
 
 export const reportingScreenshotShareProvider = ({
   apiClient,

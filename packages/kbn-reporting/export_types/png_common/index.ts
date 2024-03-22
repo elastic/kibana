@@ -11,17 +11,6 @@ import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 
 export * from './constants';
 
-interface BaseParamsPNG {
-  layout: LayoutParams;
-  forceNow?: string;
-  relativeUrl: string;
-}
-
-export type JobParamsPNGDeprecated = BaseParamsPNG & BaseParams;
-
-// Job payload: structure of stored job data provided by create_job
-export type TaskPayloadPNG = BaseParamsPNG & BasePayload;
-
 export interface JobParamsPNGV2 extends BaseParams {
   layout: LayoutParams;
   /**

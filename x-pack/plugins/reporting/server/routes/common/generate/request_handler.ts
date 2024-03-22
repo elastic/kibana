@@ -11,13 +11,12 @@ import moment from 'moment';
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import rison from '@kbn/rison';
-
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import type { BaseParams } from '@kbn/reporting-common/types';
 import { cryptoFactory } from '@kbn/reporting-server';
+import rison from '@kbn/rison';
 
-import { getCounters, type Counters } from '..';
+import { type Counters, getCounters } from '..';
 import type { ReportingCore } from '../../..';
 import { checkParamsVersion } from '../../../lib';
 import { Report } from '../../../lib/store';
