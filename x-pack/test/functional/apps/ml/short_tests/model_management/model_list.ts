@@ -540,7 +540,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsFlyout.assertFlyoutTabs(['clickToDownload', 'manualDownload']);
       });
 
-      it('should list Elser panels contents correctly', async () => {
+      it('should list Elser and E5 panels contents correctly', async () => {
         await ml.testExecution.logTestStep('should display the Elser header copy');
         await ml.trainedModelsFlyout.assertElserModelHeaderCopy();
 

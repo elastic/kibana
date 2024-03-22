@@ -22,21 +22,30 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     },
 
     async assertElserPanelsExist(): Promise<void> {
-      await retry.tryForTime(3_000, async () => {
-        await testSubjects.existOrFail('mlAddTrainedModelFlyoutModelPanel-elser-.elser_model_2');
-        await testSubjects.existOrFail(
-          'mlAddTrainedModelFlyoutModelPanel-elser-.elser_model_2_linux-x86_64'
-        );
+      await testSubjects.existOrFail('mlAddTrainedModelFlyoutModelPanel-elser-.elser_model_2', {
+        timeout: 3_000,
       });
+      await testSubjects.existOrFail(
+        'mlAddTrainedModelFlyoutModelPanel-elser-.elser_model_2_linux-x86_64',
+        {
+          timeout: 3_000,
+        }
+      );
     },
 
     async assertE5PanelsExist(): Promise<void> {
-      await retry.tryForTime(3_000, async () => {
-        await testSubjects.existOrFail('mlAddTrainedModelFlyoutModelPanel-elser-.elser_model_2');
-        await testSubjects.existOrFail(
-          'mlAddTrainedModelFlyoutModelPanel-e5-.multilingual-e5-small_linux-x86_64'
-        );
-      });
+      await testSubjects.existOrFail(
+        'mlAddTrainedModelFlyoutModelPanel-e5-.multilingual-e5-small',
+        {
+          timeout: 3_000,
+        }
+      );
+      await testSubjects.existOrFail(
+        'mlAddTrainedModelFlyoutModelPanel-e5-.multilingual-e5-small_linux-x86_64',
+        {
+          timeout: 3_000,
+        }
+      );
     },
 
     async assertDownloadButtonExists(): Promise<void> {
