@@ -12,10 +12,13 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { z } from 'zod';
+import { combineLatest } from 'rxjs';
 import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
 import { securitySolutionFactory } from './factory';
 import type { EndpointAppContext } from '../../endpoint/types';
+import { isSecuritySolutionWithCountFactory } from './factory/types';
 
+// TODO: Use only one type of SecuritySolutionFactory, allowing `buildDsl` to return multiple queries
 export const securitySolutionSearchStrategyProvider = (
   data: PluginStart,
   endpointContext: EndpointAppContext,
@@ -30,25 +33,45 @@ export const securitySolutionSearchStrategyProvider = (
       const parsedRequest = searchStrategyRequestSchema.parse(request);
 
       const queryFactory = securitySolutionFactory[parsedRequest.factoryQueryType];
+      const parseDeps = {
+        esClient: deps.esClient,
+        savedObjectsClient: deps.savedObjectsClient,
+        endpointContext,
+        request: deps.request,
+        spaceId: getSpaceId && getSpaceId(deps.request),
+        ruleDataClient,
+      };
 
       const dsl = queryFactory.buildDsl(parsedRequest);
-      return es.search({ ...request, params: dsl }, options, deps).pipe(
-        map((response) => {
-          return {
-            ...response,
-            ...{
-              rawResponse: shimHitsTotal(response.rawResponse, options),
-            },
-          };
-        }),
-        mergeMap((esSearchRes) =>
-          queryFactory.parse(parsedRequest, esSearchRes, {
-            esClient: deps.esClient,
-            savedObjectsClient: deps.savedObjectsClient,
-            endpointContext,
-            request: deps.request,
-            spaceId: getSpaceId && getSpaceId(deps.request),
-            ruleDataClient,
+      const search = es.search({ ...request, params: dsl }, options, deps).pipe(
+        map((response) => ({
+          ...response,
+          rawResponse: shimHitsTotal(response.rawResponse, options),
+        }))
+      );
+
+      if (!isSecuritySolutionWithCountFactory(queryFactory)) {
+        return search.pipe(
+          mergeMap((esSearchRes) =>
+            queryFactory.parse(parsedRequest, esSearchRes, { ...parseDeps, dsl })
+          )
+        );
+      }
+
+      // Count aggregation query
+      const countDsl = queryFactory.buildCountDsl(parsedRequest);
+      const countSearch = es.search({ ...request, params: countDsl }, options, deps).pipe(
+        map((response) => ({
+          ...response,
+          rawResponse: shimHitsTotal(response.rawResponse, options),
+        }))
+      );
+
+      return combineLatest([search, countSearch]).pipe(
+        mergeMap((responses) =>
+          queryFactory.parseResponses(parsedRequest, responses, {
+            ...parseDeps,
+            dsls: [dsl, countDsl],
           })
         )
       );

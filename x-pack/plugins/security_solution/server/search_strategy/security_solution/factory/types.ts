@@ -19,18 +19,50 @@ import type {
 } from '../../../../common/search_strategy/security_solution';
 import type { EndpointAppContext } from '../../../endpoint/types';
 
-export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
+export interface SecuritySolutionBasicFactory<T extends FactoryQueryTypes> {
   buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
   parse: (
     options: StrategyRequestType<T>,
     response: IEsSearchResponse,
-    deps?: {
+    deps: {
       esClient: IScopedClusterClient;
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
       request: KibanaRequest;
+      dsl: ISearchRequestParams;
       spaceId?: string;
       ruleDataClient?: IRuleDataClient | null;
     }
   ) => Promise<StrategyResponseType<T>>;
 }
+
+export interface SecuritySolutionWithCountFactory<T extends FactoryQueryTypes> {
+  buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
+  buildCountDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
+  parseResponses: (
+    options: StrategyRequestType<T>,
+    responses: [IEsSearchResponse, IEsSearchResponse],
+    deps: {
+      esClient: IScopedClusterClient;
+      savedObjectsClient: SavedObjectsClientContract;
+      endpointContext: EndpointAppContext;
+      request: KibanaRequest;
+      dsls: [ISearchRequestParams, ISearchRequestParams];
+      spaceId?: string;
+      ruleDataClient?: IRuleDataClient | null;
+    }
+  ) => Promise<StrategyResponseType<T>>;
+}
+
+export type SecuritySolutionFactory<T extends FactoryQueryTypes> =
+  | SecuritySolutionBasicFactory<T>
+  | SecuritySolutionWithCountFactory<T>;
+
+export const isSecuritySolutionWithCountFactory = <T extends FactoryQueryTypes>(
+  factory: SecuritySolutionFactory<T>
+): factory is SecuritySolutionWithCountFactory<T> => {
+  return (
+    (factory as SecuritySolutionWithCountFactory<T>).buildCountDsl != null &&
+    (factory as SecuritySolutionWithCountFactory<T>).parseResponses != null
+  );
+};

@@ -7,7 +7,6 @@
 
 import { z } from 'zod';
 import { NetworkQueries } from '../model/factory_query_type';
-import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
 import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
@@ -24,9 +23,10 @@ export const networkTopNFlowSchema = requestOptionsPaginatedSchema.extend({
 export type NetworkTopNFlowRequestOptionsInput = z.input<typeof networkTopNFlowSchema>;
 export type NetworkTopNFlowRequestOptions = z.infer<typeof networkTopNFlowSchema>;
 
-export const networkTopNFlowCountSchema = requestBasicOptionsSchema.extend({
+export const networkTopNFlowCountSchema = requestOptionsPaginatedSchema.extend({
   ip: z.string().ip().nullable().optional(),
   flowTarget,
+  sort,
   timerange,
   factoryQueryType: z.literal(NetworkQueries.topNFlowCount),
 });

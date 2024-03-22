@@ -8,7 +8,10 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { NetworkTopNFlowRequestOptions } from '../../../../../../common/api/search_strategy';
+import type {
+  NetworkTopNFlowRequestOptions,
+  NetworkTopNFlowCountRequestOptions,
+} from '../../../../../../common/api/search_strategy';
 import type {
   Direction,
   GeoItem,
@@ -27,7 +30,7 @@ import {
 
 export const getTopNFlowEdges = (
   response: IEsSearchResponse<unknown>,
-  options: NetworkTopNFlowRequestOptions
+  options: NetworkTopNFlowRequestOptions | NetworkTopNFlowCountRequestOptions
 ): NetworkTopNFlowEdges[] =>
   formatTopNFlowEdges(
     getOr([], `aggregations.${options.flowTarget}.buckets`, response.rawResponse),
