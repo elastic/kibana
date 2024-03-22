@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { SerializedTitles } from '@kbn/presentation-publishing';
-
-export type MarkdownEditorSerializedState = SerializedTitles & {
-  content: string;
-};
-
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEditorSerializedState>;
+export type { ComparatorFunction, ComparatorDefinition, StateComparators } from './types';
+export { getInitialValuesFromComparators, runComparators } from './state_comparators';
