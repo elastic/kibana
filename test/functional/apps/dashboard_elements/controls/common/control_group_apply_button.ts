@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/178581
+  // Failing: See https://github.com/elastic/kibana/issues/178581
   describe.skip('Dashboard control group apply button', () => {
     let controlIds: string[];
 
@@ -51,7 +51,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         title: 'Animal Name',
       });
       await dashboardControls.createTimeSliderControl();
+
+      // wait for all controls to finish loading before saving
       controlIds = await dashboardControls.getAllControlIds();
+      await dashboardControls.optionsListWaitForLoading(controlIds[0]);
+      await dashboardControls.rangeSliderWaitForLoading(controlIds[1]);
 
       // save the dashboard
       await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
