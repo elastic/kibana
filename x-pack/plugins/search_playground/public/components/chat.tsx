@@ -8,6 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +20,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
@@ -42,7 +44,7 @@ export const Chat = () => {
     resetField,
     handleSubmit,
   } = useFormContext<ChatForm>();
-  const { messages, append, stop: stopRequest } = useChat();
+  const { messages, append, stop: stopRequest, setMessages } = useChat();
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
   const messagesRef = useAutoBottomScroll([showStartPage]);
 
@@ -75,6 +77,10 @@ export const Chat = () => {
     ],
     [messages]
   );
+
+  const onClear = () => {
+    setMessages([]);
+  }
 
   if (showStartPage) {
     return <StartNewChat onStartClick={() => setShowStartPage(false)} />;
@@ -112,6 +118,23 @@ export const Chat = () => {
               css={{ paddingLeft: euiTheme.size.l, paddingRight: euiTheme.size.l }}
             >
               <EuiHorizontalRule margin="none" />
+
+              <EuiSpacer size="m" />
+
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="refresh"
+                    disabled={messages.length <= 1}
+                    onClick={onClear}
+                  >
+                    <FormattedMessage
+                      id="xpack.searchPlayground.startNewChat.startBtn"
+                      defaultMessage="Clear chat"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
 
               <EuiSpacer size="m" />
 
