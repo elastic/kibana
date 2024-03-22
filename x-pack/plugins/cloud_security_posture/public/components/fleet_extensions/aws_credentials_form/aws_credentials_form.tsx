@@ -269,6 +269,7 @@ export const AwsCredentialsForm = ({
           <EuiSpacer size="l" />
           <AwsInputVarFields
             fields={fields}
+            packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
             }}

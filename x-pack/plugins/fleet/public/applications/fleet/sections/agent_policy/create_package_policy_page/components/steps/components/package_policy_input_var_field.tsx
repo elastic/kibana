@@ -361,7 +361,7 @@ const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
   );
 };
 
-function SecretInputField({
+export function SecretInputField({
   varDef,
   value,
   onChange,

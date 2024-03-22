@@ -12,7 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { AzureCredentialsType } from '../../../../common/types_old';
 
-export type AzureCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
+export type AzureCredentialsFields = Record<
+  string,
+  { label: string; type?: 'password' | 'text'; isSecret?: boolean }
+>;
 
 export interface AzureOptionValue {
   label: string;
@@ -49,6 +52,7 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCr
         label: field.label,
         type: field.type || 'text',
         value: inputVar.value,
+        isSecret: field?.isSecret,
       } as const;
     });
 
@@ -95,6 +99,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       'azure.credentials.client_id': { label: I18N_CLIENT_ID },
       'azure.credentials.client_secret': {
         type: 'password',
+        isSecret: true,
         label: i18n.translate('xpack.csp.azureIntegration.clientSecretLabel', {
           defaultMessage: 'Client Secret',
         }),
@@ -115,6 +120,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       },
       'azure.credentials.client_certificate_password': {
         type: 'password',
+        isSecret: true,
         label: i18n.translate('xpack.csp.azureIntegration.clientCertificatePasswordLabel', {
           defaultMessage: 'Client Certificate Password',
         }),
@@ -136,6 +142,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       },
       'azure.credentials.client_password': {
         type: 'password',
+        isSecret: true,
         label: i18n.translate('xpack.csp.azureIntegration.clientPasswordLabel', {
           defaultMessage: 'Client Password',
         }),

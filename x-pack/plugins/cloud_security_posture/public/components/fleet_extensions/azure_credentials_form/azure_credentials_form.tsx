@@ -14,7 +14,6 @@ import {
   EuiHorizontalRule,
   EuiFormRow,
   EuiSelect,
-  EuiFieldPassword,
   EuiFieldText,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
@@ -22,6 +21,7 @@ import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { PackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
@@ -250,16 +250,17 @@ const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
 
 const AzureInputVarFields = ({
   fields,
+  packageInfo,
   onChange,
 }: {
   fields: Array<AzureOptions[keyof AzureOptions]['fields'][number] & { value: string; id: string }>;
+  packageInfo: PackageInfo;
   onChange: (key: string, value: string) => void;
 }) => (
   <div>
     {fields.map((field) => (
-      <EuiFormRow key={field.id} label={field.label} fullWidth hasChildLabel={true} id={field.id}>
-        <>
-          {field.type === 'password' && (
+      <>
+        {/* {field.type === 'password' && (
             <EuiFieldPassword
               id={field.id}
               type="dual"
@@ -267,17 +268,56 @@ const AzureInputVarFields = ({
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
             />
-          )}
-          {field.type === 'text' && (
+          )} */}
+        {field.type === 'password' && field.isSecret === true && (
+          <>
+            <EuiSpacer size="m" />
+            <div
+              css={css`
+                width: 100%;
+                .euiFormControlLayout,
+                .euiFormControlLayout__childrenWrapper,
+                .euiFormRow,
+                input {
+                  max-width: 100%;
+                  width: 100%;
+                }
+              `}
+            >
+              <PackagePolicyInputVarField
+                varDef={
+                  packageInfo?.data_streams?.[0].streams
+                    ?.find((v) => v.input.endsWith('azure'))
+                    ?.vars?.find((v) => v.name === field.id)!
+                }
+                value={field.value || ''}
+                onChange={(value) => {
+                  onChange(field.id, value);
+                }}
+                errors={[]}
+                forceShowErrors={false}
+                isEditPage={true}
+              />
+            </div>
+          </>
+        )}
+        {field.type === 'text' && (
+          <EuiFormRow
+            key={field.id}
+            label={field.label}
+            fullWidth
+            hasChildLabel={true}
+            id={field.id}
+          >
             <EuiFieldText
               id={field.id}
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
             />
-          )}
-        </>
-      </EuiFormRow>
+          </EuiFormRow>
+        )}
+      </>
     ))}
   </div>
 );
@@ -384,6 +424,7 @@ export const AzureCredentialsForm = ({
           <EuiSpacer size="m" />
           <AzureInputVarFields
             fields={fields}
+            packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
             }}
@@ -393,7 +434,7 @@ export const AzureCredentialsForm = ({
           <EuiSpacer size="m" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.csp.azureIntegration.manualCredentialType.documentaion"
+              id="xpack.csp.azureIntegration.manualCredentialType.documentation"
               defaultMessage="Read the {documentation} for more details"
               values={{
                 documentation: (
