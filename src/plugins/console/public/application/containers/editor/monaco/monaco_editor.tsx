@@ -14,7 +14,7 @@ import { parse } from 'query-string';
 import { debounce } from 'lodash';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
-import { useServicesContext } from '../../../contexts';
+import { useServicesContext, useEditorReadContext } from '../../../contexts';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
 
 export interface EditorProps {
@@ -29,6 +29,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const {
     services: { notifications },
   } = useServicesContext();
+  const { settings } = useEditorReadContext();
+
   const [value, setValue] = useState(initialTextValue);
 
   useEffect(() => {
@@ -109,7 +111,17 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         width: 100%;
       `}
     >
-      <CodeEditor languageId={CONSOLE_LANG_ID} value={value} onChange={setValue} fullWidth={true} />
+      <CodeEditor
+        languageId={CONSOLE_LANG_ID}
+        value={value}
+        onChange={setValue}
+        fullWidth={true}
+        accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
+        options={{
+          fontSize: settings.fontSize,
+          wordWrap: settings.wrapMode === true ? 'on' : 'off',
+        }}
+      />
     </div>
   );
 };

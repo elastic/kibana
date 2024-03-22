@@ -65,7 +65,6 @@ export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
   apiConfig: {
     connectorId: '1',
     defaultSystemPromptId: 'Default',
-    connectorTypeTitle: 'Test connector',
     model: 'model',
   },
   excludeFromLastConversationStorage: false,
@@ -91,7 +90,6 @@ export const getUpdateConversationSchemaMock = (
   apiConfig: {
     connectorId: '2',
     defaultSystemPromptId: 'Default',
-    connectorTypeTitle: 'Test connector',
     model: 'model',
   },
   excludeFromLastConversationStorage: false,
@@ -131,7 +129,6 @@ export const getConversationMock = (
   apiConfig: {
     connectorId: '1',
     defaultSystemPromptId: 'Default',
-    connectorTypeTitle: 'OpenAI',
   },
   replacements: [],
   title: 'test',
@@ -156,7 +153,6 @@ export const getQueryConversationParams = (
         apiConfig: {
           connectorId: '2',
           defaultSystemPromptId: 'Default',
-          connectorTypeTitle: 'Test connector',
           model: 'model',
         },
         category: 'assistant',
@@ -180,7 +176,6 @@ export const getQueryConversationParams = (
         apiConfig: {
           connectorId: '1',
           defaultSystemPromptId: 'Default',
-          connectorTypeTitle: 'Test connector',
           model: 'model',
         },
         excludeFromLastConversationStorage: false,
