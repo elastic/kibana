@@ -121,7 +121,6 @@ describe('Update conversation route', () => {
           ...getUpdateConversationSchemaMock(),
           apiConfig: {
             connectorId: '123',
-            connectorTypeTitle: 'OpenAI',
             defaultSystemPromptId: 'test',
           },
         },
