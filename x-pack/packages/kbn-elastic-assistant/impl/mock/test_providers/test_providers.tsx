@@ -83,6 +83,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
             setDefaultAllowReplacement={jest.fn()}
             http={mockHttp}
             baseConversations={{}}
+            currentAppId={jest.fn()}
             {...providerContext}
           >
             {children}

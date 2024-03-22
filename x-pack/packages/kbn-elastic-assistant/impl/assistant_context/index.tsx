@@ -15,7 +15,6 @@ import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/publ
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { ApplicationStart } from '@kbn/core-application-browser';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -92,7 +91,7 @@ export interface AssistantProviderProps {
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   title?: string;
   toasts?: IToasts;
-  applicationService: ApplicationStart;
+  currentAppId: Rx.BehaviorSubject<string>;
 }
 
 export interface UseAssistantContext {
@@ -149,7 +148,6 @@ export interface UseAssistantContext {
   title: string;
   toasts: IToasts | undefined;
   unRegisterPromptContext: UnRegisterPromptContext;
-  applicationService: ApplicationStart;
   currentAppId: Rx.BehaviorSubject<string>;
 }
 
@@ -179,18 +177,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   setDefaultAllowReplacement,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
-  applicationService,
+  currentAppId,
 }) => {
-  const currentAppId = useMemo(() => new Rx.BehaviorSubject(''), []);
-  if (applicationService) {
-    applicationService.currentAppId$.subscribe((appId) => {
-      if (appId) {
-        currentAppId.next(appId);
-      }
-    });
-  }
-
-  // const currentAppId = useCurrentAppId(applicationService);
   /**
    * Local storage for all quick prompts, prefixed by assistant nameSpace
    */
@@ -318,7 +306,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getLastConversationTitle,
       setLastConversationTitle: setLocalStorageLastConversationTitle,
       baseConversations,
-      applicationService,
       currentAppId,
     }),
     [
@@ -359,7 +346,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getLastConversationTitle,
       setLocalStorageLastConversationTitle,
       baseConversations,
-      applicationService,
       currentAppId,
     ]
   );

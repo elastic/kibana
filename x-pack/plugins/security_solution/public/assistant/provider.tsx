@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import * as Rx from 'rxjs';
 import { parse } from '@kbn/datemath';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -130,6 +131,15 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
 
+  const currentAppId = useMemo(() => new Rx.BehaviorSubject(''), []);
+  if (application) {
+    application.currentAppId$.subscribe((appId) => {
+      if (appId) {
+        currentAppId.next(appId);
+      }
+    });
+  }
+
   const migrateConversationsFromLocalStorage = once(
     (conversationsData: Record<string, Conversation>) =>
       createConversations(conversationsData, notifications, http, storage)
@@ -180,7 +190,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
       setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
       title={ASSISTANT_TITLE}
       toasts={toasts}
-      applicationService={application}
+      currentAppId={currentAppId}
     >
       {children}
     </ElasticAssistantProvider>

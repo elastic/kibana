@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   Conversation,
@@ -53,13 +54,17 @@ export function AssistantProvider({
   } = useKibana<StartServices>().services;
   const basePath = http.basePath.get();
 
-  let currentAppId: string | undefined;
-  applicationService?.currentAppId$.subscribe((appId) => {
-    currentAppId = appId;
-  });
+  const currentAppId = useMemo(() => new Rx.BehaviorSubject(''), []);
+  if (applicationService) {
+    applicationService.currentAppId$.subscribe((appId) => {
+      if (appId) {
+        currentAppId.next(appId);
+      }
+    });
+  }
 
   const baseConversations = useMemo(
-    () => getRegisteredBaseConversations(currentAppId ?? ''),
+    () => getRegisteredBaseConversations(currentAppId.getValue() ?? ''),
     [currentAppId, getRegisteredBaseConversations]
   );
   const assistantAvailability = useAssistantAvailability();
@@ -103,7 +108,7 @@ export function AssistantProvider({
         baseConversations={baseConversations}
         getComments={getComments}
         http={http}
-        applicationService={applicationService}
+        currentAppId={currentAppId}
         setDefaultAllow={setDefaultAllow} // remove
         setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
         title={ASSISTANT_TITLE}
