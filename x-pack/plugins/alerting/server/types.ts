@@ -293,7 +293,10 @@ export interface RuleType<
     params?:
       | {
           type: 'zod';
-          schema: z.ZodObject<z.ZodRawShape> | z.ZodIntersection<z.ZodTypeAny, z.ZodTypeAny>;
+          schema: 
+            z.ZodObject<z.ZodRawShape> | 
+            z.ZodIntersection<z.ZodTypeAny, z.ZodTypeAny> | 
+            z.ZodDiscriminatedUnion<string, z.ZodDiscriminatedUnionOption<string>[]>;
         }
       | {
           type: 'config-schema';

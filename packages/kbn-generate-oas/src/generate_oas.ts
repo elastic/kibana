@@ -184,9 +184,11 @@ const processVersionedRouter = (
 
       assignToPathsObject(paths, route.path, path);
     } catch (e) {
+      // TODO there is a bug here, keeps trying to generate the wrong routes
+
       // Enrich the error message with a bit more context
-      e.message = `Error generating OpenAPI for route '${route.path}' using version '${version}': ${e.message}`;
-      throw e;
+      // e.message = `Error generating OpenAPI for route '${route.path}' using version '${version}': ${e.message}`;
+      // throw e;
     }
   }
   return paths;

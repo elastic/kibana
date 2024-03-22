@@ -15,3 +15,4 @@ export * from './src/alerts_as_data_status';
 export * from './src/alerts_as_data_cases';
 export * from './src/routes/stack_rule_paths';
 export * from './src/rule_types';
+export * from './src/rule_params_schemas';

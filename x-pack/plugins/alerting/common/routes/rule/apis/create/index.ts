@@ -13,6 +13,14 @@ export {
   createBodySchema,
 } from './schemas/latest';
 
+export {
+  actionFrequencyZodSchema,
+  actionAlertsFilterZodSchema,
+  actionZodSchema,
+  createParamsZodSchema,
+  createBodyZodSchema,
+} from './zod_schemas/latest';
+
 export type {
   CreateRuleAction,
   CreateRuleActionFrequency,
@@ -28,6 +36,14 @@ export {
   createParamsSchema as createParamsSchemaV1,
   createBodySchema as createBodySchemaV1,
 } from './schemas/v1';
+
+export {
+  actionFrequencyZodSchema as actionFrequencyZodSchemaV1,
+  actionAlertsFilterZodSchema as actionAlertsFilterZodSchemaV1,
+  actionZodSchema as actionZodSchemaV1,
+  createParamsZodSchema as createParamsZodSchemaV1,
+  createBodyZodSchema as createBodyZodSchemaV1,
+} from './zod_schemas/v1';
 
 export type {
   CreateRuleAction as CreateRuleActionV1,

@@ -8,14 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
-import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import { 
+  ES_QUERY_ID, 
+  STACK_ALERTS_FEATURE_ID,
+  esQueryZodParamsSchema,
+  esQueryZodParamsSchemaV1
+} from '@kbn/rule-data-utils';
 import { STACK_ALERTS_AAD_CONFIG } from '..';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
   EsQueryRuleParams,
   EsQueryRuleParamsExtractedParams,
-  EsQueryRuleParamsSchema,
   EsQueryRuleState,
 } from './rule_type_params';
 import { ExecutorOptions } from './types';
@@ -152,12 +156,16 @@ export function getRuleType(
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
     validate: {
-      params: EsQueryRuleParamsSchema,
+      params: {
+        validate: (object: unknown) => {
+          return esQueryZodParamsSchema.parse(object) as EsQueryRuleParams;
+        },
+      },
     },
     schemas: {
       params: {
-        type: 'config-schema',
-        schema: EsQueryRuleParamsSchema,
+        type: 'zod',
+        schema: esQueryZodParamsSchemaV1,
       },
     },
     actionVariables: {

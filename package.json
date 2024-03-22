@@ -1151,7 +1151,7 @@
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1",
     "zod": "^3.22.3",
-    "zod-to-json-schema": "3.20.4"
+    "zod-to-json-schema": "^3.22.3"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",

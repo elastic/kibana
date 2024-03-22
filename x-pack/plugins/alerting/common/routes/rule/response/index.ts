@@ -16,7 +16,22 @@ export {
   ruleSnoozeScheduleSchema,
   notifyWhenSchema,
   scheduleIdsSchema,
+  alertDelaySchema,
 } from './schemas/latest';
+
+export {
+  ruleParamsZodSchema,
+  actionParamsZodSchema,
+  mappedParamsZodSchema,
+  ruleExecutionStatusZodSchema,
+  ruleLastRunZodSchema,
+  monitoringZodSchema,
+  ruleResponseZodSchema,
+  ruleSnoozeScheduleZodSchema,
+  notifyWhenZodSchema,
+  scheduleIdsZodSchema,
+  alertDelayZodSchema,
+} from './zod_schemas/latest';
 
 export type {
   RuleParams,
@@ -39,6 +54,20 @@ export {
   scheduleIdsSchema as scheduleIdsSchemaV1,
   alertDelaySchema as alertDelaySchemaV1,
 } from './schemas/v1';
+
+export {
+  ruleParamsZodSchema as ruleParamsZodSchemaV1,
+  actionParamsZodSchema as actionParamsZodSchemaV1,
+  mappedParamsZodSchema as mappedParamsZodSchemaV1,
+  ruleExecutionStatusZodSchema as ruleExecutionStatusZodSchemaV1,
+  ruleLastRunZodSchema as ruleLastRunZodSchemaV1,
+  monitoringZodSchema as monitoringZodSchemaV1,
+  ruleResponseZodSchema as ruleResponseZodSchemaV1,
+  ruleSnoozeScheduleZodSchema as ruleSnoozeScheduleZodSchemaV1,
+  notifyWhenZodSchema as notifyWhenZodSchemaV1,
+  scheduleIdsZodSchema as scheduleIdsZodSchemaV1,
+  alertDelayZodSchema as alertDelayZodSchemaV1,
+} from './zod_schemas/v1';
 
 export type {
   RuleParams as RuleParamsV1,

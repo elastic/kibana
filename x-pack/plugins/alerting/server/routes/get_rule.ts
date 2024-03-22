@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import { omit } from 'lodash';
-import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
+import { ruleResponseZodSchemaV1 } from '../../common/routes/rule/response';
+
 import { ILicenseState } from '../lib';
 import {
   verifyAccessAndContext,
@@ -22,10 +24,6 @@ import {
   INTERNAL_BASE_ALERTING_API_PATH,
   SanitizedRule,
 } from '../types';
-
-const paramSchema = schema.object({
-  id: schema.string(),
-});
 
 const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   alertTypeId,
@@ -85,28 +83,44 @@ const buildGetRuleRoute = ({
   router,
   excludeFromPublicApi = false,
 }: BuildGetRulesRouteParams) => {
-  router.get(
-    {
+  router
+    .versioned
+    .get({
       path,
-      validate: {
-        params: paramSchema,
+      access: excludeFromPublicApi ? 'internal' : 'public',
+      description: 'Get a rule',
+    })
+    .addVersion(
+      {
+        version: excludeFromPublicApi ? '1' : '2023-10-31',
+        validate: {
+          request: {
+            params: z.object({
+              id: z.string(),
+            }),
+          },  
+          response: {
+            200: {
+              body: ruleResponseZodSchemaV1,
+            },
+          },
+        },
       },
-    },
-    router.handleLegacyErrors(
-      verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
-        const { id } = req.params;
-        const rule = await rulesClient.get({
-          id,
-          excludeFromPublicApi,
-          includeSnoozeData: true,
-        });
-        return res.ok({
-          body: rewriteBodyRes(rule),
-        });
-      })
-    )
-  );
+      router.handleLegacyErrors(
+        verifyAccessAndContext(licenseState, async function (context, req, res) {
+          const rulesClient = (await context.alerting).getRulesClient();
+          const { id } = req.params;
+          const rule = await rulesClient.get({
+            id,
+            excludeFromPublicApi,
+            includeSnoozeData: true,
+          });
+          return res.ok({
+            body: rewriteBodyRes(rule),
+          });
+        })
+      ),
+    );
 };
 
 export const getRuleRoute = (
@@ -116,7 +130,7 @@ export const getRuleRoute = (
   buildGetRuleRoute({
     excludeFromPublicApi: true,
     licenseState,
-    path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
+    path: `${BASE_ALERTING_API_PATH}/internal/alerting`,
     router,
   });
 

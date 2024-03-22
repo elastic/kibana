@@ -7,20 +7,19 @@
 
 import { NEVER, RefinementCtx, ZodIssueCode } from 'zod';
 
-export const validateHours = (time: string, zodRefinementCtx?: RefinementCtx) => {
-  if (/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
-    return;
-  }
-  const message = `string is not a valid time in HH:mm format ${time}`;
-
-  if (zodRefinementCtx) {
+export const validateIsOneOfLiterals = (
+  arrayOfLiterals: Readonly<string[]>
+) => (
+  value: string, 
+  zodRefinementCtx: RefinementCtx
+) =>{
+  if (!arrayOfLiterals.includes(value)) {
     zodRefinementCtx.addIssue({
       code: ZodIssueCode.custom,
-      message,
+      message: `must be one of ${arrayOfLiterals.join(' | ')}`,
       fatal: true,
     });
 
     return NEVER;
   }
-  return message;
-}
+};

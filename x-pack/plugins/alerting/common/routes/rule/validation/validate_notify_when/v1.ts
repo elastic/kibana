@@ -5,11 +5,24 @@
  * 2.0.
  */
 
+import { NEVER, RefinementCtx, ZodIssueCode } from 'zod';
 import { ruleNotifyWhenV1, RuleNotifyWhenV1 } from '../../common';
 
-export function validateNotifyWhen(notifyWhen: string) {
+export function validateNotifyWhen(notifyWhen: string, zodRefinementCtx?: RefinementCtx) {
   if (Object.values(ruleNotifyWhenV1).includes(notifyWhen as RuleNotifyWhenV1)) {
     return;
   }
-  return `string is not a valid RuleNotifyWhenType: ${notifyWhen}`;
+
+  const message = `string is not a valid RuleNotifyWhenType: ${notifyWhen}`;
+
+  if (zodRefinementCtx) {
+    zodRefinementCtx.addIssue({
+      code: ZodIssueCode.custom,
+      message,
+      fatal: true,
+    });
+
+    return NEVER;
+  }
+  return message;
 }
