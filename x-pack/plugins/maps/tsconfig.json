@@ -87,6 +87,7 @@
     "@kbn/presentation-publishing",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/esql-utils",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
