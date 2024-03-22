@@ -43,8 +43,6 @@ export const PresentationPanelContextMenu = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean | undefined>(undefined);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
 
-  console.log({ contextMenuActions, contextMenuPanels });
-
   const [title, parentViewMode] = useBatchedPublishingSubjects(
     api.panelTitle,
 
