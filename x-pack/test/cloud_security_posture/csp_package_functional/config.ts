@@ -6,7 +6,7 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
-import { cspPageObjects } from '../common/ftr_provider_context';
+import { pageObjects } from './page_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -16,7 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
-    pageObjects: cspPageObjects.cspPackageFunctionalPageObjects,
+    pageObjects,
     testFiles: [require.resolve('./pages')],
     junit: {
       reportName: 'X-Pack Cloud Security Posture Functional Tests',
