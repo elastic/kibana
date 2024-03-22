@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiEmptyPrompt,
+  EuiButton,
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { PRODUCER_DISPLAY_NAMES } from '../../common/i18n';
@@ -27,6 +28,7 @@ interface RuleTypeListProps {
   onFilterByProducer: (producer: string | null) => void;
   selectedProducer: string | null;
   ruleTypesCountsByProducer: { total: number; [x: string]: number };
+  onClearFilters: () => void;
 }
 
 const producerToDisplayName = (producer: string) => {
@@ -39,6 +41,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
   onFilterByProducer,
   selectedProducer,
   ruleTypesCountsByProducer,
+  onClearFilters,
 }) => {
   const rulesList = [...ruleTypes].sort((a, b) => a.name.localeCompare(b.name));
 
@@ -85,9 +88,15 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
       >
         {rulesList.length === 0 && (
           <EuiEmptyPrompt
+            color="subdued"
             iconType="search"
             title={<h2>No rule types found</h2>}
             body={<p>Try a different search or change your filter settings.</p>}
+            actions={
+              <EuiButton size="s" color="primary" fill onClick={onClearFilters}>
+                Clear filters
+              </EuiButton>
+            }
           />
         )}
         {rulesList.map((rule) => (

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiPageHeader,
   EuiModal,
@@ -59,6 +59,11 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
   const loadingPrompt = (
     <EuiEmptyPrompt title={<h2>Loading rule types</h2>} icon={<EuiLoadingSpinner size="xl" />} />
   );
+
+  const onClearFilters = useCallback(() => {
+    onFilterByProducer(null);
+    onChangeSearch('');
+  }, [onFilterByProducer, onChangeSearch]);
 
   return (
     <EuiModal
@@ -115,6 +120,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                 onSelectRuleType={onSelectRuleType}
                 onFilterByProducer={onFilterByProducer}
                 selectedProducer={selectedProducer}
+                onClearFilters={onClearFilters}
               />
             )}
           </EuiFlexItem>
