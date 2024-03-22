@@ -17,6 +17,7 @@ import type { JobId } from '../../shared';
 import type { AnomalySwimLaneEmbeddableType } from '../constants';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import type { AnomalySwimlaneEmbeddableUserInput, MlEmbeddableBaseApi } from '../types';
+import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 
 export interface AnomalySwimLaneComponentApi {
   jobIds: PublishingSubject<JobId[]>;
@@ -36,6 +37,7 @@ export interface AnomalySwimLaneEmbeddableApi
 
 export interface AnomalySwimLaneActionContext {
   embeddable: AnomalySwimLaneEmbeddableApi;
+  data?: AppStateSelectedCells;
 }
 
 export function isSwimLaneEmbeddableContext(arg: unknown): arg is AnomalySwimLaneActionContext {

@@ -11,10 +11,10 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import moment from 'moment';
 import { firstValueFrom } from 'rxjs';
+import { isAnomalySwimlaneSelectionTriggerContext } from './triggers';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
-import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
 
 export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
 
@@ -66,11 +66,7 @@ export function createApplyTimeRangeSelectionAction(
     async isCompatible(context) {
       const [{ application }] = await getStartServices();
       const appId = await firstValueFrom(application.currentAppId$);
-      return (
-        isSwimLaneEmbeddableContext(context) &&
-        context.data !== undefined &&
-        supportedApps.includes(appId!)
-      );
+      return isAnomalySwimlaneSelectionTriggerContext(context) && supportedApps.includes(appId!);
     },
   };
 }

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
-import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
+import { isAnomalySwimlaneSelectionTriggerContext } from './triggers';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
 import type { SwimLaneDrilldownContext } from '../embeddables';
 import type { MlCoreSetup } from '../plugin';
@@ -81,7 +81,7 @@ export function createApplyInfluencerFiltersAction(
       // Only compatible with view by influencer swim lanes and single selection
       return (
         supportedApps.includes(appId!) &&
-        isSwimLaneEmbeddableContext(context) &&
+        isAnomalySwimlaneSelectionTriggerContext(context) &&
         context.data !== undefined &&
         context.data.type === SWIMLANE_TYPE.VIEW_BY &&
         context.data.viewByFieldName !== VIEW_BY_JOB_LABEL &&

@@ -15,7 +15,6 @@ import type {
   EmbeddableApiContext,
   HasParentApi,
   HasType,
-  PublishesPanelTitle,
   PublishesUnifiedSearch,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
@@ -39,10 +38,7 @@ import type {
 } from './constants';
 
 export type MlEmbeddableBaseApi = Partial<
-  HasParentApi<PublishesUnifiedSearch> &
-    PublishesViewMode &
-    PublishesUnifiedSearch &
-    PublishesPanelTitle
+  HasParentApi<PublishesUnifiedSearch> & PublishesViewMode & PublishesUnifiedSearch
 >;
 
 /** Manual input by the user */
