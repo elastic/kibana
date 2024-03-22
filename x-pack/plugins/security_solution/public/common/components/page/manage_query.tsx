@@ -19,6 +19,7 @@ export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery
   inputId?: InputsModelId;
   inspect?: inputsModel.InspectQuery;
   legendPosition?: Position;
+  loading: boolean;
   refetch: inputsModel.Refetch;
 }
 
@@ -26,12 +27,12 @@ export function manageQuery<T>(
   WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>
 ): React.FC<OwnProps & T> {
   const ManageQuery = (props: OwnProps & T) => {
-    const { deleteQuery, id, inspect = null, refetch, setQuery } = props;
+    const { deleteQuery, id, inspect = null, loading, refetch, setQuery } = props;
 
     useQueryInspector({
       deleteQuery,
       inspect,
-      loading: false,
+      loading,
       queryId: id,
       refetch,
       setQuery,

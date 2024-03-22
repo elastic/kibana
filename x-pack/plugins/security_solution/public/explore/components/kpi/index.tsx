@@ -18,17 +18,12 @@ interface KpiBaseComponentProps {
   to: string;
 }
 
-export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
-  ({ statItems, ...props }) => {
-    return (
-      <EuiFlexGroup wrap>
-        {statItems.map((statItem) => (
-          <StatItemsComponent {...props} statItems={statItem} />
-        ))}
-      </EuiFlexGroup>
-    );
-  },
-  (prevProps, nextProps) => prevProps.statItems === nextProps.statItems
-);
+export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(({ statItems, ...props }) => (
+  <EuiFlexGroup wrap>
+    {statItems.map((statItem) => (
+      <StatItemsComponent {...props} key={`kpi-base-${statItem.key}`} statItems={statItem} />
+    ))}
+  </EuiFlexGroup>
+));
 
 KpiBaseComponent.displayName = 'KpiBaseComponent';
