@@ -9,7 +9,7 @@ import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { merge, set } from 'lodash';
-import type { Logger } from '@kbn/core/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { copyAllowlistedFields, filterList } from './filterlists';
@@ -22,6 +22,7 @@ import type {
   ExceptionListItem,
   ExtraInfo,
   ListTemplate,
+  Nullable,
   TelemetryEvent,
   TimeFrame,
   TimelineResult,
@@ -281,15 +282,22 @@ export const formatValueListMetaData = (
 });
 
 export let isElasticCloudDeployment = false;
+let _clusterInfo: Nullable<ESClusterInfo>;
 export const setIsElasticCloudDeployment = (value: boolean) => {
   isElasticCloudDeployment = value;
 };
+export const setClusterInfo = (info: Nullable<ESClusterInfo>) => {
+  _clusterInfo = info;
+};
 
-export const tlog = (logger: Logger, message: string) => {
+/**
+ * @deprecated use `newTelemetryLogger` instead
+ */
+export const tlog = (logger: Logger, message: string, meta?: LogMeta) => {
   if (isElasticCloudDeployment) {
-    logger.info(message);
+    logger.info(message, logMeta(meta));
   } else {
-    logger.debug(message);
+    logger.debug(message, logMeta(meta));
   }
 };
 
@@ -297,14 +305,56 @@ export interface TelemetryLogger extends Logger {
   l: (message: string) => void;
 }
 
+/**
+ * Returns a new `TelemetryLogger` instance.
+ *
+ * This custom logger extends the base kibana Logger with the following functionality:
+ *  - Exposes a helper `TelemetryLogger::l` method that logs at the
+ *    info or debug level depending on whether the instance is a cloud deployment or not.
+ *  - For the above method as well as the regular debug, info, warn and error,
+ *    includes the cluster uuid and name as part of the metadata structured fields.
+ *
+ * Please try to use a meaningful logger name, e.g.:
+ *
+ * ```js
+ * const log = newTelemetryLogger(logger.get('tasks.endpoint'));
+ * ````
+ * instead of
+ *
+ * ```js
+ * const log = newTelemetryLogger(logger);
+ * ````
+ *
+ * It makes easier to browse the logs by filtering by the structured argument `logger`.
+ */
 export const newTelemetryLogger = (logger: Logger): TelemetryLogger => {
+  const delegated = Object.create(logger);
+
+  delegated.l = (message: string, meta?: LogMeta | undefined) =>
+    tlog(logger, message, logMeta(meta));
+  delegated.info = (message: string, meta?: LogMeta | undefined) =>
+    logger.info(message, logMeta(meta));
+  delegated.error = (message: string, meta?: LogMeta | undefined) =>
+    logger.error(message, logMeta(meta));
+  delegated.warn = (message: string, meta?: LogMeta | undefined) =>
+    logger.warn(message, logMeta(meta));
+  delegated.debug = (message: string, meta?: LogMeta | undefined) =>
+    logger.debug(message, logMeta(meta));
+
+  return delegated;
+};
+
+// helper method to merge a given LogMeta with the cluster info (if exists)
+const logMeta = (meta?: LogMeta | undefined): LogMeta => {
+  const clusterInfoMeta = _clusterInfo
+    ? {
+        cluster_uuid: _clusterInfo?.cluster_uuid,
+        cluster_name: _clusterInfo?.cluster_name,
+      }
+    : {};
   return {
-    ...logger,
-    error: logger.error,
-    info: logger.info,
-    debug: logger.debug,
-    warn: logger.warn,
-    l: (message: string) => tlog(logger, message),
+    ...clusterInfoMeta,
+    ...(meta ?? {}),
   };
 };
 
