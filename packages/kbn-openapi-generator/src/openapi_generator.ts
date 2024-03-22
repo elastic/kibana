@@ -40,11 +40,7 @@ export interface GeneratorConfig {
 
 export const generate = async (config: GeneratorConfig) => {
   const { rootDir, sourceGlob, templateName, skipLinting, bundle } = config;
-  console.log({
-    REPO_ROOT,
-    rootDir,
-    sourceGlob,
-  });
+
   if (!skipLinting) {
     await lint({
       rootDir,
