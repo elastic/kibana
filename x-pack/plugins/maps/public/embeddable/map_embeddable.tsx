@@ -109,6 +109,7 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 
 async function getChartsPaletteServiceGetColor(): Promise<((value: string) => string) | null> {
   const chartsService = getCharts();
@@ -663,6 +664,20 @@ export class MapEmbeddable
       embeddable: this,
       trigger,
     } as ActionExecutionContext;
+  };
+
+  // remove legacy library tranform methods
+  linkToLibrary = undefined;
+  unlinkFromLibrary = undefined;
+  saveStateToSavedObject = () => {};
+  savedObjectAttributesToState = () => {
+    return {
+      ..._.omit(this.getExplicitInput(), 'savedObjectId'),
+      attributes: this._savedMap.getAttributes(),
+    };
+  };
+  checkForDuplicateTitle = async (props: OnSaveProps) => { 
+    return false;
   };
 
   // Timing bug for dashboard with multiple maps with synchronized movement and filter by map extent enabled

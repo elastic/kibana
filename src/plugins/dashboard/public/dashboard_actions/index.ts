@@ -22,6 +22,7 @@ import { ExportCSVAction } from './export_csv_action';
 import { FiltersNotificationAction } from './filters_notification_action';
 import { LibraryNotificationAction } from './library_notification_action';
 import { ReplacePanelAction } from './replace_panel_action';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { LegacyUnlinkFromLibraryAction } from './legacy_unlink_from_library_action';
 
 interface BuildAllDashboardActionsProps {
@@ -69,6 +70,10 @@ export const buildAllDashboardActions = async ({
     const legacyAddToLibraryAction = new LegacyAddToLibraryAction();
     uiActions.registerAction(legacyAddToLibraryAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, legacyAddToLibraryAction.id);
+
+    const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
+    uiActions.registerAction(unlinkFromLibraryAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
 
     const legacyUnlinkFromLibraryAction = new LegacyUnlinkFromLibraryAction();
     uiActions.registerAction(legacyUnlinkFromLibraryAction);
