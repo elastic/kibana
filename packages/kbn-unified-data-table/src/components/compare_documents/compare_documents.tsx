@@ -99,9 +99,12 @@ const CompareDocuments = ({
   const comparisonColumnVisibility = useMemo<EuiDataGridColumnVisibility>(
     () => ({
       visibleColumns: comparisonColumns.map(({ id: columnId }) => columnId),
-      setVisibleColumns: () => {},
+      setVisibleColumns: (visibleColumns) => {
+        const [_fieldColumnId, ...newSelectedDocs] = visibleColumns;
+        setSelectedDocs(newSelectedDocs);
+      },
     }),
-    [comparisonColumns]
+    [comparisonColumns, setSelectedDocs]
   );
   const comparisonRowCount = useMemo(() => comparisonFields.length, [comparisonFields.length]);
   const comparisonRowHeight = useMemo<EuiDataGridRowHeightsOptions>(

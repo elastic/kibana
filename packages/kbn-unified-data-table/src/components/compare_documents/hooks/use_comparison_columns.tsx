@@ -115,8 +115,8 @@ export const useComparisonColumns = ({
         isExpandable: false,
         actions: {
           showHide: false,
-          showMoveLeft: false,
-          showMoveRight: false,
+          showMoveLeft: docIndex > 1,
+          showMoveRight: docIndex > 0 && docIndex < selectedDocs.length - 1,
           showSortAsc: false,
           showSortDesc: false,
           additional,
