@@ -97,7 +97,8 @@
     "@kbn/field-formats-plugin",
     "@kbn/aiops-utils",
     "@kbn/event-annotation-common",
-    "@kbn/data-view-field-editor-plugin"
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/infra-plugin"
   ],
   "exclude": ["target/**/*"]
 }
