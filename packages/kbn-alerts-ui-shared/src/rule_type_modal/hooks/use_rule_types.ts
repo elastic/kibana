@@ -12,9 +12,10 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
+import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import { ALERTS_FEATURE_ID } from '../../common/constants';
 import { loadRuleTypes } from '../apis/load_rule_types';
+import { RuleTypeIndexWithDescriptions, RuleTypeWithDescription } from '../types';
 
 export interface UseRuleTypesProps {
   http: HttpStart;
@@ -29,14 +30,15 @@ const getFilteredIndex = (
   filteredRuleTypes: string[],
   registeredRuleTypes: UseRuleTypesProps['registeredRuleTypes']
 ) => {
-  const index: RuleTypeIndex = new Map();
+  const index: RuleTypeIndexWithDescriptions = new Map();
   const registeredRuleTypesDictionary = keyBy(registeredRuleTypes, 'id');
   for (const ruleType of data) {
     const ruleTypeRecord: RuleType<string, string> & { description?: string } = { ...ruleType };
+    // Filter out unregistered rule types, and add descriptions to registered rule types
     if (registeredRuleTypesDictionary[ruleType.id]) {
       ruleTypeRecord.description = registeredRuleTypesDictionary[ruleType.id].description;
+      index.set(ruleType.id, ruleTypeRecord);
     }
-    index.set(ruleType.id, ruleTypeRecord);
   }
   let filteredIndex = index;
   if (filteredRuleTypes?.length) {
@@ -84,7 +86,7 @@ export const useRuleTypes = ({
     () =>
       data
         ? getFilteredIndex(data, filteredRuleTypes, registeredRuleTypes)
-        : new Map<string, RuleType>(),
+        : new Map<string, RuleTypeWithDescription>(),
     [data, filteredRuleTypes, registeredRuleTypes]
   );
 

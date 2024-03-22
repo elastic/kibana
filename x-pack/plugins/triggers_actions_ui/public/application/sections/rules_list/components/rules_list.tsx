@@ -197,6 +197,8 @@ export const RulesList = ({
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [inputText, setInputText] = useState<string>(searchFilter);
 
+  const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);
+  const [ruleTypeIdToCreate, setRuleTypeIdToCreate] = useState<string | undefined>(undefined);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
@@ -652,13 +654,13 @@ export const RulesList = ({
     }
   };
 
-  const openFlyout = useCallback(() => {
-    setRuleFlyoutVisibility(true);
+  const openRuleTypeModal = useCallback(() => {
+    setRuleTypeModalVisibility(true);
   }, []);
 
   useEffect(() => {
     setHeaderActions?.([
-      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openFlyout} />] : []),
+      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
       <RulesSettingsLink />,
       <RulesListDocLink />,
     ]);
@@ -757,7 +759,7 @@ export const RulesList = ({
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}
         showCreateRuleButtonInPrompt={showCreateRuleButtonInPrompt}
         showSpinner={showSpinner}
-        onCreateRulesClick={openFlyout}
+        onCreateRulesClick={openRuleTypeModal}
       />
       <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (
@@ -997,26 +999,36 @@ export const RulesList = ({
             )}
           </>
         )}
-        {ruleFlyoutVisible && (
-          // <Suspense fallback={<div />}>
-          //   <RuleAdd
-          //     consumer={ALERTS_FEATURE_ID}
-          //     onClose={() => {
-          //       setRuleFlyoutVisibility(false);
-          //     }}
-          //     actionTypeRegistry={actionTypeRegistry}
-          //     ruleTypeRegistry={ruleTypeRegistry}
-          //     ruleTypeIndex={ruleTypesState.data}
-          //     onSave={refreshRules}
-          //     initialSelectedConsumer={initialSelectedConsumer}
-          //   />
-          // </Suspense>
+        {ruleTypeModalVisible && (
           <RuleTypeModal
-            onClose={() => setRuleFlyoutVisibility(false)}
+            onClose={() => setRuleTypeModalVisibility(false)}
+            onSelectRuleType={(ruleTypeId) => {
+              setRuleTypeIdToCreate(ruleTypeId);
+              setRuleTypeModalVisibility(false);
+              setRuleFlyoutVisibility(true);
+            }}
             http={http}
             toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
+            filteredRuleTypes={filteredRuleTypes}
           />
+        )}
+        {ruleFlyoutVisible && (
+          <Suspense fallback={<div />}>
+            <RuleAdd
+              consumer={ALERTS_FEATURE_ID}
+              onClose={() => {
+                setRuleFlyoutVisibility(false);
+              }}
+              actionTypeRegistry={actionTypeRegistry}
+              ruleTypeRegistry={ruleTypeRegistry}
+              ruleTypeIndex={ruleTypesState.data}
+              onSave={refreshRules}
+              initialSelectedConsumer={initialSelectedConsumer}
+              ruleTypeId={ruleTypeIdToCreate}
+              canChangeTrigger={false}
+            />
+          </Suspense>
         )}
         {editFlyoutVisible && currentRuleToEdit && (
           <Suspense fallback={<div />}>

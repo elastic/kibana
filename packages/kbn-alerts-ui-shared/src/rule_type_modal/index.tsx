@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { RuleTypeModalComponent as RuleTypeModal } from './components/app';
+export { RuleTypeModalComponent as RuleTypeModal } from './components';

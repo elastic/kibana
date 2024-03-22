@@ -14,7 +14,7 @@ import {
   EuiPanel,
   EuiPageHeaderSection,
   EuiTitle,
-  EuiSearchBar,
+  EuiFieldSearch,
   EuiSpacer,
   useEuiTheme,
   useCurrentEuiBreakpoint,
@@ -23,22 +23,34 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import { RuleTypeList } from './rule_type_list';
+import { RuleTypeWithDescription } from '../types';
 
 export interface RuleTypeModalProps {
   onClose: () => void;
+  onSelectRuleType: (ruleTypeId: string) => void;
+  onFilterByProducer: (producer: string | null) => void;
+  onChangeSearch: (search: string) => void;
+  searchString: string;
+  selectedProducer: string | null;
 }
 
 export interface RuleTypeModalState {
-  ruleTypeIndex: RuleTypeIndex;
+  ruleTypes: RuleTypeWithDescription[];
   ruleTypesLoading: boolean;
+  ruleTypesCountsByProducer: { total: number; [x: string]: number };
 }
 
 export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = ({
   onClose,
-  ruleTypeIndex,
+  onSelectRuleType,
+  onFilterByProducer,
+  onChangeSearch,
+  ruleTypes,
   ruleTypesLoading,
+  ruleTypesCountsByProducer,
+  searchString,
+  selectedProducer,
 }) => {
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
@@ -73,14 +85,38 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiPageHeaderSection style={{ width: isFullscreenPortrait ? '100%' : '50%' }}>
-                  <EuiSearchBar />
+                  <EuiFieldSearch
+                    placeholder={i18n.translate(
+                      'alertsUIShared.components.ruleTypeModal.searchPlaceholder',
+                      {
+                        defaultMessage: 'Search',
+                      }
+                    )}
+                    value={searchString}
+                    onChange={({ target: { value } }) => onChangeSearch(value)}
+                    fullWidth
+                  />
                 </EuiPageHeaderSection>
               </EuiPageHeaderSection>
             </EuiPageHeader>
-            <EuiSpacer size="s" />
           </EuiFlexItem>
-          <EuiFlexItem style={{ overflow: 'hidden' }}>
-            {ruleTypesLoading ? loadingPrompt : <RuleTypeList ruleTypeIndex={ruleTypeIndex} />}
+          <EuiFlexItem
+            style={{
+              overflow: 'hidden',
+              marginTop: -16 /* Offset extra padding for card hover drop shadow */,
+            }}
+          >
+            {ruleTypesLoading ? (
+              loadingPrompt
+            ) : (
+              <RuleTypeList
+                ruleTypes={ruleTypes}
+                ruleTypesCountsByProducer={ruleTypesCountsByProducer}
+                onSelectRuleType={onSelectRuleType}
+                onFilterByProducer={onFilterByProducer}
+                selectedProducer={selectedProducer}
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

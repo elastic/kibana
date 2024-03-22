@@ -8,7 +8,6 @@
 
 import { RuleType } from '@kbn/triggers-actions-ui-types';
 
-export type RuleTypeIndexWithDescriptions = Map<
-  string,
-  RuleType<string, string> & { description?: string }
->;
+export type RuleTypeWithDescription = RuleType<string, string> & { description?: string };
+
+export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;
