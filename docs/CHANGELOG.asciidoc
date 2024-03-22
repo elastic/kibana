@@ -121,8 +121,12 @@ Alerting::
 APM::
 * Show Universal Profiling on Transaction view ({kibana-pull}176302[#176302]).
 * Adds a specific metrics dashboard for opentelemetry-node services ({kibana-pull}174700[#174700]).
+Dashboards::
+* Adds the creating of {esql} charts from the dashboard ({kibana-pull}171973[#171973]).
 Elastic Security::
 For the Elastic Security 8.13.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+{esql}::
+* Adds enhanced {esql} query editing experience with client side validation ({kibana-pull}170071[#170071]).
 Fleet::
 * Adds reference to `ecs@mappings` for each index template ({kibana-pull}174855[#174855]).
 * Adds support for the `subobjects` setting on the object type mapping ({kibana-pull}171826[#171826]).
@@ -131,8 +135,6 @@ Infrastructure::
 Integrations::
 * Adds tiles for Notion and Redis connectors ({kibana-pull}177306[#177306]).
 Lens & Visualizations::
-* Adds the creating of {esql} charts from the dashboard ({kibana-pull}171973[#171973]).
-* Adds enhanced {esql} query editing experience with client side validation ({kibana-pull}170071[#170071]).
 * Adds workspace panel dimensions by chart type ({kibana-pull}168651[#168651]).
 Machine Learning::
 * Adds the single metric viewer embeddable for dashboards ({kibana-pull}175857[#175857]).
@@ -191,7 +193,6 @@ Dashboard::
 Discover::
 * Hides the Empty fields section if there are no fields in it ({kibana-pull}172956[#172956]).
 * Adds tabs to Discover and Log Explorer ({kibana-pull}171467[#171467]).
-* Adds multiple improvements to saved query management ({kibana-pull}170599[#170599]).
 * Adds header row height configuration ({kibana-pull}175501[#175501]).
 * Adds new fields ingested in the background with valid mappings ({kibana-pull}172329[#172329]).
 * Adds caching to data view field list request with a `stale-while-revalidate` strategy ({kibana-pull}168910[#168910]).
@@ -200,6 +201,13 @@ Elastic Security::
 For the Elastic Security 8.13.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Elastic Search::
 * Adds `ignore_empty_value` to generated set processor ({kibana-pull}175172[#175172]).
+{esql}::
+* Adds clickable badges on compact view for {esql} queries ({kibana-pull}176568[#176568]).
+* Adds link on the documentation popover to navigate to our external docs ({kibana-pull}176377[#176377]).
+* Adds support for canceling {esql} queries in *Lens* ({kibana-pull}176277[#176277]).
+* Adds quick fixes feature to {esql} query validation errors ({kibana-pull}175553[#175553]).
+* Adds support for command settings ({kibana-pull}175114[#175114]).
+* Allows line breaks on the {esql} editor ({kibana-pull}173596[#173596]).
 Fleet::
 * Adds `skipRateLimitCheck` flag to the Upgrade API and Bulk_upgrade API ({kibana-pull}176923[#176923]).
 * Adds making datastream rollover lazy ({kibana-pull}176565[#176565]).
@@ -214,16 +222,8 @@ Fleet::
 Integrations::
 * Enables minute frequency for incremental syncs ({kibana-pull}176603[#176603]).
 Lens & Visualizations::
-* Adds clickable badges on compact view for {esql} queries ({kibana-pull}176568[#176568]).
-* Adds link on the documentation popover to navigate to our external docs ({kibana-pull}176377[#176377]).
-* Adds support for canceling {esql} queries in *Lens* ({kibana-pull}176277[#176277]).
-* Adds quick fixes feature to {esql} query validation errors ({kibana-pull}175553[#175553]).
-* Adds support for command settings ({kibana-pull}175114[#175114]).
 * Datatable improvements in *Lens* ({kibana-pull}174994[#174994]).
-* Adds 'greater than or equals to' and 'less than' options to filter options for date ranges and numbers ({kibana-pull}174283[#174283]).
-* Adds line breaks redesign ({kibana-pull}173596[#173596]).
 * Adds IP Prefix Aggregation-based Visualization ({kibana-pull}173474[#173474]).
-* Adds a one minute option to the date picker ({kibana-pull}172944[#172944]).
 * Displays the suggestions on the dataview mode charts in *Lens* ({kibana-pull}172924[#172924]).
 * Enables treemap in suggestions in *Lens* ({kibana-pull}169095[#169095]).
 Machine Learning::
@@ -276,6 +276,10 @@ Security::
 * Adds server side validation for uploaded file types ({kibana-pull}173960[#173960]).
 Sharing::
 * Show 'View details' UI action to open clusters inspector tab when request fails ({kibana-pull}172971[#172971]).
+Unified Search::
+* Adds 'greater than or equals to' and 'less than' options to filter options for date ranges and numbers ({kibana-pull}174283[#174283]).
+* Adds a one minute option to the date picker ({kibana-pull}172944[#172944]).
+* Adds multiple improvements to saved query management ({kibana-pull}170599[#170599]).
 
 [float]
 [[fixes-v8.13.0]]
