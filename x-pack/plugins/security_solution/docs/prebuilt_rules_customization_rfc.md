@@ -1200,9 +1200,15 @@ Given the requirements described above, the following table shows the behaviour 
 </pre>
     </td>
     <td>N/A</td>
-    <td>
-      Prebuilt rule import rejected because no matching <br>
-       version found for existing rule_id security-asset
+    <td><pre>
+{
+  name: "My prebuilt rule",
+  rule_source: {
+    type: "external",
+    is_customized: false,
+  }
+} 
+</pre>
       </td>
     <tr>
 
@@ -1217,7 +1223,6 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-  source_updated_at: "2024-05-..."
 } 
 </pre>
     </td>
@@ -1237,7 +1242,6 @@ Given the requirements described above, the following table shows the behaviour 
   rule_source: {
     type: "external",
     is_customized: false,
-    source_updated_at: "2024-05-..."
   }
 } 
 </pre>
@@ -1254,7 +1258,6 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-  source_updated_at: "2024-05-..."
 } 
 </pre>
     </td>
@@ -1274,7 +1277,6 @@ Given the requirements described above, the following table shows the behaviour 
   rule_source: {
     type: "external",
     is_customized: true,
-    source_updated_at: "2024-05-..."
   }
 } 
 </pre>
@@ -1290,7 +1292,6 @@ Given the requirements described above, the following table shows the behaviour 
   rule_source: {
     type: "external",
     is_customized: false,
-    source_updated_at: "2024-05-..."
   }
 } 
 </pre>
@@ -1299,7 +1300,6 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-  source_updated_at: "2024-05-..."
 } 
 </pre>
     </td>
@@ -1328,7 +1328,6 @@ Given the requirements described above, the following table shows the behaviour 
   rule_source: {
     type: "external",
     is_customized: false,
-    source_updated_at: "2024-05-..."
   }
 } 
 </pre>
@@ -1337,7 +1336,6 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-  source_updated_at: "2024-05-..."
 } 
 </pre>
     </td>
@@ -1357,7 +1355,6 @@ Given the requirements described above, the following table shows the behaviour 
   rule_source: {
     type: "external",
     is_customized: true,
-    source_updated_at: "2024-05-..."
   }
 } 
 </pre>
@@ -1377,7 +1374,6 @@ Given the requirements described above, the following table shows the behaviour 
   rule_source: {
     type: "external",
     is_customized: true,
-    source_updated_at: "2024-05-..."
   }
 } 
 </pre>
@@ -1386,7 +1382,6 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-  source_updated_at: "2024-05-..."
 } 
 </pre>
     </td>
@@ -1406,7 +1401,6 @@ Given the requirements described above, the following table shows the behaviour 
   rule_source: {
     type: "external",
     is_customized: false,
-    source_updated_at: "2024-05-..."
   }
 } 
 </pre>
@@ -1890,7 +1884,7 @@ The Rules Details page allows the user to modify the rule in two ways:
 
 Both of these actions are already possible for prebuilt rules.
 
-- The Rule Details page should include a text field that lets the user know if the current rules is **custom**, **Elastic prebuilt** and **customized Elastic prebuilt**. 
+- The Rule Details page should include a text field that lets the user know if the current rules is **custom**, **Elastic prebuilt** and **customized Elastic prebuilt**.
 
 #### Via the Shared Exception Lists page
 
@@ -1937,60 +1931,156 @@ We propose developing more adaptable diff algorithms tailored to specific rule f
 
 Depending on the specific field or type of field we might want to apply a specific merging algorithm when conflicts arise. Let's propose different types.
 
-##### String fields
+##### Single-line string fields
 
-For string fields, in case of three-way conflicts, we will make a best effort to reconcile any modifications done by the user and any updates proposed by Elastic.
+> Examples: `name`, `query`
 
-Examples: `name`, `description`, `setup`, `note` (Investigation guide)
+For single-line string fields we will continue to use the existing simple diff algorithm:
 
-  <table>
-    <thead>
-      <tr>
-        <th style="border-right:3px solid black">Use case</th>
-        <th>Base version</th>
-        <th>Current version</th>
-        <th style="border-right:3px solid black">Target version</th>
-        <th>Merged version (output)</th>
-      </tr>
-    </thead>
-    <tbody align="center">
-      <tr>
-        <td style="border-right:3px solid black">Keep user customizations when whole string conflicts</td>
-        <td><code>Prebuilt rule name</code></td>
-        <td><code>Completely different string</code></td>
-        <td style="border-right:3px solid black"><code>Updated prebuilt rule name</code></td>
-        <td><code>Completely different string</code></td>
-      </tr>
-      <tr>
-        <td style="border-right:3px solid black">Keep user-added prefixes and accept other modifications</td>
-        <td><code>Prebuilt rule name</code></td>
-        <td><code>[Security Solution] Prebuilt rule name</code></td>
-        <td style="border-right:3px solid black"><code>Updated prebuilt rule name</code></td>
-        <td><code>[Security Solution] Updated prebuilt rule name</code></td>
-      </tr>
-      <tr>
-        <td style="border-right:3px solid black">Keep user-added suffixes and accept other modifications</td>
-        <td><code>Prebuilt rule name</code></td>
-        <td><code>Prebuilt rule name - (Custom version 3)</code></td>
-        <td style="border-right:3px solid black"><code>Updated prebuilt rule name</code></td>
-        <td><code>Updated prebuilt rule name - (Custom version 3)</code></td>
-      </tr>
-      <tr>
-        <td style="border-right:3px solid black">Keep user customizations on conflicts, but add updates in sections with no conflicts</td>
-        <td><code>Prebuilt rule name</code></td>
-        <td><code>Customized prebuilt rule name</code></td>
-        <td style="border-right:3px solid black"><code>Updated prebuilt rule name. Much better.</code></td>
-        <td><code>Customized prebuilt rule name. Much better.</code></td>
-      </tr>
-    </tbody>
-  </table>
+- if `base` !== `current` !== target, we mark the diff as a conflict and use the current version as the merge proposal
+- if `base` === `target` && `base` !== `current`, we set merge proposal to be the current version, without a conflict
+- if `base` === `current` && `base` !== `target`, we set merge proposal to be the target version, without a conflict
+
+Reasons why we'll continue to use the simple diff algorithm for single-line string fields:
+- Merging keywords (especially enums) should never be done, because it could generate an invalid value.
+- Changes to a rule's name might indicate some semantical changes to the whole rule (e.g. related to its source data, query/filters logic, etc). So, if both Elastic and user changed the name of the same rule, this could be an indication that the two versions of these rule are not compatible with each other, and the changes need to be reviewed by the user. Generating a conflict in this case would help the user to pay attention to all the changes.
+
+<table>
+  <thead>
+    <tr>
+      <th style="border-right:3px solid black">Use case</th>
+      <th>Base version</th>
+      <th>Current version</th>
+      <th style="border-right:3px solid black">Target version</th>
+      <th>Merged version (output)</th>
+      <th>Conflict?</th>
+    </tr>
+  </thead>
+  <tbody align="center">
+    <tr>
+      <td style="border-right:3px solid black">No customization, no updates (AAA)</td>
+      <td><code>My rule name</code></td>
+      <td><code>My rule name</code></td>
+      <td style="border-right:3px solid black"><code>My rule name</code></td>
+      <td><code>My rule name</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">User customization, no updates (ABA)</td>
+      <td><code>My rule name</code></td>
+      <td><code>My CUSTOM rule name</code></td>
+      <td style="border-right:3px solid black"><code>My rule name</code></td>
+      <td><code>My CUSTOM rule name</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">No customization, upstream update (AAB)</td>
+      <td><code>My rule name</code></td>
+      <td><code>My rule name</code></td>
+      <td style="border-right:3px solid black"><code>My UPDATED rule name</code></td>
+      <td><code>My UPDATED rule name</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update match (ABB)</td>
+      <td><code>My rule name</code></td>
+      <td><code>My GREAT rule name</code></td>
+      <td style="border-right:3px solid black"><code>My GREAT rule name</code></td>
+      <td><code>My GREAT rule name</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update conflict (ABC)</td>
+      <td><code>My rule name</code></td>
+      <td><code>My GREAT rule name</code></td>
+      <td style="border-right:3px solid black"><code>My EXCELLENT rule name</code></td>
+      <td><code>My GREAT rule name</code></td>
+      <td><code>YES</code></td>
+    </tr>
+  </tbody>
+</table>
+
+
+##### Multi-line string fields
+
+> Examples: `description`, `setup`, `note` (Investigation guide)
+
+ in case of three-way conflicts, we will make a best effort to reconcile any modifications done by the user and any updates proposed by Elastic.
+
+<table>
+  <thead align="center">
+    <tr>
+      <th style="border-right:3px solid black">Use case</th>
+      <th>Base version</th>
+      <th>Current version</th>
+      <th style="border-right:3px solid black">Target version</th>
+      <th>Merged version (output)</th>
+      <th>Mark as conflict?</th>
+    </tr>
+  </thead>
+  <tbody >
+    <tr>
+      <td style="border-right:3px solid black">No customization, no updates (AAA)</td>
+      <td><pre>My description. <br>This is a second line.</pre></td>
+      <td><pre>My description. <br>This is a second line.</pre></td>
+      <td style="border-right:3px solid black"><pre>My description. <br>This is a second line.</pre></td>
+      <td><pre>My description. <br>This is a second line.</pre></td>
+      <td><pre>NO</pre></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">User customization, no updates (ABA)</td>
+      <td><pre>My description. <br>This is a second line.</pre></td>
+      <td><pre>My CUSTOM description. <br>This is a second line.</pre></td>
+      <td style="border-right:3px solid black"><pre>My description. <br>This is a second line.</pre></td>
+      <td><pre>My CUSTOM description. <br>This is a second line.</pre></td>
+      <td><pre>NO</pre></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">No customization, upstream update (AAB)</td>
+      <td><pre>My description. <br>This is a second line.</pre></td>
+      <td><pre>My description. <br>This is a second line.</pre></td>
+      <td style="border-right:3px solid black"><pre>My UDPATED description. <br>This is a second line.</pre></td>
+      <td><pre>My UDPATED description. <br>This is a second line.</pre></td>
+      <td><pre>NO</pre></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update match (ABB)</td>
+      <td><pre>My description. <br>This is a second line.</pre></td>
+      <td><pre>My GREAT description. <br>This is a second line.</pre></td>
+      <td style="border-right:3px solid black"><pre>My GREAT description. <br>This is a second line.</pre></td>
+      <td><pre>My GREAT description. <br>This is a second line.</pre></td>
+      <td><pre>NO</pre></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update <b>solvable conflict</b> (ABC)</td>
+      <td><pre>My description. <br>This is a second line.</pre></td>
+      <td><pre>My GREAT description. <br>This is a second line.</pre></td>
+      <td style="border-right:3px solid black"><pre>My description. <br>This is a second line, now longer.</pre></td>
+      <td><pre>My GREAT description. <br>This is a second line, now longer.</pre></td>
+      <td><pre>YES</pre></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update <b>non-solvable conflict</b> (ABC)</td>
+      <td><pre>My description. <br>This is a second line.</pre></td>
+      <td><pre>My GREAT description. <br>This is a third line.</pre></td>
+      <td style="border-right:3px solid black"><pre>My EXCELLENT description. <br>This is a fourth line.</pre></td>
+      <td><pre>My GREAT description. <br>This is a third line.</pre></td>
+      <td><pre>YES</pre></td>
+    </tr>
+  </tbody>
+</table>
+
+
+
 
 
 ##### Number fields
 
+> Examples: `risk_score`, `max_signals`
+
 Number fields should be treated as a whole unit, i.e. not breakable by digits. Therefore, there is only one possibility of conflicts, the scenario (A B C). In that case, **keep the current version** with the user customization.
 
-Examples: `risk_score`, `max_signals`
+
 
   <table>
     <thead>
