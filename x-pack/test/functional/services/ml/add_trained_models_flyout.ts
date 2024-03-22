@@ -76,7 +76,7 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
       const actualTabs = await testSubjects.findAll('~mlAddTrainedModelFlyoutTab', 3_000);
       const actualTabCount = actualTabs.length;
 
-      expect(expectedTabCount).to.be(actualTabCount);
+      expect(actualTabCount).to.be(expectedTabCount);
 
       for await (const tab of tabs)
         await testSubjects.existOrFail(`mlAddTrainedModelFlyoutTab ${tab}`, {
