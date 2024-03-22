@@ -184,7 +184,6 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
             )
           ),
         }),
-        // TODO simplified package policy
         SimplifiedPackagePolicyPreconfiguredSchema,
       ])
     ),
