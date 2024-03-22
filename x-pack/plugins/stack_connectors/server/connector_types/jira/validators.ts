@@ -13,7 +13,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { MAX_OTHER_FIELDS_LENGTH } from './constants';
+import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
 import { incidentSchemaObjectProperties } from './schema';
 
 export const validateCommonConfig = (

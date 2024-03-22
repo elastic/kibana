@@ -37,7 +37,7 @@ interface Props {
   messageVariables?: ActionVariable[];
   paramsProperty: string;
   inputTargetValue?: string | null;
-  label: string;
+  label: React.ReactNode | string;
   errors?: string[];
   ariaLabel?: string;
   onDocumentsChange: (data: string) => void;
