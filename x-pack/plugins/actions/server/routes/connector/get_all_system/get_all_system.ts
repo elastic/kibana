@@ -7,13 +7,13 @@
 
 import { IRouter } from '@kbn/core/server';
 import { AllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
-import { transformGetAllConnectorsResponseV1 } from './transforms';
 import { ActionsRequestHandlerContext } from '../../../types';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { transformGetAllConnectorsResponseV1 } from '../get_all/transforms';
 
-export const getAllSystemConnectorsRoute = (
+export const getAllConnectorsIncludingSystemRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {

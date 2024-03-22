@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getAllSystemConnectorsRoute } from './get_all_system';
+export { getAllConnectorsIncludingSystemRoute } from './get_all_system';

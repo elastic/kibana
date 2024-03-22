@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { listTypesSystemRoute } from './list_types_system';
+export { listTypesWithSystemRoute } from './list_types_system';

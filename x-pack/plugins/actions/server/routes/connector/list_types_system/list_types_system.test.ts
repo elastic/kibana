@@ -9,7 +9,7 @@ import { httpServiceMock } from '@kbn/core/server/mocks';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
-import { listTypesSystemRoute } from './list_types_system';
+import { listTypesWithSystemRoute } from './list_types_system';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../mocks';
 
@@ -22,12 +22,12 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-describe('listTypesSystemRoute', () => {
+describe('listTypesWithSystemRoute', () => {
   it('lists action types with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    listTypesSystemRoute(router, licenseState);
+    listTypesWithSystemRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -42,7 +42,7 @@ describe('listTypesSystemRoute', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
         supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
+        isSystemActionType: true,
       },
     ];
 
@@ -58,7 +58,7 @@ describe('listTypesSystemRoute', () => {
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
-            "is_system_action_type": false,
+            "is_system_action_type": true,
             "minimum_license_required": "gold",
             "name": "name",
             "supported_feature_ids": Array [
@@ -79,7 +79,7 @@ describe('listTypesSystemRoute', () => {
           enabled_in_license: true,
           supported_feature_ids: ['alerting'],
           minimum_license_required: 'gold',
-          is_system_action_type: false,
+          is_system_action_type: true,
         },
       ],
     });
@@ -89,7 +89,7 @@ describe('listTypesSystemRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    listTypesSystemRoute(router, licenseState);
+    listTypesWithSystemRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -169,7 +169,7 @@ describe('listTypesSystemRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    listTypesSystemRoute(router, licenseState);
+    listTypesWithSystemRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -212,7 +212,7 @@ describe('listTypesSystemRoute', () => {
       throw new Error('OMG');
     });
 
-    listTypesSystemRoute(router, licenseState);
+    listTypesWithSystemRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 

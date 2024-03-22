@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAllSystemConnectorsRoute } from './get_all_system';
+import { getAllConnectorsIncludingSystemRoute } from './get_all_system';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
@@ -21,32 +21,68 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-describe('getAllSystemConnectorsRoute', () => {
+describe('getAllConnectorsIncludingSystemRoute', () => {
   it('get all connectors with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAllSystemConnectorsRoute(router, licenseState);
+    getAllConnectorsIncludingSystemRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/actions/connectors"`);
 
     const actionsClient = actionsClientMock.create();
-    actionsClient.getAll.mockResolvedValueOnce([]);
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '.system-action-id',
+        isPreconfigured: false,
+        isSystemAction: true,
+        isDeprecated: false,
+        name: 'my system action',
+        actionTypeId: '.system-action-type',
+        isMissingSecrets: false,
+        config: {},
+        referencedByCount: 0,
+      },
+    ]);
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
-        "body": Array [],
+        "body": Array [
+          Object {
+            "config": Object {},
+            "connector_type_id": ".system-action-type",
+            "id": ".system-action-id",
+            "is_deprecated": false,
+            "is_missing_secrets": false,
+            "is_preconfigured": false,
+            "is_system_action": true,
+            "name": "my system action",
+            "referenced_by_count": 0,
+          },
+        ],
       }
     `);
 
-    expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
+    expect(actionsClient.getAll).toHaveBeenCalledWith({ includeSystemActions: true });
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: [],
+      body: [
+        {
+          config: {},
+          connector_type_id: '.system-action-type',
+          id: '.system-action-id',
+          is_deprecated: false,
+          is_missing_secrets: false,
+          is_preconfigured: false,
+          is_system_action: true,
+          name: 'my system action',
+          referenced_by_count: 0,
+        },
+      ],
     });
   });
 
@@ -54,7 +90,7 @@ describe('getAllSystemConnectorsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAllSystemConnectorsRoute(router, licenseState);
+    getAllConnectorsIncludingSystemRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -78,7 +114,7 @@ describe('getAllSystemConnectorsRoute', () => {
       throw new Error('OMG');
     });
 
-    getAllSystemConnectorsRoute(router, licenseState);
+    getAllConnectorsIncludingSystemRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
