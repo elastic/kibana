@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateChatCompletionResponseChunk } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { CreateChatCompletionResponseChunk } from '@kbn/observability-ai-assistant-plugin/server/service/client/adapters/process_openai_stream';
 import { v4 } from 'uuid';
 
 export function createOpenAiChunk(

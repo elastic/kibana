@@ -31,6 +31,11 @@ export interface NavigationPublicStart {
   };
   /** Add a solution navigation to the header nav switcher. */
   addSolutionNavigation: (solutionNavigation: SolutionNavigation) => void;
+  /**
+   * Use this handler verify if the solution navigation is enabled.
+   * @returns true if the solution navigation is enabled, false otherwise.
+   */
+  isSolutionNavigationEnabled: () => boolean;
 }
 
 export interface NavigationPublicSetupDependencies {

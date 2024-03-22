@@ -81,7 +81,10 @@ This option is not available when you use a grouping field.
 Generally this value should be set to a value that is smaller than the time window, to avoid gaps in 
 detection.
 
-7. Select a scope value, which affects the <<kibana-feature-privileges,{kib} feature privileges>> that are required to access the rule.
+7. In the advanced options, you can change the number of consecutive runs that must meet the rule conditions before an alert occurs.
+  The default value is `1`.
+
+8. Select a scope value, which affects the <<kibana-feature-privileges,{kib} feature privileges>> that are required to access the rule.
 For example when it's set to `Stack Rules`, you must have the appropriate *Management > {stack-rules-feature}* feature privileges to view or edit the rule.
 
 [float]

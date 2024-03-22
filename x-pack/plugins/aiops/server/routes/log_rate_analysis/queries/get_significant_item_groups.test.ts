@@ -7,10 +7,10 @@
 
 import { orderBy } from 'lodash';
 
-import { fields } from '../../../../common/__mocks__/artificial_logs/fields';
-import { frequentItemSets } from '../../../../common/__mocks__/artificial_logs/frequent_item_sets';
-import { significantTerms } from '../../../../common/__mocks__/artificial_logs/significant_terms';
-import { finalSignificantItemGroups } from '../../../../common/__mocks__/artificial_logs/final_significant_item_groups';
+import { fields } from '@kbn/aiops-test-utils/artificial_logs/fields';
+import { frequentItemSets } from '@kbn/aiops-test-utils/artificial_logs/frequent_item_sets';
+import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
+import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
 
 import { getSignificantItemGroups } from './get_significant_item_groups';
 

@@ -998,10 +998,10 @@
     "functions": [
       {
         "parentPluginId": "lens",
-        "id": "def-public.apiHasLensConfig",
+        "id": "def-public.isLensApi",
         "type": "Function",
         "tags": [],
-        "label": "apiHasLensConfig",
+        "label": "isLensApi",
         "description": [],
         "signature": [
           "(api: unknown) => api is ",
@@ -1009,17 +1009,17 @@
             "pluginId": "lens",
             "scope": "public",
             "docId": "kibLensPluginApi",
-            "section": "def-public.HasLensConfig",
-            "text": "HasLensConfig"
+            "section": "def-public.LensApi",
+            "text": "LensApi"
           }
         ],
-        "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
+        "path": "x-pack/plugins/lens/public/embeddable/interfaces/lens_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "lens",
-            "id": "def-public.apiHasLensConfig.$1",
+            "id": "def-public.isLensApi.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -1027,7 +1027,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
+            "path": "x-pack/plugins/lens/public/embeddable/interfaces/lens_api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -6269,6 +6269,40 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.hideFromChartSwitch",
+            "type": "Function",
+            "tags": [],
+            "label": "hideFromChartSwitch",
+            "description": [],
+            "signature": [
+              "((frame: ",
+              "FramePublicAPI",
+              ") => boolean) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.hideFromChartSwitch.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "frame",
+                "description": [],
+                "signature": [
+                  "FramePublicAPI"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.switchVisualizationType",
             "type": "Function",
             "tags": [],
@@ -10790,36 +10824,6 @@
       },
       {
         "parentPluginId": "lens",
-        "id": "def-public.HasLensConfig",
-        "type": "Type",
-        "tags": [],
-        "label": "HasLensConfig",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.HasType",
-            "text": "HasType"
-          },
-          "<\"lens\"> & { getSavedVis: () => Readonly<",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.LensSavedObjectAttributes",
-            "text": "LensSavedObjectAttributes"
-          },
-          " | undefined>; }"
-        ],
-        "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
         "id": "def-public.HeatmapVisualizationState",
         "type": "Type",
         "tags": [],
@@ -10908,6 +10912,62 @@
           "\"lens\""
         ],
         "path": "x-pack/plugins/lens/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.LensApi",
+        "type": "Type",
+        "tags": [],
+        "label": "LensApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasType",
+            "text": "HasType"
+          },
+          "<\"lens\"> & { getSavedVis: () => Readonly<",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.LensSavedObjectAttributes",
+            "text": "LensSavedObjectAttributes"
+          },
+          " | undefined>; canViewUnderlyingData: () => Promise<boolean>; getViewUnderlyingDataArgs: () => ",
+          "ViewUnderlyingDataArgs",
+          "; } & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesUnifiedSearch",
+            "text": "PublishesUnifiedSearch"
+          },
+          " & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<unknown>>"
+        ],
+        "path": "x-pack/plugins/lens/public/embeddable/interfaces/lens_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

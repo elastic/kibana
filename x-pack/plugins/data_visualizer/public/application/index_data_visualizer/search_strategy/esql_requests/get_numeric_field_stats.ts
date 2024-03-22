@@ -92,7 +92,7 @@ const getESQLNumericFieldStatsInChunk = async ({
           const median = values[startIndex + numericAccessorMap.p50];
 
           const percentiles = values
-            .slice(startIndex + numericAccessorMap.p0, startIndex + numericAccessorMap.p100)
+            .slice(startIndex + numericAccessorMap.p5, startIndex + numericAccessorMap.p100 + 1)
             .map((value: number) => ({ value }));
 
           const distribution = processDistributionData(percentiles, PERCENTILE_SPACING, min);

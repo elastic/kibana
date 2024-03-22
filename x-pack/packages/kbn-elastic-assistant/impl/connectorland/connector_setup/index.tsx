@@ -20,7 +20,7 @@ import { useLoadActionTypes } from '../use_load_action_types';
 import { StreamingText } from '../../assistant/streaming_text';
 import { ConnectorButton } from '../connector_button';
 import { useConversation } from '../../assistant/use_conversation';
-import { clearPresentationData, conversationHasNoPresentationData } from './helpers';
+import { conversationHasNoPresentationData } from './helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../use_load_connectors';
@@ -38,24 +38,27 @@ const SkipEuiText = styled(EuiText)`
 export interface ConnectorSetupProps {
   conversation?: Conversation;
   onSetupComplete?: () => void;
+  onConversationUpdate: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
 }
 
 export const useConnectorSetup = ({
   conversation = WELCOME_CONVERSATION,
   onSetupComplete,
+  onConversationUpdate,
 }: ConnectorSetupProps): {
   comments: EuiCommentProps[];
   prompt: React.ReactElement;
 } => {
-  const { appendMessage, setApiConfig, setConversation } = useConversation();
+  const { setApiConfig } = useConversation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   // Access all conversations so we can add connector to all on initial setup
-  const { actionTypeRegistry, conversations, http } = useAssistantContext();
+  const { actionTypeRegistry, http } = useAssistantContext();
+
   const {
     data: connectors,
     isSuccess: areConnectorsFetched,
     refetch: refetchConnectors,
-  } = useLoadConnectors({ http });
+  } = useLoadConnectors({ actionTypeRegistry, http });
   const isConnectorConfigured = areConnectorsFetched && !!connectors?.length;
 
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
@@ -67,15 +70,6 @@ export const useConnectorSetup = ({
 
   const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
-  // User constants
-  const userName = useMemo(
-    () => conversation.theme?.user?.name ?? i18n.CONNECTOR_SETUP_USER_YOU,
-    [conversation.theme?.user?.name]
-  );
-  const assistantName = useMemo(
-    () => conversation.theme?.assistant?.name ?? i18n.CONNECTOR_SETUP_USER_ASSISTANT,
-    [conversation.theme?.assistant?.name]
-  );
   const lastConversationMessageIndex = useMemo(
     () => conversation.messages.length - 1,
     [conversation.messages.length]
@@ -108,8 +102,7 @@ export const useConnectorSetup = ({
     setShowAddConnectorButton(true);
     bottomRef.current?.scrollIntoView({ block: 'end' });
     onSetupComplete?.();
-    setConversation({ conversation: clearPresentationData(conversation) });
-  }, [conversation, onSetupComplete, setConversation]);
+  }, [onSetupComplete]);
 
   // Show button to add connector after last message has finished streaming
   const handleSkipSetup = useCallback(() => {
@@ -124,7 +117,7 @@ export const useConnectorSetup = ({
         conversation.messages[index].timestamp == null ||
         conversation.messages[index].timestamp.length === 0
       ) {
-        conversation.messages[index].timestamp = new Date().toLocaleString();
+        conversation.messages[index].timestamp = new Date().toISOString();
       }
       const isLastMessage = index === length - 1;
       const enableStreaming =
@@ -158,9 +151,11 @@ export const useConnectorSetup = ({
     () =>
       conversation.messages.slice(0, currentMessageIndex + 1).map((message, index) => {
         const isUser = message.role === 'user';
-
+        const timestamp = `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${new Date(
+          message.timestamp
+        ).toLocaleString()}`;
         const commentProps: EuiCommentProps = {
-          username: isUser ? userName : assistantName,
+          username: isUser ? i18n.CONNECTOR_SETUP_USER_YOU : i18n.CONNECTOR_SETUP_USER_ASSISTANT,
           children: commentBody(message, index, conversation.messages.length),
           timelineAvatar: (
             <EuiAvatar
@@ -170,50 +165,39 @@ export const useConnectorSetup = ({
               iconType={AssistantAvatar}
             />
           ),
-          timestamp: `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${message.timestamp}`,
+          timestamp,
         };
         return commentProps;
       }),
-    [assistantName, commentBody, conversation.messages, currentMessageIndex, userName]
+    [commentBody, conversation.messages, currentMessageIndex]
   );
 
   const onSaveConnector = useCallback(
-    (connector: ActionConnector) => {
+    async (connector: ActionConnector) => {
       const config = getGenAiConfig(connector);
       // add action type title to new connector
       const connectorTypeTitle = getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
-      Object.values(conversations).forEach((c) => {
-        setApiConfig({
-          conversationId: c.id,
-          apiConfig: {
-            ...c.apiConfig,
-            connectorId: connector.id,
-            connectorTypeTitle,
-            provider: config?.apiProvider,
-            model: config?.defaultModel,
-          },
-        });
-      });
+      // persist only the active conversation
 
-      refetchConnectors?.();
-      setIsConnectorModalVisible(false);
-      appendMessage({
-        conversationId: conversation.id,
-        message: {
-          role: 'assistant',
-          content: i18n.CONNECTOR_SETUP_COMPLETE,
-          timestamp: new Date().toLocaleString(),
+      const updatedConversation = await setApiConfig({
+        conversation,
+        apiConfig: {
+          ...conversation.apiConfig,
+          connectorId: connector.id,
+          connectorTypeTitle,
+          provider: config?.apiProvider,
+          model: config?.defaultModel,
         },
       });
+
+      if (updatedConversation) {
+        onConversationUpdate({ cId: updatedConversation.id, cTitle: updatedConversation.title });
+
+        refetchConnectors?.();
+        setIsConnectorModalVisible(false);
+      }
     },
-    [
-      actionTypeRegistry,
-      appendMessage,
-      conversation.id,
-      conversations,
-      refetchConnectors,
-      setApiConfig,
-    ]
+    [actionTypeRegistry, conversation, onConversationUpdate, refetchConnectors, setApiConfig]
   );
 
   return {

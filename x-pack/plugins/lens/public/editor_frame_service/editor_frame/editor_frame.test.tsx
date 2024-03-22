@@ -29,7 +29,7 @@ import {
   renderWithReduxStore,
 } from '../../mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import { DragDrop, useDragDropContext } from '@kbn/dom-drag-drop';
+import { Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -626,7 +626,7 @@ describe('editor_frame', () => {
         instance.update();
 
         act(() => {
-          instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
+          instance.find('[data-test-subj="mockVisA"]').find(Droppable).prop('onDrop')!(
             {
               indexPatternId: '1',
               field: {},
@@ -711,7 +711,7 @@ describe('editor_frame', () => {
         instance.update();
 
         act(() => {
-          instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(
+          instance.find(Droppable).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(
             {
               indexPatternId: '1',
               field: {},
