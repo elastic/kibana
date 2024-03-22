@@ -22,6 +22,8 @@ export default createTestConfig({
     '--xpack.infra.enabled=true',
     '--xpack.infra.featureFlags.customThresholdAlertsEnabled=true',
     '--xpack.security.roleManagementEnabled=true',
+    `--xpack.cloud.base_url='https://cloud.elastic.co'`,
+    `--xpack.cloud.organization_url='/account/members'`,
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
