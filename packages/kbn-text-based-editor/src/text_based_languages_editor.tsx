@@ -91,7 +91,9 @@ export interface TextBasedLanguagesEditorProps {
   errors?: Error[];
   /** Warning string as it comes from ES */
   warning?: string;
-  /** Disables the editor and displays loading icon in run button */
+  /** Disables the editor and displays loading icon in run button
+   * It is also used for hiding the history component if it is not defined
+   */
   isLoading?: boolean;
   /** Disables the editor */
   isDisabled?: boolean;
@@ -156,7 +158,6 @@ let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
 let lines = 1;
-let historyComponentIsOpen = false;
 
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
@@ -196,7 +197,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
   const [isSpaceReduced, setIsSpaceReduced] = useState(false);
   const [editorWidth, setEditorWidth] = useState(0);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(historyComponentIsOpen);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
@@ -209,6 +210,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
+  const [refetchHistoryItems, setRefetchHistoryItems] = useState(false);
+
+  // as the duration on the history component is being calculated from
+  // the isLoading property, if this property is not defined we want
+  // to hide the history component
+  const hideHistoryComponent = hideQueryHistory || isLoading == null;
 
   const onQueryUpdate = useCallback(
     (value: string) => {
@@ -245,11 +252,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         queryString,
         timeZone,
       });
+      setRefetchHistoryItems(false);
     } else {
       updateCachedQueries({
         queryString,
         status: serverErrors?.length ? 'error' : serverWarning ? 'warning' : 'success',
       });
+
+      setRefetchHistoryItems(true);
     }
   }, [isLoading, isQueryLoading, queryString, serverErrors, serverWarning, timeZone]);
 
@@ -260,7 +270,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
-    historyComponentIsOpen = status;
   }, []);
 
   // Registers a command to redirect users to the index management page
@@ -923,7 +932,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         isHistoryOpen={isHistoryOpen}
                         setIsHistoryOpen={toggleHistory}
                         containerWidth={editorWidth}
-                        hideQueryHistory={hideQueryHistory}
+                        hideQueryHistory={hideHistoryComponent}
+                        refetchHistoryItems={refetchHistoryItems}
                       />
                     )}
                   </div>
@@ -1027,7 +1037,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           isHistoryOpen={isHistoryOpen}
           setIsHistoryOpen={toggleHistory}
           containerWidth={editorWidth}
-          hideQueryHistory={hideQueryHistory}
+          hideQueryHistory={hideHistoryComponent}
+          refetchHistoryItems={refetchHistoryItems}
         />
       )}
       {isCodeEditorExpanded && (

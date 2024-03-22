@@ -56,11 +56,6 @@ localStorageQueries.forEach((queryItem) => {
 
 export const addQueriesToCache = (item: QueryHistoryItem) => {
   const trimmedQueryString = getKey(item.queryString);
-  if (localStorageQueries.length === MAX_QUERIES_NUMBER) {
-    // delete the last element
-    const toBeDeletedQuery = localStorageQueries[MAX_QUERIES_NUMBER - 1];
-    cachedQueries.delete(toBeDeletedQuery.queryString);
-  }
 
   if (item.queryString) {
     const tz = getMomentTimeZone(item.timeZone);
@@ -91,5 +86,12 @@ export const updateCachedQueries = (item: QueryHistoryItem) => {
     });
   }
   const queriesToStore = Array.from(cachedQueries, ([name, value]) => ({ ...value }));
+  if (queriesToStore.length === MAX_QUERIES_NUMBER) {
+    const sortedByDate = queriesToStore.sort((a, b) => sortDates(b?.timeRan, a?.timeRan));
+
+    // delete the last element
+    const toBeDeletedQuery = sortedByDate[MAX_QUERIES_NUMBER - 1];
+    cachedQueries.delete(toBeDeletedQuery.queryString);
+  }
   localStorage.setItem(QUERY_HISTORY_ITEM_KEY, JSON.stringify(queriesToStore));
 };

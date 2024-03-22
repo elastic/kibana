@@ -105,6 +105,7 @@ interface EditorFooterProps {
   allowQueryCancellation?: boolean;
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
+  refetchHistoryItems?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -127,6 +128,7 @@ export const EditorFooter = memo(function EditorFooter({
   containerWidth,
   setIsHistoryOpen,
   hideQueryHistory,
+  refetchHistoryItems,
 }: EditorFooterProps) {
   const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
