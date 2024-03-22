@@ -672,8 +672,8 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertSpaceAwareWarningMessage(): Promise<void> {
-      await retry.tryForTime(3_000, async () => {
-        await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay');
+      await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay', {
+        timeout: 3_000,
       });
     }
   })();
