@@ -1935,17 +1935,23 @@ The algorithm used in the `/upgrade/_review` endpoint for calculating rule versi
 
 We propose developing more adaptable diff algorithms tailored to specific rule fields or rule field types. These more specific algorithms aim to minimize conflicts and automate merging of changes, doing the best effort to keep the intended customizations applied by the user, as well as the updates proposed by Elastic. Hopefully, the user will be able to simply review the proposal and accept it.
 
+In general, for all types of fields, we will follow the heuristic:
+
+- if `base` === `target` && `base` !== `current`, we set merge proposal to be the current version, without a conflict
+- if `base` === `current` && `base` !== `target`, we set merge proposal to be the target version, without a conflict
+- if `base` !== `current` !== target: mark the diff as a conflict AND:
+  - **if conflict is non-solvable**: use the `current` version as the merge proposal 
+  - **if conflict is solvable** use the generated merged version as the merge proposal (possible only in a few types, detailed below - see tables)
+
 Depending on the specific field or type of field we might want to apply a specific merging algorithm when conflicts arise. Let's propose different types.
 
 #### Single-line string fields
 
 > Examples: `name`, `query`
 
-For single-line string fields we will continue to use the existing simple diff algorithm:
+For single-line string fields we will continue to use the existing simple diff algorithm because:
 
-- if `base` !== `current` !== target, we mark the diff as a conflict and use the current version as the merge proposal
-- if `base` === `target` && `base` !== `current`, we set merge proposal to be the current version, without a conflict
-- if `base` === `current` && `base` !== `target`, we set merge proposal to be the target version, without a conflict
+
 
 Reasons why we'll continue to use the simple diff algorithm for single-line string fields:
 - Merging keywords (especially enums) should never be done, because it could generate an invalid value.
