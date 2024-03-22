@@ -5,7 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { HasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
+import {
+  HasSerializableState,
+  PresentationContainer,
+  SerializedPanelState,
+} from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import { HasType, PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
 import React, { ReactElement } from 'react';
@@ -42,6 +46,8 @@ export interface ReactEmbeddableFactory<
     buildApi: (
       apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
       comparators: StateComparators<StateType>
-    ) => ApiType
+    ) => ApiType,
+    uuid: string,
+    parentApi?: PresentationContainer
   ) => Promise<{ Component: React.FC<{}>; api: ApiType }>;
 }

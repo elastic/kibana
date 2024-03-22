@@ -69,17 +69,19 @@ export {
   type PublishesPhaseEvents,
 } from './interfaces/publishes_phase_events';
 export {
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
+  apiPublishesPartialUnifiedSearch,
+  apiPublishesWritableUnifiedSearch,
+  type PublishesTimeRange,
+  type PublishesUnifiedSearch,
+  type PublishesWritableUnifiedSearch,
+} from './interfaces/publishes_unified_search';
+export {
   apiPublishesSavedObjectId,
   useSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
-export {
-  apiPublishesPartialUnifiedSearch,
-  apiPublishesUnifiedSearch,
-  apiPublishesWritableUnifiedSearch,
-  type PublishesUnifiedSearch,
-  type PublishesWritableUnifiedSearch,
-} from './interfaces/publishes_unified_search';
 export {
   apiPublishesUnsavedChanges,
   useUnsavedChanges,
