@@ -82,12 +82,19 @@ const CompareDocuments = ({
     getStorageKey(consumer, 'ShowAllFields'),
     false
   );
+  const [showMatchingValues, setShowMatchingValues] = useLocalStorage(
+    getStorageKey(consumer, 'ShowMatchingValues'),
+    true
+  );
 
   const fieldColumnId = useGeneratedHtmlId({ prefix: 'fields' });
   const comparisonFields = useComparisonFields({
     dataView,
     selectedFieldNames,
+    selectedDocs,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
+    showMatchingValues: Boolean(showMatchingValues),
+    getDocById,
   });
   const comparisonColumns = useComparisonColumns({
     wrapper,
@@ -120,12 +127,14 @@ const CompareDocuments = ({
         showDiff={showDiff}
         diffMode={diffMode}
         showDiffDecorations={showDiffDecorations}
+        showMatchingValues={showMatchingValues}
         showAllFields={showAllFields}
         forceShowAllFields={forceShowAllFields}
         setIsCompareActive={setIsCompareActive}
         setShowDiff={setShowDiff}
         setDiffMode={setDiffMode}
         setShowDiffDecorations={setShowDiffDecorations}
+        setShowMatchingValues={setShowMatchingValues}
         setShowAllFields={setShowAllFields}
         renderCustomToolbar={renderCustomToolbar}
       />
@@ -140,9 +149,11 @@ const CompareDocuments = ({
       setShowAllFields,
       setShowDiff,
       setShowDiffDecorations,
+      setShowMatchingValues,
       showAllFields,
       showDiff,
       showDiffDecorations,
+      showMatchingValues,
     ]
   );
   const comparisonToolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(

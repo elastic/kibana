@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiLink,
   EuiPopover,
   EuiSwitch,
@@ -36,12 +37,14 @@ export interface ComparisonControlsProps {
   showDiff: boolean | undefined;
   diffMode: DocumentDiffMode | undefined;
   showDiffDecorations: boolean | undefined;
+  showMatchingValues: boolean | undefined;
   showAllFields: boolean | undefined;
   forceShowAllFields: boolean;
   setIsCompareActive: (isCompareActive: boolean) => void;
   setShowDiff: (showDiff: boolean) => void;
   setDiffMode: (diffMode: DocumentDiffMode) => void;
   setShowDiffDecorations: (showDiffDecorations: boolean) => void;
+  setShowMatchingValues: (showMatchingValues: boolean) => void;
   setShowAllFields: (showAllFields: boolean) => void;
   renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
 }
@@ -51,12 +54,14 @@ export const ComparisonControls = ({
   showDiff,
   diffMode,
   showDiffDecorations,
+  showMatchingValues,
   showAllFields,
   forceShowAllFields,
   setIsCompareActive,
   setShowDiff,
   setDiffMode,
   setShowDiffDecorations,
+  setShowMatchingValues,
   setShowAllFields,
   renderCustomToolbar,
 }: ComparisonControlsProps) => {
@@ -66,6 +71,7 @@ export const ComparisonControls = ({
   return (
     <EuiFlexGroup
       responsive={false}
+      wrap={true}
       gutterSize="s"
       alignItems="center"
       css={renderCustomToolbar ? undefined : { padding: `0 ${euiTheme.size.s}` }}
@@ -104,10 +110,12 @@ export const ComparisonControls = ({
           <DiffOptions
             diffMode={diffMode}
             showDiffDecorations={showDiffDecorations}
+            showMatchingValues={showMatchingValues}
             showAllFields={showAllFields}
             forceShowAllFields={forceShowAllFields}
             setDiffMode={setDiffMode}
             setShowDiffDecorations={setShowDiffDecorations}
+            setShowMatchingValues={setShowMatchingValues}
             setShowAllFields={setShowAllFields}
           />
         </EuiFlexItem>
@@ -134,19 +142,23 @@ export const ComparisonControls = ({
 const DiffOptions = ({
   diffMode,
   showDiffDecorations,
+  showMatchingValues,
   showAllFields,
   forceShowAllFields,
   setDiffMode,
   setShowDiffDecorations,
+  setShowMatchingValues,
   setShowAllFields,
 }: Pick<
   ComparisonControlsProps,
   | 'diffMode'
   | 'setDiffMode'
   | 'showDiffDecorations'
+  | 'showMatchingValues'
   | 'showAllFields'
   | 'forceShowAllFields'
   | 'setShowDiffDecorations'
+  | 'setShowMatchingValues'
   | 'setShowAllFields'
 >) => {
   const [isDiffOptionsMenuOpen, setIsDiffOptionsMenuOpen] = useState(false);
@@ -160,7 +172,10 @@ const DiffOptions = ({
             setIsDiffOptionsMenuOpen(!isDiffOptionsMenuOpen);
           }}
         >
-          <FormattedMessage id="unifiedDataTable.diffSettings" defaultMessage="Diff settings" />
+          <FormattedMessage
+            id="unifiedDataTable.diffSettings"
+            defaultMessage="Comparison settings"
+          />
         </EuiDataGridToolbarControl>
       }
       isOpen={isDiffOptionsMenuOpen}
@@ -207,7 +222,11 @@ const DiffOptions = ({
         {!forceShowAllFields && (
           <DiffOptionSwitch
             label={i18n.translate('unifiedDataTable.showAllFields', {
-              defaultMessage: 'Show all fields',
+              defaultMessage: 'Show full field list',
+            })}
+            description={i18n.translate('unifiedDataTable.showAllFieldsDescription', {
+              defaultMessage:
+                'Show all available fields if enabled, otherwise only fields with columns in the main table.',
             })}
             checked={showAllFields ?? false}
             onChange={(e) => {
@@ -218,8 +237,27 @@ const DiffOptions = ({
         )}
 
         <DiffOptionSwitch
+          label={i18n.translate('unifiedDataTable.showMatchingValues', {
+            defaultMessage: 'Show matching fields',
+          })}
+          description={i18n.translate('unifiedDataTable.showMatchingValuesDescription', {
+            defaultMessage:
+              'Show fields where all values are equal if enabled, otherwise only fields with differences.',
+          })}
+          checked={showMatchingValues ?? true}
+          onChange={(e) => {
+            setShowMatchingValues(e.target.checked);
+          }}
+          itemCss={{ paddingBottom: 0 }}
+        />
+
+        <DiffOptionSwitch
           label={i18n.translate('unifiedDataTable.showDiffDecorations', {
-            defaultMessage: 'Show decorations',
+            defaultMessage: 'Show diff decorations',
+          })}
+          description={i18n.translate('unifiedDataTable.showDiffDecorationsDescription', {
+            defaultMessage:
+              'Show text decorations in diffs if enabled, otherwise only use highlighting.',
           })}
           checked={showDiffDecorations ?? true}
           onChange={(e) => {
@@ -243,8 +281,8 @@ const SectionHeader: FC = ({ children }) => {
 
 const DiffModeEntry: FC<
   Pick<ComparisonControlsProps, 'diffMode' | 'setDiffMode'> & {
-    advanced?: boolean;
     entryDiffMode: DocumentDiffMode;
+    advanced?: boolean;
   }
 > = ({ children, entryDiffMode, diffMode, advanced, setDiffMode }) => {
   const { euiTheme } = useEuiTheme();
@@ -302,15 +340,24 @@ const AdvancedModeBadge = () => {
 
 const DiffOptionSwitch = ({
   label,
+  description,
   checked,
   onChange,
   itemCss,
 }: Pick<EuiSwitchProps, 'label' | 'checked' | 'onChange'> & {
+  description?: string;
   itemCss?: EuiContextMenuItemProps['css'];
 }) => {
   return (
     <EuiContextMenuItem size="s" css={itemCss}>
-      <EuiSwitch label={label} checked={checked} compressed onChange={onChange} />
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch label={label} checked={checked} compressed onChange={onChange} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip type="questionInCircle" position="right" content={description} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiContextMenuItem>
   );
 };

@@ -7,40 +7,60 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { isEqual } from 'lodash';
 import { useMemo } from 'react';
 
 export interface UseComparisonFieldsProps {
   dataView: DataView;
   selectedFieldNames: string[];
+  selectedDocs: string[];
   showAllFields: boolean;
+  showMatchingValues: boolean;
+  getDocById: (id: string) => DataTableRecord | undefined;
 }
 
 export const useComparisonFields = ({
   dataView,
   selectedFieldNames,
+  selectedDocs,
   showAllFields,
+  showMatchingValues,
+  getDocById,
 }: UseComparisonFieldsProps) => {
+  const { baseDoc, comparisonDocs } = useMemo(() => {
+    const [baseDocId, ...comparisonDocIds] = selectedDocs;
+
+    return {
+      baseDoc: getDocById(baseDocId),
+      comparisonDocs: comparisonDocIds
+        .map((docId) => getDocById(docId))
+        .filter((doc): doc is DataTableRecord => Boolean(doc)),
+    };
+  }, [getDocById, selectedDocs]);
+
   const comparisonFields = useMemo(() => {
-    let fields: string[] = [];
+    let fieldNames = selectedFieldNames;
 
     if (showAllFields) {
-      if (dataView.timeFieldName) {
-        fields.push(dataView.timeFieldName);
-      }
-
-      dataView.fields
+      const sortedFieldNames = dataView.fields
+        .filter((field) => field.name !== dataView.timeFieldName)
         .sort((a, b) => a.displayName.localeCompare(b.displayName))
-        .forEach((field) => {
-          if (field.name !== dataView.timeFieldName) {
-            fields.push(field.name);
-          }
-        });
-    } else {
-      fields = selectedFieldNames;
+        .map((field) => field.name);
+
+      fieldNames = dataView.isTimeBased()
+        ? [dataView.timeFieldName, ...sortedFieldNames]
+        : sortedFieldNames;
     }
 
-    return fields;
-  }, [dataView.fields, dataView.timeFieldName, selectedFieldNames, showAllFields]);
+    if (!baseDoc || showMatchingValues) {
+      return fieldNames;
+    }
+
+    return fieldNames.filter((fieldName) =>
+      comparisonDocs.some((doc) => !isEqual(doc.flattened[fieldName], baseDoc.flattened[fieldName]))
+    );
+  }, [baseDoc, comparisonDocs, dataView, selectedFieldNames, showAllFields, showMatchingValues]);
 
   return comparisonFields;
 };
