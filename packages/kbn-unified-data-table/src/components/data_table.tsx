@@ -1004,6 +1004,7 @@ export const UnifiedDataTable = ({
               ariaDescribedBy={randomId}
               ariaLabelledBy={ariaLabelledBy}
               dataView={dataView}
+              isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
               selectedDocs={usedSelectedDocs}
               schemaDetectors={schemaDetectors}

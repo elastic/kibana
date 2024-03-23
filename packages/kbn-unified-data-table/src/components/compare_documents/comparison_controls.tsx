@@ -33,6 +33,7 @@ import type { DocumentDiffMode } from './types';
 import type { UnifiedDataTableRenderCustomToolbar } from '../data_table';
 
 export interface ComparisonControlsProps {
+  isPlainRecord?: boolean;
   selectedDocs: string[];
   showDiff: boolean | undefined;
   diffMode: DocumentDiffMode | undefined;
@@ -50,6 +51,7 @@ export interface ComparisonControlsProps {
 }
 
 export const ComparisonControls = ({
+  isPlainRecord,
   selectedDocs,
   showDiff,
   diffMode,
@@ -79,11 +81,19 @@ export const ComparisonControls = ({
       <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.s }}>
         <EuiText size="s">
           <strong>
-            <FormattedMessage
-              id="unifiedDataTable.comparingDocuments"
-              defaultMessage="Comparing {documentCount} documents"
-              values={{ documentCount: selectedDocs.length }}
-            />
+            {isPlainRecord ? (
+              <FormattedMessage
+                id="unifiedDataTable.comparingRecords"
+                defaultMessage="Comparing {documentCount} records"
+                values={{ documentCount: selectedDocs.length }}
+              />
+            ) : (
+              <FormattedMessage
+                id="unifiedDataTable.comparingDocuments"
+                defaultMessage="Comparing {documentCount} documents"
+                values={{ documentCount: selectedDocs.length }}
+              />
+            )}
           </strong>
         </EuiText>
       </EuiFlexItem>
