@@ -15,8 +15,9 @@ const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
     id,
     params,
     actionTypeId,
-    ...('useAlertDataForTemplate' in action && typeof action.useAlertDataForTemplate !== 'undefined'
-      ? { useAlertDataForTemplate: action.useAlertDataForTemplate }
+    ...('use_alert_data_for_template' in action &&
+    typeof action.use_alert_data_for_template !== 'undefined'
+      ? { useAlertDataForTemplate: action.use_alert_data_for_template }
       : {}),
     ...('frequency' in action && action.frequency
       ? {

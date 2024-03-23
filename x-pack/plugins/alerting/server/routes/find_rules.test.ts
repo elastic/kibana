@@ -140,6 +140,8 @@ describe('findRulesRoute', () => {
               id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
               uuid: '123-456',
             },
+          ],
+          systemActions: [
             { actionTypeId: '.test', id: 'system_action-id', params: {}, uuid: '789' },
           ],
           params: { x: 42 },
@@ -188,7 +190,6 @@ describe('findRulesRoute', () => {
                 },
                 Object {
                   "connector_type_id": ".test",
-                  "group": undefined,
                   "id": "system_action-id",
                   "params": Object {},
                   "uuid": "789",
@@ -268,7 +269,6 @@ describe('findRulesRoute', () => {
               },
               {
                 connector_type_id: '.test',
-                group: undefined,
                 id: 'system_action-id',
                 params: {},
                 uuid: '789',

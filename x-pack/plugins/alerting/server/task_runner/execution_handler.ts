@@ -722,12 +722,14 @@ export class ExecutionHandler<
     for (const action of this.rule.actions) {
       const alertsArray = Object.entries(alerts);
       let summarizedAlerts = null;
+
       if (this.shouldGetSummarizedAlerts({ action, throttledSummaryActions })) {
         summarizedAlerts = await this.getSummarizedAlerts({
           action,
           spaceId: this.taskInstance.params.spaceId,
           ruleId: this.taskInstance.params.alertId,
         });
+
         if (!isSummaryActionOnInterval(action)) {
           this.logNumberOfFilteredAlerts({
             numberOfAlerts: alertsArray.length,
@@ -797,17 +799,19 @@ export class ExecutionHandler<
       }
     }
 
-    for (const systemAction of this.rule?.systemActions ?? []) {
-      if (this.canGetSummarizedAlerts()) {
-        const summarizedAlerts = await this.getSummarizedAlerts({
-          action: systemAction,
-          spaceId: this.taskInstance.params.spaceId,
-          ruleId: this.taskInstance.params.alertId,
-        });
+    if (!this.canGetSummarizedAlerts()) {
+      return executables;
+    }
 
-        if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
-          executables.push({ action: systemAction, summarizedAlerts });
-        }
+    for (const systemAction of this.rule?.systemActions ?? []) {
+      const summarizedAlerts = await this.getSummarizedAlerts({
+        action: systemAction,
+        spaceId: this.taskInstance.params.spaceId,
+        ruleId: this.taskInstance.params.alertId,
+      });
+
+      if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
+        executables.push({ action: systemAction, summarizedAlerts });
       }
     }
 

@@ -73,14 +73,7 @@ export const isSummaryActionThrottled = ({
   return throttled;
 };
 
-export const generateActionHash = (
-  action?: RuleAction,
-  isSystemAction?: (action?: RuleAction) => boolean
-) => {
-  if (action != null && isSystemAction && isSystemAction(action)) {
-    return `system-action:${action?.actionTypeId || 'no-action-type-id'}:summary`;
-  }
-
+export const generateActionHash = (action?: RuleAction) => {
   return `${action?.actionTypeId || 'no-action-type-id'}:${
     action?.frequency?.summary ? 'summary' : action?.group || 'no-action-group'
   }:${action?.frequency?.throttle || 'no-throttling'}`;

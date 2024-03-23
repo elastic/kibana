@@ -2618,5 +2618,41 @@ describe('Execution Handler', () => {
       expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
       expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
     });
+
+    test('do not execute system actions if the rule type does not support summarized alerts', async () => {
+      const actionsParams = { myParams: 'test' };
+
+      const executorParams = generateExecutionParams({
+        rule: {
+          ...defaultExecutionParams.rule,
+          systemActions: [
+            {
+              id: '1',
+              actionTypeId: '.test-system-action',
+              params: actionsParams,
+              uui: 'test',
+            },
+          ],
+        },
+        ruleType: {
+          ...defaultExecutionParams.ruleType,
+          alerts: undefined,
+        },
+      });
+
+      const buildActionParams = jest.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
+
+      executorParams.actionsClient.isSystemAction.mockReturnValue(true);
+      executorParams.taskRunnerContext.kibanaBaseUrl = 'https://example.com';
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(executorParams));
+
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
+      expect(buildActionParams).not.toHaveBeenCalled();
+      expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+      expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
+    });
   });
 });

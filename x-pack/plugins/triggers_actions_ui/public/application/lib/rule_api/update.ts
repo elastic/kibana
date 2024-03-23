@@ -24,7 +24,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
   actions: actions.map((action) => {
     const { id, params, uuid } = action;
     return {
-      ...('frequency' in action ? { group: action.group } : {}),
+      ...('group' in action ? { group: action.group } : {}),
       id,
       params,
       ...('frequency' in action
