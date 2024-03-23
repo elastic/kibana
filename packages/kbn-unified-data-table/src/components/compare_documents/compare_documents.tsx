@@ -101,6 +101,7 @@ const CompareDocuments = ({
   });
   const comparisonColumns = useComparisonColumns({
     wrapper,
+    isPlainRecord,
     fieldColumnId,
     selectedDocs,
     getDocById,

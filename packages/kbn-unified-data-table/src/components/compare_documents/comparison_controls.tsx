@@ -83,8 +83,8 @@ export const ComparisonControls = ({
           <strong>
             {isPlainRecord ? (
               <FormattedMessage
-                id="unifiedDataTable.comparingRecords"
-                defaultMessage="Comparing {documentCount} records"
+                id="unifiedDataTable.comparingResults"
+                defaultMessage="Comparing {documentCount} results"
                 values={{ documentCount: selectedDocs.length }}
               />
             ) : (

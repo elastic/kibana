@@ -20,6 +20,7 @@ import { useMemo } from 'react';
 
 export interface UseComparisonColumnsProps {
   wrapper: HTMLElement | null;
+  isPlainRecord: boolean;
   fieldColumnId: string;
   selectedDocs: string[];
   getDocById: (docId: string) => DataTableRecord | undefined;
@@ -34,6 +35,7 @@ const fieldColumnName = i18n.translate('unifiedDataTable.fieldColumnTitle', {
 
 export const useComparisonColumns = ({
   wrapper,
+  isPlainRecord,
   fieldColumnId,
   selectedDocs,
   getDocById,
@@ -98,6 +100,13 @@ export const useComparisonColumns = ({
         });
       }
 
+      const columnDisplay = isPlainRecord
+        ? i18n.translate('unifiedDataTable.comparisonColumnResultDisplay', {
+            defaultMessage: 'Result {resultNumber}',
+            values: { resultNumber: Number(docId || 0) + 1 },
+          })
+        : doc.raw._id;
+
       currentColumns.push({
         id: docId,
         display:
@@ -106,10 +115,10 @@ export const useComparisonColumns = ({
               <EuiFlexItem grow={false}>
                 <EuiIcon type="pinFilled" />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{doc.raw._id}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{columnDisplay}</EuiFlexItem>
             </EuiFlexGroup>
           ) : undefined,
-        displayAsText: doc.raw._id,
+        displayAsText: columnDisplay,
         initialWidth: columnWidth,
         isSortable: false,
         isExpandable: false,
@@ -125,7 +134,14 @@ export const useComparisonColumns = ({
     });
 
     return currentColumns;
-  }, [fieldColumnId, getDocById, selectedDocs, setSelectedDocs, wrapper]);
+  }, [
+    fieldColumnId,
+    getDocById,
+    isPlainRecord,
+    selectedDocs,
+    setSelectedDocs,
+    wrapper?.offsetWidth,
+  ]);
 
   return comparisonColumns;
 };

@@ -115,8 +115,8 @@ export function DataTableDocumentToolbarBtn({
         >
           {isPlainRecord ? (
             <FormattedMessage
-              id="unifiedDataTable.showAllRecords"
-              defaultMessage="Show all records"
+              id="unifiedDataTable.showAllResults"
+              defaultMessage="Show all results"
             />
           ) : (
             <FormattedMessage
@@ -137,8 +137,8 @@ export function DataTableDocumentToolbarBtn({
         >
           {isPlainRecord ? (
             <FormattedMessage
-              id="unifiedDataTable.showSelectedRecordsOnly"
-              defaultMessage="Show selected records only"
+              id="unifiedDataTable.showSelectedResultsOnly"
+              defaultMessage="Show selected results only"
             />
           ) : (
             <FormattedMessage
@@ -163,8 +163,8 @@ export function DataTableDocumentToolbarBtn({
         >
           {isPlainRecord ? (
             <FormattedMessage
-              id="unifiedDataTable.compareSelectedRecords"
-              defaultMessage="Compare selected records"
+              id="unifiedDataTable.compareSelectedResults"
+              defaultMessage="Compare selected results"
             />
           ) : (
             <FormattedMessage
@@ -192,8 +192,8 @@ export function DataTableDocumentToolbarBtn({
           <EuiContextMenuItem key="copyJSON" icon="copyClipboard" onClick={copy}>
             {isPlainRecord ? (
               <FormattedMessage
-                id="unifiedDataTable.copyRecordsToClipboardJSON"
-                defaultMessage="Copy records to clipboard (JSON)"
+                id="unifiedDataTable.copyResultsToClipboardJSON"
+                defaultMessage="Copy results to clipboard (JSON)"
               />
             ) : (
               <FormattedMessage
@@ -255,9 +255,9 @@ export function DataTableDocumentToolbarBtn({
         >
           {isPlainRecord ? (
             <FormattedMessage
-              id="unifiedDataTable.selectedRecordsButtonLabel"
+              id="unifiedDataTable.selectedResultsButtonLabel"
               defaultMessage="Selected"
-              description="Selected records"
+              description="Selected results"
             />
           ) : (
             <FormattedMessage
