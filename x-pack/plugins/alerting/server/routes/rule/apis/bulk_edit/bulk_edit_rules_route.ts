@@ -21,6 +21,7 @@ import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { transformOperationsV1 } from './transforms';
+import { validateRequiredGroupInDefaultActions } from '../../../lib/validate_required_group_in_default_actions';
 
 interface BuildBulkEditRulesRouteParams {
   licenseState: ILicenseState;
@@ -46,6 +47,11 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
           const { filter, operations, ids } = bulkEditData;
 
           try {
+            validateRequiredGroupInDefaultActionsInOperations(
+              operations ?? [],
+              (connectorId: string) => actionsClient.isSystemAction(connectorId)
+            );
+
             const bulkEditResults = await rulesClient.bulkEdit<RuleParamsV1>({
               filter,
               ids,
@@ -87,3 +93,14 @@ export const bulkEditInternalRulesRoute = (
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`,
     router,
   });
+
+const validateRequiredGroupInDefaultActionsInOperations = (
+  operations: BulkEditRulesRequestBodyV1['operations'],
+  isSystemAction: (connectorId: string) => boolean
+) => {
+  for (const operation of operations) {
+    if (operation.field === 'actions') {
+      validateRequiredGroupInDefaultActions(operation.value, isSystemAction);
+    }
+  }
+};

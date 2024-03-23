@@ -15,6 +15,7 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { omit } from 'lodash';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
@@ -228,7 +229,7 @@ describe('bulkEditRulesRoute', () => {
 
     const bulkEditActionsResult = { rules: mockedActionAlerts, errors: [], total: 1, skipped: [] };
 
-    it('adds the type of the actions correctly before passing the request to the rules client', async () => {
+    it('passes the system actions correctly to the rules client', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
       const actionsClient = actionsClientMock.create();
@@ -282,7 +283,7 @@ describe('bulkEditRulesRoute', () => {
       `);
     });
 
-    it('removes the type from the actions correctly before sending the response', async () => {
+    it('transforms the system actions in the response of the rules client correctly', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
       const actionsClient = actionsClientMock.create();
@@ -326,47 +327,38 @@ describe('bulkEditRulesRoute', () => {
       ]);
     });
 
-    it('fails if the action contains a type in the request', async () => {
-      const actionToValidate = {
-        group: 'default',
-        id: '2',
-        params: {
-          foo: true,
-        },
-        uuid: '123-456',
-        type: 'hello',
-      };
-
+    it('throws an error if the default action does not specifies a group', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
+      const actionsClient = actionsClientMock.create();
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
 
       bulkEditInternalRulesRoute(router, licenseState);
 
-      const [config, _] = router.post.mock.calls[0];
+      const [_, handler] = router.post.mock.calls[0];
 
-      expect(() =>
-        // @ts-expect-error: body exists
-        config.validate.body.validate({
-          ...bulkEditActionsRequest,
-          operations: [
-            {
-              operation: 'add',
-              field: 'actions',
-              value: [actionToValidate],
-            },
-          ],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`
-        "[operations.0]: types that failed validation:
-        - [operations.0.0.field]: expected value to equal [tags]
-        - [operations.0.1.value.0.type]: definition for this key is missing
-        - [operations.0.2.operation]: expected value to equal [set]
-        - [operations.0.3.operation]: expected value to equal [set]
-        - [operations.0.4.operation]: expected value to equal [set]
-        - [operations.0.5.operation]: expected value to equal [set]
-        - [operations.0.6.operation]: expected value to equal [delete]
-        - [operations.0.7.operation]: expected value to equal [set]"
-      `);
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditActionsResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, actionsClient },
+        {
+          body: {
+            ...bulkEditActionsRequest,
+            operations: [
+              {
+                operation: 'add',
+                field: 'actions',
+                value: [omit(action, 'group')],
+              },
+            ],
+          },
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Group is not defined in action 2"`
+      );
     });
   });
 });

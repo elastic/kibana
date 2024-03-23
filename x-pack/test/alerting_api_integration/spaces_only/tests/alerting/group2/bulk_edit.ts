@@ -130,6 +130,45 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           'Invalid system action params. System action type: test.system-action-connector-adapter - [myParam]: expected value of type [string] but got [undefined]'
         );
       });
+
+      it('should throw 400 if the default action is missing the group', async () => {
+        const { body: rule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
+
+        const payload = {
+          ids: [rule.id],
+          operations: [
+            {
+              operation: 'add',
+              field: 'actions',
+              value: [
+                {
+                  // group is missing
+                  id: 'test-id',
+                  params: {},
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send(payload);
+
+        expect(response.status).to.eql(400);
+        expect(response.body).to.eql({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Group is not defined in action test-id',
+        });
+      });
     });
   });
 }
