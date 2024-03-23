@@ -28,6 +28,7 @@ import {
 } from '../types';
 import { transformRuleActions } from './rule/transforms';
 import { RuleResponse } from '../../common/routes/rule/response';
+import { validateRequiredGroupInDefaultActions } from './lib/validate_required_group_in_default_actions';
 
 export type UpdateRequestBody = TypeOf<typeof bodySchema>;
 interface RuleUpdateOptionsResult extends Omit<UpdateOptions<RuleTypeParams>, 'data'> {
@@ -162,6 +163,13 @@ export const updateRuleRoute = (
           const { id } = req.params;
           const rule = req.body;
           try {
+            /**
+             * Throws an error if the group is not defined in default actions
+             */
+            validateRequiredGroupInDefaultActions(rule.actions ?? [], (connectorId: string) =>
+              actionsClient.isSystemAction(connectorId)
+            );
+
             const alertRes = await rulesClient.update(
               rewriteBodyReq({ id, data: rule }, (connectorId: string) =>
                 actionsClient.isSystemAction(connectorId)

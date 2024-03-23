@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import { UpdateRequestBody, updateRuleRoute } from './update_rule';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -278,5 +278,33 @@ describe('updateRuleRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  it('throws an error if the default action does not specifies a group', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateRuleRoute(router, licenseState);
+
+    const [config, handler] = router.put.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}"`);
+
+    rulesClient.update.mockResolvedValueOnce(mockedAlert);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: {
+          id: '1',
+        },
+        body: { ...updateRequest, actions: [omit(updateRequest.actions[0], 'group')] },
+      },
+      ['ok']
+    );
+
+    await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Group is not defined in action 2"`
+    );
   });
 });
