@@ -116,6 +116,6 @@ export const registerObservabilityRuleTypes = async (
           '../components/custom_threshold/components/alert_details_app_section/alert_details_app_section'
         )
     ),
-    priority: 5,
+    priority: 110,
   });
 };
