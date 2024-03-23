@@ -44,7 +44,16 @@ export const useComparisonFields = ({
 
     if (showAllFields) {
       const sortedFieldNames = dataView.fields
-        .filter((field) => field.name !== dataView.timeFieldName)
+        .filter((field) => {
+          if (field.name === dataView.timeFieldName) {
+            return false;
+          }
+
+          return (
+            baseDoc?.flattened[field.name] != null ||
+            comparisonDocs.some((doc) => doc.flattened[field.name] != null)
+          );
+        })
         .sort((a, b) => a.displayName.localeCompare(b.displayName))
         .map((field) => field.name);
 
