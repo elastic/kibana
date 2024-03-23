@@ -806,7 +806,7 @@ describe('update()', () => {
         isSystemAction: false,
       },
       {
-        id: 'system_action:id',
+        id: 'system_action-id',
         actionTypeId: 'test',
         config: {},
         isMissingSecrets: false,
@@ -817,7 +817,7 @@ describe('update()', () => {
       },
     ]);
 
-    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action:id');
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
 
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -838,13 +838,6 @@ describe('update()', () => {
             },
           },
           {
-            group: 'default',
-            actionRef: 'system_action:system_action-id',
-            actionTypeId: 'test',
-            params: {},
-          },
-          {
-            group: 'custom',
             actionRef: 'system_action:system_action-id',
             actionTypeId: 'test',
             params: {},
@@ -869,6 +862,7 @@ describe('update()', () => {
         },
       ],
     });
+
     const result = await rulesClient.update({
       id: '1',
       data: {
@@ -891,11 +885,7 @@ describe('update()', () => {
         ],
         systemActions: [
           {
-            id: 'system_action:id',
-            params: {},
-          },
-          {
-            id: 'system_action:id',
+            id: 'system_action-id',
             params: {},
           },
         ],
@@ -917,16 +907,10 @@ describe('update()', () => {
             uuid: '106',
           },
           {
-            actionRef: 'system_action:system_action:id',
+            actionRef: 'system_action:system_action-id',
             actionTypeId: 'test',
             params: {},
             uuid: '107',
-          },
-          {
-            actionRef: 'system_action:system_action:id',
-            actionTypeId: 'test',
-            params: {},
-            uuid: '108',
           },
         ],
         alertTypeId: 'myType',
@@ -967,20 +951,6 @@ describe('update()', () => {
             },
             "uuid": undefined,
           },
-          Object {
-            "actionTypeId": "test",
-            "group": "default",
-            "id": "system_action-id",
-            "params": Object {},
-            "uuid": undefined,
-          },
-          Object {
-            "actionTypeId": "test",
-            "group": "custom",
-            "id": "system_action-id",
-            "params": Object {},
-            "uuid": undefined,
-          },
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -994,10 +964,18 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
-        "systemActions": Array [],
+        "systemActions": Array [
+          Object {
+            "actionTypeId": "test",
+            "id": "system_action-id",
+            "params": Object {},
+            "uuid": undefined,
+          },
+        ],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
+
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       '1',
@@ -1005,6 +983,7 @@ describe('update()', () => {
         namespace: 'default',
       }
     );
+
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(actionsClient.isSystemAction).toHaveBeenCalled();
   });
@@ -1123,7 +1102,7 @@ describe('update()', () => {
             actionTypeId: 'test',
             group: 'default',
             params: { foo: true },
-            uuid: '109',
+            uuid: '108',
           },
         ],
         alertTypeId: 'myType',
@@ -1307,7 +1286,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "110",
+            "uuid": "109",
           },
         ],
         "alertTypeId": "myType",
@@ -1462,7 +1441,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "111",
+            "uuid": "110",
           },
         ],
         "alertTypeId": "myType",
@@ -2500,7 +2479,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '147',
+            uuid: '146',
           },
         ],
         alertTypeId: 'myType',
@@ -3059,7 +3038,7 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '154',
+            uuid: '153',
           },
         ],
         alertTypeId: 'myType',
@@ -3265,7 +3244,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "155",
+            "uuid": "154",
           },
         ],
         "alertTypeId": "myType",

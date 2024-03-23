@@ -451,7 +451,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       const systemAction = {
         id: 'system-connector-test.system-action',
         actionTypeId: 'test.system-action',
-        uuid: '123',
         params: {},
       };
 
@@ -466,17 +465,20 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           );
 
         expect(response.status).to.eql(200);
+        expect(response.body.actions.length).to.eql(1);
 
         objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
 
-        expect(response.body.actions).to.eql([
-          {
-            id: 'system-connector-test.system-action',
-            connector_type_id: 'test.system-action',
-            params: {},
-            uuid: '123',
-          },
-        ]);
+        const action = response.body.actions[0];
+        const { uuid, ...rest } = action;
+
+        expect(rest).to.eql({
+          id: 'system-connector-test.system-action',
+          connector_type_id: 'test.system-action',
+          params: {},
+        });
+
+        expect(uuid).to.not.be(undefined);
 
         const esResponse = await es.get<SavedObject<RawRule>>(
           {
@@ -489,14 +491,16 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         expect(esResponse.statusCode).to.eql(200);
         const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
 
-        expect(rawActions).to.eql([
-          {
-            actionRef: 'system_action:system-connector-test.system-action',
-            actionTypeId: 'test.system-action',
-            params: {},
-            uuid: '123',
-          },
-        ]);
+        const rawAction = rawActions[0];
+        const { uuid: rawActionUuid, ...rawActionRest } = rawAction;
+
+        expect(rawActionRest).to.eql({
+          actionRef: 'system_action:system-connector-test.system-action',
+          actionTypeId: 'test.system-action',
+          params: {},
+        });
+
+        expect(uuid).to.not.be(undefined);
 
         const references = esResponse.body._source?.references ?? [];
 

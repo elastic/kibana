@@ -47,6 +47,10 @@ export function mockHandlerArguments(
   KibanaResponseFactory
 ] {
   const listTypes = jest.fn(() => listTypesRes);
+  const actionsClientMocked = actionsClient || actionsClientMock.create();
+
+  actionsClient.isSystemAction.mockImplementation((id) => id === 'system_action-id');
+
   return [
     {
       alerting: {
@@ -65,7 +69,7 @@ export function mockHandlerArguments(
       },
       actions: {
         getActionsClient() {
-          return actionsClient || actionsClientMock.create();
+          return actionsClientMocked;
         },
       },
     } as unknown as AlertingRequestHandlerContext,

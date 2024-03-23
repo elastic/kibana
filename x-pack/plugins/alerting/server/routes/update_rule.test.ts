@@ -6,16 +6,14 @@
  */
 
 import { pick } from 'lodash';
-import { updateRuleRoute } from './update_rule';
+import { UpdateRequestBody, updateRuleRoute } from './update_rule';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { UpdateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { RuleNotifyWhen } from '../../common';
-import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -57,6 +55,14 @@ describe('updateRuleRoute', () => {
         },
       },
     ],
+    systemActions: [
+      {
+        actionTypeId: '.test-system-action',
+        uuid: '1234-5678',
+        id: 'system_action-id',
+        params: {},
+      },
+    ],
     notifyWhen: RuleNotifyWhen.CHANGE,
     alertDelay: {
       active: 10,
@@ -64,7 +70,8 @@ describe('updateRuleRoute', () => {
   };
 
   const mockedAction0 = mockedAlert.actions[0];
-  const updateRequest: AsApiContract<UpdateOptions<{ otherField: boolean }>['data']> = {
+
+  const updateRequest: UpdateRequestBody = {
     ...pick(mockedAlert, 'name', 'tags', 'schedule', 'params', 'throttle'),
     notify_when: mockedAlert.notifyWhen,
     actions: [
@@ -74,6 +81,11 @@ describe('updateRuleRoute', () => {
         id: mockedAction0.id,
         params: mockedAction0.params,
         alerts_filter: mockedAction0.alertsFilter,
+      },
+      {
+        uuid: '1234-5678',
+        id: 'system_action-id',
+        params: {},
       },
     ],
     alert_delay: {
@@ -87,11 +99,30 @@ describe('updateRuleRoute', () => {
     updated_at: mockedAlert.updatedAt,
     created_at: mockedAlert.createdAt,
     rule_type_id: mockedAlert.alertTypeId,
-    actions: mockedAlert.actions.map(({ actionTypeId, alertsFilter, ...rest }) => ({
-      ...rest,
-      connector_type_id: actionTypeId,
-      alerts_filter: alertsFilter,
-    })),
+    actions: [
+      {
+        uuid: '1234-5678',
+        group: 'default',
+        id: '2',
+        connector_type_id: 'test',
+        params: {
+          baz: true,
+        },
+        alerts_filter: {
+          query: {
+            kql: 'name:test',
+            dsl: '{"must": {"term": { "name": "test" }}}',
+            filters: [],
+          },
+        },
+      },
+      {
+        connector_type_id: '.test-system-action',
+        uuid: '1234-5678',
+        id: 'system_action-id',
+        params: {},
+      },
+    ],
     alert_delay: mockedAlert.alertDelay,
   };
 
@@ -153,7 +184,13 @@ describe('updateRuleRoute', () => {
             "schedule": Object {
               "interval": "12s",
             },
-            "systemActions": Array [],
+            "systemActions": Array [
+              Object {
+                "id": "system_action-id",
+                "params": Object {},
+                "uuid": "1234-5678",
+              },
+            ],
             "tags": Array [
               "foo",
             ],

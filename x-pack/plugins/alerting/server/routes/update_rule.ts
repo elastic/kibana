@@ -29,9 +29,9 @@ import {
 import { transformRuleActions } from './rule/transforms';
 import { RuleResponse } from '../../common/routes/rule/response';
 
-type RuleBody = TypeOf<typeof bodySchema>;
+export type UpdateRequestBody = TypeOf<typeof bodySchema>;
 interface RuleUpdateOptionsResult extends Omit<UpdateOptions<RuleTypeParams>, 'data'> {
-  data: RuleBody;
+  data: UpdateRequestBody;
 }
 
 const paramSchema = schema.object({

@@ -54,6 +54,7 @@ export async function loadAllActions({
   const path = includeSystemActions
     ? `${INTERNAL_BASE_ACTION_API_PATH}/connectors`
     : `${BASE_ACTION_API_PATH}/connectors`;
+
   const res = await http.get<Parameters<typeof rewriteResponseRes>[0]>(path);
 
   return rewriteResponseRes(res) as ActionConnector[];

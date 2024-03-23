@@ -663,7 +663,7 @@ describe('createRuleRoute', () => {
   });
 
   describe('actions', () => {
-    it('adds the type of the actions correctly before passing the request to the rules client', async () => {
+    it('passes the system actions correctly to the rules client', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
       const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -746,7 +746,7 @@ describe('createRuleRoute', () => {
       `);
     });
 
-    it('removes the type from the actions correctly before sending the response', async () => {
+    it('transforms the system actions in the response of the rules client correctly', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
       const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -800,41 +800,6 @@ describe('createRuleRoute', () => {
           uuid: '123-456',
         },
       ]);
-    });
-
-    it('fails if the action contains a type in the request', async () => {
-      const actionToValidate = {
-        actionTypeId: 'test',
-        group: 'default',
-        id: '2',
-        params: {
-          foo: true,
-        },
-        uuid: '123-456',
-        type: 'default',
-      } as RuleAction;
-
-      const licenseState = licenseStateMock.create();
-      const router = httpServiceMock.createRouter();
-      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
-      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
-      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
-
-      createRuleRoute({
-        router,
-        licenseState,
-        encryptedSavedObjects,
-        usageCounter: mockUsageCounter,
-      });
-
-      const [config, _] = router.post.mock.calls[0];
-
-      expect(() =>
-        // @ts-expect-error: body exists
-        config.validate.body.validate({ ...ruleToCreate, actions: [actionToValidate] })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[actions.0.type]: definition for this key is missing"`
-      );
     });
   });
 });
