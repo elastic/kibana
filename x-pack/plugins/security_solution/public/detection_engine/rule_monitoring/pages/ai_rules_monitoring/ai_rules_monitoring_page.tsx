@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -17,6 +17,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiSkeletonText,
+  EuiButtonIcon,
+  EuiCopy,
 } from '@elastic/eui';
 import { useAiRulesMonitoringContext } from './ai_rules_monitoring_context';
 import { RuleMonitoringIntervalSelector } from './rule_monitoring_interval_selector';
@@ -27,6 +29,21 @@ export function AiRulesMonitoringPage(): JSX.Element {
   const { isInitialLoading, isFetching, hasConnector, connectorPrompt, result, refetch } =
     useAiRulesMonitoringContext();
   const [comments, setComments] = useState<EuiCommentProps[]>([WELCOME_COMMENT]);
+  const copyAction = useMemo(
+    () => (
+      <EuiCopy textToCopy={result ?? ''}>
+        {(copy) => (
+          <EuiButtonIcon
+            aria-label={i18n.COPY_TO_CLIPBOARD}
+            color="primary"
+            iconType="copyClipboard"
+            onClick={copy}
+          />
+        )}
+      </EuiCopy>
+    ),
+    [result]
+  );
 
   useEffect(() => {
     if (isFetching) {
@@ -49,10 +66,11 @@ export function AiRulesMonitoringPage(): JSX.Element {
           username: 'Rule Monitoring AI Assistant',
           children: <EuiMarkdownFormat>{result}</EuiMarkdownFormat>,
           event: ' ',
+          actions: copyAction,
         },
       ]);
     }
-  }, [isFetching, result]);
+  }, [isFetching, result, copyAction]);
 
   if (isInitialLoading) {
     return (

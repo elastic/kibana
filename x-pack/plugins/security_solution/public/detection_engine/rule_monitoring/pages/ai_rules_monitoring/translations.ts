@@ -45,3 +45,10 @@ export const INLINE_CONNECTOR_LABEL = i18n.translate(
     defaultMessage: 'Connector:',
   }
 );
+
+export const COPY_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.aiRuleMonitoring.copyToClipboard',
+  {
+    defaultMessage: 'Copy to clipboard',
+  }
+);
