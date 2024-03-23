@@ -20,7 +20,7 @@ import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/ser
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { Group } from '../../../../common/custom_threshold_rule/types';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
-import { getAlertDetailsUrl } from '../../../../common';
+import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
@@ -53,6 +53,7 @@ import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
 export interface CustomThresholdLocators {
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
   logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>;
 }
 
