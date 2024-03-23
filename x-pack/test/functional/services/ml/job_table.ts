@@ -50,6 +50,18 @@ export function MachineLearningJobTableProvider(
   const retry = getService('retry');
 
   return new (class MlJobTable {
+    public async assertJobRowCalendars(jobId: string, expectedCalendars: string[]) {
+      for await (const expectedCalendar of expectedCalendars)
+        await this.withDetailsOpen(jobId, async function verifyCalendar() {
+          const calendarSelector = `${jobId}-${expectedCalendar}`;
+          await testSubjects.existOrFail(calendarSelector, {
+            timeout: 3_000,
+          });
+          const calendarVisibleText = await testSubjects.getVisibleText(calendarSelector);
+          expect(calendarVisibleText).to.be(expectedCalendar);
+        });
+    }
+
     public async parseJobTable(
       tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
     ) {
