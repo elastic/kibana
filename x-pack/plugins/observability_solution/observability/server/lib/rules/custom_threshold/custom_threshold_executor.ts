@@ -18,7 +18,6 @@ import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
-import { getContextForRecoveredAlerts } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import { Group } from '../../../../common/custom_threshold_rule/types';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { getAlertDetailsUrl } from '../../../../common';
@@ -45,6 +44,7 @@ import {
   validGroupByForContext,
   flattenAdditionalContext,
   getFormattedGroupBy,
+  getContextForRecoveredAlerts,
 } from './utils';
 
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
