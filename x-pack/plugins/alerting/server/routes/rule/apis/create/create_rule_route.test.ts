@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import { createRuleRoute } from './create_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -800,6 +800,37 @@ describe('createRuleRoute', () => {
           uuid: '123-456',
         },
       ]);
+    });
+
+    it('throws an error if the default action does not specifies a group', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+      const actionsClient = actionsClientMock.create();
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+
+      createRuleRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+      });
+
+      const [_, handler] = router.post.mock.calls[0];
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, actionsClient },
+        {
+          body: { ...ruleToCreate, actions: [omit(action, 'group')] },
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Group is not defined in action 2"`
+      );
     });
   });
 });

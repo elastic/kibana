@@ -447,6 +447,31 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(response.body.scheduledTaskId).to.eql(undefined);
     });
 
+    it('should not allow creating a default action without group', async () => {
+      const customId = '1';
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            actions: [
+              {
+                // group is missing
+                id: 'test-id',
+                params: {},
+              },
+            ],
+          })
+        );
+
+      expect(response.status).to.eql(400);
+      expect(response.body).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Group is not defined in action test-id',
+      });
+    });
+
     describe('system actions', () => {
       const systemAction = {
         id: 'system-connector-test.system-action',

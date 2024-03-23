@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { RuleTypeDisabledError } from '../../../../lib';
 import {
   handleDisabledApiKeysError,
@@ -53,6 +54,13 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
+            /**
+             * Throws an error if the group is not defined in default actions
+             */
+            requireGroupInDefaultActions(createRuleData.actions, (connectorId: string) =>
+              actionsClient.isSystemAction(connectorId)
+            );
+
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const createdRule: Rule<RuleParamsV1> = (await rulesClient.create<RuleParamsV1>({
@@ -78,4 +86,17 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
       )
     )
   );
+};
+
+const requireGroupInDefaultActions = (
+  actions: CreateRuleRequestBodyV1<RuleParamsV1>['actions'],
+  isSystemAction: (id: string) => boolean
+) => {
+  const defaultActions = actions.filter((action) => !isSystemAction(action.id));
+
+  for (const action of defaultActions) {
+    if (!action.group) {
+      throw Boom.badRequest(`Group is not defined in action ${action.id}`);
+    }
+  }
 };
