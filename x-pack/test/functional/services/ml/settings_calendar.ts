@@ -9,53 +9,26 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommonUI } from './common_ui';
-import { Navigation } from './navigation';
-import { MlADJobTable } from './job_table';
 
 export function MachineLearningSettingsCalendarProvider(
   { getService }: FtrProviderContext,
-  mlCommonUI: MlCommonUI,
-  navigation: Navigation,
-  jobTable: MlADJobTable
+  mlCommonUI: MlCommonUI
 ) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
 
   return {
-    async assertConnectedJobs(calendarId: string, expectedJobs: string) {
-      // withDetailsOpen will open up the details of the specific job, and then collapse the details section afterwards
-      await this.assertCalendarRowJobs(calendarId, expectedJobs);
-
-      // await this.assertJobRowCalendars([3, 4], false);
-      //
-      // await testSubjects.click('mlMainTab settings');
-      // await testSubjects.click('mlCalendarsMngButton');
-      // await testSubjects.click('mlEditCalendarLink');
-      //
-      // await this.selectJobGroup('multi-metric');
-      // await this.saveCalendar();
-      //
-      // const groupsAfterAddingMultiMetricsVisibleText = await testSubjects.getVisibleText(
-      //   'mlCalendarListColumnJobs'
-      // );
-      // expect(groupsAfterAddingMultiMetricsVisibleText).to.match(/multi-metric/);
-      //
-      // // Go back to the Anomaly Detection Jobs view
-      // await navigation.navigateToAnomalyDetection();
-      //
-      // // Assert that the calendar is now connected to the multimetric job group
-      // await this.assertJobRowCalendars([4]);
-      //
-      // // Assert that the calendar is still not connected to the automated job group
-      // await this.assertJobRowCalendars([3], false);
-    },
-
-    // async assertCalendarRowJobs(calendarId: string, regexp: RegExp) {
-    async assertCalendarRowJobs(calendarId: string, expectedJobs: string) {
+    async assertCalendarRowJobs(calendarId: string, expectedConnectedJobs: string[]) {
       await this.filterWithSearchString(calendarId, 1); // makes sure the table only has the one row we want to check
       const calendarRow = (await this.parseCalendarTable())[0];
-      expect(calendarRow.jobs).to.be(expectedJobs);
+      const actualJobs: string[] = calendarRow.jobs.replaceAll(',', '').split(' ');
+
+      const expectedWithinActual = expectedConnectedJobs.every((expected) =>
+        actualJobs.some((actual) => actual === expected)
+      );
+
+      expect(expectedWithinActual).to.be(true);
     },
 
     async parseCalendarTable() {

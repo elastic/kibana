@@ -136,30 +136,32 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsCalendar.saveCalendar();
       await ml.settingsCalendar.assertCalendarRowExists(calendarId);
 
-      // await ml.settingsCalendar.assertConnectedJobs(
-      //   'test_calendar_id',
-      //   'test_calendar_ad_1, test_calendar_ad_2'
-      // );
-      await ml.settingsCalendar.assertCalendarRowJobs(
-        calendarId,
-        'test_calendar_ad_1, test_calendar_ad_2'
+      await ml.testExecution.logTestStep(
+        'calendar creation results in a calendar being automatically connected to job groups applied during creation'
       );
+      await ml.settingsCalendar.assertCalendarRowJobs(calendarId, [
+        'test_calendar_ad_1',
+        'test_calendar_ad_2',
+      ]);
 
       await ml.navigation.navigateToAnomalyDetection();
 
-      await ml.jobTable.assertJobRowCalendars('test_calendar_ad_1', ['test_calendar_id']);
-      //
-      // await ml.jobTable.assertJobRowCalendars([3, 4]);
-      //
-      // await ml.navigation.navigateToSettings();
-      // await ml.settingsCalendar.navigateToCalendarManagement();
-      // await ml.settingsCalendar.openCalendarEditForm();
-      // await ml.settingsCalendar.selectJobGroup();
-      // await ml.settingsCalendar.saveCalendar();
-      // await ml.settingsCalendar.assertConnectedJobs();
-      // await ml.navigation.navigateToAnomalyDetection();
-      //
-      // await ml.jobTable.assertJobRowCalendars([1, 2]);
+      await ml.jobTable.assertJobRowCalendars('test_calendar_ad_1', [calendarId]);
+      await ml.jobTable.clickJobRowCalendar('test_calendar_ad_1', calendarId);
+
+      await ml.testExecution.logTestStep(
+        'created calendars can be connected to job groups after creation'
+      );
+
+      await ml.settingsCalendar.selectJobGroup('multi-metric');
+      await ml.settingsCalendar.saveCalendar();
+      await ml.settingsCalendar.assertCalendarRowJobs(calendarId, [
+        'test_calendar_ad_1',
+        'test_calendar_ad_2',
+        'multi-metric',
+      ]);
+      await ml.navigation.navigateToAnomalyDetection();
+      await ml.jobTable.assertJobRowCalendars('test_calendar_ad_4', [calendarId]);
     });
 
     async function assignJobToCalendar(

@@ -50,9 +50,19 @@ export function MachineLearningJobTableProvider(
   const retry = getService('retry');
 
   return new (class MlJobTable {
+    public async clickJobRowCalendar(jobId: string, calendarId: string) {
+      await this.withDetailsOpen(jobId, async function clickJobRowCalendar() {
+        const calendarSelector = `${jobId}-${calendarId}`;
+        await testSubjects.existOrFail(calendarSelector, {
+          timeout: 3_000,
+        });
+        await testSubjects.click(calendarSelector, 3_000);
+      });
+    }
+
     public async assertJobRowCalendars(jobId: string, expectedCalendars: string[]) {
       for await (const expectedCalendar of expectedCalendars)
-        await this.withDetailsOpen(jobId, async function verifyCalendar() {
+        await this.withDetailsOpen(jobId, async function verifyJobRowCalendar() {
           const calendarSelector = `${jobId}-${expectedCalendar}`;
           await testSubjects.existOrFail(calendarSelector, {
             timeout: 3_000,
