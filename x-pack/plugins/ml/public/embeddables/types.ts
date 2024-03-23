@@ -122,7 +122,7 @@ export interface SingleMetricViewerEmbeddableCustomInput {
   functionDescription?: string;
   panelTitle: string;
   selectedDetectorIndex: number;
-  selectedEntities: MlEntityField[];
+  selectedEntities?: MlEntityField[];
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
   query: Query;

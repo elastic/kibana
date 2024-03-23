@@ -23,39 +23,39 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import type { SingleMetricViewerServices } from '..';
+import type { SingleMetricViewerEmbeddableInput } from '..';
 import { SeriesControls } from '../../application/timeseriesexplorer/components/series_controls';
 import {
   APP_STATE_ACTION,
   type TimeseriesexplorerActionType,
 } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
+import type { SingleMetricViewerEmbeddableCustomInput } from '../types';
 
 export interface SingleMetricViewerInitializerProps {
   bounds: TimeRangeBounds;
   defaultTitle: string;
-  initialInput?: SingleMetricViewerServices;
+  initialInput?: Partial<SingleMetricViewerEmbeddableInput>;
   job: MlJob;
-  onCreate: (props: {
-    panelTitle: string;
-    functionDescription?: string;
-    selectedDetectorIndex: number;
-    selectedEntities: any;
-  }) => void;
+  onCreate: (props: Partial<SingleMetricViewerEmbeddableCustomInput>) => void;
   onCancel: () => void;
 }
 
 export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProps> = ({
-  bounds,
   defaultTitle,
+  bounds,
   initialInput,
   job,
   onCreate,
   onCancel,
 }) => {
   const [panelTitle, setPanelTitle] = useState<string>(defaultTitle);
-  const [functionDescription, setFunctionDescription] = useState<string | undefined>();
-  const [selectedDetectorIndex, setSelectedDetectorIndex] = useState<number>(0);
-  const [selectedEntities, setSelectedEntities] = useState<any>();
+  const [functionDescription, setFunctionDescription] = useState<string | undefined>(
+    initialInput?.functionDescription
+  );
+  const [selectedDetectorIndex, setSelectedDetectorIndex] = useState<number>(
+    initialInput?.selectedDetectorIndex ?? 0
+  );
+  const [selectedEntities, setSelectedEntities] = useState<any>(initialInput?.selectedEntities);
 
   const isPanelTitleValid = panelTitle.length > 0;
 

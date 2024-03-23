@@ -16,6 +16,7 @@ import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
 import { createClearSelectionAction } from './clear_selection_action';
 import { createEditAnomalyChartsPanelAction } from './edit_anomaly_charts_panel_action';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
+import { createEditSingleMetricViewerPanelAction } from './edit_single_metric_viewer_panel_action';
 import {
   createCategorizationADJobAction,
   createCategorizationADJobTrigger,
@@ -44,6 +45,9 @@ export function registerMlUiActions(
 ) {
   // Initialize actions
   const editSwimlanePanelAction = createEditSwimlanePanelAction(core.getStartServices);
+  const editSingleMetricViewerPanelAction = createEditSingleMetricViewerPanelAction(
+    core.getStartServices
+  );
   const openInExplorerAction = createOpenInExplorerAction(core.getStartServices);
   const openInSingleMetricViewerAction = createOpenInSingleMetricViewerAction(
     core.getStartServices
@@ -63,6 +67,7 @@ export function registerMlUiActions(
 
   // Assign triggers
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSwimlanePanelAction);
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSingleMetricViewerPanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editExplorerPanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openInExplorerAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, openInSingleMetricViewerAction.id);

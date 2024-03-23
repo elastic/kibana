@@ -53,6 +53,14 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
     super(initialInput, {} as AnomalyChartsEmbeddableOutput, parent);
   }
 
+  public updateUserInput(update: SingleMetricViewerEmbeddableInput) {
+    this.updateInput(update);
+  }
+
+  public reportsEmbeddableLoad() {
+    return true;
+  }
+
   public onLoading() {
     this.renderComplete.dispatchInProgress();
     this.updateOutput({ loading: true, error: undefined });
@@ -65,7 +73,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
 
   public onRenderComplete() {
     this.renderComplete.dispatchComplete();
-    this.updateOutput({ loading: false, error: undefined });
+    this.updateOutput({ loading: false, rendered: true, error: undefined });
   }
 
   public render(node: HTMLElement) {

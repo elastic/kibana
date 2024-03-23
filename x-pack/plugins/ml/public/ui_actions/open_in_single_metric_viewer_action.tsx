@@ -7,46 +7,29 @@
 
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type {
-  EmbeddableApiContext,
-  HasParentApi,
-  HasType,
-  PublishesUnifiedSearch,
-} from '@kbn/presentation-publishing';
-import { apiHasType, apiIsOfType } from '@kbn/presentation-publishing';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableApiContext, HasType } from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
-import type { AnomalySingleMetricViewerEmbeddableType } from '../embeddables';
+import type { AnomalySingleMetricViewerEmbeddableType, MlEmbeddableBaseApi } from '../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
+import type { SingleMetricViewerEmbeddableInput } from '../embeddables/types';
+
 import type { MlCoreSetup } from '../plugin';
-import type { JobId } from '../shared';
 
 export interface SingleMetricViewerFieldSelectionApi {
-  input: {
-    jobIds: JobId[];
-    query: any;
-    selectedEntities: MlEntityField | undefined;
-  };
+  input: Partial<SingleMetricViewerEmbeddableInput>;
 }
+
+export interface SingleMetricViewerEmbeddableApi
+  extends HasType<AnomalySingleMetricViewerEmbeddableType>,
+    MlEmbeddableBaseApi,
+    SingleMetricViewerFieldSelectionApi {}
 
 export interface OpenInSingleMetricViewerActionContext extends EmbeddableApiContext {
-  embeddable: OpenInSingleMetricViewerFromSingleMetricViewerActionApi;
-  /**
-   * Optional fields selected using anomaly charts
-   */
-  data?: MlEntityField[];
+  embeddable: SingleMetricViewerEmbeddableApi;
 }
-
-export type OpenInSingleMetricViewerBaseActionApi = Partial<
-  HasParentApi<PublishesUnifiedSearch> & PublishesUnifiedSearch & { jobIds: JobId[] }
->;
-
-export type OpenInSingleMetricViewerFromSingleMetricViewerActionApi =
-  HasType<AnomalySingleMetricViewerEmbeddableType> &
-    OpenInSingleMetricViewerBaseActionApi &
-    SingleMetricViewerFieldSelectionApi;
 
 export const OPEN_IN_SINGLE_METRIC_VIEWER_ACTION = 'openInSingleMetricViewerAction';
 
@@ -59,18 +42,14 @@ export function isSingleMetricViewerEmbeddableContext(
   );
 }
 
-export const isApiCompatible = (
-  api: unknown | null
-): api is OpenInSingleMetricViewerBaseActionApi => Boolean(apiHasType(api));
-
-const getTimeRange = (embeddable: OpenInSingleMetricViewerBaseActionApi): TimeRange | undefined => {
+const getTimeRange = (embeddable: MlEmbeddableBaseApi): TimeRange | undefined => {
   return embeddable.timeRange$?.getValue() ?? embeddable.parentApi?.timeRange$?.getValue();
 };
 
 export function createOpenInSingleMetricViewerAction(
   getStartServices: MlCoreSetup['getStartServices']
-) {
-  return createAction<EmbeddableApiContext>({
+): UiActionsActionDefinition<OpenInSingleMetricViewerActionContext> {
+  return {
     id: 'open-in-single-metric-viewer',
     type: OPEN_IN_SINGLE_METRIC_VIEWER_ACTION,
     getIconType(): string {
@@ -124,5 +103,5 @@ export function createOpenInSingleMetricViewerAction(
     async isCompatible(context: EmbeddableApiContext) {
       return isSingleMetricViewerEmbeddableContext(context);
     },
-  });
+  };
 }
