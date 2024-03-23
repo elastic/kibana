@@ -82,6 +82,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
 };
 
 export function DataTableDocumentToolbarBtn({
+  isPlainRecord,
   isFilterActive,
   rows,
   selectedDocs,
@@ -89,6 +90,7 @@ export function DataTableDocumentToolbarBtn({
   setIsCompareActive,
   setSelectedDocs,
 }: {
+  isPlainRecord: boolean;
   isFilterActive: boolean;
   rows: DataTableRecord[];
   selectedDocs: string[];
@@ -111,10 +113,17 @@ export function DataTableDocumentToolbarBtn({
             setIsFilterActive(false);
           }}
         >
-          <FormattedMessage
-            id="unifiedDataTable.showAllDocuments"
-            defaultMessage="Show all documents"
-          />
+          {isPlainRecord ? (
+            <FormattedMessage
+              id="unifiedDataTable.showAllRecords"
+              defaultMessage="Show all records"
+            />
+          ) : (
+            <FormattedMessage
+              id="unifiedDataTable.showAllDocuments"
+              defaultMessage="Show all documents"
+            />
+          )}
         </EuiContextMenuItem>
       ) : (
         <EuiContextMenuItem
@@ -126,10 +135,17 @@ export function DataTableDocumentToolbarBtn({
             setIsFilterActive(true);
           }}
         >
-          <FormattedMessage
-            id="unifiedDataTable.showSelectedDocumentsOnly"
-            defaultMessage="Show selected documents only"
-          />
+          {isPlainRecord ? (
+            <FormattedMessage
+              id="unifiedDataTable.showSelectedRecordsOnly"
+              defaultMessage="Show selected records only"
+            />
+          ) : (
+            <FormattedMessage
+              id="unifiedDataTable.showSelectedDocumentsOnly"
+              defaultMessage="Show selected documents only"
+            />
+          )}
         </EuiContextMenuItem>
       ),
     ];
@@ -145,10 +161,17 @@ export function DataTableDocumentToolbarBtn({
             setIsCompareActive(true);
           }}
         >
-          <FormattedMessage
-            id="unifiedDataTable.compareSelectedDocuments"
-            defaultMessage="Compare selected documents"
-          />
+          {isPlainRecord ? (
+            <FormattedMessage
+              id="unifiedDataTable.compareSelectedRecords"
+              defaultMessage="Compare selected records"
+            />
+          ) : (
+            <FormattedMessage
+              id="unifiedDataTable.compareSelectedDocuments"
+              defaultMessage="Compare selected documents"
+            />
+          )}
         </EuiContextMenuItem>
       );
     }
@@ -167,10 +190,17 @@ export function DataTableDocumentToolbarBtn({
       >
         {(copy) => (
           <EuiContextMenuItem key="copyJSON" icon="copyClipboard" onClick={copy}>
-            <FormattedMessage
-              id="unifiedDataTable.copyToClipboardJSON"
-              defaultMessage="Copy documents to clipboard (JSON)"
-            />
+            {isPlainRecord ? (
+              <FormattedMessage
+                id="unifiedDataTable.copyRecordsToClipboardJSON"
+                defaultMessage="Copy records to clipboard (JSON)"
+              />
+            ) : (
+              <FormattedMessage
+                id="unifiedDataTable.copyToClipboardJSON"
+                defaultMessage="Copy documents to clipboard (JSON)"
+              />
+            )}
           </EuiContextMenuItem>
         )}
       </EuiCopy>,
@@ -189,7 +219,15 @@ export function DataTableDocumentToolbarBtn({
     );
 
     return menuItems;
-  }, [isFilterActive, rows, selectedDocs, setIsCompareActive, setIsFilterActive, setSelectedDocs]);
+  }, [
+    isFilterActive,
+    isPlainRecord,
+    rows,
+    selectedDocs,
+    setIsCompareActive,
+    setIsFilterActive,
+    setSelectedDocs,
+  ]);
 
   const toggleSelectionToolbar = useCallback(
     () => setIsSelectionPopoverOpen((prevIsOpen) => !prevIsOpen),
@@ -215,11 +253,19 @@ export function DataTableDocumentToolbarBtn({
             },
           }}
         >
-          <FormattedMessage
-            id="unifiedDataTable.selectedRowsButtonLabel"
-            defaultMessage="Selected"
-            description="Selected documents"
-          />
+          {isPlainRecord ? (
+            <FormattedMessage
+              id="unifiedDataTable.selectedRecordsButtonLabel"
+              defaultMessage="Selected"
+              description="Selected records"
+            />
+          ) : (
+            <FormattedMessage
+              id="unifiedDataTable.selectedRowsButtonLabel"
+              defaultMessage="Selected"
+              description="Selected documents"
+            />
+          )}
         </EuiDataGridToolbarControl>
       }
     >
