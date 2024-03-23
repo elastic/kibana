@@ -27,6 +27,7 @@ import type { UnifiedDataTableRenderCustomToolbar } from '../data_table';
 import { ComparisonControls } from './comparison_controls';
 import { useComparisonCellValue } from './hooks/use_comparison_cell_value';
 import { useComparisonColumns } from './hooks/use_comparison_columns';
+import { useComparisonCss } from './hooks/use_comparison_css';
 import { useComparisonFields } from './hooks/use_comparison_fields';
 import type { DocumentDiffMode } from './types';
 
@@ -185,10 +186,10 @@ const CompareDocuments = ({
     selectedDocs,
     showDiff,
     diffMode,
-    showDiffDecorations,
     fieldFormats,
     getDocById,
   });
+  const comparisonCss = useComparisonCss({ diffMode, showDiffDecorations });
 
   return (
     <EuiDataGrid
@@ -206,6 +207,7 @@ const CompareDocuments = ({
       renderCellValue={ComparisonCellValue}
       renderCustomToolbar={renderCustomToolbarFn}
       data-test-subj="comparisonTable"
+      css={comparisonCss}
     />
   );
 };

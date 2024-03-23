@@ -6,27 +6,28 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiDataGridCellValueElementProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  tint,
-  useEuiBackgroundColor,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiDataGridCellValueElementProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { formatFieldValue } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldTypeName } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { Change, diffChars, diffLines, diffWords } from 'diff';
+import classNames from 'classnames';
+import { diffChars, diffLines, diffWords } from 'diff';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
+import {
+  ADDED_SEGMENT_CLASS,
+  BASE_CELL_CLASS,
+  DIFF_CELL_CLASS,
+  FIELD_NAME_CLASS,
+  MATCH_CELL_CLASS,
+  REMOVED_SEGMENT_CLASS,
+  SEGMENT_CLASS,
+} from './use_comparison_css';
 
 export interface UseComparisonCellValueProps {
   dataView: DataView;
@@ -35,7 +36,6 @@ export interface UseComparisonCellValueProps {
   selectedDocs: string[];
   showDiff: boolean | undefined;
   diffMode: DocumentDiffMode | undefined;
-  showDiffDecorations: boolean | undefined;
   fieldFormats: FieldFormatsStart;
   getDocById: (id: string) => DataTableRecord | undefined;
 }
@@ -47,7 +47,6 @@ export const useComparisonCellValue = ({
   selectedDocs,
   showDiff,
   diffMode,
-  showDiffDecorations,
   fieldFormats,
   getDocById,
 }: UseComparisonCellValueProps) => {
@@ -68,7 +67,6 @@ export const useComparisonCellValue = ({
           comparisonBaseDoc={comparisonBaseDoc}
           showDiff={showDiff}
           diffMode={diffMode}
-          showDiffDecorations={showDiffDecorations}
           fieldFormats={fieldFormats}
           getDocById={getDocById}
           {...innerProps}
@@ -85,7 +83,6 @@ export const useComparisonCellValue = ({
       fieldFormats,
       getDocById,
       showDiff,
-      showDiffDecorations,
     ]
   );
 
@@ -101,52 +98,6 @@ interface InnerCellValueProps
 
 const EMPTY_VALUE = '-';
 
-const matchingCellCss = css`
-  .unifiedDataTable__cellValue {
-    &,
-    & * {
-      color: ${euiThemeVars.euiColorSuccessText} !important;
-    }
-  }
-`;
-
-const differentCellCss = css`
-  .unifiedDataTable__cellValue {
-    &,
-    & * {
-      color: ${euiThemeVars.euiColorDangerText} !important;
-    }
-  }
-`;
-
-const indicatorCss = css`
-  position: absolute;
-  width: ${euiThemeVars.euiSizeS};
-  height: 100%;
-  margin-left: calc(-${euiThemeVars.euiSizeS} - calc(${euiThemeVars.euiSizeXS} / 2));
-  text-align: center;
-  line-height: ${euiThemeVars.euiFontSizeM};
-  font-weight: ${euiThemeVars.euiFontWeightMedium};
-`;
-
-const matchIndicatorCss = css`
-  &:before {
-    content: '+';
-    ${indicatorCss}
-    background-color: ${euiThemeVars.euiColorSuccess};
-    color: ${euiThemeVars.euiColorLightestShade};
-  }
-`;
-
-const diffIndicatorCss = css`
-  &:before {
-    content: '-';
-    ${indicatorCss}
-    background-color: ${tint(euiThemeVars.euiColorDanger, 0.25)};
-    color: ${euiThemeVars.euiColorLightestShade};
-  }
-`;
-
 const InnerCellValue = ({
   dataView,
   comparisonBaseDocId,
@@ -154,7 +105,6 @@ const InnerCellValue = ({
   comparisonFields,
   showDiff,
   diffMode,
-  showDiffDecorations,
   fieldColumnId,
   getDocById,
   fieldFormats,
@@ -168,27 +118,21 @@ const InnerCellValue = ({
   const base = comparisonBaseDoc?.[fieldName];
   const comparison = doc?.flattened[fieldName];
   const diff = useDiff({ base, comparison, showDiff, diffMode });
-  const matchBackgroundColor = useEuiBackgroundColor('success');
-  const diffBackgroundColor = useEuiBackgroundColor('danger');
-  const baseDocCellCss = css`
-    background-color: ${useEuiBackgroundColor('subdued', { method: 'transparent' })};
-  `;
 
   useEffect(() => {
     if (columnId === comparisonBaseDocId) {
-      setCellProps({ css: baseDocCellCss });
+      setCellProps({ className: BASE_CELL_CLASS });
     } else if (!showDiff || diffMode !== 'basic') {
-      setCellProps({ css: undefined });
+      setCellProps({ className: undefined });
     } else if (columnId !== fieldColumnId) {
       if (isEqual(base, comparison)) {
-        setCellProps({ css: matchingCellCss });
+        setCellProps({ className: MATCH_CELL_CLASS });
       } else {
-        setCellProps({ css: differentCellCss });
+        setCellProps({ className: DIFF_CELL_CLASS });
       }
     }
   }, [
     base,
-    baseDocCellCss,
     columnId,
     comparison,
     comparisonBaseDocId,
@@ -199,7 +143,7 @@ const InnerCellValue = ({
   ]);
 
   if (columnId === fieldColumnId) {
-    return <FieldColumn field={field} fieldName={fieldName} />;
+    return <FieldCellContent field={field} fieldName={fieldName} />;
   }
 
   if (!doc) {
@@ -221,37 +165,30 @@ const InnerCellValue = ({
             dataView.getFieldByName(fieldName)
           ),
         }}
-        css={{ whiteSpace: 'pre-wrap' }}
       />
     );
   }
 
-  const matchCss = css`
-    background-color: ${matchBackgroundColor};
-    color: ${euiThemeVars.euiColorSuccessText};
-  `;
-  const diffCss = css`
-    background-color: ${diffBackgroundColor};
-    color: ${euiThemeVars.euiColorDangerText};
-  `;
+  const SegmentTag = diffMode === 'lines' ? 'div' : 'span';
 
   return (
-    <span className={CELL_CLASS} css={{ whiteSpace: 'pre-wrap' }}>
+    <span className={CELL_CLASS}>
       {diff.map((change, i) => (
-        <DiffSegment
+        <SegmentTag
           key={`segment-${i}`}
-          change={change}
-          diffMode={diffMode}
-          showDiffDecorations={showDiffDecorations}
-          matchCss={matchCss}
-          diffCss={diffCss}
-        />
+          className={classNames(SEGMENT_CLASS, {
+            [ADDED_SEGMENT_CLASS]: change.added,
+            [REMOVED_SEGMENT_CLASS]: change.removed,
+          })}
+        >
+          {change.value}
+        </SegmentTag>
       ))}
     </span>
   );
 };
 
-const FieldColumn = ({
+const FieldCellContent = ({
   field,
   fieldName,
 }: {
@@ -268,84 +205,11 @@ const FieldColumn = ({
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText
-          size="relative"
-          css={css`
-            font-weight: ${euiThemeVars.euiFontWeightSemiBold};
-          `}
-        >
+        <EuiText size="relative" className={FIELD_NAME_CLASS}>
           {field?.displayName ?? fieldName}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-};
-
-const DiffSegment = ({
-  change,
-  diffMode,
-  showDiffDecorations,
-  matchCss,
-  diffCss,
-}: {
-  change: Change;
-  diffMode: DocumentDiffMode | undefined;
-  showDiffDecorations: boolean | undefined;
-  matchCss: ReturnType<typeof css>;
-  diffCss: ReturnType<typeof css>;
-}) => {
-  const SegmentTag = diffMode === 'lines' ? 'div' : 'span';
-
-  const highlightCss = useMemo(
-    () => (change.added ? matchCss : change.removed ? diffCss : undefined),
-    [change.added, change.removed, diffCss, matchCss]
-  );
-
-  const paddingCss = useMemo(() => {
-    if (diffMode === 'lines') {
-      return css`
-        padding-left: calc(${euiThemeVars.euiSizeXS} / 2);
-      `;
-    }
-  }, [diffMode]);
-
-  const decorationCss = useMemo(() => {
-    if (!showDiffDecorations) {
-      return undefined;
-    }
-
-    if (diffMode === 'lines') {
-      if (change.added) {
-        return matchIndicatorCss;
-      } else if (change.removed) {
-        return diffIndicatorCss;
-      }
-    } else {
-      if (change.added) {
-        return css`
-          text-decoration: underline;
-        `;
-      } else if (change.removed) {
-        return css`
-          text-decoration: line-through;
-        `;
-      }
-    }
-  }, [change.added, change.removed, diffMode, showDiffDecorations]);
-
-  return (
-    <SegmentTag
-      css={[
-        css`
-          position: relative;
-        `,
-        highlightCss,
-        paddingCss,
-        decorationCss,
-      ]}
-    >
-      {change.value}
-    </SegmentTag>
   );
 };
 
