@@ -21,6 +21,8 @@ import {
   EuiTitle,
   EuiEmptyPrompt,
   useGeneratedHtmlId,
+  EuiFilterGroup,
+  EuiFilterButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -383,22 +385,29 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             )}
 
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiFilterGroup
                 data-test-subj="indexDetailsMappingsToggleViewButton"
+                aria-label={i18n.translate(
+                  'xpack.idxMgmt.indexDetails.mappings.mappingsViewButtonGroupAriaLabel',
+                  {
+                    defaultMessage: 'Mappings View Button Group',
+                  }
+                )}
                 onClick={onToggleChange}
               >
-                {isJSONVisible ? (
+                <EuiFilterButton hasActiveFilters={!isJSONVisible} withNext>
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.mappings.tableView"
                     defaultMessage="List"
                   />
-                ) : (
+                </EuiFilterButton>
+                <EuiFilterButton hasActiveFilters={isJSONVisible}>
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.mappings.json"
                     defaultMessage="JSON"
                   />
-                )}
-              </EuiButton>
+                </EuiFilterButton>
+              </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
           {addFieldComponent && (
