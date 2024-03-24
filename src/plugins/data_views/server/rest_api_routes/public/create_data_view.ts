@@ -56,7 +56,7 @@ const registerCreateDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public', enableQueryVersion: true }).addVersion(
+    router.versioned.post({ path, access: 'public' }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {

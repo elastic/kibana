@@ -49,18 +49,15 @@ export const createRuntimeField = async ({
   usageCollection?.incrementCounter({ counterName });
   const dataView = await dataViewsService.getDataViewLazy(id);
 
-  const fld = Object.keys((await dataView.getFields({ fieldName: [name] })).getFieldMap());
-
-  if (fld.length || dataView.getRuntimeField(name)) {
-    throw new Error(`Field [name = ${name}] already exists.`);
-  }
-
   const firstNameSegment = name.split('.')[0];
 
-  const fld2 = Object.keys((await dataView.getFields({ fieldName: [name] })).getFieldMap());
+  const fld = Object.keys(
+    (await dataView.getFields({ fieldName: [name, firstNameSegment] })).getFieldMap()
+  );
 
-  if (fld2.length || dataView.getRuntimeField(firstNameSegment)) {
-    throw new Error(`Field [name = ${firstNameSegment}] already exists.`);
+  // check getRuntimeField to cover composite fields
+  if (fld.length || dataView.getRuntimeField(name) || dataView.getRuntimeField(firstNameSegment)) {
+    throw new Error(`Field [name = ${name}] already exists.`);
   }
 
   const createdRuntimeFields = await dataView.addRuntimeField(name, runtimeField);

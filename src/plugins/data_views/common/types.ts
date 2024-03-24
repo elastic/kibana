@@ -388,7 +388,10 @@ export enum DataViewType {
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
 
 // omit items saved DataView
-type FieldsForWildcardSpec = Omit<FieldSpec, 'format' | 'customLabel' | 'runtimeField' | 'count'>;
+type FieldsForWildcardSpec = Omit<
+  FieldSpec,
+  'format' | 'customLabel' | 'runtimeField' | 'count' | 'customDescription'
+>;
 
 /**
  * Serialized version of DataViewField
