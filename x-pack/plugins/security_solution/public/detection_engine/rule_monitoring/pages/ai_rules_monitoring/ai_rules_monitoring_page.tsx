@@ -22,12 +22,13 @@ import {
 } from '@elastic/eui';
 import { useAiRulesMonitoringContext } from './ai_rules_monitoring_context';
 import { RuleMonitoringIntervalSelector } from './rule_monitoring_interval_selector';
-import * as i18n from './translations';
 import { ConnectorSelector } from './connector_selector';
+import * as i18n from './translations';
 
 export function AiRulesMonitoringPage(): JSX.Element {
   const { isInitialLoading, isFetching, hasConnector, connectorPrompt, result, refetch } =
     useAiRulesMonitoringContext();
+
   const [comments, setComments] = useState<EuiCommentProps[]>([WELCOME_COMMENT]);
   const copyAction = useMemo(
     () => (

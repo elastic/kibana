@@ -22,7 +22,7 @@ export function useFetchAiRuleMonitoringResultQuery(
   const { addError } = useAppToasts();
 
   return useQuery<string>(
-    [...GET_AI_RULE_MONITORING_RESULTS_QUERY_KEY],
+    [...GET_AI_RULE_MONITORING_RESULTS_QUERY_KEY, interval],
     ({ signal }) => fetchAiRuleMonitoringResult({ connectorId, interval, signal }),
     {
       refetchIntervalInBackground: false,

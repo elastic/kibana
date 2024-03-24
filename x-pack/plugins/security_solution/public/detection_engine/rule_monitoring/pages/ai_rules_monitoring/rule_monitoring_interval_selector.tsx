@@ -7,11 +7,17 @@
 
 import React, { useCallback } from 'react';
 import type { OnTimeChangeProps } from '@elastic/eui';
-import { EuiSuperDatePicker } from '@elastic/eui';
+import { EuiSkeletonText, EuiText, EuiSuperDatePicker } from '@elastic/eui';
 import { useAiRulesMonitoringContext } from './ai_rules_monitoring_context';
+import * as i18n from './translations';
 
 export function RuleMonitoringIntervalSelector(): JSX.Element {
-  const { isFetching, analyzedDateRange, setAnalyzedDateRange } = useAiRulesMonitoringContext();
+  const {
+    isFetching,
+    numOfLoggedMessagesInAnalyzedDateRange,
+    analyzedDateRange,
+    setAnalyzedDateRange,
+  } = useAiRulesMonitoringContext();
 
   const onTimeChange = useCallback(
     ({ start: newStart, end: newEnd }: OnTimeChangeProps) => {
@@ -21,12 +27,22 @@ export function RuleMonitoringIntervalSelector(): JSX.Element {
   );
 
   return (
-    <EuiSuperDatePicker
-      isLoading={isFetching}
-      start={analyzedDateRange.start}
-      end={analyzedDateRange.end}
-      onTimeChange={onTimeChange}
-      showUpdateButton={false}
-    />
+    <>
+      <EuiSuperDatePicker
+        isLoading={isFetching}
+        isDisabled={isFetching}
+        start={analyzedDateRange.start}
+        end={analyzedDateRange.end}
+        onTimeChange={onTimeChange}
+        showUpdateButton={false}
+      />
+      <EuiText size="xs" color="subdued">
+        {numOfLoggedMessagesInAnalyzedDateRange ? (
+          i18n.LOG_ENTRIES_COUNT(numOfLoggedMessagesInAnalyzedDateRange)
+        ) : (
+          <EuiSkeletonText lines={1} size="xs" />
+        )}
+      </EuiText>
+    </>
   );
 }

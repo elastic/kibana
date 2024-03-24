@@ -52,3 +52,9 @@ export const COPY_TO_CLIPBOARD = i18n.translate(
     defaultMessage: 'Copy to clipboard',
   }
 );
+
+export const LOG_ENTRIES_COUNT = (count: number) =>
+  i18n.translate('xpack.securitySolution.aiRuleMonitoring.intervalLogEntriesCount', {
+    values: { count },
+    defaultMessage: 'You have {count} log entries in the selected interval',
+  });

@@ -20,6 +20,8 @@ import {
 } from '../../../../../common/api/detection_engine';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useFetchAiRuleMonitoringResultQuery } from '../../api/hooks/use_fetch_ai_rule_monitoring_result_query';
+import { useFetchClusterHealthQuery } from '../../api/hooks/use_fetch_cluster_health_query';
+import { DEFAULT_QUERY_OPTIONS } from '../../../rule_management/api/hooks/constants';
 
 interface AnalyzedDateRange {
   start: string;
@@ -33,6 +35,7 @@ export interface UseAiRulesMonitoring {
   connectorPrompt: React.ReactElement;
   analyzedDateRange: AnalyzedDateRange;
   setAnalyzedDateRange: (value: AnalyzedDateRange) => void;
+  numOfLoggedMessagesInAnalyzedDateRange?: number;
   currentApiConfig?: ApiConfig;
   result?: string;
   refetch: () => void;
@@ -63,6 +66,10 @@ export function AiRulesMonitoringProvider({
       to: to.toISOString(),
     } as const;
   }, [analyzedDateRange]);
+  const { data: clusterHealth } = useFetchClusterHealthQuery(
+    interval ? { ...interval, granularity: HealthIntervalGranularity.month } : undefined,
+    DEFAULT_QUERY_OPTIONS
+  );
 
   const {
     isLoading: isApiConfigLoading,
@@ -92,6 +99,8 @@ export function AiRulesMonitoringProvider({
       connectorPrompt,
       analyzedDateRange,
       setAnalyzedDateRange,
+      numOfLoggedMessagesInAnalyzedDateRange:
+        clusterHealth?.health.stats_over_interval.number_of_logged_messages.total,
       currentApiConfig: apiConfig,
       result: data,
       refetch,
@@ -116,6 +125,7 @@ export function AiRulesMonitoringProvider({
       data,
       refetch,
       currentConversationId,
+      clusterHealth,
     ]
   );
 
