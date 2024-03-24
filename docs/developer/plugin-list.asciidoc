@@ -753,6 +753,10 @@ Elastic.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/search_playground/README.md[searchPlayground]
+|The Search Playground is a tool for developers to experiment with their own data using LLMs.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler/README.md[searchprofiler]
 |The search profiler consumes the Profile API
 by sending a search API with profile: true enabled in the request body. The response contains
