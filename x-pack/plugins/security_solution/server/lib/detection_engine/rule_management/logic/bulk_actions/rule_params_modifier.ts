@@ -218,14 +218,18 @@ const applyBulkActionEditToRuleParams = (
       }
 
       if (ruleParams.investigationFields) {
-        ruleParams.investigationFields = {
-          field_names: deleteItemsFromArray(
-            (Array.isArray(ruleParams.investigationFields)
-              ? ruleParams.investigationFields
-              : ruleParams.investigationFields?.field_names) ?? [],
-            action.value.field_names
-          ),
-        };
+        const fieldNames = deleteItemsFromArray(
+          (Array.isArray(ruleParams.investigationFields)
+            ? ruleParams.investigationFields
+            : ruleParams.investigationFields?.field_names) ?? [],
+          action.value.field_names
+        );
+        ruleParams.investigationFields =
+          fieldNames.length > 0
+            ? {
+                field_names: fieldNames,
+              }
+            : undefined;
       }
       break;
     }
