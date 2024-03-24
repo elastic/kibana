@@ -13,7 +13,6 @@ import type { Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/swimlane_annotation_container';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import type { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
@@ -31,6 +30,7 @@ import type {
   AnomalySwimlaneServices,
 } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/constants';
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;

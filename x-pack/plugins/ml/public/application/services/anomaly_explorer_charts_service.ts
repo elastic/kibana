@@ -23,7 +23,7 @@ import type { SeriesConfigWithMetadata } from '../../../common/types/results';
 
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';
-import { SWIM_LANE_LABEL_WIDTH } from '../explorer/swimlane_container';
+import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 
 import type { MlApiServices } from './ml_api_service';
 import type { MlResultsService } from './results_service';
