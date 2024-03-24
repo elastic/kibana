@@ -12,7 +12,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
   CrowdstrikeGetAgentsResponse,
   CrowdstrikeGetAgentsParams,
-} from '@kbn/stack-connectors-plugin/common/Crowdstrike/types';
+} from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import {
   CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
@@ -85,7 +85,6 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     const agentId = actionRequest.endpoint_ids[0];
     const agentDetails = await this.getAgentDetails(agentId);
 
-    console.log({ agentId, agentDetails });
     return super.writeActionRequestToEndpointIndex({
       ...actionRequest,
       hosts: {

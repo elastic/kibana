@@ -391,7 +391,6 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         },
       });
     } catch (err) {
-      console.log('responseErr', err);
       return errorHandler(logger, res, err);
     }
   };
