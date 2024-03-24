@@ -58,7 +58,47 @@ describe('react embeddable renderer', () => {
   it('builds the embeddable', () => {
     const buildEmbeddableSpy = jest.spyOn(testEmbeddableFactory, 'buildEmbeddable');
     render(<ReactEmbeddableRenderer type={'test'} state={{ rawState: { bork: 'blorp?' } }} />);
-    expect(buildEmbeddableSpy).toHaveBeenCalledWith({ bork: 'blorp?' }, expect.any(Function));
+    expect(buildEmbeddableSpy).toHaveBeenCalledWith(
+      { bork: 'blorp?' },
+      expect.any(Function),
+      expect.any(String),
+      undefined
+    );
+  });
+
+  it('builds the embeddable, providing an id', () => {
+    const buildEmbeddableSpy = jest.spyOn(testEmbeddableFactory, 'buildEmbeddable');
+    render(
+      <ReactEmbeddableRenderer
+        type={'test'}
+        maybeId={'12345'}
+        state={{ rawState: { bork: 'blorp?' } }}
+      />
+    );
+    expect(buildEmbeddableSpy).toHaveBeenCalledWith(
+      { bork: 'blorp?' },
+      expect.any(Function),
+      '12345',
+      undefined
+    );
+  });
+
+  it('builds the embeddable, providing a parent', () => {
+    const buildEmbeddableSpy = jest.spyOn(testEmbeddableFactory, 'buildEmbeddable');
+    const parentApi = getMockPresentationContainer();
+    render(
+      <ReactEmbeddableRenderer
+        type={'test'}
+        state={{ rawState: { bork: 'blorp?' } }}
+        parentApi={parentApi}
+      />
+    );
+    expect(buildEmbeddableSpy).toHaveBeenCalledWith(
+      { bork: 'blorp?' },
+      expect.any(Function),
+      expect.any(String),
+      parentApi
+    );
   });
 
   it('renders the given component once it resolves', () => {
