@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/css-plugins",
+  "owner": "@elastic/appex-sharedux"
+}

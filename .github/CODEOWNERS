@@ -316,6 +316,7 @@ packages/core/user-settings/core-user-settings-server-mocks @elastic/kibana-secu
 x-pack/plugins/cross_cluster_replication @elastic/kibana-management
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
+packages/kbn-css-plugins @elastic/appex-sharedux
 x-pack/plugins/custom_branding @elastic/appex-sharedux
 packages/kbn-custom-icons @elastic/obs-ux-logs-team
 packages/kbn-custom-integrations @elastic/obs-ux-logs-team

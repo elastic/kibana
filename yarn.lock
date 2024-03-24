@@ -4299,6 +4299,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/css-plugins@link:packages/kbn-css-plugins":
+  version "0.0.0"
+  uid ""
+
 "@kbn/custom-branding-plugin@link:x-pack/plugins/custom_branding":
   version "0.0.0"
   uid ""

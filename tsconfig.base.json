@@ -626,6 +626,8 @@
       "@kbn/crypto/*": ["packages/kbn-crypto/*"],
       "@kbn/crypto-browser": ["packages/kbn-crypto-browser"],
       "@kbn/crypto-browser/*": ["packages/kbn-crypto-browser/*"],
+      "@kbn/css-plugins": ["packages/kbn-css-plugins"],
+      "@kbn/css-plugins/*": ["packages/kbn-css-plugins/*"],
       "@kbn/custom-branding-plugin": ["x-pack/plugins/custom_branding"],
       "@kbn/custom-branding-plugin/*": ["x-pack/plugins/custom_branding/*"],
       "@kbn/custom-icons": ["packages/kbn-custom-icons"],

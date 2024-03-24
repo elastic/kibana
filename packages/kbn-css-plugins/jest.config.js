@@ -6,17 +6,8 @@
  * Side Public License, v 1.
  */
 
-const autoprefixer = require('autoprefixer');
-const cssnano = require('cssnano');
-const preset = require('cssnano-preset-default');
-const { toDisplayP3ColorPostcss } = require('@kbn/css-plugins');
-
 module.exports = {
-  plugins: [
-    autoprefixer(),
-    toDisplayP3ColorPostcss(),
-    cssnano({
-      preset: preset({ discardComments: false }),
-    }),
-  ],
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-css-plugins'],
 };

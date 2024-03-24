@@ -14,6 +14,7 @@ import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { getColorMode, defaultTheme } from '@kbn/react-kibana-context-common';
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import { toDisplayP3ColorStylis } from '@kbn/css-plugins';
 
 /**
  * Props for the KibanaEuiProvider.
@@ -25,7 +26,7 @@ export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modi
 
 // Set up the caches.
 // https://eui.elastic.co/#/utilities/provider#cache-location
-const stylisPlugins = [euiStylisPrefixer]; // https://emotion.sh/docs/@emotion/cache#stylisplugins
+const stylisPlugins = [euiStylisPrefixer, toDisplayP3ColorStylis]; // https://emotion.sh/docs/@emotion/cache#stylisplugins
 
 const emotionCache = createCache({
   key: 'css',
