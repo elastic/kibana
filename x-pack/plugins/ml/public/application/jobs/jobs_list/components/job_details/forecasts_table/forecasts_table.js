@@ -325,6 +325,7 @@ export class ForecastsTable extends Component {
               }
               iconType="visLine"
               aria-label={viewForecastAriaLabel}
+              data-test-subj="mlJobListForecastTabOpenSingleMetricViewButton"
             />
           );
         },
