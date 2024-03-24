@@ -7,7 +7,7 @@
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import { getAiConnector } from './get_ai_connector';
 
 export interface AiMessage {
   role: 'system' | 'user' | 'assistant';
@@ -36,7 +36,7 @@ export async function invokeAi({
   actionsClient,
   messages,
 }: InvokeAiParams): Promise<string> {
-  const connector = await getConnector(connectorId, actionsClient);
+  const connector = await getAiConnector(connectorId, actionsClient);
   const genAiConnectorParams: InvokeAIActionsParams = {
     subActionParams: {
       messages,
@@ -54,16 +54,6 @@ export async function invokeAi({
   return isSuccessGenAiExecutorResult(result)
     ? result.data.message
     : `Error: ${result.message ?? ''} ${result.serviceMessage ?? ''}`;
-}
-
-async function getConnector(connectorId: string, actionsClient: ActionsClient): Promise<Connector> {
-  const connector = await actionsClient.get({ id: connectorId });
-
-  if (connector.actionTypeId !== '.gen-ai') {
-    throw new Error('Specified connector is not a Gen AI connector.');
-  }
-
-  return connector;
 }
 
 interface GenAiExecutorResultData {
