@@ -10,9 +10,9 @@ import { KnowledgeBaseEntryRole } from '../../common';
 
 export function registerSummarizationFunction({
   client,
-  registerFunction,
+  functions,
 }: FunctionRegistrationParameters) {
-  registerFunction(
+  functions.registerFunction(
     {
       name: 'summarize',
       contexts: ['core'],

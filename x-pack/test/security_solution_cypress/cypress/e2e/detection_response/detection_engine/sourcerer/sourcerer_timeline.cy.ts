@@ -10,7 +10,6 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '@kbn/security-solution-plugin/common/constants';
 
-import { deleteTimelines } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 
@@ -33,7 +32,7 @@ import {
 } from '../../../../tasks/sourcerer';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
 import { SOURCERER } from '../../../../screens/sourcerer';
-import { createTimeline } from '../../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../../tasks/api_calls/timelines';
 import { getTimeline, getTimelineModifiedSourcerer } from '../../../../objects/timeline';
 import { closeTimeline, openTimelineById } from '../../../../tasks/timeline';
 
@@ -58,7 +57,8 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
     isNotSourcererOption(`${DEFAULT_ALERTS_INDEX}-default`);
   });
 
-  describe('Modified badge', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/173854
+  describe.skip('Modified badge', () => {
     it('Selecting new data view does not add a modified badge', () => {
       openTimelineUsingToggle();
       cy.get(SOURCERER.badgeModified).should(`not.exist`);

@@ -90,12 +90,18 @@ test('generates metric chart config', async () => {
                   Object {
                     "columnId": "metric_formula_accessor",
                     "fieldName": "count",
+                    "meta": Object {
+                      "type": "number",
+                    },
                   },
                 ],
                 "columns": Array [
                   Object {
                     "columnId": "metric_formula_accessor",
                     "fieldName": "count",
+                    "meta": Object {
+                      "type": "number",
+                    },
                   },
                 ],
                 "index": "test",

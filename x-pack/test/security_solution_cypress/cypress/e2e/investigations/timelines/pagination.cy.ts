@@ -35,7 +35,7 @@ describe('Timeline Pagination', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   afterEach(() => {
-    cy.task('esArchiverUnload', 'timeline');
+    cy.task('esArchiverUnload', { archiveName: 'timeline' });
   });
 
   it(`should paginate records correctly`, () => {

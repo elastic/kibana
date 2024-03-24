@@ -998,10 +998,10 @@
     "functions": [
       {
         "parentPluginId": "lens",
-        "id": "def-public.apiHasLensConfig",
+        "id": "def-public.isLensApi",
         "type": "Function",
         "tags": [],
-        "label": "apiHasLensConfig",
+        "label": "isLensApi",
         "description": [],
         "signature": [
           "(api: unknown) => api is ",
@@ -1009,17 +1009,17 @@
             "pluginId": "lens",
             "scope": "public",
             "docId": "kibLensPluginApi",
-            "section": "def-public.HasLensConfig",
-            "text": "HasLensConfig"
+            "section": "def-public.LensApi",
+            "text": "LensApi"
           }
         ],
-        "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
+        "path": "x-pack/plugins/lens/public/embeddable/interfaces/lens_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "lens",
-            "id": "def-public.apiHasLensConfig.$1",
+            "id": "def-public.isLensApi.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -1027,7 +1027,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
+            "path": "x-pack/plugins/lens/public/embeddable/interfaces/lens_api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -7751,7 +7751,7 @@
               "\nRenders dimension trigger. Used only for noDatasource layers"
             ],
             "signature": [
-              "((props: { columnId: string; label: string; hideTooltip?: boolean | undefined; }) => React.ReactElement<{ columnId: string; label: string; hideTooltip?: boolean | undefined; }, string | React.JSXElementConstructor<any>> | null) | undefined"
+              "((props: { columnId: string; label: string; }) => React.ReactElement<{ columnId: string; label: string; }, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -7786,20 +7786,6 @@
                     "tags": [],
                     "label": "label",
                     "description": [],
-                    "path": "x-pack/plugins/lens/public/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "lens",
-                    "id": "def-public.Visualization.DimensionTriggerComponent.$1.hideTooltip",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "hideTooltip",
-                    "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
                     "path": "x-pack/plugins/lens/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -10824,36 +10810,6 @@
       },
       {
         "parentPluginId": "lens",
-        "id": "def-public.HasLensConfig",
-        "type": "Type",
-        "tags": [],
-        "label": "HasLensConfig",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.HasType",
-            "text": "HasType"
-          },
-          "<\"lens\"> & { getSavedVis: () => Readonly<",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.LensSavedObjectAttributes",
-            "text": "LensSavedObjectAttributes"
-          },
-          " | undefined>; }"
-        ],
-        "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
         "id": "def-public.HeatmapVisualizationState",
         "type": "Type",
         "tags": [],
@@ -10942,6 +10898,102 @@
           "\"lens\""
         ],
         "path": "x-pack/plugins/lens/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.LensApi",
+        "type": "Type",
+        "tags": [],
+        "label": "LensApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasType",
+            "text": "HasType"
+          },
+          "<\"lens\"> & { getSavedVis: () => Readonly<",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.LensSavedObjectAttributes",
+            "text": "LensSavedObjectAttributes"
+          },
+          " | undefined>; canViewUnderlyingData: () => Promise<boolean>; getViewUnderlyingDataArgs: () => ",
+          "ViewUnderlyingDataArgs",
+          "; } & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
+          },
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<unknown>>"
+        ],
+        "path": "x-pack/plugins/lens/public/embeddable/interfaces/lens_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

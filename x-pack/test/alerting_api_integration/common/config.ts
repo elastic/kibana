@@ -191,7 +191,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify([
             'localhost',
             'some.non.existent.com',
-            'smtp.live.com',
+            'smtp-mail.outlook.com',
             'slack.com',
           ])}`,
           `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
@@ -347,7 +347,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             : []),
           '--notifications.connectors.default.email=notification-email',
           '--xpack.task_manager.allow_reading_invalid_state=false',
-          '--xpack.task_manager.requeue_invalid_tasks.enabled=true',
           '--xpack.actions.queued.max=500',
           `--xpack.stack_connectors.enableExperimental=${JSON.stringify(experimentalFeatures)}`,
         ],

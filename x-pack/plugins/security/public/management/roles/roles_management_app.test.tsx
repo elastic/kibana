@@ -48,6 +48,7 @@ async function mountApp(basePath: string, pathname: string) {
         getStartServices: jest
           .fn()
           .mockResolvedValue([coreStart, { data: {}, features: featuresStart }]),
+        buildFlavor: 'traditional',
       })
       .mount({
         basePath,
@@ -70,6 +71,7 @@ describe('rolesManagementApp', () => {
         license: licenseMock.create(),
         fatalErrors,
         getStartServices: getStartServices as any,
+        buildFlavor: 'traditional',
       })
     ).toMatchInlineSnapshot(`
       Object {

@@ -15,7 +15,7 @@ import type { TimelineEventsDetailsItem } from '../../../../common/search_strate
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
-import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
+import { useEndpointHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { getFieldValue } from './helpers';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -74,8 +74,9 @@ export const useHostIsolationAction = ({
     isIsolated,
     agentStatus,
     capabilities,
-  } = useHostIsolationStatus({
+  } = useEndpointHostIsolationStatus({
     agentId,
+    agentType: sentinelOneAgentId ? 'sentinel_one' : 'endpoint',
   });
 
   const { data: sentinelOneAgentData } = useGetSentinelOneAgentStatus([sentinelOneAgentId || '']);
