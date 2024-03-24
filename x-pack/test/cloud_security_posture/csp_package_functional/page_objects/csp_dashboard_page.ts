@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
 import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
 
 export function CspDashboardPageProvider({
@@ -19,24 +14,6 @@ export function CspDashboardPageProvider({
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
-
-  const supertest = getService('supertest');
-  const log = getService('log');
-
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
 
   const dashboard = {
     getDashboardPageHeader: () => testSubjects.find('cloud-posture-dashboard-page-header'),
@@ -118,7 +95,6 @@ export function CspDashboardPageProvider({
   };
 
   return {
-    waitForPluginInitialized,
     navigateToComplianceDashboardPage,
     dashboard,
   };

@@ -13,6 +13,7 @@ import {
 } from '../../common/utils/indices';
 import { vulnerabilitiesLatestMock } from '../mocks/vulnerabilities_latest_mock';
 import { addIndexBulkDocs, deleteIndices } from '../../common/utils/index_api_helpers';
+import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
@@ -20,6 +21,8 @@ export default function ({ getPageObjects, getService }: FunctionalFtrProviderCo
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const log = getService('log');
+  const supertest = getService('supertest');
   const es = getService('es');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
 
@@ -36,7 +39,7 @@ export default function ({ getPageObjects, getService }: FunctionalFtrProviderCo
       latestVulnerabilitiesTable = findings.latestVulnerabilitiesTable;
 
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
-      await findings.waitForPluginInitialized();
+      await setupCSPPackage(retry, log, supertest);
 
       // Prepare mocked findings
       await deleteIndices(es, [VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX]);
@@ -55,7 +58,7 @@ export default function ({ getPageObjects, getService }: FunctionalFtrProviderCo
     });
 
     after(async () => {
-      await findings.vulnerabilitiesIndex.remove();
+      await deleteIndices(es, [VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX]);
     });
 
     describe('SearchBar', () => {

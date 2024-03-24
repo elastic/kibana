@@ -15,10 +15,12 @@ import {
 import { k8sFindingsMock } from '../mocks/latest_findings_mock';
 import { deleteIndices, addIndexBulkDocs } from '../../common/utils/index_api_helpers';
 import { FINDINGS_INDEX, FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
-import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
+import { createPackagePolicy, setupCSPPackage } from '../../common/utils/csp_package_helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
+  const retry = getService('retry');
+  const log = getService('log');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -63,7 +65,7 @@ export default function ({ getPageObjects, getService }: FunctionalFtrProviderCo
         'vanilla',
         'kspm'
       );
-      await rule.waitForPluginInitialized();
+      await setupCSPPackage(retry, log, supertest);
 
       await addIndexBulkDocs(es, k8sFindingsMock, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
 

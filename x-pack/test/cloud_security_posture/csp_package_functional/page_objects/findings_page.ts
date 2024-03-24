@@ -9,32 +9,11 @@ import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
 
-// Defined in CSP plugin
-export const VULNERABILITIES_INDEX_DEFAULT_NS =
-  'logs-cloud_security_posture.vulnerabilities-default';
-export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
-  'logs-cloud_security_posture.vulnerabilities_latest-default';
-
 export function FindingsPageProvider({ getService, getPageObjects }: FunctionalFtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const supertest = getService('supertest');
-  const log = getService('log');
-
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
 
   const detectionRuleApi = {
     remove: async () => {
@@ -294,7 +273,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FunctionalF
     latestVulnerabilitiesTable,
     notInstalledVulnerabilities,
     notInstalledCSP,
-    waitForPluginInitialized,
     distributionBar,
     vulnerabilityDataGrid,
     misconfigurationsFlyout,

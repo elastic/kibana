@@ -14,6 +14,7 @@ import {
   VULNERABILITIES_LATEST_INDEX,
 } from '../../common/utils/indices';
 import { deleteIndices, addIndexBulkDocs } from '../../common/utils/index_api_helpers';
+import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
@@ -21,6 +22,9 @@ export default function ({ getPageObjects, getService }: FunctionalFtrProviderCo
   const filterBar = getService('filterBar');
   const es = getService('es');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
+  const retry = getService('retry');
+  const log = getService('log');
+  const supertest = getService('supertest');
 
   const resourceName1 = 'name-ng-1-Node';
   const resourceName2 = 'othername-june12-8-8-0-1';
@@ -39,7 +43,7 @@ export default function ({ getPageObjects, getService }: FunctionalFtrProviderCo
       findings = pageObjects.findings;
 
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
-      await findings.waitForPluginInitialized();
+      await setupCSPPackage(retry, log, supertest);
 
       // Prepare mocked findings
       await deleteIndices(es, [VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX]);

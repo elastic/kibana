@@ -8,12 +8,15 @@
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
+import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 import { addIndexDocs, deleteExistingIndex } from '../../common/utils/index_api_helpers';
 import { FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
   const retry = getService('retry');
+  const log = getService('log');
+  const supertest = getService('supertest');
   const pageObjects = getPageObjects(['common', 'cloudPostureDashboard']);
   const chance = new Chance();
   const es = getService('es');
@@ -44,7 +47,7 @@ export default function ({ getPageObjects, getService }: FunctionalFtrProviderCo
       cspDashboard = pageObjects.cloudPostureDashboard;
       dashboard = pageObjects.cloudPostureDashboard.dashboard;
 
-      await cspDashboard.waitForPluginInitialized();
+      await setupCSPPackage(retry, log, supertest);
 
       await addIndexDocs(es, data, FINDINGS_LATEST_INDEX);
 

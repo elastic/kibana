@@ -8,12 +8,16 @@
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
+import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 import { addIndexBulkDocs, deleteIndices } from '../../common/utils/index_api_helpers';
 import { FINDINGS_INDEX, FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
   const es = getService('es');
+  const retry = getService('retry');
+  const supertest = getService('supertest');
+  const log = getService('log');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
   const hoursToMillisecond = (hours: number) => hours * 60 * 60 * 1000;
@@ -66,7 +70,7 @@ export default function ({ getPageObjects, getService }: FunctionalFtrProviderCo
       findings = pageObjects.findings;
 
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
-      await findings.waitForPluginInitialized();
+      await setupCSPPackage(retry, log, supertest);
     });
 
     after(async () => {

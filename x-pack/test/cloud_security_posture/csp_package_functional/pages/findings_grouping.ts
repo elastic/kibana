@@ -17,6 +17,7 @@ import {
 import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
 import { addIndexBulkDocs, deleteIndices } from '../../common/utils/index_api_helpers';
 import { FINDINGS_INDEX, FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
+import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
@@ -25,6 +26,8 @@ export default function ({ getPageObjects, getService }: FunctionalFtrProviderCo
   const supertest = getService('supertest');
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
+  const log = getService('log');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
 
@@ -151,7 +154,7 @@ export default function ({ getPageObjects, getService }: FunctionalFtrProviderCo
       findings = pageObjects.findings;
 
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
-      await findings.waitForPluginInitialized();
+      await setupCSPPackage(retry, log, supertest);
 
       // Prepare mocked findings
 
@@ -498,8 +501,7 @@ export default function ({ getPageObjects, getService }: FunctionalFtrProviderCo
           },
         };
 
-        await findings.index.add([modifiedFinding]);
-
+        await addIndexBulkDocs(es, [modifiedFinding], [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
         await findings.navigateToLatestFindingsPage();
         await pageObjects.header.waitUntilLoadingHasFinished();
 

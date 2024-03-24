@@ -7,10 +7,14 @@
 
 import expect from '@kbn/expect';
 import { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
+import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 
 // eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects }: FunctionalFtrProviderContext) => {
+export default ({ getService, getPageObjects }: FunctionalFtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
+  const retry = getService('retry');
+  const log = getService('log');
+  const supertest = getService('supertest');
 
   // FLAKY: https://github.com/elastic/kibana/issues/163950
   describe.skip('Findings Page onboarding', function () {
@@ -24,7 +28,7 @@ export default ({ getPageObjects }: FunctionalFtrProviderContext) => {
       notInstalledVulnerabilities = findings.notInstalledVulnerabilities;
       notInstalledCSP = findings.notInstalledCSP;
 
-      await findings.waitForPluginInitialized();
+      await setupCSPPackage(retry, log, supertest);
     });
 
     it('clicking on the `No integrations installed` prompt action button - `install CNVM`: navigates to the CNVM integration installation page', async () => {
