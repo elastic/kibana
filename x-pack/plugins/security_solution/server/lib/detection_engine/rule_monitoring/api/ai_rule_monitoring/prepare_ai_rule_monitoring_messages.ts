@@ -46,7 +46,9 @@ const SYSTEM_INVESTIGATION_GUIDE = [
 ].join('. ');
 
 const GOAL = [
-  'Spot potential problems in the cluster. Give advices to improve the situation.',
+  'Spot potential problems in the cluster',
+  'Analyze if it happened once or a constant problem',
+  'Give advices to improve the situation',
   'Enumerate top 5 problematic rules with their summary metrics',
   'Enumerate top errors and warnings',
 ].join('. ');
