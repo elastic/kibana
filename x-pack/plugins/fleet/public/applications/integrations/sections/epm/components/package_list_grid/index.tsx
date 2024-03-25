@@ -67,6 +67,7 @@ export interface Props {
   selectedSubCategory?: string;
   setSelectedSubCategory?: (c: string | undefined) => void;
   showMissingIntegrationMessage?: boolean;
+  showSearchTools?: boolean;
 }
 
 export const PackageListGrid: FunctionComponent<Props> = ({
@@ -87,6 +88,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   showMissingIntegrationMessage = false,
   callout,
   showCardLabels = true,
+  showSearchTools = true,
 }) => {
   const localSearchRef = useLocalSearch(list, !!isLoading);
 
@@ -174,23 +176,29 @@ export const PackageListGrid: FunctionComponent<Props> = ({
       gutterSize="xl"
       data-test-subj="epmList.integrationCards"
     >
-      <StickySidebar data-test-subj="epmList.controlsSideColumn" grow={1}>
-        <ControlsColumn controls={controls} title={title} />
-      </StickySidebar>
+      {!!controls && (
+        <StickySidebar data-test-subj="epmList.controlsSideColumn" grow={1}>
+          <ControlsColumn controls={controls} title={title} />
+        </StickySidebar>
+      )}
+
       <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn" style={{ alignSelf: 'stretch' }}>
-        <EuiFlexItem grow={false}>
-          <SearchBox
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            selectedCategory={selectedCategory}
-            setCategory={setCategory}
-            categories={categories}
-            availableSubCategories={availableSubCategories}
-            setSelectedSubCategory={setSelectedSubCategory}
-            selectedSubCategory={selectedSubCategory}
-            setUrlandReplaceHistory={setUrlandReplaceHistory}
-          />
-        </EuiFlexItem>
+        {showSearchTools && (
+          <EuiFlexItem grow={false}>
+            <SearchBox
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              selectedCategory={selectedCategory}
+              setCategory={setCategory}
+              categories={categories}
+              availableSubCategories={availableSubCategories}
+              setSelectedSubCategory={setSelectedSubCategory}
+              selectedSubCategory={selectedSubCategory}
+              setUrlandReplaceHistory={setUrlandReplaceHistory}
+            />
+          </EuiFlexItem>
+        )}
+
         {showIntegrationsSubcategories && availableSubCategories?.length ? <EuiSpacer /> : null}
         {showIntegrationsSubcategories ? (
           <EuiFlexItem grow={false}>
