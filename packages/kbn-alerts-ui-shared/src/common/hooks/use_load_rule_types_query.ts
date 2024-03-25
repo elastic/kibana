@@ -13,15 +13,15 @@ import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
-import { ALERTS_FEATURE_ID } from '../../common/constants';
-import { loadRuleTypes } from '../apis/load_rule_types';
+import { ALERTS_FEATURE_ID } from '../constants';
+import { fetchRuleTypes } from '../apis/fetch_rule_types';
 import { RuleTypeIndexWithDescriptions, RuleTypeWithDescription } from '../types';
 
 export interface UseRuleTypesProps {
   http: HttpStart;
   toasts: ToastsStart;
   filteredRuleTypes: string[];
-  registeredRuleTypes: Array<{ id: string; description: string }>;
+  registeredRuleTypes?: Array<{ id: string; description: string }>;
   enabled?: boolean;
 }
 
@@ -31,11 +31,14 @@ const getFilteredIndex = (
   registeredRuleTypes: UseRuleTypesProps['registeredRuleTypes']
 ) => {
   const index: RuleTypeIndexWithDescriptions = new Map();
-  const registeredRuleTypesDictionary = keyBy(registeredRuleTypes, 'id');
+  const registeredRuleTypesDictionary = registeredRuleTypes ? keyBy(registeredRuleTypes, 'id') : {};
   for (const ruleType of data) {
     const ruleTypeRecord: RuleType<string, string> & { description?: string } = { ...ruleType };
-    // Filter out unregistered rule types, and add descriptions to registered rule types
-    if (registeredRuleTypesDictionary[ruleType.id]) {
+    if (!registeredRuleTypes) {
+      // If rule type registry is not provided, don't use it for filtering
+      index.set(ruleType.id, ruleTypeRecord);
+    } else if (registeredRuleTypesDictionary[ruleType.id]) {
+      // Filter out unregistered rule types, and add descriptions to registered rule types
       ruleTypeRecord.description = registeredRuleTypesDictionary[ruleType.id].description;
       index.set(ruleType.id, ruleTypeRecord);
     }
@@ -51,7 +54,7 @@ const getFilteredIndex = (
   return filteredIndex;
 };
 
-export const useLoadRuleTypesIndex = ({
+export const useLoadRuleTypesQuery = ({
   http,
   toasts,
   filteredRuleTypes,
@@ -59,13 +62,13 @@ export const useLoadRuleTypesIndex = ({
   enabled = true,
 }: UseRuleTypesProps) => {
   const queryFn = () => {
-    return loadRuleTypes({ http });
+    return fetchRuleTypes({ http });
   };
 
   const onErrorFn = (error: Error) => {
     if (error) {
       toasts.addDanger(
-        i18n.translate('alertsUiShared.hooks.useRuleTypes.errorMessage', {
+        i18n.translate('alertsUIShared.hooks.useLoadRuleTypesQuery.unableToLoadRuleTypesMessage', {
           defaultMessage: 'Unable to load rule types',
         })
       );

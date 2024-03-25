@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { RuleTypeWithDescription, RuleTypeIndexWithDescriptions } from '../common/types';
-export interface RuleTypeCountsByProducer {
-  total: number;
-  [x: string]: number;
-}
+import { RuleType } from '@kbn/triggers-actions-ui-types';
+
+export type RuleTypeWithDescription = RuleType<string, string> & { description?: string };
+
+export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;
