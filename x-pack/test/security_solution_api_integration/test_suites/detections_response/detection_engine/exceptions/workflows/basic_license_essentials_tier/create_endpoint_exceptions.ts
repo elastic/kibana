@@ -74,7 +74,8 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@serverless @ess create_endpoint_exceptions', () => {
+  // @skipInQA purposefully - only running tests in MKI whose failure should block release
+  describe('@serverless @ess @skipInQA create_endpoint_exceptions', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/rule_exceptions/endpoint_without_host_type'
