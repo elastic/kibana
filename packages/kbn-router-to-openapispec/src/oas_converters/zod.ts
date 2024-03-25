@@ -35,10 +35,6 @@ const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
   return type?._def?.typeName === zodTypeKind;
 };
 
-const instanceofZodTypeOptional = (type: z.ZodTypeAny): type is z.ZodOptional<z.ZodTypeAny> => {
-  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional);
-};
-
 const instanceofZodTypeObject = (type: z.ZodTypeAny): type is z.ZodObject<z.ZodRawShape> => {
   return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodObject);
 };
