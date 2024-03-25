@@ -7,15 +7,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import fastIsEqual from 'fast-deep-equal';
 import { EuiCallOut } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
-import { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
-import { StateComparators, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { initializeTimeRange, PublishesTimeRange, StateComparators, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ReactEmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 import { Api, State, Services } from './types';
 import { getCount } from './get_count';
+import { PresentationContainer } from '@kbn/presentation-containers';
 
 export const buildSearchEmbeddable = async (
   state: State,
@@ -23,54 +22,39 @@ export const buildSearchEmbeddable = async (
     apiRegistration: ReactEmbeddableApiRegistration<State, Api>,
     comparators: StateComparators<State>
   ) => Api,
+  parentApi: PresentationContainer | undefined,
   services: Services
 ) => {
+  const {
+    appliedTimeRange$,
+    cleanupTimeRange,
+    serializeTimeRange,
+    timeRangeApi,
+    timeRangeComparators,
+  } = initializeTimeRange(state, parentApi as Partial<PublishesTimeRange>);
   const defaultDataView = await services.dataViews.getDefaultDataView();
-  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(state.timeRange);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
     defaultDataView ? [defaultDataView] : undefined
   );
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
-  function setTimeRange(nextTimeRange: TimeRange | undefined) {
-    timeRange$.next(nextTimeRange);
-  }
-
   const api = buildApi(
     {
+      ...timeRangeApi,
       dataViews: dataViews$,
-      timeRange$,
-      setTimeRange,
       dataLoading: dataLoading$,
       serializeState: () => {
         return {
           rawState: {
-            timeRange: timeRange$.value,
+            ...serializeTimeRange(),
           },
           references: [],
         };
       },
     },
     {
-      timeRange: [timeRange$, setTimeRange, fastIsEqual],
+      ...timeRangeComparators,
     }
   );
-
-  const appliedTimeRange$ = new BehaviorSubject(
-    timeRange$.value ?? api.parentApi?.timeRange$?.value
-  );
-  const subscriptions = api.timeRange$.subscribe((timeRange) => {
-    appliedTimeRange$.next(timeRange ?? api.parentApi?.timeRange$?.value);
-  });
-  if (api.parentApi?.timeRange$) {
-    subscriptions.add(
-      api.parentApi?.timeRange$.subscribe((parentTimeRange) => {
-        if (timeRange$?.value) {
-          return;
-        }
-        appliedTimeRange$.next(parentTimeRange);
-      })
-    );
-  }
 
   return {
     api,
@@ -85,7 +69,7 @@ export const buildSearchEmbeddable = async (
 
       useEffect(() => {
         return () => {
-          subscriptions.unsubscribe();
+          cleanupTimeRange();
         };
       }, []);
 

@@ -18,9 +18,9 @@ export const registerSearchEmbeddableFactory = (services: Services) => {
     deserializeState: (state) => {
       return state.rawState as State;
     },
-    buildEmbeddable: async (state, buildApi) => {
+    buildEmbeddable: async (state, buildApi, parentApi) => {
       const { buildSearchEmbeddable } = await import('./build_search_embeddable');
-      return buildSearchEmbeddable(state, buildApi, services);
+      return buildSearchEmbeddable(state, buildApi, parentApi, services);
     },
   };
 
