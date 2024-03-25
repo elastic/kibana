@@ -45,7 +45,7 @@ export function QueryHistoryAction({
   return (
     <>
       {isSpaceReduced && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="TextBasedLangEditor-toggle-query-history-icon">
           <EuiIcon
             type="clock"
             color="primary"
@@ -59,7 +59,7 @@ export function QueryHistoryAction({
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="TextBasedLangEditor-toggle-query-history-button">
           <EuiButtonEmpty
             size="xs"
             color="primary"
@@ -321,6 +321,7 @@ export function QueryColumn({
           onClick={() => {
             setIsRowExpanded(!isRowExpanded);
           }}
+          data-test-subj="TextBasedLangEditor-queryHistory-queryString-expanded"
           aria-label={
             isRowExpanded
               ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.collapseLabel', {

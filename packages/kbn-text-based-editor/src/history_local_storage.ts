@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
+import 'moment-timezone';
 const QUERY_HISTORY_ITEM_KEY = 'QUERY_HISTORY_ITEM_KEY';
 
 /**
@@ -54,6 +55,10 @@ localStorageQueries.forEach((queryItem) => {
   cachedQueries.set(trimmedQueryString, queryItem);
 });
 
+export const getCachedQueries = (): QueryHistoryItem[] => {
+  return Array.from(cachedQueries, ([name, value]) => ({ ...value }));
+};
+
 export const addQueriesToCache = (item: QueryHistoryItem) => {
   const trimmedQueryString = getKey(item.queryString);
 
@@ -85,7 +90,7 @@ export const updateCachedQueries = (item: QueryHistoryItem) => {
       queryRunning: false,
     });
   }
-  const queriesToStore = Array.from(cachedQueries, ([name, value]) => ({ ...value }));
+  const queriesToStore = getCachedQueries();
   if (queriesToStore.length === MAX_QUERIES_NUMBER) {
     const sortedByDate = queriesToStore.sort((a, b) => sortDates(b?.timeRan, a?.timeRan));
 
