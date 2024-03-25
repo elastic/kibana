@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
   const logger = getService('log');
   const retryService = getService('retry');
 
-  describe('Custom  Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
+  describe('Custom Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';

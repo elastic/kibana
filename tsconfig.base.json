@@ -1366,6 +1366,8 @@
       "@kbn/search-examples-plugin/*": ["examples/search_examples/*"],
       "@kbn/search-index-documents": ["packages/kbn-search-index-documents"],
       "@kbn/search-index-documents/*": ["packages/kbn-search-index-documents/*"],
+      "@kbn/search-playground": ["x-pack/plugins/search_playground"],
+      "@kbn/search-playground/*": ["x-pack/plugins/search_playground/*"],
       "@kbn/search-response-warnings": ["packages/kbn-search-response-warnings"],
       "@kbn/search-response-warnings/*": ["packages/kbn-search-response-warnings/*"],
       "@kbn/searchprofiler-plugin": ["x-pack/plugins/searchprofiler"],
