@@ -13,10 +13,7 @@ import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '..
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { SentinelOneActionsClientOptionsMock } from './mocks';
 import { sentinelOneMock } from './mocks';
-import {
-  ENDPOINT_ACTION_RESPONSES_INDEX,
-  ENDPOINT_ACTIONS_INDEX,
-} from '../../../../../../common/endpoint/constants';
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -136,7 +133,7 @@ describe('SentinelOneActionsClient class', () => {
     it('should write action request and response to endpoint indexes', async () => {
       await s1ActionsClient.isolate(createS1IsolationOptions());
 
-      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
       expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
         1,
         {
@@ -166,22 +163,6 @@ describe('SentinelOneActionsClient class', () => {
         },
         { meta: true }
       );
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(2, {
-        document: {
-          '@timestamp': expect.any(String),
-          EndpointActions: {
-            action_id: expect.any(String),
-            data: { command: 'isolate' },
-            input_type: 'sentinel_one',
-            started_at: expect.any(String),
-            completed_at: expect.any(String),
-          },
-          agent: { id: ['1-2-3'] },
-          error: undefined,
-        },
-        index: ENDPOINT_ACTION_RESPONSES_INDEX,
-        refresh: 'wait_for',
-      });
     });
 
     it('should return action details', async () => {
@@ -219,7 +200,7 @@ describe('SentinelOneActionsClient class', () => {
     it('should write action request and response to endpoint indexes', async () => {
       await s1ActionsClient.release(createS1IsolationOptions());
 
-      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
       expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
         1,
         {
@@ -249,22 +230,6 @@ describe('SentinelOneActionsClient class', () => {
         },
         { meta: true }
       );
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(2, {
-        document: {
-          '@timestamp': expect.any(String),
-          EndpointActions: {
-            action_id: expect.any(String),
-            data: { command: 'unisolate' },
-            input_type: 'sentinel_one',
-            started_at: expect.any(String),
-            completed_at: expect.any(String),
-          },
-          agent: { id: ['1-2-3'] },
-          error: undefined,
-        },
-        index: ENDPOINT_ACTION_RESPONSES_INDEX,
-        refresh: 'wait_for',
-      });
     });
 
     it('should return action details', async () => {
@@ -282,5 +247,17 @@ describe('SentinelOneActionsClient class', () => {
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
+  });
+
+  describe('private #checkPendingIsolateOrReleaseActions()', () => {
+    it.todo('should complete action as a failure if action request is missing S1 agent id');
+
+    it.todo('should search ES with expected query for isolate');
+
+    it.todo('should search ES with expected query for release');
+
+    it.todo('should return list of response docs');
+
+    it.todo('should return failed isolate response doc if S1 activity type is 2010');
   });
 });

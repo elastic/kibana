@@ -381,153 +381,159 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     // TODO:PT need to ensure that we ignore when the index does not exist
 
-    const query: QueryDslQueryContainer = {
-      bool: {
-        must: [
-          {
-            term: {
-              // Activity Types can be retrieved from S1 via API: `/web/api/v2.1/activities/types`
-              'sentinel_one.activity.type':
-                command === 'isolate'
-                  ? [
-                      // {
-                      //    "id": 1001
-                      //    "action": "Agent Disconnected From Network",
-                      //    "descriptionTemplate": "Agent {{ computer_name }} was disconnected from network.",
-                      // },
-                      1001,
+    // Create the `OR` clause that filters for each agent id and an updated date of greater than the date when
+    // the isolate request was created
+    const agentListQuery: QueryDslQueryContainer[] = actionRequests.reduce((acc, action) => {
+      const s1AgentId = action.meta?.agentId;
 
-                      // {
-                      //    "id": 2010
-                      //    "action": "Agent Mitigation Report Quarantine Network Failed",
-                      //    "descriptionTemplate": "Agent {{ computer_name }} was unable to disconnect from network.",
-                      // },
-                      2010,
-                    ]
-                  : [
-                      // {
-                      //    "id": 1002
-                      //    "action": "Agent Reconnected To Network",
-                      //    "descriptionTemplate": "Agent {{ computer_name }} was connected to network.",
-                      // },
-                      1002,
-                    ],
+      if (s1AgentId) {
+        if (!actionsByAgentId[s1AgentId]) {
+          actionsByAgentId[s1AgentId] = [];
+        }
+
+        actionsByAgentId[s1AgentId].push(action);
+
+        acc.push({
+          bool: {
+            filter: [
+              { term: { 'sentinel_one.activity.agent.id': s1AgentId } },
+              { range: { 'sentinel_one.activity.updated_at': { gt: action['@timestamp'] } } },
+            ],
+          },
+        });
+      } else {
+        // This is an edge case and should never happen. But just in case :-)
+        warnings.push(
+          `${command} response action ID [${action.EndpointActions.action_id}] missing SentinelOne agent ID, thus unable to check on it's status. Forcing it to complete as failure.`
+        );
+
+        completedResponses.push(
+          this.buildActionResponseEsDoc<{}, SentinelOneIsolationResponseMeta>({
+            actionId: action.EndpointActions.action_id,
+            agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
+            data: { command: 'isolate' },
+            error: {
+              message: `Unable to very if action completed. SentinelOne agent id ('meta.agentId') missing on action request document!`,
+            },
+          })
+        );
+      }
+
+      return acc;
+    }, [] as QueryDslQueryContainer[]);
+
+    if (agentListQuery.length > 0) {
+      const query: QueryDslQueryContainer = {
+        bool: {
+          must: [
+            {
+              term: {
+                // Activity Types can be retrieved from S1 via API: `/web/api/v2.1/activities/types`
+                'sentinel_one.activity.type':
+                  command === 'isolate'
+                    ? [
+                        // {
+                        //    "id": 1001
+                        //    "action": "Agent Disconnected From Network",
+                        //    "descriptionTemplate": "Agent {{ computer_name }} was disconnected from network.",
+                        // },
+                        1001,
+
+                        // {
+                        //    "id": 2010
+                        //    "action": "Agent Mitigation Report Quarantine Network Failed",
+                        //    "descriptionTemplate": "Agent {{ computer_name }} was unable to disconnect from network.",
+                        // },
+                        2010,
+                      ]
+                    : [
+                        // {
+                        //    "id": 1002
+                        //    "action": "Agent Reconnected To Network",
+                        //    "descriptionTemplate": "Agent {{ computer_name }} was connected to network.",
+                        // },
+                        1002,
+                      ],
+              },
+            },
+          ],
+          should: agentListQuery,
+          minimum_should_match: 1,
+        },
+      };
+
+      this.log.debug(
+        `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX}] index with query:\n${stringify(
+          query
+        )}`
+      );
+
+      const searchResults = await this.options.esClient
+        .search<SentinelOneActivityDoc>({
+          index: SENTINEL_ONE_ACTIVITY_INDEX,
+          query,
+          // There may be many documents for each host/agent, so we collapse it and only get back the
+          // first one that came in after the isolate request was sent
+          collapse: {
+            field: 'sentinel_one.activity.agent.id',
+            inner_hits: {
+              name: 'first_found',
+              size: 1,
+              sort: [{ 'sentinel_one.activity.updated_at': 'asc' }],
             },
           },
-        ],
-        // Create an `OR` clause that filters for each agent id an an updated date of greater than the date when
-        // the isolate request was created
-        should: actionRequests.reduce((acc, action) => {
-          const s1AgentId = action.meta?.agentId;
+          _source: false,
+          sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
+          size: 1000,
+        })
+        .catch(catchAndWrapError);
 
-          if (s1AgentId) {
-            if (!actionsByAgentId[s1AgentId]) {
-              actionsByAgentId[s1AgentId] = [];
-            }
+      this.log.debug(
+        `Search results for SentinelOne ${command} activity documents:\n${stringify(searchResults)}`
+      );
 
-            actionsByAgentId[s1AgentId].push(action);
+      for (const searchResultHit of searchResults.hits.hits) {
+        const isolateActivityResponseDoc = searchResultHit.inner_hits?.first_found.hits
+          .hits[0] as SearchHit<SentinelOneActivityDoc>;
 
-            acc.push({
-              bool: {
-                filter: [
-                  { term: { 'sentinel_one.activity.agent.id': s1AgentId } },
-                  { range: { 'sentinel_one.activity.updated_at': { gt: action['@timestamp'] } } },
-                ],
-              },
-            });
-          } else {
-            // This is an edge case and should never happen. But just in case :-)
-            warnings.push(
-              `${command} response action ID [${action.EndpointActions.action_id}] missing SentinelOne agent ID, thus unable to check on it's status. Forcing it to complete as failure.`
-            );
+        if (isolateActivityResponseDoc && isolateActivityResponseDoc._source) {
+          const s1ActivityData = isolateActivityResponseDoc._source.sentinel_one.activity;
 
+          const elasticDocId = isolateActivityResponseDoc._id;
+          const s1AgentId = s1ActivityData.agent.id;
+          const activityLogEntryId = s1ActivityData.id;
+          const activityLogEntryType = s1ActivityData.type;
+          const activityLogEntryDescription = s1ActivityData.description.primary;
+
+          for (const actionRequest of actionsByAgentId[s1AgentId]) {
             completedResponses.push(
               this.buildActionResponseEsDoc<{}, SentinelOneIsolationResponseMeta>({
-                actionId: action.EndpointActions.action_id,
-                agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
-                data: { command: 'isolate' },
-                error: {
-                  message: `Unable to very if action completed. SentinelOne agent id ('meta.agentId') missing on action request document!`,
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: { command },
+                error:
+                  activityLogEntryType === 2010 && command === 'isolate'
+                    ? {
+                        message:
+                          activityLogEntryDescription ??
+                          `Action failed. SentinelOne activity log entry [${activityLogEntryId}] has a 'type' value of 2010 indicating a failure to disconnect`,
+                      }
+                    : undefined,
+                meta: {
+                  elasticDocId,
+                  activityLogEntryId,
+                  activityLogEntryType,
+                  activityLogEntryDescription,
                 },
               })
             );
           }
-
-          return acc;
-        }, [] as QueryDslQueryContainer[]),
-        minimum_should_match: 1,
-      },
-    };
-
-    this.log.debug(
-      `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX}] index with query:\n${stringify(
-        query
-      )}`
-    );
-
-    const searchResults = await this.options.esClient
-      .search<SentinelOneActivityDoc>({
-        index: SENTINEL_ONE_ACTIVITY_INDEX,
-        query,
-        // There may be many documents for each host/agent, so we collapse it and only get back the
-        // first one that came in after the isolate request was sent
-        collapse: {
-          field: 'sentinel_one.activity.agent.id',
-          inner_hits: {
-            name: 'first_found',
-            size: 1,
-            sort: [{ 'sentinel_one.activity.updated_at': 'asc' }],
-          },
-        },
-        _source: false,
-        sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
-        size: 1000,
-      })
-      .catch(catchAndWrapError);
-
-    this.log.debug(
-      `Search results for SentinelOne ${command} activity documents:\n${stringify(searchResults)}`
-    );
-
-    for (const searchResultHit of searchResults.hits.hits) {
-      const isolateActivityResponseDoc = searchResultHit.inner_hits?.first_found.hits
-        .hits[0] as SearchHit<SentinelOneActivityDoc>;
-
-      if (isolateActivityResponseDoc && isolateActivityResponseDoc._source) {
-        const s1ActivityData = isolateActivityResponseDoc._source.sentinel_one.activity;
-
-        const elasticDocId = isolateActivityResponseDoc._id;
-        const s1AgentId = s1ActivityData.agent.id;
-        const activityLogEntryId = s1ActivityData.id;
-        const activityLogEntryType = s1ActivityData.type;
-        const activityLogEntryDescription = s1ActivityData.description.primary;
-
-        for (const actionRequest of actionsByAgentId[s1AgentId]) {
-          completedResponses.push(
-            this.buildActionResponseEsDoc<{}, SentinelOneIsolationResponseMeta>({
-              actionId: actionRequest.EndpointActions.action_id,
-              agentId: Array.isArray(actionRequest.agent.id)
-                ? actionRequest.agent.id[0]
-                : actionRequest.agent.id,
-              data: { command },
-              error:
-                activityLogEntryType === 2010 && command === 'isolate'
-                  ? {
-                      message:
-                        activityLogEntryDescription ??
-                        `Action failed. SentinelOne activity log entry [${activityLogEntryId}] has a 'type' value of 2010 indicating a failure to disconnect`,
-                    }
-                  : undefined,
-              meta: {
-                elasticDocId,
-                activityLogEntryId,
-                activityLogEntryType,
-                activityLogEntryDescription,
-              },
-            })
-          );
         }
       }
+    } else {
+      this.log.debug(`Nothing to search for. List of agents IDs is empty.`);
     }
 
     this.log.debug(`${command} action responses generated:\n${stringify(completedResponses)}`);
