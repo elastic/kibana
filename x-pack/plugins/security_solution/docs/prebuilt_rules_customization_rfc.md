@@ -2234,13 +2234,11 @@ Number fields should be treated as a whole unit, i.e. not breakable by digits. T
   </tbody>
 </table>
 
-#### Array of strings fields
+#### Array of scalar value (strings/numbers) fields
 
 > Examples: `index`, `tags`, `references`,
 
-For **array of strings** fields, conflict resolution will take place on an element by element basis - that means that the algorithm will not consider or try to solve changes within a single element. 
-
-Instead, we can create a Set-based logic to caclulate what the additions and removals where applied to the `base` version onto the `current` and `target` versions and do set manipulations to get a merged versions.
+For **arrays of scalar values** fields, we can create a Set-based logic to caclulate what the additions and removals where applied to the `base` version onto the `current` and `target` versions and do set manipulations to get a merged version.
 
 For example:
 
@@ -2352,89 +2350,69 @@ The possible scenarios are:
 Notice that with this logic we would never mark a merge scenario as a conflict.
 
 
-###### Array of objects fields
+#### Array of objects fields
+
+> Examples: `related_integrations,` `required_fields`
 
 Since the properties in each object within the array are highly dependent on one another, the whole object should be treated as a block, and not attempt to diff or merge changes to individual fields within each element.
 
 For example: in a `required_fields` update, if the `type` is updated from `unknown` in the base version to `keyword` in the `target` version, but in the same object the user has updated the base `name` of the field, the change of type will have a high probability of not making sense anymore - there is no way of knowing if the change proposed by Elastic will also apply to the field name that the user is now referring through its customization.
 
-Therefore, we should prefer to keep the user's version for the whole block.(See this example in the first element of the array in the first row of the table below).
+Therefore, to calculate a merged version, we will use a similar approach to the one used for "Array of strings", but instead of using `Set` logic, we will use `Maps` so that we can keep track of each objects based on an `id` and thus carry out algebraic operations on them to arrive to a merged version.
 
-Examples: `related_integrations,` `required_fields`
+The `id` will vary depending on the type of the field:
 
-###### Proposed algorithm
+|Field|Example object|Key used as `id`|
+|---|---|---|
+| `required_fields` | `{ ecs: true, name: 'host.name', type: 'keyword' }` | `name` |
+| `related_integrations` | `{ "package": "aws", "version": "^2.0.0", "integration": "cloudtrail" }` | `package`+`integration` |
 
-- Do element by element comparison:
-  - If element index exists in the three versions and the values:
-    - do not differ between all versions (base, current and target), **keep current** version. (A A A)
-    - do not differ between base and current, but updates target, **keep target** version. (A A B)
-    - differ between base and current, but doesn't update target, **keep current** version. (A B A)
-    - differ between base and current, updates target, **keep current** version. (A B B)
-    - differ between all version (base, current and target), **keep current** version. (A B C)
-  - If element index exists in base and current version, but not in target:
-    - If base differs from current: **keep current** version. (A B _)
-    - If base equals current: **remove element**.  (A A _)
-  - If element index exists in base and target version, but not in current:
-    - **Remove element**. (A _ B) and (A _ A)
-  - If element index exists in current and target version, but not in base:
-    - If base equals current: **add element/keep target**. (_ A A)
-    - If base differs from current: **keep both current and target**. (_ A B)
-  - If element index exists only in base version:
-    - **Remove element** (A _ _)
-  - If element index exists only in current version:
-    - **Keep current version** (_ A _)
-  - If element index exists only in target version:
-    - **Keep target version** (_ _ A)
-    
+----
+As an example - `A`, `B` and `C` are the keys of the objects in the array, and `modified` means that an object kept it's key id value, but some other propery of the object was modified:
+
+**base**: [`A`, `B`]  
+**current**: [`modified B `, `C`]  
+**target**: [`modified B`, `D`]  
+
+The logic is as follows:
+
+Changes to **current** compared against **base**:
+- Added: [`C`]
+- Removed: [`A`]
+- Modified: [`B`]
+
+Changes to **target** compared against **base**:
+- Added: [`D`]
+- Removed: [`A`]
+- Modified: [`B`]
+
+In combination:
+- Added: [`C`, `D`] (no conflicts)
+- Removed: [`A`] (no conflicts)
+- Modified: [`B`] (no conflict ONLY if the 2 objects were modified in exactly the same way)
+
+So there are two possible results:
+
+- No conflict: [`B`, `C`, `D`]
+- Conflict: no acceptable merge proposal can be built, mark as `conflict` and propose the `current` version
+
+----
+
 <table>
-    <thead>
-      <tr>
-        <th style="border-right:3px solid black">Use case</th>
-        <th>Base version</th>
-        <th>Current version</th>
-        <th style="border-right:3px solid black">Target version</th>
-        <th>Merged version (output)</th>
-      </tr>
-    </thead>
-  <tbody valign="top">
+  <thead align="center">
     <tr>
-      <td rowspan=2 style="border-right:3px solid black">Keep user changes if element conflicts, but apply changes in elements with clean updates <br><br> <ul><li><b>1st elem: (A B C - keep current) </li><li>2nd elem: (A A B - keep target)</b></li></ul><br><br> Same for: <br><ul><li><b>1st elem: (A B C) + 2nd elem: (A B A - keep current)</b></li><li><b>1st elem: (A B C) + 2nd elem: (A B B - keep current/target)</b></li></ul></td>
-      <td>
-      <pre>
-[
-  logs-*,
-  logstash-*
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  cluster_one:logs-*,
-  cluster_one:logstash-*
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
-[
-  new-index1-*,
-  new-index2-*,
-]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  cluster_one:logs-*,
-  cluster_one:logstash-*
-]
-        </pre>
-      </td>
+      <th style="border-right:3px solid black">Use case</th>
+      <th>Base version</th>
+      <th>Current version</th>
+      <th style="border-right:3px solid black">Target version</th>
+      <th>Merged version (output)</th>
+      <th>Mark as conflict?</th>
     </tr>
+  </thead>
+  <tbody >
     <tr>
-      <td>
-      <pre>
+      <td style="border-right:3px solid black">No customization, no updates (AAA)</td>
+      <td><pre>
 [
   {
     ecs: true,
@@ -2446,94 +2424,9 @@ Examples: `related_integrations,` `required_fields`
     name: "host.os.type",
     type: "keyword"
   },
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
-    type: "unknown"
-  },
-  {
-    ecs: false,
-    name: "host.os.type",
-    type: "keyword"
-  },
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
-[
-  {
-    ecs: true,
-    name: "event.action",
-    type: "keyword"
-  },
-  {
-    ecs: false,
-    name: "host.user.id",
-    type: "keyword"
-  },
-]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
-    type: "unknown"
-  },
-  {
-    ecs: false,
-    name: "host.user.id",
-    type: "keyword"
-  },
-]
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td rowspan=2 style="border-right:3px solid black">Keep user changes if element conflicts, and remove any <b>uncustomized</b> elements if removed in update <br><br><ul><li><b>1st elem: (A B C - keep current) </li><li>2nd elem: (A A _ - remove element)</b></li></ul></b></td>
-      <td>
-      <pre>
-[
-  logs-*,
-  logstash-*
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  cluster_one:logs-*,
-  logstash-*
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
-[
-  logs-new-*,
-]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  cluster_one:logs-*
-]
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <pre>
+]      
+      </pre></td>
+      <td><pre>
 [
   {
     ecs: true,
@@ -2545,87 +2438,9 @@ Examples: `related_integrations,` `required_fields`
     name: "host.os.type",
     type: "keyword"
   },
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
-    type: "unknown"
-  },
-  {
-    ecs: false,
-    name: "host.os.type",
-    type: "keyword"
-  },
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
-[
-  {
-    ecs: true,
-    name: "event.action",
-    type: "keyword"
-  }
-]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
-    type: "unknown"
-  }
-]
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td rowspan=2 style="border-right:3px solid black">Keep user changes if element conflicts, but keep any <b>customized</b> elements if removed in update <br><br>
-      <ul><li><b>1st elem: (A B C - keep current) </li><li>2nd elem: (A B _ - keep current)</b></li></ul>
-      </td>
-      <td>
-      <pre>
-[
-  logs-*,
-  logstash-*
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  cluster_one:logs-*,
-  cluster_one:logstash-*
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
-[
-  logs-new-*,
-]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  cluster_one:logs-*,
-  cluster_one:logstash-*
-]
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <pre>
+]      
+      </pre></td>
+      <td style="border-right:3px solid black"><pre>
 [
   {
     ecs: true,
@@ -2637,119 +2452,41 @@ Examples: `related_integrations,` `required_fields`
     name: "host.os.type",
     type: "keyword"
   },
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
-    type: "unknown"
-  },
-  {
-    ecs: false,
-    name: "host.user.id",
-    type: "keyword"
-  },
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
+]      
+      </pre></td>
+      <td><pre>
 [
   {
     ecs: true,
     name: "event.action",
-    type: "keyword"
-  }
-]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
     type: "unknown"
   },
   {
     ecs: false,
-    name: "host.user.id",
+    name: "host.os.type",
     type: "keyword"
   },
-]
-        </pre>
-      </td>
+]      
+      </pre></td>
+      <td><pre>NO</pre></td>
     </tr>
     <tr>
-      <td rowspan=2 style="border-right:3px solid black">Keep user changes if element conflicts and add new matching element <br><br>
-      <ul><li><b>1st elem: (A B C - keep current) </li><li>2nd elem: (_ A A - keep current/target)</b></li></ul>
-      </td>
-      <td>
-      <pre>
-[
-  logs-*,
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  cluster_one:logs-*,
-  new-target
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
-[
-  logs-new-*,
-  new-target
-]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  cluster_one:logs-*,
-  new-target
-]
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <pre>
+      <td style="border-right:3px solid black">User customization, no updates (ABA)</td>
+      <td><pre>
 [
   {
     ecs: true,
     name: "event.action",
     type: "unknown"
-  }
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
-    type: "unknown"
   },
   {
     ecs: false,
-    name: "my.new.field",
+    name: "host.os.type",
     type: "keyword"
-  }
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
+  },
+]      
+      </pre></td>
+      <td><pre>
 [
   {
     ecs: true,
@@ -2758,172 +2495,12 @@ Examples: `related_integrations,` `required_fields`
   },
   {
     ecs: false,
-    name: "my.new.field",
-    type: "keyword"
-  },
-]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
-    type: "unknown"
-  },
-  {
-    ecs: false,
-    name: "my.new.field",
-    type: "keyword"
-  } ,
-]
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td rowspan=2 style="border-right:3px solid black">Keep user changes if element conflicts and add both new conflicting elements <br><br>
-      <ul><li><b>1st elem: (A B C - keep current) </li><li>2nd elem: (_ A B - keep both current and target)</b></li></ul>
-      </td>
-      <td>
-      <pre>
-[
-  logs-*,
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  cluster_one:logs-*,
-  new-target
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
-[
-  logs-new-*,
-  elastic-index
-]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  cluster_one:logs-*,
-  new-target,
-  elastic-index
-]
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <pre>
-[
-  {
-    ecs: true,
-    name: "event.action",
-    type: "unknown"
-  }
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
-    type: "unknown"
-  },
-  {
-    ecs: false,
-    name: "my.new.field",
-    type: "keyword"
-  },
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
-[
-  {
-    ecs: true,
-    name: "event.action",
-    type: "keyword"
-  },
-  {
-    ecs: true,
-    name: "new.elastic.ip",
+    name: "host.os.ip",
     type: "ip"
-  }
-]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
-    type: "unknown"
   },
-  {
-    ecs: false,
-    name: "host.user.id",
-    type: "keyword"
-  },
-  {
-    ecs: true,
-    name: "process.executable",
-    type: "keyword"
-  },
-]
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td rowspan=2 style="border-right:3px solid black">Keep user changes if element conflicts and remove element removed by user <br><br> 
-      <ul><li><b>1st elem: (A B C - keep current) </li><li>2nd elem: (A _ A - remove element)</b></li></ul>
-      And:
-      <ul><li><b>1st elem: (A B C - keep current) </li><li>2nd elem: (A _ B - remove element</b></li></ul>
-      </td>
-      <td>
-      <pre>
-[
-  logs-*,
-  logstash-*
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  cluster_one:logs-*,
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
-[
-  logs-new-*,
-  logstash-*
-]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  cluster_one:logs-*,
-]
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <pre>
+]      
+      </pre></td>
+      <td style="border-right:3px solid black"><pre>
 [
   {
     ecs: true,
@@ -2931,58 +2508,255 @@ Examples: `related_integrations,` `required_fields`
     type: "unknown"
   },
   {
+    ecs: false,
+    name: "host.os.type",
+    type: "keyword"
+  },
+]      
+      </pre></td>
+      <td><pre>
+[
+  {
     ecs: true,
-    name: "process.executable",
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: false,
+    name: "host.os.ip",
+    type: "ip"
+  },
+]      
+      </pre></td>
+      <td><pre>NO</pre></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">No customization, upstream update (AAB)</td>
+      <td><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.os.type",
+    type: "keyword"
+  },
+]      
+      </pre></td>
+      <td><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.os.type",
+    type: "keyword"
+  },
+]      
+      </pre></td>
+      <td style="border-right:3px solid black"><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: false,
+    name: "host.os.ip",
+    type: "ip"
+  },
+]    
+      </pre></td>
+      <td><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: false,
+    name: "host.os.ip",
+    type: "ip"
+  },
+]    
+      </pre></td>
+      <td><pre>NO</pre></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update match (ABB)</td>
+      <td><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.os.type",
+    type: "keyword"
+  },
+]      
+      </pre></td>
+      <td><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: false,
+    name: "host.os.ip",
+    type: "ip"
+  },
+]    
+      </pre></td>
+      <td style="border-right:3px solid black"><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: false,
+    name: "host.os.ip",
+    type: "ip"
+  },
+]    
+      </pre></td>
+      <td><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: false,
+    name: "host.os.ip",
+    type: "ip"
+  },
+]    
+      </pre></td>
+      <td><pre>NO</pre></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update <b>solvable conflict</b> (ABC)<br><br> Object A modified in matching way</td>
+      <td><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.os.type",
+    type: "keyword"
+  },
+]      
+      </pre></td>
+      <td><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: false,
+    name: "new.field.name",
+    type: "keyword"
+  },
+]    
+      </pre></td>
+      <td style="border-right:3px solid black"><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: false,
+    name: "new.field.ip",
+    type: "ip"
+  },
+]   
+      </pre></td>
+      <td><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  },
+    {
+    ecs: false,
+    name: "new.field.name",
+    type: "keyword"
+  },
+  {
+    ecs: false,
+    name: "new.field.ip",
+    type: "ip"
+  },
+]
+      </pre></td>
+      <td><pre>NO</pre></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update <b>non-solvable conflict</b> (ABC)<br><br> Object A modified in diverging ways, propose <b>current</b> version</td>
+      <td><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  }
+]      
+      </pre></td>
+      <td><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+]    
+      </pre></td>
+      <td style="border-right:3px solid black"><pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
     type: "string"
-  }
-]
-        </pre>
-      </td>
-      <td>
-        <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
-    type: "unknown"
-  }
-]
-        </pre>
-      </td>
-      <td style="border-right:3px solid black">
-      <pre>
+  },
+]   
+      </pre></td>
+      <td><pre>
 [
   {
     ecs: true,
     name: "event.action",
     type: "keyword"
-  },
-  {
-    ecs: true,
-    name: "process.executable.ip",
-    type: "ip"
   }
 ]
-        </pre>
-        </td>
-      <td>
-      <pre>
-[
-  {
-    ecs: true,
-    name: "event.UPDATED",
-    type: "unknown"
-  }
-]
-        </pre>
-      </td>
+      </pre></td>
+      <td><pre><b>YES</b></pre></td>
     </tr>
   </tbody>
 </table>
-
-
-
-
 
 ### Changes to Rule Upgrade UX/UI flow
 
