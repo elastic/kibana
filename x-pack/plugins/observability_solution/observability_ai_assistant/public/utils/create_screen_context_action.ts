@@ -17,14 +17,13 @@ type ReturnOf<TActionDefinition extends Omit<ScreenContextActionDefinition, 'res
     : undefined;
 
 export function createScreenContextAction<
-  TActionDefinition extends Omit<ScreenContextActionDefinition, 'respond'>,
-  TResponse = ReturnOf<TActionDefinition>
+  TActionDefinition extends Omit<ScreenContextActionDefinition, 'respond'>
 >(
   definition: TActionDefinition,
-  respond: ScreenContextActionRespondFunction<TResponse>
-): ScreenContextActionDefinition<TResponse> {
+  respond: ScreenContextActionRespondFunction<ReturnOf<TActionDefinition>>
+): ScreenContextActionDefinition<unknown> {
   return {
     ...definition,
     respond,
-  };
+  } as ScreenContextActionDefinition<unknown>;
 }

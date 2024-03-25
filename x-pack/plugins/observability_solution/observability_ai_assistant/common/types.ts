@@ -104,7 +104,7 @@ export interface ObservabilityAIAssistantScreenContextRequest {
   actions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
 }
 
-export type ScreenContextActionRespondFunction<TArguments extends unknown> = ({}: {
+export type ScreenContextActionRespondFunction<TArguments> = ({}: {
   args: TArguments;
   signal: AbortSignal;
   connectorId: string;
