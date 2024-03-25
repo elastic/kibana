@@ -74,7 +74,9 @@ describe('runResilientMigrator', () => {
       kibanaVersion: options.kibanaVersion,
       waitForMigrationCompletion: options.waitForMigrationCompletion,
       mustRelocateDocuments: options.mustRelocateDocuments,
+      indexTypes: options.indexTypes,
       indexTypesMap: options.indexTypesMap,
+      hashToVersionMap: options.hashToVersionMap,
       targetIndexMappings: options.targetIndexMappings,
       preMigrationScript: options.preMigrationScript,
       migrationVersionPerType: options.migrationVersionPerType,
@@ -121,6 +123,7 @@ const mockOptions = (): RunResilientMigratorParams => {
     kibanaVersion: '8.8.0',
     waitForMigrationCompletion: false,
     mustRelocateDocuments: true,
+    indexTypes: ['a', 'c'],
     indexTypesMap: indexTypesMapMock,
     hashToVersionMap: hashToVersionMapMock,
     targetIndexMappings: {

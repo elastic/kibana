@@ -76,8 +76,7 @@ export const nextActionMap = (
   transformRawDocs: TransformRawDocs,
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,
-  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>,
-  hashToVersionMap: Record<string, string>
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
 ) => {
   return {
     INIT: (state: InitState) =>
@@ -86,17 +85,15 @@ export const nextActionMap = (
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
-    UPDATE_SOURCE_MAPPINGS_PROPERTIES: ({
-      sourceIndex,
-      sourceIndexMappings,
-      targetIndexMappings,
-    }: UpdateSourceMappingsPropertiesState) =>
+    UPDATE_SOURCE_MAPPINGS_PROPERTIES: (state: UpdateSourceMappingsPropertiesState) =>
       Actions.updateSourceMappingsProperties({
         client,
-        sourceIndex: sourceIndex.value,
-        indexMappings: sourceIndexMappings.value,
-        appMappings: targetIndexMappings,
-        hashToVersionMap,
+        indexTypes: state.indexTypes,
+        sourceIndex: state.sourceIndex.value,
+        indexMappings: state.sourceIndexMappings.value,
+        appMappings: state.targetIndexMappings,
+        latestMappingsVersions: state.latestMappingsVersions,
+        hashToVersionMap: state.hashToVersionMap,
       }),
     CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
       Actions.cleanupUnknownAndExcluded({
@@ -208,9 +205,11 @@ export const nextActionMap = (
       Actions.refreshIndex({ client, index: state.targetIndex }),
     CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
       Actions.checkTargetMappings({
-        actualMappings: Option.toUndefined(state.sourceIndexMappings),
-        expectedMappings: state.targetIndexMappings,
-        hashToVersionMap,
+        indexTypes: state.indexTypes,
+        indexMappings: Option.toUndefined(state.sourceIndexMappings),
+        appMappings: state.targetIndexMappings,
+        latestMappingsVersions: state.latestMappingsVersions,
+        hashToVersionMap: state.hashToVersionMap,
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES: (state: UpdateTargetMappingsPropertiesState) =>
       Actions.updateAndPickupMappings({
@@ -315,16 +314,14 @@ export const next = (
   transformRawDocs: TransformRawDocs,
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,
-  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>,
-  hashToVersionMap: Record<string, string>
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
 ) => {
   const map = nextActionMap(
     client,
     transformRawDocs,
     readyToReindex,
     doneReindexing,
-    updateRelocationAliases,
-    hashToVersionMap
+    updateRelocationAliases
   );
   return (state: State) => {
     const delay = createDelayFn(state);

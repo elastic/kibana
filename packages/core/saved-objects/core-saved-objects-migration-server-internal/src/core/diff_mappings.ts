@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import { getUpdatedRootFields, getUpdatedTypes } from './compare_mappings';
 
 /**
@@ -18,10 +18,14 @@ import { getUpdatedRootFields, getUpdatedTypes } from './compare_mappings';
 export function diffMappings({
   indexMappings,
   appMappings,
+  indexTypes,
+  latestMappingsVersions,
   hashToVersionMap = {},
 }: {
   indexMappings: IndexMapping;
   appMappings: IndexMapping;
+  indexTypes: string[];
+  latestMappingsVersions: VirtualVersionMap;
   hashToVersionMap?: Record<string, string>;
 }) {
   if (indexMappings.dynamic !== appMappings.dynamic) {
@@ -32,7 +36,12 @@ export function diffMappings({
   ) {
     return { changedProp: '_meta' };
   } else {
-    const changedProp = findChangedProp({ indexMappings, appMappings, hashToVersionMap });
+    const changedProp = findChangedProp({
+      indexMappings,
+      indexTypes,
+      latestMappingsVersions,
+      hashToVersionMap,
+    });
     return changedProp ? { changedProp: `properties.${changedProp}` } : undefined;
   }
 }
@@ -44,19 +53,26 @@ export function diffMappings({
  */
 function findChangedProp({
   indexMappings,
-  appMappings,
+  indexTypes,
   hashToVersionMap,
+  latestMappingsVersions,
 }: {
   indexMappings: IndexMapping;
-  appMappings: IndexMapping;
+  indexTypes: string[];
   hashToVersionMap: Record<string, string>;
+  latestMappingsVersions: VirtualVersionMap;
 }): string | undefined {
   const updatedFields = getUpdatedRootFields(indexMappings);
   if (updatedFields.length) {
     return updatedFields[0];
   }
 
-  const updatedTypes = getUpdatedTypes({ indexMappings, appMappings, hashToVersionMap });
+  const updatedTypes = getUpdatedTypes({
+    indexMeta: indexMappings._meta,
+    indexTypes,
+    latestMappingsVersions,
+    hashToVersionMap,
+  });
   if (updatedTypes.length) {
     return updatedTypes[0];
   }

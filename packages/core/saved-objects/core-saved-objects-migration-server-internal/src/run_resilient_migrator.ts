@@ -49,6 +49,7 @@ export interface RunResilientMigratorParams {
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
   mustRelocateDocuments: boolean;
+  indexTypes: string[];
   indexTypesMap: IndexTypesMap;
   targetIndexMappings: IndexMapping;
   hashToVersionMap: Record<string, string>;
@@ -77,6 +78,7 @@ export async function runResilientMigrator({
   kibanaVersion,
   waitForMigrationCompletion,
   mustRelocateDocuments,
+  indexTypes,
   indexTypesMap,
   targetIndexMappings,
   hashToVersionMap,
@@ -98,7 +100,9 @@ export async function runResilientMigrator({
     kibanaVersion,
     waitForMigrationCompletion,
     mustRelocateDocuments,
+    indexTypes,
     indexTypesMap,
+    hashToVersionMap,
     targetIndexMappings,
     preMigrationScript,
     coreMigrationVersionPerType,
@@ -119,8 +123,7 @@ export async function runResilientMigrator({
       transformRawDocs,
       readyToReindex,
       doneReindexing,
-      updateRelocationAliases,
-      hashToVersionMap
+      updateRelocationAliases
     ),
     model,
     abort: async (state?: State) => {

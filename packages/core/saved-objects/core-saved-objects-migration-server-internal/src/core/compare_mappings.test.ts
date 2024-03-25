@@ -6,66 +6,40 @@
  * Side Public License, v 1.
  */
 
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import { getBaseMappings } from './build_active_mappings';
 import { getUpdatedTypes, getUpdatedRootFields } from './compare_mappings';
 
 describe('getUpdatedTypes', () => {
   test('returns all types if _meta is missing in indexMappings', () => {
-    const indexMappings: IndexMapping = {
-      dynamic: 'strict',
-      properties: {},
-    };
-    const appMappings: IndexMapping = {
-      _meta: {
-        mappingVersions: { foo: '10.1.0', bar: '10.2.0' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
+    const indexTypes = ['foo', 'bar'];
+    const latestMappingsVersions = {};
 
-    expect(getUpdatedTypes({ indexMappings, appMappings })).toEqual(['foo', 'bar']);
+    expect(getUpdatedTypes({ indexTypes, indexMeta: undefined, latestMappingsVersions })).toEqual([
+      'foo',
+      'bar',
+    ]);
   });
 
   test('returns all types if migrationMappingPropertyHashes and mappingVersions are missing in indexMappings', () => {
-    const indexMappings: IndexMapping = {
-      dynamic: 'strict',
-      properties: {},
-      _meta: {},
-    };
-    const appMappings: IndexMapping = {
-      _meta: {
-        mappingVersions: { foo: '10.1.0', bar: '10.2.0' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
+    const indexTypes = ['foo', 'bar'];
+    const indexMeta: IndexMappingMeta = {};
+    const latestMappingsVersions = {};
 
-    expect(getUpdatedTypes({ indexMappings, appMappings })).toEqual(['foo', 'bar']);
+    expect(getUpdatedTypes({ indexTypes, indexMeta, latestMappingsVersions })).toEqual([
+      'foo',
+      'bar',
+    ]);
   });
 
   describe('when ONLY migrationMappingPropertyHashes exists in indexMappings', () => {
     test('uses the provided hashToVersionMap to compare changes and return only the types that have changed', async () => {
-      const indexMappings: IndexMapping = {
-        dynamic: 'strict',
-        properties: {},
-        _meta: {
-          migrationMappingPropertyHashes: {
-            type1: 'someHash',
-            type2: 'anotherHash',
-            type3: 'aThirdHash', // will be removed
-          },
-        },
-      };
-      const appMappings: IndexMapping = {
-        dynamic: 'strict',
-        properties: {},
-        _meta: {
-          mappingVersions: {
-            type1: '10.1.0', // remains the same
-            type2: '10.2.0', // updated
-            type4: '10.1.0', // new type
-          },
+      const indexTypes = ['type1', 'type2', 'type4'];
+      const indexMeta: IndexMappingMeta = {
+        migrationMappingPropertyHashes: {
+          type1: 'someHash',
+          type2: 'anotherHash',
+          type3: 'aThirdHash', // will be removed
         },
       };
 
@@ -75,52 +49,49 @@ describe('getUpdatedTypes', () => {
         'type3|aThirdHash': '10.1.0',
       };
 
-      expect(getUpdatedTypes({ indexMappings, appMappings, hashToVersionMap })).toEqual([
-        'type2',
-        'type4',
-      ]);
+      const latestMappingsVersions = {
+        type1: '10.1.0',
+        type2: '10.2.0',
+        type4: '10.5.0', // new type, no need to pick it up
+      };
+
+      expect(
+        getUpdatedTypes({ indexTypes, indexMeta, latestMappingsVersions, hashToVersionMap })
+      ).toEqual(['type2']);
     });
   });
 
   describe('when mappingVersions exist in indexMappings', () => {
     test('compares the modelVersions and returns only the types that have changed', async () => {
-      const indexMappings: IndexMapping = {
-        dynamic: 'strict',
-        properties: {},
-        _meta: {
-          mappingVersions: {
-            type1: '10.1.0',
-            type2: '10.1.0',
-            type3: '10.1.0', // will be removed
-          },
-          // ignored, cause mappingVersions is present
-          migrationMappingPropertyHashes: {
-            type1: 'someHash',
-            type2: 'anotherHash',
-            type3: 'aThirdHash',
-          },
+      const indexTypes = ['type1', 'type2', 'type4'];
+
+      const indexMeta: IndexMappingMeta = {
+        mappingVersions: {
+          type1: '10.1.0',
+          type2: '10.1.0',
+          type3: '10.1.0', // will be removed
+        },
+        // ignored, cause mappingVersions is present
+        migrationMappingPropertyHashes: {
+          type1: 'someHash',
+          type2: 'anotherHash',
+          type3: 'aThirdHash',
         },
       };
-      const appMappings: IndexMapping = {
-        dynamic: 'strict',
-        properties: {},
-        _meta: {
-          mappingVersions: {
-            type1: '10.1.0', // remains the same
-            type2: '10.2.0', // updated
-            type4: '10.1.0', // new type
-          },
-        },
+
+      const latestMappingsVersions = {
+        type1: '10.1.0',
+        type2: '10.2.0',
+        type4: '10.5.0', // new type, no need to pick it up
       };
 
       const hashToVersionMap = {
         // empty on purpose, not used as mappingVersions is present in indexMappings
       };
 
-      expect(getUpdatedTypes({ indexMappings, appMappings, hashToVersionMap })).toEqual([
-        'type2',
-        'type4',
-      ]);
+      expect(
+        getUpdatedTypes({ indexTypes, indexMeta, latestMappingsVersions, hashToVersionMap })
+      ).toEqual(['type2']);
     });
   });
 });

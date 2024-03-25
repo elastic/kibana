@@ -41,7 +41,13 @@ const createInitialStateCommonParams = {
   kibanaVersion: '8.1.0',
   waitForMigrationCompletion: false,
   mustRelocateDocuments: true,
+  indexTypes: ['typeA', 'typeB', 'typeC'],
   indexTypesMap,
+  hashToVersionMap: {
+    'typeA|someHash': '10.1.0',
+    'typeB|someHash': '10.1.0',
+    'typeC|someHash': '10.1.0',
+  },
   targetIndexMappings: {
     dynamic: 'strict',
     properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -63,6 +69,37 @@ describe('createInitialState', () => {
 
   beforeEach(() => {
     typeRegistry = new SavedObjectTypeRegistry();
+    typeRegistry.registerType({
+      name: 'foo',
+      hidden: false,
+      mappings: {
+        properties: {},
+      },
+      namespaceType: 'single',
+      modelVersions: {
+        1: {
+          changes: [],
+        },
+      },
+      switchToModelVersionAt: '8.10.0',
+    });
+    typeRegistry.registerType({
+      name: 'bar',
+      hidden: false,
+      mappings: {
+        properties: {},
+      },
+      namespaceType: 'single',
+      modelVersions: {
+        1: {
+          changes: [],
+        },
+        2: {
+          changes: [{ type: 'mappings_addition', addedMappings: {} }],
+        },
+      },
+      switchToModelVersionAt: '8.10.0',
+    });
     docLinks = docLinksServiceMock.createSetupContract();
     logger = mockLogger.get();
     createInitialStateParams = {
@@ -209,7 +246,17 @@ describe('createInitialState', () => {
             ],
           },
         },
+        "hashToVersionMap": Object {
+          "typeA|someHash": "10.1.0",
+          "typeB|someHash": "10.1.0",
+          "typeC|someHash": "10.1.0",
+        },
         "indexPrefix": ".kibana_task_manager",
+        "indexTypes": Array [
+          "typeA",
+          "typeB",
+          "typeC",
+        ],
         "indexTypesMap": Object {
           ".kibana": Array [
             "typeA",
@@ -225,7 +272,14 @@ describe('createInitialState', () => {
           ],
         },
         "kibanaVersion": "8.1.0",
-        "knownTypes": Array [],
+        "knownTypes": Array [
+          "foo",
+          "bar",
+        ],
+        "latestMappingsVersions": Object {
+          "bar": "10.2.0",
+          "foo": "10.0.0",
+        },
         "legacyIndex": ".kibana_task_manager",
         "logs": Array [],
         "maxBatchSize": 1000,
@@ -304,19 +358,6 @@ describe('createInitialState', () => {
   });
 
   it('returns state with the correct `knownTypes`', () => {
-    typeRegistry.registerType({
-      name: 'foo',
-      namespaceType: 'single',
-      hidden: false,
-      mappings: { properties: {} },
-    });
-    typeRegistry.registerType({
-      name: 'bar',
-      namespaceType: 'multiple',
-      hidden: true,
-      mappings: { properties: {} },
-    });
-
     const initialState = createInitialState({
       ...createInitialStateParams,
       typeRegistry,
@@ -330,7 +371,7 @@ describe('createInitialState', () => {
   it('returns state with the correct `excludeFromUpgradeFilterHooks`', () => {
     const fooExcludeOnUpgradeHook = jest.fn();
     typeRegistry.registerType({
-      name: 'foo',
+      name: 'baz',
       namespaceType: 'single',
       hidden: false,
       mappings: { properties: {} },
@@ -338,7 +379,7 @@ describe('createInitialState', () => {
     });
 
     const initialState = createInitialState(createInitialStateParams);
-    expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ foo: fooExcludeOnUpgradeHook });
+    expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ baz: fooExcludeOnUpgradeHook });
   });
 
   it('returns state with a preMigration script', () => {

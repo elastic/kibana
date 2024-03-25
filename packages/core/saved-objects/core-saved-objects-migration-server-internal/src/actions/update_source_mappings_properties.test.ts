@@ -23,6 +23,12 @@ describe('updateSourceMappingsProperties', () => {
     client = elasticsearchClientMock.createInternalClient();
     params = {
       client,
+      indexTypes: ['a', 'b', 'c'],
+      latestMappingsVersions: {
+        a: '10.1.0',
+        b: '10.2.0',
+        c: '10.5.0',
+      },
       sourceIndex: '.kibana_8.7.0_001',
       indexMappings: {
         properties: {
@@ -46,7 +52,8 @@ describe('updateSourceMappingsProperties', () => {
         _meta: {
           mappingVersions: {
             a: '10.1.0',
-            c: '10.1.0',
+            b: '10.3.0',
+            c: '10.5.0',
           },
         },
       },
@@ -60,15 +67,8 @@ describe('updateSourceMappingsProperties', () => {
   it('should not update mappings when there are no changes', async () => {
     // we overwrite the app mappings to have the "unchanged" values with respect to the index mappings
     const sameMappingsParams = chain(params)
-      .set('appMappings', {
-        ...params.indexMappings,
-        _meta: {
-          mappingVersions: {
-            a: '10.1.0',
-            b: '10.1.0',
-          },
-        },
-      })
+      // even if the app versions are more recent, we emulate a scenario where mappings haven NOT changed
+      .set('latestMappingsVersions', { a: '10.1.0', b: '10.1.0', c: '10.1.0' })
       .value();
     const result = await updateSourceMappingsProperties(sameMappingsParams)();
 

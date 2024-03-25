@@ -10,7 +10,7 @@ import { omit } from 'lodash';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import { diffMappings } from '../core/diff_mappings';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import { updateMappings } from './update_mappings';
@@ -22,6 +22,8 @@ export interface UpdateSourceMappingsPropertiesParams {
   sourceIndex: string;
   indexMappings: IndexMapping;
   appMappings: IndexMapping;
+  indexTypes: string[];
+  latestMappingsVersions: VirtualVersionMap;
   hashToVersionMap: Record<string, string>;
 }
 
@@ -34,13 +36,21 @@ export const updateSourceMappingsProperties = ({
   sourceIndex,
   indexMappings,
   appMappings,
+  indexTypes,
+  latestMappingsVersions,
   hashToVersionMap,
 }: UpdateSourceMappingsPropertiesParams): TaskEither.TaskEither<
   RetryableEsClientError | IncompatibleMappingException,
   'update_mappings_succeeded'
 > => {
   return pipe(
-    diffMappings({ indexMappings, appMappings, hashToVersionMap }),
+    diffMappings({
+      indexMappings,
+      appMappings,
+      indexTypes,
+      latestMappingsVersions,
+      hashToVersionMap,
+    }),
     TaskEither.fromPredicate(
       (changes) => !!changes,
       () => 'update_mappings_succeeded' as const

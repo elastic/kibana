@@ -133,8 +133,9 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
         // a migrator's index might no longer have any associated types to it
         const typeDefinitions = indexMap[indexName]?.typeMappings ?? {};
 
+        const indexTypes = Object.keys(typeDefinitions);
         // store only the model versions of SO types that belong to the index
-        const mappingVersions = pick(appVersions, Object.keys(typeDefinitions));
+        const mappingVersions = pick(appVersions, indexTypes);
 
         const _meta: IndexMappingMeta = {
           indexTypesMap,
@@ -145,6 +146,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
           client: options.elasticsearchClient,
           kibanaVersion: options.kibanaVersion,
           mustRelocateDocuments,
+          indexTypes,
           indexTypesMap,
           hashToVersionMap: options.hashToVersionMap,
           waitForMigrationCompletion: options.waitForMigrationCompletion,

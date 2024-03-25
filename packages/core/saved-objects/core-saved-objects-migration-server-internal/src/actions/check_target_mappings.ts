@@ -8,13 +8,15 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import { getUpdatedRootFields, getUpdatedTypes } from '../core/compare_mappings';
 
 /** @internal */
 export interface CheckTargetMappingsParams {
-  actualMappings?: IndexMapping;
-  expectedMappings: IndexMapping;
+  indexTypes: string[];
+  indexMappings?: IndexMapping;
+  appMappings: IndexMapping;
+  latestMappingsVersions: VirtualVersionMap;
   hashToVersionMap?: Record<string, string>;
 }
 
@@ -39,8 +41,10 @@ export interface TypesChanged {
 
 export const checkTargetMappings =
   ({
-    actualMappings: indexMappings,
-    expectedMappings: appMappings,
+    indexTypes,
+    indexMappings,
+    appMappings,
+    latestMappingsVersions,
     hashToVersionMap = {},
   }: CheckTargetMappingsParams): TaskEither.TaskEither<
     IndexMappingsIncomplete | RootFieldsChanged | TypesChanged,
@@ -65,8 +69,9 @@ export const checkTargetMappings =
     }
 
     const updatedTypes = getUpdatedTypes({
-      indexMappings,
-      appMappings,
+      indexTypes,
+      indexMeta: indexMappings?._meta,
+      latestMappingsVersions,
       hashToVersionMap,
     });
 

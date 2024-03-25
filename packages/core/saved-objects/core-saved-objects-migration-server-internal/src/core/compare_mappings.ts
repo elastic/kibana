@@ -7,7 +7,13 @@
  */
 
 import equals from 'fast-deep-equal';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import Semver from 'semver';
+
+import type {
+  IndexMappingMeta,
+  VirtualVersionMap,
+  IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { getBaseMappings } from './build_active_mappings';
 
 /**
@@ -29,22 +35,24 @@ export const getUpdatedRootFields = (indexMappings: IndexMapping): string[] => {
 /**
  * Compares the current vs stored mappings' hashes or modelVersions.
  * Returns a list with all the types that have been updated.
+ * @param indexMeta The meta information stored in the SO index
+ * @param knownTypes The list of SO types that belong to the index and are enabled
+ * @param latestMappingsVersions A map holding [type => version] with the latest versions where mappings have changed for each type
+ * @param hashToVersionMap A map holding information about [md5 => modelVersion] equivalence
+ * @returns the list of types that have been updated (in terms of their mappings)
  */
 export const getUpdatedTypes = ({
-  indexMappings,
-  appMappings,
+  indexMeta,
+  indexTypes,
+  latestMappingsVersions,
   hashToVersionMap = {},
 }: {
-  indexMappings: IndexMapping;
-  appMappings: IndexMapping;
+  indexMeta?: IndexMappingMeta;
+  indexTypes: string[];
+  latestMappingsVersions: VirtualVersionMap;
   hashToVersionMap?: Record<string, string>;
 }): string[] => {
-  // we are assuming current IndexMappings always include _meta + modelVersions
-  const appVersions = appMappings._meta!.mappingVersions!;
-  const indexTypes = Object.keys(appVersions);
-  const indexMeta = indexMappings._meta;
-
-  if (!indexMeta?.mappingVersions && !indexMeta?.migrationMappingPropertyHashes) {
+  if (!indexMeta || (!indexMeta.mappingVersions && !indexMeta.migrationMappingPropertyHashes)) {
     // if we currently do NOT have meta information stored in the index
     // we consider that all types have been updated
     return indexTypes;
@@ -53,43 +61,68 @@ export const getUpdatedTypes = ({
   // If something exists in stored, but is missing in current
   // we don't care, as it could be a disabled plugin, etc
   // and keeping stale stuff around is better than migrating unecessesarily.
-  const updatedTypes = indexTypes.filter((type) =>
+  return indexTypes.filter((type) =>
     isTypeUpdated({
       type,
-      appVersion: appVersions[type],
-      indexHashOrVersion:
-        indexMeta.mappingVersions?.[type] || indexMeta.migrationMappingPropertyHashes?.[type],
+      mappingVersion: latestMappingsVersions[type],
+      indexMeta,
       hashToVersionMap,
     })
   );
-
-  return updatedTypes;
 };
 
 /**
  *
  * @param type The saved object type to check
- * @param appVersion The expected "level" of the saved object, according to the current Kibana version
- * @param indexHashOrVersion The current "level" of the saved object, stored in the mappings._meta (it can be either a hash or a version)
- * @returns True if the type has changed since Kibana was last started
+ * @param mappingVersion The most recent model version that includes mappings changes
+ * @param indexMeta The meta information stored in the SO index
+ * @param hashToVersionMap A map holding information about [md5 => modelVersion] equivalence
+ * @returns true if the mappings for the given type have changed since Kibana was last started
  */
 function isTypeUpdated({
   type,
-  appVersion,
-  indexHashOrVersion,
+  mappingVersion,
+  indexMeta,
   hashToVersionMap,
 }: {
   type: string;
-  indexHashOrVersion?: string;
-  appVersion: string;
+  mappingVersion: string;
+  indexMeta: IndexMappingMeta;
   hashToVersionMap: Record<string, string>;
 }): boolean {
-  if (!indexHashOrVersion) {
-    // if we did not have information for this type stored in the SO index, it is either:
-    // - a new type, and thus there's not need to update + pickup any docs
-    // - an old re-enabled type, which will be updated on OUTDATED_DOCUMENTS_TRANSFORM
-    return true;
+  const latestMappingsVersion = Semver.parse(mappingVersion);
+  if (!latestMappingsVersion) {
+    throw new Error(
+      `The '${type}' saved object type is not specifying a valid semver: ${mappingVersion}`
+    );
   }
-  const indexEquivalentVersion = hashToVersionMap[`${type}|${indexHashOrVersion}`];
-  return indexHashOrVersion !== appVersion && indexEquivalentVersion !== appVersion;
+
+  if (indexMeta.mappingVersions) {
+    // the SO index is already using mappingVersions (instead of md5 hashes)
+    const indexVersion = indexMeta.mappingVersions[type];
+    if (!indexVersion) {
+      // either a new type, and thus there's not need to update + pickup any docs
+      // or an old re-enabled type, which will be updated on OUTDATED_DOCUMENTS_TRANSFORM
+      return false;
+    }
+
+    // if the last version where mappings have changed is more recent than the one stored in the index
+    // it means that the type has been updated
+    return latestMappingsVersion.compare(indexVersion) === 1;
+  } else if (indexMeta.migrationMappingPropertyHashes) {
+    const latestHash = indexMeta.migrationMappingPropertyHashes?.[type];
+
+    if (!latestHash) {
+      // either a new type, and thus there's not need to update + pickup any docs
+      // or an old re-enabled type, which will be updated on OUTDATED_DOCUMENTS_TRANSFORM
+      return false;
+    }
+
+    const indexEquivalentVersion = hashToVersionMap[`${type}|${latestHash}`];
+    return !indexEquivalentVersion || latestMappingsVersion.compare(indexEquivalentVersion) === 1;
+  }
+
+  // at this point, the mappings do not contain any meta informataion
+  // we consider the type has been updated, out of caution
+  return true;
 }

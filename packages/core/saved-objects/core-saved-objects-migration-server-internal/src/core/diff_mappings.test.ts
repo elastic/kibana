@@ -15,6 +15,14 @@ jest.mock('./compare_mappings');
 const getUpdatedRootFieldsMock = getUpdatedRootFields as jest.MockedFn<typeof getUpdatedRootFields>;
 const getUpdatedTypesMock = getUpdatedTypes as jest.MockedFn<typeof getUpdatedTypes>;
 
+const dummyMappings: IndexMapping = {
+  _meta: {
+    mappingVersions: { foo: '10.1.0' },
+  },
+  dynamic: 'strict',
+  properties: {},
+};
+
 const initialMappings: IndexMapping = {
   _meta: {
     mappingVersions: { foo: '10.1.0' },
@@ -40,6 +48,10 @@ const updatedMappings: IndexMapping = {
   },
 };
 
+const dummyHashToVersionMap = {
+  'foo|someHash': '10.1.0',
+};
+
 describe('diffMappings', () => {
   beforeEach(() => {
     getUpdatedRootFieldsMock.mockReset();
@@ -47,22 +59,16 @@ describe('diffMappings', () => {
   });
 
   test('is different if dynamic is different', () => {
-    const indexMappings: IndexMapping = {
-      _meta: {
-        mappingVersions: { foo: '10.1.0' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
+    const indexMappings = dummyMappings;
     const appMappings: IndexMapping = {
-      _meta: {
-        mappingVersions: { foo: '10.1.0' },
-      },
+      ...dummyMappings,
       dynamic: false,
-      properties: {},
     };
 
-    expect(diffMappings({ indexMappings, appMappings })!.changedProp).toEqual('dynamic');
+    expect(
+      diffMappings({ indexTypes: ['foo'], appMappings, indexMappings, latestMappingsVersions: {} })!
+        .changedProp
+    ).toEqual('dynamic');
   });
 
   test('is different if _meta is missing in indexMappings', () => {
@@ -70,15 +76,12 @@ describe('diffMappings', () => {
       dynamic: 'strict',
       properties: {},
     };
-    const appMappings: IndexMapping = {
-      _meta: {
-        mappingVersions: { foo: '10.1.0' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
+    const appMappings: IndexMapping = dummyMappings;
 
-    expect(diffMappings({ indexMappings, appMappings })!.changedProp).toEqual('_meta');
+    expect(
+      diffMappings({ indexTypes: ['foo'], appMappings, indexMappings, latestMappingsVersions: {} })!
+        .changedProp
+    ).toEqual('_meta');
   });
 
   test('is different if migrationMappingPropertyHashes and mappingVersions are missing in indexMappings', () => {
@@ -87,15 +90,12 @@ describe('diffMappings', () => {
       dynamic: 'strict',
       properties: {},
     };
-    const appMappings: IndexMapping = {
-      _meta: {
-        mappingVersions: { foo: '10.1.0' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
+    const appMappings: IndexMapping = dummyMappings;
 
-    expect(diffMappings({ indexMappings, appMappings })!.changedProp).toEqual('_meta');
+    expect(
+      diffMappings({ indexTypes: ['foo'], appMappings, indexMappings, latestMappingsVersions: {} })!
+        .changedProp
+    ).toEqual('_meta');
   });
 
   describe('if a root field has changed', () => {
@@ -103,7 +103,12 @@ describe('diffMappings', () => {
       getUpdatedRootFieldsMock.mockReturnValueOnce(['references']);
 
       expect(
-        diffMappings({ indexMappings: initialMappings, appMappings: updatedMappings })
+        diffMappings({
+          indexTypes: ['foo'],
+          appMappings: updatedMappings,
+          indexMappings: initialMappings,
+          latestMappingsVersions: {},
+        })
       ).toEqual({ changedProp: 'properties.references' });
 
       expect(getUpdatedRootFieldsMock).toHaveBeenCalledTimes(1);
@@ -114,18 +119,18 @@ describe('diffMappings', () => {
 
   describe('if some types have changed', () => {
     test('returns a changed type', () => {
-      const hashToVersionMap = {
-        'foo|someHash': '10.1.0',
-      };
-
       getUpdatedRootFieldsMock.mockReturnValueOnce([]);
-      getUpdatedTypesMock.mockReturnValueOnce(['foo', 'bar', 'baz']);
+      getUpdatedTypesMock.mockReturnValueOnce(['foo', 'bar']);
 
       expect(
         diffMappings({
-          indexMappings: initialMappings,
+          indexTypes: ['foo', 'bar', 'baz'],
           appMappings: updatedMappings,
-          hashToVersionMap,
+          indexMappings: initialMappings,
+          latestMappingsVersions: {
+            foo: '10.1.0',
+          },
+          hashToVersionMap: dummyHashToVersionMap,
         })
       ).toEqual({ changedProp: 'properties.foo' });
 
@@ -133,9 +138,12 @@ describe('diffMappings', () => {
       expect(getUpdatedRootFieldsMock).toHaveBeenCalledWith(initialMappings);
       expect(getUpdatedTypesMock).toHaveBeenCalledTimes(1);
       expect(getUpdatedTypesMock).toHaveBeenCalledWith({
-        indexMappings: initialMappings,
-        appMappings: updatedMappings,
-        hashToVersionMap,
+        indexTypes: ['foo', 'bar', 'baz'],
+        indexMeta: initialMappings._meta,
+        latestMappingsVersions: {
+          foo: '10.1.0',
+        },
+        hashToVersionMap: dummyHashToVersionMap,
       });
     });
   });
@@ -147,8 +155,13 @@ describe('diffMappings', () => {
 
       expect(
         diffMappings({
+          indexTypes: ['foo', 'bar', 'baz'],
+          appMappings: updatedMappings,
           indexMappings: initialMappings,
-          appMappings: initialMappings,
+          latestMappingsVersions: {
+            foo: '10.1.0',
+          },
+          hashToVersionMap: dummyHashToVersionMap,
         })
       ).toBeUndefined();
     });
