@@ -42,11 +42,11 @@ packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 x-pack/plugins/observability_solution/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+packages/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/apm @elastic/obs-ux-infra_services-team
 packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-utils @elastic/obs-ux-infra_services-team
-packages/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/plugins/asset_manager @elastic/obs-knowledge-team
