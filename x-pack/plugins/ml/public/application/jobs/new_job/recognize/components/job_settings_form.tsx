@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,14 +22,16 @@ import {
 } from '@elastic/eui';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { useDataSource } from '../../../../contexts/ml/data_source_context';
-import { ModuleJobUI, SAVE_STATE } from '../page';
+import type { ModuleJobUI } from '../page';
+import { SAVE_STATE } from '../page';
 import {
   composeValidators,
   maxLengthValidator,
   patternValidator,
 } from '../../../../../../common/util/validators';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
-import { TimeRange, TimeRangePicker } from '../../common/components';
+import type { TimeRange } from '../../common/components';
+import { TimeRangePicker } from '../../common/components';
 
 export interface JobSettingsFormValues {
   jobPrefix: string;

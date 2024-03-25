@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { map } from 'rxjs/operators';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
@@ -14,7 +14,7 @@ import type { TextClassificationResponse, RawTextClassificationResponse } from '
 import { processResponse, processInferenceResult } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getFillMaskOutputComponent } from './fill_mask_output';
-import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 
 const DEFAULT_MASK_TOKEN = '[MASK]';
 
@@ -39,7 +39,6 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
     deploymentId: string
   ) {
     super(trainedModelsApi, model, inputType, deploymentId);
-    // @ts-expect-error mask_token is missing in type
     const maskToken = model.inference_config?.[this.inferenceType]?.mask_token;
     if (maskToken) {
       this.maskToken = maskToken;

@@ -210,6 +210,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -419,6 +441,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.network_events_exclude_local',
       {
         defaultMessage: 'Exclude local connections from network events. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
       }
     ),
   },
@@ -1597,6 +1630,39 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'A comma-separated list of feature flags. Currently no feature flags are supported.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
       }
     ),
   },

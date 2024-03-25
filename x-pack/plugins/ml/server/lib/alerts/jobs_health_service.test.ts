@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { JobsHealthService, jobsHealthServiceProvider } from './jobs_health_service';
+import type { JobsHealthService } from './jobs_health_service';
+import { jobsHealthServiceProvider } from './jobs_health_service';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { Logger } from '@kbn/core/server';
-import { MlClient } from '../ml_client';
-import { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AnnotationService } from '../../models/annotation_service/annotation';
-import { JobsHealthExecutorOptions } from './register_jobs_monitoring_rule_type';
-import { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';
-import { DeepPartial } from '../../../common/types/common';
-import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import type { MlClient } from '../ml_client';
+import type { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AnnotationService } from '../../models/annotation_service/annotation';
+import type { JobsHealthExecutorOptions } from './register_jobs_monitoring_rule_type';
+import type { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';
+import type { DeepPartial } from '../../../common/types/common';
+import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 
 const MOCK_DATE_NOW = 1487076708000;
 

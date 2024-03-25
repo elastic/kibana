@@ -1395,7 +1395,48 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "maps",
+        "id": "def-public.isMapApi",
+        "type": "Function",
+        "tags": [],
+        "label": "isMapApi",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.MapApi",
+            "text": "MapApi"
+          }
+        ],
+        "path": "x-pack/plugins/maps/public/embeddable/map_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.isMapApi.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "maps",
@@ -3923,6 +3964,102 @@
           "\"map\""
         ],
         "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-public.MapApi",
+        "type": "Type",
+        "tags": [],
+        "label": "MapApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasType",
+            "text": "HasType"
+          },
+          "<\"map\"> & { getLayerList: () => ",
+          "ILayer",
+          "[]; } & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesDataViews",
+            "text": "PublishesDataViews"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
+          },
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<unknown>>"
+        ],
+        "path": "x-pack/plugins/maps/public/embeddable/map_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

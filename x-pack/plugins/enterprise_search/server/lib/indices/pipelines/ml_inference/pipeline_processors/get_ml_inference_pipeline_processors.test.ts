@@ -337,6 +337,7 @@ describe('getMlInferencePipelineProcessorNamesFromPipelines', () => {
     const expected = ['ml-inference-pipeline-1'];
     const processorNames = getMlInferencePipelineProcessorNamesFromPipelines(
       'my-index',
+      // @ts-expect-error pipeline._meta defined as mandatory
       mockGetPipeline
     );
     expect(processorNames).toEqual(expected);
@@ -344,6 +345,7 @@ describe('getMlInferencePipelineProcessorNamesFromPipelines', () => {
   it('should return an empty array for a missing @ml-inference pipeline', () => {
     const processorNames = getMlInferencePipelineProcessorNamesFromPipelines(
       'my-index-without-ml-inference-pipeline',
+      // @ts-expect-error pipeline._meta defined as mandatory
       mockGetPipeline
     );
 
@@ -353,6 +355,7 @@ describe('getMlInferencePipelineProcessorNamesFromPipelines', () => {
     const processorNames = getMlInferencePipelineProcessorNamesFromPipelines(
       'my-index-without-ml-inference-pipeline',
       {
+        // @ts-expect-error pipeline._meta defined as mandatory
         'my-index-without-ml-inference-pipeline': {},
       }
     );

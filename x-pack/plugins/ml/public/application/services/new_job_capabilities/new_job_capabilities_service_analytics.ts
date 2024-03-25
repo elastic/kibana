@@ -6,7 +6,8 @@
  */
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { Field, NewJobCapsResponse } from '@kbn/ml-anomaly-utils';
 import {
   getDependentVar,
@@ -63,7 +64,7 @@ class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
     try {
       const resp: NewJobCapsResponse = await ml.dataFrameAnalytics.newJobCapsAnalytics(
         dataView.getIndexPattern(),
-        dataView.type === 'rollup'
+        dataView.type === DataViewType.ROLLUP
       );
 
       const allFields = removeNestedFieldChildren(resp, dataView.getIndexPattern());

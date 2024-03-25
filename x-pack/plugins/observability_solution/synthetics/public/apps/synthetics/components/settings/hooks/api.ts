@@ -6,12 +6,27 @@
  */
 
 import { PolicyFromES } from '@kbn/index-lifecycle-management-plugin/common/types';
+import { DataStream } from '@kbn/index-management-plugin/common';
 import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { apiService } from '../../../../../utils/api_service';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 
 export const getIlmPolicies = async (): Promise<PolicyFromES[]> => {
   return await apiService.get('/api/index_lifecycle_management/policies');
+};
+
+export const getDslPolicies = async (): Promise<{ data: DataStream[] }> => {
+  return apiService.get(
+    '/api/index_management/data_streams',
+    {
+      includeStats: true,
+    },
+    undefined,
+    undefined,
+    {
+      'X-Elastic-Internal-Origin': 'Kibana',
+    }
+  );
 };
 
 export const getIndicesData = async (): Promise<{ data: CatIndicesResponse }> => {

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { AzureCredentialsType } from '../../../../common/types_old';
+import { CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '../../test_subjects';
 
 export type AzureCredentialsFields = Record<
   string,
@@ -51,6 +52,7 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCr
         id,
         label: field.label,
         type: field.type || 'text',
+        testSubj: field.testSubj,
         value: inputVar.value,
         isSecret: field?.isSecret,
       } as const;
@@ -95,14 +97,21 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       defaultMessage: 'Service principal with Client Secret',
     }),
     fields: {
-      'azure.credentials.tenant_id': { label: I18N_TENANT_ID },
-      'azure.credentials.client_id': { label: I18N_CLIENT_ID },
+      'azure.credentials.tenant_id': {
+        label: I18N_TENANT_ID,
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+      },
+      'azure.credentials.client_id': {
+        label: I18N_CLIENT_ID,
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+      },
       'azure.credentials.client_secret': {
         type: 'password',
         isSecret: true,
         label: i18n.translate('xpack.csp.azureIntegration.clientSecretLabel', {
           defaultMessage: 'Client Secret',
         }),
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
       },
     },
   },
@@ -111,12 +120,19 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       defaultMessage: 'Service principal with Client Certificate',
     }),
     fields: {
-      'azure.credentials.tenant_id': { label: I18N_TENANT_ID },
-      'azure.credentials.client_id': { label: I18N_CLIENT_ID },
+      'azure.credentials.tenant_id': {
+        label: I18N_TENANT_ID,
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+      },
+      'azure.credentials.client_id': {
+        label: I18N_CLIENT_ID,
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+      },
       'azure.credentials.client_certificate_path': {
         label: i18n.translate('xpack.csp.azureIntegration.clientCertificatePathLabel', {
           defaultMessage: 'Client Certificate Path',
         }),
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
       },
       'azure.credentials.client_certificate_password': {
         type: 'password',
@@ -124,6 +140,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
         label: i18n.translate('xpack.csp.azureIntegration.clientCertificatePasswordLabel', {
           defaultMessage: 'Client Certificate Password',
         }),
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
       },
     },
   },
@@ -133,12 +150,19 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       { defaultMessage: 'Service principal with Client Username and Password' }
     ),
     fields: {
-      'azure.credentials.tenant_id': { label: I18N_TENANT_ID },
-      'azure.credentials.client_id': { label: I18N_CLIENT_ID },
+      'azure.credentials.tenant_id': {
+        label: I18N_TENANT_ID,
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+      },
+      'azure.credentials.client_id': {
+        label: I18N_CLIENT_ID,
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+      },
       'azure.credentials.client_username': {
         label: i18n.translate('xpack.csp.azureIntegration.clientUsernameLabel', {
           defaultMessage: 'Client Username',
         }),
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_USERNAME,
       },
       'azure.credentials.client_password': {
         type: 'password',
@@ -146,6 +170,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
         label: i18n.translate('xpack.csp.azureIntegration.clientPasswordLabel', {
           defaultMessage: 'Client Password',
         }),
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_PASSWORD,
       },
     },
   },

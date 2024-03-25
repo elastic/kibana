@@ -22,6 +22,7 @@ import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import { formatValue } from '../../../formatters/format_value';
 import {
@@ -39,9 +40,8 @@ import {
 import { timeBucketsServiceFactory } from '../../../util/time_buckets_service';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
-import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
+import { timeSeriesExplorerServiceFactory } from '../../../util/time_series_explorer_service';
 import { mlEscape } from '../../../util/string_utils';
-import { mlFieldFormatService } from '../../../services/field_format_service';
 import {
   ANNOTATION_MASK_ID,
   getAnnotationBrush,
@@ -53,7 +53,6 @@ import {
   ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
-import { context } from '@kbn/kibana-react-plugin/public';
 
 import { LinksMenuUI } from '../../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../../components/rule_editor';
@@ -137,6 +136,7 @@ class TimeseriesChartIntl extends Component {
 
   static contextType = context;
   getTimeBuckets;
+  mlTimeSeriesExplorer;
 
   rowMouseenterSubscriber = null;
   rowMouseleaveSubscriber = null;
@@ -159,6 +159,11 @@ class TimeseriesChartIntl extends Component {
   }
 
   componentDidMount() {
+    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
+      this.context.services.uiSettings,
+      this.context.services.mlServices.mlApiServices,
+      this.context.services.mlServices.mlResultsService
+    );
     this.getTimeBuckets = timeBucketsServiceFactory(
       this.context.services.uiSettings
     ).getTimeBuckets;
@@ -304,12 +309,10 @@ class TimeseriesChartIntl extends Component {
     chartElement.selectAll('*').remove();
 
     if (typeof selectedJob !== 'undefined') {
-      this.fieldFormat = this.context?.services?.mlServices?.mlFieldFormatService
-        ? this.context.services.mlServices.mlFieldFormatService.getFieldFormat(
-            selectedJob.job_id,
-            detectorIndex
-          )
-        : mlFieldFormatService.getFieldFormat(selectedJob.job_id, detectorIndex);
+      this.fieldFormat = this.context.services.mlServices.mlFieldFormatService.getFieldFormat(
+        selectedJob.job_id,
+        detectorIndex
+      );
     } else {
       return;
     }
@@ -1881,7 +1884,7 @@ class TimeseriesChartIntl extends Component {
     // Depending on the way the chart is aggregated, there may not be
     // a point at exactly the same time as the record being highlighted.
     const anomalyTime = record.source.timestamp;
-    const markerToSelect = findChartPointForAnomalyTime(
+    const markerToSelect = this.mlTimeSeriesExplorer.findChartPointForAnomalyTime(
       focusChartData,
       anomalyTime,
       focusAggregationInterval

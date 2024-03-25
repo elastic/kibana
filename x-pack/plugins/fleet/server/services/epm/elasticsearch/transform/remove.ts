@@ -42,7 +42,6 @@ export const deleteTransforms = async (
           {
             force: true,
             transform_id: transformId,
-            // @ts-expect-error ES type needs to be updated
             delete_dest_index: deleteDestinationIndices,
           },
           { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }

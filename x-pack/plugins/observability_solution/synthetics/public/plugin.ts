@@ -50,11 +50,12 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public/plugin';
 import {
-  ObservabilityAIAssistantPluginStart,
-  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { ServerlessPluginSetup } from '@kbn/serverless/public';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
@@ -67,7 +68,7 @@ export interface ClientPluginsSetup {
   exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
@@ -84,7 +85,7 @@ export interface ClientPluginsStart {
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
@@ -99,6 +100,8 @@ export interface ClientPluginsStart {
   docLinks: DocLinksStart;
   uiSettings: CoreStart['uiSettings'];
   usageCollection: UsageCollectionStart;
+  serverless: ServerlessPluginStart;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -157,17 +160,17 @@ export class UptimePlugin
         {
           id: 'overview',
           title: i18n.translate('xpack.synthetics.overviewPage.linkText', {
-            defaultMessage: 'Overview',
+            defaultMessage: 'Monitors',
           }),
           path: '/',
           visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
         {
-          id: 'management',
-          title: i18n.translate('xpack.synthetics.managementPage.linkText', {
-            defaultMessage: 'Management',
+          id: 'certificates',
+          title: i18n.translate('xpack.synthetics.deepLink.certificatesPage.linkText', {
+            defaultMessage: 'TLS Certificates',
           }),
-          path: '/monitors',
+          path: '/certificates',
           visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
       ],
@@ -175,7 +178,14 @@ export class UptimePlugin
         const [coreStart, corePlugins] = await core.getStartServices();
 
         const { renderApp } = await import('./apps/synthetics/render_app');
-        return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
+        return renderApp(
+          coreStart,
+          plugins,
+          corePlugins,
+          params,
+          this.initContext.env.mode.dev,
+          this._isServerless
+        );
       },
     });
   }

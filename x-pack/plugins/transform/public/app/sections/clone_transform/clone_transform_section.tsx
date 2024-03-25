@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { RouteComponentProps } from 'react-router-dom';
 import { parse } from 'query-string';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
-import { TransformConfigUnion } from '../../../../common/types/transform';
+import type { TransformConfigUnion } from '../../../../common/types/transform';
 
 import { useGetTransform } from '../../hooks';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
