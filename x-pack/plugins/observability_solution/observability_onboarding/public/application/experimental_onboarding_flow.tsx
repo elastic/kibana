@@ -4,17 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 
 import React from 'react';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import backgroundImageUrl from './header/background.svg';
+import { Footer } from './footer/footer';
+import { OnboardingFlowForm } from './onboarding_flow_form/onboarding_flow_form';
+import { Header } from './header/header';
 
 export function ExperimentalOnboardingFlow() {
   return (
-    <div>
-      {i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.experimentalOnboardingFlowLabel',
-        { defaultMessage: 'Experimental onboarding flow' }
-      )}
-    </div>
+    <>
+      <EuiPageTemplate.Section
+        paddingSize="xl"
+        css={css`
+          & > div {
+            background-image: url(${backgroundImageUrl});
+            background-position: right center;
+            background-repeat: no-repeat;
+          }
+        `}
+        grow={false}
+        restrictWidth
+      >
+        <EuiSpacer size="xl" />
+        <Header />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
+        <OnboardingFlowForm />
+        <EuiSpacer size="xl" />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
+        <Footer />
+        <EuiSpacer size="xl" />
+      </EuiPageTemplate.Section>
+    </>
   );
 }
