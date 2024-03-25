@@ -13,14 +13,12 @@ import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/css';
 
-import { CrowdstrikeAgentStatus } from '../../../../../detections/components/host_isolation/crowdstrike_agent_status';
 import type { BrowserField } from '../../../../../common/containers/source';
 import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
 } from '../../../../../../common/field_maps/field_names';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
-import { CROWDSTRIKE_AGENT_ID_FIELD } from '../../../../../common/utils/crowdstrike_alert_check';
 import { SentinelOneAgentStatus } from '../../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
