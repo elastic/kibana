@@ -53,28 +53,28 @@ export function SaveDashboardModal({
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
   const history = useHistory();
 
-  let defaultOption: EuiComboBoxOptionOption<string> | undefined;
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [serviceFiltersEnabled, setserviceFiltersEnabled] = useState(
+  const [serviceFiltersEnabled, setServiceFiltersEnabled] = useState(
     (currentDashboard?.serviceEnvironmentFilterEnabled &&
       currentDashboard?.serviceNameFilterEnabled) ??
       true
   );
 
-  if (currentDashboard) {
-    const { title, dashboardSavedObjectId } = currentDashboard;
-    defaultOption = { label: title, value: dashboardSavedObjectId };
-  }
-
-  const [selectedDashboard, setSelectedDashboard] = useState(
-    defaultOption ? [defaultOption] : []
+  const [selectedDashboard, setSelectedDashboard] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >(
+    currentDashboard
+      ? [
+          {
+            label: currentDashboard.title,
+            value: currentDashboard.dashboardSavedObjectId,
+          },
+        ]
+      : []
   );
 
   const isEditMode = !!currentDashboard?.id;
-
-  const reloadCustomDashboards = useCallback(() => {
-    onRefresh();
-  }, [onRefresh]);
 
   const options = allAvailableDashboards?.map(
     (dashboardItem: DashboardItem) => ({
@@ -92,6 +92,7 @@ export function SaveDashboardModal({
       const [newDashboard] = selectedDashboard;
       try {
         if (newDashboard.value) {
+          setIsLoading(true);
           await callApmApi('POST /internal/apm/custom-dashboard', {
             params: {
               query: { customDashboardId: currentDashboard?.id },
@@ -117,7 +118,7 @@ export function SaveDashboardModal({
               dashboardId: newDashboard.value,
             }),
           });
-          reloadCustomDashboards();
+          onRefresh();
         }
       } catch (error) {
         console.error(error);
@@ -132,6 +133,7 @@ export function SaveDashboardModal({
           text: error.body.message,
         });
       }
+      setIsLoading(false);
       onClose();
     },
     [
@@ -139,7 +141,7 @@ export function SaveDashboardModal({
       notifications.toasts,
       serviceFiltersEnabled,
       onClose,
-      reloadCustomDashboards,
+      onRefresh,
       isEditMode,
       serviceName,
       currentDashboard,
@@ -170,7 +172,7 @@ export function SaveDashboardModal({
       <EuiModalBody>
         <EuiFlexGroup direction="column" justifyContent="center">
           <EuiComboBox
-            isLoading={status === FETCH_STATUS.LOADING}
+            isLoading={status === FETCH_STATUS.LOADING || isLoading}
             isDisabled={status === FETCH_STATUS.LOADING || isEditMode}
             placeholder={i18n.translate(
               'xpack.apm.serviceDashboards.selectDashboard.placeholder',
@@ -210,7 +212,7 @@ export function SaveDashboardModal({
                 </EuiToolTip>
               </p>
             }
-            onChange={() => setserviceFiltersEnabled(!serviceFiltersEnabled)}
+            onChange={() => setServiceFiltersEnabled(!serviceFiltersEnabled)}
             checked={serviceFiltersEnabled}
           />
         </EuiFlexGroup>
@@ -220,6 +222,7 @@ export function SaveDashboardModal({
         <EuiButtonEmpty
           data-test-subj="apmSelectDashboardCancelButton"
           onClick={onClose}
+          isDisabled={status === FETCH_STATUS.LOADING || isLoading}
         >
           {i18n.translate(
             'xpack.apm.serviceDashboards.selectDashboard.cancel',
@@ -231,6 +234,7 @@ export function SaveDashboardModal({
         <EuiButton
           data-test-subj="apmSelectDashboardButton"
           onClick={onClickSave}
+          isLoading={status === FETCH_STATUS.LOADING || isLoading}
           fill
         >
           {isEditMode

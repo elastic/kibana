@@ -7,13 +7,14 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ILM_POLICY_NAME, JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
+import { ILM_POLICY_NAME, JOB_STATUS } from '@kbn/reporting-common';
 import type {
   ExecutionError,
   ReportDocument,
   ReportOutput,
   ReportSource,
 } from '@kbn/reporting-common/types';
+import { REPORTING_SYSTEM_INDEX } from '@kbn/reporting-server';
 import moment from 'moment';
 import type { Report } from '.';
 import { SavedReport } from '.';
