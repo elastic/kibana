@@ -37,23 +37,19 @@ export function NavControl({}: {}) {
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
-      return hasBeenOpened ? service.start({ signal }) : undefined;
+      return hasBeenOpened
+        ? service.start({ signal }).catch((error) => {
+            notifications.toasts.addError(error, {
+              title: 'Failed to initialize Observability AI Assistant',
+            });
+
+            setHasBeenOpened(false);
+            setIsOpen(false);
+          })
+        : undefined;
     },
     [service, hasBeenOpened]
   );
-
-  useEffect(() => {
-    if (!chatService.error) {
-      return;
-    }
-
-    notifications.toasts.addError(chatService.error, {
-      title: 'Failed to initialize Observability AI Assistant',
-    });
-
-    setHasBeenOpened(false);
-    setIsOpen(false);
-  }, [chatService.error, notifications.toasts]);
 
   const [isOpen, setIsOpen] = useState(false);
 
