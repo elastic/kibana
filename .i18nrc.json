@@ -89,7 +89,10 @@
       "packages/kbn-management"
     ],
     "monaco": "packages/kbn-monaco/src",
-    "navigation": "src/plugins/navigation",
+    "navigation": [
+      "src/plugins/navigation",
+      "packages/solution-nav"
+    ],
     "links": "src/plugins/links",
     "newsfeed": "src/plugins/newsfeed",
     "presentationUtil": "src/plugins/presentation_util",
@@ -102,7 +105,7 @@
     "savedObjectsManagement": "src/plugins/saved_objects_management",
     "searchConnectors": "packages/kbn-search-connectors",
     "server": "src/legacy/server",
-    "share": "src/plugins/share",
+    "share": ["src/plugins/share", "packages/kbn-reporting-share"],
     "sharedUXPackages": "packages/shared-ux",
     "searchApiPanels": "packages/kbn-search-api-panels/",
     "searchErrors": "packages/kbn-search-errors",

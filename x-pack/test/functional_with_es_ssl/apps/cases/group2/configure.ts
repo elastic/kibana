@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -36,9 +37,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('change closure option successfully', async () => {
         await cases.common.selectRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
-        const toast = await toasts.getToastElement(1);
+        const toast = await toasts.getElementByIndex(1);
         expect(await toast.getVisibleText()).to.be('Settings successfully updated');
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
       });
     });
@@ -57,6 +58,27 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Custom fields', function () {
+      before(async () => {
+        await cases.api.createConfigWithCustomFields({
+          customFields: [
+            {
+              key: 'o11y_custom_field',
+              label: 'My o11y field',
+              type: CustomFieldTypes.TOGGLE,
+              required: false,
+            },
+          ],
+          owner: 'observability',
+        });
+      });
+
+      it('existing configurations do not interfere', async () => {
+        // A configuration created in o11y should not be visible in stack
+        expect(await testSubjects.getVisibleText('empty-custom-fields')).to.be(
+          'You do not have any fields yet'
+        );
+      });
+
       it('adds a custom field', async () => {
         await testSubjects.existOrFail('custom-fields-form-group');
         await common.clickAndValidate('add-custom-field', 'custom-field-flyout');

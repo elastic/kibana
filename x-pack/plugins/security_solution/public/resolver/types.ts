@@ -315,6 +315,8 @@ export interface DataState {
 
   readonly detectedBounds?: TimeFilters;
 
+  readonly overriddenTimeBounds?: TimeFilters;
+
   readonly tree?: {
     /**
      * The parameters passed from the resolver properties

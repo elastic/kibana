@@ -47,6 +47,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           data-test-subj="installAllRulesButton"
           onClick={installAllRules}
           disabled={!canUserEditRules || !isRulesAvailableForInstall || isRequestInProgress}
+          aria-label={i18n.INSTALL_ALL_ARIA_LABEL}
         >
           {i18n.INSTALL_ALL}
           {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}

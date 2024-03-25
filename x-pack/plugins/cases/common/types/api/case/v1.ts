@@ -51,7 +51,7 @@ const CaseCustomFieldTextWithValidationRt = rt.strict({
 
 const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);
 
-const CustomFieldsRt = limitedArraySchema({
+export const CaseRequestCustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,
   fieldName: 'customFields',
   min: 0,
@@ -124,7 +124,7 @@ export const CasePostRequestRt = rt.intersection([
       /**
        * The list of custom field values of the case.
        */
-      customFields: CustomFieldsRt,
+      customFields: CaseRequestCustomFieldsRt,
     })
   ),
 ]);
@@ -418,7 +418,7 @@ export const CasePatchRequestRt = rt.intersection([
       /**
        * Custom fields of the case
        */
-      customFields: CustomFieldsRt,
+      customFields: CaseRequestCustomFieldsRt,
     })
   ),
   /**
@@ -510,6 +510,7 @@ export type GetReportersResponse = rt.TypeOf<typeof GetReportersResponseRt>;
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
 export type GetRelatedCasesByAlertResponse = rt.TypeOf<typeof GetRelatedCasesByAlertResponseRt>;
-export type CaseRequestCustomFields = rt.TypeOf<typeof CustomFieldsRt>;
+export type CaseRequestCustomFields = rt.TypeOf<typeof CaseRequestCustomFieldsRt>;
+export type CaseRequestCustomField = rt.TypeOf<typeof CustomFieldRt>;
 export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;

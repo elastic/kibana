@@ -46,7 +46,6 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
 
 export interface ESQLCommandMode extends ESQLAstBaseItem {
   type: 'mode';
-  args: ESQLAstItem[];
 }
 
 export interface ESQLFunction extends ESQLAstBaseItem {

@@ -24,6 +24,7 @@ import {
   emptyStackFrame,
   emptyStackTrace,
 } from '..';
+import { isErrorFrame } from './profiling';
 
 interface TopNFunctionAndFrameGroup {
   Frame: StackFrameMetadata;
@@ -68,6 +69,7 @@ export function createTopNFunctions({
   stackFrames,
   stackTraces,
   startIndex,
+  showErrorFrames,
 }: {
   endIndex: number;
   events: Map<StackTraceID, number>;
@@ -76,6 +78,7 @@ export function createTopNFunctions({
   stackFrames: Map<StackFrameID, StackFrame>;
   stackTraces: Map<StackTraceID, StackTrace>;
   startIndex: number;
+  showErrorFrames: boolean;
 }): TopNFunctions {
   // The `count` associated with a frame provides the total number of
   // traces in which that node has appeared at least once. However, a
@@ -101,7 +104,11 @@ export function createTopNFunctions({
 
     const lenStackTrace = stackTrace.FrameIDs.length;
 
-    for (let i = 0; i < lenStackTrace; i++) {
+    // Error frames only appear as first frame in a stacktrace.
+    const start =
+      !showErrorFrames && lenStackTrace > 0 && isErrorFrame(stackTrace.Types[0]) ? 1 : 0;
+
+    for (let i = start; i < lenStackTrace; i++) {
       const frameID = stackTrace.FrameIDs[i];
       const fileID = stackTrace.FileIDs[i];
       const addressOrLine = stackTrace.AddressOrLines[i];

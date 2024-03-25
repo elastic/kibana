@@ -108,6 +108,27 @@ describe('CustomFieldFlyout ', () => {
       });
     });
 
+    it('calls onSaveField with correct params when a custom field is NOT required and has a default value', async () => {
+      appMockRender.render(<CustomFieldFlyout {...props} />);
+
+      userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+      userEvent.paste(
+        await screen.findByTestId('text-custom-field-default-value'),
+        'Default value'
+      );
+      userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
+
+      await waitFor(() => {
+        expect(props.onSaveField).toBeCalledWith({
+          key: expect.anything(),
+          label: 'Summary',
+          required: false,
+          type: CustomFieldTypes.TEXT,
+          defaultValue: 'Default value',
+        });
+      });
+    });
+
     it('calls onSaveField with the correct params when a custom field is required', async () => {
       appMockRender.render(<CustomFieldFlyout {...props} />);
 
@@ -202,6 +223,7 @@ describe('CustomFieldFlyout ', () => {
           label: 'Summary',
           required: false,
           type: CustomFieldTypes.TOGGLE,
+          defaultValue: false,
         });
       });
     });

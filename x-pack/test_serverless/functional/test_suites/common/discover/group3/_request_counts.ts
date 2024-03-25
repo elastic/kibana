@@ -13,11 +13,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'discover',
     'timePicker',
     'header',
-    'unifiedSearch',
-    'settings',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -27,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');

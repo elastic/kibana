@@ -21,23 +21,25 @@ import {
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
+  finalizeAlertsMigration,
+  getEqlRuleForAlertTesting,
+  getSavedQueryRuleForAlertTesting,
+  getThreatMatchRuleForAlertTesting,
+  getThresholdRuleForAlertTesting,
+  startAlertsMigration,
+  removeRandomValuedPropertiesFromAlert,
+} from '../../../utils';
+import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  finalizeAlertsMigration,
-  getEqlRuleForAlertTesting,
-  getRuleForAlertTesting,
-  getSavedQueryRuleForAlertTesting,
   getAlertsByIds,
-  getThreatMatchRuleForAlertTesting,
-  getThresholdRuleForAlertTesting,
-  startAlertsMigration,
   waitFor,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-  removeRandomValuedPropertiesFromAlert,
-} from '../../../utils';
+  getRuleForAlertTesting,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -208,8 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176105
-    describe.skip('Query', () => {
+    describe('Query', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
         await createAlertsIndex(supertest, log);
@@ -548,8 +549,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176117
-    describe.skip('Saved Query', () => {
+    describe('Saved Query', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
         await createAlertsIndex(supertest, log);
@@ -592,8 +592,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176270
-    describe.skip('EQL', () => {
+    describe('EQL', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
         await createAlertsIndex(supertest, log);
@@ -636,8 +635,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176359
-    describe.skip('Threshold', () => {
+    describe('Threshold', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
         await createAlertsIndex(supertest, log);

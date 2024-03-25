@@ -5,14 +5,25 @@
  * 2.0.
  */
 
+import type { DownloadSource } from '../../../../../../common/types';
 import type { PLATFORM_TYPE } from '../../../hooks';
 
 export type CommandsByPlatform = {
   [key in PLATFORM_TYPE]: string;
 };
 
-function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
-  const ARTIFACT_BASE_URL = 'https://artifacts.elastic.co/downloads/beats/elastic-agent';
+function getArtifact(
+  platform: PLATFORM_TYPE,
+  kibanaVersion: string,
+  downloadSource?: DownloadSource
+) {
+  const ARTIFACT_BASE_URL = `${
+    downloadSource
+      ? downloadSource.host.endsWith('/')
+        ? downloadSource.host.substring(0, downloadSource.host.length - 1)
+        : downloadSource.host
+      : 'https://artifacts.elastic.co/downloads'
+  }/beats/elastic-agent`;
 
   const artifactMap: Record<PLATFORM_TYPE, { downloadCommand: string }> = {
     linux: {
@@ -65,11 +76,12 @@ export function getInstallCommandForPlatform(
   fleetServerHost?: string,
   isProductionDeployment?: boolean,
   sslCATrustedFingerprint?: string,
-  kibanaVersion?: string
+  kibanaVersion?: string,
+  downloadSource?: DownloadSource
 ): string {
   const newLineSeparator = platform === 'windows' ? '`\n' : '\\\n';
 
-  const artifact = getArtifact(platform, kibanaVersion ?? '');
+  const artifact = getArtifact(platform, kibanaVersion ?? '', downloadSource);
 
   const commandArguments = [];
 

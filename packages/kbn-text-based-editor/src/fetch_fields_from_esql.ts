@@ -24,6 +24,7 @@ export function fetchFieldsFromESQL(
   query: Query | AggregateQuery,
   expressions: ExpressionsStart,
   time?: TimeRange,
+  abortController?: AbortController,
   dataView?: DataView
 ) {
   return textBasedQueryStateToAstWithValidation({
@@ -33,7 +34,15 @@ export function fetchFieldsFromESQL(
   })
     .then((ast) => {
       if (ast) {
-        const execution = expressions.run(ast, null);
+        const executionContract = expressions.execute(ast, null);
+
+        if (abortController) {
+          abortController.signal.onabort = () => {
+            executionContract.cancel();
+          };
+        }
+
+        const execution = executionContract.getData();
         let finalData: Datatable;
         let error: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {

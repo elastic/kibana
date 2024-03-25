@@ -12,7 +12,7 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, ROW_HEIGHT_OPTION, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
   type UnifiedDataTableProps,
-  type DataTableColumnTypes,
+  type DataTableColumnsMeta,
   DataLoadingState as DiscoverGridLoadingState,
 } from '@kbn/unified-data-table';
 import { DiscoverGrid } from '../components/discover_grid';
@@ -33,6 +33,11 @@ export interface DiscoverGridEmbeddableProps
   savedSearchId?: string;
 }
 
+export type DiscoverGridEmbeddableSearchProps = Omit<
+  DiscoverGridEmbeddableProps,
+  'sampleSizeState' | 'loadingState' | 'query'
+>;
+
 export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
@@ -44,7 +49,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      customColumnTypes?: DataTableColumnTypes
+      customColumnsMeta?: DataTableColumnsMeta
     ) => (
       <DiscoverGridFlyout
         dataView={props.dataView}
@@ -52,7 +57,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        columnTypes={customColumnTypes}
+        columnsMeta={customColumnsMeta}
         savedSearchId={props.savedSearchId}
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}
@@ -101,7 +106,9 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         renderDocumentView={renderDocumentView}
         renderCustomToolbar={renderCustomToolbar}
         showColumnTokens
-        headerRowHeight={3}
+        configHeaderRowHeight={3}
+        showFullScreenButton={false}
+        className="unifiedDataTable"
       />
     </SavedSearchEmbeddableBase>
   );

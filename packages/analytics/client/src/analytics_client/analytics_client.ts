@@ -133,12 +133,9 @@ export class AnalyticsClient implements IAnalyticsClient {
       properties: eventData as unknown as Record<string, unknown>,
     };
 
-    // debug-logging before checking the opt-in status to help during development
-    if (this.initContext.isDev) {
-      this.initContext.logger.debug<EventDebugLogMeta>(`Report event "${eventType}"`, {
-        ebt_event: event,
-      });
-    }
+    this.initContext.logger.debug<EventDebugLogMeta>(`Report event "${eventType}"`, {
+      ebt_event: event,
+    });
 
     const optInConfig = this.optInConfig$.value;
 
@@ -171,6 +168,7 @@ export class AnalyticsClient implements IAnalyticsClient {
     this.optInConfig$.next(optInConfigInstance);
   };
 
+  // @ts-expect-error upgrade typescript v4.9.5
   public registerContextProvider = <Context>(contextProviderOpts: ContextProviderOpts<Context>) => {
     this.contextService.registerContextProvider(contextProviderOpts);
   };

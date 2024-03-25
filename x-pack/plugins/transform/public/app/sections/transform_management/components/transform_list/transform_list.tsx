@@ -8,6 +8,7 @@
 import React, { type FC, type MouseEventHandler, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,7 +18,6 @@ import {
   EuiInMemoryTable,
   EuiPageTemplate,
   EuiPopover,
-  EuiSearchBarProps,
   EuiTitle,
 } from '@elastic/eui';
 import {
@@ -62,7 +62,7 @@ import { ExpandedRow } from './expanded_row';
 import { filterTransforms, transformFilters } from './transform_search_bar_filters';
 import { useTableSettings } from './use_table_settings';
 import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
-import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
+import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 import { StopActionModal } from '../action_stop/stop_action_modal';
 
 type ItemIdToExpandedRowMap = Record<string, JSX.Element>;

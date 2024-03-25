@@ -47,7 +47,7 @@ const TogglePanelComponent: React.FC<{
             body={<p>{i18n.TOGGLE_PANEL_EMPTY_DESCRIPTION}</p>}
             css={css`
               padding: ${euiTheme.base * 5}px 0;
-              .euiEmptyPrompt__contentInner {
+              .euiEmptyPrompt__content {
                 max-width: none;
               }
             `}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
 import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../constants';
 import { limitedStringSchema } from '../../../schema';
 
@@ -14,3 +15,14 @@ export const CaseCustomFieldTextWithValidationValueRt = (fieldName: string) =>
     min: 1,
     max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
   });
+
+/**
+ * Update custom_field
+ */
+
+export const CustomFieldPutRequestRt = rt.strict({
+  value: rt.union([rt.boolean, rt.null, CaseCustomFieldTextWithValidationValueRt('value')]),
+  caseVersion: rt.string,
+});
+
+export type CustomFieldPutRequest = rt.TypeOf<typeof CustomFieldPutRequestRt>;

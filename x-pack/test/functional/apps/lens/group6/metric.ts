@@ -298,7 +298,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('converts color stops to number', async () => {
-      await PageObjects.lens.openPalettePanel('lnsMetric');
+      await PageObjects.lens.openPalettePanel();
       await PageObjects.common.sleep(1000);
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
       expect([

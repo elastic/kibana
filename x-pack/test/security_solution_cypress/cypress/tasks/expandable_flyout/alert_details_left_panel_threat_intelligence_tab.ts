@@ -11,8 +11,5 @@ import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from 
  * Open the Threat intelligence tab under the Insights tab in the document details expandable flyout left section
  */
 export const openThreatIntelligenceTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON)
-    .should('be.visible')
-    .click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON).click();
 };

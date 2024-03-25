@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  const PageObjects = getPageObjects(['common', 'context']);
+  const PageObjects = getPageObjects(['common', 'context', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
 
   describe('context filters', function contextSize() {
@@ -29,6 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'discover:rowHeightOption': 0, // to have more grid rows visible at once
       });
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.common.navigateToApp('discover');
     });
 
     beforeEach(async function () {

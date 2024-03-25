@@ -223,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               chartAvailable: true,
               id: 'customer_full_name',
-              legend: 'top 20 of 3321 categories',
+              legend: 'top 20 of 3327 categories',
               colorStats: [
                 { color: '#000000', percentage: 25 },
                 { color: '#54B399', percentage: 75 },

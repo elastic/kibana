@@ -9,10 +9,33 @@ import { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
 import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
 
-export default async function createTestConfig({ readConfigFile }: FtrConfigProviderContext) {
+export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
+  infer TServices,
+  {}
+>
+  ? TServices
+  : {};
+
+export type InheritedPageObjects = InheritedFtrProviderContext extends GenericFtrProviderContext<
+  infer TServices,
+  infer TPageObjects
+>
+  ? TPageObjects
+  : {};
+
+interface ObsLogExplorerConfig {
+  services: InheritedServices & {
+    logSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<LogsSynthtraceEsClient>;
+  };
+}
+
+export default async function createTestConfig({
+  readConfigFile,
+}: FtrConfigProviderContext): Promise<ObsLogExplorerConfig> {
   const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
   const services = functionalConfig.get('services');
-  const pageObjects = functionalConfig.get('pageObjects');
 
   return {
     ...functionalConfig.getAll(),
@@ -27,14 +50,11 @@ export default async function createTestConfig({ readConfigFile }: FtrConfigProv
         });
       },
     },
-    pageObjects,
   };
 }
 
-export type CreateTestConfig = Awaited<ReturnType<typeof createTestConfig>>;
-
-export type ObsLogsExplorerServices = CreateTestConfig['services'];
-export type ObsLogsExplorerPageObject = CreateTestConfig['pageObjects'];
+export type ObsLogsExplorerServices = ObsLogExplorerConfig['services'];
+export type ObsLogsExplorerPageObject = InheritedPageObjects;
 
 export type FtrProviderContext = GenericFtrProviderContext<
   ObsLogsExplorerServices,

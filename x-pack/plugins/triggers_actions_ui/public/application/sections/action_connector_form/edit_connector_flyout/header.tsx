@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiTitle,
@@ -34,7 +34,7 @@ const FlyoutHeaderComponent: React.FC<{
   connectorTypeId: string;
   connectorTypeDesc: string;
   selectedTab: EditConnectorTabs;
-  setTab: () => void;
+  setTab: (nextPage: EditConnectorTabs) => void;
   icon?: IconType | null;
 }> = ({
   icon,
@@ -52,6 +52,18 @@ const FlyoutHeaderComponent: React.FC<{
 
   const { euiTheme } = useEuiTheme();
   const canExecute = hasExecuteActionsCapability(capabilities, connectorTypeId);
+
+  const setConfigurationTab = useCallback(() => {
+    setTab(EditConnectorTabs.Configuration);
+  }, [setTab]);
+
+  const setTestTab = useCallback(() => {
+    setTab(EditConnectorTabs.Test);
+  }, [setTab]);
+
+  const setRulesTab = useCallback(() => {
+    setTab(EditConnectorTabs.Rules);
+  }, [setTab]);
 
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="edit-connector-flyout-header">
@@ -137,7 +149,7 @@ const FlyoutHeaderComponent: React.FC<{
         `}
       >
         <EuiTab
-          onClick={setTab}
+          onClick={setConfigurationTab}
           data-test-subj="configureConnectorTab"
           isSelected={EditConnectorTabs.Configuration === selectedTab}
         >
@@ -145,9 +157,18 @@ const FlyoutHeaderComponent: React.FC<{
             defaultMessage: 'Configuration',
           })}
         </EuiTab>
+        <EuiTab
+          onClick={setRulesTab}
+          data-test-subj="rulesConnectorTab"
+          isSelected={EditConnectorTabs.Rules === selectedTab}
+        >
+          {i18n.translate('xpack.triggersActionsUI.sections.rulesConnectorList.tabText', {
+            defaultMessage: 'Rules',
+          })}
+        </EuiTab>
         {canExecute && (
           <EuiTab
-            onClick={setTab}
+            onClick={setTestTab}
             data-test-subj="testConnectorTab"
             isSelected={EditConnectorTabs.Test === selectedTab}
           >

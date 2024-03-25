@@ -91,6 +91,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
                   scale: 'interval',
                   params: {
                     interval: 'auto',
+                    includeEmptyRows: true,
                   },
                 },
                 '0a923af2-c880-4aa3-aa93-a0b9c2801f6d': {
@@ -100,6 +101,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
                   isBucketed: false,
                   scale: 'ratio',
                   sourceField: '___records___',
+                  params: { emptyAsNull: true },
                 },
                 '42334c6e-98d9-47a2-b4cb-a445abb44c93': {
                   label: TOP_VALUE(`${stackByField}`), // could be event.category

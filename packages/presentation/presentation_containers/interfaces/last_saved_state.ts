@@ -30,7 +30,7 @@ export const getLastSavedStateSubjectForChild = <StateType extends unknown = unk
   deserializer?: (state: SerializedPanelState) => StateType
 ): PublishingSubject<StateType | undefined> | undefined => {
   if (!parentApi) return;
-  const fetchUnsavedChanges = (): StateType | undefined => {
+  const fetchLastSavedState = (): StateType | undefined => {
     if (!apiPublishesLastSavedState(parentApi)) return;
     const rawLastSavedState = parentApi.getLastSavedStateForChild(childId);
     if (rawLastSavedState === undefined) return;
@@ -39,11 +39,11 @@ export const getLastSavedStateSubjectForChild = <StateType extends unknown = unk
       : (rawLastSavedState.rawState as StateType);
   };
 
-  const lastSavedStateForChild = new BehaviorSubject<StateType | undefined>(fetchUnsavedChanges());
+  const lastSavedStateForChild = new BehaviorSubject<StateType | undefined>(fetchLastSavedState());
   if (!apiPublishesLastSavedState(parentApi)) return;
   parentApi.lastSavedState
     .pipe(
-      map(() => fetchUnsavedChanges()),
+      map(() => fetchLastSavedState()),
       filter((rawLastSavedState) => rawLastSavedState !== undefined)
     )
     .subscribe(lastSavedStateForChild);

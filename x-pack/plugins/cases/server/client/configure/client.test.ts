@@ -346,30 +346,6 @@ describe('client', () => {
         'Failed to get patch configure in route: Error: Invalid custom field types in request for the following labels: "text label"'
       );
     });
-
-    it('throws when an optional custom field has a default value', async () => {
-      await expect(
-        update(
-          'test-id',
-          {
-            version: 'test-version',
-            customFields: [
-              {
-                key: 'extra_default',
-                label: 'text label',
-                type: CustomFieldTypes.TEXT,
-                required: false,
-                defaultValue: 'foobar',
-              },
-            ],
-          },
-          clientArgs,
-          casesClientInternal
-        )
-      ).rejects.toThrow(
-        'Failed to get patch configure in route: Error: The following optional custom fields try to define a default value: "text label"'
-      );
-    });
   });
 
   describe('create', () => {
@@ -429,29 +405,6 @@ describe('client', () => {
         )
       ).rejects.toThrow(
         'Failed to create case configuration: Error: Invalid duplicated custom field keys in request: duplicated_key'
-      );
-    });
-
-    it('throws when an optional custom field has a default value', async () => {
-      await expect(
-        create(
-          {
-            ...baseRequest,
-            customFields: [
-              {
-                key: 'extra_default',
-                label: 'text label',
-                type: CustomFieldTypes.TEXT,
-                required: false,
-                defaultValue: 'foobar',
-              },
-            ],
-          },
-          clientArgs,
-          casesClientInternal
-        )
-      ).rejects.toThrow(
-        'Failed to create case configuration: Error: The following optional custom fields try to define a default value: "text label"'
       );
     });
   });

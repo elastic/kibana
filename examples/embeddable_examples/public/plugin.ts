@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import {
   HelloWorldEmbeddableFactory,
   HELLO_WORLD_EMBEDDABLE,
@@ -31,7 +35,12 @@ import {
   FilterDebuggerEmbeddableFactory,
   FilterDebuggerEmbeddableFactoryDefinition,
 } from './filter_debugger';
-import { registerMarkdownEditorEmbeddable } from './react_embeddables/eui_markdown_react_embeddable';
+import { registerMarkdownEditorEmbeddable } from './react_embeddables/eui_markdown/eui_markdown_react_embeddable';
+import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
+import { registerFieldListFactory } from './react_embeddables/field_list/field_list_react_embeddable';
+import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
+import { registerSearchEmbeddableFactory } from './react_embeddables/search/register_search_embeddable_factory';
+import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -39,7 +48,12 @@ export interface EmbeddableExamplesSetupDependencies {
 }
 
 export interface EmbeddableExamplesStartDependencies {
+  dataViews: DataViewsPublicPluginStart;
   embeddable: EmbeddableStart;
+  uiActions: UiActionsStart;
+  data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 interface ExampleEmbeddableFactories {
@@ -53,8 +67,6 @@ export interface EmbeddableExamplesStart {
   createSampleData: () => Promise<void>;
   factories: ExampleEmbeddableFactories;
 }
-
-registerMarkdownEditorEmbeddable();
 
 export class EmbeddableExamplesPlugin
   implements
@@ -102,6 +114,18 @@ export class EmbeddableExamplesPlugin
     core: CoreStart,
     deps: EmbeddableExamplesStartDependencies
   ): EmbeddableExamplesStart {
+    registerFieldListFactory(core, deps);
+    registerCreateFieldListAction(deps.uiActions);
+
+    registerMarkdownEditorEmbeddable();
+    registerCreateEuiMarkdownAction(deps.uiActions);
+
+    registerSearchEmbeddableFactory({
+      data: deps.data,
+      dataViews: deps.dataViews,
+    });
+    registerAddSearchPanelAction(deps.uiActions);
+
     return {
       createSampleData: async () => {},
       factories: this.exampleEmbeddableFactories as ExampleEmbeddableFactories,

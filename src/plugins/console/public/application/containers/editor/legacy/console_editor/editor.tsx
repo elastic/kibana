@@ -108,7 +108,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     }
 
     const readQueryParams = () => {
-      const [, queryString] = (window.location.hash || '').split('?');
+      const [, queryString] = (window.location.hash || window.location.search || '').split('?');
 
       return parse(queryString || '', { sort: false }) as Required<QueryParams>;
     };

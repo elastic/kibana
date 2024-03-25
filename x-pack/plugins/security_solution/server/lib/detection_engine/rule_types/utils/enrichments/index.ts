@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/constants';
 import { createHostRiskEnrichments } from './enrichment_by_type/host_risk';
 
 import { createUserRiskEnrichments } from './enrichment_by_type/user_risk';
@@ -38,8 +39,10 @@ export const enrichEvents: EnrichEventsFunction = async ({
 
     logger.debug('Alert enrichments started');
     const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
-    const isAssetCriticalityEnabled =
-      experimentalFeatures?.entityAnalyticsAssetCriticalityEnabled ?? false;
+    const { uiSettingsClient } = services;
+    const isAssetCriticalityEnabled = await uiSettingsClient.get<boolean>(
+      ENABLE_ASSET_CRITICALITY_SETTING
+    );
 
     let isNewRiskScoreModuleInstalled = false;
     if (isNewRiskScoreModuleAvailable) {

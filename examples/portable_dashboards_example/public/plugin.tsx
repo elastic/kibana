@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  AppMountParameters,
-  AppNavLinkStatus,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-} from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -41,7 +35,7 @@ export class PortableDashboardsExamplePlugin
     core.application.register({
       id: PLUGIN_ID,
       title: 'Portable dashboard examples',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const [, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');

@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 
-import { getMlModelTypesForModelConfig } from '../../../../../../../common/ml_inference_pipeline';
 import { getMLType } from '../../../shared/ml_inference/utils';
 
 import { MLInferenceLogic } from './ml_inference_logic';
@@ -23,10 +22,10 @@ import { ZeroShotClassificationInferenceConfiguration } from './zero_shot_infere
 export const InferenceConfiguration: React.FC = () => {
   const {
     addInferencePipelineModal: { configuration },
-    selectedMLModel,
+    selectedModel,
   } = useValues(MLInferenceLogic);
-  if (!selectedMLModel || configuration.existingPipeline) return null;
-  const modelType = getMLType(getMlModelTypesForModelConfig(selectedMLModel));
+  if (!selectedModel || configuration.existingPipeline) return null;
+  const modelType = getMLType(selectedModel.types);
   switch (modelType) {
     case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
       return (

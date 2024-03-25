@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { merge } from 'lodash';
+import deepmerge from 'deepmerge';
 import { CspConfigType } from './config';
 
 export type CspDirectiveName =
@@ -70,7 +70,10 @@ export class CspDirectives {
     firstConfig: CspConfigType,
     ...otherConfigs: Array<Partial<CspConfigType>>
   ): CspDirectives {
-    const config = otherConfigs.length ? merge(firstConfig, ...otherConfigs) : firstConfig;
+    const config = otherConfigs.reduce<CspConfigType>(
+      (acc, conf) => deepmerge(acc, conf),
+      firstConfig
+    );
     const cspDirectives = new CspDirectives();
 
     // combining `default` directive configurations

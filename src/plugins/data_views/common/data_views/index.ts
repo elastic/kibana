@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './_pattern_cache';
 export * from './flatten_hit';
 export * from './data_view';
 export * from './data_views';

@@ -233,6 +233,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: false },
         basic: { enabled: true },
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.azureBlobStorage.name', {
       defaultMessage: 'Azure Blob Storage',
@@ -568,6 +571,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.confluence.name', {
       defaultMessage: 'Confluence',
@@ -687,6 +693,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
       },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.dropbox.name', {
@@ -934,11 +943,149 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     name: i18n.translate('searchConnectors.nativeConnectors.github.name', {
       defaultMessage: 'Github',
     }),
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     serviceType: 'github',
   },
+  gmail: {
+    configuration: {
+      service_account_credentials: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gmail.service_account_credentials.label',
+          {
+            defaultMessage: 'GMail service account JSON',
+          }
+        ),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      subject: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.gmail.subject.label', {
+          defaultMessage: 'Google Workspace admin email',
+        }),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.gmail.subject.tooltip', {
+          defaultMessage: 'Admin account email address',
+        }),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [
+          {
+            type: 'regex',
+            constraint: '^\\S+@\\S+\\.\\S+$',
+          },
+        ],
+        value: '',
+      },
+      customer_id: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.gmail.customer_id.label', {
+          defaultMessage: 'Google customer id',
+        }),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.gmail.customer_id.tooltip', {
+          defaultMessage: 'Google admin console -> Account -> Settings -> Customer Id',
+        }),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      include_spam_and_trash: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gmail.include_spam_and_trash.label',
+          {
+            defaultMessage: 'Include spam and trash emails',
+          }
+        ),
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gmail.include_spam_and_trash.tooltip',
+          {
+            defaultMessage: 'Will include spam and trash emails, when set to true.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gmail.use_document_level_security.label',
+          {
+            defaultMessage: 'Enable document level security',
+          }
+        ),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gmail.use_document_level_security.tooltip',
+          {
+            defaultMessage:
+              'Document level security ensures identities and permissions set in GMail are maintained in Elasticsearch. This enables you to restrict and personalize read-access users have to documents in this index. Access control syncs ensure this metadata is kept up to date in your Elasticsearch documents.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+    },
+    features: {
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
+    name: i18n.translate('searchConnectors.nativeConnectors.gmail.name', {
+      defaultMessage: 'Gmail',
+    }),
+    serviceType: 'gmail',
+  },
   google_cloud_storage: {
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     configuration: {
       buckets: {
         default_value: null,
@@ -1231,6 +1378,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
     },
@@ -1559,6 +1709,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.jira.name', {
       defaultMessage: 'Jira',
@@ -1793,7 +1946,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.INTEGER,
         ui_restrictions: [],
         validations: [],
-        value: 9090,
+        value: 1433,
       },
       username: {
         default_value: '',
@@ -2278,6 +2431,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: false },
         basic: { enabled: true },
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.networkDrive.name', {
       defaultMessage: 'Network drive',
@@ -2404,6 +2560,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     features: {
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
     },
@@ -2646,6 +2805,314 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     serviceType: 'oracle',
   },
+  outlook: {
+    configuration: {
+      data_source: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.DROPDOWN,
+        label: i18n.translate('searchConnectors.nativeConnectors.outlook.data_source.label', {
+          defaultMessage: 'Outlook data source',
+        }),
+        options: [
+          {
+            label: 'Outlook Cloud',
+            value: 'outlook_cloud',
+          },
+          {
+            label: 'Outlook Server',
+            value: 'outlook_server',
+          },
+        ],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'outlook_cloud',
+      },
+      tenant_id: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_cloud',
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.outlook.tenant_id.label', {
+          defaultMessage: 'Tenant ID',
+        }),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      client_id: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_cloud',
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.outlook.client_id.label', {
+          defaultMessage: 'Client ID',
+        }),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      client_secret: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_cloud',
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.outlook.client_secret.label', {
+          defaultMessage: 'Client Secret Value',
+        }),
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      exchange_server: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_server',
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.outlook.exchange_server.label', {
+          defaultMessage: 'Exchange Server',
+        }),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.exchange_server.tooltip',
+          {
+            defaultMessage: "Exchange server's IP address. E.g. 127.0.0.1",
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      active_directory_server: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_server',
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.active_directory_server.label',
+          {
+            defaultMessage: 'Active Directory Server',
+          }
+        ),
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.active_directory_server.tooltip',
+          {
+            defaultMessage: "Active Directory server's IP address. E.g. 127.0.0.1",
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      username: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_server',
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.outlook.username.label', {
+          defaultMessage: 'Exchange server username',
+        }),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      password: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_server',
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.outlook.password.label', {
+          defaultMessage: 'Exchange server password',
+        }),
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      domain: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_server',
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.outlook.domain.label', {
+          defaultMessage: 'Exchange server domain name',
+        }),
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.outlook.domain.tooltip', {
+          defaultMessage: 'Domain name such as gmail.com, outlook.com',
+        }),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      ssl_enabled: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_server',
+          },
+        ],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate('searchConnectors.nativeConnectors.outlook.ssl_enabled.label', {
+          defaultMessage: 'Enable SSL',
+        }),
+        options: [],
+        order: 10,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      ssl_ca: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_server',
+          },
+          {
+            field: 'ssl_enabled',
+            value: true,
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.outlook.ssl_ca.label', {
+          defaultMessage: 'SSL certificate',
+        }),
+        options: [],
+        order: 11,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      use_text_extraction_service: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.use_text_extraction_service.label',
+          {
+            defaultMessage: 'Use text extraction service',
+          }
+        ),
+        options: [],
+        order: 12,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.use_text_extraction_service.toolip',
+          {
+            defaultMessage:
+              'Requires a separate deployment of the Elastic Text Extraction Service. Requires that pipeline settings disable text extraction.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+    },
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: false },
+        basic: { enabled: true },
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
+    name: i18n.translate('searchConnectors.nativeConnectors.outlook.name', {
+      defaultMessage: 'Outlook',
+    }),
+    serviceType: 'outlook',
+  },
   postgresql: {
     configuration: {
       host: {
@@ -2681,7 +3148,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.INTEGER,
         ui_restrictions: [],
         validations: [],
-        value: 9090,
+        value: 5432,
       },
       username: {
         default_value: '',
@@ -2992,7 +3459,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     serviceType: 's3',
   },
   salesforce: {
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     configuration: {
       domain: {
         default_value: null,
@@ -3009,7 +3480,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'searchConnectors.content.nativeConnectors.salesforce.domain.tooltip',
           {
             defaultMessage:
-              "The domain for your Salesforce instance. If your Salesforce URL is, the domain would be 'foo'.",
+              "The domain for your Salesforce instance. If your Salesforce URL is 'https://foo.salesforce.com', the domain would be 'foo'.",
           }
         ),
         type: FieldType.STRING,
@@ -3110,7 +3581,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       username: {
         default_value: null,
         depends_on: [],
-        display: DisplayType.TEXTAREA,
+        display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.servicenow.username.label', {
           defaultMessage: 'Username',
         }),
@@ -3231,6 +3702,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
       },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.servicenow.name', {

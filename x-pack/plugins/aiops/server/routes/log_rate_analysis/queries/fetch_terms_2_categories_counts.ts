@@ -12,10 +12,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { FieldValuePair, SignificantItem } from '@kbn/ml-agg-utils';
+import type { FetchFrequentItemSetsResponse, ItemSet } from '@kbn/aiops-utils/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
-import type { FetchFrequentItemSetsResponse, ItemSet } from '../../../../common/types';
 import { getCategoryQuery } from '../../../../common/api/log_categorization/get_category_query';
 import type { Category } from '../../../../common/api/log_categorization/types';
 import { LOG_RATE_ANALYSIS_SETTINGS } from '../../../../common/constants';
@@ -99,10 +99,10 @@ export async function fetchTerms2CategoriesCounts(
         ) as estypes.MsearchMultisearchBody
       );
       results.push({
-        set: {
-          [term.fieldName]: term.fieldValue,
-          [category.fieldName]: category.fieldValue,
-        },
+        set: [
+          { fieldName: term.fieldName, fieldValue: term.fieldValue },
+          { fieldName: category.fieldName, fieldValue: category.fieldValue },
+        ],
         size: 2,
         maxPValue: Math.max(term.pValue ?? 1, category.pValue ?? 1),
         doc_count: 0,
@@ -116,10 +116,7 @@ export async function fetchTerms2CategoriesCounts(
       searches.push(
         getTerm2CategoryCountRequest(
           params,
-          Object.entries(itemSet.set).map(([fieldName, fieldValue]) => ({
-            fieldName,
-            fieldValue,
-          })),
+          itemSet.set,
           category.fieldName,
           { key: `${category.key}`, count: category.doc_count, examples: [], regex: '' },
           from,
@@ -127,10 +124,7 @@ export async function fetchTerms2CategoriesCounts(
         ) as estypes.MsearchMultisearchBody
       );
       results.push({
-        set: {
-          ...itemSet.set,
-          [category.fieldName]: category.fieldValue,
-        },
+        set: [...itemSet.set, { fieldName: category.fieldName, fieldValue: category.fieldValue }],
         size: Object.keys(itemSet.set).length + 1,
         maxPValue: Math.max(itemSet.maxPValue ?? 1, category.pValue ?? 1),
         doc_count: 0,

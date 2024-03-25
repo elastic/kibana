@@ -15,9 +15,7 @@ import {
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createRule,
   createRuleThroughAlertingEndpoint,
-  deleteAllRules,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
@@ -27,6 +25,7 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   checkInvestigationFieldSoValue,
 } from '../../../utils';
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

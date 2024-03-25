@@ -23,9 +23,11 @@ describe('getAlertsForNotification', () => {
       'default',
       0,
       {
+        // new alerts
         '1': alert1,
       },
       {
+        // active alerts
         '1': alert1,
         '2': alert2,
       },
@@ -94,11 +96,13 @@ describe('getAlertsForNotification', () => {
       {},
       {},
       {
+        // recovered alerts
         '1': alert1,
         '2': alert2,
         '3': alert3,
       },
       {
+        // current recovered alerts
         '1': alert1,
         '2': alert2,
         '3': alert3,
@@ -228,11 +232,13 @@ describe('getAlertsForNotification', () => {
         {},
         {},
         {
+          // recovered alerts
           '1': alert1,
           '2': alert2,
           '3': alert3,
         },
         {
+          // current recovered alerts
           '1': alert1,
           '2': alert2,
           '3': alert3,
@@ -360,11 +366,13 @@ describe('getAlertsForNotification', () => {
       {},
       {},
       {
+        // recovered alerts
         '1': alert1,
         '2': alert2,
         '3': alert3,
       },
       {
+        // current recovered alerts
         '1': alert1,
         '2': alert2,
         '3': alert3,
@@ -459,21 +467,24 @@ describe('getAlertsForNotification', () => {
     });
     const alert2 = new Alert('2', { meta: { uuid: 'uuid-2' } });
 
-    const { newAlerts, activeAlerts, currentActiveAlerts } = getAlertsForNotification(
-      DEFAULT_FLAPPING_SETTINGS,
-      true,
-      'default',
-      0,
-      {
-        '1': alert1,
-      },
-      {
-        '1': alert1,
-        '2': alert2,
-      },
-      {},
-      {}
-    );
+    const { newAlerts, activeAlerts, currentActiveAlerts, delayedAlertsCount } =
+      getAlertsForNotification(
+        DEFAULT_FLAPPING_SETTINGS,
+        true,
+        'default',
+        0,
+        {
+          // new alerts
+          '1': alert1,
+        },
+        {
+          // active alerts
+          '1': alert1,
+          '2': alert2,
+        },
+        {},
+        {}
+      );
     expect(newAlerts).toMatchInlineSnapshot(`
       Object {
         "1": Object {
@@ -536,28 +547,32 @@ describe('getAlertsForNotification', () => {
         },
       }
     `);
+    expect(delayedAlertsCount).toBe(0);
   });
 
   test('should reset activeCount for all recovered alerts', () => {
     const alert1 = new Alert('1', { meta: { activeCount: 3 } });
     const alert3 = new Alert('3');
 
-    const { recoveredAlerts, currentRecoveredAlerts } = getAlertsForNotification(
-      DEFAULT_FLAPPING_SETTINGS,
-      true,
-      'default',
-      0,
-      {},
-      {},
-      {
-        '1': alert1,
-        '3': alert3,
-      },
-      {
-        '1': alert1,
-        '3': alert3,
-      }
-    );
+    const { recoveredAlerts, currentRecoveredAlerts, delayedAlertsCount } =
+      getAlertsForNotification(
+        DEFAULT_FLAPPING_SETTINGS,
+        true,
+        'default',
+        0,
+        {},
+        {},
+        {
+          // recovered alerts
+          '1': alert1,
+          '3': alert3,
+        },
+        {
+          // current recovered alerts
+          '1': alert1,
+          '3': alert3,
+        }
+      );
 
     expect(alertsWithAnyUUID(recoveredAlerts)).toMatchInlineSnapshot(`
       Object {
@@ -603,6 +618,7 @@ describe('getAlertsForNotification', () => {
         },
       }
     `);
+    expect(delayedAlertsCount).toBe(0);
   });
 
   test('should remove the alert from newAlerts and should not return the alert in currentActiveAlerts if the activeCount is less than the rule alertDelay', () => {
@@ -611,21 +627,24 @@ describe('getAlertsForNotification', () => {
     });
     const alert2 = new Alert('2', { meta: { uuid: 'uuid-2' } });
 
-    const { newAlerts, activeAlerts, currentActiveAlerts } = getAlertsForNotification(
-      DEFAULT_FLAPPING_SETTINGS,
-      true,
-      'default',
-      5,
-      {
-        '1': alert1,
-      },
-      {
-        '1': alert1,
-        '2': alert2,
-      },
-      {},
-      {}
-    );
+    const { newAlerts, activeAlerts, currentActiveAlerts, delayedAlertsCount } =
+      getAlertsForNotification(
+        DEFAULT_FLAPPING_SETTINGS,
+        true,
+        'default',
+        5,
+        {
+          // new alerts
+          '1': alert1,
+        },
+        {
+          // active alerts
+          '1': alert1,
+          '2': alert2,
+        },
+        {},
+        {}
+      );
     expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
     expect(activeAlerts).toMatchInlineSnapshot(`
       Object {
@@ -652,23 +671,26 @@ describe('getAlertsForNotification', () => {
       }
     `);
     expect(currentActiveAlerts).toMatchInlineSnapshot(`Object {}`);
+    expect(delayedAlertsCount).toBe(2);
   });
 
   test('should update active alert to look like a new alert if the activeCount is equal to the rule alertDelay', () => {
     const alert2 = new Alert('2', { meta: { uuid: 'uuid-2' } });
 
-    const { newAlerts, activeAlerts, currentActiveAlerts } = getAlertsForNotification(
-      DEFAULT_FLAPPING_SETTINGS,
-      true,
-      'default',
-      1,
-      {},
-      {
-        '2': alert2,
-      },
-      {},
-      {}
-    );
+    const { newAlerts, activeAlerts, currentActiveAlerts, delayedAlertsCount } =
+      getAlertsForNotification(
+        DEFAULT_FLAPPING_SETTINGS,
+        true,
+        'default',
+        1,
+        {},
+        {
+          // active alerts
+          '2': alert2,
+        },
+        {},
+        {}
+      );
     expect(newAlerts['2'].getState().duration).toBe('0');
     expect(newAlerts['2'].getState().start).toBeTruthy();
 
@@ -677,5 +699,7 @@ describe('getAlertsForNotification', () => {
 
     expect(currentActiveAlerts['2'].getState().duration).toBe('0');
     expect(currentActiveAlerts['2'].getState().start).toBeTruthy();
+
+    expect(delayedAlertsCount).toBe(0);
   });
 });

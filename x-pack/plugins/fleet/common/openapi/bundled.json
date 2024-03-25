@@ -1312,6 +1312,109 @@
         }
       }
     },
+    "/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
+      "post": {
+        "summary": "Authorize transforms",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "transformId": {
+                            "type": "string"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          },
+                          "error": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "transformId",
+                          "error"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "reauthorize-transforms",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgName",
+            "in": "path",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgVersion",
+            "in": "path",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "prerelease",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to include prerelease packages in categories count (e.g. beta, rc, preview)"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "transforms": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "transformId": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
       "get": {
         "summary": "Get package file",
@@ -6871,6 +6974,10 @@
           "force": {
             "type": "boolean",
             "description": "Force upgrade, skipping validation (should be used with caution)"
+          },
+          "skipRateLimitCheck": {
+            "type": "boolean",
+            "description": "Skip rate limit check for upgrade"
           }
         },
         "required": [
@@ -6935,6 +7042,10 @@
           "force": {
             "type": "boolean",
             "description": "Force upgrade, skipping validation (should be used with caution)"
+          },
+          "skipRateLimitCheck": {
+            "type": "boolean",
+            "description": "Skip rate limit check for upgrade"
           }
         },
         "required": [
@@ -7282,6 +7393,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -7354,6 +7469,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -8189,7 +8308,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",
@@ -8198,6 +8322,8 @@
                   "type": "string"
                 },
                 "when": {
+                  "deprecated": true,
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {
@@ -8703,7 +8829,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",
@@ -8712,6 +8843,8 @@
                   "type": "string"
                 },
                 "when": {
+                  "deprecated": true,
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {

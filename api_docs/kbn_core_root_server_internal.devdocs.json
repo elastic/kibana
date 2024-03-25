@@ -135,7 +135,7 @@
             "signature": [
               "() => Promise<",
               "InternalCorePreboot",
-              ">"
+              " | undefined>"
             ],
             "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
             "deprecated": false,
@@ -337,7 +337,7 @@
             "signature": [
               "() => Promise<",
               "InternalCorePreboot",
-              ">"
+              " | undefined>"
             ],
             "path": "packages/core/root/core-root-server-internal/src/server.ts",
             "deprecated": false,

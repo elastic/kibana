@@ -34,6 +34,8 @@ import {
   RuleEditProps,
   IErrorObject,
   RuleType,
+  RuleTypeParams,
+  RuleTypeMetaData,
   TriggersActionsUiConfig,
   RuleNotifyWhenType,
 } from '../../../types';
@@ -81,7 +83,12 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
   return clonedRule;
 };
 
-export const RuleEdit = ({
+export type RuleEditComponent = typeof RuleEdit;
+
+export const RuleEdit = <
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+>({
   initialRule,
   onClose,
   reloadRules,
@@ -91,7 +98,7 @@ export const RuleEdit = ({
   actionTypeRegistry,
   metadata: initialMetadata,
   ...props
-}: RuleEditProps) => {
+}: RuleEditProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
   const [{ rule }, dispatch] = useReducer(ruleReducer as ConcreteRuleReducer, {
     rule: cloneAndMigrateRule(initialRule),

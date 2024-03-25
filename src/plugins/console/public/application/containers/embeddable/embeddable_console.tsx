@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -15,31 +15,64 @@ import {
   EuiPortal,
   EuiScreenReaderOnly,
   EuiThemeProvider,
-  EuiWindowEvent,
   keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { dynamic } from '@kbn/shared-ux-utility';
 
 import {
   EmbeddableConsoleProps,
   EmbeddableConsoleDependencies,
 } from '../../../types/embeddable_console';
 
-import { ConsoleWrapper } from './console_wrapper';
+import * as store from '../../stores/embeddable_console';
+import { setLoadFromParameter, removeLoadFromParameter } from '../../lib/load_from';
+
 import './_index.scss';
+
+const KBN_BODY_CONSOLE_CLASS = 'kbnBody--hasEmbeddableConsole';
 
 const landmarkHeading = i18n.translate('console.embeddableConsole.landmarkHeading', {
   defaultMessage: 'Developer console',
 });
 
+const ConsoleWrapper = dynamic(async () => ({
+  default: (await import('./console_wrapper')).ConsoleWrapper,
+}));
+
 export const EmbeddableConsole = ({
   size = 'm',
   core,
   usageCollection,
+  setDispatch,
 }: EmbeddableConsoleProps & EmbeddableConsoleDependencies) => {
-  const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
-  const toggleConsole = () => setIsConsoleOpen(!isConsoleOpen);
+  const [consoleState, consoleDispatch] = useReducer(
+    store.reducer,
+    store.initialValue,
+    (value) => ({ ...value })
+  );
   const chromeStyle = useObservable(core.chrome.getChromeStyle$());
+  useEffect(() => {
+    setDispatch(consoleDispatch);
+    return () => setDispatch(null);
+  }, [setDispatch, consoleDispatch]);
+  useEffect(() => {
+    if (consoleState.isOpen && consoleState.loadFromContent) {
+      setLoadFromParameter(consoleState.loadFromContent);
+    } else if (!consoleState.isOpen) {
+      removeLoadFromParameter();
+    }
+  }, [consoleState.isOpen, consoleState.loadFromContent]);
+  useEffect(() => {
+    document.body.classList.add(KBN_BODY_CONSOLE_CLASS);
+    return () => document.body.classList.remove(KBN_BODY_CONSOLE_CLASS);
+  }, []);
+
+  const isConsoleOpen = consoleState.isOpen;
+  const setIsConsoleOpen = (value: boolean) => {
+    consoleDispatch(value ? { type: 'open' } : { type: 'close' });
+  };
+  const toggleConsole = () => setIsConsoleOpen(!isConsoleOpen);
 
   const onKeyDown = (event: any) => {
     if (event.key === keys.ESCAPE) {
@@ -91,12 +124,7 @@ export const EmbeddableConsole = ({
               </EuiButton>
             </div>
           </EuiThemeProvider>
-          {isConsoleOpen ? (
-            <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
-              <EuiWindowEvent event="keydown" handler={onKeyDown} />
-              <ConsoleWrapper core={core} usageCollection={usageCollection} />
-            </div>
-          ) : null}
+          {isConsoleOpen ? <ConsoleWrapper {...{ core, usageCollection, onKeyDown }} /> : null}
         </section>
         <EuiScreenReaderOnly>
           <p aria-live="assertive">
@@ -111,7 +139,3 @@ export const EmbeddableConsole = ({
     </EuiPortal>
   );
 };
-
-// Default Export is needed to lazy load this react component
-// eslint-disable-next-line import/no-default-export
-export default EmbeddableConsole;

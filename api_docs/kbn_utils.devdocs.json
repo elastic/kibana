@@ -451,6 +451,41 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utils",
+        "id": "def-common.prettyPrintAndSortKeys",
+        "type": "Function",
+        "tags": [],
+        "label": "prettyPrintAndSortKeys",
+        "description": [
+          "\nGiven a JS object, will return a JSON.stringified result with consistently\nsorted keys."
+        ],
+        "signature": [
+          "(object: object) => string"
+        ],
+        "path": "packages/kbn-utils/src/json/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/utils",
+            "id": "def-common.prettyPrintAndSortKeys.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "object",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "packages/kbn-utils/src/json/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

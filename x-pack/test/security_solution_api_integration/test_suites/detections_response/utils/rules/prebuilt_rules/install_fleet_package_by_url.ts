@@ -10,7 +10,6 @@ import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
-import { retry } from '../../retry';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 
 const MAX_RETRIES = 2;
@@ -30,8 +29,9 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   retryService: RetryService
 ): Promise<InstallPackageResponse> => {
-  const fleetResponse = await retry<InstallPackageResponse>({
-    test: async () => {
+  const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
+    installPrebuiltRulesPackageViaFleetAPI.name,
+    async () => {
       const testResponse = await supertest
         .post(`/api/fleet/epm/packages/security_detection_engine`)
         .set('kbn-xsrf', 'xxxx')
@@ -44,10 +44,11 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
 
       return testResponse.body;
     },
-    retryService,
-    retries: MAX_RETRIES,
-    timeout: ATTEMPT_TIMEOUT,
-  });
+    {
+      retryCount: MAX_RETRIES,
+      timeout: ATTEMPT_TIMEOUT,
+    }
+  );
 
   await refreshSavedObjectIndices(es);
 
@@ -69,8 +70,9 @@ export const installPrebuiltRulesPackageByVersion = async (
   version: string,
   retryService: RetryService
 ): Promise<InstallPackageResponse> => {
-  const fleetResponse = await retry<InstallPackageResponse>({
-    test: async () => {
+  const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
+    installPrebuiltRulesPackageByVersion.name,
+    async () => {
       const testResponse = await supertest
         .post(epmRouteService.getInstallPath('security_detection_engine', version))
         .set('kbn-xsrf', 'xxxx')
@@ -83,10 +85,11 @@ export const installPrebuiltRulesPackageByVersion = async (
 
       return testResponse.body;
     },
-    retryService,
-    retries: MAX_RETRIES,
-    timeout: ATTEMPT_TIMEOUT,
-  });
+    {
+      retryCount: MAX_RETRIES,
+      timeout: ATTEMPT_TIMEOUT,
+    }
+  );
 
   await refreshSavedObjectIndices(es);
 

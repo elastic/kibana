@@ -38,6 +38,8 @@ Note: The plugin was previously named Ingest Manager, it's possible that some va
 
 These are some additional recommendations to the steps detailed in the [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env).
 
+Note: this section details how to run Kibana in stateful mode. For serverless development, see the [Developing Kibana in serverless mode](dev_docs/developing_kibana_and_fleet_server.md) guide.
+
 1. Create a `config/kibana.dev.yml` file by copying the existing `config/kibana.yml` file.
 2. It is recommended to explicitly set a base path for Kibana (refer to [Considerations for basepath](https://www.elastic.co/guide/en/kibana/current/development-basepath.html) for details). To do this, add the following to your `kibana.dev.yml`:
 
@@ -92,6 +94,8 @@ Refer to the [Running Elasticsearch during development](https://www.elastic.co/g
 ### Running Fleet Server Locally in a Container
 
 It can be useful to run Fleet Server in a container on your local machine in order to free up your actual "bare metal" machine to run Elastic Agent for testing purposes. Otherwise, you'll only be able to a single instance of Elastic Agent dedicated to Fleet Server on your local machine, and this can make testing integrations and policies difficult.
+
+Note: if you need to do simultaneous Kibana and Fleet Server development, refer to the [Developing Kibana and Fleet Server simulatanously](dev_docs/developing_kibana_and_fleet_server.md) guide.
 
 _The following is adapted from the Fleet Server [README](https://github.com/elastic/fleet-server#running-elastic-agent-with-fleet-server-in-container)_
 

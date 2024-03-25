@@ -29,7 +29,7 @@ export class BedrockSimulator extends Simulator {
       return BedrockSimulator.sendErrorResponse(response);
     }
 
-    if (request.url === '/model/anthropic.claude-v2/invoke-with-response-stream') {
+    if (request.url === '/model/anthropic.claude-v2:1/invoke-with-response-stream') {
       return BedrockSimulator.sendStreamResponse(response);
     }
 

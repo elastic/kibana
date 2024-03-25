@@ -14,18 +14,13 @@ import {
   RISK_SCORE_CALCULATION_URL,
 } from '../../../../../common/constants';
 import { riskScoreCalculationRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_calculation/request_schema';
-import type { ExperimentalFeatures } from '../../../../../common';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { assetCriticalityServiceFactory } from '../../asset_criticality';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 
-export const riskScoreCalculationRoute = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
-) => {
+export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       path: RISK_SCORE_CALCULATION_URL,
@@ -49,9 +44,10 @@ export const riskScoreCalculationRoute = (
         const riskEngineDataClient = securityContext.getRiskEngineDataClient();
         const riskScoreDataClient = securityContext.getRiskScoreDataClient();
         const assetCriticalityDataClient = securityContext.getAssetCriticalityDataClient();
+        const securityConfig = await securityContext.getConfig();
         const assetCriticalityService = assetCriticalityServiceFactory({
           assetCriticalityDataClient,
-          experimentalFeatures,
+          uiSettingsClient: coreContext.uiSettings.client,
         });
 
         const riskScoreService = riskScoreServiceFactory({
@@ -83,6 +79,11 @@ export const riskScoreCalculationRoute = (
 
           const afterKeys = userAfterKeys ?? {};
           const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
+          const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
+            securityConfig.entityAnalytics
+          );
+
+          const alertSampleSizePerShard = entityAnalyticsConfig?.alertSampleSizePerShard;
 
           const result = await riskScoreService.calculateAndPersistScores({
             afterKeys,
@@ -94,6 +95,7 @@ export const riskScoreCalculationRoute = (
             range,
             runtimeMappings,
             weights,
+            alertSampleSizePerShard,
           });
 
           return response.ok({ body: result });
