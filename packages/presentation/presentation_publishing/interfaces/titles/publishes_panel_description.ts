@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
+import { PublishingSubject, useStateFromPublishingSubject } from '../../publishing_subject';
 
 export interface PublishesPanelDescription {
   panelDescription: PublishingSubject<string | undefined>;

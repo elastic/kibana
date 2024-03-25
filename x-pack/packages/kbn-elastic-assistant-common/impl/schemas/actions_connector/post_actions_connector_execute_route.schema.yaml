@@ -26,7 +26,6 @@ paths:
               type: object
               required:
                 - params
-                - llmType
                 - replacements
                 - subAction
               properties:
@@ -61,11 +60,6 @@ paths:
                     $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacement'
                 size:
                   type: number
-                llmType:
-                  type: string
-                  enum:
-                    - bedrock
-                    - openai
       responses:
         '200':
           description: Successful response
