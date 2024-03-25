@@ -118,7 +118,6 @@ export const ConversationSelector: React.FC<Props> = React.memo(
               ? {
                   apiConfig: {
                     connectorId: defaultConnector.id,
-                    connectorTypeTitle: defaultConnector.connectorTypeTitle,
                     provider: defaultConnector.apiProvider,
                     defaultSystemPromptId: defaultSystemPrompt?.id,
                   },

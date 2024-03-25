@@ -49,8 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const fleetPackageInstallationResponse = await installPrebuiltRulesPackageViaFleetAPI(
         es,
         supertest,
-        retry,
-        log
+        retry
       );
 
       expect(fleetPackageInstallationResponse.items.length).toBe(1);

@@ -40,6 +40,7 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
@@ -63,7 +64,6 @@ import { MlTooltipComponent } from '../components/chart_tooltip';
 import { SwimlaneAnnotationContainer, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
 import { SwimLaneWrapper } from './alerts';
 
@@ -95,6 +95,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         charts: chartsService,
         cases,
         embeddable,
+        uiSettings,
       },
     } = useMlKibana();
 
@@ -113,7 +114,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const canEditDashboards = capabilities.dashboard?.createNew ?? false;
 
-    const timeBuckets = useTimeBuckets();
+    const timeBuckets = useTimeBuckets(uiSettings);
 
     const { overallAnnotations } = explorerState;
 
@@ -412,7 +413,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             {menuPanels[0].items!.length > 0 ? (
               <EuiFlexItem
                 grow={false}
-                css={{ 'margin-left': 'auto !important', 'align-self': 'baseline' }}
+                css={{ marginLeft: 'auto !important', alignSelf: 'baseline' }}
               >
                 <EuiPopover
                   button={
@@ -460,7 +461,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               </>
             )}
 
-            <EuiFlexItem grow={true} css={{ 'max-width': '500px' }}>
+            <EuiFlexItem grow={true} css={{ maxWidth: '500px' }}>
               <SeverityControl
                 value={severityUpdate ?? 0}
                 onChange={useCallback((update) => {

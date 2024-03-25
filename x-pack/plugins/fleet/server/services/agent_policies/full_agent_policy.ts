@@ -31,7 +31,12 @@ import type {
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
-import { dataTypes, kafkaCompressionType, outputType } from '../../../common/constants';
+import {
+  dataTypes,
+  DEFAULT_OUTPUT,
+  kafkaCompressionType,
+  outputType,
+} from '../../../common/constants';
 
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
@@ -490,8 +495,12 @@ export function transformOutputToFullPolicyOutput(
 
 /**
  * Get id used in full agent policy (sent to the agents)
+ * we use "default" for the default policy to avoid breaking changes
  */
 function getOutputIdForAgentPolicy(output: Output) {
+  if (output.is_default && output.type === outputType.Elasticsearch) {
+    return DEFAULT_OUTPUT.name;
+  }
   return output.id;
 }
 
