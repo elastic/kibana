@@ -35,6 +35,7 @@ describe('ChartConfigPanel', () => {
           } as unknown as UnifiedHistogramVisContext,
           isFlyoutVisible: true,
           setIsFlyoutVisible: jest.fn(),
+          onSuggestionContextChange: jest.fn(),
           isPlainRecord: true,
           lensAdapters: lensAdaptersMock,
           query: {
@@ -67,6 +68,7 @@ describe('ChartConfigPanel', () => {
           } as unknown as UnifiedHistogramVisContext,
           isFlyoutVisible: true,
           setIsFlyoutVisible: jest.fn(),
+          onSuggestionContextChange: jest.fn(),
           isPlainRecord: false,
           currentSuggestionContext: {
             suggestion: currentSuggestionMock,

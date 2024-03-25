@@ -93,6 +93,8 @@ export async function onSaveSearch({
 }) {
   const { uiSettings, savedObjectsTagging } = services;
   const dataView = state.internalState.getState().dataView;
+  const latestVisContext = state.internalState.getState().latestVisContext;
+
   const onSave = async ({
     newTitle,
     newCopyOnSave,
@@ -115,9 +117,11 @@ export async function onSaveSearch({
     const currentRowsPerPage = savedSearch.rowsPerPage;
     const currentSampleSize = savedSearch.sampleSize;
     const currentDescription = savedSearch.description;
+    const currentVisContext = savedSearch.visContext;
     const currentTags = savedSearch.tags;
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
+    savedSearch.visContext = latestVisContext;
     savedSearch.timeRestore = newTimeRestore;
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
@@ -159,6 +163,7 @@ export async function onSaveSearch({
       savedSearch.rowsPerPage = currentRowsPerPage;
       savedSearch.sampleSize = currentSampleSize;
       savedSearch.description = currentDescription;
+      savedSearch.visContext = currentVisContext;
       if (savedObjectsTagging) {
         savedSearch.tags = currentTags;
       }

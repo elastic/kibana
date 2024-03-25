@@ -40,7 +40,7 @@ export function ChartConfigPanel({
   currentSuggestionContext: UnifiedHistogramSuggestionContext;
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
-  onSuggestionContextChange?: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
+  onSuggestionContextChange: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
   const previousSuggestion = useRef<Suggestion | undefined>(undefined);
@@ -53,7 +53,7 @@ export function ChartConfigPanel({
         ...(datasourceState && { datasourceState }),
         ...(visualizationState && { visualizationState }),
       };
-      onSuggestionContextChange?.({
+      onSuggestionContextChange({
         ...currentSuggestionContext,
         suggestion: updatedSuggestion,
       });

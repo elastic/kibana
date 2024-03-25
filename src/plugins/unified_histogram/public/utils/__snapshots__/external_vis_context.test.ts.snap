@@ -183,7 +183,7 @@ Object {
     "breakdownField": undefined,
     "dataViewId": "index-pattern-with-timefield-id",
     "timeField": "timestamp",
-    "timeInterval": "auto",
+    "timeInterval": undefined,
   },
   "suggestionType": "lensSuggestion",
 }
@@ -336,7 +336,6 @@ Object {
   "requestData": Object {
     "dataViewId": "index-pattern-with-timefield-id",
     "timeField": "timestamp",
-    "timeInterval": "auto",
   },
   "suggestionType": "lensSuggestion",
 }

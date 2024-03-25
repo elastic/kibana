@@ -86,6 +86,7 @@ export const getLensVisMock = async ({
     breakdownField,
     externalVisContext: undefined,
     table,
+    onSuggestionContextChange: () => {},
   });
 
   return {

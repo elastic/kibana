@@ -11,9 +11,10 @@ import {
   createStateContainerReactHelpers,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
-import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 
 export interface InternalState {
   dataView: DataView | undefined;
@@ -22,6 +23,7 @@ export interface InternalState {
   adHocDataViews: DataView[];
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
+  latestVisContext: UnifiedHistogramVisContext | undefined; // it will be used during saved search saving
 }
 
 export interface InternalStateTransitions {
@@ -40,6 +42,9 @@ export interface InternalStateTransitions {
     state: InternalState
   ) => (dataView: DataTableRecord | undefined) => InternalState;
   setCustomFilters: (state: InternalState) => (customFilters: Filter[]) => InternalState;
+  setLatestVisContext: (
+    state: InternalState
+  ) => (latestVisContext: UnifiedHistogramVisContext | undefined) => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -59,6 +64,7 @@ export function getInternalStateContainer() {
       savedDataViews: [],
       expandedDoc: undefined,
       customFilters: [],
+      latestVisContext: undefined,
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -112,6 +118,12 @@ export function getInternalStateContainer() {
         ...prevState,
         customFilters,
       }),
+      setLatestVisContext:
+        (prevState: InternalState) =>
+        (latestVisContext: UnifiedHistogramVisContext | undefined) => ({
+          ...prevState,
+          latestVisContext,
+        }),
     },
     {},
     { freeze: (state) => state }

@@ -8,7 +8,7 @@
 
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
-import { pick } from 'lodash';
+import { isEqual, pick } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
@@ -48,7 +48,10 @@ export type UnifiedHistogramContainerProps = {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
-  onVisContextChanged?: (nextVisContext: UnifiedHistogramVisContext | undefined) => void;
+  onVisContextChanged?: (
+    nextVisContext: UnifiedHistogramVisContext | undefined,
+    wasInvalidatedAndRebuilt: boolean
+  ) => void;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'
@@ -134,7 +137,8 @@ export const UnifiedHistogramContainer = forwardRef<
       ),
     });
   }, [input$, stateService]);
-  const { dataView, query, searchSessionId, requestAdapter, isChartLoading } = containerProps;
+  const { dataView, query, searchSessionId, requestAdapter, isChartLoading, externalVisContext } =
+    containerProps;
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const stateProps = useStateProps({
     stateService,
@@ -150,10 +154,14 @@ export const UnifiedHistogramContainer = forwardRef<
         return undefined;
       }
 
-      return (visContext) => {
-        onVisContextChanged(exportVisContext(visContext));
+      return (visContext, wasInvalidatedAndRebuilt) => {
+        const minifiedVisContext = exportVisContext(visContext);
+
+        if (!isEqual(minifiedVisContext, externalVisContext)) {
+          onVisContextChanged(minifiedVisContext, wasInvalidatedAndRebuilt);
+        }
       };
-    }, [onVisContextChanged]);
+    }, [onVisContextChanged, externalVisContext]);
 
   // Don't render anything until the container is initialized
   if (!layoutProps || !lensSuggestionsApi || !api) {

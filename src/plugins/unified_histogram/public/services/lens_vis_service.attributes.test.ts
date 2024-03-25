@@ -709,7 +709,7 @@ describe('LensVisService attributes', () => {
           "breakdownField": undefined,
           "dataViewId": "index-pattern-with-timefield-id",
           "timeField": "timestamp",
-          "timeInterval": "auto",
+          "timeInterval": undefined,
         },
         "suggestionType": "lensSuggestion",
       }

@@ -161,13 +161,16 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * Callback to update the suggested chart
    */
-  onSuggestionContextChange?: (
+  onSuggestionContextChange: (
     suggestionContext: UnifiedHistogramSuggestionContext | undefined
   ) => void;
   /**
    * Callback to notify about the change in Lens attributes
    */
-  onVisContextChanged?: (visContext: UnifiedHistogramVisContext | undefined) => void;
+  onVisContextChanged?: (
+    visContext: UnifiedHistogramVisContext | undefined,
+    wasInvalidatedAndRebuilt: boolean
+  ) => void;
   /**
    * Callback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status
    * and {@link UnifiedHistogramHitsContext.total} to result

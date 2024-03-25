@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const retry = getService('retry');
+  const find = getService('find');
   const browser = getService('browser');
   const PageObjects = getPageObjects([
     'settings',
@@ -87,6 +88,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const seriesType = await testSubjects.getVisibleText('lns_layer_settings');
     await testSubjects.click('cancelFlyoutButton');
     return seriesType;
+  }
+
+  async function getCurrentVisSeriesSuggestionTypeTitle() {
+    await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+    const title = await find.byCssSelector('.lnsLayerPanel__settingsStaticHeader .euiTitle');
+    const suggestionTypeTitle = await title.getVisibleText();
+    await testSubjects.click('cancelFlyoutButton');
+    return suggestionTypeTitle;
+  }
+
+  async function getCurrentVisChartTitle() {
+    const chartElement = await find.byCssSelector(
+      '[data-test-subj="unifiedHistogramChart"] [data-render-complete="true"]'
+    );
+    return await chartElement.getAttribute('data-title');
   }
 
   describe('discover lens vis', function describeIndexTests() {
@@ -274,6 +290,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await checkESQLHistogramVis(defaultTimespanESQL, '10');
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
+
+      // now we are changing to a different query to check lens suggestion logic too
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageA = avg(bytes) by extension'
+      );
+      await testSubjects.click('querySubmitButton');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await PageObjects.discover.chooseLensChart('Donut');
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await monacoEditor.getCodeEditorValue()).to.contain('averageA');
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
+
+      await PageObjects.discover.revertUnsavedChanges();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
+      expect(await getCurrentVisChartTitle()).to.be('Bar vertical stacked');
+
+      await checkESQLHistogramVis(defaultTimespanESQL, '10');
+      expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
     });
 
     it('should be able to customize ESQL vis and save it', async () => {
@@ -292,12 +339,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.saveSearch('testCustomESQLVis');
 
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
 
       await browser.refresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
     });
 
     it('should be able to load a saved search with custom vis, edit vis and revert changes', async () => {
@@ -307,11 +358,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
       await PageObjects.discover.chooseLensChart('Waffle');
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Waffle');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Waffle');
+      expect(await getCurrentVisChartTitle()).to.be('Waffle');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
 
@@ -322,6 +377,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
 
       await PageObjects.discover.chooseLensChart('Bar vertical stacked');
       await changeVisSeriesType('line');
@@ -335,6 +392,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('unsavedChangesBadge');
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Bar vertical stacked');
       expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
+      expect(await getCurrentVisChartTitle()).to.be('Bar vertical stacked');
     });
 
     it('should close lens flyout on revert changes', async () => {
@@ -353,6 +411,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.chooseLensChart('Treemap');
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Treemap');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Treemap');
+      expect(await getCurrentVisChartTitle()).to.be('Treemap');
 
       await PageObjects.discover.saveSearch('testCustomESQLVisRevert');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -361,6 +421,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.chooseLensChart('Donut');
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
 
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization'); // open the flyout
       await testSubjects.existOrFail('lnsEditOnFlyFlyout');
@@ -373,6 +435,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('unsavedChangesBadge');
       await testSubjects.missingOrFail('lnsEditOnFlyFlyout'); // it should close the flyout
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Treemap');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Treemap');
+      expect(await getCurrentVisChartTitle()).to.be('Treemap');
     });
   });
 }
