@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, skip } from 'rxjs';
 import { PublishingSubject, ValueFromPublishingSubject } from './types';
 
 /**
@@ -39,7 +39,7 @@ export const useStateFromPublishingSubject = <
   const [value, setValue] = useState<ValueFromPublishingSubject<SubjectType>>(subject?.getValue());
   useEffect(() => {
     if (!subject) return;
-    const subscription = subject.subscribe((newValue) => setValue(newValue));
+    const subscription = subject.pipe(skip(1)).subscribe((newValue) => setValue(newValue));
     return () => subscription.unsubscribe();
   }, [subject]);
   return value;

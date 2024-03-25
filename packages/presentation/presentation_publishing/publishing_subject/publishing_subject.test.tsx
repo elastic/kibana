@@ -111,7 +111,7 @@ describe('useBatchedPublishingSubjects', () => {
         screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
       ).toBeInTheDocument();
     });
-    expect(screen.getByTestId('renderCount')).toHaveTextContent('3');
+    expect(screen.getByTestId('renderCount')).toHaveTextContent('2');
   });
 
   test('should render for each state update outside of click handler', async () => {

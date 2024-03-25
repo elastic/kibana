@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, skip } from 'rxjs/operators';
 import { AnyPublishingSubject, PublishingSubject, UnwrapPublishingSubjectTuple } from './types';
 
 const hasSubjectsArrayChanged = (
@@ -67,7 +67,11 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
     }
     if (definedSubjects.length === 0) return;
     const subscription = combineLatest(definedSubjects)
-      .pipe(debounceTime(0))
+      .pipe(
+        // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
+        skip(1),
+        debounceTime(0)
+      )
       .subscribe((values) => {
         setLatestPublishedValues((lastPublishedValues) => {
           const newLatestPublishedValues: UnwrapPublishingSubjectTuple<SubjectsType> = [

@@ -8,7 +8,6 @@
 
 import {
   PublishingSubject,
-  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing/publishing_subject';
 
 export interface CanDuplicatePanels {
@@ -29,9 +28,3 @@ export interface CanExpandPanels {
 export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is CanExpandPanels => {
   return Boolean((unknownApi as CanExpandPanels)?.expandPanel !== undefined);
 };
-
-/**
- * Gets this API's expanded panel state as a reactive variable which will cause re-renders on change.
- */
-export const useExpandedPanelId = (api: Partial<CanExpandPanels> | undefined) =>
-  useStateFromPublishingSubject(apiCanExpandPanels(api) ? api.expandedPanelId : undefined);
