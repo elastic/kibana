@@ -64,7 +64,8 @@ describe('migration actions', () => {
 
   beforeAll(async () => {
     esServer = await startES();
-    client = esServer.es.getClient().child(MIGRATION_CLIENT_OPTIONS);
+    // we don't need a long timeout for testing purposes
+    client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 5500 });
     esCapabilities = elasticsearchServiceMock.createCapabilities();
 
     // Create test fixture data:
@@ -414,7 +415,6 @@ describe('migration actions', () => {
             },
           },
         },
-        { maxRetries: 0 /** handle retry ourselves for now */ }
       );
 
       // Start tracking the index status
@@ -1831,7 +1831,6 @@ describe('migration actions', () => {
               },
             },
           },
-          { maxRetries: 0 /** handle retry ourselves for now */ }
         )
         .catch((e) => {
           /** ignore */
@@ -1839,10 +1838,13 @@ describe('migration actions', () => {
 
       // Call createIndex even though the index already exists
       const createIndexPromise = createIndex({
-        client,
+        // make sure this request does not timeout
+        client: client.child({ requestTimeout: 30_000 }),
         indexName: 'red_then_yellow_index',
         mappings: undefined as any,
         esCapabilities,
+        timeout: '30s',
+        waitForIndexStatusTimeout: '2s',
       })();
       let indexYellow = false;
 
