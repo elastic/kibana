@@ -15,7 +15,7 @@ steps:
 
   # - wait
 
-  - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
+  - command: TEST_PACKAGE=fips .buildkite/scripts/steps/package_testing/test.sh
     label: 'Smoke testing for FIPS'
     agents:
       queue: n2-4-virt

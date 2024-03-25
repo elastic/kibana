@@ -21,8 +21,11 @@ elif [[ "$TEST_PACKAGE" == "rpm" ]]; then
   download_artifact 'kibana-*-x86_64.rpm' . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.6"
 elif [[ "$TEST_PACKAGE" == "docker" ]]; then
-  download_artifact "kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact "kibana-$KIBANA_PKG_VERSION*-$FULL_VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.7"
+elif [[ "$TEST_PACKAGE" == "fips" ]]; then
+  download_artifact "kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  KIBANA_IP_ADDRESS="192.168.56.8"
 fi
 cd ..
 
@@ -42,7 +45,7 @@ function echoKibanaLogs {
 
     echo "--- Journal "
     vagrant ssh $TEST_PACKAGE -t -c 'sudo journalctl -u kibana.service --no-pager'
-  elif [[ "$TEST_PACKAGE" == "docker" ]]; then
+  elif [[ "$TEST_PACKAGE" == "docker" ]] || [[ "$TEST_PACKAGE" == "fips" ]]; then
     echo '--- Docker logs'
     vagrant ssh $TEST_PACKAGE -t -c 'sudo docker logs kibana'
   fi
