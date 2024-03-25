@@ -190,6 +190,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
   ): Promise<RunActionResponse> {
     const response = await this.request(params);
+    // keeping the response the same as claude 2 for our APIs
+    // adding the usage object for better token tracking
     return {
       completion: parseContent(response.data.content),
       stop_reason: response.data.stop_reason,
@@ -279,9 +281,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   public async invokeAI({
     messages,
     model,
+    stopSequences,
+    temperature,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
-      body: JSON.stringify(formatBedrockBody({ messages })),
+      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, temperature })),
       model,
     });
     return { message: res.completion.trim() };
@@ -314,8 +318,8 @@ const formatBedrockBody = ({
     []
   ),
   max_tokens: DEFAULT_TOKEN_LIMIT,
-  temperature,
   stop_sequences: stopSequences,
+  temperature,
 });
 
 function parseContent(content: Array<{ text?: string; type: string }>): string {
