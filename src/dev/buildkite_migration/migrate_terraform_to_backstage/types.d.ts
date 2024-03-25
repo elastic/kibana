@@ -46,8 +46,9 @@ interface BuildkiteScheduleConfig {
 type WebhookConfig = any;
 
 export interface BuildkitePipelineConfig {
+  allow_rebuilds?: boolean;
   branch_configuration: string;
-  cancel_intermediate_builds: boolean;
+  cancel_intermediate_builds?: boolean;
   default_branch: string;
   description: string;
   name: string;
@@ -57,18 +58,19 @@ export interface BuildkitePipelineConfig {
   team: Team[];
 
   for_each: string;
-  skip_intermediate_builds: boolean;
+  skip_intermediate_builds?: boolean;
 }
 
 export interface ProviderSettings {
-  build_branches: boolean;
-  build_pull_requests: boolean;
-  publish_commit_status: boolean;
-  skip_pull_request_builds_for_existing_commits: boolean;
+  build_branches?: boolean;
+  build_pull_requests?: boolean;
+  publish_commit_status?: boolean;
+  skip_pull_request_builds_for_existing_commits?: boolean;
   trigger_mode: 'none' | 'code' | 'deployment' | 'fork';
 
-  build_tags: boolean;
-  skip_builds_for_existing_commits: boolean;
+  prefix_pull_request_fork_branch_names?: boolean;
+  build_tags?: boolean;
+  skip_builds_for_existing_commits?: boolean;
 }
 
 export interface Team {

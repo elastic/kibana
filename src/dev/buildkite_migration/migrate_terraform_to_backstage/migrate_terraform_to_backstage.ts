@@ -289,6 +289,11 @@ function convertBuildkiteResources({
   return pipelines;
 }
 
+// We can use this function to provide the defaults we had from the terraform+buildkite setup over the backstage defaults
+function valueOrDefault(value: any, defaultValue: any) {
+  return value === undefined ? defaultValue : value;
+}
+
 function convertBuildkitePipeline(
   pipelineId: string,
   pipeline: BuildkitePipelineConfig,
@@ -315,6 +320,14 @@ function convertBuildkitePipeline(
   const canonicalPipelineId =
     `buildkite-pipeline-` + pipelineId.replace(/[^a-zA-Z0-9-]+/g, '-').toLowerCase();
 
+  const teams = pipeline.team.reduce(
+    (acc, team) => ({ ...acc, [team.slug]: { access_level: team.access_level } }),
+    {} as Record<string, { access_level: string }>
+  );
+  if (!teams.everyone) {
+    teams.everyone = { access_level: 'BULID_AND_READ' };
+  }
+
   const pipelineObj = {
     apiVersion: 'backstage.io/v1alpha1',
     kind: 'Resource',
@@ -334,6 +347,7 @@ function convertBuildkitePipeline(
         },
         spec: {
           env,
+          allow_rebuilds: valueOrDefault(pipeline.allow_rebuilds, false),
           branch_configuration: pipeline.branch_configuration,
           cancel_intermediate_builds: pipeline.cancel_intermediate_builds,
           default_branch: pipeline.default_branch,
@@ -341,22 +355,24 @@ function convertBuildkitePipeline(
           // description is in metadata
           repository: trimRepo(pipeline.repository),
           pipeline_file: pipelineFile, // instead of steps
-          skip_intermediate_builds: pipeline.skip_intermediate_builds,
+          skip_intermediate_builds: valueOrDefault(pipeline.skip_intermediate_builds, false),
 
           provider_settings: {
             build_branches: providerSettings.build_branches,
             build_pull_requests: providerSettings.build_pull_requests,
             publish_commit_status: providerSettings.publish_commit_status,
-            skip_pull_request_builds_for_existing_commits:
-              providerSettings.skip_pull_request_builds_for_existing_commits,
             trigger_mode: providerSettings.trigger_mode,
             build_tags: providerSettings.build_tags,
-            skip_builds_for_existing_commits: providerSettings.skip_builds_for_existing_commits,
+            prefix_pull_request_fork_branch_names: valueOrDefault(
+              providerSettings.prefix_pull_request_fork_branch_names,
+              false
+            ),
+            skip_pull_request_builds_for_existing_commits: valueOrDefault(
+              providerSettings.skip_builds_for_existing_commits,
+              true
+            ),
           },
-          teams: pipeline.team.reduce(
-            (acc, team) => ({ ...acc, [team.slug]: { access_level: team.access_level } }),
-            {} as any
-          ),
+          teams,
         },
       },
     },
