@@ -18,11 +18,9 @@ import {
   ENABLE_USER_RISK_SCORE_BUTTON,
   HOSTS_DONUT_CHART,
   HOSTS_TABLE_ROWS,
-  HOST_RISK_SCORE_NO_DATA_DETECTED,
   USERS_DONUT_CHART,
   USERS_TABLE,
   USERS_TABLE_ROWS,
-  USER_RISK_SCORE_NO_DATA_DETECTED,
   USERS_TABLE_ALERT_CELL,
   HOSTS_TABLE_ALERT_CELL,
   HOSTS_TABLE,
@@ -56,46 +54,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   describe('legacy risk score', () => {
-    describe('Without data', () => {
-      beforeEach(() => {
-        login();
-        visitWithTimeRange(ENTITY_ANALYTICS_URL);
-      });
-
-      it('shows enable host risk button', () => {
-        cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('be.visible');
-      });
-
-      it('shows enable user risk button', () => {
-        cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('be.visible');
-      });
-    });
-
-    describe('Risk Score enabled but still no data', () => {
-      before(() => {
-        cy.task('esArchiverLoad', { archiveName: 'risk_hosts_no_data' });
-        cy.task('esArchiverLoad', { archiveName: 'risk_users_no_data' });
-      });
-
-      beforeEach(() => {
-        login();
-        visitWithTimeRange(ENTITY_ANALYTICS_URL);
-      });
-
-      after(() => {
-        cy.task('esArchiverUnload', { archiveName: 'risk_hosts_no_data' });
-        cy.task('esArchiverUnload', { archiveName: 'risk_users_no_data' });
-      });
-
-      it('shows no data detected prompt for host risk score module', () => {
-        cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-      });
-
-      it('shows no data detected prompt for user risk score module', () => {
-        cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-      });
-    });
-
     describe('With Legacy data', () => {
       before(() => {
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts_legacy_data' });

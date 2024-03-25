@@ -14,8 +14,6 @@ import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 import {
-  ENABLE_HOST_RISK_SCORE_BUTTON,
-  ENABLE_USER_RISK_SCORE_BUTTON,
   HOSTS_DONUT_CHART,
   HOSTS_TABLE_ROWS,
   HOST_RISK_SCORE_NO_DATA_DETECTED,
@@ -62,39 +60,11 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   describe('new risk score', () => {
-    describe('Without data', () => {
-      beforeEach(() => {
-        login();
-        visitWithTimeRange(ENTITY_ANALYTICS_URL);
-      });
-
-      it('shows enable host and user risk button', () => {
-        cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('be.visible');
-
-        cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('be.visible');
-      });
-    });
-
     describe('When risk engine is enabled', () => {
       beforeEach(() => {
         login();
         mockRiskEngineEnabled();
         visitWithTimeRange(ENTITY_ANALYTICS_URL);
-      });
-
-      describe('Without data (before the risk engine runs for the first time)', () => {
-        before(() => {
-          cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_no_data' });
-        });
-
-        after(() => {
-          cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_no_data' });
-        });
-
-        it('shows no data detected prompt for host and user risk scores', () => {
-          cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-          cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-        });
       });
 
       describe('With host risk data', () => {
