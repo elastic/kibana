@@ -51,7 +51,7 @@ const getFilteredIndex = (
   return filteredIndex;
 };
 
-export const useRuleTypesIndex = ({
+export const useLoadRuleTypesIndex = ({
   http,
   toasts,
   filteredRuleTypes,
