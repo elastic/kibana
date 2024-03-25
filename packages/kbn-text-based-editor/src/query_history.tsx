@@ -198,9 +198,16 @@ export function QueryHistory({
                     }
                   )}
                 >
-                  <EuiIcon
-                    type="playFilled"
-                    size="m"
+                  <EuiButtonIcon
+                    iconType="playFilled"
+                    aria-label={i18n.translate(
+                      'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryRun',
+                      {
+                        defaultMessage: 'Run query',
+                      }
+                    )}
+                    role="button"
+                    iconSize="m"
                     onClick={() => onUpdateAndSubmit(item.queryString)}
                     css={css`
                       cursor: pointer;
@@ -219,9 +226,9 @@ export function QueryHistory({
                   )}
                 >
                   {(copy) => (
-                    <EuiIcon
-                      type="copy"
-                      size="m"
+                    <EuiButtonIcon
+                      iconType="copy"
+                      iconSize="m"
                       onClick={copy}
                       css={css`
                         cursor: pointer;
