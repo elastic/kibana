@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
+import type { LensBreakdownConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { HostMetricsExplanationContent } from '../../../../../../components/lens';
 import { Chart } from './chart';
 import { Popover } from '../../common/popover';
@@ -20,6 +21,7 @@ export const MetricsGrid = () => {
 
   const { value: charts = [] } = useAsync(async () => {
     const { cpu, disk, memory, network } = await model.metrics.getCharts();
+
     return [
       cpu.xy.cpuUsage,
       cpu.xy.normalizedLoad1m,
@@ -35,6 +37,18 @@ export const MetricsGrid = () => {
       network.xy.tx,
     ].map((chart) => ({
       ...chart,
+      layers: chart.layers.map((layer) =>
+        layer.type === 'series'
+          ? {
+              ...layer,
+              breakdown: {
+                type: 'topValues',
+                field: 'host.name',
+                size: 10,
+              } as LensBreakdownConfig,
+            }
+          : layer
+      ),
       ...(dataView?.id
         ? {
             dataset: {
