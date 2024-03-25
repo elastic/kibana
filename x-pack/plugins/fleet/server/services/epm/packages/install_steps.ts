@@ -42,7 +42,7 @@ import { withPackageSpan } from './utils';
 import type { InstallContext } from './_state_machine_package_install';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 
-export async function stepCreateRestartInstallation({ context }: { context: InstallContext }) {
+export async function stepCreateRestartInstallation(context: InstallContext) {
   const {
     savedObjectsClient,
     logger,
@@ -117,7 +117,7 @@ export async function stepCreateRestartInstallation({ context }: { context: Inst
   return { esReferences };
 }
 
-export async function stepInstallKibanaAssets({ context }: { context: InstallContext }) {
+export async function stepInstallKibanaAssets(context: InstallContext) {
   const {
     savedObjectsClient,
     savedObjectsImporter,
@@ -152,7 +152,7 @@ export async function stepInstallKibanaAssets({ context }: { context: InstallCon
   return { kibanaAssetPromise };
 }
 
-export async function stepInstallILMPolicies({ context }: { context: InstallContext }) {
+export async function stepInstallILMPolicies(context: InstallContext) {
   const { logger, esReferences, packageInstallContext, esClient, savedObjectsClient } = context;
   let updatedEsReferences;
   // currently only the base package has an ILM policy
@@ -186,7 +186,7 @@ export async function stepInstallILMPolicies({ context }: { context: InstallCont
   return { esReferences: updatedEsReferences };
 }
 
-export async function stepInstallMlModel({ context }: { context: InstallContext }) {
+export async function stepInstallMlModel(context: InstallContext) {
   const { logger, esReferences, packageInstallContext, esClient, savedObjectsClient } = context;
 
   // installs ml models
@@ -197,7 +197,7 @@ export async function stepInstallMlModel({ context }: { context: InstallContext 
   return { esReferences: updatedEsReferences };
 }
 
-export async function stepInstallIndexTemplatePipelines({ context }: { context: InstallContext }) {
+export async function stepInstallIndexTemplatePipelines(context: InstallContext) {
   const {
     esClient,
     savedObjectsClient,
@@ -257,7 +257,7 @@ export async function stepInstallIndexTemplatePipelines({ context }: { context: 
   }
 }
 
-export async function stepRemoveLegacyTemplates({ context }: { context: InstallContext }) {
+export async function stepRemoveLegacyTemplates(context: InstallContext) {
   const { esClient, packageInstallContext, logger } = context;
   const { packageInfo } = packageInstallContext;
   try {
@@ -268,7 +268,7 @@ export async function stepRemoveLegacyTemplates({ context }: { context: InstallC
   }
 }
 
-export async function stepUpdateCurrentWriteIndices({ context }: { context: InstallContext }) {
+export async function stepUpdateCurrentWriteIndices(context: InstallContext) {
   const { esClient, logger, ignoreMappingUpdateErrors, skipDataStreamRollover, indexTemplates } =
     context;
 
@@ -282,7 +282,7 @@ export async function stepUpdateCurrentWriteIndices({ context }: { context: Inst
   );
 }
 
-export async function stepInstallTransforms({ context }: { context: InstallContext }) {
+export async function stepInstallTransforms(context: InstallContext) {
   const {
     packageInstallContext,
     esClient,
@@ -309,7 +309,7 @@ export async function stepInstallTransforms({ context }: { context: InstallConte
   return { esReferences: res.esReferences };
 }
 
-export async function stepDeletePreviousPipelines({ context }: { context: InstallContext }) {
+export async function stepDeletePreviousPipelines(context: InstallContext) {
   const {
     packageInstallContext,
     esClient,
@@ -357,7 +357,7 @@ export async function stepDeletePreviousPipelines({ context }: { context: Instal
   return { esReferences: updatedESReferences };
 }
 
-export async function stepSaveArchiveEntries({ context }: { context: InstallContext }) {
+export async function stepSaveArchiveEntries(context: InstallContext) {
   const { packageInstallContext, savedObjectsClient, logger, installSource, kibanaAssetPromise } =
     context;
   const installedKibanaAssetsRefs = await kibanaAssetPromise;
@@ -383,7 +383,7 @@ export async function stepSaveArchiveEntries({ context }: { context: InstallCont
   return { packageAssetRefs, installedKibanaAssetsRefs };
 }
 
-export async function stepSaveSystemObject({ context }: { context: InstallContext }) {
+export async function stepSaveSystemObject(context: InstallContext) {
   const { packageInstallContext, savedObjectsClient, logger, esClient } = context;
 
   const { packageInfo } = packageInstallContext;

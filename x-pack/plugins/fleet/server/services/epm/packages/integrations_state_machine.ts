@@ -31,6 +31,9 @@ export async function handleState(
   let stateResult;
   let updatedContext = { ...context };
   if (typeof currentState.onTransition === 'function') {
+    logger.debug(
+      `Current state ${currentStateName} -  Running transition ${currentState.onTransition.name}`
+    );
     try {
       stateResult = await currentState.onTransition.call(undefined, updatedContext);
       // check if is a function/promise
@@ -41,6 +44,9 @@ export async function handleState(
         updatedContext = { ...updatedContext, ...stateResult };
       }
       currentStatus = 'success';
+      logger.debug(
+        `Executed state: ${currentStateName} with status: ${currentStatus} - nextState: ${currentState.nextState}`
+      );
     } catch (error) {
       currentStatus = 'failed';
       logger.warn(
@@ -50,9 +56,7 @@ export async function handleState(
   } else {
     currentStatus = 'failed';
   }
-  logger.debug(
-    `Executed state: ${currentStateName} with status: ${currentStatus} - nextState: ${currentState.nextState}`
-  );
+
   if (typeof currentState.onPostTransition === 'function') {
     try {
       await currentState.onPostTransition.call(undefined, updatedContext);

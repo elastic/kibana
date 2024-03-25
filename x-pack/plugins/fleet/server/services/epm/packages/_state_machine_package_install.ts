@@ -144,8 +144,15 @@ export async function _stateMachineInstallPackage(
     installStates,
     installStates.context
   );
-  return [
-    ...(installedKibanaAssetsRefs as KibanaAssetReference[]),
-    ...(esReferences as EsAssetReference[]),
-  ];
+  if (
+    installedKibanaAssetsRefs &&
+    installedKibanaAssetsRefs.length &&
+    esReferences &&
+    esReferences.length
+  )
+    return [
+      ...(installedKibanaAssetsRefs as KibanaAssetReference[]),
+      ...(esReferences as EsAssetReference[]),
+    ];
+  return [];
 }

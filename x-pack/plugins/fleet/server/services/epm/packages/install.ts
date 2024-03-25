@@ -734,7 +734,9 @@ async function installPackageWitStateMachine(options: {
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
-  logger.info(`Install - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `);
+  logger.info(
+    `Install with enablePackagesStateMachine - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `
+  );
 
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
   await Promise.resolve();
