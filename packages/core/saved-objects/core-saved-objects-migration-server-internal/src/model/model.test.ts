@@ -115,7 +115,16 @@ describe('migrations v2 model', () => {
         ],
       },
     },
+    indexTypes: ['config'],
     knownTypes: ['dashboard', 'config'],
+    latestMappingsVersions: {
+      config: '10.3.0',
+      dashboard: '10.3.0',
+    },
+    hashToVersionMap: {
+      'config|someHash': '10.1.0',
+      'dashboard|anotherHash': '10.2.0',
+    },
     excludeFromUpgradeFilterHooks: {},
     migrationDocLinks: {
       resolveMigrationFailures: 'https://someurl.co/',

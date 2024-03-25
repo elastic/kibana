@@ -141,7 +141,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -158,6 +171,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -349,7 +363,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -366,6 +393,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -561,7 +589,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -578,6 +619,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -777,7 +819,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -794,6 +849,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -1029,7 +1085,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -1046,6 +1115,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -1248,7 +1318,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -1265,6 +1348,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
