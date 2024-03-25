@@ -36,7 +36,8 @@
       "expressionTagcloud",
       "eventAnnotation",
       "unifiedSearch",
-      "contentManagement"
+      "contentManagement",
+      "licensing"
     ],
     "optionalPlugins": [
       "expressionLegacyMetricVis",
@@ -57,6 +58,7 @@
       "fieldFormats",
       "charts",
       "textBasedLanguages",
+      "esUiShared",
     ],
     "extraPublicDirs": [
       "common/constants"

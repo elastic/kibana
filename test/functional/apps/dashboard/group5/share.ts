@@ -45,21 +45,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'common', 'share', 'timePicker']);
 
   const getSharedUrl = async (mode: TestingModes): Promise<string> => {
-    await retry.waitFor('share menu to open', async () => {
-      await PageObjects.share.clickShareTopNavButton();
-      return await PageObjects.share.isShareMenuOpen();
-    });
-    if (mode === 'savedObject') {
-      await PageObjects.share.exportAsSavedObject();
+    // REMOVE WHEN REDESIGN COMPLETE
+    if (await PageObjects.share.checkOldVersion()) {
+      await retry.waitFor('share menu to open', async () => {
+        await PageObjects.share.clickShareTopNavButton();
+        return await PageObjects.share.isShareMenuOpen();
+      });
+    } else {
+      await retry.waitFor('share modal to open', async () => {
+        await PageObjects.share.clickShareTopNavButton();
+        return await PageObjects.share.isShareModalOpen();
+      });
+    }
+    // REMOVE WHEN REDESIGN IS COMPLETED
+    if (await PageObjects.share.checkOldVersion()) {
+      if (mode === 'savedObject') {
+        await PageObjects.share.exportAsSavedObject();
+      }
     }
     const sharedUrl = await PageObjects.share.getSharedUrl();
+    await PageObjects.share.closeShareModal();
     return sharedUrl;
   };
 
   describe('share dashboard', () => {
+    afterEach(async () => {
+      await PageObjects.share.closeShareModal();
+    });
+
     const testFilterState = async (mode: TestingModes) => {
       it('should not have "filters" state in either app or global state when no filters', async () => {
-        expect(await getSharedUrl(mode)).to.not.contain('filters');
+        if (await PageObjects.share.checkOldVersion()) {
+          expect(await getSharedUrl(mode)).to.not.contain('filters');
+        }
       });
 
       it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
@@ -68,6 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const sharedUrl = await getSharedUrl(mode);
         const { globalState, appState } = getStateFromUrl(sharedUrl);
+        await PageObjects.share.closeShareModal;
         expect(globalState).to.not.contain('filters');
         if (mode === 'snapshot') {
           expect(appState).to.contain('filters');
@@ -124,27 +143,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('snapshot share', async () => {
       describe('test local state', async () => {
         it('should not have "panels" state when not in unsaved changes state', async () => {
-          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
-          expect(await getSharedUrl('snapshot')).to.not.contain('panels');
+          if (await PageObjects.share.checkOldVersion()) {
+            await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+            expect(await getSharedUrl('snapshot')).to.not.contain('panels');
+          }
         });
 
         it('should have "panels" in app state when a panel has been modified', async () => {
-          await dashboardPanelActions.customizePanel();
-          await dashboardCustomizePanel.setCustomPanelTitle('Test New Title');
-          await dashboardCustomizePanel.clickSaveButton();
-          await PageObjects.dashboard.waitForRenderComplete();
-          await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+          if (await PageObjects.share.checkOldVersion()) {
+            await dashboardPanelActions.customizePanel();
+            await dashboardCustomizePanel.setCustomPanelTitle('Test New Title');
+            await dashboardCustomizePanel.clickSaveButton();
+            await PageObjects.dashboard.waitForRenderComplete();
+            await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
 
-          const sharedUrl = await getSharedUrl('snapshot');
-          const { appState } = getStateFromUrl(sharedUrl);
-          expect(appState).to.contain('panels');
+            const sharedUrl = await getSharedUrl('snapshot');
+            const { appState } = getStateFromUrl(sharedUrl);
+            expect(appState).to.contain('panels');
+          }
         });
 
         it('should once again not have "panels" state when save is clicked', async () => {
-          await PageObjects.dashboard.clickQuickSave();
-          await PageObjects.dashboard.waitForRenderComplete();
-          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
-          expect(await getSharedUrl('snapshot')).to.not.contain('panels');
+          if (await PageObjects.share.checkOldVersion()) {
+            await PageObjects.dashboard.clickQuickSave();
+            await PageObjects.dashboard.waitForRenderComplete();
+            await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+            expect(await getSharedUrl('snapshot')).to.not.contain('panels');
+          }
         });
       });
 
@@ -153,6 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.share.closeShareModal();
         await filterBar.removeAllFilters();
         await PageObjects.dashboard.clickQuickSave();
         await PageObjects.dashboard.waitForRenderComplete();

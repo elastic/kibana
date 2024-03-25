@@ -26,6 +26,7 @@ export interface ExportPanelShareOpts {
   theme: ThemeServiceSetup;
 }
 
+export type ExportModalShareOpts = ExportPanelShareOpts;
 export interface ReportingSharingData {
   title: string;
   layout: LayoutParams;

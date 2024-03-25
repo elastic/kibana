@@ -12,12 +12,13 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { EuiWrappingPopover } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
-import { ShareMenuTabs } from '../components/share_tabs';
+import { ShareMenuV2 } from '../components/share_tabs';
 import { ShareContextMenu } from '../components/share_context_menu';
 
 export class ShareMenuManager {
@@ -114,7 +115,7 @@ export class ShareMenuManager {
     if (!newVersionEnabled) {
       const element = (
         <I18nProvider>
-          <KibanaThemeProvider theme$={theme.theme$}>
+          <KibanaThemeProvider theme={theme}>
             <EuiWrappingPopover
               id="sharePopover"
               button={anchorElement}
@@ -151,29 +152,31 @@ export class ShareMenuManager {
       const openModal = () => {
         const session = overlays.openModal(
           toMountPoint(
-            <ShareMenuTabs
-              allowEmbed={allowEmbed}
-              allowShortUrl={allowShortUrl}
-              objectId={objectId}
-              objectType={objectType}
-              objectTypeTitle={objectTypeTitle}
-              shareMenuItems={menuItems}
-              sharingData={sharingData}
-              shareableUrl={shareableUrl}
-              shareableUrlForSavedObject={shareableUrlForSavedObject}
-              shareableUrlLocatorParams={shareableUrlLocatorParams}
-              onClose={() => {
-                onClose();
-                session.close();
+            <ShareMenuV2
+              shareContext={{
+                allowEmbed,
+                allowShortUrl,
+                objectId,
+                objectType,
+                objectTypeTitle,
+                sharingData,
+                shareableUrl,
+                shareableUrlForSavedObject,
+                shareableUrlLocatorParams,
+                embedUrlParamExtensions,
+                anonymousAccess,
+                showPublicUrlSwitch,
+                urlService,
+                snapshotShareWarning,
+                disabledShareUrl,
+                isDirty,
+                isEmbedded: allowEmbed,
+                shareMenuItems: menuItems,
+                onClose: () => {
+                  onClose();
+                  session.close();
+                },
               }}
-              embedUrlParamExtensions={embedUrlParamExtensions}
-              anonymousAccess={anonymousAccess}
-              showPublicUrlSwitch={showPublicUrlSwitch}
-              urlService={urlService}
-              snapshotShareWarning={snapshotShareWarning}
-              disabledShareUrl={disabledShareUrl}
-              isDirty={isDirty}
-              isEmbedded={allowEmbed}
             />,
             { i18n, theme }
           ),
