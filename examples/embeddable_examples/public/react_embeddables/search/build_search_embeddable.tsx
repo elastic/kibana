@@ -12,11 +12,8 @@ import { EuiCallOut } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import {
-  EmbeddableStateComparators,
-  ReactEmbeddableApiRegistration,
-} from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
+import { StateComparators, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { ReactEmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 import { Api, State, Services } from './types';
 import { getCount } from './get_count';
 
@@ -24,7 +21,7 @@ export const buildSearchEmbeddable = async (
   state: State,
   buildApi: (
     apiRegistration: ReactEmbeddableApiRegistration<State, Api>,
-    comparators: EmbeddableStateComparators<State>
+    comparators: StateComparators<State>
   ) => Api,
   services: Services
 ) => {
