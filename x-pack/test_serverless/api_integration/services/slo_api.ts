@@ -31,7 +31,7 @@ interface Dependency {
 export interface SloBurnRateRuleParams {
   sloId: string;
   windows: WindowSchema[];
-  dependencies: Dependency[];
+  dependencies?: Dependency[];
 }
 
 interface SloParams {
