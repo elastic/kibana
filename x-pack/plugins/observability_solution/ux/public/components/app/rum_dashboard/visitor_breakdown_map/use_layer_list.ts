@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getDataViewId } from '@kbn/apm-data-view';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
@@ -68,7 +68,7 @@ export function useLayerList() {
           label: 'Page load duration',
         },
       ],
-      indexPatternId: getDataViewId(spaceId),
+      indexPatternId: getStaticDataViewId(spaceId),
       applyGlobalQuery: true,
       applyGlobalTime: true,
       applyForceRefresh: true,
@@ -83,7 +83,7 @@ export function useLayerList() {
         query: 'transaction.type : "page-load"',
         language: 'kuery',
       },
-      indexPatternId: getDataViewId(spaceId),
+      indexPatternId: getStaticDataViewId(spaceId),
       applyGlobalQuery: true,
       applyGlobalTime: true,
       applyForceRefresh: true,

@@ -8,7 +8,7 @@
 import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { getDataViewId } from '@kbn/apm-data-view';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import {
   TRACE_ID,
   TRANSACTION_ID,
@@ -39,7 +39,7 @@ export async function createOrUpdateStaticDataView({
   logger: Logger;
 }): CreateDataViewResponse {
   const { config } = resources;
-  const dataViewId = getDataViewId(spaceId);
+  const dataViewId = getStaticDataViewId(spaceId);
   logger.info(`create static data view ${dataViewId}`);
 
   return withApmSpan('create_static_data_view', async () => {

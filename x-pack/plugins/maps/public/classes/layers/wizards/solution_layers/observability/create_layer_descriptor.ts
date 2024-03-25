@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
-import { getDataViewId } from '@kbn/apm-data-view';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import {
   AggDescriptor,
   ColorDynamicOptions,
@@ -153,7 +153,7 @@ export function createLayerDescriptor({
   const apmSourceQuery = createAmpSourceQuery(layer);
   const label = createLayerLabel(layer, metric);
   const metricsDescriptor = createAggDescriptor(metric);
-  const apmDataViewId = getDataViewId(getSpaceId());
+  const apmDataViewId = getStaticDataViewId(getSpaceId());
 
   if (display === DISPLAY.CHOROPLETH) {
     const joinId = uuidv4();

@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { FieldFilter as Filter } from '@kbn/es-query';
-import { getDataViewId } from '@kbn/apm-data-view';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
@@ -26,7 +26,7 @@ const getWildcardFilter = (
 ): Filter => {
   return {
     meta: {
-      index: getDataViewId(spaceId),
+      index: getStaticDataViewId(spaceId),
       alias: null,
       negate: false,
       disabled: false,
@@ -45,7 +45,7 @@ const getMatchFilter = (
 ): Filter => {
   return {
     meta: {
-      index: getDataViewId(spaceId),
+      index: getStaticDataViewId(spaceId),
       alias: null,
       negate: false,
       disabled: false,
@@ -65,7 +65,7 @@ const getMultiMatchFilter = (
 ): Filter => {
   return {
     meta: {
-      index: getDataViewId(spaceId),
+      index: getStaticDataViewId(spaceId),
       type: 'phrases',
       key: field,
       value: values.join(', '),
@@ -86,7 +86,7 @@ const getMultiMatchFilter = (
 function getExistFilter(spaceId: string): Filter {
   return {
     meta: {
-      index: getDataViewId(spaceId),
+      index: getStaticDataViewId(spaceId),
       alias: null,
       negate: false,
       disabled: false,

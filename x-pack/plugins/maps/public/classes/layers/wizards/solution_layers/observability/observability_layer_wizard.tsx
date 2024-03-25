@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getDataViewId } from '@kbn/apm-data-view';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../../../common/constants';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { ObservabilityLayerTemplate } from './observability_layer_template';
@@ -19,7 +19,7 @@ export const ObservabilityLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH, LAYER_WIZARD_CATEGORY.SOLUTIONS],
   getIsDisabled: async () => {
     try {
-      await getIndexPatternService().get(getDataViewId(getSpaceId()));
+      await getIndexPatternService().get(getStaticDataViewId(getSpaceId()));
       return false;
     } catch (e) {
       return true;
