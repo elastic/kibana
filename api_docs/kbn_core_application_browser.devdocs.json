@@ -1183,6 +1183,10 @@
                 "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx"
               },
               {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/public/application.tsx"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
               },
