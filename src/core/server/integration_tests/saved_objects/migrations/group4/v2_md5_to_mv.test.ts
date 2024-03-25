@@ -98,6 +98,7 @@ const HASH_TO_VERSION_MAP: Record<string, string> = {};
 HASH_TO_VERSION_MAP[`some-type|${SOME_TYPE_HASH}`] = '10.1.0';
 // simulate that transition to modelVersion happened before 'another-type' was updated
 HASH_TO_VERSION_MAP[`another-type|${ANOTHER_TYPE_HASH}`] = '10.1.0';
+HASH_TO_VERSION_MAP[`no-mv-type|${A_THIRD_HASH}`] = '0.0.0';
 
 describe('V2 algorithm', () => {
   let esServer: TestElasticsearchUtils['es'];
