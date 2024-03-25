@@ -261,20 +261,6 @@ exports[`ResetSLO resets all associated resources 8`] = `
           },
           Object {
             "set": Object {
-              "description": "Set indicator.params field",
-              "field": "slo.indicator.params",
-              "value": Object {
-                "environment": "irrelevant",
-                "index": "metrics-apm*",
-                "service": "irrelevant",
-                "threshold": 500,
-                "transactionName": "irrelevant",
-                "transactionType": "irrelevant",
-              },
-            },
-          },
-          Object {
-            "set": Object {
               "description": "Set budgetingMethod field",
               "field": "slo.budgetingMethod",
               "value": "occurrences",

@@ -63,19 +63,6 @@ Array [
       },
       Object {
         "set": Object {
-          "description": "Set indicator.params field",
-          "field": "slo.indicator.params",
-          "value": Object {
-            "environment": "irrelevant",
-            "index": "metrics-apm*",
-            "service": "irrelevant",
-            "transactionName": "irrelevant",
-            "transactionType": "irrelevant",
-          },
-        },
-      },
-      Object {
-        "set": Object {
           "description": "Set budgetingMethod field",
           "field": "slo.budgetingMethod",
           "value": "occurrences",
