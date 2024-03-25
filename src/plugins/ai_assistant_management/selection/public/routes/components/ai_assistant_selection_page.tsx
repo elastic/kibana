@@ -109,7 +109,7 @@ export function AiAssistantSelectionPage() {
             )}
             titleSize="xs"
             onClick={() =>
-              navigateToApp('management', { path: 'kibana/aiAssistantManagementObservability' })
+              navigateToApp('management', { path: 'kibana/observabilityAiAssistantManagement' })
             }
           />
         </EuiFlexItem>
