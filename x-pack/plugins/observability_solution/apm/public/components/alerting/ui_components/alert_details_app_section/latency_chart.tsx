@@ -52,7 +52,6 @@ function LatencyChart({
   comparisonEnabled,
   offset,
   timeZone,
-  customAlertEvaluationThreshold,
 }: {
   alert: TopAlert;
   transactionType: string;
@@ -66,7 +65,6 @@ function LatencyChart({
   comparisonEnabled: boolean;
   offset: string;
   timeZone: string;
-  customAlertEvaluationThreshold?: number;
 }) {
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -127,8 +125,7 @@ function LatencyChart({
       preferred,
     ]
   );
-  const alertEvalThreshold =
-    customAlertEvaluationThreshold || alert.fields[ALERT_EVALUATION_THRESHOLD];
+  const alertEvalThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
 
   const alertEvalThresholdChartData = alertEvalThreshold
     ? [
@@ -149,10 +146,7 @@ function LatencyChart({
     : [];
 
   const getLatencyChartAdditionalData = () => {
-    if (
-      isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID]) ||
-      customAlertEvaluationThreshold
-    ) {
+    if (isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID])) {
       return [
         <AlertActiveTimeRangeAnnotation
           alertStart={alert.start}
