@@ -102,6 +102,9 @@ export const registerImageEmbeddableFactory = ({
         Component: () => {
           const imageConfig = useStateFromPublishingSubject(imageConfig$);
           const [hasTriggerActions, setHasTriggerActions] = useState(false);
+          const dynamicActionsState = useStateFromPublishingSubject(
+            dynamicActionsApi?.dynamicActionsApi.dynamicActionsState$
+          );
 
           useEffect(() => {
             if (!dynamicActionsApi) return;
@@ -114,23 +117,8 @@ export const registerImageEmbeddableFactory = ({
           }, []);
 
           useEffect(() => {
-            let mounted = true;
-
-            // hack: timeout to give a chance for a drilldown action to be registered just after it is created by user
-            setTimeout(() => {
-              if (!mounted) return;
-
-              uiActionsService
-                .getTriggerCompatibleActions(imageClickTrigger.id, { embeddable })
-                .catch(() => [])
-                .then((actions) => {
-                  if (mounted) setHasTriggerActions(actions.length > 0);
-                });
-            }, 0);
-            return () => {
-              mounted = false;
-            };
-          });
+            setHasTriggerActions((dynamicActionsState?.dynamicActions.events ?? []).length > 0);
+          }, [dynamicActionsState]);
 
           return (
             <ImageViewerContext.Provider
