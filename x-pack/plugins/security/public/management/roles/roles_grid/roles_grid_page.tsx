@@ -53,6 +53,7 @@ interface Props {
   buildFlavor?: BuildFlavor;
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
+  cloudOrgUrl?: string;
 }
 
 interface State {
@@ -141,7 +142,12 @@ export class RolesGridPage extends Component<Props, State> {
     ];
     if (customRolesEnabled) {
       pageRightSideItems.push(
-        <EuiButtonEmpty href="#/some_url" target="_blank" iconSide="right" iconType="popout">
+        <EuiButtonEmpty
+          href={this.props.cloudOrgUrl}
+          target="_blank"
+          iconSide="right"
+          iconType="popout"
+        >
           <FormattedMessage
             id="xpack.security.management.roles.assignRolesLinkLabel"
             defaultMessage="Assign roles"
@@ -451,7 +457,9 @@ export class RolesGridPage extends Component<Props, State> {
 
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiButton size="s">Manage Members</EuiButton>
+                <EuiButton size="s" href={this.props.cloudOrgUrl}>
+                  Manage Members
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </>,

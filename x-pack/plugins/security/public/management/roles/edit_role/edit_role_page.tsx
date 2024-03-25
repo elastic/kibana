@@ -95,6 +95,7 @@ interface Props {
   buildFlavor: BuildFlavor;
   i18nStart: I18nStart;
   theme: ThemeServiceStart;
+  cloudOrgUrl?: string;
 }
 
 function useRemoteClusters(http: HttpStart) {
@@ -313,6 +314,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   buildFlavor,
   i18nStart,
   theme,
+  cloudOrgUrl,
 }) => {
   const isDarkMode = useDarkMode();
 
@@ -631,7 +633,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
               </p>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton size="s">Assign role</EuiButton>
+                  <EuiButton size="s" href={cloudOrgUrl}>
+                    Assign role
+                  </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>,

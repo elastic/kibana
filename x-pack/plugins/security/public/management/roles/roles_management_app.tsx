@@ -50,7 +50,7 @@ export const rolesManagementApp = Object.freeze({
       title,
       async mount({ element, theme$, setBreadcrumbs, history }) {
         const [
-          [startServices, { dataViews, features, spaces }],
+          [startServices, { dataViews, features, spaces, cloud }],
           { RolesGridPage },
           { EditRolePage },
           { RolesAPIClient },
@@ -121,6 +121,7 @@ export const rolesManagementApp = Object.freeze({
                 buildFlavor={buildFlavor}
                 i18nStart={i18nStart}
                 theme={themeServiceStart}
+                cloudOrgUrl={cloud?.organizationUrl}
               />
             </Breadcrumb>
           );
