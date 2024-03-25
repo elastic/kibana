@@ -20,6 +20,7 @@ import {
   EuiIcon,
   EuiFlexGrid,
   EuiAvatar,
+  useEuiTheme
 } from '@elastic/eui';
 
 interface UseCaseOption {
@@ -167,6 +168,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     ? options.find((option) => option.id === selectedId)
     : undefined;
 
+    const {euiTheme} = useEuiTheme();
+
   return (
     <EuiPanel hasBorder>
       <TitleWithIcon
@@ -180,7 +183,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         )}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup css={{ margin: 20 }}>
+      <EuiFlexGroup css={{ margin: `calc(${euiTheme.size.xxl} / 2)` }}>
         <EuiFlexItem css={{ fontWeight: 'bold' }}>
           {options.map((option, index) => (
             <div
