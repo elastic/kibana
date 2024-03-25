@@ -49,6 +49,10 @@ const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
   }
 `;
 
+const ButtonsFlexGroup = styled(EuiFlexGroup)`
+  padding-left: 24px;
+`;
+
 const FlyoutFooterWPadding = styled(EuiFlyoutFooter)`
   padding: 16px 24px !important;
 `;
@@ -65,7 +69,8 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     perPage: SO_SEARCH_LIMIT,
   });
 
-  const [nActions, setNActions] = useState(20);
+  const defaultNActions = 20;
+  const [nActions, setNActions] = useState(defaultNActions);
   const [dateFilter, setDateFilter] = useState<moment.Moment | null>(null);
   const { currentActions, abortUpgrade, isFirstLoading } = useActionStatus(
     onAbortSuccess,
@@ -118,6 +123,11 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         }),
       });
     }
+  };
+
+  const onChangeDateFilter = (date: moment.Moment | null) => {
+    setDateFilter(date);
+    setNActions(defaultNActions);
   };
 
   return (
@@ -237,7 +247,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
                 onClickViewAgents={onClickViewAgents}
               />
             ))}
-            <EuiFlexGroup gutterSize="s" alignItems="center" css="padding-left: 24px">
+            <ButtonsFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="m"
@@ -252,12 +262,24 @@ export const AgentActivityFlyout: React.FunctionComponent<{
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <JumpToDate
-                  selectedDate={dateFilter}
-                  onChangeSelectedDate={(date: moment.Moment | null) => setDateFilter(date)}
-                />
+                <JumpToDate selectedDate={dateFilter} onChangeSelectedDate={onChangeDateFilter} />
               </EuiFlexItem>
-            </EuiFlexGroup>
+              {dateFilter && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="m"
+                    onClick={() => onChangeDateFilter(null)}
+                    flush="left"
+                    data-test-subj="agentActivityFlyout.clearDateFilterButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentActivityFlyout.clearDateFilterButton"
+                      defaultMessage="Clear date filter"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </ButtonsFlexGroup>
           </EuiFlexGroup>
         </FullHeightFlyoutBody>
         <FlyoutFooterWPadding>

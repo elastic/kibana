@@ -24,7 +24,7 @@ export const JumpToDate: React.FunctionComponent<Props> = (props) => {
       selected={props.selectedDate}
       onChange={props.onChangeSelectedDate}
       maxDate={moment()}
-      customInput={<CustomInput {...props} />}
+      customInput={<JumpToButton {...props} />}
     />
   );
 };
@@ -34,7 +34,7 @@ interface CustomInputProps {
   value?: string;
 }
 
-const CustomInput = forwardRef(({ onClick, value }: CustomInputProps, ref) => {
+const JumpToButton = forwardRef(({ onClick, value }: CustomInputProps, ref) => {
   return (
     <EuiButtonEmpty size="m" flush="left" onClick={onClick}>
       <FormattedMessage
