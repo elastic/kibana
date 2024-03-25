@@ -93,6 +93,10 @@ const PORT_LABEL = i18n.translate('searchConnectors.nativeConnectors.portLabel',
   defaultMessage: 'Port',
 });
 
+const PERSONAL_ACCESS_TOKEN = 'personal_access_token';
+
+const GITHUB_APP = 'github_app';
+
 export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | undefined> = {
   azure_blob_storage: {
     configuration: {
@@ -772,13 +776,13 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
                 defaultMessage: 'Personal access token',
               }
             ),
-            value: 'personal_access_token',
+            value: PERSONAL_ACCESS_TOKEN,
           },
           {
             label: i18n.translate('searchConnectors.nativeConnectors.github.options.githubApp', {
               defaultMessage: 'GitHub App',
             }),
-            value: 'github_app',
+            value: GITHUB_APP,
           },
         ],
         order: 3,
@@ -788,14 +792,14 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
-        value: 'personal_access_token',
+        value: PERSONAL_ACCESS_TOKEN,
       },
       token: {
         default_value: null,
         depends_on: [
           {
             field: 'auth_method',
-            value: 'personal_access_token',
+            value: PERSONAL_ACCESS_TOKEN,
           },
         ],
         display: DisplayType.TEXTBOX,
@@ -850,7 +854,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [
           {
             field: 'auth_method',
-            value: 'personal_access_token',
+            value: PERSONAL_ACCESS_TOKEN,
           },
           {
             field: 'repo_type',
@@ -876,7 +880,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [
           {
             field: 'auth_method',
-            value: 'github_app',
+            value: GITHUB_APP,
           },
         ],
         display: DisplayType.NUMERIC,
@@ -898,7 +902,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [
           {
             field: 'auth_method',
-            value: 'github_app',
+            value: GITHUB_APP,
           },
         ],
         display: DisplayType.TEXTAREA,
