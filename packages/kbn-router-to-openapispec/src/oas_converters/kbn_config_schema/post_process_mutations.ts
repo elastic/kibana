@@ -22,23 +22,24 @@ const isNullable = (schema: OpenAPIV3.SchemaObject): boolean => {
   return schema.nullable === true;
 };
 
+const hasDefault = (schema: OpenAPIV3.SchemaObject): boolean => {
+  return schema.default != null;
+};
+
 const metaOptional = 'x-oas-optional';
 const populateRequiredFields = (schema: OpenAPIV3.SchemaObject): void => {
   if (!schema.properties) return;
   const required: string[] = [];
 
-  const entries = Object.entries(schema.properties);
-  for (let x = 0; x < entries.length; x++) {
-    const entry = entries[x];
-    const key: string = entry[0];
-    const value: OpenAPIV3.SchemaObject = entry[1] as OpenAPIV3.SchemaObject;
+  const entries = Object.entries(schema.properties as Record<string, OpenAPIV3.SchemaObject>);
+  for (const [key, value] of entries) {
     if ((value as Record<string, unknown>)[metaOptional]) {
       delete (value as Record<string, unknown>)[metaOptional];
     } else if (
-      Boolean(value.default != null) ||
+      hasDefault(value) ||
       Boolean(value.anyOf && value.anyOf.some((v) => isNullable(v as OpenAPIV3.SchemaObject)))
     ) {
-      // Do not add any of the above to the required array
+      // Must not be added to the required array
     } else {
       required.push(key);
     }
