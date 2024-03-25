@@ -11,6 +11,13 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
+import type {
+  EmbeddableApiContext,
+  HasParentApi,
+  HasType,
+  PublishesUnifiedSearch,
+  PublishesViewMode,
+} from '@kbn/presentation-publishing';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
@@ -29,6 +36,18 @@ import type {
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
+
+export type MlEmbeddableBaseApi = Partial<
+  HasParentApi<PublishesUnifiedSearch> & PublishesViewMode & PublishesUnifiedSearch
+>;
+
+/** Manual input by the user */
+export interface AnomalySwimlaneEmbeddableUserInput {
+  jobIds: JobId[];
+  panelTitle: string;
+  swimlaneType: SwimlaneType;
+  viewBy?: string;
+}
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -66,8 +85,11 @@ export interface AnomalySwimlaneEmbeddableCustomOutput {
 export type AnomalySwimlaneEmbeddableOutput = EmbeddableOutput &
   AnomalySwimlaneEmbeddableCustomOutput;
 
-export interface EditSwimlanePanelContext {
-  embeddable: IEmbeddable<AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableOutput>;
+export type EditSwimLaneActionApi = HasType<AnomalySwimLaneEmbeddableType> &
+  Partial<HasParentApi<PublishesUnifiedSearch>>;
+
+export interface EditSwimlanePanelContext extends EmbeddableApiContext {
+  embeddable: EditSwimLaneActionApi;
 }
 
 export interface SwimLaneDrilldownContext extends EditSwimlanePanelContext {

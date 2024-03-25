@@ -74,7 +74,7 @@ const gaugeConfig: LensConfig = {
   queryMaxValue: 'max',
   shape: 'arc',
 };
-const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
+const configBuilder = new LensConfigBuilder(dataViewsAPI, lensFormulaAPI);
 const lensConfig = configBuilder.build(gaugeConfig, { 
   timeRange: { from: 'now-1h', to: 'now', type: 'relative' },
   embeddable: true,

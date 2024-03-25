@@ -435,7 +435,6 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                   message: 'Hello world',
                   isEnabledKnowledgeBase: false,
                   isEnabledRAGAlerts: false,
-                  llmType: 'bedrock',
                   replacements: [],
                 })
                 .pipe(passThrough);
