@@ -645,6 +645,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       esClient: core.elasticsearch.client.asInternalUser,
       productFeaturesService,
       savedObjectsClient,
+      connectorActions: plugins.actions,
     });
 
     if (plugins.taskManager) {
