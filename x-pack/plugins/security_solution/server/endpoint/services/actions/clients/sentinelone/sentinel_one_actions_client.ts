@@ -272,7 +272,5 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     // if (abortSignal.aborted) {
     //   return;
     // }
-
-    await this.getAgentDetails('foo');
   }
 }
