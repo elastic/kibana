@@ -9,8 +9,11 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import type { BuildFlavor } from '@kbn/config';
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -187,7 +190,8 @@ function getProps({
       return [];
     }
   });
-
+  const i18nMock = i18nServiceMock.createStartContract();
+  const themeMock = themeServiceMock.createStartContract();
   return {
     action,
     roleName: role?.name,
@@ -205,6 +209,9 @@ function getProps({
     uiCapabilities: buildUICapabilities(canManageSpaces),
     history: scopedHistoryMock.create(),
     spacesApiUi,
+    buildFlavor: 'traditional' as BuildFlavor,
+    theme: themeMock,
+    i18nStart: i18nMock,
   };
 }
 
