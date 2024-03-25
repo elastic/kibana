@@ -9,10 +9,7 @@
 import { EuiCallOut } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import {
-  initializeTimeRange,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { initializeTimeRange, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React, { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
