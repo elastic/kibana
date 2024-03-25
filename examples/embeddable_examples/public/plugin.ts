@@ -6,25 +6,17 @@
  * Side Public License, v 1.
  */
 
-<<<<<<< HEAD
-=======
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import {
-  EmbeddableSetup,
-  EmbeddableStart,
-  registerReactEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
->>>>>>> upstream/main
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  registerReactEmbeddableFactory,
+} from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
@@ -32,7 +24,6 @@ import {
   FilterDebuggerEmbeddableFactoryDefinition,
   FILTER_DEBUGGER_EMBEDDABLE,
 } from './filter_debugger';
-<<<<<<< HEAD
 import {
   HelloWorldEmbeddableFactory,
   HelloWorldEmbeddableFactoryDefinition,
@@ -48,20 +39,14 @@ import {
   SimpleEmbeddableFactoryDefinition,
   SIMPLE_EMBEDDABLE,
 } from './migrations';
+import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
-import { registerDataTableFactory } from './react_embeddables/data_table/data_table_react_embeddable';
-import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
-import { registerMarkdownEditorEmbeddable } from './react_embeddables/eui_markdown/eui_markdown_react_embeddable';
-import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
-import { registerFieldListFactory } from './react_embeddables/field_list/field_list_react_embeddable';
-=======
-import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
-import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
-import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
+import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
+import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 import { SEARCH_EMBEDDABLE_ID } from './react_embeddables/search/constants';
->>>>>>> upstream/main
+import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -161,8 +146,13 @@ export class EmbeddableExamplesPlugin
       return getSearchEmbeddableFactory(deps);
     });
 
-    registerDataTableFactory(core, deps);
     registerCreateDataTableAction(deps.uiActions);
+    registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
+      const { getDataTableFactory } = await import(
+        './react_embeddables/data_table/data_table_react_embeddable'
+      );
+      return getDataTableFactory(core, deps);
+    });
 
     return {
       createSampleData: async () => {},
