@@ -39,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertLimitReached: sinon.fake(),
             getRecoveredAlerts: sinon.fake(),
             setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
           };
           const ruleParams: RuleParams = {
             logView: {
@@ -105,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertLimitReached: sinon.fake(),
             getRecoveredAlerts: sinon.fake(),
             setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
           };
           const ruleParams: RuleParams = {
             logView: {
@@ -173,6 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertLimitReached: sinon.fake(),
             getRecoveredAlerts: sinon.fake(),
             setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
           };
           const ruleParams: RuleParams = {
             logView: {
@@ -250,6 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertLimitReached: sinon.fake(),
             getRecoveredAlerts: sinon.fake(),
             setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
           };
           const ruleParams: RuleParams = {
             logView: {
@@ -298,6 +302,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertLimitReached: sinon.fake(),
             getRecoveredAlerts: sinon.fake(),
             setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
           };
           const ruleParams: RuleParams = {
             logView: {
@@ -373,6 +378,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertLimitReached: sinon.fake(),
             getRecoveredAlerts: sinon.fake(),
             setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
           };
           const ruleParams: RuleParams = {
             logView: {
@@ -437,6 +443,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertLimitReached: sinon.fake(),
             getRecoveredAlerts: sinon.fake(),
             setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
           };
           const ruleParams: RuleParams = {
             logView: {
