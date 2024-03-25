@@ -194,7 +194,7 @@ Array [
             >
               <span
                 aria-current="page"
-                class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncatedLast-onlyChild-euiTextColor-default"
+                class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-onlyChild-isTruncatedLast-euiTextColor-default"
                 data-test-subj="breadcrumb first last"
                 title="test"
               >

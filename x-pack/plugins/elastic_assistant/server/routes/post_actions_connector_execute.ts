@@ -65,6 +65,9 @@ export const postActionsConnectorExecuteRoute = (
         const telemetry = assistantContext.telemetry;
 
         try {
+          // Get the actions plugin start contract from the request context for the agents
+          const actionsClient = await assistantContext.actions.getActionsClientWithRequest(request);
+
           const authenticatedUser = assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return response.unauthorized({
@@ -188,6 +191,10 @@ export const postActionsConnectorExecuteRoute = (
           }
 
           const connectorId = decodeURIComponent(request.params.connectorId);
+          const connectors = await actionsClient.getBulk({
+            ids: [connectorId],
+            throwIfSystemAction: false,
+          });
 
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
@@ -201,12 +208,13 @@ export const postActionsConnectorExecuteRoute = (
               actions,
               request,
               connectorId,
+              llmType: connectors[0]?.actionTypeId,
               params: {
                 subAction: request.body.subAction,
                 subActionParams: {
                   model: request.body.model,
                   messages: [...(prevMessages ?? []), ...(newMessage ? [newMessage] : [])],
-                  ...(request.body.llmType === 'openai'
+                  ...(connectors[0]?.actionTypeId === '.gen-ai'
                     ? { n: 1, stop: null, temperature: 0.2 }
                     : {}),
                 },
