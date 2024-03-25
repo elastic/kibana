@@ -638,6 +638,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.filewrite_sync',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.filewrite_sync',
+      {
+        defaultMessage:
+          'Send file kernel driver write notifications synchronously where possible.  May improve the reliability of file write and malware-on-write enrichments at the cost of system responsiveness. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.kernel.network',
     first_supported_version: '7.9',
     documentation: i18n.translate(
