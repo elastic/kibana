@@ -11,10 +11,7 @@ import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import {
-  ReactEmbeddableFactory,
-  registerReactEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitles } from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
@@ -25,7 +22,7 @@ import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 import { ImageEmbeddableStrings } from './image_embeddable_strings';
 import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
-export const registerImageEmbeddableFactory = ({
+export const getImageEmbeddableFactory = ({
   embeddableEnhanced,
 }: {
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
@@ -108,5 +105,5 @@ export const registerImageEmbeddableFactory = ({
     },
   };
 
-  registerReactEmbeddableFactory(imageEmbeddableFactory);
+  return imageEmbeddableFactory;
 };
