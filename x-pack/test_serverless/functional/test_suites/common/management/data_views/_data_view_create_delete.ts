@@ -24,7 +24,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // "index_not_found_exception: no such index [.kibana_ingest]",
       // so it was switched to `savedObjects.cleanStandardList()`
       await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json'
+      );
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({});
       // TODO: Navigation to Data View Management is different in Serverless
@@ -33,7 +35,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json');
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json'
+      );
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
