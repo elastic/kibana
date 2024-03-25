@@ -85,7 +85,6 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     const agentId = actionRequest.endpoint_ids[0];
     const agentDetails = await this.getAgentDetails(agentId);
 
-    console.log({ agentDetails });
     return super.writeActionRequestToEndpointIndex({
       ...actionRequest,
       hosts: {
