@@ -35,13 +35,14 @@ import {
   OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID,
   DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
 } from '../common';
-import {
+import type {
   NavigationPublicSetup,
   NavigationPublicStart,
   NavigationPublicSetupDependencies,
   NavigationPublicStartDependencies,
   ConfigSchema,
   SolutionNavigation,
+  SolutionNavigationOptInStatus,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
@@ -64,7 +65,7 @@ export class NavigationPublicPlugin
   private readonly stop$ = new ReplaySubject<void>(1);
   private coreStart?: CoreStart;
   private depsStart?: NavigationPublicStartDependencies;
-  private userProfileOptOut$: Observable<boolean | undefined> = of(DEFAULT_OPT_OUT_NEW_NAV);
+  private userProfileOptOut$: Observable<boolean | undefined> = of(undefined);
   private userProfileMenuItemAdded = false;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
@@ -181,16 +182,7 @@ export class NavigationPublicPlugin
       .subscribe(([enabled, status, defaultSolution, userOptedOut]) => {
         if (enabled) {
           // Add menu item in the user profile menu to opt in/out of the new navigation
-          let defaultOptOutValue = DEFAULT_OPT_OUT_NEW_NAV;
-          if (status === 'visible' && userOptedOut === undefined) {
-            defaultOptOutValue = false;
-          } else if (status === 'hidden' && userOptedOut === undefined) {
-            defaultOptOutValue = true;
-          } else if (userOptedOut !== undefined) {
-            defaultOptOutValue = userOptedOut;
-          }
-
-          this.addOptInOutUserProfile({ core, security, defaultOptOutValue });
+          this.addOptInOutUserProfile({ core, security, optInStatusSetting: status, userOptedOut });
         } else {
           // TODO. Remove the user profile menu item if the feature is disabled.
           // But first let's wait as maybe there will be a page refresh when opting out.
@@ -202,6 +194,7 @@ export class NavigationPublicPlugin
         } else {
           const changeImmediately =
             status === 'visible' || (status === 'hidden' && userOptedOut === false);
+
           if (!changeImmediately) {
             chrome.setChromeStyle('classic');
           }
@@ -273,13 +266,22 @@ export class NavigationPublicPlugin
   private addOptInOutUserProfile({
     core,
     security,
-    defaultOptOutValue,
+    optInStatusSetting,
+    userOptedOut,
   }: {
     core: CoreStart;
-    defaultOptOutValue: boolean;
+    userOptedOut?: boolean;
+    optInStatusSetting?: SolutionNavigationOptInStatus;
     security?: SecurityPluginStart;
   }) {
     if (!security || this.userProfileMenuItemAdded) return;
+
+    let defaultOptOutValue = userOptedOut !== undefined ? userOptedOut : DEFAULT_OPT_OUT_NEW_NAV;
+    if (optInStatusSetting === 'visible' && userOptedOut === undefined) {
+      defaultOptOutValue = false;
+    } else if (optInStatusSetting === 'hidden' && userOptedOut === undefined) {
+      defaultOptOutValue = true;
+    }
 
     const menuLink: UserMenuLink = {
       content: (
