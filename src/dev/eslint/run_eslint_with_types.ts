@@ -57,9 +57,8 @@ export function runEslintWithTypes() {
 
         throw createFailError('unable to find projects to lint');
       }
-      const concurrency = process.env.CI
-        ? Os.availableParallelism()
-        : Os.availableParallelism() / 2;
+
+      const concurrency = Math.max(1, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
       log.info(`Linting ${projects.length} projects, ${concurrency} at a time`);
 
       const failures = await Rx.lastValueFrom(
