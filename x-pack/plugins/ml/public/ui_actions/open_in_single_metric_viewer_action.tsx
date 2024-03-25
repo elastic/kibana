@@ -8,24 +8,14 @@
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { EmbeddableApiContext, HasType } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
-import type { AnomalySingleMetricViewerEmbeddableType, MlEmbeddableBaseApi } from '../embeddables';
+import type { MlEmbeddableBaseApi, SingleMetricViewerEmbeddableApi } from '../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
-import type { SingleMetricViewerEmbeddableInput } from '../embeddables/types';
 
 import type { MlCoreSetup } from '../plugin';
-
-export interface SingleMetricViewerFieldSelectionApi {
-  input: Partial<SingleMetricViewerEmbeddableInput>;
-}
-
-export interface SingleMetricViewerEmbeddableApi
-  extends HasType<AnomalySingleMetricViewerEmbeddableType>,
-    MlEmbeddableBaseApi,
-    SingleMetricViewerFieldSelectionApi {}
 
 export interface OpenInSingleMetricViewerActionContext extends EmbeddableApiContext {
   embeddable: SingleMetricViewerEmbeddableApi;

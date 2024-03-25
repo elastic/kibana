@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import {
-  type SingleMetricViewerEmbeddableApi,
-  isSingleMetricViewerEmbeddableContext,
-} from './open_in_single_metric_viewer_action';
+import { isSingleMetricViewerEmbeddableContext } from './open_in_single_metric_viewer_action';
 import type { MlCoreSetup } from '../plugin';
 import { HttpService } from '../application/services/http_service';
-import type { SingleMetricViewerEmbeddableInput } from '../embeddables/types';
+import type {
+  SingleMetricViewerEmbeddableInput,
+  SingleMetricViewerEmbeddableApi,
+} from '../embeddables/types';
 
 export const EDIT_SINGLE_METRIC_VIEWER_PANEL_ACTION = 'editSingleMetricViewerPanelAction';
 

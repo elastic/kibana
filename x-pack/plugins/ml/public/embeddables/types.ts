@@ -17,6 +17,7 @@ import type {
   HasType,
   PublishesUnifiedSearch,
   PublishesViewMode,
+  PublishesWritablePanelTitle,
 } from '@kbn/presentation-publishing';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
@@ -33,6 +34,7 @@ import type { MlResultsService } from '../application/services/results_service';
 import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import type {
   AnomalyExplorerChartsEmbeddableType,
+  AnomalySingleMetricViewerEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
@@ -132,6 +134,20 @@ export interface SingleMetricViewerEmbeddableCustomInput {
 
 export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
   SingleMetricViewerEmbeddableCustomInput;
+
+export interface SingleMetricViewerFieldSelectionApi {
+  input: Partial<SingleMetricViewerEmbeddableInput>;
+}
+
+export interface SingleMetricViewerComponentApi extends SingleMetricViewerFieldSelectionApi {
+  updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
+}
+
+export interface SingleMetricViewerEmbeddableApi
+  extends HasType<AnomalySingleMetricViewerEmbeddableType>,
+    PublishesWritablePanelTitle,
+    MlEmbeddableBaseApi,
+    SingleMetricViewerComponentApi {}
 
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
