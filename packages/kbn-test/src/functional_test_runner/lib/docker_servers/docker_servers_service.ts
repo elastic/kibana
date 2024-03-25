@@ -11,7 +11,6 @@ import execa from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs/operators';
 import { ToolingLog } from '@kbn/tooling-log';
-// import { REPO_ROOT } from '@kbn/repo-info';
 
 import { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';
@@ -72,15 +71,8 @@ export class DockerServersService {
         args || [],
         '-p',
         `${server.port}:${server.portInContainer}`,
-        '--rm',
-        '--name',
-        'kibana_fips',
-        '--network=host',
-        // '-v',
-        // `${REPO_ROOT}/config/kibana.fips.ftr.yml:/usr/share/kibana/config/kibana.yml`,
         server.image,
       ].flat();
-      this.log.warning(dockerArgs);
       const res = await execa('docker', dockerArgs);
 
       return res.stdout.trim();
@@ -214,7 +206,7 @@ export class DockerServersService {
     ).toPromise();
   }
 
-  async startServers() {
+  private async startServers() {
     await Promise.all(
       this.servers.map(async (server) => {
         if (server.enabled) {

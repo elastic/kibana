@@ -50,7 +50,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
               ? '--server.versioned.versionResolution=newest'
               : '--server.versioned.versionResolution=oldest',
           ],
-      log,
     });
 
     reportTime(runStartTime, 'ready', {
