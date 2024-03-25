@@ -3079,10 +3079,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-assistant-management-observability-plugin@link:src/plugins/ai_assistant_management/observability":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ai-assistant-management-plugin@link:src/plugins/ai_assistant_management/selection":
   version "0.0.0"
   uid ""
@@ -5364,6 +5360,10 @@
   uid ""
 
 "@kbn/observability-ai-assistant-app-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant_app":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-ai-assistant-management-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant_management":
   version "0.0.0"
   uid ""
 
