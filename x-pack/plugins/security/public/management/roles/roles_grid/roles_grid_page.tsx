@@ -126,41 +126,36 @@ export class RolesGridPage extends Component<Props, State> {
     );
 
     const emptyResultsMessage = customRolesEnabled ? 'No custom roles found' : 'No items found';
-
+    const pageRightSideItems = [
+      <EuiButton
+        data-test-subj="createRoleButton"
+        {...reactRouterNavigate(this.props.history, getRoleManagementHref('edit'))}
+        fill
+        iconType="plusInCircleFilled"
+      >
+        <FormattedMessage
+          id="xpack.security.management.roles.createRoleButtonLabel"
+          defaultMessage="Create role"
+        />
+      </EuiButton>,
+    ];
+    if (customRolesEnabled) {
+      pageRightSideItems.push(
+        <EuiButtonEmpty href="#/some_url" target="_blank" iconSide="right" iconType="popout">
+          <FormattedMessage
+            id="xpack.security.management.roles.assignRolesLinkLabel"
+            defaultMessage="Assign roles"
+          />
+        </EuiButtonEmpty>
+      );
+    }
     return (
       <>
         <EuiPageHeader
           bottomBorder
           pageTitle={rolesTitle}
           description={rolesDescription}
-          rightSideItems={
-            this.props.readOnly
-              ? undefined
-              : [
-                  <EuiButton
-                    data-test-subj="createRoleButton"
-                    {...reactRouterNavigate(this.props.history, getRoleManagementHref('edit'))}
-                    fill
-                    iconType="plusInCircleFilled"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.management.roles.createRoleButtonLabel"
-                      defaultMessage="Create role"
-                    />
-                  </EuiButton>,
-                  <EuiButtonEmpty
-                    href="#/navigation/button"
-                    target="_blank"
-                    iconSide="right"
-                    iconType="popout"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.management.roles.assignRolesLinkLabel"
-                      defaultMessage="Assign roles"
-                    />
-                  </EuiButtonEmpty>,
-                ]
-          }
+          rightSideItems={this.props.readOnly ? undefined : pageRightSideItems}
         />
 
         <EuiSpacer size="l" />
