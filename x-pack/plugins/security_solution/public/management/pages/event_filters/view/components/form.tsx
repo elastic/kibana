@@ -567,7 +567,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             <EuiText color="subdued" size="xs" data-test-subj="duplicate-fields-warning-message">
               <FormattedMessage
                 id="xpack.securitySolution.eventFilters.warningMessage.duplicateFields"
-                defaultMessage="Using multiples of the same filed values can degrade Endpoint performance and/or create ineffective rules"
+                defaultMessage="Using multiples of the same field values can degrade Endpoint performance and/or create ineffective rules"
               />
             </EuiText>
           </>
