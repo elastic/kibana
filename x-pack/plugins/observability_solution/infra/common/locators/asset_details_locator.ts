@@ -16,7 +16,14 @@ export type AssetDetailsLocatorDependencies = InfraLocatorDependencies;
 export interface AssetDetailsLocatorParams extends SerializableRecord {
   assetType: string;
   assetId: string;
-  assetDetails: {
+  _a?: {
+    time?: {
+      from: string;
+      to: string;
+    };
+    interval?: string;
+  };
+  assetDetails?: {
     tabId?: string;
     dashboardId?: string;
     dateRange?: {
@@ -34,10 +41,11 @@ export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDet
   constructor(protected readonly deps: AssetDetailsLocatorDependencies) {}
 
   public readonly getLocation = async (params: AssetDetailsLocatorParams) => {
+    const searchPath = rison.encodeUnknown(params._a);
     const assetDetails = rison.encodeUnknown(params.assetDetails);
     return {
       app: 'metrics',
-      path: `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}`,
+      path: `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}&_a=${searchPath}`,
       state: {},
     };
   };
