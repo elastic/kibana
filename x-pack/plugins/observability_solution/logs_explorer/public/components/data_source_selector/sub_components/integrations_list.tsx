@@ -73,25 +73,26 @@ export function IntegrationsList({
 }
 
 function IntegrationItem({ integration }) {
-  const { id, datasets, onClick } = integration;
+  const { id, datasets, icons, name, version, onClick } = integration;
   const accordionId = useGeneratedHtmlId({ prefix: 'integration', suffix: id });
 
   const integrationIcon = useMemo(
-    () => (
-      <PackageIcon
-        packageName={integration.name}
-        version={integration.version}
-        size="m"
-        icons={integration.icons}
-        tryApi
-      />
-    ),
-    [integration]
+    () =>
+      Boolean(name && version) ? (
+        <PackageIcon packageName={name} version={version} size="m" icons={icons} tryApi />
+      ) : (
+        <EuiIcon type="package" />
+      ),
+    [name, version, icons]
   );
 
   const integrationButton = (
     <IntegrationItemButton integration={integration} icon={integrationIcon} />
   );
+
+  const content = Boolean(datasets?.length > 0)
+    ? datasets.map((dataset) => <DatasetItem dataset={dataset} icon={integrationIcon} />)
+    : integration.content;
 
   return (
     <EuiAccordion
@@ -102,9 +103,7 @@ function IntegrationItem({ integration }) {
       {...(onClick && { onToggle: onClick })}
     >
       {rule}
-      {datasets.map((dataset) => (
-        <DatasetItem dataset={dataset} icon={integrationIcon} />
-      ))}
+      {content}
     </EuiAccordion>
   );
 }
@@ -132,6 +131,8 @@ function Header({ onSortByName, search, ...props }) {
 }
 
 function IntegrationItemButton({ integration, icon, ...props }) {
+  const count = integration.datasets?.length ?? 0;
+
   return (
     <ListRow {...props}>
       <NameColumn>
@@ -139,7 +140,7 @@ function IntegrationItemButton({ integration, icon, ...props }) {
       </NameColumn>
       <DatasetCountColumn>
         <EuiText size="xs" color="subdued">
-          <span>{integration.datasets.length}</span>
+          <span>{count}</span>
         </EuiText>
       </DatasetCountColumn>
     </ListRow>

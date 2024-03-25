@@ -23,6 +23,7 @@ export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) =
 
 interface IntegrationsTreeParams {
   datasets: Dataset[] | null;
+  datasetsFallback?: React.ReactNode;
   integrations: Integration[] | null;
   onDatasetSelected: DatasetSelectionHandler;
   onUncategorizedLoad: LoadDatasets;
@@ -31,18 +32,20 @@ interface IntegrationsTreeParams {
 export const buildIntegrationsTree = ({
   integrations,
   datasets,
+  datasetsFallback,
   onDatasetSelected,
   onUncategorizedLoad,
 }: IntegrationsTreeParams) => {
   const uncategorizedIntegration = {
     title: uncategorizedLabel,
-    datasets: datasets ?? [],
+    datasets,
     onClick: onUncategorizedLoad,
+    content: datasetsFallback,
   };
 
   return [uncategorizedIntegration, ...(integrations ?? [])].map((integration) => ({
     ...integration,
-    datasets: integration.datasets.map((dataset) => ({
+    datasets: integration.datasets?.map((dataset) => ({
       ...dataset,
       title: dataset.getFullTitle(),
       onClick: () => onDatasetSelected(dataset),

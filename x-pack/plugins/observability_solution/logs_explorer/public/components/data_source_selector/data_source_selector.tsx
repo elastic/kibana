@@ -16,6 +16,8 @@ import {
   DATA_VIEWS_TAB_ID,
   integrationsLabel,
   INTEGRATIONS_TAB_ID,
+  noDatasetsDescriptionLabel,
+  noDatasetsLabel,
   noIntegrationsDescriptionLabel,
   noIntegrationsLabel,
 } from './constants';
@@ -94,16 +96,35 @@ export function DataSourceSelector({
     onSelectionChange,
   });
 
-  const integrationItems = useMemo(
-    () =>
-      buildIntegrationsTree({
-        datasets,
-        integrations,
-        onDatasetSelected: selectDataset,
-        onUncategorizedLoad,
-      }),
-    [integrations, datasets, selectDataset, onUncategorizedLoad]
-  );
+  const integrationItems = useMemo(() => {
+    const datasetsFallback = (
+      <ListStatus
+        key="uncategorizedStatusItem"
+        data={datasets}
+        description={noDatasetsDescriptionLabel}
+        error={datasetsError}
+        isLoading={isLoadingUncategorized}
+        onRetry={onUncategorizedReload}
+        title={noDatasetsLabel}
+      />
+    );
+
+    return buildIntegrationsTree({
+      datasets,
+      datasetsFallback,
+      integrations,
+      onDatasetSelected: selectDataset,
+      onUncategorizedLoad,
+    });
+  }, [
+    datasets,
+    datasetsError,
+    integrations,
+    isLoadingUncategorized,
+    onUncategorizedLoad,
+    onUncategorizedReload,
+    selectDataset,
+  ]);
 
   const integrationsStatusPrompt = useMemo(
     () => (
