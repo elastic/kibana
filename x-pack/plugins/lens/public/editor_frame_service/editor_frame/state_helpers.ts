@@ -452,6 +452,7 @@ export async function persistedStateToExpression(
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
       nowInstant: services.nowProvider.get(),
+      canUseCache: true,
     }),
     activeVisualizationState,
     indexPatterns,
