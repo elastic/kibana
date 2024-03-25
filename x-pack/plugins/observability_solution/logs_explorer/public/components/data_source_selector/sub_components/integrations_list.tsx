@@ -221,7 +221,8 @@ const IntegrationListWrapper = styled(EuiPanel)`
 `;
 
 const indentationStyle = css`
-  padding-left: calc(${euiThemeVars.euiSizeL} + ${euiThemeVars.euiSizeXS});
+  padding-left: ${euiThemeVars.euiSizeL};
+  margin-block-start: ${euiThemeVars.euiSizeXS};
 `;
 
 const headerStyle = css`
