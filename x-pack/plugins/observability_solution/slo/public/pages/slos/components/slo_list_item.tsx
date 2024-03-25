@@ -21,7 +21,7 @@ import { SLOGroupings } from './common/slo_groupings';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
-  rules: Array<Rule<BurnRateRuleParams>> | undefined;
+  rules?: Array<Rule<BurnRateRuleParams>>;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
   activeAlerts?: number;
@@ -95,6 +95,7 @@ export function SloListItem({
         <EuiFlexItem grow={false}>
           <SloItemActions
             slo={slo}
+            rules={rules}
             isActionsPopoverOpen={isActionsPopoverOpen}
             setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
             setIsActionsPopoverOpen={setIsActionsPopoverOpen}

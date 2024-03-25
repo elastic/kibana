@@ -24,6 +24,7 @@ import {
 import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
+import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { BurnRateRuleParams } from '../../../../typings';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -73,6 +74,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
+  const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
@@ -124,10 +126,12 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
         {(isMouseOver || isActionsPopoverOpen) && (
           <SloCardItemActions
             slo={slo}
+            rules={rules}
             isActionsPopoverOpen={isActionsPopoverOpen}
             setIsActionsPopoverOpen={setIsActionsPopoverOpen}
             setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
             setDeleteConfirmationModalOpen={setDeleteConfirmationModalOpen}
+            setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
           />
         )}
@@ -137,6 +141,12 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
         slo={slo}
         isAddRuleFlyoutOpen={isAddRuleFlyoutOpen}
         setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
+      />
+
+      <EditBurnRateRuleFlyout
+        rule={rules?.[0]}
+        isEditRuleFlyoutOpen={isEditRuleFlyoutOpen}
+        setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
       />
 
       {isDeleteConfirmationModalOpen ? (

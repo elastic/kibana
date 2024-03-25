@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule, AsApiContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { transformRule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { BurnRateRuleParams } from '../typings';
 import { useKibana } from '../utils/kibana_react';
@@ -21,7 +22,7 @@ interface RuleApiResponse {
   page: number;
   total: number;
   per_page: number;
-  data: Array<Rule<BurnRateRuleParams>>;
+  data: Array<AsApiContract<Rule<BurnRateRuleParams>>>;
 }
 
 export interface UseFetchRulesForSloResponse {
@@ -40,7 +41,6 @@ export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSl
       try {
         const body = JSON.stringify({
           filter: sloIds.map((sloId) => `alert.attributes.params.sloId:${sloId}`).join(' or '),
-          fields: ['params', 'name'],
           per_page: 1000,
         });
 
@@ -48,9 +48,11 @@ export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSl
           body,
         });
 
+        const rules = response.data.map((rule) => transformRule(rule));
+
         const init = sloIds.reduce((acc, sloId) => ({ ...acc, [sloId]: [] }), {});
 
-        return response.data.reduce(
+        return rules.reduce(
           (acc, rule) => ({
             ...acc,
             [rule.params.sloId]: acc[rule.params.sloId].concat(rule),
