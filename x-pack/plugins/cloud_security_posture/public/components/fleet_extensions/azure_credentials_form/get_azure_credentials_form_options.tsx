@@ -14,7 +14,7 @@ import { AzureCredentialsType } from '../../../../common/types_old';
 
 export type AzureCredentialsFields = Record<
   string,
-  { label: string; type?: 'password' | 'text'; isSecret?: boolean }
+  { label: string; type?: 'password' | 'text'; isSecret?: boolean; testSubj?: string }
 >;
 
 export interface AzureOptionValue {
