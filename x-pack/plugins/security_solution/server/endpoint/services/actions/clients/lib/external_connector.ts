@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { once } from 'lodash';
 import { stringify } from '../../../../utils/stringify';
-import { ResponseActionsClientError, ResponseActionsConnectorNotConfigured } from '../errors';
+import { ResponseActionsClientError, ResponseActionsConnectorNotConfiguredError } from '../errors';
 
 export interface NormalizedExternalConnectorClientExecuteOptions<
   TParams extends Record<string, any> = Record<string, any>,
@@ -59,7 +59,7 @@ export class NormalizedExternalConnectorClient {
 
       if (!connector) {
         this.log.debug(stringify(connectorList));
-        throw new ResponseActionsConnectorNotConfigured(this.connectorTypeId);
+        throw new ResponseActionsConnectorNotConfiguredError(this.connectorTypeId);
       }
 
       this.log.debug(

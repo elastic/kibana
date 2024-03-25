@@ -8,6 +8,7 @@
 import type { CancellableTask, RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
 import { catchAndWrapError } from '../../utils';
 import { stringify } from '../../utils/stringify';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
@@ -111,15 +112,26 @@ export class CompleteExternalActionsTaskRunner
             return null;
           }
 
-          // FIXME:PT need to implement logic that first checks if a given agent type is currently supported - like do we have what we need to "talk" to them?
-
           const agentTypeActionsClient =
             this.endpointContextServices.getInternalResponseActionsClient({ agentType });
 
-          return agentTypeActionsClient.processPendingActions({
-            abortSignal: this.abortController.signal,
-            addToQueue: this.updatesQueue.addToQueue.bind(this.updatesQueue),
-          });
+          return agentTypeActionsClient
+            .processPendingActions({
+              abortSignal: this.abortController.signal,
+              addToQueue: this.updatesQueue.addToQueue.bind(this.updatesQueue),
+            })
+            .catch((err) => {
+              // ignore errors due to connector not being configured - no point in logging errors if a customer
+              // is not using response actions for the given agent type
+              if (err instanceof ResponseActionsConnectorNotConfiguredError) {
+                this.log.debug(
+                  `Skipping agentType [${agentType}]: No stack connector configured for this agent type`
+                );
+                return null;
+              }
+
+              this.errors.push(err.message);
+            });
         }
       )
     );

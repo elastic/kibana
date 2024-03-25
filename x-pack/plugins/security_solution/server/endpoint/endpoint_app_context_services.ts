@@ -273,13 +273,13 @@ export class EndpointAppContextService {
     return this.startDependencies.messageSigningService;
   }
 
-  public async getInternalResponseActionsClient({
+  public getInternalResponseActionsClient({
     agentType = 'endpoint',
     username = 'elastic',
   }: {
     agentType?: ResponseActionAgentType;
     username?: string;
-  }): Promise<ResponseActionsClient> {
+  }): ResponseActionsClient {
     if (!this.startDependencies?.esClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
@@ -289,7 +289,7 @@ export class EndpointAppContextService {
       esClient: this.startDependencies.esClient,
       username,
       isAutomated: true,
-      connectorActions: await this.startDependencies.connectorActions.getUnsecuredActionsClient(),
+      connectorActions: this.startDependencies.connectorActions.getUnsecuredActionsClient(),
     });
   }
 

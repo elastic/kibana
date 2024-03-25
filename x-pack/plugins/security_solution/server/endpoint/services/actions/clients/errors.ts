@@ -45,7 +45,7 @@ export class UnsupportedResponseActionsAgentTypeError extends ResponseActionsCli
   }
 }
 
-export class ResponseActionsConnectorNotConfigured extends ResponseActionsClientError {
+export class ResponseActionsConnectorNotConfiguredError extends ResponseActionsClientError {
   constructor(
     connectorTypeId: string,
     public readonly statusCode: number = 400,

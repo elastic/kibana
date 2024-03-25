@@ -102,6 +102,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return actionSendResponse;
   }
 
+  /** Gets agent details directly from SentinelOne */
   private async getAgentDetails(id: string): Promise<SentinelOneGetAgentsResponse['data'][number]> {
     const executeOptions: NormalizedExternalConnectorClientExecuteOptions<
       SentinelOneGetAgentsParams,
@@ -115,23 +116,15 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       },
     };
 
-    let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
-
-    try {
-      const response = (await this.connectorActionsClient.execute(
+    const s1ApiResponse: SentinelOneGetAgentsResponse | undefined = (
+      (await this.connectorActionsClient.execute(
         executeOptions
-      )) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
+      )) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>
+    ).data;
 
-      this.log.debug(`Response for SentinelOne agent id [${id}] returned:\n${stringify(response)}`);
-
-      s1ApiResponse = response.data;
-    } catch (err) {
-      throw new ResponseActionsClientError(
-        `Error while attempting to retrieve SentinelOne host with agent id [${id}]`,
-        500,
-        err
-      );
-    }
+    this.log.debug(
+      `Response for SentinelOne agent id [${id}] returned:\n${stringify(s1ApiResponse)}`
+    );
 
     if (!s1ApiResponse || !s1ApiResponse.data[0]) {
       throw new ResponseActionsClientError(`SentinelOne agent id [${id}] not found`, 404);
@@ -279,5 +272,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     // if (abortSignal.aborted) {
     //   return;
     // }
+
+    await this.getAgentDetails('foo');
   }
 }
