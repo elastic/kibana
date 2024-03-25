@@ -20,7 +20,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { useTimeBuckets } from '../../common/hooks/use_time_buckets';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
@@ -174,7 +174,7 @@ export const useDataVisualizerGridData = (
     data.query.filterManager,
   ]);
 
-  const _timeBuckets = useTimeBuckets();
+  const _timeBuckets = useTimeBuckets(uiSettings);
 
   const timefilter = useTimefilter({
     timeRangeSelector: currentDataView?.timeFieldName !== undefined,
