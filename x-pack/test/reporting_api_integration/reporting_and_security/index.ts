@@ -26,7 +26,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./csv_v2_esql'));
     loadTestFile(require.resolve('./network_policy'));
     loadTestFile(require.resolve('./spaces'));
-    loadTestFile(require.resolve('./usage'));
     loadTestFile(require.resolve('./ilm_migration_apis'));
     loadTestFile(require.resolve('./error_codes'));
     loadTestFile(require.resolve('./validation'));

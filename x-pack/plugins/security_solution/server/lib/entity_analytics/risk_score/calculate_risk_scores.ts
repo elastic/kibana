@@ -327,7 +327,7 @@ export const calculateRiskScores = async ({
             },
           },
           field_value_factor: {
-            field: 'kibana.alert.risk_score', // sort by risk score
+            field: ALERT_RISK_SCORE, // sort by risk score
           },
         },
       },
