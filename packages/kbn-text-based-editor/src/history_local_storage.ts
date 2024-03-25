@@ -8,6 +8,7 @@
 import moment from 'moment';
 import 'moment-timezone';
 const QUERY_HISTORY_ITEM_KEY = 'QUERY_HISTORY_ITEM_KEY';
+const dateFormat = 'MMM. D, YY HH:mm:ss.SSS';
 
 /**
  * We show maximum 20 ES|QL queries in the Query history component
@@ -16,6 +17,7 @@ const QUERY_HISTORY_ITEM_KEY = 'QUERY_HISTORY_ITEM_KEY';
 export interface QueryHistoryItem {
   status?: 'success' | 'error' | 'warning';
   queryString: string;
+  startDateMilliseconds?: number;
   timeRan?: string;
   timeZone?: string;
   duration?: string;
@@ -32,7 +34,7 @@ const getMomentTimeZone = (timeZone?: string) => {
   return !timeZone || timeZone === 'Browser' ? moment.tz.guess() : timeZone;
 };
 
-const sortDates = (date1?: string, date2?: string) => {
+const sortDates = (date1?: number, date2?: number) => {
   return moment(date1)?.valueOf() - moment(date2)?.valueOf();
 };
 
@@ -41,8 +43,8 @@ export const getHistoryItems = (sortDirection: 'desc' | 'asc'): QueryHistoryItem
   const historyItems: QueryHistoryItem[] = JSON.parse(localStorageString);
   const sortedByDate = historyItems.sort((a, b) => {
     return sortDirection === 'desc'
-      ? sortDates(b?.timeRan, a?.timeRan)
-      : sortDates(a?.timeRan, b?.timeRan);
+      ? sortDates(b.startDateMilliseconds, a.startDateMilliseconds)
+      : sortDates(a.startDateMilliseconds, b.startDateMilliseconds);
   });
   return sortedByDate;
 };
@@ -66,7 +68,8 @@ export const addQueriesToCache = (item: QueryHistoryItem) => {
     const tz = getMomentTimeZone(item.timeZone);
     cachedQueries.set(trimmedQueryString, {
       ...item,
-      timeRan: moment().tz(tz).format('MMM. D, YY HH:mm:ss.SSS'),
+      timeRan: moment().tz(tz).format(dateFormat),
+      startDateMilliseconds: moment().valueOf(),
       queryRunning: true,
     });
   }
@@ -77,14 +80,11 @@ export const updateCachedQueries = (item: QueryHistoryItem) => {
   const query = cachedQueries.get(trimmedQueryString);
 
   if (query) {
-    const tz = getMomentTimeZone(query?.timeZone);
-    const now = moment().tz(tz).format('MMM. D, YY HH:mm:ss.SSS');
-    const duration = moment(now).diff(moment(query?.timeRan));
+    const now = moment().valueOf();
+    const duration = moment(now).diff(moment(query?.startDateMilliseconds));
     cachedQueries.set(trimmedQueryString, {
       ...query,
-      timeRan: query.queryRunning
-        ? moment(query?.timeRan).format('MMM. D, YY HH:mm:ss')
-        : query.timeRan,
+      timeRan: query.queryRunning ? query.timeRan : moment().format('MMM. D, YY HH:mm:ss'),
       duration: query.queryRunning ? `${duration}ms` : query.duration,
       status: item.status,
       queryRunning: false,
@@ -92,7 +92,9 @@ export const updateCachedQueries = (item: QueryHistoryItem) => {
   }
   const queriesToStore = getCachedQueries();
   if (queriesToStore.length === MAX_QUERIES_NUMBER) {
-    const sortedByDate = queriesToStore.sort((a, b) => sortDates(b?.timeRan, a?.timeRan));
+    const sortedByDate = queriesToStore.sort((a, b) =>
+      sortDates(b?.startDateMilliseconds, a?.startDateMilliseconds)
+    );
 
     // delete the last element
     const toBeDeletedQuery = sortedByDate[MAX_QUERIES_NUMBER - 1];
