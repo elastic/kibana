@@ -14,6 +14,7 @@ import {
   routeValidationObject,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
+import { UnsupportedFeatureInOfferingError } from '../../common/rest/errors';
 import { DatasetQualityRequestHandlerContext } from '../types';
 import { DatasetQualityRouteHandlerResources } from './types';
 
@@ -22,9 +23,16 @@ interface RegisterRoutes {
   repository: ServerRouteRepository;
   logger: Logger;
   plugins: DatasetQualityRouteHandlerResources['plugins'];
+  getEsCapabilities: DatasetQualityRouteHandlerResources['getEsCapabilities'];
 }
 
-export function registerRoutes({ repository, core, logger, plugins }: RegisterRoutes) {
+export function registerRoutes({
+  repository,
+  core,
+  logger,
+  plugins,
+  getEsCapabilities,
+}: RegisterRoutes) {
   const routes = Object.values(repository);
 
   const router = core.http.createRouter();
@@ -56,6 +64,7 @@ export function registerRoutes({ repository, core, logger, plugins }: RegisterRo
             logger,
             params: decodedParams,
             plugins,
+            getEsCapabilities,
           })) as any;
 
           if (data === undefined) {
@@ -84,6 +93,11 @@ export function registerRoutes({ repository, core, logger, plugins }: RegisterRo
           if (error instanceof errors.RequestAbortedError) {
             opts.statusCode = 499;
             opts.body.message = 'Client closed request';
+          }
+
+          if (error instanceof UnsupportedFeatureInOfferingError) {
+            opts.statusCode = 501;
+            opts.body.message = error.message ?? 'Unsupported feature in offering';
           }
 
           return response.customError(opts);

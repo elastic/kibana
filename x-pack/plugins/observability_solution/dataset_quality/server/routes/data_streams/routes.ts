@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
+import { UnsupportedFeatureInOfferingError } from '../../../common/rest/errors';
 import { DataStreamType } from '../../../common/types';
 import {
   DataStreamDetails,
@@ -147,10 +148,17 @@ const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
   async handler(resources): Promise<{
     estimatedDataInBytes: number;
   }> {
-    const { context, params } = resources;
+    const { context, params, getEsCapabilities } = resources;
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const isServerless = (await getEsCapabilities()).serverless;
+
+    if (isServerless) {
+      throw new UnsupportedFeatureInOfferingError(
+        'Estimated data is unsupported in serverless mode'
+      );
+    }
 
     const estimatedDataInBytes = await getEstimatedDataInBytes({
       esClient,

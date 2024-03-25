@@ -8,6 +8,7 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { UnsupportedFeatureInOfferingError } from '../../../../common/rest/errors';
 import { DEFAULT_TIME_RANGE } from '../../../../common/constants';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { filterInactiveDatasets } from '../../../utils/filter_inactive_datasets';
@@ -123,6 +124,12 @@ export const createPureDatasetsSummaryPanelStateMachine = (
                 },
                 onError: [
                   {
+                    target: 'disabled',
+                    cond: {
+                      type: 'estimatedDataIsDisabled',
+                    },
+                  },
+                  {
                     target: 'retrying',
                     cond: {
                       type: 'canRetry',
@@ -143,6 +150,9 @@ export const createPureDatasetsSummaryPanelStateMachine = (
               },
             },
             loaded: {
+              type: 'final',
+            },
+            disabled: {
               type: 'final',
             },
           },
@@ -181,6 +191,9 @@ export const createPureDatasetsSummaryPanelStateMachine = (
             return context.retries[retriesKey] < MAX_RETRIES;
           }
           return false;
+        },
+        estimatedDataIsDisabled: (context, event, { cond }) => {
+          return event.data instanceof UnsupportedFeatureInOfferingError;
         },
       },
     }
