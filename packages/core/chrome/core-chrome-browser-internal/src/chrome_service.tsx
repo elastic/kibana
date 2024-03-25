@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
-import { mergeMap, map, takeUntil } from 'rxjs/operators';
+import { mergeMap, map, takeUntil, filter } from 'rxjs/operators';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
@@ -531,7 +531,11 @@ export class ChromeService {
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
-      getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
+      getChromeStyle$: () =>
+        chromeStyle$.pipe(
+          filter((style): style is ChromeStyle => style !== undefined),
+          takeUntil(this.stop$)
+        ),
       getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
       project: {
         setHome: setProjectHome,
