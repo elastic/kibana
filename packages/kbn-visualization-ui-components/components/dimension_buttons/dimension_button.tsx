@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiFontSize,
+  useEuiShadow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -42,7 +43,7 @@ export interface DimensionButtonProps {
   message?: Message;
 }
 
-export function DimensionButton({
+function DimensionButtonImpl({
   groupLabel,
   children,
   onClick,
@@ -56,6 +57,7 @@ export function DimensionButton({
     <div
       {...otherProps}
       css={css`
+        ${useEuiShadow('xs')}
         ${useEuiFontSize('s')}
         border-radius: ${euiThemeVars.euiBorderRadius};
         position: relative;
@@ -66,6 +68,7 @@ export function DimensionButton({
         gap: ${euiThemeVars.euiSizeS};
         min-height: ${euiThemeVars.euiSizeXL};
         padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeS};
+        background: ${euiThemeVars.euiColorEmptyShade};
       `}
     >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
@@ -119,8 +122,8 @@ export function DimensionButton({
           transition-property: color, opacity, background-color, transform;
           opacity: 0;
 
-          .domDragDrop:hover &,
-          .domDragDrop:focus-within & {
+          .domDraggable:hover &,
+          .domDraggable:focus-within & {
             opacity: 1;
           }
           &:hover,
@@ -133,3 +136,5 @@ export function DimensionButton({
     </div>
   );
 }
+
+export const DimensionButton = React.memo(DimensionButtonImpl);

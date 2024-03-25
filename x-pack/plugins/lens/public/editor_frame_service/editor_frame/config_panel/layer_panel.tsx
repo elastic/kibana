@@ -49,8 +49,6 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const [isPanelSettingsOpen, setPanelSettingsOpen] = useState(false);
 
-  const [hideTooltip, setHideTooltip] = useState<boolean>(false);
-
   const {
     framePublicAPI,
     layerId,
@@ -552,8 +550,6 @@ export function LayerPanel(props: LayerPanelProps) {
                               state={layerDatasourceState}
                               layerDatasource={layerDatasource}
                               datasourceLayers={framePublicAPI.datasourceLayers}
-                              onDragStart={() => setHideTooltip(true)}
-                              onDragEnd={() => setHideTooltip(false)}
                               onDrop={onDrop}
                               indexPatterns={dataViews.indexPatterns}
                             >
@@ -591,7 +587,6 @@ export function LayerPanel(props: LayerPanelProps) {
                                     {activeVisualization?.DimensionTriggerComponent?.({
                                       columnId,
                                       label: columnLabelMap?.[columnId] ?? '',
-                                      hideTooltip,
                                     })}
                                   </>
                                 )}
