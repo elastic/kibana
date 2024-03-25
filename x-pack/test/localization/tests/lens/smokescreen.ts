@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'average':
         return field ? `${field} の平均` : `平均`;
       case 'max':
-        return field ? `${field} お最高値` : '最高';
+        return field ? `${field} の最高値` : '最高';
       case 'terms':
         return field ? `${field}の上位${values} の値` : 'トップの値';
       case 'sum':
