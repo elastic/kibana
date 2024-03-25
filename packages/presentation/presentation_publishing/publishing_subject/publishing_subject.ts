@@ -39,6 +39,7 @@ export const useStateFromPublishingSubject = <
   const [value, setValue] = useState<ValueFromPublishingSubject<SubjectType>>(subject?.getValue());
   useEffect(() => {
     if (!subject) return;
+    // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
     const subscription = subject.pipe(skip(1)).subscribe((newValue) => setValue(newValue));
     return () => subscription.unsubscribe();
   }, [subject]);
