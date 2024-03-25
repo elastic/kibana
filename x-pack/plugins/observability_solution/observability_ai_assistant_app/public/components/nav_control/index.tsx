@@ -45,6 +45,8 @@ export function NavControl({}: {}) {
 
             setHasBeenOpened(false);
             setIsOpen(false);
+
+            throw error;
           })
         : undefined;
     },
