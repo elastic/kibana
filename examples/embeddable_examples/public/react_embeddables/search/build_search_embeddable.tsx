@@ -10,11 +10,16 @@ import React, { useEffect, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
-import { initializeTimeRange, PublishesTimeRange, StateComparators, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  initializeTimeRange,
+  PublishesTimeRange,
+  StateComparators,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { ReactEmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { Api, State, Services } from './types';
 import { getCount } from './get_count';
-import { PresentationContainer } from '@kbn/presentation-containers';
 
 export const buildSearchEmbeddable = async (
   state: State,
