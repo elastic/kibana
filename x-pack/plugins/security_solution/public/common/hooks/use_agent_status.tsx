@@ -13,7 +13,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
 import { AGENT_STATUS_ROUTE } from '../../../common/endpoint/constants';
 import type { AgentStatusApiResponse } from '../../../common/endpoint/types';
-import { useHttp } from '../lib/kibana';
+import { KibanaServices, useHttp } from '../lib/kibana';
 
 interface ErrorType {
   statusCode: number;
@@ -44,4 +44,22 @@ export const useAgentStatus = (
         })
         .then((response) => response.data),
   });
+};
+
+// TODO: Remove this function when endpoint list is ported
+//  to use tanstack-query instead of redyx
+export const fetchEndpointPendingActionsByAgentId = async (
+  agentIds: string[]
+): Promise<AgentStatusApiResponse['data'][string]> => {
+  const response = await KibanaServices.get().http.get<AgentStatusApiResponse['data']>(
+    AGENT_STATUS_ROUTE,
+    {
+      version: '2023-10-31',
+      query: {
+        agentIds,
+        agentType: 'endpoint',
+      },
+    }
+  );
+  return response.data;
 };

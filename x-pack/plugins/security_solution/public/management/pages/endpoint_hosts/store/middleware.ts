@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
-import type { DataViewBase, Query } from '@kbn/es-query';
-import type { CoreStart, HttpStart } from '@kbn/core/public';
-import type { Dispatch } from 'redux';
+import {firstValueFrom} from 'rxjs';
+import type {DataViewBase, Query} from '@kbn/es-query';
+import type {CoreStart, HttpStart} from '@kbn/core/public';
+import type {Dispatch} from 'redux';
 import semverGte from 'semver/functions/gte';
-import type {
-  IndexFieldsStrategyRequest,
-  IndexFieldsStrategyResponse,
-} from '@kbn/timelines-plugin/common';
+import type {IndexFieldsStrategyRequest, IndexFieldsStrategyResponse,} from '@kbn/timelines-plugin/common';
+import {fetchEndpointPendingActionsByAgentId} from '../../../../common/hooks/use_agent_status';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   HOST_METADATA_LIST_ROUTE,
@@ -29,30 +27,20 @@ import type {
   MetadataListResponse,
   ResponseActionApiResponse,
 } from '../../../../../common/endpoint/types';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
-import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
-import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
-import type { AppAction } from '../../../../common/store/actions';
-import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
+import {isolateHost, unIsolateHost} from '../../../../common/lib/endpoint_isolation';
+import type {ImmutableMiddlewareAPI, ImmutableMiddlewareFactory} from '../../../../common/store';
+import type {AppAction} from '../../../../common/store/actions';
+import {sendGetEndpointSpecificPackagePolicies} from '../../../services/policies/policies';
 import {
   asStaleResourceState,
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
 } from '../../../state';
-import {
-  sendBulkGetPackagePolicies,
-  sendGetEndpointSecurityPackage,
-} from '../../../services/policies/ingest';
-import type { GetPolicyListResponse } from '../../policy/types';
-import type {
-  AgentIdsPendingActions,
-  EndpointState,
-  PolicyIds,
-  TransformStats,
-  TransformStatsResponse,
-} from '../types';
-import type { EndpointPackageInfoStateChanged } from './action';
+import {sendBulkGetPackagePolicies, sendGetEndpointSecurityPackage,} from '../../../services/policies/ingest';
+import type {GetPolicyListResponse} from '../../policy/types';
+import type {AgentIdsPendingActions, EndpointState, PolicyIds, TransformStats, TransformStatsResponse,} from '../types';
+import type {EndpointPackageInfoStateChanged} from './action';
 import {
   endpointPackageInfo,
   endpointPackageVersion,
@@ -313,23 +301,23 @@ const loadEndpointsPendingActions = async ({
 }: EndpointPageStore): Promise<void> => {
   const state = getState();
   const listEndpoints = listData(state);
-  const agentsIds = new Set<string>();
+  const agentIds = new Set<string>();
 
   for (const endpointInfo of listEndpoints) {
-    agentsIds.add(endpointInfo.metadata.elastic.agent.id);
+    agentIds.add(endpointInfo.metadata.elastic.agent.id);
   }
 
-  if (agentsIds.size === 0) {
+  if (agentIds.size === 0) {
     return;
   }
 
   try {
-    const { data: pendingActions } = await fetchPendingActionsByAgentId(Array.from(agentsIds));
+    const { agentId, pendingActions } = await fetchEndpointPendingActionsByAgentId(
+      Array.from(agentIds)
+    );
     const agentIdToPendingActions: AgentIdsPendingActions = new Map();
 
-    for (const pendingAction of pendingActions) {
-      agentIdToPendingActions.set(pendingAction.agent_id, pendingAction.pending_actions);
-    }
+    agentIdToPendingActions.set(agentId, pendingActions);
 
     dispatch({
       type: 'endpointPendingActionsStateChanged',
