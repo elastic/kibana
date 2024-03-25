@@ -19,10 +19,13 @@ import {
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
+import {
+  createTimeline,
+  deleteTimelines,
+  favoriteTimeline,
+} from '../../../tasks/api_calls/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 const mockTimeline = getTimeline();
 const mockFavoritedTimeline = getFavoritedTimeline();

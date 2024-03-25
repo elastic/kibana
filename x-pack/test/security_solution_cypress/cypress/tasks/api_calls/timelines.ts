@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
-import { CompleteTimeline, getTimeline } from '../../objects/timeline';
+import type {
+  AllTimelinesResponse,
+  TimelineResponse,
+} from '@kbn/security-solution-plugin/common/api/timeline';
+import type { CompleteTimeline } from '../../objects/timeline';
+import { getTimeline } from '../../objects/timeline';
 import { rootRequest } from './common';
 
 const mockTimeline = getTimeline();
@@ -153,3 +157,22 @@ export const favoriteTimeline = ({
       templateTimelineVersion: templateTimelineVersion || null,
     },
   });
+
+export const getAllTimelines = () =>
+  rootRequest<AllTimelinesResponse>({
+    method: 'GET',
+    url: 'api/timelines?page_size=100&page_index=1&sort_field=updated&sort_order=desc&timeline_type=default',
+  });
+
+export const deleteTimelines = () => {
+  getAllTimelines().then(($timelines) => {
+    const savedObjectIds = $timelines.body.timeline.map((timeline) => timeline.savedObjectId);
+    rootRequest<AllTimelinesResponse>({
+      method: 'DELETE',
+      url: 'api/timeline',
+      body: {
+        savedObjectIds,
+      },
+    });
+  });
+};
