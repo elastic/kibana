@@ -2236,17 +2236,121 @@ Number fields should be treated as a whole unit, i.e. not breakable by digits. T
 
 #### Array of strings fields
 
-For **array of strings** fields, conflict resolution will take place on an element by element basis - that means that the algorithm will not consider or try to solve changes within a single element. For example:
+> Examples: `index`, `tags`, `references`,
 
-```
-base: [test1]
-current: [my-test1]
-target: [test2]
-output: [my-test1]
-```
-Therefor the example above, the algorithm should not try to merge the single string element by breaking it into parts.
+For **array of strings** fields, conflict resolution will take place on an element by element basis - that means that the algorithm will not consider or try to solve changes within a single element. 
 
-Example **array of strings** fields: `index`, `tags`, `references`,
+Instead, we can create a Set-based logic to caclulate what the additions and removals where applied to the `base` version onto the `current` and `target` versions and do set manipulations to get a merged versions.
+
+For example:
+
+**base**: [linux, network]  
+**current**: [windows, host]  
+**target**: [linux, ml]  
+**expected output**: [windows, host, ml]  
+
+The logic is as follows:
+
+Changes to **current** compared against **base**:
+- Added: [windows, host]
+- Removed: [linux, network]
+
+
+Changes to **target** compared against **base**:
+- Added: [ml]
+- Removed: [network]
+
+Combining both modifications:
+- Added: [windows, host, ml]
+- Removed: [network] (which elements were removed in both?)
+
+Applying these combined modifications to base results in:
+- **[windows, host, ml]**
+
+This logic can be achieved using built-in Javascript `Set` logic:
+
+```js
+const base = new Set(["linux", "network"]);  
+const current = new Set(["windows", "host"]);  
+const target = new Set(["linux", "ml"]);  
+const output = new Set(["windows", "host", "ml"]);  
+
+
+const addedCurrent = current.difference(base); // [windows, host]
+const removedCurrent = base.difference(current); // [linux, network]
+
+const addedTarget = target.difference(base); // [ml]
+const removedTarget = base.difference(target); // [network]
+
+const bothRemoved = removedCurrent.intersection(removedTarget); // [network]
+
+const merged = base
+                .difference(bothRemoved)
+                .union(addedCurrent)
+                .union(addedTarget)
+
+// Results in: [windows, host, ml]
+```
+
+The possible scenarios are:
+
+<table>
+  <thead>
+    <tr>
+      <th style="border-right:3px solid black">Use case</th>
+      <th>Base version</th>
+      <th>Current version</th>
+      <th style="border-right:3px solid black">Target version</th>
+      <th>Merged version (output)</th>
+      <th>Mark as conflict?</th>
+    </tr>
+  </thead>
+  <tbody align="center">
+    <tr>
+      <td style="border-right:3px solid black">No customization, no updates (AAA)</td>
+      <td><code>[linux,network]</code></td>
+      <td><code>[linux,network]</code></td>
+      <td style="border-right:3px solid black"><code>[linux,network]</code></td>
+      <td><code>[linux,network]</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">User customization, no updates (ABA)</td>
+      <td><code>[linux,network]</code></td>
+      <td><code>[windows, host]</code></td>
+      <td style="border-right:3px solid black"><code>[linux,network]</code></td>
+      <td><code>[windows, host]</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">No customization, upstream update (AAB)</td>
+      <td><code>[linux,network]</code></td>
+      <td><code>[linux,network]</code></td>
+      <td style="border-right:3px solid black"><code>[windows, host]</code></td>
+      <td><code>[windows, host]</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update match (ABB)</td>
+      <td><code>[linux,network]</code></td>
+      <td><code>[linux,ml]</code></td>
+      <td style="border-right:3px solid black"><code>[linux,ml]</code></td>
+      <td><code>[linux,ml]</code></td>
+      <td><code>NO</code></td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Customization and upstream update conflict (ABC)</td>
+      <td><code>[linux,network]</code></td>
+      <td><code>[linux,ml,security]</code></td>
+      <td style="border-right:3px solid black"><code>[aws, cloudfront]</code></td>
+      <td><code>[linux,ml,security,<br>aws,cloudfront]</code></td>
+      <td><code>NO</code></td>
+    </tr>
+  </tbody>
+</table>
+
+Notice that with this logic we would never mark a merge scenario as a conflict.
+
 
 ###### Array of objects fields
 
