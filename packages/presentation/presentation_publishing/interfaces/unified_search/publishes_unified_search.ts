@@ -15,7 +15,7 @@ export interface PublishesTimeRange {
 
 export type PublishesWritableTimeRange = PublishesTimeRange & {
   setTimeRange: (timeRange: TimeRange | undefined) => void;
-}
+};
 
 export type PublishesUnifiedSearch = PublishesTimeRange & {
   isCompatibleWithUnifiedSearch?: () => boolean;
@@ -23,10 +23,11 @@ export type PublishesUnifiedSearch = PublishesTimeRange & {
   query$: PublishingSubject<Query | AggregateQuery | undefined>;
 };
 
-export type PublishesWritableUnifiedSearch = PublishesUnifiedSearch & PublishesWritableTimeRange & {
-  setFilters: (filters: Filter[] | undefined) => void;
-  setQuery: (query: Query | undefined) => void;
-};
+export type PublishesWritableUnifiedSearch = PublishesUnifiedSearch &
+  PublishesWritableTimeRange & {
+    setFilters: (filters: Filter[] | undefined) => void;
+    setQuery: (query: Query | undefined) => void;
+  };
 
 export const apiPublishesTimeRange = (
   unknownApi: null | unknown

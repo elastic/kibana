@@ -12,10 +12,10 @@ import { initializeTimeRange } from './initialize_time_range';
 
 describe('initialize time range', () => {
   describe('appliedTimeRange$', () => {
-    let timeRange: TimeRange | undefined = undefined;
+    let timeRange: TimeRange | undefined;
     const parentApi = {
-      timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined)
-    }
+      timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+    };
 
     describe('local and parent time range', () => {
       beforeEach(() => {
@@ -30,22 +30,20 @@ describe('initialize time range', () => {
       });
 
       it('should return local time range', () => {
-        const { appliedTimeRange$ } =  initializeTimeRange({ timeRange }, parentApi);
+        const { appliedTimeRange$ } = initializeTimeRange({ timeRange }, parentApi);
         expect(appliedTimeRange$.value).toEqual({
           from: 'now-15m',
           to: 'now',
-        })
+        });
       });
 
       it('should emit when local time range changes', async () => {
         let emitCount = 0;
-        const { appliedTimeRange$, timeRangeApi } =  initializeTimeRange({ timeRange }, parentApi);
+        const { appliedTimeRange$, timeRangeApi } = initializeTimeRange({ timeRange }, parentApi);
 
-        const subscribe = appliedTimeRange$
-          .pipe(skip(1))
-          .subscribe((timeRange) => {
-            emitCount++;
-          });
+        const subscribe = appliedTimeRange$.pipe(skip(1)).subscribe(() => {
+          emitCount++;
+        });
 
         timeRangeApi.setTimeRange({
           from: 'now-16m',
@@ -64,48 +62,44 @@ describe('initialize time range', () => {
 
       it('should not emit when parent time range changes', async () => {
         let emitCount = 0;
-        const { appliedTimeRange$ } =  initializeTimeRange({ timeRange }, parentApi);
-  
-        const subscribe = appliedTimeRange$
-          .pipe(skip(1))
-          .subscribe((timeRange) => {
-            emitCount++;
-          });
-  
-          parentApi.timeRange$.next({
-            from: 'now-25h',
-            to: 'now',
-          });
+        const { appliedTimeRange$ } = initializeTimeRange({ timeRange }, parentApi);
+
+        const subscribe = appliedTimeRange$.pipe(skip(1)).subscribe(() => {
+          emitCount++;
+        });
+
+        parentApi.timeRange$.next({
+          from: 'now-25h',
+          to: 'now',
+        });
         await new Promise(process.nextTick);
-  
+
         expect(emitCount).toBe(0);
         expect(appliedTimeRange$.value).toEqual({
           from: 'now-15m',
           to: 'now',
         });
-  
+
         subscribe.unsubscribe();
       });
-  
+
       it('should emit parent time range when local time range is cleared', async () => {
         let emitCount = 0;
-        const { appliedTimeRange$, timeRangeApi } =  initializeTimeRange({ timeRange }, parentApi);
-  
-        const subscribe = appliedTimeRange$
-          .pipe(skip(1))
-          .subscribe((timeRange) => {
-            emitCount++;
-          });
-  
+        const { appliedTimeRange$, timeRangeApi } = initializeTimeRange({ timeRange }, parentApi);
+
+        const subscribe = appliedTimeRange$.pipe(skip(1)).subscribe(() => {
+          emitCount++;
+        });
+
         timeRangeApi.setTimeRange(undefined);
         await new Promise(process.nextTick);
-  
+
         expect(emitCount).toBe(1);
         expect(appliedTimeRange$.value).toEqual({
           from: 'now-24h',
           to: 'now',
         });
-  
+
         subscribe.unsubscribe();
       });
     });
@@ -120,35 +114,33 @@ describe('initialize time range', () => {
       });
 
       it('should return parent time range', () => {
-        const { appliedTimeRange$ } =  initializeTimeRange({ timeRange }, parentApi);
+        const { appliedTimeRange$ } = initializeTimeRange({ timeRange }, parentApi);
         expect(appliedTimeRange$.value).toEqual({
           from: 'now-24h',
           to: 'now',
-        })
+        });
       });
 
       it('should emit when parent time range changes', async () => {
         let emitCount = 0;
-        const { appliedTimeRange$ } =  initializeTimeRange({ timeRange }, parentApi);
-  
-        const subscribe = appliedTimeRange$
-          .pipe(skip(1))
-          .subscribe((timeRange) => {
-            emitCount++;
-          });
-  
-          parentApi.timeRange$.next({
-            from: 'now-25h',
-            to: 'now',
-          });
+        const { appliedTimeRange$ } = initializeTimeRange({ timeRange }, parentApi);
+
+        const subscribe = appliedTimeRange$.pipe(skip(1)).subscribe(() => {
+          emitCount++;
+        });
+
+        parentApi.timeRange$.next({
+          from: 'now-25h',
+          to: 'now',
+        });
         await new Promise(process.nextTick);
-  
+
         expect(emitCount).toBe(1);
         expect(appliedTimeRange$.value).toEqual({
           from: 'now-25h',
           to: 'now',
         });
-  
+
         subscribe.unsubscribe();
       });
     });

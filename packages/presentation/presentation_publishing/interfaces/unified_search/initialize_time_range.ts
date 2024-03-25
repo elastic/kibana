@@ -9,9 +9,9 @@
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { TimeRange } from '@kbn/es-query';
+import { PublishingSubject } from '../../publishing_subject';
 import { StateComparators } from '../../comparators';
 import { PublishesTimeRange, PublishesWritableTimeRange } from './publishes_unified_search';
-import { PublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
 
 export interface SerializedTimeRange {
   timeRange: TimeRange | undefined;
@@ -19,7 +19,7 @@ export interface SerializedTimeRange {
 
 export const initializeTimeRange = (
   rawState: SerializedTimeRange,
-  parentApi?: Partial<PublishesTimeRange>,
+  parentApi?: Partial<PublishesTimeRange>
 ): {
   appliedTimeRange$: PublishingSubject<TimeRange | undefined>;
   cleanupTimeRange: () => void;
@@ -27,14 +27,11 @@ export const initializeTimeRange = (
   timeRangeApi: PublishesWritableTimeRange;
   timeRangeComparators: StateComparators<SerializedTimeRange>;
 } => {
-
   const timeRange$ = new BehaviorSubject<TimeRange | undefined>(rawState.timeRange);
   function setTimeRange(nextTimeRange: TimeRange | undefined) {
     timeRange$.next(nextTimeRange);
   }
-  const appliedTimeRange$ = new BehaviorSubject(
-    timeRange$.value ?? parentApi?.timeRange$?.value
-  );
+  const appliedTimeRange$ = new BehaviorSubject(timeRange$.value ?? parentApi?.timeRange$?.value);
 
   const subscriptions = timeRange$.subscribe((timeRange) => {
     appliedTimeRange$.next(timeRange ?? parentApi?.timeRange$?.value);
@@ -59,7 +56,7 @@ export const initializeTimeRange = (
       timeRange: timeRange$.value,
     }),
     timeRangeComparators: {
-      timeRange: [timeRange$, setTimeRange, fastIsEqual]
+      timeRange: [timeRange$, setTimeRange, fastIsEqual],
     } as StateComparators<SerializedTimeRange>,
     timeRangeApi: {
       timeRange$,
