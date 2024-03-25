@@ -70,7 +70,7 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
       .pipe(
         debounceTime(0),
         // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
-        skip(1),
+        skip(1)
       )
       .subscribe((values) => {
         setLatestPublishedValues((lastPublishedValues) => {
