@@ -81,5 +81,6 @@ export const kibanaLogsDataViewTestData: TestData = {
       'response.keyword',
       'tags.keyword',
     ],
+    prompt: 'change-point',
   },
 };

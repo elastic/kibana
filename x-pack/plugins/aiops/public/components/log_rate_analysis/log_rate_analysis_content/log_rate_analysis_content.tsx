@@ -6,8 +6,8 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useEffect, useMemo, useRef, useState, type FC } from 'react';
-import { EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef, useState, type FC } from 'react';
+import { EuiButton, EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import type { Moment } from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -17,6 +17,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
+  getWindowParametersForTrigger,
+  getSnappedTimestamps,
+  getSnappedWindowParameters,
   LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
@@ -203,6 +206,38 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         }
       : undefined;
 
+  const triggerAnalysis = useCallback(() => {
+    if (documentCountStats) {
+      const { interval, timeRangeEarliest, timeRangeLatest, changePoint } = documentCountStats;
+
+      if (changePoint && interval && timeRangeEarliest && timeRangeLatest) {
+        const wp = getWindowParametersForTrigger(
+          changePoint.startTs,
+          interval,
+          timeRangeEarliest,
+          timeRangeLatest,
+          changePoint
+        );
+
+        const snapTimestamps = getSnappedTimestamps(timeRangeEarliest, timeRangeLatest, interval);
+
+        const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
+
+        if (brushSelectionUpdate !== undefined) {
+          brushSelectionUpdate(
+            wpSnap,
+            true,
+            changePoint.type === LOG_RATE_ANALYSIS_TYPE.DIP
+              ? LOG_RATE_ANALYSIS_TYPE.DIP
+              : LOG_RATE_ANALYSIS_TYPE.SPIKE
+          );
+        }
+      }
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [documentCountStats]);
+
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
       {documentCountStats !== undefined && (
@@ -242,7 +277,59 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           embeddingOrigin={embeddingOrigin}
         />
       )}
-      {windowParameters === undefined && (
+      {windowParameters === undefined && documentCountStats?.changePoint && (
+        <EuiEmptyPrompt
+          color="subdued"
+          hasShadow={false}
+          hasBorder={false}
+          css={{ minWidth: '100%' }}
+          title={
+            <h2>
+              {documentCountStats?.changePoint.type === LOG_RATE_ANALYSIS_TYPE.SPIKE && (
+                <FormattedMessage
+                  id="xpack.aiops.logRateAnalysis.page.changePointSpikePromptTitle"
+                  defaultMessage="Log rate spike detected"
+                />
+              )}
+              {documentCountStats?.changePoint.type === LOG_RATE_ANALYSIS_TYPE.DIP && (
+                <FormattedMessage
+                  id="xpack.aiops.logRateAnalysis.page.changePointDipPromptTitle"
+                  defaultMessage="Log rate dip detected"
+                />
+              )}
+              {documentCountStats?.changePoint.type !== LOG_RATE_ANALYSIS_TYPE.SPIKE &&
+                documentCountStats?.changePoint.type !== LOG_RATE_ANALYSIS_TYPE.DIP && (
+                  <FormattedMessage
+                    id="xpack.aiops.logRateAnalysis.page.changePointOtherPromptTitle"
+                    defaultMessage="Log rate change point detected"
+                  />
+                )}
+            </h2>
+          }
+          titleSize="xs"
+          body={
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.aiops.logRateAnalysis.page.changePointPromptBody"
+                  defaultMessage="The log rate analysis feature identifies statistically significant field/value combinations that contribute to a log rate spike or dip."
+                />
+              </p>
+              <EuiButton
+                data-test-subj="aiopsLogRateAnalysisContentRunAnalysisButton"
+                onClick={triggerAnalysis}
+              >
+                <FormattedMessage
+                  id="xpack.aiops.logRateAnalysis.page.changePointPromptRunAnalysisButton"
+                  defaultMessage="Run analysis"
+                />
+              </EuiButton>
+            </>
+          }
+          data-test-subj="aiopsChangePointDetectedPrompt"
+        />
+      )}
+      {windowParameters === undefined && documentCountStats?.changePoint === undefined && (
         <EuiEmptyPrompt
           color="subdued"
           hasShadow={false}

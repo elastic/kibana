@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   getLogRateAnalysisType,
+  getSnappedTimestamps,
   getSnappedWindowParameters,
   getWindowParametersForTrigger,
   type DocumentCountStatsChangePoint,
@@ -255,17 +256,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPointsSplit, timeRangeEarliest, timeRangeLatest, interval]);
 
-  const snapTimestamps = useMemo(() => {
-    const timestamps: number[] = [];
-    let n = timeRangeEarliest;
-
-    while (n <= timeRangeLatest + interval) {
-      timestamps.push(n);
-      n += interval;
-    }
-
-    return timestamps;
-  }, [timeRangeEarliest, timeRangeLatest, interval]);
+  const snapTimestamps = useMemo(
+    () => getSnappedTimestamps(timeRangeEarliest, timeRangeLatest, interval),
+    [timeRangeEarliest, timeRangeLatest, interval]
+  );
 
   const timefilterUpdateHandler = useCallback(
     (range: TimeFilterRange) => {

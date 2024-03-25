@@ -14,6 +14,7 @@ export {
 export type { LogRateHistogramItem } from './log_rate_analysis/log_rate_histogram_item';
 export type { DocumentCountStatsChangePoint } from './log_rate_analysis/types';
 export type { WindowParameters } from './log_rate_analysis/window_parameters';
+export { getSnappedTimestamps } from './log_rate_analysis/get_snapped_timestamps';
 export { getSnappedWindowParameters } from './log_rate_analysis/get_snapped_window_parameters';
 export { getWindowParameters } from './log_rate_analysis/get_window_parameters';
 export { getWindowParametersForTrigger } from './log_rate_analysis/get_window_parameters_for_trigger';
