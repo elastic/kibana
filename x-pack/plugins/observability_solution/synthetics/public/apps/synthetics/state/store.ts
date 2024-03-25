@@ -18,7 +18,6 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({ thunk: false }).concat(sagaMW),
   devTools: process.env.NODE_ENV !== 'production',
   preloadedState: {},
-  enhancers: [],
 });
 
 sagaMW.run(rootEffect);

@@ -16,7 +16,7 @@ import { initialState, State } from './state';
 export const store = configureStore({
   reducer,
   devTools: process.env.NODE_ENV !== 'production',
-  enhancers: [],
+  enhancers: () => [],
 });
 
 export const Context = createContext<ReactReduxContextValue<State>>({

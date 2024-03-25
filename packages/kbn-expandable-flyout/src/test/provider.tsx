@@ -28,7 +28,7 @@ export const TestProvider: FC<PropsWithChildren<TestProviderProps>> = ({
     reducer,
     devTools: false,
     preloadedState: state,
-    enhancers: [],
+    enhancers: () => [],
   });
 
   return (
