@@ -25,7 +25,7 @@ import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../use_load_connectors';
 import { AssistantAvatar } from '../../assistant/assistant_avatar/assistant_avatar';
-import { getActionTypeTitle, getGenAiConfig } from '../helpers';
+import { getGenAiConfig } from '../helpers';
 
 const ConnectorButtonWrapper = styled.div`
   margin-bottom: 10px;
@@ -58,7 +58,7 @@ export const useConnectorSetup = ({
     data: connectors,
     isSuccess: areConnectorsFetched,
     refetch: refetchConnectors,
-  } = useLoadConnectors({ actionTypeRegistry, http });
+  } = useLoadConnectors({ http });
   const isConnectorConfigured = areConnectorsFetched && !!connectors?.length;
 
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
@@ -175,16 +175,12 @@ export const useConnectorSetup = ({
   const onSaveConnector = useCallback(
     async (connector: ActionConnector) => {
       const config = getGenAiConfig(connector);
-      // add action type title to new connector
-      const connectorTypeTitle = getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
       // persist only the active conversation
-
       const updatedConversation = await setApiConfig({
         conversation,
         apiConfig: {
           ...conversation.apiConfig,
           connectorId: connector.id,
-          connectorTypeTitle,
           provider: config?.apiProvider,
           model: config?.defaultModel,
         },
@@ -197,7 +193,7 @@ export const useConnectorSetup = ({
         setIsConnectorModalVisible(false);
       }
     },
-    [actionTypeRegistry, conversation, onConversationUpdate, refetchConnectors, setApiConfig]
+    [conversation, onConversationUpdate, refetchConnectors, setApiConfig]
   );
 
   return {
