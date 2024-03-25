@@ -518,9 +518,7 @@ describe('<IndexDetailsPage />', () => {
         httpRequestsMockHelpers.setUpdateIndexMappingsResponse(testIndexName, {
           acknowledged: true,
         });
-        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
-          mappings: mockIndexMappingResponse,
-        });
+
         await act(async () => {
           testBed = await setup({ httpSetup });
         });
@@ -544,7 +542,10 @@ describe('<IndexDetailsPage />', () => {
         expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
       });
 
-      it('Can add new fields and can save mappings', async () => {
+      it('can add new fields and can save mappings', async () => {
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: mockIndexMappingResponse,
+        });
         await testBed.actions.mappings.addNewMappingFieldNameAndType([
           { name: 'name', type: 'text' },
         ]);
@@ -563,7 +564,7 @@ describe('<IndexDetailsPage />', () => {
           requestOptions
         );
 
-        // refreshed mappings and page re-render
+        // refresh mappings and page re-renders
         expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
         expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(false);
 
@@ -575,6 +576,20 @@ describe('<IndexDetailsPage />', () => {
         expect(jsonContent).toEqual(
           JSON.stringify({ mappings: mockIndexMappingResponse }, null, 2)
         );
+      });
+      it('there is a callout with error message when save mappings fail', async () => {
+        const error = {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Error saving mapping:',
+        };
+        httpRequestsMockHelpers.setUpdateIndexMappingsResponse(testIndexName, undefined, error);
+
+        await testBed.actions.mappings.addNewMappingFieldNameAndType([
+          { name: 'test_field', type: 'boolean' },
+        ]);
+        await testBed.actions.mappings.clickSaveMappingsButton();
+        expect(testBed.actions.mappings.isSaveMappingsErrorDisplayed()).toBe(true);
       });
     });
 

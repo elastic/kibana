@@ -46,6 +46,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getCodeBlockContent: () => string;
       getDocsLinkHref: () => string;
       isErrorDisplayed: () => boolean;
+      isSaveMappingsErrorDisplayed:()=>boolean;
       clickErrorReloadButton: () => Promise<void>;
       getTreeViewContent: (fieldName: string) => string;
       clickToggleViewButton: () => Promise<void>;
@@ -231,6 +232,9 @@ export const setup = async ({
         find('indexDetailsMappingsSaveMappings').simulate('click');
       });
       component.update();
+    },
+    isSaveMappingsErrorDisplayed: () => {
+      return exists('indexDetailsSaveMappingsError');
     },
     addNewMappingFieldNameAndType: async (mappingFields?: MappingField[]) => {
       const { form } = testBed;

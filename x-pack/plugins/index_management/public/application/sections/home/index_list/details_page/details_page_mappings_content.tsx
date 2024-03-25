@@ -23,6 +23,7 @@ import {
   useGeneratedHtmlId,
   EuiFilterGroup,
   EuiFilterButton,
+  EuiCallOut,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -92,6 +93,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const [previousStateFields, setPreviousStateFields] = useState<NormalizedField[]>(
     getFieldsFromState(state)
   );
+  const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
   const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
   const onToggleChange = () => {
     setIsJSONVisible(!isJSONVisible);
@@ -180,14 +182,21 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   }, [dispatch, isAddingFields, state]);
 
   const updateMappings = useCallback(async () => {
-    const { error } = await updateIndexMappings(indexName, deNormalize(state.fields));
-    if (!error) {
-      notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.indexDetails.mappings.successfullyUpdatedIndexMappings', {
-          defaultMessage: 'Index Mapping was successfully updated',
-        })
-      );
-      refetchMapping();
+    try {
+      const { error } = await updateIndexMappings(indexName, deNormalize(state.fields));
+
+      if (!error) {
+        notificationService.showSuccessToast(
+          i18n.translate('xpack.idxMgmt.indexDetails.mappings.successfullyUpdatedIndexMappings', {
+            defaultMessage: 'Index Mapping was successfully updated',
+          })
+        );
+        refetchMapping();
+      } else {
+        setSaveMappingError(error.message);
+      }
+    } catch (exception) {
+      setSaveMappingError(exception.message);
     }
   }, [state.fields, indexName, refetchMapping]);
 
@@ -283,6 +292,28 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         fieldsListComponent
       )}
     </>
+  );
+
+  const errorSavingMappings = saveMappingError && (
+    <EuiFlexItem grow={false}>
+      <EuiCallOut
+        color="danger"
+        data-test-subj="indexDetailsSaveMappingsError"
+        iconType="error"
+        title={i18n.translate('xpack.idxMgmt.indexDetails.mappings.error.title', {
+          defaultMessage: 'Error saving mapping',
+        })}
+      >
+        <EuiText>
+          <FormattedMessage
+            id="xpack.idxMgmt.indexDetails.mappings.error.title"
+            defaultMessage="Error saving mapping: {errorMessage}"
+            values={{ errorMessage: saveMappingError }}
+          />
+        </EuiText>
+      </EuiCallOut>
+      <EuiSpacer />
+    </EuiFlexItem>
   );
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
@@ -408,6 +439,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
+          {errorSavingMappings}
           {isAddingFields && (
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder>
