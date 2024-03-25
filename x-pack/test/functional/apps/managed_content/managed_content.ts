@@ -71,7 +71,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await expectManagedContentSignifiers(false, 'lnsApp_saveButton');
       });
 
-      it('discover', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/178920
+      it.skip('discover', async () => {
         await PageObjects.common.navigateToActualUrl(
           'discover',
           'view/managed-3d62-4113-ac7c-de2e20a68fbc'
