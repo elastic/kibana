@@ -1121,7 +1121,7 @@ export interface BlocklistFields {
 }
 
 export interface OnWriteScanFields {
-  on_write_scan: boolean;
+  on_write_scan?: boolean;
 }
 
 /** Policy protection mode options */
