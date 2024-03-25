@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { registerMappingRoute } from './register_mapping_route';
-export { registerUpdateMappingRoute } from './register_update_mapping_route';
+export {registerIndexMappingRoutes} from './register_index_mapping_route';

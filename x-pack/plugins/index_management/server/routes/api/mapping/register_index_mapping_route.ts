@@ -6,10 +6,10 @@
  */
 
 import { RouteDependencies } from '../../../types';
-import { registerMappingRoute } from './register_mapping_route';
+import { registerGetMappingRoute } from './register_mapping_route';
 import { registerUpdateMappingRoute } from './register_update_mapping_route';
 
 export function registerIndexMappingRoutes(dependencies: RouteDependencies) {
-  registerMappingRoute(dependencies);
+  registerGetMappingRoute(dependencies);
   registerUpdateMappingRoute(dependencies);
 }
