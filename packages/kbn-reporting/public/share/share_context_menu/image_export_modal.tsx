@@ -275,46 +275,37 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     }
     return (
       <>
-        {isUnsaved && (
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="share.modalContent.unsavedStateErrorText"
-                defaultMessage="Save your work before copying this URL."
-              />
-            }
-          >
-            <EuiCopy textToCopy={absoluteUrl}>
-              {(copy) => (
-                <EuiButtonEmpty
-                  iconType="copy"
-                  disabled={isUnsaved}
-                  flush="both"
-                  onClick={copy}
-                  data-test-subj="shareReportingCopyURL"
-                >
-                  <FormattedMessage
-                    id="share.modalContent.copyUrlButtonLabel"
-                    defaultMessage="Post URL"
-                  />
-                </EuiButtonEmpty>
-              )}
-            </EuiCopy>
-          </EuiToolTip>
-        )}
         <EuiToolTip
           content={
-            isSaved ? (
-              <FormattedMessage
-                id="reporting.modalContent.postUrl"
-                defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
-              />
-            ) : (
-              <FormattedMessage
-                id="reporting.modalContent.postUrl"
-                defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher.  Unsaved changes: URL may change if you upgrade Kibana"
-              />
-            )
+            <FormattedMessage
+              id="share.modalContent.unsavedStateErrorText"
+              defaultMessage="Save your work before copying this URL."
+            />
+          }
+        >
+          <EuiCopy textToCopy={absoluteUrl}>
+            {(copy) => (
+              <EuiButtonEmpty
+                iconType="copy"
+                disabled={!isSaved}
+                flush="both"
+                onClick={copy}
+                data-test-subj="shareReportingCopyURL"
+              >
+                <FormattedMessage
+                  id="share.modalContent.copyUrlButtonLabel"
+                  defaultMessage="Post URL"
+                />
+              </EuiButtonEmpty>
+            )}
+          </EuiCopy>
+        </EuiToolTip>
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="reporting.share.postURLWatcherMessage"
+              defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher. Unsaved changes: URL may change if you upgrade Kibana"
+            />
           }
         >
           <EuiIcon type="questionInCircle" />
