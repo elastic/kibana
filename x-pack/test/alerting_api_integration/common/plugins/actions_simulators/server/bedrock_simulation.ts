@@ -35,13 +35,23 @@ export class BedrockSimulator extends Simulator {
       return BedrockSimulator.sendStreamResponse(response);
     }
 
-    return BedrockSimulator.sendResponse(response);
+    if (data.prompt) {
+      return BedrockSimulator.sendDeprecatedResponse(response);
+    }
+
+    return BedrockSimulator.sendLatestResponse(response);
   }
 
-  private static sendResponse(response: http.ServerResponse) {
+  private static sendLatestResponse(response: http.ServerResponse) {
     response.statusCode = 202;
     response.setHeader('Content-Type', 'application/json');
-    response.end(JSON.stringify(bedrockSuccessResponse, null, 4));
+    response.end(JSON.stringify(bedrockClaude3SuccessResponse, null, 4));
+  }
+
+  private static sendDeprecatedResponse(response: http.ServerResponse) {
+    response.statusCode = 202;
+    response.setHeader('Content-Type', 'application/json');
+    response.end(JSON.stringify(bedrockClaude2SuccessResponse, null, 4));
   }
 
   private static sendStreamResponse(response: http.ServerResponse) {
@@ -59,9 +69,25 @@ export class BedrockSimulator extends Simulator {
   }
 }
 
-export const bedrockSuccessResponse = {
+export const bedrockClaude2SuccessResponse = {
   stop_reason: 'max_tokens',
   completion: 'Hello there! How may I assist you today?',
+};
+
+export const bedrockClaude3SuccessResponse = {
+  id: 'compl_01E7D3vTBHdNdKWCe6zALmLH',
+  type: 'message',
+  role: 'assistant',
+  content: [
+    {
+      type: 'text',
+      text: 'Hello there! How may I assist you today?',
+    },
+  ],
+  model: 'claude-2.1',
+  stop_reason: 'max_tokens',
+  stop_sequence: null,
+  usage: { input_tokens: 41, output_tokens: 64 },
 };
 
 export const bedrockFailedResponse = {
