@@ -96,6 +96,25 @@ describe('8.14.0 Endpoint Package Policy migration', () => {
     expect(migratedPolicyConfig.linux.malware.on_write_scan).toBe(true);
   });
 
+  it('should not backfill `on_write_scan` field if already present due to user edit before migration is performed on serverless', () => {
+    const originalPolicyConfigSO = cloneDeep(policyDoc);
+    const originalPolicyConfig = originalPolicyConfigSO.attributes.inputs[0].config?.policy.value;
+    originalPolicyConfig.windows.malware.on_write_scan = false;
+    originalPolicyConfig.mac.malware.on_write_scan = true;
+    originalPolicyConfig.linux.malware.on_write_scan = false;
+
+    const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
+      document: originalPolicyConfigSO,
+      fromVersion: 5,
+      toVersion: 6,
+    });
+
+    const migratedPolicyConfig = migratedPolicyConfigSO.attributes.inputs[0].config?.policy.value;
+    expect(migratedPolicyConfig.windows.malware.on_write_scan).toBe(false);
+    expect(migratedPolicyConfig.mac.malware.on_write_scan).toBe(true);
+    expect(migratedPolicyConfig.linux.malware.on_write_scan).toBe(false);
+  });
+
   // no reason for removing `on_write_scan` for a lower version Kibana - the field will just sit silently in the package config
   it('should not strip `on_write_scan` in regards of forward compatibility', () => {
     const originalPolicyConfigSO = cloneDeep(policyDoc);

@@ -28,9 +28,9 @@ export const migratePackagePolicyToV8140: SavedObjectModelDataBackfillFn<
   if (input && input.config) {
     const policy = input.config.policy.value;
 
-    policy.windows.malware.on_write_scan = ON_WRITE_SCAN_DEFAULT_VALUE;
-    policy.mac.malware.on_write_scan = ON_WRITE_SCAN_DEFAULT_VALUE;
-    policy.linux.malware.on_write_scan = ON_WRITE_SCAN_DEFAULT_VALUE;
+    policy.windows.malware.on_write_scan ??= ON_WRITE_SCAN_DEFAULT_VALUE;
+    policy.mac.malware.on_write_scan ??= ON_WRITE_SCAN_DEFAULT_VALUE;
+    policy.linux.malware.on_write_scan ??= ON_WRITE_SCAN_DEFAULT_VALUE;
   }
 
   return { attributes: updatedPackagePolicyDoc.attributes };
