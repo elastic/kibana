@@ -23,10 +23,12 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
-import type { NotificationsStart, ScopedHistory } from '@kbn/core/public';
+import type { I18nStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ConfirmDelete } from './confirm_delete';
@@ -49,6 +51,8 @@ interface Props {
   history: ScopedHistory;
   readOnly?: boolean;
   buildFlavor?: BuildFlavor;
+  theme: ThemeServiceStart;
+  i18nStart: I18nStart;
 }
 
 interface State {
@@ -441,6 +445,28 @@ export class RolesGridPage extends Component<Props, State> {
       selection: [],
       showDeleteConfirmation: false,
     });
+    if (this.props.buildFlavor === 'serverless') {
+      this.props.notifications.toasts.addDanger({
+        title: i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
+          defaultMessage: 'Custom role deleted',
+        }),
+        text: toMountPoint(
+          <>
+            <p>A good toast message is short and to the point</p>
+
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s">Manage Members</EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>,
+          {
+            i18n: this.props.i18nStart,
+            theme: this.props.theme,
+          }
+        ),
+      });
+    }
     this.loadRoles();
   };
 

@@ -74,6 +74,7 @@ export const rolesManagementApp = Object.freeze({
           i18n: i18nStart,
           notifications,
           chrome,
+          theme: themeServiceStart,
         } = startServices;
 
         chrome.docTitle.change(title);
@@ -117,6 +118,9 @@ export const rolesManagementApp = Object.freeze({
                 dataViews={dataViews}
                 history={history}
                 spacesApiUi={spacesApiUi}
+                buildFlavor={buildFlavor}
+                i18nStart={i18nStart}
+                theme={themeServiceStart}
               />
             </Breadcrumb>
           );
@@ -144,6 +148,8 @@ export const rolesManagementApp = Object.freeze({
                           history={history}
                           readOnly={!startServices.application.capabilities.roles.save}
                           buildFlavor={buildFlavor}
+                          i18nStart={i18nStart}
+                          theme={themeServiceStart}
                         />
                       </Route>
                       <Route path="/edit/:roleName?">

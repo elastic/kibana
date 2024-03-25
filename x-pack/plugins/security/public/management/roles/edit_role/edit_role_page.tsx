@@ -23,13 +23,16 @@ import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'reac
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
+import type { BuildFlavor } from '@kbn/config';
 import type {
   Capabilities,
   DocLinksStart,
   FatalErrorsSetup,
   HttpStart,
+  I18nStart,
   NotificationsStart,
   ScopedHistory,
+  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -38,6 +41,7 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate, useDarkMode } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
@@ -88,6 +92,9 @@ interface Props {
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
   spacesApiUi?: SpacesApiUi;
+  buildFlavor: BuildFlavor;
+  i18nStart: I18nStart;
+  theme: ThemeServiceStart;
 }
 
 function useRemoteClusters(http: HttpStart) {
@@ -303,6 +310,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
   notifications,
   history,
   spacesApiUi,
+  buildFlavor,
+  i18nStart,
+  theme,
 }) => {
   const isDarkMode = useDarkMode();
 
@@ -605,12 +615,37 @@ export const EditRolePage: FunctionComponent<Props> = ({
         return;
       }
 
-      notifications.toasts.addSuccess(
-        i18n.translate(
-          'xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage',
-          { defaultMessage: 'Saved role' }
-        )
-      );
+      if (buildFlavor === 'serverless') {
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.security.management.editRole.customRoleSuccessfullySavedNotificationTitle',
+            { defaultMessage: 'Custom role created' }
+          ),
+          text: toMountPoint(
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.customRoleSuccessfullySavedNotificationText"
+                  defaultMessage="You can now assign this role to users of this project from your Organization page."
+                />
+              </p>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="s">Assign role</EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>,
+            { i18n: i18nStart, theme }
+          ),
+        });
+      } else {
+        notifications.toasts.addSuccess(
+          i18n.translate(
+            'xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage',
+            { defaultMessage: 'Saved role' }
+          )
+        );
+      }
 
       backToRoleList();
     }
