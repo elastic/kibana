@@ -101,6 +101,8 @@ export type {
   LifecycleResponseFactory,
   RawRequest,
   FakeRawRequest,
+  RouteValidatorContainer,
+  RouteValidatorFullConfigContainer,
 } from './src/router';
 export { validBodyOutput, RouteValidationError } from './src/router';
 

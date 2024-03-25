@@ -128,3 +128,20 @@ export interface RouteValidatorOptions {
  */
 export type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> &
   RouteValidatorOptions;
+
+export interface RouteValidatorFullConfigResponses {
+  [statusCode: number]: { body: ObjectType | Type<any> };
+  unsafe?: {
+    body?: boolean;
+  };
+}
+
+export interface RouteValidatorFullConfigContainer<P, Q, B> {
+  request: RouteValidatorFullConfig<P, Q, B>;
+  responses?: RouteValidatorFullConfigResponses;
+}
+
+export type RouteValidatorContainer<P, Q, B> =
+  | RouteValidatorFullConfig<P, Q, B>
+  /** Extended form to allow specifying request and response schemas */
+  | RouteValidatorFullConfigContainer<P, Q, B>;
