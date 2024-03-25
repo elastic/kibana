@@ -38,6 +38,7 @@ export class LensConfigBuilder {
   private formulaAPI: FormulaPublicApi | undefined;
   private dataViewsAPI: DataViewsPublicPluginStart;
 
+  // formulaApi is optional, as it is not necessary to use it when creating charts with ES|QL
   constructor(dataViewsAPI: DataViewsPublicPluginStart, formulaAPI?: FormulaPublicApi) {
     this.formulaAPI = formulaAPI;
     this.dataViewsAPI = dataViewsAPI;
