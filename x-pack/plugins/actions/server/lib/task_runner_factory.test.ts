@@ -29,7 +29,6 @@ import {
   isRetryableError,
   isUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 const executeParamsFields = [
@@ -52,32 +51,6 @@ const inMemoryMetrics = inMemoryMetricsMock.create();
 let fakeTimer: sinon.SinonFakeTimers;
 let taskRunnerFactory: TaskRunnerFactory;
 let mockedTaskInstance: ConcreteTaskInstance;
-
-const mockAction = {
-  id: '1',
-  type: 'action',
-  attributes: {
-    name: '1',
-    actionTypeId: 'test',
-    config: {
-      bar: true,
-    },
-    secrets: {
-      baz: true,
-    },
-    isMissingSecrets: false,
-  },
-  references: [],
-};
-
-const mockActionInfo = {
-  actionTypeId: mockAction.attributes.actionTypeId,
-  name: mockAction.attributes.name,
-  config: mockAction.attributes.config,
-  secrets: mockAction.attributes.secrets,
-  actionId: mockAction.id,
-  rawAction: mockAction.attributes,
-};
 
 beforeAll(() => {
   fakeTimer = sinon.useFakeTimers();
@@ -109,9 +82,15 @@ const services = {
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 
+const unsecuredServices = {
+  log: jest.fn(),
+  savedObjectsClient: savedObjectsRepositoryMock.create(),
+};
+
 const actionExecutorInitializerParams = {
   logger: loggingSystemMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
+  getUnsecuredServices: jest.fn().mockReturnValue(unsecuredServices),
   actionTypeRegistry,
   getActionsAuthorizationWithRequest: jest.fn().mockReturnValue(actionsAuthorizationMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
@@ -133,7 +112,6 @@ describe('Task Runner Factory', () => {
     jest.resetAllMocks();
     jest.clearAllMocks();
     actionExecutorInitializerParams.getServices.mockReturnValue(services);
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
   });
 
   test(`throws an error if factory isn't initialized`, () => {
@@ -1098,135 +1076,20 @@ describe('Task Runner Factory', () => {
     expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
   });
 
-  test('loadIndirectParams fetches taskParams and actionInfo and returns the rawAction', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-    });
-
-    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '3',
-      type: 'action_task_params',
-      attributes: {
-        actionId: '2',
-        params: { baz: true },
-        executionId: '123abc',
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
-      references: [
-        {
-          id: '9',
-          name: 'actionRef',
-          type: 'action',
-        },
-      ],
-    });
-
-    const result = await taskRunner.loadIndirectParams();
-
-    expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
-    expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
-      'action_task_params',
-      '3',
-      { namespace: 'namespace-test' }
-    );
-    expect(mockedActionExecutor.getActionInfoInternal).toHaveBeenCalledWith(
-      '9',
-      expect.any(CoreKibanaRequest),
-      'test'
-    );
-
-    expect(result).toEqual({
-      data: {
-        indirectParams: mockActionInfo.rawAction,
-        actionInfo: mockActionInfo,
-        taskParams: {
-          attributes: {
-            actionId: '9',
-            apiKey: 'MTIzOmFiYw==',
-            executionId: '123abc',
-            params: {
-              baz: true,
-            },
-          },
-          id: '3',
-          references: [
-            {
-              id: '9',
-              name: 'actionRef',
-              type: 'action',
-            },
-          ],
-          type: 'action_task_params',
-        },
-      },
-    });
-  });
-
-  test("loadIndirectParams returns error when it can't fetch the actionInfo", async () => {
+  test('throws error if it cannot fetch task data', async () => {
     jest.resetAllMocks();
     const error = new Error('test');
-    mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(error);
 
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
     });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '3',
-      type: 'action_task_params',
-      attributes: {
-        actionId: '2',
-        params: { baz: true },
-        executionId: '123abc',
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
-      references: [
-        {
-          id: '9',
-          name: 'actionRef',
-          type: 'action',
-        },
-      ],
-    });
-
-    const result = await taskRunner.loadIndirectParams();
-
-    expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
-    expect(mockedActionExecutor.getActionInfoInternal).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({ error });
-  });
-
-  test('throws error if it cannot fetch task or action data', async () => {
-    jest.resetAllMocks();
-    const error = new Error('test');
-    mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
-
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-    });
-    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '3',
-      type: 'action_task_params',
-      attributes: {
-        actionId: '2',
-        params: { baz: true },
-        executionId: '123abc',
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
-      references: [
-        {
-          id: '9',
-          name: 'actionRef',
-          type: 'action',
-        },
-      ],
-    });
 
     try {
       await taskRunner.run();
     } catch (e) {
+      expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
       expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
       expect(e).toEqual(error);
     }

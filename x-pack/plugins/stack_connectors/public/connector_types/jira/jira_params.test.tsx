@@ -37,6 +37,7 @@ const actionParams = {
       priority: 'High',
       externalId: null,
       parent: null,
+      otherFields: null,
     },
     comments: [],
   },
