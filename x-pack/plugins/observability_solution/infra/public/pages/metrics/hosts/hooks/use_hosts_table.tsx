@@ -27,7 +27,7 @@ import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useMetricsDataViewContext } from './use_metrics_data_view';
 import { ColumnHeader } from '../components/table/column_header';
-import { TABLE_COLUMN_LABEL } from '../translations';
+import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 
@@ -118,10 +118,6 @@ const sortTableData =
   };
 
 /**
- * Columns translations
- */
-
-/**
  * Build a table columns and items starting from the snapshot nodes.
  */
 export const useHostsTable = () => {
@@ -207,6 +203,8 @@ export const useHostsTable = () => {
     return items.sort(sortTableData(sorting)).slice(startIndex, endIndex);
   }, [items, pagination, sorting]);
 
+  const metricColumnsWidth = displayAlerts ? '11%' : '15%';
+
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
       {
@@ -231,7 +229,14 @@ export const useHostsTable = () => {
       ...(displayAlerts
         ? [
             {
-              name: TABLE_COLUMN_LABEL.alertsCount,
+              name: (
+                <ColumnHeader
+                  label={TABLE_COLUMN_LABEL.alertsCount}
+                  toolTip={METRICS_TOOLTIP.alertsCount}
+                  showDocumentationLink={false}
+                />
+              ),
+              width: '95px',
               field: 'alertsCount',
               sortable: true,
               'data-test-subj': 'hostsView-tableRow-alertsCount',
@@ -240,18 +245,18 @@ export const useHostsTable = () => {
                   return null;
                 }
                 return (
-                  <EuiToolTip position="top" content={TABLE_COLUMN_LABEL.alertsCount}>
+                  <EuiToolTip position="top" content={TABLE_CONTENT_LABEL.activeAlerts}>
                     <EuiBadge
                       iconType="warning"
                       color="danger"
                       onClick={() => {
                         setProperties({ detailsItemId: row.id === detailsItemId ? null : row.id });
                       }}
-                      onClickAriaLabel={TABLE_COLUMN_LABEL.alertsCount}
+                      onClickAriaLabel={TABLE_CONTENT_LABEL.activeAlerts}
                       iconOnClick={() => {
                         setProperties({ detailsItemId: row.id === detailsItemId ? null : row.id });
                       }}
-                      iconOnClickAriaLabel={TABLE_COLUMN_LABEL.alertsCount}
+                      iconOnClickAriaLabel={TABLE_CONTENT_LABEL.activeAlerts}
                     >
                       {alertsCount}
                     </EuiBadge>
@@ -270,7 +275,7 @@ export const useHostsTable = () => {
         render: (title: HostNodeRow['title']) => (
           <EntryTitle title={title} onClick={() => reportHostEntryClick(title)} />
         ),
-        width: '20%',
+        width: displayAlerts ? '15%' : '20%',
       },
       {
         name: (
@@ -280,6 +285,7 @@ export const useHostsTable = () => {
             formula={formulas?.cpuUsage.value}
           />
         ),
+        width: metricColumnsWidth,
         field: 'cpu',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-cpuUsage',
@@ -294,6 +300,7 @@ export const useHostsTable = () => {
             formula={formulas?.normalizedLoad1m.value}
           />
         ),
+        width: metricColumnsWidth,
         field: 'normalizedLoad1m',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-normalizedLoad1m',
@@ -308,6 +315,7 @@ export const useHostsTable = () => {
             formula={formulas?.memoryUsage.value}
           />
         ),
+        width: metricColumnsWidth,
         field: 'memory',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memoryUsage',
@@ -322,6 +330,7 @@ export const useHostsTable = () => {
             formula={formulas?.memoryFree.value}
           />
         ),
+        width: metricColumnsWidth,
         field: 'memoryFree',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memoryFree',
@@ -336,6 +345,7 @@ export const useHostsTable = () => {
             formula={formulas?.diskUsage.value}
           />
         ),
+        width: metricColumnsWidth,
         field: 'diskSpaceUsage',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-diskSpaceUsage',
@@ -350,6 +360,7 @@ export const useHostsTable = () => {
             formula={formulas?.rx.value}
           />
         ),
+        width: '10%',
         field: 'rx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
@@ -364,6 +375,7 @@ export const useHostsTable = () => {
             formula={formulas?.tx.value}
           />
         ),
+        width: '10%',
         field: 'tx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',
@@ -383,6 +395,7 @@ export const useHostsTable = () => {
       reportHostEntryClick,
       setProperties,
       displayAlerts,
+      metricColumnsWidth,
     ]
   );
 
