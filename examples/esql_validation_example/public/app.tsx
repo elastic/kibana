@@ -123,7 +123,7 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
               onChange={(optionId) => {
                 setCallbacksEnabled({
                   ...callbacksEnabled,
-                  [optionId]: !callbacksEnabled[optionId],
+                  [optionId]: !callbacksEnabled[optionId as keyof typeof callbacksEnabled],
                 });
               }}
             />
