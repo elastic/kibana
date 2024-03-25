@@ -20,7 +20,7 @@ import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { format as formatUrl } from 'url';
 
 import supertest from 'supertest';
-import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
+import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import {
   removeMonitorEmptyValues,
@@ -175,7 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
           expiration: '12d',
           kibana_role_descriptors: {
             uptime_save: {
-              elasticsearch: serviceApiKeyPrivileges,
+              elasticsearch: getServiceApiKeyPrivileges(false),
               kibana: [
                 {
                   base: [],
@@ -218,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
           expiration: '12d',
           kibana_role_descriptors: {
             uptime_save: {
-              elasticsearch: serviceApiKeyPrivileges,
+              elasticsearch: getServiceApiKeyPrivileges(false),
               kibana: [
                 {
                   base: [],
