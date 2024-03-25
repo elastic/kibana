@@ -151,6 +151,7 @@ export const rolesManagementApp = Object.freeze({
                           buildFlavor={buildFlavor}
                           i18nStart={i18nStart}
                           theme={themeServiceStart}
+                          cloudOrgUrl={cloud?.organizationUrl}
                         />
                       </Route>
                       <Route path="/edit/:roleName?">
