@@ -20,7 +20,7 @@ import {
   EuiIcon,
   EuiFlexGrid,
   EuiAvatar,
-  useEuiTheme
+  useEuiTheme,
 } from '@elastic/eui';
 
 interface UseCaseOption {
@@ -168,7 +168,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     ? options.find((option) => option.id === selectedId)
     : undefined;
 
-    const {euiTheme} = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiPanel hasBorder>
@@ -191,6 +191,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               onMouseEnter={() => setHoveredId(option.id)}
               onMouseLeave={() => setHoveredId(undefined)}
             >
+              {/* Using EuiSpacer instead of EuiFlexGroup to ensure spacing is part of hit area for mouse hover effect */}
               {index > 0 && <EuiSpacer size="m" />}
               <EuiCheckableCard
                 id={option.id}
