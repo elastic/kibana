@@ -6,9 +6,9 @@
  */
 
 import type { ErrorToastOptions } from '@kbn/core/public';
-import { EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, logicalCSS, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
@@ -24,21 +24,7 @@ import {
 } from './translations';
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
-
-const LINE_CLAMP = 3;
-const Title = styled.span`
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: ${LINE_CLAMP};
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
-`;
-const EuiTextStyled = styled(EuiText)`
-  ${({ theme }) => `
-    margin-bottom: ${theme.eui?.paddingSizes?.s ?? 8}px;
-  `}
-`;
+import { TruncatedText } from '../components/truncated_text';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
@@ -161,7 +147,7 @@ export const useCasesToast = () => {
         return toasts.addSuccess({
           color: 'success',
           iconType: 'check',
-          title: toMountPoint(<Title>{renderTitle}</Title>),
+          title: toMountPoint(<TruncatedText text={renderTitle} />),
           text: toMountPoint(
             <CaseToastSuccessContent
               content={renderContent}
@@ -200,12 +186,19 @@ export const CaseToastSuccessContent = ({
   onViewCaseClick?: () => void;
   content?: string;
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <>
       {content !== undefined ? (
-        <EuiTextStyled size="s" data-test-subj="toaster-content-sync-text">
+        <EuiText
+          size="s"
+          css={css`
+            ${logicalCSS('margin-bottom', euiTheme.size.s)};
+          `}
+          data-test-subj="toaster-content-sync-text"
+        >
           {content}
-        </EuiTextStyled>
+        </EuiText>
       ) : null}
       {onViewCaseClick !== undefined ? (
         <EuiButtonEmpty

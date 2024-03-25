@@ -15,7 +15,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
 import { UserActionTypes } from '../../../common/types/domain';
-import { decodeOrThrow } from '../../../common/api';
+import { decodeOrThrow } from '../../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,

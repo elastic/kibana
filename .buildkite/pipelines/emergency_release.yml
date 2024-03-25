@@ -17,3 +17,4 @@ steps:
       env:
         REMOTE_SERVICE_CONFIG: "${EMERGENCY_RELEASE_REMOTE_SERVICE_CONFIG}"
         SERVICE_COMMIT_HASH: "${VERSION}"
+        DRY_RUN: "${DRY_RUN:-false}"

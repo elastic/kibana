@@ -112,6 +112,12 @@ export const allowedExperimentalValues = Object.freeze({
   expandableEventFlyoutEnabled: false,
 
   /**
+   * Enables expandable flyout in timeline
+   */
+  expandableTimelineFlyoutEnabled: false,
+  /*
+
+  /**
    * Enables new Set of filters on the Alerts page.
    */
   alertsPageFiltersEnabled: true,
@@ -168,11 +174,6 @@ export const allowedExperimentalValues = Object.freeze({
    * and associated callout in the UI
    */
   riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables alerts suppression for indicator match rules
-   */
-  alertSuppressionForIndicatorMatchRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
