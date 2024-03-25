@@ -6,14 +6,13 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { InspectResponse } from '../../../../../public/types';
 import type { GeoItem, TopNetworkTablesEcsField } from '../common';
-import type { CursorType, Maybe, TotalValue, GenericBuckets } from '../../../common';
+import type { CursorType, Inspect, Maybe, TotalValue, GenericBuckets } from '../../../common';
 
 export interface NetworkTopNFlowStrategyResponse extends IEsSearchResponse {
   edges: NetworkTopNFlowEdges[];
   totalCount: number;
-  inspect?: InspectResponse;
+  inspect?: Inspect & { response?: string[] };
 }
 
 export type NetworkTopNFlowCountStrategyResponse = NetworkTopNFlowStrategyResponse;

@@ -19,50 +19,47 @@ import type {
 } from '../../../../common/search_strategy/security_solution';
 import type { EndpointAppContext } from '../../../endpoint/types';
 
-export interface SecuritySolutionBasicFactory<T extends FactoryQueryTypes> {
+export interface ParseDeps {
+  esClient: IScopedClusterClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  endpointContext: EndpointAppContext;
+  request: KibanaRequest;
+  dsl: ISearchRequestParams;
+  spaceId?: string;
+  ruleDataClient?: IRuleDataClient | null;
+}
+
+export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
   buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
   parse: (
     options: StrategyRequestType<T>,
     response: IEsSearchResponse,
-    deps: {
-      esClient: IScopedClusterClient;
-      savedObjectsClient: SavedObjectsClientContract;
-      endpointContext: EndpointAppContext;
-      request: KibanaRequest;
-      dsl: ISearchRequestParams;
-      spaceId?: string;
-      ruleDataClient?: IRuleDataClient | null;
-    }
+    deps?: ParseDeps
   ) => Promise<StrategyResponseType<T>>;
 }
 
+export interface ParseWithCountDeps extends Omit<ParseDeps, 'dsl'> {
+  dsls: [ISearchRequestParams, ISearchRequestParams];
+}
 export interface SecuritySolutionWithCountFactory<T extends FactoryQueryTypes> {
   buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
   buildCountDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
-  parseResponses: (
+  parse: (
     options: StrategyRequestType<T>,
     responses: [IEsSearchResponse, IEsSearchResponse],
-    deps: {
-      esClient: IScopedClusterClient;
-      savedObjectsClient: SavedObjectsClientContract;
-      endpointContext: EndpointAppContext;
-      request: KibanaRequest;
-      dsls: [ISearchRequestParams, ISearchRequestParams];
-      spaceId?: string;
-      ruleDataClient?: IRuleDataClient | null;
-    }
+    deps: ParseWithCountDeps
   ) => Promise<StrategyResponseType<T>>;
 }
 
-export type SecuritySolutionFactory<T extends FactoryQueryTypes> =
-  | SecuritySolutionBasicFactory<T>
+export type SecuritySolutionSearchStrategyFactory<T extends FactoryQueryTypes> =
+  | SecuritySolutionFactory<T>
   | SecuritySolutionWithCountFactory<T>;
 
 export const isSecuritySolutionWithCountFactory = <T extends FactoryQueryTypes>(
-  factory: SecuritySolutionFactory<T>
+  factory: SecuritySolutionSearchStrategyFactory<T>
 ): factory is SecuritySolutionWithCountFactory<T> => {
   return (
-    (factory as SecuritySolutionWithCountFactory<T>).buildCountDsl != null &&
-    (factory as SecuritySolutionWithCountFactory<T>).parseResponses != null
+    (factory as SecuritySolutionWithCountFactory<T>).buildCountDsl != null
+    // &&    (factory as SecuritySolutionWithCountFactory<T>).parseResponses != null
   );
 };

@@ -43,6 +43,13 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.topNFlowCount,
             flowTarget: FlowTargetSourceDest.source,
+            sort: { field: NetworkTopTablesFields.bytes_in, direction: Direction.desc },
+            pagination: {
+              activePage: 0,
+              cursorStart: 0,
+              fakePossibleCount: 0,
+              querySize: 10,
+            },
             timerange: {
               interval: '12h',
               to: TO,

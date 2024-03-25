@@ -69,7 +69,7 @@ export const securitySolutionSearchStrategyProvider = (
 
       return combineLatest([search, countSearch]).pipe(
         mergeMap((responses) =>
-          queryFactory.parseResponses(parsedRequest, responses, {
+          queryFactory.parse(parsedRequest, responses, {
             ...parseDeps,
             dsls: [dsl, countDsl],
           })

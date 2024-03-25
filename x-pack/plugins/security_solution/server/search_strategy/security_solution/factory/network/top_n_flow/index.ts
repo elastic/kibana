@@ -15,7 +15,7 @@ import type {
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import type { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory, SecuritySolutionWithCountFactory } from '../../types';
 
 import { getTopNFlowEdges } from './helpers';
 import {
@@ -24,7 +24,7 @@ import {
   buildTopNFlowFullQuery,
 } from './query.top_n_flow_network.dsl';
 
-export const networkTopNFlow: SecuritySolutionFactory<NetworkQueries.topNFlow> = {
+export const networkTopNFlow: SecuritySolutionWithCountFactory<NetworkQueries.topNFlow> = {
   buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
@@ -32,7 +32,7 @@ export const networkTopNFlow: SecuritySolutionFactory<NetworkQueries.topNFlow> =
     return buildTopNFlowQuery(options);
   },
   buildCountDsl: (options) => buildTopNFlowCountQuery(options),
-  parseResponses: async (
+  parse: async (
     options,
     [searchResponse, countResponse],
     { dsls }
@@ -63,18 +63,22 @@ export const networkTopNFlowCount: SecuritySolutionFactory<NetworkQueries.topNFl
     }
     return buildTopNFlowFullQuery(options);
   },
-  parse: async (options, response, { dsl }): Promise<NetworkTopNFlowStrategyResponse> => {
+  parse: async (options, response, deps): Promise<NetworkTopNFlowStrategyResponse> => {
     const { cursorStart, querySize } = options.pagination;
     const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
     const edges = networkTopNFlowEdges.splice(cursorStart, querySize - cursorStart);
     const totalCount = getOr(0, 'rawResponse.aggregations.top_n_flow_count.value', response);
+
+    const dsl = deps?.dsl
+      ? inspectStringifyObject(deps.dsl)
+      : inspectStringifyObject(buildTopNFlowFullQuery(options));
 
     return {
       ...response,
       edges,
       totalCount,
       inspect: {
-        dsl: [inspectStringifyObject(dsl)],
+        dsl: [dsl],
         response: [inspectStringifyObject(response.rawResponse)],
       },
     };
