@@ -2341,9 +2341,9 @@ The possible scenarios are:
     <tr>
       <td style="border-right:3px solid black">Customization and upstream update conflict (ABC)</td>
       <td><code>[linux,network]</code></td>
-      <td><code>[linux,ml,security]</code></td>
-      <td style="border-right:3px solid black"><code>[aws, cloudfront]</code></td>
-      <td><code>[linux,ml,security,<br>aws,cloudfront]</code></td>
+      <td><code>[windows, host]</code></td>
+      <td style="border-right:3px solid black"><code>[linux, ml]</code></td>
+      <td><code>[windows, host, ml]</code></td>
       <td><code>NO</code></td>
     </tr>
   </tbody>
