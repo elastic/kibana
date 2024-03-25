@@ -25,7 +25,7 @@ import { DataViewMenuItem } from './sub_components/data_view_menu_item';
 import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
 import { DataSourceSelectorProps } from './types';
-import { createDataViewsStatusItem } from './utils';
+import { buildIntegrationsTree, createDataViewsStatusItem } from './utils';
 import { AddDataButton } from './sub_components/add_data_button';
 import { IntegrationsList } from './sub_components/integrations_list';
 import { DataViewList } from './sub_components/data_views_list';
@@ -58,10 +58,10 @@ export function DataSourceSelector({
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
   onSelectionChange,
+  onUncategorizedLoad,
   onUncategorizedReload,
   onUncategorizedSearch,
   onUncategorizedSort,
-  onUncategorizedTabClick,
 }: DataSourceSelectorProps) {
   const {
     search,
@@ -94,52 +94,16 @@ export function DataSourceSelector({
     onSelectionChange,
   });
 
-  // const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
-  //   if (!integrations || integrations.length === 0) {
-  //     return {
-  //       items: [
-  //         createIntegrationStatusItem({
-  //           data: integrations,
-  //           error: integrationsError,
-  //           isLoading: isLoadingIntegrations,
-  //           onRetry: onIntegrationsReload,
-  //         }),
-  //       ],
-  //       panels: [],
-  //     };
-  //   }
-
-  //   return buildIntegrationsTree({
-  //     integrations,
-  //     onDatasetSelected: selectDataset,
-  //     spyRef: setSpyRef,
-  //   });
-  // }, [
-  //   integrations,
-  //   integrationsError,
-  //   isLoadingIntegrations,
-  //   selectDataset,
-  //   onIntegrationsReload,
-  //   setSpyRef,
-  // ]);
-
-  // const uncategorizedItems = useMemo(() => {
-  //   if (!datasets || datasets.length === 0) {
-  //     return [
-  //       createUncategorizedStatusItem({
-  //         data: datasets,
-  //         error: datasetsError,
-  //         isLoading: isLoadingUncategorized,
-  //         onRetry: onUncategorizedReload,
-  //       }),
-  //     ];
-  //   }
-
-  //   return datasets.map((dataset) => ({
-  //     name: dataset.title,
-  //     onClick: () => selectDataset(dataset),
-  //   }));
-  // }, [datasets, datasetsError, isLoadingUncategorized, selectDataset, onUncategorizedReload]);
+  const integrationItems = useMemo(
+    () =>
+      buildIntegrationsTree({
+        datasets,
+        integrations,
+        onDatasetSelected: selectDataset,
+        onUncategorizedLoad,
+      }),
+    [integrations, datasets, selectDataset, onUncategorizedLoad]
+  );
 
   const integrationsStatusPrompt = useMemo(
     () => (
@@ -191,15 +155,6 @@ export function DataSourceSelector({
       onClick: switchToIntegrationsTab,
       'data-test-subj': 'dataSourceSelectorIntegrationsTab',
     },
-    // {
-    //   id: UNCATEGORIZED_TAB_ID,
-    //   name: uncategorizedLabel,
-    //   onClick: () => {
-    //     onUncategorizedTabClick(); // Lazy-load uncategorized datasets only when accessing the Uncategorized tab
-    //     switchToUncategorizedTab();
-    //   },
-    //   'data-test-subj': 'dataSourceSelectorUncategorizedTab',
-    // },
     {
       id: DATA_VIEWS_TAB_ID,
       name: dataViewsLabel,
@@ -239,9 +194,11 @@ export function DataSourceSelector({
       while the tradeoff of keeping the contents in memory provide a better UX. */}
       {/* Integrations tab content */}
       <IntegrationsList
-        items={integrations}
+        items={integrationItems}
         hidden={tabId !== INTEGRATIONS_TAB_ID}
         onScrollEnd={scrollToIntegrationsBottom}
+        onSortByName={sortByOrder}
+        search={search}
         statusPrompt={integrationsStatusPrompt}
       >
         <SearchControls

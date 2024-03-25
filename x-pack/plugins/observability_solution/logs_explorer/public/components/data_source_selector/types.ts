@@ -76,7 +76,7 @@ export interface DataSourceSelectorProps {
   /* Triggered when retrying to load the data streams */
   onUncategorizedReload: ReloadDatasets;
   /* Triggered when the uncategorized tab is selected */
-  onUncategorizedTabClick: LoadDatasets;
+  onUncategorizedLoad: LoadDatasets;
   /* Triggered when the selection is updated */
   onSelectionChange: DataSourceSelectionChangeHandler;
 }

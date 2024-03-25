@@ -152,7 +152,7 @@ Basic.args = {
   onDataViewsReload: () => alert('Reload data views...'),
   onDataViewsTabClick: () => console.log('Load data views...'),
   onIntegrationsReload: () => alert('Reload integrations...'),
-  onUncategorizedTabClick: () => console.log('Load uncategorized streams...'),
+  onUncategorizedLoad: () => console.log('Load uncategorized streams...'),
   onUncategorizedReload: () => alert('Reloading streams...'),
 };
 

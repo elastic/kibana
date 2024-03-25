@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
   useGeneratedHtmlId,
@@ -16,14 +15,13 @@ import {
   EuiText,
   EuiIcon,
   EuiPanel,
-  EuiListGroup,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useIntersectionRef } from '../../../hooks/use_intersection_ref';
-import { INTEGRATIONS_PANEL_ID } from '../constants';
+import { nameColumnLabel } from '../constants';
 
 interface IntegrationsListProps {
   items: unknown[];
@@ -36,29 +34,27 @@ export function IntegrationsList({
   items,
   statusPrompt,
   onScrollEnd,
+  onSortByName,
+  search,
   ...props
 }: IntegrationsListProps) {
   const [spyRef] = useIntersectionRef({ onIntersecting: onScrollEnd });
 
-  const shouldDisplayPrompt = Boolean(!items || items.length === 0);
+  const shouldDisplayPrompt = Boolean(!items || items.length <= 1);
 
   return (
     <EuiPanel
       {...props}
-      id={INTEGRATIONS_PANEL_ID}
-      data-test-subj="integrationsContextMenu"
+      data-test-subj="dataSourceSelectorIntegrationsList"
       paddingSize="none"
       hasShadow={false}
     >
       {children}
-      {/* TODO: get real numbers from api */}
-      <Counter totalIntegrationsCount={items?.length ?? 0} totalDatasetsCount={50} />
       {rule}
-      <Header />
-      {rule}
-      {shouldDisplayPrompt && statusPrompt}
       {!shouldDisplayPrompt && (
         <IntegrationListWrapper className="eui-yScroll" paddingSize="none" hasShadow={false}>
+          <Header onSortByName={onSortByName} search={search} />
+          {shouldDisplayPrompt && statusPrompt}
           {items.map((integration, pos) => {
             const isLastItem = pos === items.length - 1;
 
@@ -77,7 +73,7 @@ export function IntegrationsList({
 }
 
 function IntegrationItem({ integration }) {
-  const { id, datasets } = integration;
+  const { id, datasets, onClick } = integration;
   const accordionId = useGeneratedHtmlId({ prefix: 'integration', suffix: id });
 
   const integrationIcon = useMemo(
@@ -98,30 +94,40 @@ function IntegrationItem({ integration }) {
   );
 
   return (
-    <EuiAccordion id={accordionId} buttonContent={integrationButton}>
+    <EuiAccordion
+      id={accordionId}
+      buttonContent={integrationButton}
+      buttonContentClassName="eui-fullWidth"
+      data-test-subj={integration.id}
+      {...(onClick && { onToggle: onClick })}
+    >
+      {rule}
       {datasets.map((dataset) => (
-        <>
-          {rule}
-          <DatasetItem dataset={dataset} icon={integrationIcon} />
-        </>
+        <DatasetItem dataset={dataset} icon={integrationIcon} />
       ))}
     </EuiAccordion>
   );
 }
 
-function Header(props) {
+function Header({ onSortByName, search, ...props }) {
+  const handleNameSort = (sortOrder) => onSortByName({ ...search, sortOrder });
+
   return (
-    <ListRow withIndentation {...props}>
-      <NameColumn component={Sortable}>
-        <EuiText size="xs">
-          <strong>
-            {i18n.translate('xpack.logsExplorer.headerListItem.nameTextLabel', {
-              defaultMessage: 'Name',
-            })}
-          </strong>
-        </EuiText>
-      </NameColumn>
-    </ListRow>
+    <div css={headerStyle}>
+      <ListRow withIndentation {...props}>
+        <NameColumn component={Sortable} sortOrder={search.sortOrder} onSort={handleNameSort}>
+          <EuiText size="xs">
+            <strong>{nameColumnLabel}</strong>
+          </EuiText>
+        </NameColumn>
+        <DatasetCountColumn>
+          <EuiText size="xs" color="subdued">
+            <span>#</span>
+          </EuiText>
+        </DatasetCountColumn>
+      </ListRow>
+      {rule}
+    </div>
   );
 }
 
@@ -131,27 +137,30 @@ function IntegrationItemButton({ integration, icon, ...props }) {
       <NameColumn>
         <TextWithIcon text={integration.title} icon={icon} />
       </NameColumn>
+      <DatasetCountColumn>
+        <EuiText size="xs" color="subdued">
+          <span>{integration.datasets.length}</span>
+        </EuiText>
+      </DatasetCountColumn>
     </ListRow>
   );
 }
 
 function DatasetItem({ dataset, icon, ...props }) {
   return (
-    <ListRow withIndentation {...props}>
-      <NameColumn component={ButtonWithIcon} text={dataset.name} icon={icon} />
+    <ListRow withIndentation css={datasetItemStyle} {...props}>
+      <NameColumn
+        component={ButtonWithIcon}
+        text={dataset.title}
+        icon={icon}
+        onClick={dataset.onClick}
+      />
     </ListRow>
   );
 }
 
-function ListRow({ withIndentation = false, ...props }) {
-  return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      css={withIndentation ? indentationStyle : undefined}
-      {...props}
-    />
-  );
+function ListRow(props) {
+  return <StyledListRow gutterSize="s" alignItems="center" {...props} />;
 }
 
 function TextWithIcon({ icon, text, ...props }) {
@@ -175,14 +184,24 @@ function NameColumn(props) {
   return <ListColumn grow={3} {...props} />;
 }
 
+function DatasetCountColumn(props) {
+  return <ListColumn grow={false} {...props} />;
+}
+
 // TODO: use this column to compose the integrations table using the right reserved space
 // function LastActivityColumn(props) {
 //   return <ListColumn grow={2} {...props} />;
 // }
 
-function Sortable({ children, isAscending = false, ...props }) {
+function Sortable({ children, sortOrder = 'asc', onSort, ...props }) {
+  const isAscending = sortOrder === 'asc';
+
+  const handleSort = () => {
+    onSort(isAscending ? 'desc' : 'asc');
+  };
+
   return (
-    <button {...props}>
+    <button {...props} onClick={handleSort}>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -190,22 +209,6 @@ function Sortable({ children, isAscending = false, ...props }) {
         </EuiFlexItem>
       </EuiFlexGroup>
     </button>
-  );
-}
-
-function Counter({ totalDatasetsCount, totalIntegrationsCount }) {
-  return (
-    <EuiText size="xs" color="subdued" css={counterStyle}>
-      <p>
-        {i18n.translate('xpack.logsExplorer.dataSourceSelector.counter', {
-          defaultMessage: '{totalIntegrationsCount} integrations, {totalDatasetsCount} datasets',
-          values: {
-            totalDatasetsCount,
-            totalIntegrationsCount,
-          },
-        })}
-      </p>
-    </EuiText>
   );
 }
 
@@ -218,11 +221,21 @@ const IntegrationListWrapper = styled(EuiPanel)`
 `;
 
 const indentationStyle = css`
-  padding-left: ${euiThemeVars.euiSizeL};
-  margin-inline-start: ${euiThemeVars.euiSizeXS};
+  padding-left: calc(${euiThemeVars.euiSizeL} + ${euiThemeVars.euiSizeXS});
 `;
 
-const counterStyle = css`
-  padding-left: ${euiThemeVars.euiSizeS};
-  margin-bottom: ${euiThemeVars.euiSizeS};
+const headerStyle = css`
+  position: sticky;
+  top: 0;
+  background-color: ${euiThemeVars.euiColorEmptyShade};
+  z-index: ${euiThemeVars.euiZHeader};
+`;
+
+const datasetItemStyle = css`
+  border-top: 1px solid ${euiThemeVars.euiColorLightestShade};
+`;
+
+const StyledListRow = styled(EuiFlexGroup)`
+  padding-right: ${euiThemeVars.euiSizeL};
+  ${({ withIndentation = false }) => (withIndentation ? indentationStyle : '')}
 `;

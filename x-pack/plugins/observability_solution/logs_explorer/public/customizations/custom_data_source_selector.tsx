@@ -95,7 +95,7 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
       onUncategorizedReload={reloadDatasets}
       onUncategorizedSearch={searchDatasets}
       onUncategorizedSort={sortDatasets}
-      onUncategorizedTabClick={loadDatasets}
+      onUncategorizedLoad={loadDatasets}
     />
   );
 });

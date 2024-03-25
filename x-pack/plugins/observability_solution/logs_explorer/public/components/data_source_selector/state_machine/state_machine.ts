@@ -26,7 +26,7 @@ import {
 export const createPureDataSourceSelectorStateMachine = (
   initialContext: Partial<DefaultDataSourceSelectorContext> = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBlA9gVwCcBjMLMAGzCPRwIDoAHHJgNzHqPJ1kgGIAVAPIBxYQBkAogG0ADAF1EoJrACW6FTgB2ikAA9EADgBMAGhABPRAEYArFbozHMowHYjAFg8A2AMxuAvv5maJi4hCRklNS0jMw4bPTMYJq8AMJigljS8jrKahraSHrWVjIudEY+7n5e7gYy9T5mlgg+lXQ2Lga2Mu5eMn4+VoHBGNj4xKQUVDT0TKzsdEkpQqKSsgpFeepaOvoIVqXlldUutfWNzYh+7g5dVkZeXgCcLm5WzyMgIePhU1GzWILRIMZK8LKSVL8AD6AEExGJoRlhFgNrluPldkV9qVXhUqjU6g0BlcEJ5bp1us5nj4bGUGl8fmFJpEZjF5vFFss6CpNOgwFACBgCrB+KgAEbggDqAEl+KkABLQoTQ5Cw-iw6EANRlEilWGVsIAQmithidoVQPt3HY6AZaa8vHTurSXKS3j46FZ3DIvFYndV+r7GWNmRFptE5nEEktQZoeXyBUKLaKJeDUgAlQQI5WCaEygBy-Akwgz6plggLBqNgn4QgAsqalOaCnsSm6LIgbAZyr6jDYXjI7N2bJ8gt9QxNwwD2dGuXGE-zBcKtKnJVlYRnFdCjQBNaEF2H17KbZuqC1tg4GW4vb1HGxVGx9Gykvqep1eIwGXz9Z7VV4hqEU7-GyUbArGySLkmK6aGu4KCBmMJ7tCCHIBIGZNiA2ytti1jPEYdptL6niVP6D5NJ2rQ+hUdKOD4XguAMziAb8LIRoCHIxtyvJLsmIpiuuEiQjCaoalk-CYdhWJWtYDTHASZxEpclHuC4Nh3PULjPFYbjuB8XgsWGIGRkCnIgpBEBjFqKhgAA7nBWCyvKSoqoWxaluWlYGhqJo5Ga544TJZK2vao5nM6Viuu6RgEbUxFMZ+dguIZwGsiZnHzhZVk2fZAnghIm7bshh7HpJLbScUCD1DeNiVPRzz4U+dikqOBj4u4dRnIcBjPD2KV-GlHFzuZ8aWZg1l2Q5CFIfuqHoWVAUVfs3QEVpRgNb0n79t2r4uLcxgugYnTPL0an9WxM5gWZEGjdlk15RCEhQqq6qajqeoLZilqVaUPbtYSFwkpRamxbUDwyFYPWqcY53TqBdA8ACBR0CwqDkCoY28lAg0FLwn0XrhCCuOpEM2J0lRHRDvWkqU9EdLYnRDG8g7uLDxmAojMzI6j6OY5o2PsbjUhWKeWHld9+zEw4DNuD4lMfAYNNdDIdBOqU22PrYBnjkyqXsTEnPUNzaMY8K-M41oeNGKLUkS4gUuk+Tct0grNP9LFqkNZ7Ol9Gzg0G4LWgI1jlD5cJcI5siqJ+WeX2XopdAdbV1TOC8X6mJRtjXnQe2qVUNL9PRrM65OA36-QhsWsH-Oh49z2ibC4n44FlW1c8drGF023Q14NOeznenHZ4rxDEYfvlwjgfxqoNdgGHT0ia92q6lKzdLYgCdJx4Pip-hxg06PFSQwxVQdb6Y6jEBZeXZPSNB2j5Dz-Xr1NzHYuLXbCCbza2+7+nfd+joD4OWzsTpDCOuPG+ldkYPyfovDUy8Ppv1tpeI4BE6RnC0t0Pof4OwtG9C8RORhIae36O4XBkD4bQKDmNVAE1bJwIjoiKOa9P5oI6GUBivUCG4JpqOAiB19INWAb7EuV8LpUKnnQWh9DGEN1fjbcWqCyjoM4VgnhqkaYM2lk+Xq+FFJVEoSZaht1xo5TkUvd6q9kFKMJg8PE9JXDrRcA8MmGd8ExQpD2IwTE7AnUeIEccmgcAQDgDoXW19QLog-peAAtK4Uk8TbhOBSak5iYjWJw3SsNaJcdCbENJL4RODVer2hkNpXwPYbBGKGuBTg3BIC5IJkFSKHwOgnDqH6c4itKJyxVk+DwRwCFqWLpfTJ7NZzgWWE0lu+wXikn7KtWith6KHDlt6GpkzrrcgABYqFgOgGZ68Dh0wHIsz8TxPBtHcYYPoOiGKHAeGs4YGSjL+yulxBcPFoIpgEkcthpzEqPEeLUSoMVCkGDasOBivpuitReWMt5E8MojWkXdXKEp-nxwHO0x8-Yhx2D8NFLwqsfSMR8M8QuQxRkTnEVkjmU8sX5PcKSP87dSZeB7P6R4thNkVykTzU26hzaMv8nkoKbglaENcH6CGWk5IDj5bfLmQcZ5QEoEyoK3Y2rD1qM8WqxhyFuwaF6T2X4+j9mMNU15esoFSIfpqyqvVkllHJeQk6jEbkHE-LcD4a1IrAK6AEG1kTjFSJkTlR1OICSJxtCI7BLiGgH1qnQYRX4Hmjn9AYQJ-ggA */
+  /** @xstate-layout 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-8nzPA-OfA0uk7MmjPjpg+W0NhwUbMhcubRpVNzwqzk0MZJseo9A9FYJKR1UqBjdJtPoDgCVWxXuSuplQfSjn7kC+4ESjKvwuWjDBmjRb23UI7LlIVanhQ8CzbO-chjSMLnPV8EdOmXKXi45uUBKDcvCkGXq1QqFXCfJzFmAdep1GDsC8MekOVf2Fj-cg5BjVNR6oUiRR1krEjeDal0dAwx6QLuOYwcSdXio0d-VxvDSperxNzXO10XyHX2t6a+MMnDkWDNDHF+L4lAA */
   createMachine<DataSourceSelectorContext, DataSourceSelectorEvent, DataSourceSelectorTypestate>(
     {
       context: { ...DEFAULT_CONTEXT, ...initialContext },
@@ -162,8 +162,7 @@ export const createPureDataSourceSelectorStateMachine = (
         storeDataViewsTabId: assign((_context) => ({ tabId: DATA_VIEWS_TAB_ID })),
         storeSearch: assign((context, event) => {
           if ('search' in event) {
-            const id = context.tabId === INTEGRATIONS_TAB_ID ? context.panelId : context.tabId;
-            context.searchCache.set(id, event.search);
+            context.searchCache.set(context.tabId, event.search);
 
             return {
               search: event.search,
@@ -185,8 +184,8 @@ export const createPureDataSourceSelectorStateMachine = (
             : {}
         ),
         retrieveSearchFromCache: assign((context, event) => {
-          if (event.type === 'SWITCH_TO_INTEGRATIONS_TAB' && 'panelId' in context) {
-            return { search: context.searchCache.get(context.panelId) ?? defaultSearch };
+          if (event.type === 'SWITCH_TO_INTEGRATIONS_TAB' && 'tabId' in context) {
+            return { search: context.searchCache.get(context.tabId) ?? defaultSearch };
           }
           if (event.type === 'SWITCH_TO_DATA_VIEWS_TAB' && 'tabId' in context) {
             return { search: context.searchCache.get(context.tabId) ?? defaultSearch };
@@ -195,7 +194,7 @@ export const createPureDataSourceSelectorStateMachine = (
         }),
         maybeRestoreSearchResult: actions.pure((context, event) => {
           const hasSearchOnIntegrationsTab =
-            event.type === 'SWITCH_TO_INTEGRATIONS_TAB' && context.searchCache.has(context.panelId);
+            event.type === 'SWITCH_TO_INTEGRATIONS_TAB' && context.searchCache.has(context.tabId);
           const hasSearchOnDataViewsTab =
             event.type === 'SWITCH_TO_DATA_VIEWS_TAB' && context.searchCache.has(context.tabId);
 
@@ -253,26 +252,6 @@ export const createDataSourceSelectorStateMachine = ({
       sortDataViews: (context, event) => {
         if ('search' in event) {
           onDataViewsSort(event.search);
-        }
-      },
-      searchIntegrationsStreams: (context, event) => {
-        if ('search' in event) {
-          onIntegrationsStreamsSearch({ ...event.search, integrationId: context.panelId });
-        }
-      },
-      sortIntegrationsStreams: (context, event) => {
-        if ('search' in event) {
-          onIntegrationsStreamsSort({ ...event.search, integrationId: context.panelId });
-        }
-      },
-      searchUncategorized: (_context, event) => {
-        if ('search' in event) {
-          onUncategorizedSearch(event.search);
-        }
-      },
-      sortUncategorized: (_context, event) => {
-        if ('search' in event) {
-          onUncategorizedSort(event.search);
         }
       },
     },

@@ -5,73 +5,49 @@
  * 2.0.
  */
 
-import React, { RefCallback } from 'react';
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import { PackageIcon } from '@kbn/fleet-plugin/public';
+import React from 'react';
 import { Dataset, Integration } from '../../../common/datasets';
 import {
   DATA_SOURCE_SELECTOR_WIDTH,
   noDataViewsDescriptionLabel,
   noDataViewsLabel,
+  uncategorizedLabel,
 } from './constants';
 import { DatasetSelectionHandler } from './types';
 import ListStatus, { ListStatusProps } from './sub_components/list_status';
+import { LoadDatasets } from '../../hooks/use_datasets';
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_SOURCE_SELECTOR_WIDTH,
 });
 
 interface IntegrationsTreeParams {
-  integrations: Integration[];
+  datasets: Dataset[] | null;
+  integrations: Integration[] | null;
   onDatasetSelected: DatasetSelectionHandler;
-  spyRef: RefCallback<HTMLButtonElement>;
+  onUncategorizedLoad: LoadDatasets;
 }
 
-interface IntegrationsTree {
-  items: EuiContextMenuPanelItemDescriptor[];
-  panels: EuiContextMenuPanelDescriptor[];
-}
-
-/**
- * The `EuiContextMenu` component receives a list of panels,
- * each one with a pointer id which is used as a reference for the items to know
- * what panel they refer to.
- * This helper function, starting from a list of integrations,
- * generate the necessary item entries for each integration,
- * and also create a related panel that render the list of data streams for the integration.
- */
 export const buildIntegrationsTree = ({
   integrations,
+  datasets,
   onDatasetSelected,
-  spyRef,
+  onUncategorizedLoad,
 }: IntegrationsTreeParams) => {
-  return integrations.reduce(
-    (integrationsTree: IntegrationsTree, integration, pos) => {
-      const { name, title, version, datasets, icons } = integration;
-      const isLastIntegration = pos === integrations.length - 1;
+  const uncategorizedIntegration = {
+    title: uncategorizedLabel,
+    datasets: datasets ?? [],
+    onClick: onUncategorizedLoad,
+  };
 
-      integrationsTree.items.push({
-        name: title,
-        icon: <PackageIcon packageName={name} version={version} size="m" icons={icons} tryApi />,
-        'data-test-subj': integration.id,
-        panel: integration.id,
-        ...(isLastIntegration && { buttonRef: spyRef }),
-      });
-
-      integrationsTree.panels.push({
-        id: integration.id,
-        title,
-        width: DATA_SOURCE_SELECTOR_WIDTH,
-        items: datasets.map((dataset) => ({
-          name: dataset.title,
-          onClick: () => onDatasetSelected(dataset),
-        })),
-      });
-
-      return integrationsTree;
-    },
-    { items: [], panels: [] }
-  );
+  return [uncategorizedIntegration, ...(integrations ?? [])].map((integration) => ({
+    ...integration,
+    datasets: integration.datasets.map((dataset) => ({
+      ...dataset,
+      title: dataset.getFullTitle(),
+      onClick: () => onDatasetSelected(dataset),
+    })),
+  }));
 };
 
 export const createAllLogsItem = () => {

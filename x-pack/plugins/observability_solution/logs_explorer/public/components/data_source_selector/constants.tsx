@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const POPOVER_ID = 'data-source-selector-popover';
-export const INTEGRATIONS_PANEL_ID = 'data-source-selector-integrations-panel';
 export const INTEGRATIONS_TAB_ID = 'data-source-selector-integrations-tab';
 export const DATA_VIEWS_PANEL_ID = 'data-source-selector-data-views-panel';
 export const DATA_VIEWS_TAB_ID = 'data-source-selector-data-views-tab';
@@ -41,6 +40,11 @@ export const dataViewsLabel = i18n.translate('xpack.logsExplorer.dataSourceSelec
 export const openDiscoverLabel = i18n.translate(
   'xpack.logsExplorer.dataSourceSelector.openDiscover',
   { defaultMessage: 'Opens in Discover' }
+);
+
+export const nameColumnLabel = i18n.translate(
+  'xpack.logsExplorer.dataSourceSelector.nameColumnLabel',
+  { defaultMessage: 'Name' }
 );
 
 export const sortOrdersLabel = i18n.translate('xpack.logsExplorer.dataSourceSelector.sortOrders', {
