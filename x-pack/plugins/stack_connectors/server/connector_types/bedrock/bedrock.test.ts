@@ -173,7 +173,7 @@ describe('BedrockConnector', () => {
 
         expect(mockSigner).toHaveBeenCalledWith(
           {
-            body: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0.5 }),
+            body: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0 }),
             headers: {
               accept: 'application/vnd.amazon.eventstream',
               'Content-Type': 'application/json',
@@ -196,7 +196,7 @@ describe('BedrockConnector', () => {
           method: 'post',
           responseSchema: StreamingResponseSchema,
           responseType: 'stream',
-          data: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0.5 }),
+          data: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0 }),
         });
       });
 
@@ -238,7 +238,7 @@ describe('BedrockConnector', () => {
               { role: 'user', content: 'What is 2+2?' },
             ],
             max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0.5,
+            temperature: 0,
           }),
         });
       });
@@ -284,7 +284,7 @@ describe('BedrockConnector', () => {
               { role: 'user', content: 'What is 2+2?' },
             ],
             max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0.5,
+            temperature: 0,
           }),
         });
       });
@@ -326,7 +326,7 @@ describe('BedrockConnector', () => {
             ...JSON.parse(DEFAULT_BODY),
             messages: [{ role: 'user', content: 'Hello world' }],
             max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0.5,
+            temperature: 0,
           }),
         });
         expect(response.message).toEqual(mockResponseString);
@@ -371,7 +371,7 @@ describe('BedrockConnector', () => {
               { role: 'user', content: 'What is 2+2?' },
             ],
             max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0.5,
+            temperature: 0,
           }),
         });
         expect(response.message).toEqual(mockResponseString);

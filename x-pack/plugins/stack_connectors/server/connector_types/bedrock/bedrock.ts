@@ -295,7 +295,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
 const formatBedrockBody = ({
   messages,
   stopSequences,
-  temperature = 0.5,
+  temperature = 0,
 }: {
   messages: Array<{ role: string; content: string }>;
   stopSequences?: string[];

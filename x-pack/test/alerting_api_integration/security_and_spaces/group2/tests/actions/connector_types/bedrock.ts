@@ -424,7 +424,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 { role: 'user', content: 'What is 2+2?' },
               ],
               max_tokens: DEFAULT_TOKEN_LIMIT,
-              temperature: 0.5,
+              temperature: 0,
             });
             expect(body).to.eql({
               status: 'ok',
