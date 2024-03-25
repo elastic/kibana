@@ -15,7 +15,8 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 
 import { useDatePickerContext } from './use_date_picker_context';
-import { mlTimefilterRefresh$, Refresh } from '../services/timefilter_refresh_service';
+import type { Refresh } from '../services/timefilter_refresh_service';
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 /**
  * Options interface for the `useTimefilter` custom hook.

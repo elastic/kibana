@@ -32,6 +32,8 @@ export const plugin: PluginInitializer<
   return new Plugin(initializerContext);
 };
 
+export type { ConfigSchema } from './plugin';
+
 export {
   enableLegacyUptimeApp,
   syntheticsThrottlingEnabled,
@@ -51,12 +53,10 @@ export {
   uptimeOverviewLocatorID,
 } from '../common';
 
-export type { SloEditLocatorParams } from './locators/slo_edit';
-
+export type { RulesParams } from './locators/rules';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
-
-export { DatePicker } from './pages/overview/components/date_picker/date_picker';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
+export { DatePicker } from './pages/overview/components/date_picker/date_picker';
 
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
 
@@ -68,11 +68,16 @@ export type { TopAlert, AlertSummary, AlertSummaryField };
 
 export { observabilityFeatureId, observabilityAppId } from '../common';
 
+export { useFetchDataViews } from './hooks/use_fetch_data_views';
 export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useSummaryTimeRange } from './hooks/use_summary_time_range';
+export { useGetFilteredRuleTypes } from './hooks/use_get_filtered_rule_types';
+export { useCreateRule } from './hooks/use_create_rule';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
+export { buildEsQuery } from './utils/build_es_query';
+export { KibanaReactStorybookDecorator } from './utils/kibana_react.storybook_decorator';
 
 export type {
   ObservabilityRuleTypeFormatter,
@@ -86,8 +91,10 @@ export { DatePickerContextProvider } from './context/date_picker_context/date_pi
 export { fromQuery, toQuery } from './utils/url';
 export { getAlertSummaryTimeRange } from './utils/alert_summary_widget';
 export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate_bucket_size';
+export type { render } from './utils/test_helper';
 
 export { convertTo } from '../common/utils/formatters/duration';
+export { getElasticsearchQueryOrThrow } from '../common/utils/parse_kuery';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';
 export { WithKueryAutocompletion } from './components/rule_kql_filter/with_kuery_autocompletion';
 export { AutocompleteField } from './components/rule_kql_filter/autocomplete_field';

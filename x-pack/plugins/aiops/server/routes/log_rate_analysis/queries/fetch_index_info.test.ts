@@ -24,9 +24,6 @@ describe('fetch_index_info', () => {
           myKeywordFieldName: { keyword: { aggregatable: true } },
           // Should not end up as a field candidate, it's a keyword but non-aggregatable
           myKeywordFieldNameToBeIgnored: { keyword: { aggregatable: false } },
-          // Should not end up as a field candidate, based on this field caps result it would be
-          // but it will not be part of the mocked search result so will count as unpopulated.
-          myUnpopulatedKeywordFieldName: { keyword: { aggregatable: true } },
           // Should not end up as a field candidate since fields of type number will not be considered
           myNumericFieldName: { number: {} },
         },

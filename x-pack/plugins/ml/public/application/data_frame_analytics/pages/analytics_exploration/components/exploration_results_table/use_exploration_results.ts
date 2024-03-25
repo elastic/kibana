@@ -7,9 +7,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
@@ -34,8 +34,8 @@ import {
   type UseIndexDataReturnType,
 } from '@kbn/ml-data-grid';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { MlApiServices } from '../../../../../services/ml_api_service';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlApiServices } from '../../../../../services/ml_api_service';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 
 import { getIndexData, getIndexFields } from '../../../../common';

@@ -50,7 +50,7 @@ describe.skip(
     const ADDITIONAL_ENTRY = 'host.hostname';
 
     beforeEach(() => {
-      cy.task('esArchiverUnload', 'endpoint');
+      cy.task('esArchiverUnload', { archiveName: 'endpoint' });
       login();
       deleteAlertsAndRules();
 
@@ -62,7 +62,7 @@ describe.skip(
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'endpoint');
+      cy.task('esArchiverUnload', { archiveName: 'endpoint' });
     });
 
     it('Should be able to create and close single Endpoint exception from overflow menu', () => {

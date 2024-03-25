@@ -9,9 +9,9 @@ import React, { Fragment } from 'react';
 
 import { EuiForm, EuiPanel, EuiSpacer } from '@elastic/eui';
 
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../common/types/aggregations';
 
-import { PivotAggsConfigDict } from '../../../../common';
+import type { PivotAggsConfigDict } from '../../../../common';
 
 export interface AggListSummaryProps {
   list: PivotAggsConfigDict;

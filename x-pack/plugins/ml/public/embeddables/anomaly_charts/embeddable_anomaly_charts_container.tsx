@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useMemo, useEffect, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -17,6 +18,7 @@ import {
   type MlEntityFieldOperation,
   ML_ANOMALY_THRESHOLD,
 } from '@kbn/ml-anomaly-utils';
+import { TimeBuckets } from '@kbn/ml-time-buckets';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
@@ -29,9 +31,8 @@ import type {
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
-import { TimeBuckets } from '../../application/util/time_buckets';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
-import { MlLocatorParams } from '../../../common/types/locator';
+import type { MlLocatorParams } from '../../../common/types/locator';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
