@@ -25,7 +25,7 @@ import { paths } from '../../../common/locators/paths';
 
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import type { TopAlert } from '../../typings/alerts';
-import { Overview } from './alerts_flyout_overview';
+import { Overview } from './alert_flyout_overview/alerts_flyout_overview';
 
 interface FlyoutProps {
   rawAlert: AlertsTableFlyoutBaseProps['alert'];
