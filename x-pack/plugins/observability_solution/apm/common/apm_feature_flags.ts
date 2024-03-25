@@ -17,6 +17,7 @@ export enum ApmFeatureFlagName {
   SourcemapApiAvailable = 'sourcemapApiAvailable',
   StorageExplorerAvailable = 'storageExplorerAvailable',
   ProfilingIntegrationAvailable = 'profilingIntegrationAvailable',
+  RuleFormV2Enabled = 'ruleFormV2Enabled',
 }
 
 const apmFeatureFlagMap = {
@@ -49,6 +50,10 @@ const apmFeatureFlagMap = {
     type: t.boolean,
   },
   [ApmFeatureFlagName.ProfilingIntegrationAvailable]: {
+    default: false,
+    type: t.boolean,
+  },
+  [ApmFeatureFlagName.RuleFormV2Enabled]: {
     default: false,
     type: t.boolean,
   },
