@@ -25,8 +25,10 @@ import type {
   RequestHandler,
   VersionedRouter,
   RouteRegistrar,
+  RouteValidatorFullConfigContainer,
+  RouteValidatorFullConfig,
 } from '@kbn/core-http-server';
-import { validBodyOutput } from '@kbn/core-http-server';
+import { validBodyOutput, type RouteValidatorContainer } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
@@ -48,6 +50,18 @@ function getRouteFullPath(routerPath: string, routePath: string) {
   // we should omit one of them to have a valid concatenated path.
   const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
   return `${routerPath}${routePath.slice(routePathStartIndex)}`;
+}
+
+function isValidatorContainer(
+  value: RouteValidatorContainer<unknown, unknown, unknown>
+): value is RouteValidatorFullConfigContainer<unknown, unknown, unknown> {
+  return 'request' in value;
+}
+
+function getRequestValidation(
+  value: RouteValidatorContainer<unknown, unknown, unknown>
+): RouteValidatorFullConfig<unknown, unknown, unknown> {
+  return isValidatorContainer(value) ? value.request : value;
 }
 
 /**
@@ -79,7 +93,7 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   }
 
   if (route.validate) {
-    return RouteValidator.from(route.validate);
+    return RouteValidator.from(getRequestValidation(route.validate));
   }
 }
 
@@ -95,7 +109,7 @@ function validOptions(
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
-  const shouldValidateBody = (validate && !!validate.body) || !!options.body;
+  const shouldValidateBody = (validate && !!getRequestValidation(validate).body) || !!options.body;
 
   const { output } = options.body || {};
   if (typeof output === 'string' && !validBodyOutput.includes(output)) {

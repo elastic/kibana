@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '@kbn/config-schema';
-import type { RouteValidatorFullConfig } from './route_validator';
+import type { RouteValidatorContainer } from './route_validator';
 
 /**
  * The set of valid body.output
@@ -163,14 +162,6 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
 
   /** Human-friendly description of this endpoint */
   description?: string;
-
-  /**
-   * Responses grouped by status code expressed using runtime validation schemas.
-   * The mechanism used to express request inputs (params, query, body).
-   */
-  responses?: {
-    [statusCode: number]: { body: Type<any> };
-  };
 }
 
 /**
@@ -249,7 +240,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * });
    * ```
    */
-  validate: RouteValidatorFullConfig<P, Q, B> | false;
+  validate: RouteValidatorContainer<P, Q, B> | false;
 
   /**
    * Additional route options {@link RouteConfigOptions}.
