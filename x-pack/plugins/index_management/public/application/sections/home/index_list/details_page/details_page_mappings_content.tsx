@@ -306,7 +306,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       >
         <EuiText>
           <FormattedMessage
-            id="xpack.idxMgmt.indexDetails.mappings.error.title"
+            id="xpack.idxMgmt.indexDetails.mappings.error.description"
             defaultMessage="Error saving mapping: {errorMessage}"
             values={{ errorMessage: saveMappingError }}
           />
