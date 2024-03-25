@@ -6,7 +6,7 @@
  */
 
 import { applyMiddleware, Dispatch, Store } from 'redux';
-import thunkMiddleware from 'redux-thunk';
+import { thunk } from 'redux-thunk';
 import addons from '@storybook/addons';
 import { diff } from 'jsondiffpatch';
 import { isFunction } from 'lodash';
@@ -21,7 +21,7 @@ import { getInitialState as getState } from '../../public/state/initial_state';
 import { State } from '../../types';
 
 export const getInitialState: () => State = () => getState();
-export const getMiddleware = () => applyMiddleware(thunkMiddleware);
+export const getMiddleware = () => applyMiddleware(thunk);
 export const getReducer = () => getRootReducer(getInitialState());
 
 export const patchDispatch: (store: Store, dispatch: Dispatch) => Dispatch =
