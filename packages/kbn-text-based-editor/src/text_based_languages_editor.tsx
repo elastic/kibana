@@ -203,12 +203,21 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+  // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
     warnings: MonacoMessage[];
   }>({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
+  });
+  // contains only client side validation messages
+  const [clientParserMessages, setClientParserMessages] = useState<{
+    errors: MonacoMessage[];
+    warnings: MonacoMessage[];
+  }>({
+    errors: [],
+    warnings: [],
   });
   const [refetchHistoryItems, setRefetchHistoryItems] = useState(false);
 
@@ -256,16 +265,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     } else {
       updateCachedQueries({
         queryString,
-        status: editorMessages.errors?.length
+        status: clientParserMessages.errors?.length
           ? 'error'
-          : editorMessages.warnings.length
+          : clientParserMessages.warnings.length
           ? 'warning'
           : 'success',
       });
 
       setRefetchHistoryItems(true);
     }
-  }, [editorMessages, isLoading, isQueryLoading, queryString, timeZone]);
+  }, [clientParserMessages, isLoading, isQueryLoading, queryString, timeZone]);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
@@ -462,6 +471,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         markers.push(...parserErrors);
       }
       if (active) {
+        setClientParserMessages({ errors: parserErrors, warnings: parserWarnings });
         setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
         monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
         return;
