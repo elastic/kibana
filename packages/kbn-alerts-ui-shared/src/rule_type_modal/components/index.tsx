@@ -7,11 +7,11 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { countBy } from 'lodash';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import { useRuleTypes } from '../hooks';
+import { useRuleTypesIndex } from '../hooks';
 import { RuleTypeModal, type RuleTypeModalProps } from './rule_type_modal';
+import { filterAndCountRuleTypes } from './helpers/filterAndCountRuleTypes';
 
 export interface RuleTypeModalComponentProps
   extends Pick<RuleTypeModalProps, 'onClose' | 'onSelectRuleType'> {
@@ -35,44 +35,23 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
 
   const {
     ruleTypesState: { data: ruleTypeIndex, isLoading: ruleTypesLoading },
-  } = useRuleTypes({
+  } = useRuleTypesIndex({
     http,
     toasts,
     filteredRuleTypes,
     registeredRuleTypes,
   });
 
-  const [ruleTypes, ruleTypesCountsByProducer] = useMemo(() => {
-    if (!ruleTypeIndex) return [[], { total: 0 }];
-    const ruleTypeValues = [...ruleTypeIndex.values()];
-    const ruleTypesFilteredBySearch = ruleTypeValues.filter((ruleType) => {
-      if (searchString) {
-        return (
-          ruleType.name.toLowerCase().includes(searchString.toLowerCase()) ||
-          (ruleType.description &&
-            ruleType.description.toLowerCase().includes(searchString.toLowerCase()))
-        );
-      }
-      return true;
-    });
-    const ruleTypesFilteredBySearchAndProducer = ruleTypesFilteredBySearch.filter((ruleType) => {
-      if (selectedProducer && ruleType.producer !== selectedProducer) return false;
-      return true;
-    });
-    return [
-      ruleTypesFilteredBySearchAndProducer,
-      {
-        ...countBy(ruleTypesFilteredBySearch, 'producer'),
-        total: ruleTypesFilteredBySearch.length,
-      },
-    ];
-  }, [ruleTypeIndex, searchString, selectedProducer]);
+  const [ruleTypes, ruleTypeCountsByProducer] = useMemo(
+    () => filterAndCountRuleTypes(ruleTypeIndex, selectedProducer, searchString),
+    [ruleTypeIndex, searchString, selectedProducer]
+  );
 
   return (
     <RuleTypeModal
       {...props}
       ruleTypes={ruleTypes}
-      ruleTypesCountsByProducer={ruleTypesCountsByProducer}
+      ruleTypeCountsByProducer={ruleTypeCountsByProducer}
       ruleTypesLoading={ruleTypesLoading}
       onChangeSearch={setSearchString}
       onFilterByProducer={setSelectedProducer}

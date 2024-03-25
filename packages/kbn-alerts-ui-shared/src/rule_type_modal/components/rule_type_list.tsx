@@ -20,14 +20,14 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { PRODUCER_DISPLAY_NAMES } from '../../common/i18n';
-import { RuleTypeWithDescription } from '../types';
+import { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
 
 interface RuleTypeListProps {
   ruleTypes: RuleTypeWithDescription[];
   onSelectRuleType: (ruleTypeId: string) => void;
   onFilterByProducer: (producer: string | null) => void;
   selectedProducer: string | null;
-  ruleTypesCountsByProducer: { total: number; [x: string]: number };
+  ruleTypeCountsByProducer: RuleTypeCountsByProducer;
   onClearFilters: () => void;
 }
 
@@ -40,7 +40,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
   onSelectRuleType,
   onFilterByProducer,
   selectedProducer,
-  ruleTypesCountsByProducer,
+  ruleTypeCountsByProducer,
   onClearFilters,
 }) => {
   const rulesList = [...ruleTypes].sort((a, b) => a.name.localeCompare(b.name));
@@ -58,13 +58,13 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
         <EuiFacetGroup>
           <EuiFacetButton
             fullWidth
-            quantity={ruleTypesCountsByProducer.total}
+            quantity={ruleTypeCountsByProducer.total}
             onClick={() => onFilterByProducer(null)}
             isSelected={!selectedProducer}
           >
             All
           </EuiFacetButton>
-          {Object.entries(omit(ruleTypesCountsByProducer, 'total'))
+          {Object.entries(omit(ruleTypeCountsByProducer, 'total'))
             .sort(([, aCount], [, bCount]) => bCount - aCount)
             .map(([producer, count]) => (
               <EuiFacetButton

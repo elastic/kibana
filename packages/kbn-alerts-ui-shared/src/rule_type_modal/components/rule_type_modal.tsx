@@ -24,7 +24,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { RuleTypeList } from './rule_type_list';
-import { RuleTypeWithDescription } from '../types';
+import { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
 
 export interface RuleTypeModalProps {
   onClose: () => void;
@@ -38,7 +38,7 @@ export interface RuleTypeModalProps {
 export interface RuleTypeModalState {
   ruleTypes: RuleTypeWithDescription[];
   ruleTypesLoading: boolean;
-  ruleTypesCountsByProducer: { total: number; [x: string]: number };
+  ruleTypeCountsByProducer: RuleTypeCountsByProducer;
 }
 
 export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = ({
@@ -48,7 +48,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
   onChangeSearch,
   ruleTypes,
   ruleTypesLoading,
-  ruleTypesCountsByProducer,
+  ruleTypeCountsByProducer,
   searchString,
   selectedProducer,
 }) => {
@@ -116,7 +116,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
             ) : (
               <RuleTypeList
                 ruleTypes={ruleTypes}
-                ruleTypesCountsByProducer={ruleTypesCountsByProducer}
+                ruleTypeCountsByProducer={ruleTypeCountsByProducer}
                 onSelectRuleType={onSelectRuleType}
                 onFilterByProducer={onFilterByProducer}
                 selectedProducer={selectedProducer}
