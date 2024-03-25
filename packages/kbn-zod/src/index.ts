@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import typeDetect from 'type-detect';
+// import typeDetect from 'type-detect';
 import * as z from './zod';
 
-const globalErrorMap: z.ZodErrorMap = (issue, ctx) => {
-  if (issue.code === z.ZodIssueCode.invalid_type) {
-    return {
-      message: `expected value of type [${issue.expected}] but got [${typeDetect(ctx.data)}]`,
-    };
-  }
-  return { message: ctx.defaultError };
-};
-z.setErrorMap(globalErrorMap);
+// const globalErrorMap: z.ZodErrorMap = (issue, ctx) => {
+//   if (issue.code === z.ZodIssueCode.invalid_type) {
+//     return {
+//       message: `expected value of type [${issue.expected}] but got [${typeDetect(ctx.data)}]`,
+//     };
+//   }
+//   return { message: ctx.defaultError };
+// };
+// z.setErrorMap(globalErrorMap);
 
 export function instanceofZodType(type: any): type is z.ZodTypeAny {
   return !!type?._def?.typeName;
