@@ -2418,12 +2418,28 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-common.IElasticsearchConfig.healthCheckStartupDelay",
+            "type": "Object",
+            "tags": [],
+            "label": "healthCheckStartupDelay",
+            "description": [
+              "\nThe interval between health check requests Kibana sends to the Elasticsearch before the first green signal."
+            ],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
             "id": "def-common.IElasticsearchConfig.healthCheckDelay",
             "type": "Object",
             "tags": [],
             "label": "healthCheckDelay",
             "description": [
-              "\nThe interval between health check requests Kibana sends to the Elasticsearch."
+              "\nThe interval between health check requests Kibana sends to the Elasticsearch after the first green signal."
             ],
             "signature": [
               "moment.Duration"
