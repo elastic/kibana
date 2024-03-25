@@ -26,7 +26,7 @@ cd target
 cd ..
 
 node scripts/es snapshot \
-  -E network.bind_host=127.0.0.1 \
+  -E network.bind_host=0.0.0.0 \
   -E discovery.type=single-node \
   --license=trial &
 while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
@@ -54,7 +54,7 @@ while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
 docker run \
   -p 5601:5601 \
   --env SERVER_HOST="0.0.0.0" \
-  --env ELASTICSEARCH_HOSTS="http://127.0.0.1:9200" \
+  --env ELASTICSEARCH_HOSTS="http://host.docker.internal:9200" \
   --env ELASTICSEARCH_USERNAME="kibana_system" \
   --env ELASTICSEARCH_PASSWORD="changeme" \
   docker.elastic.co/kibana-ci/kibana-ubi-fips:8.14.0-SNAPSHOT-75d5abe8ff6163ddcf7311beebe988d47bb7f790
