@@ -22,7 +22,7 @@ export const FileUploadCallout = () => {
       title={i18n.translate('xpack.serverlessSearch.selectClient.fileUploadCallout.title', {
         defaultMessage: 'Upload your data from a file',
       })}
-      size="m"
+      size="s"
       iconType="iInCircle"
     >
       <p>
@@ -31,8 +31,6 @@ export const FileUploadCallout = () => {
           defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
         />
       </p>
-      <EuiSpacer />
-      <EuiSpacer size="xxl" />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton

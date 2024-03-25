@@ -16,21 +16,22 @@ export const ConnectorsCallout = () => {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.serverlessSearch.selectClient.connectorsCallout.title', {
-        defaultMessage: 'Sync your data using a connector client',
+        defaultMessage: 'Sync your data with a connector client',
       })}
-      size="m"
+      size="s"
       iconType="iInCircle"
     >
       <p>
         <FormattedMessage
           id="xpack.serverlessSearch.selectClient.connectorsCallout.description"
-          defaultMessage="Sync a range of popular third-party data sources to Elasticsearch, by deploying open code Elastic connectors on your own infrastructure."
+          defaultMessage="Sync popular third-party data sources to Elasticsearch using open code connectors on your infrastructure."
         />
       </p>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton
             color="primary"
+            iconType="plusInCircle"
             data-test-subj="connectors-callout-cta"
             onClick={() => createConnector()}
             isLoading={isLoading}
