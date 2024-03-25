@@ -80,7 +80,6 @@ const AssistantComponent: React.FC<Props> = ({
   setConversationTitle,
 }) => {
   const {
-    actionTypeRegistry,
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
@@ -136,7 +135,6 @@ const AssistantComponent: React.FC<Props> = ({
 
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
-    actionTypeRegistry,
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);

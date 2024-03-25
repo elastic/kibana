@@ -6,6 +6,7 @@
  */
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { BuildFlavor } from '@kbn/config';
 import type {
   CoreSetup,
   CoreStart,
@@ -22,6 +23,8 @@ import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/pu
 import type {
   AuthenticationServiceSetup,
   AuthenticationServiceStart,
+  AuthorizationServiceSetup,
+  AuthorizationServiceStart,
   SecurityPluginSetup,
   SecurityPluginStart as SecurityPluginStartWithoutDeprecatedMembers,
 } from '@kbn/security-plugin-types-public';
@@ -32,6 +35,7 @@ import { accountManagementApp, UserProfileAPIClient } from './account_management
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import { AuthenticationService } from './authentication';
+import { AuthorizationService } from './authorization';
 import { buildSecurityApi } from './build_security_api';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
@@ -72,6 +76,7 @@ export class SecurityPlugin
   private readonly config: ConfigType;
   private sessionTimeout?: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();
+  private readonly authorizationService = new AuthorizationService();
   private readonly navControlService;
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly managementService: ManagementService;
@@ -79,16 +84,17 @@ export class SecurityPlugin
   private readonly anonymousAccessService = new AnonymousAccessService();
   private readonly analyticsService = new AnalyticsService();
   private authc!: AuthenticationServiceSetup;
+  private authz!: AuthorizationServiceSetup;
   private securityApiClients!: SecurityApiClients;
+  private buildFlavor: BuildFlavor;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
+
     this.config = this.initializerContext.config.get<ConfigType>();
     this.securityCheckupService = new SecurityCheckupService(this.config, localStorage);
-    this.navControlService = new SecurityNavControlService(
-      initializerContext.env.packageInfo.buildFlavor
-    );
-    this.managementService = new ManagementService(
-      this.initializerContext.config.get<ConfigType>()
-    );
+    this.navControlService = new SecurityNavControlService(this.buildFlavor);
+    this.managementService = new ManagementService(this.config);
   }
 
   public setup(
@@ -105,6 +111,10 @@ export class SecurityPlugin
       config: this.config,
       getStartServices: core.getStartServices,
       http: core.http,
+    });
+
+    this.authz = this.authorizationService.setup({
+      config: this.config,
     });
 
     this.securityApiClients = {
@@ -142,6 +152,7 @@ export class SecurityPlugin
         authc: this.authc,
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
+        buildFlavor: this.buildFlavor,
       });
     }
 
@@ -168,6 +179,7 @@ export class SecurityPlugin
 
     return {
       authc: this.authc,
+      authz: this.authz,
       license,
     };
   }
@@ -205,6 +217,7 @@ export class SecurityPlugin
       uiApi: getUiApi({ core }),
       navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
+      authz: this.authz as AuthorizationServiceStart,
       userProfiles: {
         getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(
           this.securityApiClients.userProfiles

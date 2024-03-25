@@ -7,9 +7,9 @@
  */
 import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
 import {
-  packageMock,
-  mockedRootDir,
   gitRevExecMock,
+  mockedRootDir,
+  packageMock,
   readUuidFileMock,
   resetAllMocks,
 } from './config.test.mocks';
@@ -153,6 +153,7 @@ describe('ApmConfiguration', () => {
       delete process.env.ELASTIC_APM_API_KEY;
       delete process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE;
       delete process.env.ELASTIC_APM_SERVER_URL;
+      delete process.env.ELASTIC_APM_GLOBAL_LABELS;
       delete process.env.NODE_ENV;
     });
 
@@ -182,6 +183,21 @@ describe('ApmConfiguration', () => {
         expect(config.getConfig('serviceName')).toEqual(
           expect.objectContaining({
             environment: 'ci',
+          })
+        );
+      });
+
+      it('ELASTIC_APM_GLOBAL_LABELS', () => {
+        process.env.ELASTIC_APM_GLOBAL_LABELS = 'test1=1,test2=2';
+        const config = new ApmConfiguration(mockedRootDir, {}, true);
+
+        expect(config.getConfig('serviceName')).toEqual(
+          expect.objectContaining({
+            globalLabels: {
+              git_rev: 'sha',
+              test1: '1',
+              test2: '2',
+            },
           })
         );
       });
