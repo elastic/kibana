@@ -256,12 +256,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     } else {
       updateCachedQueries({
         queryString,
-        status: serverErrors?.length ? 'error' : serverWarning ? 'warning' : 'success',
+        status: editorMessages.errors?.length
+          ? 'error'
+          : editorMessages.warnings.length
+          ? 'warning'
+          : 'success',
       });
 
       setRefetchHistoryItems(true);
     }
-  }, [isLoading, isQueryLoading, queryString, serverErrors, serverWarning, timeZone]);
+  }, [editorMessages, isLoading, isQueryLoading, queryString, timeZone]);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
