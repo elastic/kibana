@@ -26,7 +26,7 @@ cd target
 cd ..
 
 node scripts/es snapshot \
-  -E network.bind_host=127.0.0.1 \
+  -E network.bind_host=0.0.0.0 \
   -E discovery.type=single-node \
   --license=trial &
 while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
