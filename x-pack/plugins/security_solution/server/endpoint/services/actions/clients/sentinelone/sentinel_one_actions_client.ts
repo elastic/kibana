@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import { once } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { NormalizedExternalConnectorClientExecuteOptions } from '../lib/external_connector';
+import { NormalizedExternalConnectorClient } from '../lib/external_connector';
 import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
 } from '../../..';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { SentinelOneConnectorExecuteOptions } from './types';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type { ActionDetails, LogsEndpointAction } from '../../../../../../common/endpoint/types';
@@ -35,48 +34,20 @@ import type {
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
-  connectorActions: ActionsClient;
+  connectorActions: ActionsClient | IUnsecuredActionsClient;
 };
 
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
-  private readonly connectorActionsClient: ActionsClient;
-  private readonly getConnector: () => Promise<ConnectorWithExtraFindData>;
+  private readonly connectorActionsClient: NormalizedExternalConnectorClient;
 
   constructor({ connectorActions, ...options }: SentinelOneActionsClientOptions) {
     super(options);
-    this.connectorActionsClient = connectorActions;
-
-    this.getConnector = once(async () => {
-      let connectorList: ConnectorWithExtraFindData[] = [];
-
-      try {
-        connectorList = await this.connectorActionsClient.getAll();
-      } catch (err) {
-        throw new ResponseActionsClientError(
-          `Unable to retrieve list of stack connectors: ${err.message}`,
-          // failure here is likely due to Authz, but because we don't have a good way to determine that,
-          // the `statusCode` below is set to `400` instead of `401`.
-          400,
-          err
-        );
-      }
-      const connector = connectorList.find(({ actionTypeId, isDeprecated, isMissingSecrets }) => {
-        return actionTypeId === SENTINELONE_CONNECTOR_ID && !isDeprecated && !isMissingSecrets;
-      });
-
-      if (!connector) {
-        throw new ResponseActionsClientError(
-          `No SentinelOne stack connector found`,
-          400,
-          connectorList
-        );
-      }
-
-      this.log.debug(`Using SentinelOne stack connector: ${connector.name} (${connector.id})`);
-
-      return connector;
-    });
+    this.connectorActionsClient = new NormalizedExternalConnectorClient(
+      SENTINELONE_CONNECTOR_ID,
+      connectorActions,
+      this.log
+    );
   }
 
   protected async writeActionRequestToEndpointIndex(
@@ -101,9 +72,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionType: SUB_ACTION,
     actionParams: object
   ): Promise<ActionTypeExecutorResult<unknown>> {
-    const { id: connectorId } = await this.getConnector();
     const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
-      actionId: connectorId,
       params: {
         subAction: actionType,
         subActionParams: actionParams,
@@ -134,9 +103,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   private async getAgentDetails(id: string): Promise<SentinelOneGetAgentsResponse['data'][number]> {
-    const { id: connectorId } = await this.getConnector();
-    const executeOptions: SentinelOneConnectorExecuteOptions<SentinelOneGetAgentsParams> = {
-      actionId: connectorId,
+    const executeOptions: NormalizedExternalConnectorClientExecuteOptions<
+      SentinelOneGetAgentsParams,
+      SUB_ACTION
+    > = {
       params: {
         subAction: SUB_ACTION.GET_AGENTS,
         subActionParams: {
