@@ -2264,7 +2264,7 @@
             "section": "def-common.DatatableColumnType",
             "text": "DatatableColumnType"
           },
-          "; field?: string | undefined; index?: string | undefined; params?: ",
+          "; esType?: string | undefined; field?: string | undefined; index?: string | undefined; params?: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -6760,7 +6760,7 @@
         "label": "VisualizeEmbeddableContract",
         "description": [],
         "signature": [
-          "{ readonly type: \"visualization\"; readonly id: string; uuid: string; dataViews: ",
+          "{ readonly id: string; readonly type: \"visualization\"; uuid: string; dataViews: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -7261,7 +7261,7 @@
         "label": "VisualizeEmbeddableFactoryContract",
         "description": [],
         "signature": [
-          "{ create: (input: ",
+          "{ readonly type: \"visualization\"; create: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -7325,7 +7325,7 @@
             "section": "def-public.VisualizeEmbeddable",
             "text": "VisualizeEmbeddable"
           },
-          " | undefined>; readonly type: \"visualization\"; inject: (_state: ",
+          " | undefined>; inject: (_state: ",
           {
             "pluginId": "embeddable",
             "scope": "common",
@@ -8773,7 +8773,7 @@
             "section": "def-common.DatatableColumnType",
             "text": "DatatableColumnType"
           },
-          "; field?: string | undefined; index?: string | undefined; params?: ",
+          "; esType?: string | undefined; field?: string | undefined; index?: string | undefined; params?: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
