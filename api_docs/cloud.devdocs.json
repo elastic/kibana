@@ -73,6 +73,20 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.deployments_url",
+            "type": "string",
+            "tags": [],
+            "label": "deployments_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudConfigType.deployment_url",
             "type": "string",
             "tags": [],
@@ -279,6 +293,22 @@
             "label": "cloudId",
             "description": [
               "\nCloud ID. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.deploymentsUrl",
+            "type": "string",
+            "tags": [],
+            "label": "deploymentsUrl",
+            "description": [
+              "\nThis is the path to the Cloud deployments management page. The value is already prepended with `baseUrl`.\n"
             ],
             "signature": [
               "string | undefined"

@@ -15,6 +15,8 @@ import type {
   RiskEngineStatus,
   RiskScore,
 } from '../../../common/entity_analytics/risk_engine';
+import type { ConfigType } from '../../config';
+export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
 
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;
@@ -26,6 +28,7 @@ export interface CalculateScoresParams {
   range: { start: string; end: string };
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
+  alertSampleSizePerShard?: number;
 }
 
 export interface CalculateAndPersistScoresParams {
@@ -38,6 +41,7 @@ export interface CalculateAndPersistScoresParams {
   range: Range;
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
+  alertSampleSizePerShard?: number;
 }
 
 export interface CalculateAndPersistScoresResponse {
@@ -112,16 +116,19 @@ export interface CalculateRiskScoreAggregations {
 export interface RiskScoreBucket {
   key: { [identifierField: string]: string };
   doc_count: number;
-  risk_details: {
-    value: {
-      score: number;
-      normalized_score: number;
-      notes: string[];
-      category_1_score: number;
-      category_1_count: number;
+  top_inputs: {
+    doc_count: number;
+    risk_details: {
+      value: {
+        score: number;
+        normalized_score: number;
+        notes: string[];
+        category_1_score: number;
+        category_1_count: number;
+      };
     };
+    inputs: SearchResponse;
   };
-  inputs: SearchResponse;
 }
 
 export interface RiskEngineConfiguration {
@@ -132,4 +139,5 @@ export interface RiskEngineConfiguration {
   interval: string;
   pageSize: number;
   range: Range;
+  alertSampleSizePerShard?: number;
 }
