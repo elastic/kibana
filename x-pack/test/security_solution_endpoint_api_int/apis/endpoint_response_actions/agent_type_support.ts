@@ -23,7 +23,11 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('Elastic-Api-Version', '2023-10-31')
           .send({ endpoint_ids: ['test'], agent_type: 'sentinel_one' })
-          .expect(200);
+          .expect(400, {
+            statusCode: 400,
+            error: 'Bad Request',
+            message: '[request body.agent_type]: feature is disabled',
+          });
       });
     });
   });
