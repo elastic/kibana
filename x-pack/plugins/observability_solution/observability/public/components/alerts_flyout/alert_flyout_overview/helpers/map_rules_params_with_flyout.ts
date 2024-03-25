@@ -52,12 +52,13 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         } as unknown as FlyoutThresholdData;
       });
 
-    case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID || METRIC_THRESHOLD_ALERT_TYPE_ID:
+    case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID:
+    case METRIC_THRESHOLD_ALERT_TYPE_ID:
       return observedValues.map((observedValue, metricIndex) => {
         const criteria = ruleCriteria[metricIndex] as BaseMetricExpressionParams & {
           metric: string;
         };
-        const fields = criteria.metric;
+        const fields = [criteria.metric];
         const comparator = criteria.comparator;
         const threshold = criteria.threshold;
         return {

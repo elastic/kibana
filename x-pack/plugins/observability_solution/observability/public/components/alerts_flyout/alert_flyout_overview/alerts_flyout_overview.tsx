@@ -52,7 +52,6 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
       return { field, value: values[index] };
     }
   });
-
   useEffect(() => {
     const mappedRuleParams = mapRuleParamsWithFlyout(alert);
     setRuleCriteria(mappedRuleParams);
