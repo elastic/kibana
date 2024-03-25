@@ -56,6 +56,79 @@ test('generates gauge chart config', async () => {
       chartType: 'gauge',
       title: 'test',
       dataset: {
+        esql: 'from test | count=count()',
+      },
+      value: 'count',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+      formulaAPI: {} as any,
+    }
+  );
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "references": Array [
+        Object {
+          "id": "test",
+          "name": "indexpattern-datasource-layer-layer_0",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {
+          "test": Object {},
+        },
+        "datasourceStates": Object {
+          "textBased": Object {
+            "layers": Object {
+              "layer_0": Object {
+                "allColumns": Array [
+                  Object {
+                    "columnId": "metric_formula_accessor",
+                    "fieldName": "count",
+                  },
+                ],
+                "columns": Array [
+                  Object {
+                    "columnId": "metric_formula_accessor",
+                    "fieldName": "count",
+                  },
+                ],
+                "index": "test",
+                "query": Object {
+                  "esql": "from test | count=count()",
+                },
+              },
+            },
+          },
+        },
+        "filters": Array [],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "labelMajorMode": "auto",
+          "layerId": "layer_0",
+          "layerType": "data",
+          "metricAccessor": "metric_formula_accessor",
+          "shape": "horizontalBullet",
+          "ticksPosition": "auto",
+        },
+      },
+      "title": "test",
+      "visualizationType": "lnsGauge",
+    }
+  `);
+});
+
+test('generates gauge chart config with goal and max', async () => {
+  const result = await buildGauge(
+    {
+      chartType: 'gauge',
+      title: 'test',
+      dataset: {
         esql: 'from test | count=count() | eval max=1000 | eval goal=500',
       },
       value: 'count',
