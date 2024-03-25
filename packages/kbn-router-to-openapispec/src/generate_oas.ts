@@ -38,12 +38,15 @@ export interface GenerateOpenApiDocumentOptions {
 }
 
 export const generateOpenApiDocument = (
-  appRouters: Array<CoreVersionedRouter | Router>,
+  appRouters: { routers: Router[]; versionedRouters: CoreVersionedRouter[] },
   opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document => {
   const paths: OpenAPIV3.PathsObject = {};
-  for (const appRouter of appRouters) {
-    Object.assign(paths, getOpenApiPathsObject(appRouter, opts.pathStartsWith));
+  for (const router of appRouters.routers) {
+    Object.assign(paths, processRouter(router, opts.pathStartsWith));
+  }
+  for (const router of appRouters.versionedRouters) {
+    Object.assign(paths, processVersionedRouter(router, opts.pathStartsWith));
   }
   return {
     openapi: openApiVersion,
@@ -272,14 +275,4 @@ const assignToPathsObject = (
 ): void => {
   const pathName = path.replace('?', '');
   paths[pathName] = { ...paths[pathName], ...pathObject };
-};
-
-const getOpenApiPathsObject = (
-  appRouter: Router | CoreVersionedRouter,
-  pathStartsWith?: string
-): OpenAPIV3.PathsObject => {
-  if (appRouter instanceof CoreVersionedRouter) {
-    return processVersionedRouter(appRouter, pathStartsWith);
-  }
-  return processRouter(appRouter, pathStartsWith);
 };

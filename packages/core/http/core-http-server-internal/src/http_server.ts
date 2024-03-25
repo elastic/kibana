@@ -632,21 +632,26 @@ export class HttpServer {
     });
   }
 
-  /**
-   * Get an array of all routers with routes registered
-   */
-  private getAllRoutersWithRegisteredRoutes(): Array<Router | CoreVersionedRouter> {
-    return this.getRegisteredRouters().flatMap((r) => {
-      const routers: Array<Router | CoreVersionedRouter> = [];
-      if ((r as Router).getRoutes(true).length > 0) {
-        routers.push(r as Router);
-      }
-      const versionedRouter = r.versioned as CoreVersionedRouter;
-      if (versionedRouter.getRoutes().length > 0) {
-        routers.push(versionedRouter);
-      }
-      return routers;
-    });
+  private getRouters(): {
+    routers: Router[];
+    versionedRouters: CoreVersionedRouter[];
+  } {
+    return this.getRegisteredRouters().reduce<{
+      routers: Router[];
+      versionedRouters: CoreVersionedRouter[];
+    }>(
+      (acc, r) => {
+        if ((r as Router).getRoutes(true).length > 0) {
+          acc.routers.push(r as Router);
+        }
+        const versionedRouter = r.versioned as CoreVersionedRouter;
+        if (versionedRouter.getRoutes().length > 0) {
+          acc.versionedRouters.push(versionedRouter);
+        }
+        return acc;
+      },
+      { routers: [], versionedRouters: [] }
+    );
   }
 
   private generateOasSemaphore = new Semaphore(1);
@@ -662,7 +667,7 @@ export class HttpServer {
               const pathStartsWith = req.query?.pathStartsWith;
               try {
                 // Potentially quite expensive
-                const result = generateOpenApiDocument(this.getAllRoutersWithRegisteredRoutes(), {
+                const result = generateOpenApiDocument(this.getRouters(), {
                   baseUrl: 'todo',
                   title: 'todo',
                   version: '0.0.0',
