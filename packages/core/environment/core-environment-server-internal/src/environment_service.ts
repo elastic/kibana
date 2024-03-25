@@ -64,7 +64,8 @@ export class EnvironmentService {
     ]);
 
     // Log unhandled rejections so that we can fix them in preparation for https://github.com/elastic/kibana/issues/77469
-    process.on('unhandledRejection', (reason) => {
+    // Using `prependListener` so that it runs before the setup_node_env/exit_on_warning one.
+    process.prependListener('unhandledRejection', (reason) => {
       const message = (reason as Error)?.stack ?? JSON.stringify(reason);
       this.log.warn(`Detected an unhandled Promise rejection: ${message}`);
     });
