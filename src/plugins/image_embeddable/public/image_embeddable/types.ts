@@ -12,12 +12,7 @@ import {
   DefaultEmbeddableApi,
   SerializedReactEmbeddableTitles,
 } from '@kbn/embeddable-plugin/public';
-import {
-  HasEditCapabilities,
-  HasSupportedTriggers,
-  PublishesBlockingError,
-  PublishesDataLoading,
-} from '@kbn/presentation-publishing';
+import { HasEditCapabilities, HasSupportedTriggers } from '@kbn/presentation-publishing';
 
 export type ImageEmbeddableSerializedState = SerializedReactEmbeddableTitles &
   Partial<DynamicActionsSerializedState> & {
@@ -26,8 +21,6 @@ export type ImageEmbeddableSerializedState = SerializedReactEmbeddableTitles &
 
 export type ImageEmbeddableApi = DefaultEmbeddableApi<ImageEmbeddableSerializedState> &
   HasEditCapabilities &
-  PublishesDataLoading &
-  PublishesBlockingError &
   HasSupportedTriggers &
   Partial<HasDynamicActions>;
 
