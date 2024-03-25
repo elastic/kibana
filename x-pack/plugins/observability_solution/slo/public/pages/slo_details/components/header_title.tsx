@@ -26,7 +26,6 @@ export function HeaderTitle({ isLoading, slo }: Props) {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>
       <SLOGroupings slo={slo} />
 
       <EuiFlexGroup
