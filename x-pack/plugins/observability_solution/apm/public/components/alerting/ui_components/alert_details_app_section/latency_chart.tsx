@@ -42,6 +42,7 @@ import { DEFAULT_DATE_FORMAT } from './constants';
 function LatencyChart({
   alert,
   transactionType,
+  transactionName,
   serviceName,
   environment,
   start,
@@ -51,9 +52,11 @@ function LatencyChart({
   comparisonEnabled,
   offset,
   timeZone,
+  customAlertEvaluationThreshold,
 }: {
   alert: TopAlert;
   transactionType: string;
+  transactionName?: string;
   serviceName: string;
   environment: string;
   start: string;
@@ -63,13 +66,16 @@ function LatencyChart({
   comparisonEnabled: boolean;
   offset: string;
   timeZone: string;
+  customAlertEvaluationThreshold?: number;
 }) {
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
     kuery: '',
     numBuckets: 100,
-    type: ApmDocumentType.ServiceTransactionMetric,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
   const { euiTheme } = useEuiTheme();
   const {
@@ -96,7 +102,7 @@ function LatencyChart({
                 start,
                 end,
                 transactionType,
-                transactionName: undefined,
+                transactionName,
                 latencyAggregationType,
                 documentType: preferred.source.documentType,
                 rollupInterval: preferred.source.rollupInterval,
@@ -117,10 +123,12 @@ function LatencyChart({
       serviceName,
       start,
       transactionType,
+      transactionName,
       preferred,
     ]
   );
-  const alertEvalThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
+  const alertEvalThreshold =
+    customAlertEvaluationThreshold || alert.fields[ALERT_EVALUATION_THRESHOLD];
 
   const alertEvalThresholdChartData = alertEvalThreshold
     ? [
@@ -141,7 +149,10 @@ function LatencyChart({
     : [];
 
   const getLatencyChartAdditionalData = () => {
-    if (isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID])) {
+    if (
+      isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID]) ||
+      customAlertEvaluationThreshold
+    ) {
       return [
         <AlertActiveTimeRangeAnnotation
           alertStart={alert.start}
