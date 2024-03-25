@@ -50,17 +50,19 @@ export interface StartDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupContract {}
 
+export interface ReactEmbeddableDynamicActionsApi {
+  dynamicActionsApi: HasDynamicActions;
+  dynamicActionsComparator: EmbeddableStateComparators<DynamicActionsSerializedState>;
+  serializeDynamicActions: () => DynamicActionsSerializedState;
+  startDynamicActions: () => { stopDynamicActions: () => void };
+}
+
 export interface StartContract {
   initializeReactEmbeddableDynamicActions: (
     uuid: string,
     getTitle: () => string | undefined,
     state: DynamicActionsSerializedState
-  ) => {
-    dynamicActionsApi: HasDynamicActions;
-    dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
-    serializeDynamicActions: () => DynamicActionsSerializedState;
-    startDynamicActions: () => { stopDynamicActions: () => void };
-  };
+  ) => ReactEmbeddableDynamicActionsApi;
 }
 
 export interface DynamicActionsSerializedState {

@@ -9,7 +9,7 @@
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { openImageEditor } from '../image_editor/open_image_editor';
+import { openImageEditor } from '../components/image_editor/open_image_editor';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,

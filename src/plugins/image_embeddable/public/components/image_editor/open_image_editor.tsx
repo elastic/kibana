@@ -11,11 +11,11 @@ import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 import { skip, Subject, take, takeUntil } from 'rxjs';
-import { ImageConfig } from '../image_embeddable/types';
+import { ImageConfig } from '../../image_embeddable/types';
 import { ImageViewerContext } from '../image_viewer/image_viewer_context';
-import { FileImageMetadata, imageEmbeddableFileKind } from '../imports';
-import { coreServices, filesService, securityService } from '../services/kibana_services';
-import { createValidateUrl } from '../utils/validate_url';
+import { FileImageMetadata, imageEmbeddableFileKind } from '../../imports';
+import { coreServices, filesService, securityService } from '../../services/kibana_services';
+import { createValidateUrl } from '../../utils/validate_url';
 
 export const openImageEditor = async (initialImageConfig?: ImageConfig): Promise<ImageConfig> => {
   const { overlays, theme, application, i18n, http } = coreServices;

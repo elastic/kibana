@@ -22,8 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FileImage } from '@kbn/shared-ux-file-image';
 
-import { ImageConfig } from '../types';
-import { validateImageConfig } from '../utils/validate_image_config';
+import { ImageConfig } from '../../types';
+import { validateImageConfig } from '../../utils/validate_image_config';
 import notFound from './assets/not_found_light.png';
 import notFound2x from './assets/not_found_light@2x.png';
 import { useImageViewerContext } from './image_viewer_context';

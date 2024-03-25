@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
@@ -16,24 +16,16 @@ import {
   ReactEmbeddableFactory,
   registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
-import { imageClickTrigger, IMAGE_CLICK_TRIGGER } from '../actions';
-import { openImageEditor } from '../image_editor/open_image_editor';
-import { ImageViewer, ImageViewerContext } from '../image_viewer';
-import { FileImageMetadata, imageEmbeddableFileKind } from '../imports';
-import {
-  coreServices,
-  filesService,
-  screenshotModeService,
-  uiActionsService,
-} from '../services/kibana_services';
-import { createValidateUrl } from '../utils/validate_url';
+import { IMAGE_CLICK_TRIGGER } from '../actions';
+import { openImageEditor } from '../components/image_editor/open_image_editor';
+import { FileImageMetadata } from '../imports';
+import { filesService } from '../services/kibana_services';
 import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 import { ImageEmbeddableStrings } from './image_embeddable_strings';
 import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
-import './image_embeddable.scss';
+import { ImageEmbeddable } from '../components/image_embeddable';
 
 export const registerImageEmbeddableFactory = ({
   embeddableEnhanced,
@@ -99,64 +91,18 @@ export const registerImageEmbeddableFactory = ({
 
       return {
         api: embeddable,
-        Component: () => {
-          const imageConfig = useStateFromPublishingSubject(imageConfig$);
-          const [hasTriggerActions, setHasTriggerActions] = useState(false);
-          const dynamicActionsState = useStateFromPublishingSubject(
-            dynamicActionsApi?.dynamicActionsApi.dynamicActionsState$
-          );
-
-          useEffect(() => {
-            if (!dynamicActionsApi) return;
-            // start the dynamic actions manager on mount
-            const { stopDynamicActions } = dynamicActionsApi.startDynamicActions();
-            return () => {
-              // stop the dynamic actions manager on unmount
-              stopDynamicActions();
-            };
-          }, []);
-
-          useEffect(() => {
-            setHasTriggerActions((dynamicActionsState?.dynamicActions.events ?? []).length > 0);
-          }, [dynamicActionsState]);
-
-          return (
-            <ImageViewerContext.Provider
-              value={{
-                getImageDownloadHref: (fileId: string) => {
-                  return filesClient.getDownloadHref({
-                    id: fileId,
-                    fileKind: imageEmbeddableFileKind.id,
-                  });
-                },
-                validateUrl: createValidateUrl(coreServices.http.externalUrl),
-              }}
-            >
-              <ImageViewer
-                className="imageEmbeddableImage"
-                imageConfig={imageConfig}
-                isScreenshotMode={screenshotModeService?.isScreenshotMode()}
-                onLoad={() => {
-                  dataLoading$.next(false);
-                }}
-                onError={() => {
-                  dataLoading$.next(false);
-                  blockingError$.next(new Error(ImageEmbeddableStrings.getErrorMessage()));
-                }}
-                onClick={
-                  // note: passing onClick enables the cursor pointer style, so we only pass it if there are compatible actions
-                  hasTriggerActions
-                    ? () => {
-                        uiActionsService.executeTriggerActions(imageClickTrigger.id, {
-                          embeddable,
-                        });
-                      }
-                    : undefined
-                }
-              />
-            </ImageViewerContext.Provider>
-          );
-        },
+        Component: () => (
+          <ImageEmbeddable
+            api={{
+              ...embeddable,
+              imageConfig$,
+              setDataLoading: (loading) => dataLoading$.next(loading),
+              setBlockingError: (error) => blockingError$.next(error),
+            }}
+            filesClient={filesClient}
+            startDynamicActions={dynamicActionsApi?.startDynamicActions}
+          />
+        ),
       };
     },
   };

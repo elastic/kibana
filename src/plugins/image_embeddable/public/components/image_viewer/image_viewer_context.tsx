@@ -7,7 +7,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import type { createValidateUrl } from '../utils/validate_url';
+import type { createValidateUrl } from '../../utils/validate_url';
 
 export interface ImageViewerContextValue {
   getImageDownloadHref: (fileId: string) => string;

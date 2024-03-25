@@ -14,7 +14,7 @@ import { FilesContext } from '@kbn/shared-ux-file-context';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import { ImageViewerContext } from '../image_viewer';
 import { ImageEditorFlyout, ImageEditorFlyoutProps } from './image_editor_flyout';
-import { imageEmbeddableFileKind } from '../imports';
+import { imageEmbeddableFileKind } from '../../imports';
 
 const validateUrl = jest.fn(() => ({ isValid: true }));
 
