@@ -17,9 +17,7 @@ import {
   DataViewsPublicPluginStart,
   DATA_VIEW_SAVED_OBJECT_TYPE,
 } from '@kbn/data-views-plugin/public';
-import {
-  ReactEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';

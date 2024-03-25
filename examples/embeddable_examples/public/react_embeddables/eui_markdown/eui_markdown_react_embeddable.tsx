@@ -8,9 +8,7 @@
 
 import { EuiMarkdownEditor, EuiMarkdownFormat } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  ReactEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   initializeTitles,
