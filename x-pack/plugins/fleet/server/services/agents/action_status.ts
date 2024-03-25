@@ -25,18 +25,23 @@ import {
 import { appContextService } from '..';
 
 /**
- * Return current bulk actions
+ * Return current bulk actions.
+ * These are a combination of agent actions and agent policy change actions, sorted by timestamp.
+ * With page=i and perPage=N, this works by:
+ * 1. fetching (i+1)*N agent actions
+ * 2. fetching (i+1)*N agent policy actions
+ * 3. concatenating and sorting those
+ * 4. returning the [i*N : (i+1)*N[ slice of the array
  */
 export async function getActionStatuses(
   esClient: ElasticsearchClient,
   options: ActionStatusOptions
 ): Promise<ActionStatus[]> {
   const actionResults = await getActionResults(esClient, options);
-
   const policyChangeActions = await getPolicyChangeActions(esClient, options);
-  const actionStatuses = [...actionResults, ...policyChangeActions].sort(
-    (a: ActionStatus, b: ActionStatus) => (b.creationTime > a.creationTime ? 1 : -1)
-  );
+  const actionStatuses = [...actionResults, ...policyChangeActions]
+    .sort((a: ActionStatus, b: ActionStatus) => (b.creationTime > a.creationTime ? 1 : -1))
+    .slice(getPage(options), getPerPage(options));
   return actionStatuses;
 }
 
@@ -177,6 +182,22 @@ async function getActionResults(
   return results;
 }
 
+export function getPage(options: ActionStatusOptions) {
+  if (options.page === undefined || options.perPage === undefined) {
+    return 0;
+  }
+
+  return options.page * options.perPage;
+}
+
+export function getPerPage(options: ActionStatusOptions) {
+  if (options.page === undefined || options.perPage === undefined) {
+    return 20;
+  }
+
+  return (options.page + 1) * options.perPage;
+}
+
 async function getActions(
   esClient: ElasticsearchClient,
   options: ActionStatusOptions
@@ -184,8 +205,8 @@ async function getActions(
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
-    from: options.page ?? 0,
-    size: options.perPage ?? 20,
+    from: 0,
+    size: getPerPage(options),
     query: {
       bool: {
         must_not: [
@@ -320,8 +341,7 @@ async function getPolicyChangeActions(
 ): Promise<ActionStatus[]> {
   const agentPoliciesRes = await esClient.search({
     index: AGENT_POLICY_INDEX,
-    from: options.page ?? 0,
-    size: options.perPage ?? 20,
+    size: getPerPage(options),
     query: {
       bool: {
         filter: [
