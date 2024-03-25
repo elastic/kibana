@@ -27,14 +27,6 @@ export const DEFAULT_MODEL_LABEL = i18n.translate(
   }
 );
 
-export const ANTHROPIC_ERROR = i18n.translate(
-  'xpack.stackConnectors.components.bedrock.anthropicError',
-  {
-    defaultMessage:
-      'Current support is for the Anthropic Claude models, please update this field to an Anthropic model.',
-  }
-);
-
 export const SECRET = i18n.translate('xpack.stackConnectors.components.bedrock.secret', {
   defaultMessage: 'Secret',
 });

@@ -200,7 +200,7 @@ describe('BedrockConnector', () => {
         });
       });
 
-      it('formats messages from user, assistant, and system', async () => {
+      it('ensureMessageFormat - formats messages from user, assistant, and system', async () => {
         await connector.invokeStream({
           messages: [
             {
@@ -236,6 +236,56 @@ describe('BedrockConnector', () => {
               { role: 'user', content: 'Hello world' },
               { role: 'assistant', content: 'Hi, I am a good chatbot' },
               { role: 'user', content: 'What is 2+2?' },
+            ],
+            max_tokens: DEFAULT_TOKEN_LIMIT,
+            temperature: 0,
+          }),
+        });
+      });
+
+      it('ensureMessageFormat - formats messages from when double user/assistant occurs', async () => {
+        await connector.invokeStream({
+          messages: [
+            {
+              role: 'system',
+              content: 'Be a good chatbot',
+            },
+            {
+              role: 'assistant',
+              content: 'Hi, I am a good chatbot',
+            },
+            {
+              role: 'assistant',
+              content: 'But I can be naughty',
+            },
+            {
+              role: 'user',
+              content: 'What is 2+2?',
+            },
+            {
+              role: 'user',
+              content: 'I can be naughty too',
+            },
+            {
+              role: 'system',
+              content: 'This is extra tricky',
+            },
+          ],
+          stopSequences: ['\n\nHuman:'],
+        });
+        expect(mockRequest).toHaveBeenCalledWith({
+          signed: true,
+          responseType: 'stream',
+          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          data: JSON.stringify({
+            ...JSON.parse(DEFAULT_BODY),
+            messages: [
+              { content: 'Be a good chatbot', role: 'user' },
+              { content: 'Ok.\nHi, I am a good chatbot\nBut I can be naughty', role: 'assistant' },
+              { content: 'What is 2+2?\nI can be naughty too\nThis is extra tricky', role: 'user' },
+              { content: 'Ok.', role: 'assistant' },
             ],
             max_tokens: DEFAULT_TOKEN_LIMIT,
             temperature: 0,

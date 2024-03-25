@@ -302,25 +302,48 @@ const formatBedrockBody = ({
   temperature?: number;
 }) => ({
   anthropic_version: 'bedrock-2023-05-31',
-  messages: messages.reduce(
-    (acc: Array<{ role: string; content: string }>, m) => [
-      ...acc,
-      ...(m.role === 'system'
-        ? // Bedrock only accepts assistant and user roles.
-          // If a system message is sent, transform it to a user message
-          // followed by an assistant message (as 2 user messages in a row are not allowed)
-          [
-            { ...m, role: 'user' },
-            { content: 'Ok.', role: 'assistant' },
-          ]
-        : [{ ...m, role: m.role === 'assistant' ? 'assistant' : 'user' }]),
-    ],
-    []
-  ),
+  messages: ensureMessageFormat(messages),
   max_tokens: DEFAULT_TOKEN_LIMIT,
   stop_sequences: stopSequences,
   temperature,
 });
+
+/**
+ * Ensures that the messages are in the correct format for the Bedrock API
+ * Bedrock only accepts assistant and user roles.
+ * If 2 user or 2 assistant messages are sent in a row, Bedrock throws an error
+ * We combine the messages into a single message to avoid this error
+ * @param messages
+ */
+const ensureMessageFormat = (
+  messages: Array<{ role: string; content: string }>
+): Array<{ role: string; content: string }> =>
+  messages.reduce((acc: Array<{ role: string; content: string }>, m) => {
+    const lastMessage = acc[acc.length - 1];
+    if (lastMessage && lastMessage.role === m.role) {
+      // Bedrock only accepts assistant and user roles.
+      // If 2 user or 2 assistant messages are sent in a row, combine the messages into a single message
+      return [
+        ...acc.slice(0, -1),
+        { content: `${lastMessage.content}\n${m.content}`, role: m.role },
+      ];
+    }
+    if (m.role === 'system') {
+      if (lastMessage && lastMessage.role === 'user') {
+        // Bedrock only accepts assistant and user roles.
+        // If 2 user or 2 assistant messages are sent in a row, combine the messages into a single message
+        return [
+          ...acc.slice(0, -1),
+          { content: `${lastMessage.content}\n${m.content}`, role: 'user' },
+          { content: 'Ok.', role: 'assistant' },
+        ];
+      }
+      return [...acc, { content: m.content, role: 'user' }, { content: 'Ok.', role: 'assistant' }];
+    }
+
+    // force roll outside of system to ensure it is either assistant or user
+    return [...acc, { ...m, role: m.role === 'assistant' ? 'assistant' : 'user' }];
+  }, []);
 
 function parseContent(content: Array<{ text?: string; type: string }>): string {
   let parsedContent = '';

@@ -66,14 +66,6 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
     [editAction, index, subActionParams]
   );
 
-  const { isInvalid, errorMessage } = useMemo(
-    () => ({
-      isInvalid: model === undefined ? false : model.split('.')[0] === 'anthropic' ? false : true,
-      errorMessage: i18n.ANTHROPIC_ERROR,
-    }),
-    [model]
-  );
-
   return (
     <>
       <JsonEditorWithMessageVariables
@@ -113,8 +105,6 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
             }}
           />
         }
-        isInvalid={isInvalid}
-        error={errorMessage}
       >
         <EuiFieldText
           data-test-subj="bedrock-model"
