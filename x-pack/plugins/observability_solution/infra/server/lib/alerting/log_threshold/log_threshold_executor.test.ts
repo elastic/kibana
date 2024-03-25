@@ -443,6 +443,7 @@ describe('Log threshold executor', () => {
           setAlertLimitReached: jest.fn(),
           getRecoveredAlerts: jest.fn(),
           setAlertData: jest.fn(),
+          isTrackedAlert: jest.fn(),
         };
 
         const ruleParams = {
@@ -482,6 +483,7 @@ describe('Log threshold executor', () => {
           setAlertLimitReached: jest.fn(),
           getRecoveredAlerts: jest.fn(),
           setAlertData: jest.fn(),
+          isTrackedAlert: jest.fn(),
         };
 
         const ruleParams = {
@@ -510,6 +512,7 @@ describe('Log threshold executor', () => {
           setAlertLimitReached: jest.fn(),
           getRecoveredAlerts: jest.fn(),
           setAlertData: jest.fn(),
+          isTrackedAlert: jest.fn(),
         };
 
         const ruleParams = {
@@ -538,6 +541,7 @@ describe('Log threshold executor', () => {
           setAlertLimitReached: jest.fn(),
           getRecoveredAlerts: jest.fn(),
           setAlertData: jest.fn(),
+          isTrackedAlert: jest.fn(),
         };
 
         const ruleParams = {
@@ -568,6 +572,7 @@ describe('Log threshold executor', () => {
           setAlertLimitReached: jest.fn(),
           getRecoveredAlerts: jest.fn(),
           setAlertData: jest.fn(),
+          isTrackedAlert: jest.fn(),
         };
 
         const ruleParams = {
@@ -706,6 +711,7 @@ describe('Log threshold executor', () => {
           setAlertLimitReached: jest.fn(),
           getRecoveredAlerts: jest.fn(),
           setAlertData: jest.fn(),
+          isTrackedAlert: jest.fn(),
         };
 
         const ruleParams = {
@@ -794,6 +800,7 @@ describe('Log threshold executor', () => {
           setAlertLimitReached: jest.fn(),
           getRecoveredAlerts: jest.fn(),
           setAlertData: jest.fn(),
+          isTrackedAlert: jest.fn(),
         };
 
         const ruleParams = {
