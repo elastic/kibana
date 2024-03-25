@@ -144,7 +144,6 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
                       apiConfig: {
                         defaultSystemPromptId: getDefaultSystemPromptId(convo),
                         connectorId: defaultConnector?.id ?? '',
-                        connectorTypeTitle: defaultConnector?.connectorTypeTitle ?? '',
                       },
                     }),
               }))
@@ -211,7 +210,6 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
       [
         conversationSettings,
         conversationsSettingsBulkActions,
-        defaultConnector?.connectorTypeTitle,
         defaultConnector?.id,
         selectedSystemPrompt,
         setConversationSettings,

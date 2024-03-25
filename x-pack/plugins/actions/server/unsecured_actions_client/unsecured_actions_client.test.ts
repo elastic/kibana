@@ -6,25 +6,122 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { asNotificationExecutionSource } from '../lib';
 import { actionExecutorMock } from '../lib/action_executor.mock';
 import { UnsecuredActionsClient } from './unsecured_actions_client';
+import { Logger } from '@kbn/core/server';
+import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
+
+jest.mock('../application/connector/methods/get_all/get_all');
+
+const mockGetAllUnsecured = getAllUnsecured as jest.MockedFunction<typeof getAllUnsecured>;
 
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const actionExecutor = actionExecutorMock.create();
 const executionEnqueuer = jest.fn();
-const logger = loggingSystemMock.create().get();
-
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const clusterClient = elasticsearchServiceMock.createClusterClient();
+const inMemoryConnectors = [
+  {
+    id: 'testPreconfigured',
+    actionTypeId: '.slack',
+    secrets: {},
+    isPreconfigured: true,
+    isDeprecated: false,
+    isSystemAction: false,
+    name: 'test',
+    config: {
+      foo: 'bar',
+    },
+  },
+  /**
+   * System actions will not
+   * be returned from getAllUnsecured
+   */
+  {
+    id: 'system-connector-.cases',
+    actionTypeId: '.cases',
+    name: 'System action: .cases',
+    config: {},
+    secrets: {},
+    isDeprecated: false,
+    isMissingSecrets: false,
+    isPreconfigured: false,
+    isSystemAction: true,
+  },
+];
 let unsecuredActionsClient: UnsecuredActionsClient;
 
 beforeEach(() => {
   jest.resetAllMocks();
   unsecuredActionsClient = new UnsecuredActionsClient({
     actionExecutor,
-    internalSavedObjectsRepository,
+    clusterClient,
     executionEnqueuer,
+    inMemoryConnectors,
+    internalSavedObjectsRepository,
+    kibanaIndices: ['.kibana'],
     logger,
+  });
+});
+
+describe('getAll()', () => {
+  test('calls getAllUnsecured library method with appropriate parameters', async () => {
+    const expectedResult = [
+      {
+        actionTypeId: 'test',
+        id: '1',
+        name: 'test',
+        isMissingSecrets: false,
+        config: { foo: 'bar' },
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        referencedByCount: 6,
+      },
+      {
+        id: 'testPreconfigured',
+        actionTypeId: '.slack',
+        name: 'test',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        referencedByCount: 2,
+      },
+    ];
+    mockGetAllUnsecured.mockResolvedValueOnce(expectedResult);
+    const result = await unsecuredActionsClient.getAll('default');
+    expect(result).toEqual(expectedResult);
+    expect(mockGetAllUnsecured).toHaveBeenCalledWith({
+      esClient: clusterClient.asInternalUser,
+      inMemoryConnectors,
+      kibanaIndices: ['.kibana'],
+      logger,
+      internalSavedObjectsRepository,
+      spaceId: 'default',
+    });
+  });
+
+  test('throws error if getAllUnsecured throws errors', async () => {
+    mockGetAllUnsecured.mockImplementationOnce(() => {
+      throw new Error('failfail');
+    });
+    await expect(
+      unsecuredActionsClient.getAll('customSpace')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failfail"`);
+    expect(mockGetAllUnsecured).toHaveBeenCalledWith({
+      esClient: clusterClient.asInternalUser,
+      inMemoryConnectors,
+      kibanaIndices: ['.kibana'],
+      logger,
+      internalSavedObjectsRepository,
+      spaceId: 'customSpace',
+    });
   });
 });
 

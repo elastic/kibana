@@ -383,7 +383,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
         <div className="dataDriftSingleBrush" data-test-subj={`dataDriftSingleBrush-${id}`}>
           <div
             css={{
-              'margin-bottom': '-4px',
+              marginBottom: '-4px',
             }}
           >
             <SingleBrush
