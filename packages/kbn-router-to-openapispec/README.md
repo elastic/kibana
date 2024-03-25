@@ -1,3 +1,3 @@
-# @kbn/generate-oas
+# @kbn/router-to-openapispec
 
 Generate OAS from router definitions.

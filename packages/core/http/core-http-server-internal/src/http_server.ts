@@ -8,7 +8,7 @@
 
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
-import { generateOpenApiDocument } from '@kbn/generate-oas';
+import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -20,8 +20,8 @@ import {
 } from '@kbn/server-http-tools';
 
 import type { Duration } from 'moment';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { take, pairwise } from 'rxjs/operators';
+import { firstValueFrom, of, type Observable, type Subscription } from 'rxjs';
+import { take, pairwise, mergeMap } from 'rxjs/operators';
 import apm from 'elastic-apm-node';
 // @ts-expect-error no type definition
 import Brok from 'brok';
@@ -51,6 +51,7 @@ import { identity } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
+import { Semaphore } from '@kbn/std';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -335,6 +336,7 @@ export class HttpServer {
       }
     }
 
+    // TODO: consider adding a control for registering this route, conceivable that it is not needed in all cases...
     this.registerOasEndpoint();
 
     await this.server.start();
@@ -630,39 +632,44 @@ export class HttpServer {
     });
   }
 
-  private oasCache: undefined | object;
+  private generateOasSemaphore = new Semaphore(1);
   private registerOasEndpoint() {
     this.server!.route({
       path: '/api/oas',
       method: 'GET',
-      handler: (req, h) => {
-        // TODO cache the result of generating OAS
-        // if (this.oasCache) return h.response(this.oasCache);
-
-        const pathStartsWith = req.query?.pathStartsWith;
-        try {
-          const routers = this.getRegisteredRouters().flatMap((r) => {
-            const rs: Array<Router | CoreVersionedRouter> = [];
-            if ((r as Router).getRoutes(true).length > 0) {
-              rs.push(r as Router);
-            }
-            const versionedRouter = r.versioned as CoreVersionedRouter;
-            if (versionedRouter.getRoutes().length > 0) {
-              rs.push(versionedRouter);
-            }
-            return rs;
-          });
-          this.oasCache = generateOpenApiDocument(routers, {
-            baseUrl: 'todo',
-            title: 'todo',
-            version: '0.0.0',
-            pathStartsWith,
-          });
-          return h.response(this.oasCache);
-        } catch (e) {
-          this.log.error(e);
-          return h.response({ message: e.message }).code(500);
-        }
+      handler: async (req, h) => {
+        return await firstValueFrom(
+          of(1).pipe(
+            this.generateOasSemaphore.acquire(),
+            mergeMap(async () => {
+              const pathStartsWith = req.query?.pathStartsWith;
+              try {
+                const routers = this.getRegisteredRouters().flatMap((r) => {
+                  const rs: Array<Router | CoreVersionedRouter> = [];
+                  if ((r as Router).getRoutes(true).length > 0) {
+                    rs.push(r as Router);
+                  }
+                  const versionedRouter = r.versioned as CoreVersionedRouter;
+                  if (versionedRouter.getRoutes().length > 0) {
+                    rs.push(versionedRouter);
+                  }
+                  return rs;
+                });
+                // Potentially quite expensive
+                const result = generateOpenApiDocument(routers, {
+                  baseUrl: 'todo',
+                  title: 'todo',
+                  version: '0.0.0',
+                  pathStartsWith,
+                });
+                return h.response(result);
+              } catch (e) {
+                this.log.error(e);
+                return h.response({ message: e.message }).code(500);
+              }
+            })
+          )
+        );
       },
       options: {
         app: { access: 'public' },
