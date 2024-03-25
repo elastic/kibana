@@ -94,6 +94,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     function loadScript(url, cb) {
       var dom = document.createElement('script');
       dom.async = false;
+      dom.defer = true;
       dom.src = url;
       dom.addEventListener('error', failure);
       dom.addEventListener('load', cb);
