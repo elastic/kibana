@@ -14,6 +14,14 @@ import { Reference } from '@kbn/content-management-utils';
  */
 export interface SerializedPanelState<RawStateType extends object = object> {
   references?: Reference[];
-  rawState: RawStateType;
+  rawState: RawStateType | undefined;
   version?: string;
 }
+
+export interface HasSerializableState<StateType extends object = object> {
+  serializeState: () => SerializedPanelState<StateType>;
+}
+
+export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {
+  return Boolean((api as HasSerializableState)?.serializeState);
+};

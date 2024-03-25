@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import useToggle from 'react-use/lib/useToggle';
-import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { type Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
@@ -35,66 +35,60 @@ interface Props {
 }
 export const ContextualInsightProcessRow = ({ command }: { command: string }) => {
   const {
-    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
+    observabilityAIAssistant: {
+      ObservabilityAIAssistantContextualInsight,
+      getContextualInsightMessages,
+    },
   } = useKibanaContextForPlugin().services;
 
   const explainProcessMessages = useMemo<Message[] | undefined>(() => {
     if (!command) {
       return undefined;
     }
-    const now = new Date().toISOString();
-    return [
-      {
-        '@timestamp': now,
-        message: {
-          role: MessageRole.User,
-          content: `I am a software engineer. I am trying to understand what a process running on my
-          machine does.
-          Your task is to first describe what the process is and what its general use cases are. If I also provide you
-          with the arguments to the process you should then explain its arguments and how they influence the behaviour
-          of the process. If I do not provide any arguments then explain the behaviour of the process when no arguments are
-          provided.
-          If you do not recognise the process say "No information available for this process". If I provide an argument
-          to the process that you do not recognise then say "No information available for this argument" when explaining
-          that argument.
-          Here is an example with arguments.
-          Process: metricbeat -c /etc/metricbeat.yml -d autodiscover,kafka -e -system.hostfs=/hostfs
-          Explanation: Metricbeat is part of the Elastic Stack. It is a lightweight shipper that you can install on your
-          servers to periodically collect metrics from the operating system and from services running on the server.
-          Use cases for Metricbeat generally revolve around infrastructure monitoring. You would typically install
-          Metricbeat on your servers to collect metrics from your systems and services. These metrics are then
-          used for performance monitoring, anomaly detection, system status checks, etc.
-          Here is a breakdown of the arguments used:
-          * -c /etc/metricbeat.yml: The -c option is used to specify the configuration file for Metricbeat. In
-          this case, /etc/metricbeat.yml is the configuration file. This file contains configurations for what
-          metrics to collect and where to send them (e.g., to Elasticsearch or Logstash).
-          * -d autodiscover,kafka: The -d option is used to enable debug output for selected components. In
-          this case, debug output is enabled for autodiscover and kafka components. The autodiscover feature
-          allows Metricbeat to automatically discover services as they get started and stopped in your environment,
-          and kafka is presumably a monitored service from which Metricbeat collects metrics.
-          * -e: The -e option is used to log to stderr and disable syslog/file output. This is useful for debugging.
-          * -system.hostfs=/hostfs: The -system.hostfs option is used to set the mount point of the host’s
-          filesystem for use in monitoring a host from within a container. In this case, /hostfs is the mount
-          point. When running Metricbeat inside a container, filesystem metrics would be for the container by
-          default, but with this option, Metricbeat can get metrics for the host system.
-          Here is an example without arguments.
-          Process: metricbeat
-          Explanation: Metricbeat is part of the Elastic Stack. It is a lightweight shipper that you can install on your
-          servers to periodically collect metrics from the operating system and from services running on the server.
-          Use cases for Metricbeat generally revolve around infrastructure monitoring. You would typically install
-          Metricbeat on your servers to collect metrics from your systems and services. These metrics are then
-          used for performance monitoring, anomaly detection, system status checks, etc.
-          Running it without any arguments will start the process with the default configuration file, typically
-          located at /etc/metricbeat/metricbeat.yml. This file specifies the metrics to be collected and where
-          to ship them to.
-          Now explain this process to me.
-          Process: ${command}
-          Explanation:
-            `,
-        },
-      },
-    ];
-  }, [command]);
+
+    return getContextualInsightMessages({
+      message: `I am a software engineer. I am trying to understand what this process running on my
+      machine does.`,
+      instructions: `Your task is to first describe what the process is and what its general use cases are. If I also provide you
+      with the arguments to the process you should then explain its arguments and how they influence the behaviour
+      of the process. If I do not provide any arguments then explain the behaviour of the process when no arguments are
+      provided.
+      
+      Here is an example with arguments.
+      Process: metricbeat -c /etc/metricbeat.yml -d autodiscover,kafka -e -system.hostfs=/hostfs
+      Explanation: Metricbeat is part of the Elastic Stack. It is a lightweight shipper that you can install on your
+      servers to periodically collect metrics from the operating system and from services running on the server.
+      Use cases for Metricbeat generally revolve around infrastructure monitoring. You would typically install
+      Metricbeat on your servers to collect metrics from your systems and services. These metrics are then
+      used for performance monitoring, anomaly detection, system status checks, etc.
+      Here is a breakdown of the arguments used:
+      * -c /etc/metricbeat.yml: The -c option is used to specify the configuration file for Metricbeat. In
+      this case, /etc/metricbeat.yml is the configuration file. This file contains configurations for what
+      metrics to collect and where to send them (e.g., to Elasticsearch or Logstash).
+      * -d autodiscover,kafka: The -d option is used to enable debug output for selected components. In
+      this case, debug output is enabled for autodiscover and kafka components. The autodiscover feature
+      allows Metricbeat to automatically discover services as they get started and stopped in your environment,
+      and kafka is presumably a monitored service from which Metricbeat collects metrics.
+      * -e: The -e option is used to log to stderr and disable syslog/file output. This is useful for debugging.
+      * -system.hostfs=/hostfs: The -system.hostfs option is used to set the mount point of the host’s
+      filesystem for use in monitoring a host from within a container. In this case, /hostfs is the mount
+      point. When running Metricbeat inside a container, filesystem metrics would be for the container by
+      default, but with this option, Metricbeat can get metrics for the host system.
+      Here is an example without arguments.
+      Process: metricbeat
+      Explanation: Metricbeat is part of the Elastic Stack. It is a lightweight shipper that you can install on your
+      servers to periodically collect metrics from the operating system and from services running on the server.
+      Use cases for Metricbeat generally revolve around infrastructure monitoring. You would typically install
+      Metricbeat on your servers to collect metrics from your systems and services. These metrics are then
+      used for performance monitoring, anomaly detection, system status checks, etc.
+      Running it without any arguments will start the process with the default configuration file, typically
+      located at /etc/metricbeat/metricbeat.yml. This file specifies the metrics to be collected and where
+      to ship them to.
+      Now explain this process to me.
+      Process: ${command}
+      Explanation:`,
+    });
+  }, [command, getContextualInsightMessages]);
   return (
     <>
       {ObservabilityAIAssistantContextualInsight && explainProcessMessages ? (

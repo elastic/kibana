@@ -15,7 +15,7 @@
 
 import { Filter, TimeRange, type AggregateQuery, type Query } from '@kbn/es-query';
 
-import { PublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
+import { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
 
@@ -23,7 +23,7 @@ const mockTimeRange: TimeRange = { from: 'now-17m', to: 'now' };
 
 describe('custom time range badge action', () => {
   let action: CustomTimeRangeBadge;
-  let context: { embeddable: PublishesLocalUnifiedSearch };
+  let context: { embeddable: PublishesUnifiedSearch };
 
   let updateTimeRange: (timeRange: TimeRange | undefined) => void;
 
@@ -34,9 +34,9 @@ describe('custom time range badge action', () => {
     action = new CustomTimeRangeBadge();
     context = {
       embeddable: {
-        localTimeRange: timeRangeSubject,
-        localFilters: new BehaviorSubject<Filter[] | undefined>(undefined),
-        localQuery: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+        timeRange$: timeRangeSubject,
+        filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+        query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
       },
     };
   });

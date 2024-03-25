@@ -92,6 +92,10 @@ export const createPureDatasetQualityControllerStateMachine = (
               target: 'datasets.loaded',
               actions: ['storeIntegrations'],
             },
+            UPDATE_NAMESPACES: {
+              target: 'datasets.loaded',
+              actions: ['storeNamespaces'],
+            },
             UPDATE_QUERY: {
               actions: ['storeQuery'],
             },
@@ -221,6 +225,16 @@ export const createPureDatasetQualityControllerStateMachine = (
                 filters: {
                   ...context.filters,
                   integrations: event.integrations,
+                },
+              }
+            : {};
+        }),
+        storeNamespaces: assign((context, event) => {
+          return 'namespaces' in event
+            ? {
+                filters: {
+                  ...context.filters,
+                  namespaces: event.namespaces,
                 },
               }
             : {};

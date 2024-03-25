@@ -341,6 +341,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                     options={stackByOptions}
                     prepend={i18n.STACK_BY}
                     value={selectedStackByOption?.value}
+                    aria-label={i18n.STACK_BY}
                   />
                 )}
               </EuiFlexItem>
