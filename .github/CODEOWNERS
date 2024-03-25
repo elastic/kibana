@@ -11,7 +11,6 @@ x-pack/plugins/actions @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
 packages/kbn-actions-types @elastic/response-ops
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
-src/plugins/ai_assistant_management/observability @elastic/obs-knowledge-team
 src/plugins/ai_assistant_management/selection @elastic/obs-knowledge-team
 x-pack/packages/ml/aiops_components @elastic/ml-ui
 x-pack/plugins/aiops @elastic/ml-ui
@@ -583,6 +582,7 @@ src/plugins/no_data_page @elastic/appex-sharedux
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/plugins/observability_solution/observability_ai_assistant_app @elastic/obs-knowledge-team
+x-pack/plugins/observability_solution/observability_ai_assistant_management @elastic/obs-knowledge-team
 x-pack/plugins/observability_solution/observability_ai_assistant @elastic/obs-knowledge-team
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
@@ -1175,6 +1175,8 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /.bazelversion @elastic/kibana-operations
 /WORKSPACE.bazel @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
+/.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-visualizations
+/.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-visualizations
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { type DataView } from '@kbn/data-views-plugin/common';
+import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
   Embeddable,
   type EmbeddableInput,
   type EmbeddableOutput,
   type IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { type DataView } from '@kbn/data-views-plugin/common';
-import { type DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { BehaviorSubject } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { type AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import type { JobId } from '../../shared';
@@ -28,7 +29,8 @@ export abstract class AnomalyDetectionEmbeddable<
   // Need to defer embeddable load in order to resolve data views
   deferEmbeddableLoad = true;
 
-  public jobIds: JobId[] = [];
+  // API
+  public abstract jobIds: BehaviorSubject<JobId[] | undefined>;
 
   protected constructor(
     initialInput: Input,
@@ -45,8 +47,6 @@ export abstract class AnomalyDetectionEmbeddable<
 
   protected async initializeOutput(initialInput: CommonInput) {
     const { jobIds } = initialInput;
-
-    this.jobIds = jobIds;
 
     try {
       const jobs = await firstValueFrom(this.anomalyDetectorService.getJobs$(jobIds));
