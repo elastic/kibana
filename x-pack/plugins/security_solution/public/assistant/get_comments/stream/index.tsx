@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useFetchConnectorsQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
@@ -20,7 +21,7 @@ interface Props {
   isFetching?: boolean;
   isControlsEnabled?: boolean;
   index: number;
-  connectorTypeTitle: string;
+  connectorId: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
   refetchCurrentConversation: () => void;
   regenerateMessage: () => void;
@@ -29,7 +30,7 @@ interface Props {
 
 export const StreamComment = ({
   content,
-  connectorTypeTitle,
+  connectorId,
   index,
   isControlsEnabled = false,
   isError = false,
@@ -39,10 +40,13 @@ export const StreamComment = ({
   regenerateMessage,
   transformMessage,
 }: Props) => {
+  const { data: connectors } = useFetchConnectorsQuery();
+  const llmType = connectors?.find((c) => c.id === connectorId)?.connector_type_id ?? '.gen-ai';
+
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,
     content,
-    connectorTypeTitle,
+    llmType,
     reader,
     isError,
   });

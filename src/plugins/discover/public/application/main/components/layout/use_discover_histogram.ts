@@ -35,6 +35,7 @@ import type { DiscoverStateContainer } from '../../services/discover_state';
 import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import type { DiscoverAppState } from '../../services/discover_app_state_container';
+import { RecordRawType } from '../../services/discover_data_state_container';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -148,13 +149,18 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
       ({ status, result }) => {
+        const { recordRawType, result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
+
+        if (recordRawType === RecordRawType.PLAIN) {
+          // ignore histogram's total hits updates for text-based records as Discover manages them during docs fetching
+          return;
+        }
+
         if (result instanceof Error) {
           // Set totalHits$ to an error state
           setTotalHitsError(result);
           return;
         }
-
-        const { recordRawType, result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
 
         if (
           (status === UnifiedHistogramFetchStatus.loading ||

@@ -36,7 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    describe('printablePdfV2', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/178924
+    describe.skip('printablePdfV2', () => {
       it('allows width and height to have decimal', async () => {
         const downloadReportPath = await reportingAPI.postJobJSON(
           '/api/reporting/generate/printablePdfV2',
@@ -85,7 +86,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('pngV2', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/179001
+    describe.skip('pngV2', () => {
       it('fails if width or height are non-numeric', async () => {
         const downloadReportPath = await reportingAPI.postJobJSON('/api/reporting/generate/pngV2', {
           jobParams: createPngV2Params('cucucachoo'),

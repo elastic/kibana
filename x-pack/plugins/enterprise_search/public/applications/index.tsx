@@ -121,6 +121,7 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
+    searchPlayground: plugins.searchPlayground,
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,
