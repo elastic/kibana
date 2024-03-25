@@ -12,13 +12,66 @@ import type {
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import type {
   NetworkTopNFlowCountRequestOptions,
-  // NetworkTopNFlowCountRequestOptions,
+  NetworkTopNFlowOldRequestOptions,
   NetworkTopNFlowRequestOptions,
 } from '../../../../../../common/api/search_strategy';
 import type { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getOppositeField } from '../helpers';
 import { getQueryOrder } from './helpers';
+
+export const buildTopNFlowOldQuery = ({
+  defaultIndex,
+  filterQuery,
+  flowTarget,
+  sort,
+  pagination,
+  timerange: { from, to },
+  ip,
+}: NetworkTopNFlowOldRequestOptions): ISearchRequestParams => {
+  const querySize = pagination?.querySize ?? 10;
+
+  const filter = [...createQueryFilterClauses(filterQuery), getTimeRangeFilter(from, to)];
+
+  const dslQuery = {
+    allow_no_indices: true,
+    index: defaultIndex,
+    ignore_unavailable: true,
+    body: {
+      aggregations: {
+        ...getCountAgg(flowTarget),
+        ...getFlowTargetAggs(sort, flowTarget, querySize),
+      },
+      query: {
+        bool: ip
+          ? {
+              filter,
+              should: [
+                {
+                  term: {
+                    [`${getOppositeField(flowTarget)}.ip`]: ip,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            }
+          : {
+              filter,
+            },
+      },
+      _source: false,
+      fields: [
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
+    },
+    size: 0,
+    track_total_hits: false,
+  };
+  return dslQuery;
+};
 
 export const buildTopNFlowQuery = ({
   defaultIndex,
@@ -76,52 +129,8 @@ export const buildTopNFlowCountQuery = ({
   flowTarget,
   timerange: { from, to },
   ip,
-}: NetworkTopNFlowRequestOptions): ISearchRequestParams => {
-  const filter = [...createQueryFilterClauses(filterQuery), getTimeRangeFilter(from, to)];
-  const dslQuery = {
-    allow_no_indices: true,
-    index: defaultIndex,
-    ignore_unavailable: true,
-    body: {
-      aggregations: getCountAgg(flowTarget),
-      query: {
-        bool: ip
-          ? {
-              filter,
-              should: [
-                {
-                  term: {
-                    [`${getOppositeField(flowTarget)}.ip`]: ip,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            }
-          : {
-              filter,
-            },
-      },
-      _source: false,
-    },
-    size: 0,
-    track_total_hits: false,
-  };
-  return dslQuery;
-};
-
-export const buildTopNFlowFullQuery = ({
-  defaultIndex,
-  filterQuery,
-  flowTarget,
-  sort,
-  pagination,
-  timerange: { from, to },
-  ip,
 }: NetworkTopNFlowCountRequestOptions): ISearchRequestParams => {
-  const querySize = pagination?.querySize ?? 10;
-
   const filter = [...createQueryFilterClauses(filterQuery), getTimeRangeFilter(from, to)];
-
   const dslQuery = {
     allow_no_indices: true,
     index: defaultIndex,
@@ -129,7 +138,6 @@ export const buildTopNFlowFullQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),
-        ...getFlowTargetAggs(sort, flowTarget, querySize),
       },
       query: {
         bool: ip
@@ -149,12 +157,6 @@ export const buildTopNFlowFullQuery = ({
             },
       },
       _source: false,
-      fields: [
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
-        },
-      ],
     },
     size: 0,
     track_total_hits: false,

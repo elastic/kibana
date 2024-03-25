@@ -5,13 +5,12 @@
  * 2.0.
  */
 import { catchError, filter, map } from 'rxjs/operators';
-import { isObject, noop, omit } from 'lodash/fp';
+import { noop, omit } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { useObservable } from '@kbn/securitysolution-hook-utils';
 import { isRunningResponse } from '@kbn/data-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import type { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 
 import type {
@@ -19,31 +18,12 @@ import type {
   StrategyRequestInputType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
+import { getInspectResponse } from '../../../helpers';
 import type { inputsModel } from '../../store';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../../common/constants';
-
-interface UseSearchStrategyProps<QueryType extends FactoryQueryTypes> {
-  factoryQueryType: QueryType;
-  /**
-   * `result` initial value. It is used until the search strategy returns some data.
-   */
-  initialResult: Omit<StrategyResponseType<QueryType>, 'rawResponse'>;
-  /**
-   * Message displayed to the user on a Toast when an error happens.
-   */
-  errorMessage?: string;
-  /**
-   * When the flag switches from `false` to `true`, it will abort any ongoing request.
-   */
-  abort?: boolean;
-  /**
-   * Show error toast when error occurs on search complete
-   */
-  showErrorToast?: boolean;
-}
 
 interface UseSearchFunctionParams<QueryType extends FactoryQueryTypes> {
   request: Omit<StrategyRequestInputType<QueryType>, 'factoryQueryType'>;
@@ -105,7 +85,25 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   errorMessage,
   abort = false,
   showErrorToast = true,
-}: UseSearchStrategyProps<QueryType>) => {
+}: {
+  factoryQueryType: QueryType;
+  /**
+   * `result` initial value. It is used until the search strategy returns some data.
+   */
+  initialResult: Omit<StrategyResponseType<QueryType>, 'rawResponse'>;
+  /**
+   * Message displayed to the user on a Toast when an error happens.
+   */
+  errorMessage?: string;
+  /**
+   * When the flag switches from `false` to `true`, it will abort any ongoing request.
+   */
+  abort?: boolean;
+  /**
+   * Show error toast when error occurs on search complete
+   */
+  showErrorToast?: boolean;
+}) => {
   const abortCtrl = useRef(new AbortController());
   const refetch = useRef<inputsModel.Refetch>(noop);
   const { addError } = useAppToasts();
@@ -158,7 +156,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
     }
     return [
       omit<StrategyResponseType<QueryType>, 'rawResponse'>('rawResponse', result),
-      getInspectResponse(result),
+      getInspectResponse(result, EMPTY_INSPECT),
     ];
   }, [result, initialResult]);
 
@@ -170,20 +168,4 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
     refetch: refetch.current,
     inspect,
   };
-};
-
-export const getInspectResponse = <T extends FactoryQueryTypes>({
-  inspect,
-  rawResponse,
-}: StrategyResponseType<T>): InspectResponse => {
-  const dsl = isObject(inspect) && inspect.dsl ? inspect.dsl : EMPTY_INSPECT.dsl;
-
-  let response: string[] = EMPTY_INSPECT.response;
-  if (isObject(inspect) && 'response' in inspect) {
-    response = inspect.response;
-  } else if (isObject(rawResponse)) {
-    response = [JSON.stringify(rawResponse, null, 2)];
-  }
-
-  return { dsl, response };
 };

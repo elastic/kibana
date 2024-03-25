@@ -14,7 +14,7 @@ import { TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { networkModel } from '../../store';
 import { NetworkTopNFlowTable } from '.';
-import { mockData } from './mock';
+import { mockData, mockCount } from './mock';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 jest.mock('../../../../common/lib/kibana');
@@ -34,7 +34,7 @@ describe('NetworkTopNFlow Table Component', () => {
     loadPage,
     setQuerySkip: jest.fn(),
     showMorePagesIndicator: true,
-    totalCount: mockData.totalCount,
+    totalCount: mockCount.totalCount,
     type: networkModel.NetworkType.page,
   };
 

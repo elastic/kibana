@@ -6,9 +6,15 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { NetworkTopNFlowRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type {
+  NetworkTopNFlowCountRequestOptions,
+  NetworkTopNFlowRequestOptions,
+} from '../../../../../../../common/api/search_strategy';
 
-import type { NetworkTopNFlowStrategyResponse } from '../../../../../../../common/search_strategy';
+import type {
+  NetworkTopNFlowCountStrategyResponse,
+  NetworkTopNFlowStrategyResponse,
+} from '../../../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
@@ -32,6 +38,23 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
   flowTarget: FlowTargetSourceDest.source,
   pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 50, querySize: 10 },
   sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+  timerange: { interval: '12h', from: '2020-09-13T10:16:46.870Z', to: '2020-09-14T10:16:46.870Z' },
+};
+
+export const mockCountOptions: NetworkTopNFlowCountRequestOptions = {
+  defaultIndex: [
+    'apm-*-transaction*',
+    'traces-apm*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'logs-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+  factoryQueryType: NetworkQueries.topNFlowCount,
+  filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+  flowTarget: FlowTargetSourceDest.source,
   timerange: { interval: '12h', from: '2020-09-13T10:16:46.870Z', to: '2020-09-14T10:16:46.870Z' },
 };
 
@@ -585,7 +608,6 @@ export const mockCountStrategyResponse: IEsSearchResponse<unknown> = {
 };
 
 export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = {
-  totalCount: 738,
   edges: [
     {
       node: {
@@ -934,6 +956,57 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
       ),
     ],
   },
+  rawResponse: {} as NetworkTopNFlowStrategyResponse['rawResponse'],
+};
+
+export const formattedCountStrategyResponse: NetworkTopNFlowCountStrategyResponse = {
+  inspect: {
+    dsl: [
+      JSON.stringify(
+        {
+          allow_no_indices: true,
+          index: [
+            'apm-*-transaction*',
+            'traces-apm*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignore_unavailable: true,
+          body: {
+            aggregations: {
+              top_n_flow_count: { cardinality: { field: 'source.ip' } },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-13T10:16:46.870Z',
+                        lte: '2020-09-14T10:16:46.870Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            _source: false,
+          },
+          size: 0,
+          track_total_hits: false,
+        },
+        null,
+        2
+      ),
+    ],
+  },
+  totalCount: 738,
   rawResponse: {} as NetworkTopNFlowStrategyResponse['rawResponse'],
 };
 

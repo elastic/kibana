@@ -7,80 +7,77 @@
 
 import { getOr } from 'lodash/fp';
 
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
   NetworkTopNFlowStrategyResponse,
   NetworkQueries,
   NetworkTopNFlowEdges,
+  NetworkTopNFlowCountStrategyResponse,
+  NetworkTopNFlowOldStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import type { SecuritySolutionFactory, SecuritySolutionWithCountFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 
 import { getTopNFlowEdges } from './helpers';
 import {
   buildTopNFlowQuery,
   buildTopNFlowCountQuery,
-  buildTopNFlowFullQuery,
+  buildTopNFlowOldQuery,
 } from './query.top_n_flow_network.dsl';
 
-export const networkTopNFlow: SecuritySolutionWithCountFactory<NetworkQueries.topNFlow> = {
+export const networkTopNFlowOld: SecuritySolutionFactory<NetworkQueries.topNFlowOld> = {
+  buildDsl: (options) => {
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
+    return buildTopNFlowOldQuery(options);
+  },
+  parse: async (
+    options,
+    response: IEsSearchResponse<unknown>
+  ): Promise<NetworkTopNFlowOldStrategyResponse> => {
+    const { cursorStart, querySize } = options.pagination;
+    const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
+    const edges = networkTopNFlowEdges.splice(cursorStart, querySize - cursorStart);
+    const totalCount = getOr(0, 'rawResponse.aggregations.top_n_flow_count.value', response);
+
+    const inspect = { dsl: [inspectStringifyObject(buildTopNFlowOldQuery(options))] };
+    return { ...response, inspect, edges, totalCount };
+  },
+};
+
+export const networkTopNFlow: SecuritySolutionFactory<NetworkQueries.topNFlow> = {
   buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildTopNFlowQuery(options);
   },
-  buildCountDsl: (options) => buildTopNFlowCountQuery(options),
   parse: async (
     options,
-    [searchResponse, countResponse],
-    { dsls }
+    response: IEsSearchResponse<unknown>
   ): Promise<NetworkTopNFlowStrategyResponse> => {
     const { cursorStart, querySize } = options.pagination;
-    const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(searchResponse, options);
+    const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
     const edges = networkTopNFlowEdges.splice(cursorStart, querySize - cursorStart);
-    const totalCount = getOr(0, 'rawResponse.aggregations.top_n_flow_count.value', countResponse);
 
-    return {
-      ...searchResponse,
-      edges,
-      totalCount,
-      inspect: {
-        dsl: dsls.map((dsl) => inspectStringifyObject(dsl)),
-        response: [searchResponse.rawResponse, countResponse.rawResponse].map((rawResponse) =>
-          inspectStringifyObject(rawResponse)
-        ),
-      },
-    };
+    const inspect = { dsl: [inspectStringifyObject(buildTopNFlowQuery(options))] };
+    return { ...response, inspect, edges };
   },
 };
 
 export const networkTopNFlowCount: SecuritySolutionFactory<NetworkQueries.topNFlowCount> = {
-  buildDsl: (options) => {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
-    return buildTopNFlowFullQuery(options);
-  },
-  parse: async (options, response, deps): Promise<NetworkTopNFlowStrategyResponse> => {
-    const { cursorStart, querySize } = options.pagination;
-    const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
-    const edges = networkTopNFlowEdges.splice(cursorStart, querySize - cursorStart);
+  buildDsl: (options) => buildTopNFlowCountQuery(options),
+  parse: async (
+    options,
+    response: IEsSearchResponse<unknown>
+  ): Promise<NetworkTopNFlowCountStrategyResponse> => {
     const totalCount = getOr(0, 'rawResponse.aggregations.top_n_flow_count.value', response);
 
-    const dsl = deps?.dsl
-      ? inspectStringifyObject(deps.dsl)
-      : inspectStringifyObject(buildTopNFlowFullQuery(options));
-
-    return {
-      ...response,
-      edges,
-      totalCount,
-      inspect: {
-        dsl: [dsl],
-        response: [inspectStringifyObject(response.rawResponse)],
-      },
-    };
+    const inspect = { dsl: [inspectStringifyObject(buildTopNFlowCountQuery(options))] };
+    return { ...response, inspect, totalCount };
   },
 };

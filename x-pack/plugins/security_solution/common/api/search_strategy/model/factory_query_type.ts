@@ -43,6 +43,7 @@ export enum NetworkQueries {
   topCountries = 'topCountries',
   topNFlowCount = 'topNFlowCount',
   topNFlow = 'topNFlow',
+  topNFlowOld = 'topNFlowOld',
   users = 'users',
 }
 

@@ -6,14 +6,15 @@
  */
 
 import * as buildQuery from './query.top_n_flow_network.dsl';
-import { networkTopNFlow } from '.';
+import { networkTopNFlow, networkTopNFlowCount } from '.';
 import {
   mockOptions,
+  mockCountOptions,
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
   mockCountStrategyResponse,
+  formattedCountStrategyResponse,
 } from './__mocks__';
-import type { ParseWithCountDeps } from '../../types';
 
 describe('Network TopNFlow search strategy', () => {
   describe('networkTopNFlow', () => {
@@ -32,12 +33,33 @@ describe('Network TopNFlow search strategy', () => {
 
     describe('parse', () => {
       test('should parse data correctly', async () => {
-        const result = await networkTopNFlow.parse(
-          mockOptions,
-          [mockSearchStrategyResponse, mockCountStrategyResponse],
-          { dsls: [] } as unknown as ParseWithCountDeps
-        );
+        const result = await networkTopNFlow.parse(mockOptions, mockSearchStrategyResponse);
         expect(result).toMatchObject(formattedSearchStrategyResponse);
+      });
+    });
+  });
+
+  describe('networkTopNFlowCount', () => {
+    const buildTopNFlowCountQuery = jest.spyOn(buildQuery, 'buildTopNFlowCountQuery');
+
+    afterEach(() => {
+      buildTopNFlowCountQuery.mockClear();
+    });
+
+    describe('buildDsl', () => {
+      test('should build dsl query', () => {
+        networkTopNFlowCount.buildDsl(mockCountOptions);
+        expect(buildTopNFlowCountQuery).toHaveBeenCalledWith(mockCountOptions);
+      });
+    });
+
+    describe('parse', () => {
+      test('should parse data correctly', async () => {
+        const result = await networkTopNFlowCount.parse(
+          mockCountOptions,
+          mockCountStrategyResponse
+        );
+        expect(result).toMatchObject(formattedCountStrategyResponse);
       });
     });
   });

@@ -87,45 +87,57 @@ export const useNetworkTopNFlow = ({
     loading,
     result: response,
     search,
-    refetch,
+    refetch: refetchData,
     inspect,
   } = useSearchStrategy<NetworkQueries.topNFlow>({
     factoryQueryType: NetworkQueries.topNFlow,
-    initialResult: { edges: [], totalCount: 0 },
+    initialResult: { edges: [] },
     errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
     abort: skip,
   });
 
-  // const {
-  //   loading: loadingTotalCount,
-  //   result: responseTotalCount,
-  //   search: searchTotalCount,
-  //   refetch: refetchTotalCount,
-  //   inspect: inspectTotalCount,
-  // } = useSearchStrategy<NetworkQueries.topNFlowCount>({
-  //   factoryQueryType: NetworkQueries.topNFlowCount,
-  //   initialResult: { totalCount: -1 },
-  //   errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
-  //   abort: skip,
-  // });
+  const {
+    loading: loadingTotalCount,
+    result: responseTotalCount,
+    search: searchTotalCount,
+    refetch: refetchTotalCount,
+    inspect: inspectTotalCount,
+  } = useSearchStrategy<NetworkQueries.topNFlowCount>({
+    factoryQueryType: NetworkQueries.topNFlowCount,
+    initialResult: { totalCount: -1 },
+    errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
+    abort: skip,
+  });
 
-  // const refetch = useCallback(() => {
-  //   refetchData();
-  //   refetchTotalCount();
-  // }, [refetchData, refetchTotalCount]);
+  const refetch = useCallback(() => {
+    refetchData();
+    refetchTotalCount();
+  }, [refetchData, refetchTotalCount]);
 
   const networkTopNFlowResponse = useMemo(
     () => ({
-      id,
       networkTopNFlow: response.edges,
-      totalCount: response.totalCount,
-      inspect,
+      id,
+      inspect: {
+        dsl: [...inspect.dsl, ...inspectTotalCount.dsl],
+        response: [...inspect.response, ...inspectTotalCount.response],
+      },
       isInspected: false,
       loadPage,
       refetch,
       startDate,
+      totalCount: responseTotalCount.totalCount,
     }),
-    [id, inspect, refetch, response.edges, response.totalCount, startDate, loadPage]
+    [
+      id,
+      inspect,
+      inspectTotalCount,
+      refetch,
+      response.edges,
+      responseTotalCount.totalCount,
+      startDate,
+      loadPage,
+    ]
   );
 
   useEffect(() => {
@@ -155,8 +167,9 @@ export const useNetworkTopNFlow = ({
   useEffect(() => {
     if (!skip && networkTopNFlowRequest) {
       search(networkTopNFlowRequest);
+      searchTotalCount(networkTopNFlowRequest);
     }
-  }, [networkTopNFlowRequest, search, skip]);
+  }, [networkTopNFlowRequest, search, searchTotalCount, skip]);
 
-  return [loading, networkTopNFlowResponse];
+  return [loading || loadingTotalCount, networkTopNFlowResponse];
 };

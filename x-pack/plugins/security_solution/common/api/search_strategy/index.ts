@@ -35,7 +35,11 @@ import {
 import { networkOverviewSchema } from './network/overview';
 import { networkTlsSchema } from './network/tls';
 import { networkTopCountriesSchema } from './network/top_countries';
-import { networkTopNFlowCountSchema, networkTopNFlowSchema } from './network/top_n_flow';
+import {
+  networkTopNFlowCountSchema,
+  networkTopNFlowOldSchema,
+  networkTopNFlowSchema,
+} from './network/top_n_flow';
 import { networkUsersSchema } from './network/users';
 
 import {
@@ -105,6 +109,7 @@ export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryTyp
   networkOverviewSchema,
   networkTlsSchema,
   networkTopCountriesSchema,
+  networkTopNFlowOldSchema,
   networkTopNFlowSchema,
   networkTopNFlowCountSchema,
   networkUsersSchema,

@@ -6,7 +6,7 @@
  */
 
 import type { FactoryQueryTypes } from '../../../../common/search_strategy/security_solution';
-import type { SecuritySolutionSearchStrategyFactory } from './types';
+import type { SecuritySolutionFactory } from './types';
 
 import { hostsFactory } from './hosts';
 import { matrixHistogramFactory } from './matrix_histogram';
@@ -19,7 +19,7 @@ import { relatedEntitiesFactory } from './related_entities';
 
 export const securitySolutionFactory: Record<
   FactoryQueryTypes,
-  SecuritySolutionSearchStrategyFactory<FactoryQueryTypes>
+  SecuritySolutionFactory<FactoryQueryTypes>
 > = {
   ...hostsFactory,
   ...usersFactory,

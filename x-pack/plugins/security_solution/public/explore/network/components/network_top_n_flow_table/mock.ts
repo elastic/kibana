@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import type { NetworkTopNFlowStrategyResponse } from '../../../../../common/search_strategy';
+import type {
+  NetworkTopNFlowCountStrategyResponse,
+  NetworkTopNFlowStrategyResponse,
+} from '../../../../../common/search_strategy';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+
+export const mockCount: NetworkTopNFlowCountStrategyResponse = {
+  totalCount: 524,
+  rawResponse: {} as NetworkTopNFlowStrategyResponse['rawResponse'],
+};
 
 export const mockData: NetworkTopNFlowStrategyResponse = {
   edges: [
@@ -73,6 +81,5 @@ export const mockData: NetworkTopNFlowStrategyResponse = {
       },
     },
   ],
-  totalCount: 524,
   rawResponse: {} as NetworkTopNFlowStrategyResponse['rawResponse'],
 };
