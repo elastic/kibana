@@ -30,7 +30,8 @@ import {
   visitPolicyList,
 } from '../../../screens';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/179274
+describe.skip(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
     tags: ['@serverless'],
