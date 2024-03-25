@@ -87,11 +87,13 @@ export const DataViewsFilter = ({ count, filter, onFilter }: DataViewFilterProps
                 title: selectDataViewTypeLabel,
                 items: [
                   {
+                    'data-test-subj': 'logsExplorerDataSourceSelectorDataViewTypeAll',
                     icon: filter.dataType !== logsDataViewType ? 'check' : 'empty',
                     name: allDataViewTypesLabel,
                     onClick: createSelectTypeFilter(undefined),
                   },
                   {
+                    'data-test-subj': 'logsExplorerDataSourceSelectorDataViewTypeLogs',
                     icon: filter.dataType === logsDataViewType ? 'check' : 'empty',
                     name: logsDataViewTypeLabel,
                     onClick: createSelectTypeFilter('logs'),

@@ -604,19 +604,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
         });
 
-        it('should sort the data views list by the clicked sorting option', async () => {
+        it('should filter the list of data views by type', async () => {
+          // Test descending order
+          await PageObjects.observabilityLogsExplorer.changeDataViewTypeFilter('Logs');
           await retry.try(async () => {
-            const panelTitleNode = await PageObjects.observabilityLogsExplorer
+            const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
-            expect(
-              await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
-                panelTitleNode
-              )
-            ).to.be('Data Views');
+            expect(menuEntries.length).to.be(1);
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
           });
 
+          // Test back ascending order
+          await PageObjects.observabilityLogsExplorer.changeDataViewTypeFilter('All');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogsExplorer
+              .getDataViewsContextMenu()
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
+
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+          });
+        });
+
+        it('should sort the data views list by the clicked sorting option', async () => {
           // Test descending order
           await PageObjects.observabilityLogsExplorer.clickSortButtonBy('desc');
           await retry.try(async () => {
@@ -664,20 +681,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should load a data view allowed by the settings upon click', async () => {
           await retry.try(async () => {
-            const panelTitleNode = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu: WebElementWrapper) =>
-                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
-              );
-
-            expect(
-              await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
-                panelTitleNode
-              )
-            ).to.be('Data Views');
-          });
-
-          await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
               .then((menu: WebElementWrapper) =>
@@ -702,18 +705,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should navigate to Discover and load a data view not allowed by the settings upon click', async () => {
-          await retry.try(async () => {
-            const panelTitleNode = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
-
-            expect(
-              await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
-                panelTitleNode
-              )
-            ).to.be('Data Views');
-          });
-
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
