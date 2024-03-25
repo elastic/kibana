@@ -709,6 +709,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
       previousProps.selectedForecastId !== this.props.selectedForecastId ||
+      previousProps.selectedJob?.job_id !== this.props.selectedJob?.job_id ||
       previousProps.selectedJobId !== this.props.selectedJobId ||
       previousProps.functionDescription !== this.props.functionDescription
     ) {
@@ -719,6 +720,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
         previousProps.selectedForecastId !== this.props.selectedForecastId ||
         previousProps.selectedJobId !== this.props.selectedJobId ||
+        previousProps.selectedJob?.job_id !== this.props.selectedJob?.job_id ||
         previousProps.functionDescription !== this.props.functionDescription;
       this.loadSingleMetricData(fullRefresh);
     }
