@@ -21,15 +21,34 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
+import { SeriesType, XYState, visualizationTypes } from './types';
+import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
+import { getDataLayers } from './visualization_helpers';
 
 interface AddLayerButtonProps {
+  state: XYState;
   supportedLayers: VisualizationLayerDescription[];
   addLayer: AddLayerFunction<ExtraAppendLayerArg>;
   eventAnnotationService: EventAnnotationServiceType;
   isInlineEditing?: boolean;
 }
 
+export enum AddLayerPanelType {
+  main = 'main',
+  selectAnnotationMethod = 'selectAnnotationMethod',
+  layerVisualizationType = 'layerVisualizationType',
+}
+
+// function shift<T>(array: T[], positions: number): T[] {
+//   // Handle negative or values greater than array length
+//   positions = positions % array.length;
+
+//   // Split the array into two parts and concatenate them in the shifted order
+//   return array.slice(positions).concat(array.slice(0, positions));
+// }
+
 export function AddLayerButton({
+  state,
   supportedLayers,
   addLayer,
   eventAnnotationService,
@@ -47,7 +66,7 @@ export function AddLayerButton({
     toolTipContent,
   }: typeof supportedLayers[0]) => {
     return {
-      panel: 1,
+      panel: AddLayerPanelType.selectAnnotationMethod,
       toolTipContent,
       disabled,
       name: (
@@ -70,6 +89,36 @@ export function AddLayerButton({
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
   };
+
+  const dataPanel = ({
+    type,
+    label,
+    icon,
+    disabled,
+    toolTipContent,
+  }: typeof supportedLayers[0]) => {
+    return {
+      panel: AddLayerPanelType.layerVisualizationType,
+      toolTipContent,
+      disabled,
+      name: <span className="lnsLayerAddButtonLabel">{label}</span>,
+      className: 'lnsLayerAddButton',
+      icon: icon && <EuiIcon size="m" type={icon} />,
+      ['data-test-subj']: `lnsLayerAddButton-${type}`,
+    };
+  };
+
+  const horizontalOnly = isHorizontalChart(state.layers);
+
+  const availableVisTypes = visualizationTypes.filter(
+    (t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly
+  );
+
+  // to decide: should we shift the availableVisTypes array?
+  const currentLayerVisType =
+    availableVisTypes.findIndex((t) => t.id === getDataLayers(state.layers)[0].seriesType) || 0;
+
+  // const availableVisTypes = shift(availableVisTypes, currentLayerVisType)
 
   return (
     <>
@@ -98,10 +147,11 @@ export function AddLayerButton({
         panelPaddingSize="none"
       >
         <EuiContextMenu
-          initialPanelId={0}
+          initialPanelId={AddLayerPanelType.main}
+          size="s"
           panels={[
             {
-              id: 0,
+              id: AddLayerPanelType.main,
               title: i18n.translate('xpack.lens.configPanel.selectLayerType', {
                 defaultMessage: 'Select layer type',
               }),
@@ -110,6 +160,8 @@ export function AddLayerButton({
                 const { type, label, icon, disabled, toolTipContent } = props;
                 if (type === LayerTypes.ANNOTATIONS) {
                   return annotationPanel(props);
+                } else if (type === LayerTypes.DATA) {
+                  return dataPanel(props);
                 }
                 return {
                   toolTipContent,
@@ -126,7 +178,7 @@ export function AddLayerButton({
               }),
             },
             {
-              id: 1,
+              id: AddLayerPanelType.selectAnnotationMethod,
               initialFocusedItemIndex: 0,
               title: i18n.translate('xpack.lens.configPanel.selectAnnotationMethod', {
                 defaultMessage: 'Select annotation method',
@@ -155,6 +207,23 @@ export function AddLayerButton({
                   'data-test-subj': 'lnsAnnotationLayer_addFromLibrary',
                 },
               ],
+            },
+            {
+              size: 's',
+              id: AddLayerPanelType.layerVisualizationType,
+              initialFocusedItemIndex: currentLayerVisType,
+              title: i18n.translate('xpack.lens.layerPanel.layerVisualizationType', {
+                defaultMessage: 'Layer visualization type',
+              }),
+              items: availableVisTypes.map((t) => ({
+                name: t.fullLabel || t.label,
+                icon: t.icon && <EuiIcon size="m" type={t.icon} />,
+                onClick: () => {
+                  addLayer(LayerTypes.DATA, undefined, undefined, t.id as SeriesType);
+                  toggleLayersChoice(false);
+                },
+                'data-test-subj': `lnsXY_seriesType-${t.id}`,
+              })),
             },
           ]}
         />
