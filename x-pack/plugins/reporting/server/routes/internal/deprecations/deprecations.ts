@@ -7,7 +7,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { Logger, RequestHandler } from '@kbn/core/server';
 import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '@kbn/reporting-common';
-import { REPORTING_DATA_STREAM_WILDCARD } from '@kbn/reporting-server';
+import { REPORTING_DATA_STREAM, REPORTING_DATA_STREAM_WILDCARD } from '@kbn/reporting-server';
 import type { IlmPolicyStatusResponse } from '@kbn/reporting-common/url';
 import type { ReportingCore } from '../../../core';
 import { IlmPolicyManager } from '../../../lib';
@@ -125,7 +125,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       // Second we migrate all of the existing indices to be managed by the reporting ILM policy
       try {
         await client.indices.putSettings({
-          index: REPORTING_DATA_STREAM_WILDCARD,
+          index: REPORTING_DATA_STREAM,
           body: {
             index: {
               lifecycle: {

@@ -7,10 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ILM_POLICY_NAME } from '@kbn/reporting-common';
-import { reportingIlmPolicy } from './constants';
+import { REPORTING_DATA_STREAM } from '@kbn/reporting-server';
+import { reportingIlmPolicy, reportingIndexTemplate } from './constants';
 
 /**
- * Responsible for detecting and provisioning the reporting ILM policy.
+ * Responsible for detecting and provisioning the reporting ILM policy in stateful deployments.
+ * Must be linked to the data stream once it is created.
  *
  * Uses the provided {@link ElasticsearchClient} to scope request privileges.
  */
@@ -40,6 +42,16 @@ export class IlmPolicyManager {
     await this.client.ilm.putLifecycle({
       name: ILM_POLICY_NAME,
       body: reportingIlmPolicy,
+    });
+  }
+
+  /**
+   * Link the Reporting ILM policy to the Data Stream index template
+   */
+  public async linkIlmPolicy(): Promise<void> {
+    await this.client.indices.putIndexTemplate({
+      name: REPORTING_DATA_STREAM,
+      body: reportingIndexTemplate,
     });
   }
 }

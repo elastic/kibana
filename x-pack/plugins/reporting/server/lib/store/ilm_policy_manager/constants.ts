@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IlmPutLifecycleRequest,
+  IndicesPutIndexTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const reportingIlmPolicy: IlmPutLifecycleRequest['body'] = {
   policy: {
@@ -15,4 +18,12 @@ export const reportingIlmPolicy: IlmPutLifecycleRequest['body'] = {
       },
     },
   },
+};
+
+export const reportingIndexTemplate: IndicesPutIndexTemplateRequest['body'] = {
+  index_patterns: ['.kibana-reporting*'],
+  template: {
+    settings: { 'index.lifecycle.name': 'kibana-reporting' },
+  },
+  data_stream: {},
 };

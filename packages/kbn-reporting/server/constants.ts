@@ -17,7 +17,7 @@ export const PLUGIN_ID = 'reporting';
 // number of backing indices.
 export const REPORTING_DATA_STREAM = '.kibana-reporting';
 
-// Pattern to search for historical reports
+// Pattern to include historical reports in search for reports
 export const REPORTING_DATA_STREAM_WILDCARD = '.reporting-*,.kibana-reporting*';
 
 /*
