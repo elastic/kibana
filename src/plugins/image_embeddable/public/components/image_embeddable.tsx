@@ -70,6 +70,7 @@ export const ImageEmbeddable = ({
       }}
     >
       <ImageViewer
+        data-rendering-count={1} // TODO: Remove this as part of https://github.com/elastic/kibana/issues/179376
         className="imageEmbeddableImage"
         imageConfig={imageConfig}
         isScreenshotMode={screenshotModeService?.isScreenshotMode()}

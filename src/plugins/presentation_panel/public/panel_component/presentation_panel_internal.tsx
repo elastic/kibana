@@ -110,7 +110,6 @@ export const PresentationPanelInternal = <
       aria-labelledby={headerId}
       data-test-embeddable-id={api?.uuid}
       data-test-subj="embeddablePanel"
-      data-rendering-count={1}
       {...contentAttrs}
     >
       {!hideHeader && api && (
