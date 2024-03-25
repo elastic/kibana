@@ -122,7 +122,8 @@ describe('Dependencies', () => {
   });
 });
 
-describe('Dependencies with high volume of data', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/179083
+describe.skip('Dependencies with high volume of data', () => {
   before(() => {
     synthtrace.index(
       generateManyDependencies({
@@ -142,10 +143,7 @@ describe('Dependencies with high volume of data', () => {
 
   it('shows dependencies inventory page', () => {
     cy.visitKibana(
-      `/app/apm/dependencies/inventory?${new URLSearchParams({
-        ...timeRange,
-        kuery: 'elasticsearch*',
-      })}`
+      `/app/apm/dependencies/inventory?${new URLSearchParams(timeRange)}`
     );
 
     cy.getByTestSubj('dependenciesTable');

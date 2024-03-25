@@ -28,7 +28,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
@@ -36,6 +35,7 @@ import type { DiscoverStateContainer } from '../../services/discover_state';
 import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import type { DiscoverAppState } from '../../services/discover_app_state_container';
+import { RecordRawType } from '../../services/discover_data_state_container';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -149,13 +149,18 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
       ({ status, result }) => {
+        const { recordRawType, result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
+
+        if (recordRawType === RecordRawType.PLAIN) {
+          // ignore histogram's total hits updates for text-based records as Discover manages them during docs fetching
+          return;
+        }
+
         if (result instanceof Error) {
           // Set totalHits$ to an error state
           setTotalHitsError(result);
           return;
         }
-
-        const { recordRawType, result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
 
         if (
           (status === UnifiedHistogramFetchStatus.loading ||
@@ -311,8 +316,6 @@ export const useDiscoverHistogram = ({
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
-  const servicesMemoized = useMemo(() => ({ ...services, uiActions: getUiActions() }), [services]);
-
   const filtersMemoized = useMemo(
     () => [...(filters ?? []), ...customFilters],
     [filters, customFilters]
@@ -324,7 +327,7 @@ export const useDiscoverHistogram = ({
   return {
     ref,
     getCreationOptions,
-    services: servicesMemoized,
+    services,
     dataView: isPlainRecord ? textBasedDataView : dataView,
     query: isPlainRecord ? textBasedQuery : query,
     filters: filtersMemoized,

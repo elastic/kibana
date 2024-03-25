@@ -6,11 +6,11 @@
  */
 
 import type { AnalyticsServiceStart, CoreStart } from '@kbn/core/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { remove } from 'lodash';
-import { ObservabilityAIAssistantScreenContext } from '../../common/types';
+import { compact, without } from 'lodash';
+import { BehaviorSubject, debounceTime, filter, lastValueFrom, of, Subject, take } from 'rxjs';
+import type { Message, ObservabilityAIAssistantScreenContext } from '../../common/types';
+import { createFunctionRequestMessage } from '../../common/utils/create_function_request_message';
+import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationRenderFunction, ObservabilityAIAssistantService } from '../types';
 
@@ -18,22 +18,17 @@ export function createService({
   analytics,
   coreStart,
   enabled,
-  licenseStart,
-  securityStart,
-  shareStart,
 }: {
   analytics: AnalyticsServiceStart;
   coreStart: CoreStart;
   enabled: boolean;
-  licenseStart: LicensingPluginStart;
-  securityStart: SecurityPluginStart;
-  shareStart: SharePluginStart;
 }): ObservabilityAIAssistantService {
-  const client = createCallObservabilityAIAssistantAPI(coreStart);
+  const apiClient = createCallObservabilityAIAssistantAPI(coreStart);
 
   const registrations: ChatRegistrationRenderFunction[] = [];
 
-  const screenContexts: ObservabilityAIAssistantScreenContext[] = [];
+  const screenContexts$ = new BehaviorSubject<ObservabilityAIAssistantScreenContext[]>([]);
+  const predefinedConversation$ = new Subject<{ messages: Message[]; title?: string }>();
 
   return {
     isEnabled: () => {
@@ -44,20 +39,56 @@ export function createService({
     },
     start: async ({ signal }) => {
       const mod = await import('./create_chat_service');
-      return await mod.createChatService({ analytics, client, signal, registrations });
+      return await mod.createChatService({ analytics, apiClient, signal, registrations });
     },
-    callApi: client,
-    getCurrentUser: () => securityStart.authc.getCurrentUser(),
-    getLicense: () => licenseStart.license$,
-    getLicenseManagementLocator: () => shareStart,
+    callApi: apiClient,
+    getScreenContexts() {
+      return screenContexts$.value;
+    },
     setScreenContext: (context: ObservabilityAIAssistantScreenContext) => {
-      screenContexts.push(context);
-      return () => {
-        remove(screenContexts, context);
-      };
+      screenContexts$.next(screenContexts$.value.concat(context));
+
+      function unsubscribe() {
+        screenContexts$.next(without(screenContexts$.value, context));
+      }
+
+      return unsubscribe;
     },
-    getScreenContexts: () => {
-      return screenContexts;
+    navigate: async (cb) => {
+      cb();
+
+      // wait for at least 1s of no network activity
+      await lastValueFrom(
+        coreStart.http.getLoadingCount$().pipe(
+          filter((count) => count === 0),
+          debounceTime(1000),
+          take(1)
+        )
+      );
+
+      return of(
+        createFunctionRequestMessage({
+          name: 'context',
+          args: {
+            queries: [],
+            categories: [],
+          },
+        }),
+        createFunctionResponseMessage({
+          name: 'context',
+          content: {
+            screenDescription: compact(
+              screenContexts$.value.map((context) => context.screenDescription)
+            ).join('\n\n'),
+          },
+        })
+      );
+    },
+    conversations: {
+      openNewConversation: ({ messages, title }: { messages: Message[]; title?: string }) => {
+        predefinedConversation$.next({ messages, title });
+      },
+      predefinedConversation$: predefinedConversation$.asObservable(),
     },
   };
 }

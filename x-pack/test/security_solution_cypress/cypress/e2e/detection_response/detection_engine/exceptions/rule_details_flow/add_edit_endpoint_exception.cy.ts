@@ -26,11 +26,7 @@ import {
   submitNewExceptionItem,
 } from '../../../../../tasks/exceptions';
 
-import {
-  deleteAlertsAndRules,
-  deleteEndpointExceptionList,
-  deleteExceptionLists,
-} from '../../../../../tasks/api_calls/common';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -48,6 +44,8 @@ import {
 import {
   createEndpointExceptionList,
   createEndpointExceptionListItem,
+  deleteEndpointExceptionList,
+  deleteExceptionLists,
 } from '../../../../../tasks/api_calls/exceptions';
 
 describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverless'] }, () => {
@@ -61,12 +59,13 @@ describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverle
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   beforeEach(() => {
     deleteExceptionLists();
     deleteEndpointExceptionList();
+
     login();
     deleteAlertsAndRules();
   });
@@ -95,6 +94,7 @@ describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverle
 
     it('creates an exception item', () => {
       // when no exceptions exist, empty component shows with action to add exception
+
       cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
       // open add exception modal

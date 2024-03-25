@@ -77,7 +77,10 @@ export const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
-          link: 'observability-overview:slos',
+          title: i18n.translate('xpack.serverlessObservability.nav.slo', {
+            defaultMessage: 'SLOs',
+          }),
+          link: 'slo',
         },
         {
           id: 'aiops',

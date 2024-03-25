@@ -8,7 +8,7 @@
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import type {
-  ChatRegistrationFunction,
+  RegistrationCallback,
   RegisterFunction,
 } from '@kbn/observability-ai-assistant-plugin/server/service/types';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
@@ -47,8 +47,11 @@ export function registerAssistantFunctions({
   kibanaVersion: string;
   ruleDataClient: IRuleDataClient;
   plugins: APMRouteHandlerResources['plugins'];
-}): ChatRegistrationFunction {
-  return async ({ resources, registerContext, registerFunction }) => {
+}): RegistrationCallback {
+  return async ({
+    resources,
+    functions: { registerContext, registerFunction },
+  }) => {
     const apmRouteHandlerResources: APMRouteHandlerResources = {
       context: resources.context,
       request: resources.request,

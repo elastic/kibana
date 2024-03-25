@@ -98,8 +98,11 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
   };
 
+  const chromeStyle = useObservable(coreStart.chrome.getChromeStyle$(), 'classic');
+
   const services: StartServices = useMemo(() => {
     return {
+      ...coreStart,
       cases: deps.cases,
       charts: deps.charts,
       contentManagement: deps.contentManagement,
@@ -124,7 +127,6 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
       uiActions: deps.uiActions,
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
-      ...coreStart,
       mlServices: getMlGlobalServices(coreStart.http, deps.data.dataViews, deps.usageCollection),
     };
   }, [deps, coreStart]);
@@ -165,7 +167,11 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
           <KibanaContextProvider services={services}>
             <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
+                <EnabledFeaturesContextProvider
+                  isServerless={isServerless}
+                  mlFeatures={mlFeatures}
+                  showMLNavMenu={chromeStyle === 'classic'}
+                >
                   <MlRouter pageDeps={pageDeps} />
                 </EnabledFeaturesContextProvider>
               </DatePickerContextProvider>

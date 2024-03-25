@@ -7,7 +7,7 @@ You can also check out the dedicated app view, which enables easier search and f
 
 ## Directory: x-pack/plugins/cloud_security_posture
 
-**Total Tests:** 425 | **Skipped:** 5 (1.18%) | **Todo:** 0 (0.00%)
+**Total Tests:** 424 | **Skipped:** 5 (1.18%) | **Todo:** 0 (0.00%)
 
 ![](https://img.shields.io/badge/UT-brightgreen) ![](https://img.shields.io/badge/HAS-SKIP-yellow)
 
@@ -276,15 +276,14 @@ You can also check out the dedicated app view, which enables easier search and f
 | [Prefer Cloud dashboard if both integration have findings](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
 | [Show CSPM installation prompt if CSPM is not installed and KSPM is installed ,NO AGENT](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
 | [Show KSPM installation prompt if KSPM is not installed and CSPM is installed , NO AGENT](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
-| [should not select default tab is user has already selected one themselves](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
 | [getDefaultTab](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | describe |  |  |
 | [returns CSPM tab if only CSPM has findings](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
 | [returns CSPM tab if both CSPM and KSPM has findings](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
 | [returns KSPM tab if only KSPM has findings](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
 | [when no findings preffers CSPM tab unless not-installed or unprivileged](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
-| [returns CSPM tab is plugin status and kspm status is not provided](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
-| [returns KSPM tab is plugin status and csp status is not provided](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
-| [returns CSPM tab when only plugins status data is provided](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
+| [should returns undefined when plugin status and cspm stats is not provided](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
+| [should return undefined is plugin status and csp status is not provided ](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
+| [should return undefined when  plugins status or cspm stats data is not provided](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
 | [<BenchmarksSection />](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/benchmarks_section.test.tsx) | describe |  |  |
 | [Sorting](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/benchmarks_section.test.tsx) | describe |  |  |
 | [sorts by ascending order of compliance scores](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/benchmarks_section.test.tsx) | it |  |  |
@@ -443,11 +442,61 @@ You can also check out the dedicated app view, which enables easier search and f
 | [should drop unknown properties when running the up migration](x-pack/plugins/cloud_security_posture/server/tasks/task_state.test.ts) | it |  |  |
 </details>
 
+## Directory: x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture
+
+**Total Tests:** 37 | **Skipped:** 0 (0.00%) | **Todo:** 0 (0.00%)
+
+![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/SERVERLESS-pink) ![](https://img.shields.io/badge/API-INTEGRATION-purple)
+
+<details>
+<summary>Test Details</summary>
+
+| Test Label | Type | Skipped | Todo |
+|------------|------|---------|------|
+| [GET /internal/cloud_security_posture/benchmark](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/benchmark/v1.ts) | describe |  |  |
+| [Should return non-empty array filled with Rules if user has CSP integrations](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/benchmark/v1.ts) | it |  |  |
+| [Should return array size 2 when we set per page to be only 2 (total element is still 3)](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/benchmark/v1.ts) | it |  |  |
+| [Should return array size 2 when we set per page to be only 2 (total element is still 3)](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/benchmark/v1.ts) | it |  |  |
+| [Should return empty array when we set page to be above the last page number](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/benchmark/v1.ts) | it |  |  |
+| [GET /internal/cloud_security_posture/benchmark](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/benchmark/v2.ts) | describe |  |  |
+| [Should return all benchmarks if user has CSP integrations](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/benchmark/v2.ts) | it |  |  |
+| [GET internal/cloud_security_posture/rules/_find](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/find_csp_benchmark_rule.ts) | describe |  |  |
+| [Should return 500 error code when not provide package policy id or benchmark id](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/find_csp_benchmark_rule.ts) | it |  |  |
+| [Should return 500 error code when provide both package policy id and benchmark id](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/find_csp_benchmark_rule.ts) | it |  |  |
+| [Should return 404 status code when the package policy ID does not exist](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/find_csp_benchmark_rule.ts) | it |  |  |
+| [Should return 200 status code and filter rules by benchmarkId](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/find_csp_benchmark_rule.ts) | it |  |  |
+| [Should return 200 status code, and only requested fields in the response](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/find_csp_benchmark_rule.ts) | it |  |  |
+| [Should return 200 status code, items sorted by metadata.section field](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/find_csp_benchmark_rule.ts) | it |  |  |
+| [Should return 200 status code and paginate rules with a limit of PerPage](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/find_csp_benchmark_rule.ts) | it |  |  |
+| [cloud_security_posture](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/index.ts) | describe |  |  |
+| [GET /internal/cloud_security_posture/status](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | describe |  |  |
+| [STATUS = INDEXED TEST](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | describe |  |  |
+| [Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | it |  |  |
+| [Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | it |  |  |
+| [Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | it |  |  |
+| [GET /internal/cloud_security_posture/status](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexing.ts) | describe |  |  |
+| [STATUS = INDEXING TEST](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexing.ts) | describe |  |  |
+| [Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexing.ts) | it |  |  |
+| [Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexing.ts) | it |  |  |
+| [Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexing.ts) | it |  |  |
+| [GET /internal/cloud_security_posture/status](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_not_deployed_not_installed.ts) | describe |  |  |
+| [STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_not_deployed_not_installed.ts) | describe |  |  |
+| [Should return not-deployed when installed kspm, no findings on either indices and no healthy agents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_not_deployed_not_installed.ts) | it |  |  |
+| [Should return not-deployed when installed cspm, no findings on either indices and no healthy agents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_not_deployed_not_installed.ts) | it |  |  |
+| [Should return not-deployed when installed cnvm, no findings on either indices and no healthy agents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_not_deployed_not_installed.ts) | it |  |  |
+| [Verify cloud_security_posture telemetry payloads](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/telemetry.ts) | describe |  |  |
+| [includes only KSPM findings](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/telemetry.ts) | it |  |  |
+| [includes only CSPM findings](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/telemetry.ts) | it |  |  |
+| [includes CSPM and KSPM findings](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/telemetry.ts) | it |  |  |
+| [](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/telemetry.ts) | it |  |  |
+| [includes KSPM findings without posture_type and CSPM findings as well](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/telemetry.ts) | it |  |  |
+</details>
+
 ## Directory: x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture
 
-**Total Tests:** 4 | **Skipped:** 2 (50.00%) | **Todo:** 0 (0.00%)
+**Total Tests:** 4 | **Skipped:** 0 (0.00%) | **Todo:** 0 (0.00%)
 
-![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/HAS-SKIP-yellow)
+![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/SERVERLESS-pink)
 
 <details>
 <summary>Test Details</summary>
@@ -455,8 +504,8 @@ You can also check out the dedicated app view, which enables easier search and f
 | Test Label | Type | Skipped | Todo |
 |------------|------|---------|------|
 | [Cloud Posture Dashboard Page](x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/compliance_dashboard.ts) | describe |  |  |
-| [Kubernetes Dashboard](x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/compliance_dashboard.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [displays accurate summary compliance score](x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/compliance_dashboard.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Kubernetes Dashboard](x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/compliance_dashboard.ts) | describe |  |  |
+| [displays accurate summary compliance score](x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/compliance_dashboard.ts) | it |  |  |
 | [cloud_security_posture](x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/index.ts) | describe |  |  |
 </details>
 
@@ -537,9 +586,9 @@ You can also check out the dedicated app view, which enables easier search and f
 
 ## Directory: x-pack/test/cloud_security_posture_api
 
-**Total Tests:** 35 | **Skipped:** 8 (22.86%) | **Todo:** 0 (0.00%)
+**Total Tests:** 35 | **Skipped:** 0 (0.00%) | **Todo:** 0 (0.00%)
 
-![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/API-INTEGRATION-purple) ![](https://img.shields.io/badge/HAS-SKIP-yellow)
+![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/API-INTEGRATION-purple)
 
 <details>
 <summary>Test Details</summary>
@@ -550,14 +599,14 @@ You can also check out the dedicated app view, which enables easier search and f
 | [Get Benchmark API](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | describe |  |  |
 | [Verify cspm benchmark score is updated when muting rules](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
 | [Verify kspm benchmark score is updated when muting rules](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
-| [Verify update csp rules states API](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [mute benchmark rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [unmute rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [verify new rules are added and existing rules are set.](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [mute detection rule successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Expect to mute two benchmark rules and one detection rule](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Expect to save rules states when requesting to update empty object](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [set wrong action input](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Verify update csp rules states API](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | describe |  |  |
+| [mute benchmark rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [unmute rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [verify new rules are added and existing rules are set.](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [mute detection rule successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [Expect to mute two benchmark rules and one detection rule](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [Expect to save rules states when requesting to update empty object](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [set wrong action input](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
 | [Tests get rules states API](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | describe |  |  |
 | [get rules states successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
 | [get empty object when rules states not exists](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
@@ -585,7 +634,7 @@ You can also check out the dedicated app view, which enables easier search and f
 
 ## Directory: x-pack/test/cloud_security_posture_functional
 
-**Total Tests:** 137 | **Skipped:** 10 (7.30%) | **Todo:** 2 (1.46%)
+**Total Tests:** 137 | **Skipped:** 6 (4.38%) | **Todo:** 2 (1.46%)
 
 ![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/HAS-TODO-green) ![](https://img.shields.io/badge/HAS-SKIP-yellow)
 
@@ -653,10 +702,10 @@ You can also check out the dedicated app view, which enables easier search and f
 | [Findings page with old data](x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts) | describe |  |  |
 | [returns no Findings KSPM](x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts) | it |  |  |
 | [returns no Findings CSPM](x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts) | it |  |  |
-| [Findings Page onboarding](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Findings Page onboarding](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | describe |  |  |
+| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it |  |  |
+| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it |  |  |
+| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it |  |  |
 | [Findings Page - DataTable](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
 | [SearchBar](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
 | [add filter](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
