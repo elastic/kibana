@@ -11,7 +11,11 @@ import fastIsEqual from 'fast-deep-equal';
 import { TimeRange } from '@kbn/es-query';
 import { PublishingSubject } from '../../publishing_subject';
 import { StateComparators } from '../../comparators';
-import { PublishesTimeRange, PublishesWritableTimeRange } from './publishes_unified_search';
+import {
+  apiPublishesTimeRange,
+  PublishesTimeRange,
+  PublishesWritableTimeRange,
+} from './publishes_unified_search';
 
 export interface SerializedTimeRange {
   timeRange: TimeRange | undefined;
@@ -19,7 +23,7 @@ export interface SerializedTimeRange {
 
 export const initializeTimeRange = (
   rawState: SerializedTimeRange,
-  parentApi?: Partial<PublishesTimeRange>
+  parentApi?: unknown
 ): {
   appliedTimeRange$: PublishingSubject<TimeRange | undefined>;
   cleanupTimeRange: () => void;
@@ -31,12 +35,16 @@ export const initializeTimeRange = (
   function setTimeRange(nextTimeRange: TimeRange | undefined) {
     timeRange$.next(nextTimeRange);
   }
-  const appliedTimeRange$ = new BehaviorSubject(timeRange$.value ?? parentApi?.timeRange$?.value);
+  const appliedTimeRange$ = new BehaviorSubject(
+    timeRange$.value ?? (parentApi as Partial<PublishesTimeRange>)?.timeRange$?.value
+  );
 
   const subscriptions = timeRange$.subscribe((timeRange) => {
-    appliedTimeRange$.next(timeRange ?? parentApi?.timeRange$?.value);
+    appliedTimeRange$.next(
+      timeRange ?? (parentApi as Partial<PublishesTimeRange>)?.timeRange$?.value
+    );
   });
-  if (parentApi?.timeRange$) {
+  if (apiPublishesTimeRange(parentApi)) {
     subscriptions.add(
       parentApi?.timeRange$.subscribe((parentTimeRange) => {
         if (timeRange$?.value) {

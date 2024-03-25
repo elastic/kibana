@@ -11,7 +11,6 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRange,
-  PublishesTimeRange,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React, { useEffect, useState } from 'react';
@@ -33,7 +32,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         serializeTimeRange,
         timeRangeApi,
         timeRangeComparators,
-      } = initializeTimeRange(state, parentApi as Partial<PublishesTimeRange>);
+      } = initializeTimeRange(state, parentApi);
       const defaultDataView = await services.dataViews.getDefaultDataView();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         defaultDataView ? [defaultDataView] : undefined
