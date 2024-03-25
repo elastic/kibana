@@ -25,8 +25,6 @@ import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 import { ImageEmbeddableStrings } from './image_embeddable_strings';
 import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
-import { ImageEmbeddable } from '../components/image_embeddable';
-
 export const registerImageEmbeddableFactory = ({
   embeddableEnhanced,
 }: {
@@ -41,6 +39,10 @@ export const registerImageEmbeddableFactory = ({
       return state.rawState as ImageEmbeddableSerializedState;
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
+      const { ImageEmbeddable: ImageEmbeddableComponent } = await import(
+        '../components/image_embeddable'
+      );
+
       const { titlesApi, titleComparators, serializeTitles } =
         initializeReactEmbeddableTitles(initialState);
 
@@ -92,7 +94,7 @@ export const registerImageEmbeddableFactory = ({
       return {
         api: embeddable,
         Component: () => (
-          <ImageEmbeddable
+          <ImageEmbeddableComponent
             api={{
               ...embeddable,
               imageConfig$,

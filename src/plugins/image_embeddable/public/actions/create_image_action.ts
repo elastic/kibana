@@ -7,7 +7,7 @@
  */
 
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openImageEditor } from '../components/image_editor/open_image_editor';
 import {
