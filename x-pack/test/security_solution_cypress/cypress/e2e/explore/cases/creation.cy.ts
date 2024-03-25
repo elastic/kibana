@@ -52,8 +52,12 @@ import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
-import { ELASTICSEARCH_USERNAME } from '../../../env_var_names_constants';
+import { CLOUD_SERVERLESS, ELASTICSEARCH_USERNAME } from '../../../env_var_names_constants';
 import { deleteCases } from '../../../tasks/api_calls/cases';
+
+// https://github.com/elastic/kibana/issues/179231
+const isCloudServerless = Cypress.env(CLOUD_SERVERLESS);
+const username = isCloudServerless ? 'admin' : Cypress.env(ELASTICSEARCH_USERNAME);
 
 // Tracked by https://github.com/elastic/security-team/issues/7696
 describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
@@ -109,12 +113,8 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
       'have.text',
       `${this.mycase.description} ${this.mycase.timeline.title}`
     );
-    cy.get(CASE_DETAILS_USERNAMES)
-      .eq(REPORTER)
-      .should('contain', Cypress.env(ELASTICSEARCH_USERNAME));
-    cy.get(CASE_DETAILS_USERNAMES)
-      .eq(PARTICIPANTS)
-      .should('contain', Cypress.env(ELASTICSEARCH_USERNAME));
+    cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('contain', username);
+    cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('contain', username);
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
 
     EXPECTED_METRICS.forEach((metric) => {
