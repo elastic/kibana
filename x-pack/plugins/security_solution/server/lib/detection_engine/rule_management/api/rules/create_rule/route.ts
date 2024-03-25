@@ -133,7 +133,7 @@ export const createRuleRoute = (
                       : [],
                 },
               };
-              const updatedParentRule = await updateRules({
+              await updateRules({
                 rulesClient,
                 existingRule: rule,
                 ruleUpdate: transformValidate(updatedInfo),
