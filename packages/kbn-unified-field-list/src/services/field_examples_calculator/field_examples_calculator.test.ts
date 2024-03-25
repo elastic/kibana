@@ -7,9 +7,14 @@
  */
 
 import { keys, clone, uniq, filter, map, flatten } from 'lodash';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { getFieldExampleBuckets, groupValues, getFieldValues } from './field_examples_calculator';
+import {
+  getFieldExampleBuckets,
+  groupValues,
+  getFieldValues,
+  type FieldValueCountsParams,
+} from './field_examples_calculator';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 const hitsAsValues: Array<Record<string, string | number | string[] | object>> = [
   {
@@ -211,13 +216,13 @@ describe('fieldExamplesCalculator', function () {
   });
 
   describe('getFieldExampleBuckets', function () {
-    let params: { hits: any; field: any; count: number; dataView: DataView };
+    let params: FieldValueCountsParams;
     beforeEach(function () {
       params = {
-        hits,
-        field: dataView.fields.getByName('extension'),
+        values: getFieldValues(hits, dataView.fields.getByName('extension')!, dataView),
+        field: dataView.fields.getByName('extension')!,
         count: 3,
-        dataView,
+        isTextBased: false,
       };
     });
 
@@ -230,14 +235,16 @@ describe('fieldExamplesCalculator', function () {
     });
 
     it('analyzes geo types', function () {
-      params.field = dataView.fields.getByName('point');
+      params.field = dataView.fields.getByName('point')!;
+      params.values = getFieldValues(hits, params.field, dataView);
       expect(getFieldExampleBuckets(params)).toEqual({
         buckets: [{ count: 3, key: { coordinates: [100, 20], type: 'Point' } }],
         sampledDocuments: 20,
         sampledValues: 3,
       });
 
-      params.field = dataView.fields.getByName('area');
+      params.field = dataView.fields.getByName('area')!;
+      params.values = getFieldValues(hits, params.field, dataView);
       expect(getFieldExampleBuckets(params)).toEqual({
         buckets: [],
         sampledDocuments: 20,
@@ -246,30 +253,67 @@ describe('fieldExamplesCalculator', function () {
     });
 
     it('fails to analyze attachment types', function () {
-      params.field = dataView.fields.getByName('request_body');
+      params.field = dataView.fields.getByName('request_body')!;
+      params.values = getFieldValues(hits, params.field, dataView);
       expect(() => getFieldExampleBuckets(params)).toThrowError();
 
-      params.field = dataView.fields.getByName('_score');
+      params.field = dataView.fields.getByName('_score')!;
+      params.values = getFieldValues(hits, params.field, dataView);
       expect(() => getFieldExampleBuckets(params)).toThrowError();
     });
 
     it('fails to analyze fields that are in the mapping, but not the hits', function () {
-      params.field = dataView.fields.getByName('machine.os');
+      params.field = dataView.fields.getByName('machine.os')!;
+      params.values = getFieldValues(hits, params.field, dataView);
       expect(getFieldExampleBuckets(params).buckets).toHaveLength(0);
       expect(getFieldExampleBuckets(params).sampledValues).toBe(0);
     });
 
     it('counts the total hits', function () {
-      expect(getFieldExampleBuckets(params).sampledDocuments).toBe(params.hits.length);
+      expect(getFieldExampleBuckets(params).sampledDocuments).toBe(params.values.length);
     });
 
     it('counts total number of values', function () {
-      params.field = dataView.fields.getByName('@tags');
+      params.field = dataView.fields.getByName('@tags')!;
+      params.values = getFieldValues(hits, params.field, dataView);
       expect(getFieldExampleBuckets(params).sampledValues).toBe(3);
-      params.field = dataView.fields.getByName('extension');
-      expect(getFieldExampleBuckets(params).sampledValues).toBe(params.hits.length);
-      params.field = dataView.fields.getByName('phpmemory');
+      params.field = dataView.fields.getByName('extension')!;
+      params.values = getFieldValues(hits, params.field, dataView);
+      expect(getFieldExampleBuckets(params).sampledValues).toBe(params.values.length);
+      params.field = dataView.fields.getByName('phpmemory')!;
+      params.values = getFieldValues(hits, params.field, dataView);
       expect(getFieldExampleBuckets(params).sampledValues).toBe(5);
+    });
+
+    it('works for text-based', function () {
+      const result = getFieldExampleBuckets({
+        values: [['a'], ['b'], ['a'], ['a']],
+        field: { name: 'message', type: 'string', esTypes: ['text'] } as DataViewField,
+        isTextBased: true,
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "buckets": Array [
+            Object {
+              "count": 3,
+              "key": "a",
+            },
+            Object {
+              "count": 1,
+              "key": "b",
+            },
+          ],
+          "sampledDocuments": 4,
+          "sampledValues": 4,
+        }
+      `);
+      expect(() =>
+        getFieldExampleBuckets({
+          values: [['a'], ['b'], ['a'], ['a']],
+          field: { name: 'message', type: 'string', esTypes: ['keyword'] } as DataViewField,
+          isTextBased: true,
+        })
+      ).toThrowError();
     });
   });
 });
