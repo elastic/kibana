@@ -2396,7 +2396,9 @@ So there are two possible results:
 - No conflict: [`B`, `C`, `D`]
 - Conflict: no acceptable merge proposal can be built, mark as `conflict` and propose the `current` version
 
-----
+
+---
+The possible scenarios are:
 
 <table>
   <thead align="center">
