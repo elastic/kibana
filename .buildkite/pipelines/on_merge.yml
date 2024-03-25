@@ -307,6 +307,32 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/functional/defend_workflows.sh
+    label: 'Defend Workflows Cypress Tests'
+    agents:
+      queue: n2-4-virt
+    depends_on:
+      - build
+    timeout_in_minutes: 60
+    parallelism: 16
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
+    label: 'Defend Workflows Cypress Tests on Serverless'
+    agents:
+      queue: n2-4-virt
+    depends_on:
+      - build
+    timeout_in_minutes: 60
+    parallelism: 10
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: '.buildkite/scripts/steps/functional/on_merge_unsupported_ftrs.sh'
     label: Trigger unsupported ftr tests
     timeout_in_minutes: 10

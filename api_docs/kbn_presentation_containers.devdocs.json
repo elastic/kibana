@@ -905,7 +905,7 @@
             "label": "rawState",
             "description": [],
             "signature": [
-              "RawStateType"
+              "RawStateType | undefined"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
             "deprecated": false,
