@@ -34,7 +34,8 @@
     "@kbn/share-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/fleet-plugin",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/cloud-experiments-plugin"
   ],
   "exclude": ["target/**/*"]
 }

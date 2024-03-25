@@ -7,6 +7,7 @@
  */
 
 import { join } from 'path';
+import deepmerge from 'deepmerge';
 import { merge } from 'lodash';
 import { execSync } from 'child_process';
 import { getDataPath } from '@kbn/utils';
@@ -295,7 +296,10 @@ export class ApmConfiguration {
     const { servicesOverrides, redactUsers, ...configFromKibanaConfig } =
       this.getConfigFromKibanaConfig();
     const configFromEnv = this.getConfigFromEnv(configFromKibanaConfig);
-    const config = merge({}, configFromKibanaConfig, configFromEnv);
+    const config = [configFromKibanaConfig, configFromEnv].reduce<AgentConfigOptions>(
+      (acc, conf) => deepmerge(acc, conf),
+      {}
+    );
 
     if (config.active === false && config.contextPropagationOnly !== false) {
       throw new Error(
