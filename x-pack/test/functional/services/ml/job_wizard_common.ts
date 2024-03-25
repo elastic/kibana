@@ -619,5 +619,77 @@ export function MachineLearningJobWizardCommonProvider(
         await testSubjects.existOrFail(expectedSelector);
       });
     },
+
+    async getAnnotationSwitchCheckedState(): Promise<boolean> {
+      const subj = 'mlJobWizardSwitchAnnotations';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
+      return isSelected === 'true';
+    },
+
+    async getAnnotationsSwitchCheckedState(expectedValue: boolean) {
+      const actualCheckedState = await this.getAnnotationSwitchCheckedState();
+      expect(actualCheckedState).to.eql(
+        expectedValue,
+        `Expected annotations switch to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          actualCheckedState ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
+    async toggleAnnotationSwitch(toggle: boolean) {
+      const subj = 'mlJobWizardSwitchAnnotations';
+      if ((await this.getAnnotationSwitchCheckedState()) !== toggle) {
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
+          await this.getAnnotationSwitchCheckedState();
+        });
+      }
+    },
+
+    async togglingModelChangeAnnotationsShowsCalloutAndRemovesCallout() {
+      await this.toggleAnnotationSwitch(false);
+      await testSubjects.existOrFail('mlJobWizardAlsoEnableAnnotationsRecommendationCallout', {
+        timeout: 3_000,
+      });
+      await this.toggleAnnotationSwitch(true);
+      await testSubjects.missingOrFail('mlJobWizardAlsoEnableAnnotationsRecommendationCallout', {
+        timeout: 3_000,
+      });
+    },
+
+    async goBackToTimeRange() {
+      await testSubjects.existOrFail('mlJobWizardTimeRangeStep', {
+        timeout: 3_000,
+      });
+      await testSubjects.click('mlJobWizardTimeRangeStep');
+    },
+
+    async setEndDate(input: string) {
+      await testSubjects.setValue('mlJobWizardDatePickerRangeEndDate', input);
+    },
+
+    async goBackToJobDetailsSection() {
+      await testSubjects.existOrFail('mlJobWizardJobDetailsStep', {
+        timeout: 3_000,
+      });
+      await testSubjects.click('mlJobWizardJobDetailsStep');
+    },
+
+    async assertValidationCallouts(expectedCallouts: string[]) {
+      if (expectedCallouts.length === 1) {
+        const [, memLimitTooHighCalloutVisibleText] = await testSubjects.getVisibleTextAll(
+          'mlValidationCallout'
+        );
+
+        expect(memLimitTooHighCalloutVisibleText).to.be(expectedCallouts[0]);
+        return;
+      }
+
+      const allCallOutVisibleTexts = await testSubjects.getVisibleTextAll('mlValidationCallout');
+      const expectedWithinActual = expectedCallouts.every((expected) =>
+        allCallOutVisibleTexts.some((actual) => actual === expected)
+      );
+      expect(expectedWithinActual).to.be(true);
+    },
   };
 }

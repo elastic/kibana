@@ -85,21 +85,23 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
             />
           }
           endDateControl={
-            <EuiDatePicker
-              selected={endMoment}
-              onChange={handleChangeEnd}
-              startDate={startMoment}
-              endDate={endMoment}
-              aria-label={i18n.translate(
-                'xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel',
-                {
-                  defaultMessage: 'End date',
-                }
-              )}
-              showTimeSelect
-              dateFormat={dateFormat}
-              minDate={startMoment}
-            />
+            <div data-test-subj="mlJobWizardDatePickerRangeEndDate">
+              <EuiDatePicker
+                selected={endMoment}
+                onChange={handleChangeEnd}
+                startDate={startMoment}
+                endDate={endMoment}
+                aria-label={i18n.translate(
+                  'xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel',
+                  {
+                    defaultMessage: 'End date',
+                  }
+                )}
+                showTimeSelect
+                dateFormat={dateFormat}
+                minDate={startMoment}
+              />
+            </div>
           }
         />
       </div>
