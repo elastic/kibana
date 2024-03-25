@@ -30,7 +30,6 @@ const link = 'https://www.elastic.co/';
 describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(function () {
     deleteTimelines();
-    login();
     createTimeline(getTimelineNonValidQuery())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) => {
