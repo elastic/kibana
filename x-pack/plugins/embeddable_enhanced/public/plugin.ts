@@ -18,8 +18,11 @@ import {
   IEmbeddable,
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { EmbeddableStateComparators } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
-import { apiHasUniqueId, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import {
+  apiHasUniqueId,
+  EmbeddableApiContext,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import {
   AdvancedUiActionsSetup,
@@ -52,7 +55,7 @@ export interface SetupContract {}
 
 export interface ReactEmbeddableDynamicActionsApi {
   dynamicActionsApi: HasDynamicActions;
-  dynamicActionsComparator: EmbeddableStateComparators<DynamicActionsSerializedState>;
+  dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
   serializeDynamicActions: () => DynamicActionsSerializedState;
   startDynamicActions: () => { stopDynamicActions: () => void };
 }

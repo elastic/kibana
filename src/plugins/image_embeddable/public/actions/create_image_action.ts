@@ -9,7 +9,6 @@
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { openImageEditor } from '../components/image_editor/open_image_editor';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
@@ -21,15 +20,16 @@ export const registerCreateImageAction = () => {
   uiActionsService.registerAction<EmbeddableApiContext>({
     id: ADD_IMAGE_EMBEDDABLE_ACTION_ID,
     getIconType: () => 'image',
-    isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+    isCompatible: async ({ embeddable: parentApi }) => {
+      return apiIsPresentationContainer(parentApi);
     },
-    execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
+    execute: async ({ embeddable: parentApi }) => {
+      if (!apiIsPresentationContainer(parentApi)) throw new IncompatibleActionError();
 
-      const imageConfig = await openImageEditor();
+      const { openImageEditor } = await import('../components/image_editor/open_image_editor');
+      const imageConfig = await openImageEditor({ parentApi });
 
-      embeddable.addNewPanel({
+      parentApi.addNewPanel({
         panelType: IMAGE_EMBEDDABLE_TYPE,
         initialState: { imageConfig },
       });

@@ -8,13 +8,14 @@
 
 import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
-  DefaultEmbeddableApi,
-  SerializedReactEmbeddableTitles,
-} from '@kbn/embeddable-plugin/public';
-import { type HasEditCapabilities, type HasSupportedTriggers } from '@kbn/presentation-publishing';
+  HasEditCapabilities,
+  HasSupportedTriggers,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 
-export type ImageEmbeddableSerializedState = SerializedReactEmbeddableTitles &
+export type ImageEmbeddableSerializedState = SerializedTitles &
   Partial<DynamicActionsSerializedState> & {
     imageConfig: ImageConfig;
   };

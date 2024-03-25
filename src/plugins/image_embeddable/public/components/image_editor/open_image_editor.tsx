@@ -8,42 +8,49 @@
 
 import React from 'react';
 
+import { PresentationContainer, tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FilesContext } from '@kbn/shared-ux-file-context';
-import { skip, Subject, take, takeUntil } from 'rxjs';
+
 import { ImageConfig } from '../../image_embeddable/types';
-import { ImageViewerContext } from '../image_viewer/image_viewer_context';
 import { FileImageMetadata, imageEmbeddableFileKind } from '../../imports';
 import { coreServices, filesService, securityService } from '../../services/kibana_services';
 import { createValidateUrl } from '../../utils/validate_url';
+import { ImageViewerContext } from '../image_viewer/image_viewer_context';
 
-export const openImageEditor = async (initialImageConfig?: ImageConfig): Promise<ImageConfig> => {
-  const { overlays, theme, application, i18n, http } = coreServices;
+export const openImageEditor = async ({
+  parentApi,
+  initialImageConfig,
+}: {
+  parentApi: PresentationContainer;
+  initialImageConfig?: ImageConfig;
+}): Promise<ImageConfig> => {
+  const { ImageEditorFlyout } = await import('./image_editor_flyout');
+
+  const { overlays, theme, i18n, http } = coreServices;
   const user = securityService ? await securityService.authc.getCurrentUser() : undefined;
   const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
 
-  const { ImageEditorFlyout } = await import('./image_editor_flyout');
+  /**
+   * If available, the parent API will keep track of which flyout is open and close it
+   * if the app changes, disable certain actions when the flyout is open, etc.
+   */
+  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   return new Promise((resolve, reject) => {
-    const closed$ = new Subject<true>();
-
     const onSave = (imageConfig: ImageConfig) => {
       resolve(imageConfig);
-      handle.close();
+      flyoutSession.close();
+      overlayTracker?.clearOverlays();
     };
 
     const onCancel = () => {
       reject();
-      handle.close();
+      flyoutSession.close();
+      overlayTracker?.clearOverlays();
     };
 
-    // TODO replace with tracksOverlays logic
-    // Close the flyout on application change.
-    application.currentAppId$.pipe(takeUntil(closed$), skip(1), take(1)).subscribe(() => {
-      handle.close();
-    });
-
-    const handle = overlays.openFlyout(
+    const flyoutSession = overlays.openFlyout(
       toMountPoint(
         <FilesContext client={filesClient}>
           <ImageViewerContext.Provider
@@ -68,13 +75,14 @@ export const openImageEditor = async (initialImageConfig?: ImageConfig): Promise
         { theme, i18n }
       ),
       {
+        onClose: () => {
+          overlayTracker?.clearOverlays();
+        },
         ownFocus: true,
         'data-test-subj': 'createImageEmbeddableFlyout',
       }
     );
 
-    handle.onClose.then(() => {
-      closed$.next(true);
-    });
+    overlayTracker?.openOverlay(flyoutSession);
   });
 };

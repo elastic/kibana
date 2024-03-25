@@ -54,6 +54,7 @@ export const ImageEmbeddable = ({
   }, [startDynamicActions]);
 
   useEffect(() => {
+    // set `hasTriggerActions` depending on whether or not the image has at least one drilldown
     setHasTriggerActions((dynamicActionsState?.dynamicActions.events ?? []).length > 0);
   }, [dynamicActionsState]);
 

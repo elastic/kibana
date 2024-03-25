@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { initializeTitles } from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
@@ -61,7 +62,10 @@ export const getImageEmbeddableFactory = ({
           blockingError: blockingError$,
           supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
           onEdit: async () => {
-            const newImageConfig = await openImageEditor(imageConfig$.getValue());
+            const newImageConfig = await openImageEditor({
+              parentApi: embeddable.parentApi as PresentationContainer,
+              initialImageConfig: imageConfig$.getValue(),
+            });
             imageConfig$.next(newImageConfig);
           },
           isEditingEnabled: () => true,
