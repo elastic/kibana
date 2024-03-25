@@ -87,7 +87,11 @@ export function processBedrockStream({
 
         const isStartOfFunctionCall = !functionCallsBuffer && completion.includes('<function');
 
-        const isEndOfFunctionCall = functionCallsBuffer && chunkBody.stop === '</function_calls>';
+        const isEndOfFunctionCall =
+          functionCallsBuffer &&
+          chunkBody.type === 'message_delta' &&
+          chunkBody.delta &&
+          chunkBody.delta.stop_sequence === '</function_calls>';
 
         const isInFunctionCall = !!functionCallsBuffer;
 
@@ -97,7 +101,7 @@ export function processBedrockStream({
           completion = before.trimEnd();
         } else if (isEndOfFunctionCall) {
           completion = '';
-          functionCallsBuffer += prepareBedrockOutput(chunkBody) + chunkBody.stop;
+          functionCallsBuffer += prepareBedrockOutput(chunkBody) + chunkBody?.delta?.stop_sequence;
 
           logger.debug(`Parsing xml:\n${functionCallsBuffer}`);
 
@@ -162,9 +166,15 @@ interface TokenCountChunk extends CompletionChunk {
 }
 
 interface CompletionChunk {
-  completion: string;
-  stop_reason: string | null;
-  stop: null | string;
+  type?: string;
+  delta?: {
+    type?: string;
+    text?: string;
+    stop_reason?: null | string;
+    stop_sequence?: null | string;
+  };
+  message?: { content: Array<{ text?: string; type: string }> };
+  content_block?: { type: string; text: string };
 }
 
 function isTokenCountCompletionChunk(value: any): value is TokenCountChunk {
@@ -192,11 +202,7 @@ function emitTokenCountEvent(
  * @param responseBody
  * @returns string
  */
-const prepareBedrockOutput = (responseBody: {
-  type?: string;
-  delta?: { type: string; text: string };
-  message?: { content: Array<{ text?: string; type: string }> };
-}): string => {
+const prepareBedrockOutput = (responseBody: CompletionChunk): string => {
   if (responseBody.type && responseBody.type.length) {
     if (responseBody.type === 'message_start' && responseBody.message) {
       return parseContent(responseBody.message.content);
