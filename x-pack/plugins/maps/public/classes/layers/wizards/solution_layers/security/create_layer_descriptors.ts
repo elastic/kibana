@@ -32,11 +32,11 @@ import { getDefaultDynamicProperties } from '../../../../styles/vector/vector_st
 const defaultDynamicProperties = getDefaultDynamicProperties();
 const euiVisColorPalette = euiPaletteColorBlind();
 
-function getSourceField(indexPatternId: string, indexPatternTitle: string) {
+function getSourceField(indexPatternId: string) {
   return isAPMDataView(indexPatternId) ? 'client.geo.location' : 'source.geo.location';
 }
 
-function getDestinationField(indexPatternId: string, indexPatternTitle: string) {
+function getDestinationField(indexPatternId: string) {
   return isAPMDataView(indexPatternId) ? 'server.geo.location' : 'destination.geo.location';
 }
 
@@ -47,7 +47,7 @@ function createSourceLayerDescriptor(
 ) {
   const sourceDescriptor = ESSearchSource.createDescriptor({
     indexPatternId,
-    geoField: getSourceField(indexPatternId, indexPatternTitle),
+    geoField: getSourceField(indexPatternId),
     scalingType: SCALING_TYPES.TOP_HITS,
     topHitsSplitField: isAPMDataView(indexPatternId) ? 'client.ip' : 'source.ip',
     tooltipProperties: isAPMDataView(indexPatternId)
@@ -105,7 +105,7 @@ function createDestinationLayerDescriptor(
 ) {
   const sourceDescriptor = ESSearchSource.createDescriptor({
     indexPatternId,
-    geoField: getDestinationField(indexPatternId, indexPatternTitle),
+    geoField: getDestinationField(indexPatternId),
     scalingType: SCALING_TYPES.TOP_HITS,
     topHitsSplitField: isAPMDataView(indexPatternId) ? 'server.ip' : 'destination.ip',
     tooltipProperties: isAPMDataView(indexPatternId)
@@ -163,8 +163,8 @@ function createLineLayerDescriptor(
 ) {
   const sourceDescriptor = ESPewPewSource.createDescriptor({
     indexPatternId,
-    sourceGeoField: getSourceField(indexPatternId, indexPatternTitle),
-    destGeoField: getDestinationField(indexPatternId, indexPatternTitle),
+    sourceGeoField: getSourceField(indexPatternId),
+    destGeoField: getDestinationField(indexPatternId),
     metrics: [
       {
         type: AGG_TYPE.SUM,
