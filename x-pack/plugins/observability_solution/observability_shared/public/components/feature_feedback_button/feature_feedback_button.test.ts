@@ -12,12 +12,12 @@ describe('getSurveyFeedbackURL', () => {
   it('should return the correct URL without any parameters', () => {
     const expectedUrl = formUrl;
     const actualUrl = getSurveyFeedbackURL({ formUrl });
-    expect(actualUrl).toBe(`${expectedUrl}?entry.573002982=Self-Managed+%28you+manage%29`);
+    expect(actualUrl).toBe(`${expectedUrl}`);
   });
 
   it('should append kibana version parameter correctly', () => {
     const kibanaVersion = '7.15.0';
-    const expectedUrl = `${formUrl}?entry.548460210=${kibanaVersion}&entry.573002982=Self-Managed+%28you+manage%29`;
+    const expectedUrl = `${formUrl}?entry.548460210=${kibanaVersion}`;
     const actualUrl = getSurveyFeedbackURL({ formUrl, kibanaVersion });
     expect(actualUrl).toBe(expectedUrl);
   });
@@ -31,21 +31,21 @@ describe('getSurveyFeedbackURL', () => {
 
   it('should append sanitized path parameter correctly', () => {
     const sanitizedPath = '/path/to/something';
-    const expectedUrl = `${formUrl}?entry.573002982=Self-Managed+%28you+manage%29&entry.1876422621=%2Fpath%2Fto%2Fsomething`;
+    const expectedUrl = `${formUrl}?entry.1876422621=%2Fpath%2Fto%2Fsomething`;
     const actualUrl = getSurveyFeedbackURL({ formUrl, sanitizedPath });
     expect(actualUrl).toBe(expectedUrl);
   });
 
   it('should append ML job type parameter correctly for host', () => {
     const nodeType: NodeType = 'host';
-    const expectedUrl = `${formUrl}?entry.573002982=Self-Managed+%28you+manage%29&entry.170406579=Host+Anomalies`;
+    const expectedUrl = `${formUrl}?entry.170406579=Host+Anomalies`;
     const actualUrl = getSurveyFeedbackURL({ formUrl, nodeType });
     expect(actualUrl).toBe(expectedUrl);
   });
 
   it('should append ML job type parameter correctly for pod', () => {
     const nodeType: NodeType = 'pod';
-    const expectedUrl = `${formUrl}?entry.573002982=Self-Managed+%28you+manage%29&entry.170406579=Pod+Anomalies`;
+    const expectedUrl = `${formUrl}?entry.170406579=Pod+Anomalies`;
     const actualUrl = getSurveyFeedbackURL({ formUrl, nodeType });
     expect(actualUrl).toBe(expectedUrl);
   });
@@ -58,7 +58,7 @@ describe('getSurveyFeedbackURL', () => {
       mlJobTypeParam: 'm',
     };
     const kibanaVersion = '8.0.0';
-    const expectedUrl = `${formUrl}?${customFormConfig.kibanaVersionQueryParam}=${kibanaVersion}&${customFormConfig.kibanaDeploymentTypeQueryParam}=Self-Managed+%28you+manage%29`;
+    const expectedUrl = `${formUrl}?${customFormConfig.kibanaVersionQueryParam}=${kibanaVersion}`;
     const actualUrl = getSurveyFeedbackURL({
       formUrl,
       kibanaVersion,
@@ -92,12 +92,16 @@ describe('getSurveyFeedbackURL', () => {
 
   it('should append deployment type parameter correctly for self-managed', () => {
     const kibanaVersion = '8.0.0';
+    const isServerlessEnv = false;
+    const isCloudEnv = false;
     const sanitizedPath = '/path/to/something';
     const expectedUrl = `${formUrl}?entry.548460210=8.0.0&entry.573002982=Self-Managed+%28you+manage%29&entry.1876422621=%2Fpath%2Fto%2Fsomething`;
     const actualUrl = getSurveyFeedbackURL({
       formUrl,
       kibanaVersion,
       sanitizedPath,
+      isServerlessEnv,
+      isCloudEnv,
     });
     expect(actualUrl).toBe(expectedUrl);
   });

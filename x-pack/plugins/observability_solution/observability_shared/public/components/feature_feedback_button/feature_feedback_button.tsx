@@ -48,7 +48,11 @@ export const getSurveyFeedbackURL = ({
   isServerlessEnv?: boolean;
   nodeType?: NodeType;
 }) => {
-  const deploymentType = getDeploymentType(isCloudEnv, isServerlessEnv);
+  const deploymentType =
+    isCloudEnv !== undefined || isServerlessEnv !== undefined
+      ? getDeploymentType(isCloudEnv, isServerlessEnv)
+      : undefined;
+
   const mlJobType = nodeType ? getMLJobType(nodeType) : undefined;
 
   const url = new URL(formUrl);
