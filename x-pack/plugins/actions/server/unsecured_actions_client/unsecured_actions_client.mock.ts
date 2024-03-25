@@ -11,6 +11,7 @@ export type UnsecuredActionsClientMock = jest.Mocked<IUnsecuredActionsClient>;
 
 const createUnsecuredActionsClientMock = () => {
   const mocked: UnsecuredActionsClientMock = {
+    getAll: jest.fn(),
     execute: jest.fn(),
     bulkEnqueueExecution: jest.fn(),
   };
