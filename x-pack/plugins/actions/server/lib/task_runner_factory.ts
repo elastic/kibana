@@ -21,23 +21,20 @@ import {
 } from '@kbn/core/server';
 import {
   createTaskRunError,
-  LoadIndirectParamsResult,
   RunContext,
   TaskErrorSource,
   throwRetryableError,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { LoadedIndirectParams } from '@kbn/task-manager-plugin/server/task';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { ActionExecutorContract, ActionInfo } from './action_executor';
+import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { ActionExecutorContract } from './action_executor';
 import {
   ActionTaskExecutorParams,
   ActionTaskParams,
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
   isPersistedActionTask,
-  RawAction,
   SpaceIdToNamespaceFunction,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
@@ -59,14 +56,6 @@ export interface TaskRunnerContext {
   basePathService: IBasePath;
   savedObjectsRepository: ISavedObjectsRepository;
 }
-
-export interface ActionData extends LoadedIndirectParams<RawAction> {
-  indirectParams: RawAction;
-  actionInfo: ActionInfo;
-  taskParams: TaskParams;
-}
-
-export type ActionDataResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
 
 type TaskParams = Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>;
 
@@ -110,50 +99,8 @@ export class TaskRunnerFactory {
     const actionExecutionId = uuidv4();
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
 
-    let actionData: ActionDataResult<ActionData>;
-
     return {
-      async loadIndirectParams(): Promise<ActionDataResult<ActionData>> {
-        try {
-          const taskParams = await getActionTaskParams(
-            actionTaskExecutorParams,
-            encryptedSavedObjectsClient,
-            spaceIdToNamespace
-          );
-
-          const { spaceId } = actionTaskExecutorParams;
-          const request = getFakeRequest(taskParams.attributes.apiKey);
-          const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
-
-          const actionInfo = await actionExecutor.getActionInfoInternal(
-            taskParams.attributes.actionId,
-            request,
-            namespace.namespace
-          );
-          actionData = {
-            data: {
-              indirectParams: actionInfo.rawAction,
-              taskParams,
-              actionInfo,
-            },
-          };
-          return actionData;
-        } catch (err) {
-          const error = createTaskRunError(err, getErrorSource(err) || TaskErrorSource.FRAMEWORK);
-          actionData = { error };
-          return { error };
-        }
-      },
       async run() {
-        if (!actionData) {
-          actionData = await this.loadIndirectParams();
-        }
-        if (actionData.error) {
-          return throwRetryableError(actionData.error, true);
-        }
-
-        const { spaceId } = actionTaskExecutorParams;
-        const { taskParams, actionInfo } = actionData.data;
         const {
           attributes: {
             actionId,
@@ -165,11 +112,16 @@ export class TaskRunnerFactory {
             relatedSavedObjects,
           },
           references,
-        } = taskParams;
+        } = await getActionTaskParams(
+          actionTaskExecutorParams,
+          encryptedSavedObjectsClient,
+          spaceIdToNamespace
+        );
 
+        const { spaceId } = actionTaskExecutorParams;
         const path = addSpaceIdToPath('/', spaceId);
-
         const request = getFakeRequest(apiKey);
+
         basePathService.set(request, path);
 
         let executorResult: ActionTypeExecutorResult<unknown> | undefined;
@@ -180,7 +132,6 @@ export class TaskRunnerFactory {
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request,
             taskInfo,
-            actionInfo,
             executionId,
             consumer,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
@@ -312,9 +263,9 @@ async function getActionTaskParams(
       };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw createTaskRunError(e, TaskErrorSource.USER);
+        throw createRetryableError(createTaskRunError(e, TaskErrorSource.USER), true);
       }
-      throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+      throw createRetryableError(createTaskRunError(e, TaskErrorSource.FRAMEWORK), true);
     }
   } else {
     return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
