@@ -172,4 +172,5 @@ export interface UsageStats {
   'data_views:fields_excluded_data_tiers': string;
   'observability:apmEnableTransactionProfiling': boolean;
   'devTools:enablePersistentConsole': boolean;
+  'aiAssistant:preferredAIAssistantType': string;
 }
