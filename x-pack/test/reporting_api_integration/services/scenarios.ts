@@ -10,7 +10,10 @@ import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-pdf-common';
 import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
-import { REPORTING_DATA_STREAM, REPORTING_DATA_STREAM_WILDCARD } from '@kbn/reporting-server';
+import {
+  REPORTING_DATA_STREAM_WILDCARD,
+  REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
+} from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -211,7 +214,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     // ignores 409 errs and keeps retrying
     await retry.tryForTime(5000, async () => {
       await esSupertest
-        .post(`/${REPORTING_DATA_STREAM_WILDCARD}/_delete_by_query`)
+        .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_delete_by_query`)
         .send({ query: { match_all: {} } })
         .expect(200);
     });
@@ -248,7 +251,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       'index.lifecycle.name': null,
     };
     await esSupertest
-      .put(`/${REPORTING_DATA_STREAM}/_settings`)
+      .put(`/${REPORTING_DATA_STREAM_WILDCARD}/_settings`)
       .send({
         settings,
       })

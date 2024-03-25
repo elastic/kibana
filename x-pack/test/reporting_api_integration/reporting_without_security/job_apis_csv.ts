@@ -8,7 +8,19 @@
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { ReportApiJSON } from '@kbn/reporting-common/types';
+import { pick } from 'lodash';
 import { FtrProviderContext } from '../ftr_provider_context';
+
+const apiResponseFields = [
+  'attempts',
+  'created_by',
+  'jobtype',
+  'meta',
+  'payload.isDeprecated',
+  'payload.title',
+  'payload.type',
+  'status',
+];
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -42,18 +54,31 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
     });
 
-    afterEach(async () => {
-      await reportingAPI.deleteAllReports();
-    });
-
     after(async () => {
       await reportingAPI.teardownLogs();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
+    afterEach(async () => {
+      await reportingAPI.deleteAllReports();
+    });
+
     it('Posted CSV job is visible in the job count', async () => {
       const { job, path } = await postJobCSV();
-      expect(job.payload.title).equal('A Saved Search With a DATE FILTER');
+      expectSnapshot(pick(job, apiResponseFields)).toMatchInline(`
+        Object {
+          "attempts": 0,
+          "created_by": false,
+          "jobtype": "csv_searchsource",
+          "meta": Object {
+            "objectType": "search",
+          },
+          "payload": Object {
+            "title": "A Saved Search With a DATE FILTER",
+          },
+          "status": "pending",
+        }
+      `);
 
       // call the job count api
       const { text: countText } = await supertestNoAuth
@@ -68,7 +93,20 @@ export default function ({ getService }: FtrProviderContext) {
     it('Posted CSV job is visible in the status check', async () => {
       // post a job
       const { job, path } = await postJobCSV();
-      expect(job.payload.title).equal('A Saved Search With a DATE FILTER');
+      expectSnapshot(pick(job, apiResponseFields)).toMatchInline(`
+        Object {
+          "attempts": 0,
+          "created_by": false,
+          "jobtype": "csv_searchsource",
+          "meta": Object {
+            "objectType": "search",
+          },
+          "payload": Object {
+            "title": "A Saved Search With a DATE FILTER",
+          },
+          "status": "pending",
+        }
+      `);
 
       // call the listing api
       const { text: listText } = await supertestNoAuth
@@ -78,6 +116,22 @@ export default function ({ getService }: FtrProviderContext) {
       // verify the top item in the list
       const listingJobs: ReportApiJSON[] = JSON.parse(listText);
       expect(listingJobs[0].id).to.be(job.id);
+      expectSnapshot(listingJobs.map((j) => pick(j, apiResponseFields))).toMatchInline(`
+        Array [
+          Object {
+            "attempts": 0,
+            "created_by": false,
+            "jobtype": "csv_searchsource",
+            "meta": Object {
+              "objectType": "search",
+            },
+            "payload": Object {
+              "title": "A Saved Search With a DATE FILTER",
+            },
+            "status": "pending",
+          },
+        ]
+      `);
 
       // clean up
       await reportingAPI.waitForJobToFinish(path);
@@ -86,7 +140,20 @@ export default function ({ getService }: FtrProviderContext) {
     it('Posted CSV job is visible in the first page of jobs listing', async () => {
       // post a job
       const { job, path } = await postJobCSV();
-      expect(job.payload.title).equal('A Saved Search With a DATE FILTER');
+      expectSnapshot(pick(job, apiResponseFields)).toMatchInline(`
+        Object {
+          "attempts": 0,
+          "created_by": false,
+          "jobtype": "csv_searchsource",
+          "meta": Object {
+            "objectType": "search",
+          },
+          "payload": Object {
+            "title": "A Saved Search With a DATE FILTER",
+          },
+          "status": "pending",
+        }
+      `);
 
       // call the listing api
       const { text: listText, status } = await supertestNoAuth
@@ -97,6 +164,22 @@ export default function ({ getService }: FtrProviderContext) {
       // verify the top item in the list
       const listingJobs: ReportApiJSON[] = JSON.parse(listText);
       expect(listingJobs[0].id).to.be(job.id);
+      expectSnapshot(listingJobs.map((j) => pick(j, apiResponseFields))).toMatchInline(`
+        Array [
+          Object {
+            "attempts": 0,
+            "created_by": false,
+            "jobtype": "csv_searchsource",
+            "meta": Object {
+              "objectType": "search",
+            },
+            "payload": Object {
+              "title": "A Saved Search With a DATE FILTER",
+            },
+            "status": "pending",
+          },
+        ]
+      `);
 
       // clean up
       await reportingAPI.waitForJobToFinish(path);
@@ -105,7 +188,20 @@ export default function ({ getService }: FtrProviderContext) {
     it('Posted CSV job details are visible in the info API', async () => {
       // post a job
       const { job, path } = await postJobCSV();
-      expect(job.payload.title).equal('A Saved Search With a DATE FILTER');
+      expectSnapshot(pick(job, apiResponseFields)).toMatchInline(`
+        Object {
+          "attempts": 0,
+          "created_by": false,
+          "jobtype": "csv_searchsource",
+          "meta": Object {
+            "objectType": "search",
+          },
+          "payload": Object {
+            "title": "A Saved Search With a DATE FILTER",
+          },
+          "status": "pending",
+        }
+      `);
 
       const { text: infoText, status } = await supertestNoAuth
         .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/${job.id}`)
@@ -113,7 +209,20 @@ export default function ({ getService }: FtrProviderContext) {
       expect(status).to.be(200);
 
       const info = JSON.parse(infoText);
-      expect(info.payload.title).equal('A Saved Search With a DATE FILTER');
+      expectSnapshot(pick(info, apiResponseFields)).toMatchInline(`
+        Object {
+          "attempts": 0,
+          "created_by": false,
+          "jobtype": "csv_searchsource",
+          "meta": Object {
+            "objectType": "search",
+          },
+          "payload": Object {
+            "title": "A Saved Search With a DATE FILTER",
+          },
+          "status": "pending",
+        }
+      `);
 
       await reportingAPI.waitForJobToFinish(path);
     });

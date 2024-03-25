@@ -6,9 +6,9 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '@kbn/reporting-common';
-import { REPORTING_DATA_STREAM, REPORTING_DATA_STREAM_WILDCARD } from '@kbn/reporting-server';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
+import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import type { ReportingCore } from '../../../core';
 import { IlmPolicyManager } from '../../../lib';
 import { getCounters } from '../../common';
@@ -30,7 +30,7 @@ const getAuthzWrapper =
             index: [
               {
                 privileges: ['manage'], // required to do anything with the reporting indices
-                names: [REPORTING_DATA_STREAM_WILDCARD],
+                names: [REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY],
                 allow_restricted_indices: true,
               },
             ],
@@ -122,16 +122,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
 
       // Second we migrate all of the existing indices to be managed by the reporting ILM policy
       try {
-        await client.indices.putSettings({
-          index: REPORTING_DATA_STREAM,
-          body: {
-            index: {
-              lifecycle: {
-                name: ILM_POLICY_NAME,
-              },
-            },
-          },
-        });
+        await scopedIlmPolicyManager.migrateIndicesToIlmPolicy();
 
         counters.usageCounter();
 

@@ -362,16 +362,14 @@ describe('ReportingStore', () => {
       expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
-          "body": Object {
-            "policy": Object {
-              "phases": Object {
-                "hot": Object {
-                  "actions": Object {},
-                },
+          "name": "kibana-reporting",
+          "policy": Object {
+            "phases": Object {
+              "hot": Object {
+                "actions": Object {},
               },
             },
           },
-          "name": "kibana-reporting",
         }
       `);
     });

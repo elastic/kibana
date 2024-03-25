@@ -7,11 +7,13 @@
 
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-common';
+import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
 import { Response } from 'supertest';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function createUsageServices({ getService }: FtrProviderContext) {
   const log = getService('log');
+  const esSupertest = getService('esSupertest');
   const supertest = getService('supertest');
 
   return {
@@ -46,6 +48,42 @@ export function createUsageServices({ getService }: FtrProviderContext) {
         expect(jobInfo.body.output.warnings).to.be(undefined); // expect no failure message to be present in job info
         expect(statusCode).to.be(200);
       }
+    },
+
+    /**
+     *
+     * @return {Promise<Function>} A function to call to clean up the index alias that was added.
+     */
+    async coerceReportsIntoExistingIndex(indexName: string) {
+      log.debug(`ReportingAPI.coerceReportsIntoExistingIndex(${indexName})`);
+
+      // Adding an index alias coerces the report to be generated on an existing index which means any new
+      // index schema won't be applied. This is important if a point release updated the schema. Reports may still
+      // be inserted into an existing index before the new schema is applied.
+      const timestampForIndex = indexTimestamp('week', '.');
+      await esSupertest
+        .post('/_aliases')
+        .send({
+          actions: [
+            {
+              add: { index: indexName, alias: `.reporting-${timestampForIndex}` },
+            },
+          ],
+        })
+        .expect(200);
+
+      return async () => {
+        await esSupertest
+          .post('/_aliases')
+          .send({
+            actions: [
+              {
+                remove: { index: indexName, alias: `.reporting-${timestampForIndex}` },
+              },
+            ],
+          })
+          .expect(200);
+      };
     },
 
     async expectAllJobsToFinishSuccessfully(jobPaths: string[]) {

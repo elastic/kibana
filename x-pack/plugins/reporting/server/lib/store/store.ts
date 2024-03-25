@@ -14,7 +14,7 @@ import type {
   ReportOutput,
   ReportSource,
 } from '@kbn/reporting-common/types';
-import { REPORTING_DATA_STREAM } from '@kbn/reporting-server';
+import { REPORTING_DATA_STREAM_ALIAS } from '@kbn/reporting-server';
 import moment from 'moment';
 import type { Report } from '.';
 import { SavedReport } from '.';
@@ -123,13 +123,16 @@ export class ReportingStore {
       this.logger.debug(`Found ILM policy ${ILM_POLICY_NAME}; skipping creation.`);
       return;
     }
-    this.logger.info(`Creating ILM policy for managing reporting indices: ${ILM_POLICY_NAME}`);
+    this.logger.info(`Creating ILM policy for reporting data stream: ${ILM_POLICY_NAME}`);
     await ilmPolicyManager.createIlmPolicy();
+
+    this.logger.info(`Linking ILM policy to reporting data stream: ${REPORTING_DATA_STREAM_ALIAS}`);
+    await ilmPolicyManager.linkIlmPolicy();
   }
 
   private async indexReport(report: Report): Promise<IndexResponse> {
     const doc = {
-      index: REPORTING_DATA_STREAM,
+      index: REPORTING_DATA_STREAM_ALIAS,
       id: report._id,
       refresh: 'wait_for' as estypes.Refresh,
       op_type: 'create' as const,
@@ -155,7 +158,7 @@ export class ReportingStore {
       await this.createIlmPolicy();
     } catch (e) {
       this.logger.error('Error in start phase');
-      this.logger.error(e.body?.error);
+      this.logger.error(e);
       throw e;
     }
   }
