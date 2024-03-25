@@ -22,12 +22,13 @@ interface ErrorType {
   meta: ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
 }
 
+// TODO TC: This is a copy of the useGetSentinelOneAgentStatus hook - waiting for https://github.com/elastic/kibana/pull/178625
 export const useGetCrowdstrikeAgentStatus = (
   agentIds: string[],
   options: UseQueryOptions<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>> => {
-  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-    'sentinelOneManualHostActionsEnabled'
+  const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'crowdstrikeManualHostActionsEnabled'
   );
 
   const http = useHttp();
@@ -36,7 +37,7 @@ export const useGetCrowdstrikeAgentStatus = (
     queryKey: ['get-agent-status', agentIds],
     ...options,
     enabled: !(
-      sentinelOneManualHostActionsEnabled &&
+      crowdstrikeManualHostActionsEnabled &&
       isEmpty(agentIds.filter((agentId) => agentId.trim().length))
     ),
     // TODO: update this to use a function instead of a number
@@ -47,8 +48,7 @@ export const useGetCrowdstrikeAgentStatus = (
           version: '1',
           query: {
             agentIds,
-            // 8.13 sentinel_one support via internal API
-            agentType: 'sentinel_one',
+            agentType: 'crowdstrike',
           },
         })
         .then((response) => response.data),

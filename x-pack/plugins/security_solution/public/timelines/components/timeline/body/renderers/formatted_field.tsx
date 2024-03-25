@@ -271,12 +271,15 @@ const FormattedFieldValueComponent: React.FC<{
     fieldFromBrowserField?.name === SENTINEL_ONE_AGENT_ID_FIELD
   ) {
     return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
-  } else if (
-    fieldName === CROWDSTRIKE_AGENT_ID_FIELD ||
-    fieldFromBrowserField?.name === CROWDSTRIKE_AGENT_ID_FIELD
-  ) {
-    return <CrowdstrikeAgentStatus agentId={String(value ?? '')} />;
-  } else if (fieldName === ALERT_HOST_CRITICALITY || fieldName === ALERT_USER_CRITICALITY) {
+  }
+  // TODO TC: double check if we need this - it show's status of the agent instead of the agent id in the TABLE ROW
+  //  else if (
+  // fieldName === CROWDSTRIKE_AGENT_ID_FIELD ||
+  // fieldFromBrowserField?.name === CROWDSTRIKE_AGENT_ID_FIELD
+  // ) {
+  // return <CrowdstrikeAgentStatus agentId={String(value ?? '')} />;
+  // }
+  else if (fieldName === ALERT_HOST_CRITICALITY || fieldName === ALERT_USER_CRITICALITY) {
     return (
       <AssetCriticalityLevel
         contextId={contextId}

@@ -34,12 +34,13 @@ export const HostIsolationPanel = React.memo(
 
     const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(details), [details]);
     const crowdstrikeAgentId = useMemo(() => {
-      let id = getCrowdstrikeAgentId(details);
-      // HARDCODED agent id for testing purposes - remove this IF statement when the agent id is available in the alert
-      if (id) {
-        id = '42a139dada1a4bb3b39a3436b5de21d5';
-      }
-      return id;
+      return getCrowdstrikeAgentId(details);
+      // let id = getCrowdstrikeAgentId(details);
+      // // HARDCODED agent id for testing purposes - remove this IF statement when the agent id is available in the alert
+      // if (id) {
+      //   id = '42a139dada1a4bb3b39a3436b5de21d5';
+      // }
+      // return id;
     }, [details]);
 
     const hostName = useMemo(
@@ -52,7 +53,6 @@ export const HostIsolationPanel = React.memo(
       [details]
     );
 
-    console.log({ crowdstrikeAgentId });
     const { casesInfo } = useCasesFromAlerts({ alertId });
     // TODO: TC - Crowdstrike handle agentType
     const agentType: ResponseActionAgentType = useMemo(() => {
