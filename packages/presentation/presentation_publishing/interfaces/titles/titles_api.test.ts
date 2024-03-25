@@ -6,27 +6,24 @@
  * Side Public License, v 1.
  */
 
-import {
-  initializeReactEmbeddableTitles,
-  SerializedReactEmbeddableTitles,
-} from './react_embeddable_titles';
+import { initializeTitles, SerializedTitles } from './titles_api';
 
-describe('react embeddable titles', () => {
-  const rawState: SerializedReactEmbeddableTitles = {
+describe('titles api', () => {
+  const rawState: SerializedTitles = {
     title: 'very cool title',
     description: 'less cool description',
     hidePanelTitles: false,
   };
 
   it('should initialize publishing subjects with the provided rawState', () => {
-    const { titlesApi } = initializeReactEmbeddableTitles(rawState);
+    const { titlesApi } = initializeTitles(rawState);
     expect(titlesApi.panelTitle.value).toBe(rawState.title);
     expect(titlesApi.panelDescription.value).toBe(rawState.description);
     expect(titlesApi.hidePanelTitle.value).toBe(rawState.hidePanelTitles);
   });
 
   it('should update publishing subject values when set functions are called', () => {
-    const { titlesApi } = initializeReactEmbeddableTitles(rawState);
+    const { titlesApi } = initializeTitles(rawState);
 
     titlesApi.setPanelTitle('even cooler title');
     titlesApi.setPanelDescription('super uncool description');
@@ -38,21 +35,21 @@ describe('react embeddable titles', () => {
   });
 
   it('should correctly serialize current state', () => {
-    const { serializeTitles, titlesApi } = initializeReactEmbeddableTitles(rawState);
+    const { serializeTitles, titlesApi } = initializeTitles(rawState);
     titlesApi.setPanelTitle('UH OH, A TITLE');
 
     const serializedTitles = serializeTitles();
     expect(serializedTitles).toMatchInlineSnapshot(`
-      Object {
-        "description": "less cool description",
-        "hidePanelTitles": false,
-        "title": "UH OH, A TITLE",
-      }
-    `);
+        Object {
+          "description": "less cool description",
+          "hidePanelTitles": false,
+          "title": "UH OH, A TITLE",
+        }
+      `);
   });
 
   it('should return the correct set of comparators', () => {
-    const { titleComparators } = initializeReactEmbeddableTitles(rawState);
+    const { titleComparators } = initializeTitles(rawState);
 
     expect(titleComparators.title).toBeDefined();
     expect(titleComparators.description).toBeDefined();
@@ -60,7 +57,7 @@ describe('react embeddable titles', () => {
   });
 
   it('should correctly compare hidePanelTitles with custom comparator', () => {
-    const { titleComparators } = initializeReactEmbeddableTitles(rawState);
+    const { titleComparators } = initializeTitles(rawState);
 
     expect(titleComparators.hidePanelTitles![2]!(true, false)).toBe(false);
     expect(titleComparators.hidePanelTitles![2]!(undefined, false)).toBe(true);
