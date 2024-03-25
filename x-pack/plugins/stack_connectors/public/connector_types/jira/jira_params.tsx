@@ -406,6 +406,13 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                   color="subdued"
                   type="questionInCircle"
                   className="eui-alignTop"
+                  data-test-subj="otherFieldsHelpTooltip"
+                  aria-label={i18n.translate(
+                    'xpack.stackConnectors.components.jira.otherFieldsHelpTooltip',
+                    {
+                      defaultMessage: 'Additional fields help',
+                    }
+                  )}
                   content={i18n.translate(
                     'xpack.stackConnectors.components.jira.otherFieldsHelpText',
                     {
@@ -419,7 +426,6 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             onDocumentsChange={(json: string) => {
               editSubActionProperty('otherFields', json);
             }}
-            dataTestSubj="otherFieldsJsonEditor"
           />
         </EuiFormRow>
       </>
