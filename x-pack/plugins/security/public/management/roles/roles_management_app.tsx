@@ -143,6 +143,7 @@ export const rolesManagementApp = Object.freeze({
                           rolesAPIClient={rolesAPIClient}
                           history={history}
                           readOnly={!startServices.application.capabilities.roles.save}
+                          buildFlavor={buildFlavor}
                         />
                       </Route>
                       <Route path="/edit/:roleName?">
