@@ -62,6 +62,7 @@ import {
 } from '../../../shared/managed_table';
 import { TryItButton } from '../../../shared/try_it_button';
 import { HealthBadge } from './health_badge';
+import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -96,10 +97,23 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.AlertsCount,
-            name: i18n.translate('xpack.apm.servicesTable.alertsColumnLabel', {
-              defaultMessage: 'Active alerts',
-            }),
-            width: `${unit * 8}px`,
+            name: (
+              <ColumnHeaderWithTooltip
+                tooltipContent={i18n.translate(
+                  'xpack.apm.servicesTable.tooltip.alertsCount',
+                  {
+                    defaultMessage: 'The count of the active alerts',
+                  }
+                )}
+                label={i18n.translate(
+                  'xpack.apm.servicesTable.alertsColumnLabel',
+                  {
+                    defaultMessage: 'Alerts',
+                  }
+                )}
+              />
+            ),
+            width: `${unit * 6}px`,
             sortable: true,
             render: (_, { serviceName, alertsCount }) => {
               if (!alertsCount) {
