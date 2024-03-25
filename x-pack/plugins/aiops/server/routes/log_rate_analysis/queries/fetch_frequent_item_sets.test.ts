@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { significantTerms } from '../../../../common/__mocks__/artificial_logs/significant_terms';
+import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
 
 import { getShouldClauses, getFrequentItemSetsAggFields } from './fetch_frequent_item_sets';
 
