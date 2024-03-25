@@ -1524,27 +1524,6 @@
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "taskManager",
-            "id": "def-server.TaskRegisterDefinition.indirectParamsSchema",
-            "type": "Object",
-            "tags": [],
-            "label": "indirectParamsSchema",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ObjectType",
-                "text": "ObjectType"
-              },
-              "<any> | undefined"
-            ],
-            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1600,21 +1579,6 @@
         ],
         "signature": [
           "{ params: Record<string, any>; scope?: string[] | undefined; enabled?: boolean | undefined; state: Record<string, any>; taskType: string; }"
-        ],
-        "path": "x-pack/plugins/task_manager/server/task.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "taskManager",
-        "id": "def-server.LoadIndirectParamsResult",
-        "type": "Type",
-        "tags": [],
-        "label": "LoadIndirectParamsResult",
-        "description": [],
-        "signature": [
-          "{ data: T; error?: undefined; } | { data?: undefined; error: Error; }"
         ],
         "path": "x-pack/plugins/task_manager/server/task.ts",
         "deprecated": false,

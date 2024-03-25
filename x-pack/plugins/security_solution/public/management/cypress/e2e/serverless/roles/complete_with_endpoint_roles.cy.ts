@@ -152,7 +152,8 @@ describe.skip(
         ensureFleetPermissionDeniedScreen();
       });
 
-      describe('Response Actions access', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/179281
+      describe.skip('Response Actions access', () => {
         beforeEach(() => {
           visitEndpointList();
           openConsoleFromEndpointList();
