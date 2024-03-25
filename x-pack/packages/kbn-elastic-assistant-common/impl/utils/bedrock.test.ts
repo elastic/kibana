@@ -9,7 +9,7 @@ import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { handleBedrockChunk } from '../..';
 
-const getCompletion = (completion: string) => ({
+const getContentBlockDelta = (completion: string) => ({
   type: 'content_block_delta',
   index: 0,
   delta: { type: 'text_delta', text: completion },
@@ -53,9 +53,9 @@ const messageStop = {
 const mockChunks = [
   messageStart,
   contentBlockStart,
-  getCompletion('My'),
-  getCompletion(' new'),
-  getCompletion(' message'),
+  getContentBlockDelta('My'),
+  getContentBlockDelta(' new'),
+  getContentBlockDelta(' message'),
   contentBlockStop,
   messageDelta,
   messageStop,
