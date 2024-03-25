@@ -9,7 +9,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toExpression } from '@kbn/interpreter';
+import { fromExpression, toExpression } from '@kbn/interpreter';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiButtonEmpty, EuiLink, EuiTextColor } from '@elastic/eui';
@@ -18,6 +18,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
+  ExpressionValue,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -47,7 +48,7 @@ import {
   VisualizationDisplayOptions,
 } from '../../../types';
 import { switchToSuggestion } from '../suggestion_helpers';
-import { buildExpression } from '../expression_helpers';
+import { buildExpression, exprCache, getDataVariables } from '../expression_helpers';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
 import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
@@ -276,6 +277,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         }
 
         if (adapters && adapters.tables) {
+          // add adapters.tables to cache
+          Object.entries(adapters.tables?.tables).forEach((table) => {
+            exprCache.setValue(table[0], table[1]);
+          });
+
           dispatchLens(
             onActiveDataChange({
               activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
@@ -323,6 +329,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           dateRange: framePublicAPI.dateRange,
           nowInstant: plugins.data.nowProvider.get(),
           searchSessionId,
+          canUseCache: true,
         });
 
         if (ast) {
@@ -594,6 +601,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     return (
       <VisualizationWrapper
         expression={localState.expressionToRender}
+        variables={getDataVariables(fromExpression(localState.expressionToRender!))}
         lensInspector={lensInspector}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
@@ -692,6 +700,7 @@ function useReportingState(errors: UserMessage[]): {
 
 export const VisualizationWrapper = ({
   expression,
+  variables,
   lensInspector,
   onEvent,
   hasCompatibleActions,
@@ -706,6 +715,7 @@ export const VisualizationWrapper = ({
   displayOptions,
 }: {
   expression: string | null | undefined;
+  variables: Record<string, ExpressionValue>;
   lensInspector: LensInspector;
   onEvent: (event: ExpressionRendererEvent) => void;
   hasCompatibleActions: (event: ExpressionRendererEvent) => Promise<boolean>;
@@ -772,6 +782,7 @@ export const VisualizationWrapper = ({
         className="lnsExpressionRenderer__component"
         padding={displayOptions?.noPadding ? undefined : 'm'}
         expression={expression!}
+        variables={variables}
         searchContext={searchContext}
         searchSessionId={searchSessionId}
         onEvent={onEvent}
