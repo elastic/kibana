@@ -12,10 +12,10 @@ import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import {
-  initializeReactEmbeddableTitles,
   ReactEmbeddableFactory,
   registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
+import { initializeTitles } from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
 import { openImageEditor } from '../components/image_editor/open_image_editor';
@@ -43,8 +43,7 @@ export const registerImageEmbeddableFactory = ({
         '../components/image_embeddable'
       );
 
-      const { titlesApi, titleComparators, serializeTitles } =
-        initializeReactEmbeddableTitles(initialState);
+      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
 
       const dynamicActionsApi = embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
         uuid,
