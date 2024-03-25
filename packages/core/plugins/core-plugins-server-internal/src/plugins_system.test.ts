@@ -128,7 +128,7 @@ test('getPlugins returns the list of plugins', () => {
   expect(pluginsSystem.getPlugins()).toEqual([pluginA, pluginB]);
 });
 
-test('getPluginDependencies returns dependency tree of symbols', () => {
+test('getPluginDependencies returns dependency tree with keys topologically sorted', () => {
   pluginsSystem.addPlugin(createPlugin('plugin-a', { required: ['no-dep'] }));
   pluginsSystem.addPlugin(
     createPlugin('plugin-b', { required: ['plugin-a'], optional: ['no-dep', 'other'] })
@@ -138,6 +138,7 @@ test('getPluginDependencies returns dependency tree of symbols', () => {
   expect(pluginsSystem.getPluginDependencies()).toMatchInlineSnapshot(`
     Object {
       "asNames": Map {
+        "no-dep" => Array [],
         "plugin-a" => Array [
           "no-dep",
         ],
@@ -145,9 +146,9 @@ test('getPluginDependencies returns dependency tree of symbols', () => {
           "plugin-a",
           "no-dep",
         ],
-        "no-dep" => Array [],
       },
       "asOpaqueIds": Map {
+        Symbol(no-dep) => Array [],
         Symbol(plugin-a) => Array [
           Symbol(no-dep),
         ],
@@ -155,7 +156,6 @@ test('getPluginDependencies returns dependency tree of symbols', () => {
           Symbol(plugin-a),
           Symbol(no-dep),
         ],
-        Symbol(no-dep) => Array [],
       },
     }
   `);
