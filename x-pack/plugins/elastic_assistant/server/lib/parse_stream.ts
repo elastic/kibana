@@ -18,7 +18,7 @@ export const handleStreamStorage: (
   onMessageSent?: (content: string) => void
 ) => Promise<void> = async (responseStream, llmType, onMessageSent) => {
   try {
-    const parser = llmType === 'bedrock' ? parseBedrockStream : parseOpenAIStream;
+    const parser = llmType === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
     // TODO @steph add abort signal
     const parsedResponse = await parser(responseStream);
     if (onMessageSent) {
