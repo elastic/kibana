@@ -172,10 +172,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-  let wrapperClassName = 'mappingsEditor__createFieldWrapper ';
-  isAddingFields !== undefined && isAddingFields
-    ? (wrapperClassName += 'mappingsEditor__createFieldAddField')
-    : (wrapperClassName += 'mappingsEditor__createFieldBorder');
+  const wrapperClassName =
+    'mappingsEditor__createFieldWrapper ' +
+    (isAddingFields ? 'mappingsEditor__createFieldAddField' : 'mappingsEditor__createFieldBorder');
 
   return (
     <EuiOutsideClickDetector onOutsideClick={onClickOutside}>

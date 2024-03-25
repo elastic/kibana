@@ -15,7 +15,7 @@ interface Props {
   treeDepth?: number;
   state: State;
   setPreviousState?: (state: State) => void;
-  isUsingPreviousStateFields?: boolean;
+  isAddingFields?: boolean;
 }
 
 export const FieldsList = React.memo(function FieldsListComponent({
@@ -23,7 +23,7 @@ export const FieldsList = React.memo(function FieldsListComponent({
   treeDepth,
   state,
   setPreviousState,
-  isUsingPreviousStateFields,
+  isAddingFields,
 }: Props) {
   if (fields === undefined) {
     return null;
@@ -38,7 +38,7 @@ export const FieldsList = React.memo(function FieldsListComponent({
           isLastItem={index === fields.length - 1}
           state={state}
           setPreviousState={setPreviousState}
-          isUsingPreviousStateFields={isUsingPreviousStateFields}
+          isAddingFields={isAddingFields}
         />
       ))}
     </ul>

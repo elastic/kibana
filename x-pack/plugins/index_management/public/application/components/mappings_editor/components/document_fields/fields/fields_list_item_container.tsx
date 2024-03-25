@@ -17,7 +17,7 @@ interface Props {
   isLastItem: boolean;
   state: State;
   setPreviousState?: (state: State) => void;
-  isUsingPreviousStateFields?: boolean;
+  isAddingFields?: boolean;
 }
 
 export const FieldsListItemContainer = ({
@@ -26,7 +26,7 @@ export const FieldsListItemContainer = ({
   isLastItem,
   state,
   setPreviousState,
-  isUsingPreviousStateFields,
+  isAddingFields,
 }: Props) => {
   const dispatch = useDispatch();
   const listElement = useRef<HTMLLIElement | null>(null);
@@ -69,7 +69,7 @@ export const FieldsListItemContainer = ({
 
   const toggleExpand = useCallback(() => {
     // if using static state, set state manually
-    if (isUsingPreviousStateFields && setPreviousState !== undefined) {
+    if (isAddingFields && setPreviousState !== undefined) {
       const previousField = state.fields.byId[fieldId];
       const nextField: NormalizedField = {
         ...previousField,
@@ -88,7 +88,7 @@ export const FieldsListItemContainer = ({
     } else {
       dispatch({ type: 'field.toggleExpand', value: { fieldId } });
     }
-  }, [fieldId, dispatch, isUsingPreviousStateFields, setPreviousState, state]);
+  }, [fieldId, dispatch, isAddingFields, setPreviousState, state]);
 
   return (
     <FieldsListItem
@@ -109,7 +109,7 @@ export const FieldsListItemContainer = ({
       setPreviousState={setPreviousState}
       toggleExpand={toggleExpand}
       state={state}
-      isUsingPreviousStateFields={isUsingPreviousStateFields}
+      isAddingFields={isAddingFields}
     />
   );
 };

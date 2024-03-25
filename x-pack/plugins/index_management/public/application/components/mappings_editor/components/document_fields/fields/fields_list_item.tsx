@@ -63,7 +63,7 @@ interface Props {
   setPreviousState?: (state: State) => void;
   treeDepth: number;
   state: State;
-  isUsingPreviousStateFields?: boolean;
+  isAddingFields?: boolean;
 }
 
 function FieldListItemComponent(
@@ -83,7 +83,7 @@ function FieldListItemComponent(
     toggleExpand,
     treeDepth,
     state,
-    isUsingPreviousStateFields,
+    isAddingFields,
     setPreviousState,
   }: Props,
   ref: React.Ref<HTMLLIElement>
@@ -126,7 +126,7 @@ function FieldListItemComponent(
         isMultiField={canHaveMultiFields}
         paddingLeft={indentCreateField}
         maxNestedDepth={maxNestedDepth}
-        isAddingFields={isUsingPreviousStateFields}
+        isAddingFields={isAddingFields}
       />
     );
   };
@@ -310,7 +310,7 @@ function FieldListItemComponent(
           fields={childFieldsArray}
           treeDepth={treeDepth + 1}
           state={state}
-          isUsingPreviousStateFields={isUsingPreviousStateFields}
+          isAddingFields={isAddingFields}
           setPreviousState={setPreviousState}
         />
       )}

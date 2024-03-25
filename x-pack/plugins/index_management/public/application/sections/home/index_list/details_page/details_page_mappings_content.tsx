@@ -245,10 +245,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       fields={previousStateFields}
       state={previousState}
       setPreviousState={setPreviousState}
-      isUsingPreviousStateFields={isAddingFields}
+      isAddingFields={isAddingFields}
     />
   ) : (
-    <FieldsList fields={getFieldsFromState(state)} state={state} />
+    <FieldsList fields={getFieldsFromState(state)} state={state} isAddingFields={isAddingFields} />
   );
   const fieldSearchComponent = isAddingFields ? (
     <DocumentFieldsSearch

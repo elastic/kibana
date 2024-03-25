@@ -71,7 +71,7 @@ export const DocumentFieldsTreeEditor = ({ onCancelAddingNewFields, isAddingFiel
 
   return (
     <>
-      <FieldsList fields={fields} state={useMappingsState()} />
+      <FieldsList fields={fields} state={useMappingsState()} isAddingFields={isAddingFields} />
       {renderCreateField()}
       {renderAddFieldButton()}
     </>
