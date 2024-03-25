@@ -231,11 +231,11 @@ describe('BedrockConnector', () => {
           data: JSON.stringify({
             ...JSON.parse(DEFAULT_BODY),
             messages: [
-              { role: 'user', content: 'Be a good chatbot' },
+              { content: 'Be a good chatbot', role: 'user' },
               { content: 'Ok.', role: 'assistant' },
-              { role: 'user', content: 'Hello world' },
-              { role: 'assistant', content: 'Hi, I am a good chatbot' },
-              { role: 'user', content: 'What is 2+2?' },
+              { content: 'Hello world', role: 'user' },
+              { content: 'Hi, I am a good chatbot', role: 'assistant' },
+              { content: 'What is 2+2?', role: 'user' },
             ],
             max_tokens: DEFAULT_TOKEN_LIMIT,
             temperature: 0,
@@ -327,11 +327,11 @@ describe('BedrockConnector', () => {
           data: JSON.stringify({
             ...JSON.parse(DEFAULT_BODY),
             messages: [
-              { role: 'user', content: 'Be a good chatbot' },
+              { content: 'Be a good chatbot', role: 'user' },
               { content: 'Ok.', role: 'assistant' },
-              { role: 'user', content: 'Hello world' },
-              { role: 'assistant', content: 'Hi, I am a good chatbot' },
-              { role: 'user', content: 'What is 2+2?' },
+              { content: 'Hello world', role: 'user' },
+              { content: 'Hi, I am a good chatbot', role: 'assistant' },
+              { content: 'What is 2+2?', role: 'user' },
             ],
             max_tokens: DEFAULT_TOKEN_LIMIT,
             temperature: 0,
@@ -374,7 +374,7 @@ describe('BedrockConnector', () => {
           responseSchema: RunApiLatestResponseSchema,
           data: JSON.stringify({
             ...JSON.parse(DEFAULT_BODY),
-            messages: [{ role: 'user', content: 'Hello world' }],
+            messages: [{ content: 'Hello world', role: 'user' }],
             max_tokens: DEFAULT_TOKEN_LIMIT,
             temperature: 0,
           }),
@@ -414,11 +414,11 @@ describe('BedrockConnector', () => {
           data: JSON.stringify({
             ...JSON.parse(DEFAULT_BODY),
             messages: [
-              { role: 'user', content: 'Be a good chatbot' },
+              { content: 'Be a good chatbot', role: 'user' },
               { content: 'Ok.', role: 'assistant' },
-              { role: 'user', content: 'Hello world' },
-              { role: 'assistant', content: 'Hi, I am a good chatbot' },
-              { role: 'user', content: 'What is 2+2?' },
+              { content: 'Hello world', role: 'user' },
+              { content: 'Hi, I am a good chatbot', role: 'assistant' },
+              { content: 'What is 2+2?', role: 'user' },
             ],
             max_tokens: DEFAULT_TOKEN_LIMIT,
             temperature: 0,

@@ -342,7 +342,7 @@ const ensureMessageFormat = (
     }
 
     // force roll outside of system to ensure it is either assistant or user
-    return [...acc, { ...m, role: m.role === 'assistant' ? 'assistant' : 'user' }];
+    return [...acc, { content: m.content, role: m.role === 'assistant' ? 'assistant' : 'user' }];
   }, []);
 
 function parseContent(content: Array<{ text?: string; type: string }>): string {

@@ -20,7 +20,7 @@ const human = '\n\nHuman:';
 
 export const DEFAULT_BODY = JSON.stringify({
   anthropic_version: 'bedrock-2023-05-31',
-  messages: [{ role: 'user', content: 'Hello world' }],
+  messages: [{ content: 'Hello world', role: 'user' }],
   max_tokens: DEFAULT_TOKEN_LIMIT,
   stop_sequences: [human],
 });
