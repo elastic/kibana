@@ -7,6 +7,5 @@
  */
 
 export enum TextBasedLanguages {
-  SQL = 'SQL',
   ESQL = 'ESQL',
 }

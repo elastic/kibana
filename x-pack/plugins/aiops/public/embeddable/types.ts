@@ -6,13 +6,13 @@
  */
 
 import type { FC } from 'react';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { SelectedChangePoint } from '../components/change_point_detection/change_point_detection_context';
-import {
+import type {
   EmbeddableChangePointChartInput,
   EmbeddableChangePointChartOutput,
 } from './embeddable_change_point_chart';
-import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
+import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 
 export type EmbeddableChangePointChartExplicitInput = {
   title: string;

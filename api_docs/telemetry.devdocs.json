@@ -10,7 +10,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TelemetryConstants",
-        "description": ["\nPublic's start exposed APIs by the telemetry plugin"],
+        "description": [
+          "\nPublic's start exposed APIs by the telemetry plugin"
+        ],
         "path": "src/plugins/telemetry/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -21,8 +23,12 @@
             "type": "Function",
             "tags": [],
             "label": "getPrivacyStatementUrl",
-            "description": ["Elastic's privacy statement url"],
-            "signature": ["() => string"],
+            "description": [
+              "Elastic's privacy statement url"
+            ],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -38,7 +44,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TelemetryPluginConfig",
-        "description": ["\nPublic-exposed configuration"],
+        "description": [
+          "\nPublic-exposed configuration"
+        ],
         "path": "src/plugins/telemetry/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -49,7 +57,9 @@
             "type": "boolean",
             "tags": [],
             "label": "banner",
-            "description": ["The banner is expected to be shown when needed"],
+            "description": [
+              "The banner is expected to be shown when needed"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -60,7 +70,9 @@
             "type": "boolean",
             "tags": [],
             "label": "allowChangingOptInStatus",
-            "description": ["Does the cluster allow changing the opt-in/out status via the UI?"],
+            "description": [
+              "Does the cluster allow changing the opt-in/out status via the UI?"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -71,8 +83,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "optIn",
-            "description": ["Is the cluster opted-in?"],
-            "signature": ["boolean | null"],
+            "description": [
+              "Is the cluster opted-in?"
+            ],
+            "signature": [
+              "boolean | null"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -86,7 +102,9 @@
             "description": [
               "Specify if telemetry should send usage to the prod or staging remote telemetry service"
             ],
-            "signature": ["\"prod\" | \"staging\""],
+            "signature": [
+              "\"prod\" | \"staging\""
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -100,7 +118,9 @@
             "description": [
               "Should the telemetry payloads be sent from the server or the browser?"
             ],
-            "signature": ["\"browser\" | \"server\""],
+            "signature": [
+              "\"browser\" | \"server\""
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -111,8 +131,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "telemetryNotifyUserAboutOptInDefault",
-            "description": ["Should notify the user about the opt-in status?"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Should notify the user about the opt-in status?"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -123,8 +147,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "userCanChangeSettings",
-            "description": ["Does the user have enough privileges to change the settings?"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Does the user have enough privileges to change the settings?"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -138,7 +166,9 @@
             "description": [
               "Should we hide the privacy statement notice? Useful on some environments, e.g. Cloud"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -149,8 +179,12 @@
             "type": "Object",
             "tags": [],
             "label": "labels",
-            "description": ["Extra labels to add to the telemetry context"],
-            "signature": ["{ [x: string]: unknown; }"],
+            "description": [
+              "Extra labels to add to the telemetry context"
+            ],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -177,7 +211,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TelemetryServicePublicApis",
-        "description": ["\nPublicly exposed APIs from the Telemetry Service"],
+        "description": [
+          "\nPublicly exposed APIs from the Telemetry Service"
+        ],
         "path": "src/plugins/telemetry/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -188,8 +224,12 @@
             "type": "Function",
             "tags": [],
             "label": "getIsOptedIn",
-            "description": ["Is the cluster opted-in to telemetry?"],
-            "signature": ["() => boolean | null"],
+            "description": [
+              "Is the cluster opted-in to telemetry?"
+            ],
+            "signature": [
+              "() => boolean | null"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -202,7 +242,9 @@
             "type": "boolean",
             "tags": [],
             "label": "userCanChangeSettings",
-            "description": ["Is the user allowed to change the opt-in/out status?"],
+            "description": [
+              "Is the user allowed to change the opt-in/out status?"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -216,7 +258,9 @@
             "description": [
               "Can phone-home telemetry calls be made? This depends on whether we have opted-in or if we are rendering a report"
             ],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -229,8 +273,12 @@
             "type": "Function",
             "tags": [],
             "label": "getCanChangeOptInStatus",
-            "description": ["Is the cluster allowed to change the opt-in/out status?"],
-            "signature": ["() => boolean"],
+            "description": [
+              "Is the cluster allowed to change the opt-in/out status?"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -246,7 +294,9 @@
             "description": [
               "Fetches an unencrypted telemetry payload so we can show it to the user"
             ],
-            "signature": ["() => Promise<unknown[]>"],
+            "signature": [
+              "() => Promise<unknown[]>"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -262,7 +312,9 @@
             "description": [
               "\nOverwrite the opt-in status.\nIt will send a final request to the remote telemetry cluster to report about the opt-in/out change."
             ],
-            "signature": ["(optedIn: boolean) => Promise<boolean>"],
+            "signature": [
+              "(optedIn: boolean) => Promise<boolean>"
+            ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -273,8 +325,12 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "optedIn",
-                "description": ["Whether the user is opting-in (`true`) or out (`false`)."],
-                "signature": ["boolean"],
+                "description": [
+                  "Whether the user is opting-in (`true`) or out (`false`)."
+                ],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "src/plugins/telemetry/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -307,7 +363,9 @@
           "type": "Object",
           "tags": [],
           "label": "telemetryService",
-          "description": ["{@link TelemetryServicePublicApis}"],
+          "description": [
+            "{@link TelemetryServicePublicApis}"
+          ],
           "signature": [
             {
               "pluginId": "telemetry",
@@ -327,8 +385,12 @@
           "type": "Object",
           "tags": [],
           "label": "telemetryNotifications",
-          "description": ["Notification helpers"],
-          "signature": ["{ setOptedInNoticeSeen: () => Promise<void>; }"],
+          "description": [
+            "Notification helpers"
+          ],
+          "signature": [
+            "{ setOptedInNoticeSeen: () => Promise<void>; }"
+          ],
           "path": "src/plugins/telemetry/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -339,7 +401,9 @@
           "type": "Object",
           "tags": [],
           "label": "telemetryConstants",
-          "description": ["Set of publicly exposed telemetry constants"],
+          "description": [
+            "Set of publicly exposed telemetry constants"
+          ],
           "signature": [
             {
               "pluginId": "telemetry",
@@ -363,7 +427,9 @@
       "type": "Interface",
       "tags": [],
       "label": "TelemetryPluginSetup",
-      "description": ["\nPublic's setup exposed APIs by the telemetry plugin"],
+      "description": [
+        "\nPublic's setup exposed APIs by the telemetry plugin"
+      ],
       "path": "src/plugins/telemetry/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -374,7 +440,9 @@
           "type": "Object",
           "tags": [],
           "label": "telemetryService",
-          "description": ["{@link TelemetryService}"],
+          "description": [
+            "{@link TelemetryService}"
+          ],
           "signature": [
             {
               "pluginId": "telemetry",
@@ -403,7 +471,9 @@
         "type": "Interface",
         "tags": [],
         "label": "DataTelemetryBasePayload",
-        "description": ["\nCommon counters for the {@link DataTelemetryDocument}s"],
+        "description": [
+          "\nCommon counters for the {@link DataTelemetryDocument}s"
+        ],
         "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -414,7 +484,9 @@
             "type": "number",
             "tags": [],
             "label": "index_count",
-            "description": ["How many indices match the declared pattern"],
+            "description": [
+              "How many indices match the declared pattern"
+            ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -425,8 +497,12 @@
             "type": "number",
             "tags": [],
             "label": "ecs_index_count",
-            "description": ["How many indices match the declared pattern follow ECS conventions"],
-            "signature": ["number | undefined"],
+            "description": [
+              "How many indices match the declared pattern follow ECS conventions"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -437,8 +513,12 @@
             "type": "number",
             "tags": [],
             "label": "doc_count",
-            "description": ["How many documents are among all the identified indices"],
-            "signature": ["number | undefined"],
+            "description": [
+              "How many documents are among all the identified indices"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -449,8 +529,12 @@
             "type": "number",
             "tags": [],
             "label": "size_in_bytes",
-            "description": ["Total size in bytes among all the identified indices"],
-            "signature": ["number | undefined"],
+            "description": [
+              "Total size in bytes among all the identified indices"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -494,7 +578,9 @@
             "type": "Object",
             "tags": [],
             "label": "data_stream",
-            "description": ["For data-stream indices. Reporting their details"],
+            "description": [
+              "For data-stream indices. Reporting their details"
+            ],
             "signature": [
               "{ dataset?: string | undefined; type?: string | undefined; } | undefined"
             ],
@@ -508,8 +594,12 @@
             "type": "Object",
             "tags": [],
             "label": "package",
-            "description": ["When available, reporting the package details"],
-            "signature": ["{ name: string; } | undefined"],
+            "description": [
+              "When available, reporting the package details"
+            ],
+            "signature": [
+              "{ name: string; } | undefined"
+            ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -523,7 +613,9 @@
             "description": [
               "What's the process indexing the data? (i.e.: \"beats\", \"logstash\")"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -577,7 +669,9 @@
             "type": "string",
             "tags": [],
             "label": "node_id",
-            "description": ["\nThe Node ID as reported by ES"],
+            "description": [
+              "\nThe Node ID as reported by ES"
+            ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -647,7 +741,9 @@
       "type": "Interface",
       "tags": [],
       "label": "TelemetryPluginSetup",
-      "description": ["\nServer's setup exposed APIs by the telemetry plugin"],
+      "description": [
+        "\nServer's setup exposed APIs by the telemetry plugin"
+      ],
       "path": "src/plugins/telemetry/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -661,7 +757,11 @@
           "description": [
             "\nResolves into the telemetry Url used to send telemetry.\nThe url is wrapped with node's [URL constructor](https://nodejs.org/api/url.html)."
           ],
-          "signature": ["() => Promise<", "URL", ">"],
+          "signature": [
+            "() => Promise<",
+            "URL",
+            ">"
+          ],
           "path": "src/plugins/telemetry/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -678,7 +778,9 @@
       "type": "Interface",
       "tags": [],
       "label": "TelemetryPluginStart",
-      "description": ["\nServer's start exposed APIs by the telemetry plugin"],
+      "description": [
+        "\nServer's start exposed APIs by the telemetry plugin"
+      ],
       "path": "src/plugins/telemetry/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -687,12 +789,16 @@
           "parentPluginId": "telemetry",
           "id": "def-server.TelemetryPluginStart.getIsOptedIn",
           "type": "Function",
-          "tags": ["track-adoption"],
+          "tags": [
+            "track-adoption"
+          ],
           "label": "getIsOptedIn",
           "description": [
             "\nResolves `true` if sending usage to Elastic is enabled.\nResolves `false` if the user explicitly opted out of sending usage data to Elastic\nor did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).\n"
           ],
-          "signature": ["() => Promise<boolean>"],
+          "signature": [
+            "() => Promise<boolean>"
+          ],
           "path": "src/plugins/telemetry/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": true,
@@ -710,16 +816,16 @@
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender_helpers.ts"
             },
             {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/telemetry/sender.test.ts"
+            },
+            {
               "plugin": "synthetics",
               "path": "x-pack/plugins/observability_solution/synthetics/server/telemetry/sender.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/telemetry/sender.test.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/telemetry/sender.test.ts"
             },
             {
               "plugin": "synthetics",

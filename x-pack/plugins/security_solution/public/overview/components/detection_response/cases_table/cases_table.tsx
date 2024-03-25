@@ -87,7 +87,7 @@ export const CasesTable = React.memo(() => {
             />
             <EuiSpacer size="m" />
             <EuiButton data-test-subj="allCasesButton" onClick={navigateToCases}>
-              {i18n.VIEW_RECENT_CASES}
+              {i18n.VIEW_ALL_CASES}
             </EuiButton>
           </>
         )}

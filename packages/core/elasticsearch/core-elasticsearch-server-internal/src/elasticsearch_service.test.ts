@@ -69,6 +69,7 @@ beforeEach(() => {
     hosts: ['http://1.2.3.4'],
     healthCheck: {
       delay: duration(10),
+      startupDelay: duration(10),
     },
     ssl: {
       verificationMode: 'none',
@@ -182,6 +183,7 @@ describe('#preboot', () => {
       expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
+          "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
           ],
@@ -400,6 +402,7 @@ describe('#start', () => {
       expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
+          "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
           ],

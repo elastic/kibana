@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { finalSignificantItemGroups } from '../../../../common/__mocks__/artificial_logs/final_significant_item_groups';
+import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
 
 import { getGroupFilter } from './get_group_filter';
 
@@ -14,12 +14,12 @@ describe('getGroupFilter', () => {
     expect(getGroupFilter(finalSignificantItemGroups[0])).toStrictEqual([
       {
         term: {
-          url: 'login.php',
+          response_code: '500',
         },
       },
       {
         term: {
-          user: 'Peter',
+          url: 'home.php',
         },
       },
     ]);

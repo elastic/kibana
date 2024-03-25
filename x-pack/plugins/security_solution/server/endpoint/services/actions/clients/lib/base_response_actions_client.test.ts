@@ -12,12 +12,13 @@ import type {
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientWriteActionResponseToEndpointIndexOptions,
 } from './base_response_actions_client';
-import { ResponseActionsClientImpl } from './base_response_actions_client';
+import { HOST_NOT_ENROLLED, ResponseActionsClientImpl } from './base_response_actions_client';
 import type {
   ActionDetails,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   EndpointActionResponseDataOutput,
+  EndpointActionDataParameterTypes,
 } from '../../../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -28,14 +29,19 @@ import type { Logger } from '@kbn/logging';
 import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+  ENDPOINT_ACTIONS_INDEX,
+} from '../../../../../../common/endpoint/constants';
 import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
 import { set } from 'lodash';
 import { responseActionsClientMock } from '../mocks';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
-import { HOST_NOT_ENROLLED } from '../../create/validate';
 import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -308,8 +314,8 @@ describe('ResponseActionsClientImpl base class', () => {
         agent_type: 'endpoint',
         endpoint_ids: ['one'],
         comment: 'test comment',
-        rule_name: undefined,
-        rule_id: undefined,
+        ruleName: undefined,
+        ruleId: undefined,
         alert_ids: undefined,
         case_ids: undefined,
         hosts: undefined,
@@ -390,11 +396,11 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should include Rule information if rule_id and rule_name were provided', async () => {
-      indexDocOptions.rule_id = '1-2-3';
-      indexDocOptions.rule_name = 'rule 123';
+      indexDocOptions.ruleId = '1-2-3';
+      indexDocOptions.ruleName = 'rule 123';
       expectedIndexDoc.rule = {
-        name: indexDocOptions.rule_name,
-        id: indexDocOptions.rule_id,
+        name: indexDocOptions.ruleName,
+        id: indexDocOptions.ruleId,
       };
 
       await expect(
@@ -403,7 +409,7 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should NOT include Rule information if rule_id or rule_name are missing', async () => {
-      indexDocOptions.rule_id = '1-2-3';
+      indexDocOptions.ruleId = '1-2-3';
 
       await expect(
         baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
@@ -551,6 +557,111 @@ describe('ResponseActionsClientImpl base class', () => {
       await expect(responsePromise).rejects.toHaveProperty('statusCode', 500);
     });
   });
+
+  describe('#fetchAllPendingActions()', () => {
+    beforeEach(() => {
+      const generator = new EndpointActionGenerator('seed');
+      const actionRequestEsHitPages = [
+        // Page 1
+        [
+          generator.generateActionEsHit({
+            agent: { id: 'agent-a' },
+            EndpointActions: { action_id: 'action-id-1' },
+          }),
+        ],
+        // Page 2
+        [
+          generator.generateActionEsHit({
+            agent: { id: 'agent-b' },
+            EndpointActions: { action_id: 'action-id-2' },
+          }),
+        ],
+      ];
+      let nextActionRequestPageNumber = 0;
+
+      constructorOptions.esClient.search.mockImplementation(async (_searchReq) => {
+        const searchReq = _searchReq as SearchRequest;
+
+        // FYI: The iterable uses a Point In Time
+        if (searchReq!.pit) {
+          return generator.toEsSearchResponse(
+            actionRequestEsHitPages[nextActionRequestPageNumber++] ?? []
+          );
+        }
+
+        switch (searchReq!.index) {
+          case ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN:
+            // `action-1` will have a response - thus its complete
+            if (JSON.stringify(searchReq).includes('action-id-1')) {
+              return generator.toEsSearchResponse([
+                generator.toEsSearchHit(
+                  generator.generateResponse({
+                    agent: { id: 'agent-a' },
+                    EndpointActions: { action_id: 'action-id-1' },
+                  }),
+                  ENDPOINT_ACTION_RESPONSES_INDEX
+                ),
+              ]);
+            }
+
+            // `action-2 will not have a response - it will be pending
+            return generator.toEsSearchResponse([]);
+        }
+
+        return generator.toEsSearchResponse([]);
+      });
+    });
+
+    it('should return an async iterable', () => {
+      const iterable = baseClassMock.fetchAllPendingActions();
+
+      expect(iterable).toEqual({
+        [Symbol.asyncIterator]: expect.any(Function),
+      });
+    });
+
+    it('should query ES with expected criteria', async () => {
+      for await (const pendingActions of baseClassMock.fetchAllPendingActions()) {
+        expect(pendingActions);
+      }
+
+      expect(constructorOptions.esClient.search).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: { term: { 'EndpointActions.input_type': expect.any(String) } },
+              must_not: { exists: { field: 'error' } },
+              filter: [{ range: { 'EndpointActions.expiration': { gte: 'now' } } }],
+            },
+          },
+        })
+      );
+    });
+
+    it('should provide an array of pending actions', async () => {
+      const iterationData: Array<
+        Array<
+          LogsEndpointAction<EndpointActionDataParameterTypes, EndpointActionResponseDataOutput, {}>
+        >
+      > = [];
+
+      for await (const pendingActions of baseClassMock.fetchAllPendingActions()) {
+        iterationData.push(pendingActions);
+      }
+
+      expect(iterationData.length).toBe(2);
+      expect(iterationData[0]).toEqual([]); // First page of results should be empty due to how the mock was setup
+      expect(iterationData[1]).toEqual([
+        expect.objectContaining({
+          EndpointActions: expect.objectContaining({
+            action_id: 'action-id-2',
+          }),
+          agent: { id: 'agent-b' },
+        }),
+      ]);
+    });
+  });
 });
 
 class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
@@ -578,5 +689,9 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
     return super.writeActionResponseToEndpointIndex<TOutputContent>(options);
+  }
+
+  public fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
+    return super.fetchAllPendingActions();
   }
 }

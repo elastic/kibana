@@ -4769,7 +4769,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -10039,7 +10039,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -11948,7 +11948,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -21850,7 +21850,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -26737,7 +26737,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -30273,9 +30273,27 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe Kibana normalized type of the column"
+            ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.DatatableColumnMeta.esType",
+            "type": "string",
+            "tags": [],
+            "label": "esType",
+            "description": [
+              "\nThe original type of the column from ES"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -34517,7 +34535,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -36545,7 +36563,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,

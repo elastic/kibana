@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('renders a filter controls section as part of the unified search bar', async () => {
       await PageObjects.observabilityLogsExplorer.navigateTo();
-      await testSubjects.existOrFail('datasetFiltersCustomization', { allowHidden: true });
+      await testSubjects.existOrFail('dataSourceFiltersCustomization', { allowHidden: true });
     });
   });
 }

@@ -6,14 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import {
   DataDriftIndexOrSearchRedirect,
   DataDriftIndexPatternsPicker,
 } from '../../../datavisualizer/data_drift/index_patterns_picker';
-import { NavigateToPath } from '../../../contexts/kibana';
-import { MlRoute } from '../..';
-import { createPath, PageLoader, PageProps } from '../../router';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import type { MlRoute } from '../..';
+import type { PageProps } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import {
   breadcrumbOnClickFactory,

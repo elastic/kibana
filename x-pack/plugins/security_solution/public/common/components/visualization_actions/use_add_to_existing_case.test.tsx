@@ -15,31 +15,15 @@ import {
 } from '../../../cases_test_utils';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 
-const mockedUseKibana = mockUseKibana();
-const mockGetUseCasesAddToExistingCaseModal = jest.fn();
-const mockCanUseCases = jest.fn();
-
-jest.mock('../../lib/kibana', () => {
-  const original = jest.requireActual('../../lib/kibana');
-
-  return {
-    ...original,
-    useKibana: () => ({
-      ...mockedUseKibana,
-      services: {
-        ...mockedUseKibana.services,
-        cases: {
-          hooks: {
-            useCasesAddToExistingCaseModal: mockGetUseCasesAddToExistingCaseModal,
-          },
-          helpers: { canUseCases: mockCanUseCases },
-        },
-      },
-    }),
-  };
-});
+jest.mock('../../lib/kibana');
 
 describe('useAddToExistingCase', () => {
+  const mockedUseKibana = mockUseKibana();
+  const mockCanUseCases = jest.fn();
+  const mockUseCasesAddToExistingCaseModal = jest.fn().mockReturnValue({
+    open: jest.fn(),
+    close: jest.fn(),
+  });
   const mockOnAddToCaseClicked = jest.fn();
   const timeRange = {
     from: '2022-03-06T16:00:00.000Z',
@@ -48,6 +32,9 @@ describe('useAddToExistingCase', () => {
 
   beforeEach(() => {
     mockCanUseCases.mockReturnValue(allCasesPermissions());
+    mockedUseKibana.services.cases.hooks.useCasesAddToExistingCaseModal =
+      mockUseCasesAddToExistingCaseModal;
+    mockedUseKibana.services.cases.helpers.canUseCases = mockCanUseCases;
   });
 
   it('useCasesAddToExistingCaseModal with attachments', () => {
@@ -59,7 +46,7 @@ describe('useAddToExistingCase', () => {
         lensMetadata: undefined,
       })
     );
-    expect(mockGetUseCasesAddToExistingCaseModal).toHaveBeenCalledWith({
+    expect(mockUseCasesAddToExistingCaseModal).toHaveBeenCalledWith({
       onClose: mockOnAddToCaseClicked,
       successToaster: {
         title: 'Successfully added visualization to the case',
@@ -127,7 +114,7 @@ describe('useAddToExistingCase', () => {
       description: 'test_description',
     };
 
-    mockGetUseCasesAddToExistingCaseModal.mockReturnValue({ open: mockOpenCaseModal });
+    mockUseCasesAddToExistingCaseModal.mockReturnValue({ open: mockOpenCaseModal });
 
     const { result } = renderHook(() =>
       useAddToExistingCase({

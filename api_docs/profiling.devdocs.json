@@ -14,7 +14,9 @@
       "tags": [],
       "label": "ProfilingPluginStart",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "x-pack/plugins/observability_solution/profiling/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
@@ -116,7 +118,9 @@
         "tags": [],
         "label": "timeRangeFromRequest",
         "description": [],
-        "signature": ["(request: any) => [number, number]"],
+        "signature": [
+          "(request: any) => [number, number]"
+        ],
         "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -128,7 +132,9 @@
             "tags": [],
             "label": "request",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -149,7 +155,9 @@
         "tags": [],
         "label": "INDEX_EVENTS",
         "description": [],
-        "signature": ["\"profiling-events-all\""],
+        "signature": [
+          "\"profiling-events-all\""
+        ],
         "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -162,7 +170,9 @@
         "tags": [],
         "label": "INDEX_EXECUTABLES",
         "description": [],
-        "signature": ["\"profiling-executables\""],
+        "signature": [
+          "\"profiling-executables\""
+        ],
         "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -175,7 +185,9 @@
         "tags": [],
         "label": "INDEX_FRAMES",
         "description": [],
-        "signature": ["\"profiling-stackframes\""],
+        "signature": [
+          "\"profiling-stackframes\""
+        ],
         "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -188,7 +200,9 @@
         "tags": [],
         "label": "INDEX_TRACES",
         "description": [],
-        "signature": ["\"profiling-stacktraces\""],
+        "signature": [
+          "\"profiling-stacktraces\""
+        ],
         "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -213,7 +227,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"profiling\""],
+        "signature": [
+          "\"profiling\""
+        ],
         "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -226,7 +242,9 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": ["\"profiling\""],
+        "signature": [
+          "\"profiling\""
+        ],
         "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

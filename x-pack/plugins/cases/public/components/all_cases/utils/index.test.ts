@@ -11,7 +11,6 @@ import {
   deflattenCustomFieldKey,
   stringToInteger,
   stringToIntegerWithDefault,
-  getLocalStorageKey,
 } from '.';
 
 describe('utils', () => {
@@ -62,16 +61,6 @@ describe('utils', () => {
 
     it('sets the default value correctly if the value is not a number', () => {
       expect(stringToIntegerWithDefault('foo', 10)).toBe(10);
-    });
-  });
-
-  describe('getLocalStorageKey', () => {
-    it('constructs the local storage key correctly', () => {
-      expect(getLocalStorageKey('my-key', 'test-app-id')).toBe('test-app-id.my-key');
-    });
-
-    it('constructs the local storage key correctly when the app ID is not defined', () => {
-      expect(getLocalStorageKey('my-key')).toBe('.my-key');
     });
   });
 });

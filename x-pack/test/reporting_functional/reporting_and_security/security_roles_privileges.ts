@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 const DASHBOARD_TITLE = 'Ecom Dashboard';
 const SAVEDSEARCH_TITLE = 'Ecommerce Data';
 const VIS_TITLE = 'e-commerce pie chart';
-const CANVAS_TITLE = 'The Very Cool Workpad for PDF Tests';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -24,17 +23,17 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingFunctional.teardownEcommerce();
     });
 
-    describe('Dashboard: Download CSV file', () => {
+    describe('Dashboard: Generate CSV report', () => {
       it('does not allow user that does not have reporting privileges', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryDashboardDownloadCsvNotAvailable('Ecommerce Data');
+        await reportingFunctional.tryDashboardGenerateCsvNotAvailable('Ecommerce Data');
       });
 
       it('does allow user with reporting privileges', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryDashboardDownloadCsvSuccess('Ecommerce Data');
+        await reportingFunctional.tryDashboardGenerateCsvSuccess('Ecommerce Data');
       });
     });
 
@@ -69,34 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedSearch(SAVEDSEARCH_TITLE);
         await reportingFunctional.tryDiscoverCsvSuccess();
-      });
-    });
-
-    describe('Canvas: Generate PDF', () => {
-      const kibanaServer = getService('kibanaServer');
-      const reportingApi = getService('reportingAPI');
-      before('initialize tests', async () => {
-        await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/canvas/workpad_pdf_test'
-        );
-      });
-
-      after('teardown tests', async () => {
-        await kibanaServer.savedObjects.cleanStandardList();
-        await reportingApi.deleteAllReports();
-        await reportingFunctional.initEcommerce();
-      });
-
-      it('does not allow user that does not have reporting privileges', async () => {
-        await reportingFunctional.loginDataAnalyst();
-        await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
-        await reportingFunctional.tryGeneratePdfNotAvailable();
-      });
-
-      it('does allow user with reporting privileges', async () => {
-        await reportingFunctional.loginReportingUser();
-        await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
-        await reportingFunctional.tryGeneratePdfSuccess();
       });
     });
 

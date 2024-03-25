@@ -17,12 +17,17 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CONFIGURATION_LABEL, OVERVIEW_LABEL } from '../../../../../common/i18n_string';
+import {
+  CONFIGURATION_LABEL,
+  OVERVIEW_LABEL,
+  SCHEDULING_LABEL,
+} from '../../../../../common/i18n_string';
 import { ConnectorLinkElasticsearch } from './connector_link';
 import { ConnectorConfigFields } from './connector_config_fields';
 import { ConnectorIndexName } from './connector_index_name';
 import { ConnectorConfigurationPanels } from './connector_config_panels';
 import { ConnectorOverview } from './connector_overview';
+import { ConnectorScheduling } from '../conector_scheduling_tab/connector_scheduling';
 
 interface ConnectorConfigurationProps {
   connector: Connector;
@@ -107,6 +112,16 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
       ),
       id: 'configuration',
       name: CONFIGURATION_LABEL,
+    },
+    {
+      content: (
+        <>
+          <EuiSpacer />
+          <ConnectorScheduling connector={connector} />
+        </>
+      ),
+      id: 'scheduling',
+      name: SCHEDULING_LABEL,
     },
   ];
 

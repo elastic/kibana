@@ -28,6 +28,7 @@ export const FilterBar = ({ query, onQueryChange }: FilterBarComponentProps) => 
 
   return (
     <EuiFieldSearch
+      data-test-subj="datasetQualityFilterBarFieldSearch"
       fullWidth
       placeholder={placeholder}
       value={query ?? ''}

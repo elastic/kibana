@@ -12,13 +12,10 @@ import {
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
-import { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
-import { render, waitFor } from '@testing-library/react';
-import React, { useImperativeHandle } from 'react';
+import { StateComparators } from '@kbn/presentation-publishing';
+import { waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { ReactEmbeddableParentContext } from './react_embeddable_api';
-import { useReactEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-import { EmbeddableStateComparators, ReactEmbeddableFactory } from './types';
+import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
 
 interface SuperTestStateType {
   name: string;
@@ -29,7 +26,7 @@ interface SuperTestStateType {
 describe('react embeddable unsaved changes', () => {
   let initialState: SuperTestStateType;
   let lastSavedState: SuperTestStateType;
-  let comparators: EmbeddableStateComparators<SuperTestStateType>;
+  let comparators: StateComparators<SuperTestStateType>;
   let deserializeState: (state: SerializedPanelState) => SuperTestStateType;
   let parentApi: (PresentationContainer & PublishesLastSavedState) | null;
 
@@ -50,7 +47,7 @@ describe('react embeddable unsaved changes', () => {
     const nameSubject = new BehaviorSubject<string>(initialState.name);
     const ageSubject = new BehaviorSubject<number>(initialState.age);
     const taglineSubject = new BehaviorSubject<string>(initialState.tagline);
-    const defaultComparators: EmbeddableStateComparators<SuperTestStateType> = {
+    const defaultComparators: StateComparators<SuperTestStateType> = {
       name: [nameSubject, jest.fn((nextName) => nameSubject.next(nextName))],
       age: [ageSubject, jest.fn((nextAge) => ageSubject.next(nextAge))],
       tagline: [taglineSubject, jest.fn((nextTagline) => taglineSubject.next(nextTagline))],
@@ -58,8 +55,8 @@ describe('react embeddable unsaved changes', () => {
     return defaultComparators;
   };
 
-  const renderTestComponent = async (
-    customComparators?: EmbeddableStateComparators<SuperTestStateType>
+  const startTrackingUnsavedChanges = (
+    customComparators?: StateComparators<SuperTestStateType>
   ) => {
     comparators = customComparators ?? initializeDefaultComparators();
     deserializeState = jest.fn((state) => state.rawState as SuperTestStateType);
@@ -69,70 +66,36 @@ describe('react embeddable unsaved changes', () => {
       getLastSavedStateForChild: () => ({ rawState: lastSavedState }),
       lastSavedState: new Subject<void>(),
     };
-
-    let apiToReturn: PublishesUnsavedChanges | null = null;
-    const TestComponent = React.forwardRef<PublishesUnsavedChanges>((props, ref) => {
-      const unsavedChangesApi = useReactEmbeddableUnsavedChanges(
-        'someId',
-        { deserializeState } as ReactEmbeddableFactory<SuperTestStateType>,
-        comparators
-      );
-      useImperativeHandle(ref, () => unsavedChangesApi);
-
-      return <div>A Test Component</div>;
-    });
-
-    const componentElement = (
-      <TestComponent
-        ref={(outApi) => {
-          apiToReturn = outApi;
-        }}
-      />
-    );
-
-    if (parentApi) {
-      render(
-        <ReactEmbeddableParentContext.Provider value={{ parentApi }}>
-          {componentElement}
-        </ReactEmbeddableParentContext.Provider>
-      );
-    } else {
-      render(componentElement);
-    }
-
-    await waitFor(() => {
-      expect(apiToReturn).toBeDefined();
-    });
-    return apiToReturn as unknown as PublishesUnsavedChanges;
+    return startTrackingEmbeddableUnsavedChanges('id', parentApi, comparators, deserializeState);
   };
 
   it('should return undefined unsaved changes when used without a parent context to provide the last saved state', async () => {
     parentApi = null;
-    const unsavedChangesApi = await renderTestComponent();
+    const unsavedChangesApi = startTrackingUnsavedChanges();
     expect(unsavedChangesApi).toBeDefined();
     expect(unsavedChangesApi.unsavedChanges.value).toBe(undefined);
   });
 
   it('runs factory deserialize function on last saved state', async () => {
-    await renderTestComponent();
+    startTrackingUnsavedChanges();
     expect(deserializeState).toHaveBeenCalledWith({ rawState: lastSavedState });
   });
 
   it('should return unsaved changes subject initialized to undefined when no unsaved changes are detected', async () => {
-    const unsavedChangesApi = await renderTestComponent();
+    const unsavedChangesApi = startTrackingUnsavedChanges();
     expect(unsavedChangesApi.unsavedChanges.value).toBe(undefined);
   });
 
   it('should return unsaved changes subject initialized with diff when unsaved changes are detected', async () => {
     initialState.tagline = 'Testing is my speciality!';
-    const unsavedChangesApi = await renderTestComponent();
+    const unsavedChangesApi = startTrackingUnsavedChanges();
     expect(unsavedChangesApi.unsavedChanges.value).toEqual({
       tagline: 'Testing is my speciality!',
     });
   });
 
   it('should detect unsaved changes when state changes during the lifetime of the component', async () => {
-    const unsavedChangesApi = await renderTestComponent();
+    const unsavedChangesApi = startTrackingUnsavedChanges();
     expect(unsavedChangesApi.unsavedChanges.value).toBe(undefined);
 
     comparators.tagline[1]('Testing is my speciality!');
@@ -144,7 +107,7 @@ describe('react embeddable unsaved changes', () => {
   });
 
   it('should detect unsaved changes when last saved state changes during the lifetime of the component', async () => {
-    const unsavedChangesApi = await renderTestComponent();
+    const unsavedChangesApi = startTrackingUnsavedChanges();
     expect(unsavedChangesApi.unsavedChanges.value).toBe(undefined);
 
     lastSavedState.tagline = 'Some other tagline';
@@ -158,7 +121,7 @@ describe('react embeddable unsaved changes', () => {
   });
 
   it('should reset unsaved changes, calling given setters with last saved values. This should remove all unsaved state', async () => {
-    const unsavedChangesApi = await renderTestComponent();
+    const unsavedChangesApi = startTrackingUnsavedChanges();
     expect(unsavedChangesApi.unsavedChanges.value).toBe(undefined);
 
     comparators.tagline[1]('Testing is my speciality!');
@@ -179,7 +142,7 @@ describe('react embeddable unsaved changes', () => {
     lastSavedState.age = 20;
     initialState.age = 50;
     const ageSubject = new BehaviorSubject(initialState.age);
-    const customComparators: EmbeddableStateComparators<SuperTestStateType> = {
+    const customComparators: StateComparators<SuperTestStateType> = {
       ...initializeDefaultComparators(),
       age: [
         ageSubject,
@@ -188,7 +151,7 @@ describe('react embeddable unsaved changes', () => {
       ],
     };
 
-    const unsavedChangesApi = await renderTestComponent(customComparators);
+    const unsavedChangesApi = startTrackingUnsavedChanges(customComparators);
 
     // here we expect there to be no unsaved changes, both unsaved state and last saved state have two digits.
     expect(unsavedChangesApi.unsavedChanges.value).toBe(undefined);

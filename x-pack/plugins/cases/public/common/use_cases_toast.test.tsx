@@ -16,14 +16,14 @@ import userEvent from '@testing-library/user-event';
 import type { SupportedCaseAttachment } from '../types';
 import { getByTestId, queryByTestId, screen } from '@testing-library/react';
 import { OWNER_INFO } from '../../common/constants';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
+import { useApplication } from './lib/kibana/use_application';
 
 jest.mock('./lib/kibana');
-jest.mock('../components/cases_context/use_cases_context');
+jest.mock('./lib/kibana/use_application');
 
 const useToastsMock = useToasts as jest.Mock;
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useCasesContextMock = useCasesContext as jest.Mock;
+const useApplicationMock = useApplication as jest.Mock;
 
 describe('Use cases toast hook', () => {
   const successMock = jest.fn();
@@ -70,7 +70,7 @@ describe('Use cases toast hook', () => {
       navigateToUrl,
     };
 
-    useCasesContextMock.mockReturnValue({ appId: 'testAppId' });
+    useApplicationMock.mockReturnValue({ appId: 'testAppId' });
   });
 
   describe('showSuccessAttach', () => {
@@ -282,7 +282,7 @@ describe('Use cases toast hook', () => {
       });
 
       it('does not navigates to a case if the appId is not defined', () => {
-        useCasesContextMock.mockReturnValue({ appId: undefined });
+        useApplicationMock.mockReturnValue({ appId: undefined });
 
         const { result } = renderHook(
           () => {

@@ -50,12 +50,8 @@ const constructLocatorParams = (
   const locatorParams: DatasetQualityLocatorParams = {
     filters: {
       timeRange: {
-        from: time?.from || 'now-24h',
-        to: time?.to || 'now',
-        refresh: {
-          isPaused: refreshInterval ? refreshInterval.pause : false,
-          interval: refreshInterval ? refreshInterval.value : 60000,
-        },
+        ...(time ?? { from: 'now-24h', to: 'now' }),
+        refresh: refreshInterval ?? { pause: false, value: 60000 },
       },
     },
   };

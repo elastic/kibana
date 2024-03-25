@@ -623,7 +623,7 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
       cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
 
       cy.url().should('include', '/app/observability-logs-explorer');
-      cy.get('[data-test-subj="datasetSelectorPopoverButton"]')
+      cy.get('[data-test-subj="dataSourceSelectorPopoverButton"]')
         .contains('[Mylogs] mylogs', { matchCase: false })
         .should('exist');
     });

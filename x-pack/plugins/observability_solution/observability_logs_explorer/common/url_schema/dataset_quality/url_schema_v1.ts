@@ -50,8 +50,8 @@ const timeRangeRT = rt.strict({
   from: rt.string,
   to: rt.string,
   refresh: rt.strict({
-    isPaused: rt.boolean,
-    interval: rt.number,
+    pause: rt.boolean,
+    value: rt.number,
   }),
 });
 
@@ -68,6 +68,7 @@ export const filtersRT = rt.exact(
     fullNames: rt.boolean,
     timeRange: timeRangeRT,
     integrations: rt.array(rt.string),
+    namespaces: rt.array(rt.string),
     query: rt.string,
   })
 );

@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-
 import type { CasesColumnSelection } from './types';
 
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { mergeSelectedColumnsWithConfiguration } from './utils/merge_selected_columns_with_configuration';
-import { getLocalStorageKey } from './utils';
+import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
 
 export function useCasesColumnsSelection() {
-  const { appId } = useCasesContext();
   const casesColumnsConfig = useCasesColumnsConfiguration();
 
-  const [selectedColumns, setSelectedColumns] = useLocalStorage<CasesColumnSelection[]>(
-    getLocalStorageKey(LOCAL_STORAGE_KEYS.casesTableColumns, appId)
+  const [selectedColumns, setSelectedColumns] = useCasesLocalStorage<CasesColumnSelection[]>(
+    LOCAL_STORAGE_KEYS.casesTableColumns,
+    []
   );
 
   const columns = selectedColumns || [];

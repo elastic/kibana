@@ -572,7 +572,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       buffer,
       requestBody: _.pick(searchSource.getSearchRequestBody(), [
         'aggs',
-        'fields',
         'query',
         'runtime_mappings',
       ]),

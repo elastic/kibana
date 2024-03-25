@@ -28,7 +28,6 @@ const searchInput = {
 const executeTriggerActions = async (triggerId: string, context: object) => {
   return Promise.resolve(undefined);
 };
-const trigger = { id: 'ACTION_VIEW_SAVED_SEARCH' };
 const embeddableConfig = {
   editable: true,
   services,
@@ -39,7 +38,7 @@ describe('view saved search action', () => {
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     const embeddable = new SavedSearchEmbeddable(embeddableConfig, searchInput);
-    expect(await action.isCompatible({ embeddable, trigger })).toBe(true);
+    expect(await action.isCompatible({ embeddable })).toBe(true);
   });
 
   it('is not compatible when embeddable not of type saved search', async () => {
@@ -57,7 +56,6 @@ describe('view saved search action', () => {
     expect(
       await action.isCompatible({
         embeddable,
-        trigger,
       })
     ).toBe(false);
   });
@@ -69,7 +67,6 @@ describe('view saved search action', () => {
     expect(
       await action.isCompatible({
         embeddable,
-        trigger,
       })
     ).toBe(false);
   });
@@ -78,12 +75,9 @@ describe('view saved search action', () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     const embeddable = new SavedSearchEmbeddable(embeddableConfig, searchInput);
     await new Promise((resolve) => setTimeout(resolve, 0));
-    await action.execute({ embeddable, trigger });
+    await action.execute({ embeddable });
     expect(discoverServiceMock.locator.navigate).toHaveBeenCalledWith(
-      getDiscoverLocatorParams({
-        input: embeddable.getInput(),
-        savedSearch: embeddable.getSavedSearch()!,
-      })
+      getDiscoverLocatorParams(embeddable)
     );
   });
 });

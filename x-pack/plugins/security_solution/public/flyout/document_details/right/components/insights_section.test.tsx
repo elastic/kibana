@@ -8,7 +8,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
-import { INSIGHTS_HEADER_TEST_ID } from './test_ids';
+import {
+  INSIGHTS_HEADER_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
+  CORRELATIONS_TEST_ID,
+} from './test_ids';
 import { TestProviders } from '../../../../common/mock';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
@@ -133,5 +137,25 @@ describe('<InsightsSection />', () => {
     expect(wrapper.getByTestId(INSIGHTS_HEADER_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'true');
     expect(wrapper.getAllByRole('button')[0]).not.toHaveAttribute('disabled');
+  });
+
+  it('should not render threat intel and correlations insights component when document is not signal', () => {
+    const getFieldsData = (field: string) => {
+      switch (field) {
+        case 'event.kind':
+          return 'metric';
+      }
+    };
+    const contextValue = {
+      eventId: 'some_Id',
+      getFieldsData,
+      documentIsSignal: false,
+    } as unknown as RightPanelContext;
+
+    const { getByTestId, queryByTestId } = renderInsightsSection(contextValue, false);
+
+    expect(getByTestId(INSIGHTS_HEADER_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_THREAT_INTELLIGENCE_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(CORRELATIONS_TEST_ID)).not.toBeInTheDocument();
   });
 });

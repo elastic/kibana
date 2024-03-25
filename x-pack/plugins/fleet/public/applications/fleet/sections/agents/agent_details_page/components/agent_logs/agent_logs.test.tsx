@@ -6,14 +6,17 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { render } from '@testing-library/react';
 
-import { useStartServices } from '../../../../../hooks';
+import { useAuthz, useStartServices } from '../../../../../hooks';
+import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { AgentLogsUI } from './agent_logs';
 
+jest.mock('../../../../../../../hooks/use_authz');
+
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
   return {
+    ...jest.requireActual('@kbn/kibana-utils-plugin/public'),
     createStateContainerReactHelpers: jest.fn().mockReturnValue({
       useTransitions: jest.fn().mockReturnValue({ update: jest.fn() }),
     }),
@@ -55,7 +58,15 @@ jest.mock('../../../../../hooks', () => {
 const mockUseStartServices = useStartServices as jest.Mock;
 
 describe('AgentLogsUI', () => {
+  beforeEach(() => {
+    jest.mocked(useAuthz).mockReturnValue({
+      fleet: {
+        allAgents: true,
+      },
+    } as any);
+  });
   const renderComponent = () => {
+    const renderer = createFleetTestRendererMock();
     const agent = {
       id: 'agent1',
       local_metadata: { elastic: { agent: { version: '8.11' } } },
@@ -67,7 +78,7 @@ describe('AgentLogsUI', () => {
       end: '2023-20-04T14:20:00.340Z',
       query: '',
     } as any;
-    return render(<AgentLogsUI agent={agent} state={state} />);
+    return renderer.render(<AgentLogsUI agent={agent} state={state} />);
   };
 
   const mockStartServices = (isServerlessEnabled?: boolean) => {

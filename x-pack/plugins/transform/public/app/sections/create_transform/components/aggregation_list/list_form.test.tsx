@@ -10,9 +10,10 @@ import { render } from '@testing-library/react';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
-import { PivotAggsConfig } from '../../../../common';
+import type { PivotAggsConfig } from '../../../../common';
 
-import { AggListForm, AggListProps } from './list_form';
+import type { AggListProps } from './list_form';
+import { AggListForm } from './list_form';
 
 describe('Transform: <AggListForm />', () => {
   test('Minimal initialization', () => {

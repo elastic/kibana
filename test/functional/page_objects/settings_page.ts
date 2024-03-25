@@ -152,6 +152,13 @@ export class SettingsPageObject extends FtrService {
     return this.testSubjects.find('createIndexPatternTitleInput');
   }
 
+  async getTimeFieldNameField() {
+    const wrapperElement = await this.testSubjects.find('timestampField');
+    return wrapperElement.findByTestSubject('comboBoxSearchInput');
+  }
+
+  noTimeFieldOption = "--- I don't want to use the time filter ---";
+
   async selectTimeFieldOption(selection: string) {
     const testSubj = 'timestampField';
     const timefield = await this.testSubjects.find(testSubj);
@@ -850,6 +857,9 @@ export class SettingsPageObject extends FtrService {
   async clickAddField() {
     this.log.debug('click Add Field');
     await this.testSubjects.click('addField');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('flyoutTitle');
+    });
   }
 
   async clickSaveField() {
@@ -865,8 +875,7 @@ export class SettingsPageObject extends FtrService {
 
   async setFieldType(type: string) {
     this.log.debug('set type = ' + type);
-    await this.testSubjects.setValue('typeField', type);
-    await this.browser.pressKeys(this.browser.keys.ENTER);
+    await this.comboBox.set('typeField', type);
   }
 
   async setFieldTypeComposite() {

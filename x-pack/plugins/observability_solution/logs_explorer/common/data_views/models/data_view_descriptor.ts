@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { DataViewSpecWithId } from '../../dataset_selection';
+import { DEFAULT_ALLOWED_LOGS_DATA_VIEWS } from '../../constants';
+import { DataViewSpecWithId } from '../../data_source_selection';
 import { DataViewDescriptorType } from '../types';
 import { buildIndexPatternRegExp } from '../utils';
 
-type Allowlist = Array<string | RegExp>;
+type AllowedList = Array<string | RegExp>;
 
-const LOGS_ALLOWLIST: Allowlist = [
-  buildIndexPatternRegExp(['logs', 'auditbeat', 'filebeat', 'winbeat']),
+const LOGS_ALLOWED_LIST: AllowedList = [
+  buildIndexPatternRegExp(DEFAULT_ALLOWED_LOGS_DATA_VIEWS),
   // Add more strings or regex patterns as needed
 ];
 
@@ -58,6 +59,10 @@ export class DataViewDescriptor {
     };
   }
 
+  testAgainstAllowedList(allowedList: string[]) {
+    return this.title ? isAllowed(this.title, [buildIndexPatternRegExp(allowedList)]) : false;
+  }
+
   public static create({ id, namespaces, title, type, name }: DataViewDescriptorFactoryParams) {
     const nameWithFallbackTitle = name ?? title;
     const dataType = title ? DataViewDescriptor.#extractDataType(title) : 'unresolved';
@@ -74,7 +79,7 @@ export class DataViewDescriptor {
   }
 
   static #extractDataType(title: string): DataViewDescriptorType['dataType'] {
-    if (isAllowed(title, LOGS_ALLOWLIST)) {
+    if (isAllowed(title, LOGS_ALLOWED_LIST)) {
       return 'logs';
     }
 
@@ -94,7 +99,7 @@ export class DataViewDescriptor {
   }
 }
 
-function isAllowed(value: string, allowList: Allowlist) {
+function isAllowed(value: string, allowList: AllowedList) {
   for (const allowedItem of allowList) {
     if (typeof allowedItem === 'string') {
       return value === allowedItem;

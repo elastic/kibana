@@ -30,7 +30,7 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
         'rum_test_data',
       ]);
       await syntheticsRunner.loadTestData(
-        path.join(__dirname, '../../../synthetics/e2e/fixtures/es_archiver/'),
+        path.join(__dirname, '../../synthetics/e2e/fixtures/es_archiver/'),
         ['full_heartbeat', 'browser']
       );
       await syntheticsRunner.loadTestFiles(async () => {
