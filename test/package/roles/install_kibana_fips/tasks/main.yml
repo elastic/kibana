@@ -2,13 +2,13 @@
   find:
     paths: /packages/
     patterns: kibana-ubi-fips-[0-9]*-docker-image.tar.gz
-  register: kibana_docker
+  register: kibana_fips
 
 - name: load image
   become: yes
   docker_image:
-    name: "{{ kibana_docker.files[0].path | basename| regex_replace('kibana-(.*)-docker-image.tar.gz', 'docker.elastic.co/kibana-ci/kibana-ubi-fips:\\1') }}"
-    load_path: '{{ kibana_docker.files[0].path }}'
+    name: "{{ kibana_fips.files[0].path | basename| regex_replace('kibana-(.*)-docker-image.tar.gz', 'docker.elastic.co/kibana-ci/kibana-ubi-fips:\\1') }}"
+    load_path: '{{ kibana_fips.files[0].path }}'
     timeout: 300
     source: load
     state: present
@@ -17,7 +17,7 @@
   become: yes
   docker_container:
     name: kibana
-    image: "{{ kibana_docker.files[0].path | basename| regex_replace('kibana-(.*)-docker-image.tar.gz', 'docker.elastic.co/kibana/kibana-ubi-fips:\\1') }}"
+    image: "{{ kibana_fips.files[0].path | basename| regex_replace('kibana-(.*)-docker-image.tar.gz', 'docker.elastic.co/kibana/kibana-ubi-fips:\\1') }}"
     network_mode: host
     env:
       SERVER_HOST: 0.0.0.0
