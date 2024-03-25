@@ -1,4 +1,6 @@
+## Lists potential commits for deployment
 ## Creates deploy@<timestamp> tag on Kibana
+## Then kicks of the deployment to QA
 
 agents:
   image: family/kibana-ubuntu-2004
