@@ -205,7 +205,7 @@ export const HASH_TO_VERSION_MAP = {
   'osquery-saved-query|a05ec7031231a4b71bfb4493a07b2dc5': '10.1.0',
   'policy-settings-protection-updates-note|37d4035a1dc3c5e58f1b519f99093f21': '10.0.0',
   'query|aa811b49f48906074f59110bfa83984c': '10.2.0',
-  'risk-engine-configuration|c4ad17c11d3c041d85006d0faef1c6a4': '10.0.0',
+  'risk-engine-configuration|431232781a82926aad5b1fd849715c0f': '10.1.0',
   'rules-settings|001f60645e96c71520214b57f3ea7590': '10.0.0',
   'sample-data-telemetry|7d3cfeb915303c9641c59681967ffeb4': '10.0.0',
   'search-session|fea3612a90b81672991617646f229a61': '10.0.0',
