@@ -23,6 +23,11 @@ components:
         - description
         - risk_score
         - severity
+      example:
+        name: 'My rule'
+        description: 'This is a test rule'
+        risk_score: 50
+        severity: 'low'
 
     BaseOptionalFields:
       x-inline: true
