@@ -90,7 +90,7 @@ export class NormalizedExternalConnectorClient {
 
     if (this.isUnsecuredActionsClient(this.connectorsClient)) {
       return this.connectorsClient.execute({
-        requesterId: '', // FIXME:PT get value,
+        requesterId: 'background_task',
         id: connectorId,
         spaceId,
         params,
