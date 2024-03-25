@@ -219,8 +219,6 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
   }
 
   if (extraWarning) {
-    // for testing: if addResultToValidation is set to warnings instead of errors,
-    // callout shows up in tests
     addResultToValidation(
       validation,
       'entries',
