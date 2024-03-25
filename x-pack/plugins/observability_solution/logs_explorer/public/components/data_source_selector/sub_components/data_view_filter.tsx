@@ -50,7 +50,7 @@ export const DataViewsFilter = ({ count, filter, onFilter }: DataViewFilterProps
   };
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="xs">
           {i18n.translate('xpack.logsExplorer.dataSourceSelector.dataViewCount', {
