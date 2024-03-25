@@ -486,18 +486,22 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     const getUnsecuredActionsClient = () => {
       const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+        ACTION_SAVED_OBJECT_TYPE,
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       ]);
 
       return new UnsecuredActionsClient({
         actionExecutor: actionExecutor!,
-        internalSavedObjectsRepository,
+        clusterClient: core.elasticsearch.client,
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           connectorTypeRegistry: actionTypeRegistry!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
         }),
+        inMemoryConnectors: this.inMemoryConnectors,
+        internalSavedObjectsRepository,
+        kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
       });
     };
