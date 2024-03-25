@@ -1469,7 +1469,7 @@
         "label": "pollEsNodesVersion",
         "description": [],
         "signature": [
-          "({ internalClient, log, kibanaVersion, ignoreVersionMismatch, esVersionCheckInterval: healthCheckInterval, }: ",
+          "({ internalClient, log, kibanaVersion, ignoreVersionMismatch, healthCheckInterval, healthCheckStartupInterval, }: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server-internal",
             "scope": "common",
@@ -1498,7 +1498,7 @@
             "id": "def-common.pollEsNodesVersion.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  internalClient,\n  log,\n  kibanaVersion,\n  ignoreVersionMismatch,\n  esVersionCheckInterval: healthCheckInterval,\n}",
+            "label": "{\n  internalClient,\n  log,\n  kibanaVersion,\n  ignoreVersionMismatch,\n  healthCheckInterval,\n  healthCheckStartupInterval,\n}",
             "description": [],
             "signature": [
               {
@@ -3077,11 +3077,25 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-common.PollEsNodesVersionOptions.esVersionCheckInterval",
+            "id": "def-common.PollEsNodesVersionOptions.healthCheckInterval",
             "type": "number",
             "tags": [],
-            "label": "esVersionCheckInterval",
+            "label": "healthCheckInterval",
             "description": [],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
+            "id": "def-common.PollEsNodesVersionOptions.healthCheckStartupInterval",
+            "type": "number",
+            "tags": [],
+            "label": "healthCheckStartupInterval",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3100,7 +3114,7 @@
         "label": "ElasticsearchConfigType",
         "description": [],
         "signature": [
-          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; }>; readonly hosts: string | string[]; readonly requestTimeout: moment.Duration; readonly compression: boolean; readonly apiVersion: string; readonly customHeaders: Record<string, string>; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly idleSocketTimeout: moment.Duration; readonly requestHeadersWhitelist: string | string[]; readonly shardTimeout: moment.Duration; readonly pingTimeout: moment.Duration; readonly logQueries: boolean; readonly ignoreVersionMismatch: boolean; readonly skipStartupConnectionCheck: boolean; readonly apisToRedactInLogs: Readonly<{ method?: string | undefined; } & { path: string; }>[]; }"
+          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; startupDelay: moment.Duration; }>; readonly hosts: string | string[]; readonly requestTimeout: moment.Duration; readonly compression: boolean; readonly apiVersion: string; readonly customHeaders: Record<string, string>; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly idleSocketTimeout: moment.Duration; readonly requestHeadersWhitelist: string | string[]; readonly shardTimeout: moment.Duration; readonly pingTimeout: moment.Duration; readonly logQueries: boolean; readonly ignoreVersionMismatch: boolean; readonly skipStartupConnectionCheck: boolean; readonly apisToRedactInLogs: Readonly<{ method?: string | undefined; } & { path: string; }>[]; }"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_config.ts",
         "deprecated": false,
@@ -3383,6 +3397,14 @@
             "text": "ObjectType"
           },
           "<{ delay: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<moment.Duration>; startupDelay: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
