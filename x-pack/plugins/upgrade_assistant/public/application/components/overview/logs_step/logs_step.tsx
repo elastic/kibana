@@ -72,7 +72,6 @@ const i18nTexts = {
         missingPrivileges: (
           <EuiCode transparentBackground={true}>{privilegesMissing?.index?.join(', ')}</EuiCode>
         ),
-        privilegesCount: privilegesMissing?.index?.length,
       }}
     />
   ),
