@@ -17,6 +17,7 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
+import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -39,7 +40,7 @@ describe('CrowdstrikeActionsClient class', () => {
       Parameters<typeof responseActionsClientMock.createIsolateOptions>[0],
       'agent_type'
     > = {}
-  ) => responseActionsClientMock.createIsolateOptions({ ...overrides, agent_type: 'sentinel_one' });
+  ) => responseActionsClientMock.createIsolateOptions({ ...overrides, agent_type: 'crowdstrike' });
 
   beforeEach(() => {
     classConstructorOptions = CrowdstrikeMock.createConstructorOptions();
@@ -127,11 +128,12 @@ describe('CrowdstrikeActionsClient class', () => {
       await crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions());
 
       expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
-        actionId: 's1-connector-instance-id',
+        actionId: 'crowdstrike-connector-instance-id',
         params: {
-          subAction: 'isolateHost',
+          subAction: SUB_ACTION.HOST_ACTIONS,
           subActionParams: {
-            uuid: '1-2-3',
+            command: 'contain',
+            ids: ['1-2-3'],
           },
         },
       });
@@ -159,7 +161,7 @@ describe('CrowdstrikeActionsClient class', () => {
                 },
               },
               expiration: expect.any(String),
-              input_type: 'sentinel_one',
+              input_type: 'crowdstrike',
               type: 'INPUT_ACTION',
             },
             agent: { id: ['1-2-3'] },
@@ -176,7 +178,7 @@ describe('CrowdstrikeActionsClient class', () => {
           EndpointActions: {
             action_id: expect.any(String),
             data: { command: 'isolate' },
-            input_type: 'sentinel_one',
+            input_type: 'crowdstrike',
             started_at: expect.any(String),
             completed_at: expect.any(String),
           },
@@ -210,11 +212,12 @@ describe('CrowdstrikeActionsClient class', () => {
       await crowdstrikeActionsClient.release(createCrowdstrikeIsolationOptions());
 
       expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
-        actionId: 's1-connector-instance-id',
+        actionId: 'crowdstrike-connector-instance-id',
         params: {
-          subAction: 'releaseHost',
+          subAction: SUB_ACTION.HOST_ACTIONS,
           subActionParams: {
-            uuid: '1-2-3',
+            command: 'lift_containment',
+            ids: ['1-2-3'],
           },
         },
       });
@@ -242,7 +245,7 @@ describe('CrowdstrikeActionsClient class', () => {
                 },
               },
               expiration: expect.any(String),
-              input_type: 'sentinel_one',
+              input_type: 'crowdstrike',
               type: 'INPUT_ACTION',
             },
             agent: { id: ['1-2-3'] },
@@ -259,7 +262,7 @@ describe('CrowdstrikeActionsClient class', () => {
           EndpointActions: {
             action_id: expect.any(String),
             data: { command: 'unisolate' },
-            input_type: 'sentinel_one',
+            input_type: 'crowdstrike',
             started_at: expect.any(String),
             completed_at: expect.any(String),
           },

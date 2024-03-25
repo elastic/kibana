@@ -88,7 +88,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     return super.writeActionRequestToEndpointIndex({
       ...actionRequest,
       hosts: {
-        [agentId]: { name: agentDetails.hostname },
+        [agentId]: { name: agentDetails[0].hostname },
       },
     });
   }
@@ -282,6 +282,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
 
+    console.log({ actionRequestDoc });
     await this.updateCases({
       command: reqIndexOptions.command,
       caseIds: reqIndexOptions.case_ids,

@@ -315,7 +315,7 @@ export const getSummaryRows = ({
   isReadOnly = false,
   investigationFields,
   sentinelOneManualHostActionsEnabled,
-  crowdstrikeeManualHostActionsEnabled,
+  crowdstrikeManualHostActionsEnabled,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
@@ -325,7 +325,7 @@ export const getSummaryRows = ({
   isDraggable?: boolean;
   isReadOnly?: boolean;
   sentinelOneManualHostActionsEnabled?: boolean;
-  crowdstrikeeManualHostActionsEnabled?: boolean;
+  crowdstrikeManualHostActionsEnabled?: boolean;
 }) => {
   const eventCategories = getEventCategoriesFromData(data);
 
@@ -391,7 +391,7 @@ export const getSummaryRows = ({
         // TODO
         if (
           field.id === CROWDSTRIKE_AGENT_ID_FIELD &&
-          crowdstrikeeManualHostActionsEnabled &&
+          crowdstrikeManualHostActionsEnabled &&
           !isAlertFromCrowdstrikeEvent({ data })
         ) {
           return acc;

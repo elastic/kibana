@@ -37,8 +37,8 @@ const AlertSummaryViewComponent: React.FC<{
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'
   );
-  const crowdstrikeeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-    'crowdstrikeeManualHostActionsEnabled'
+  const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'crowdstrikeManualHostActionsEnabled'
   );
 
   const summaryRows = useMemo(
@@ -52,7 +52,7 @@ const AlertSummaryViewComponent: React.FC<{
         isReadOnly,
         investigationFields,
         sentinelOneManualHostActionsEnabled,
-        crowdstrikeeManualHostActionsEnabled,
+        crowdstrikeManualHostActionsEnabled,
       }),
     [
       browserFields,
@@ -63,7 +63,7 @@ const AlertSummaryViewComponent: React.FC<{
       isReadOnly,
       investigationFields,
       sentinelOneManualHostActionsEnabled,
-      crowdstrikeeManualHostActionsEnabled,
+      crowdstrikeManualHostActionsEnabled,
     ]
   );
 
