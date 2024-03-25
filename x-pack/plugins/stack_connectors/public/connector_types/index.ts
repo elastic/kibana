@@ -73,7 +73,7 @@ export function registerConnectorTypes({
   if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
     connectorTypeRegistry.register(getSentinelOneConnectorType());
   }
-  if (ExperimentalFeaturesService.get().crowdStrikeConnectorOn) {
+  if (ExperimentalFeaturesService.get().crowdstrikeConnectorOn) {
     connectorTypeRegistry.register(getCrowdStrikeConnectorType());
   }
 }

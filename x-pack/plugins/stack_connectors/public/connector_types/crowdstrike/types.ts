@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CrowdstrikeIsolateHostParams } from '../../../common/crowdstrike/types';
+import type { CrowdstrikeHostActionsParams } from '../../../common/crowdstrike/types';
 import type { SUB_ACTION } from '../../../common/crowdstrike/constants';
 
-export type CrowdstrikeExecuteSubActionParams = CrowdstrikeIsolateHostParams;
+export type CrowdstrikeExecuteSubActionParams = CrowdstrikeHostActionsParams;
 
 export interface CrowdstrikeExecuteActionParams {
   subAction: SUB_ACTION;

@@ -113,7 +113,7 @@ export function registerConnectorTypes({
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());
   }
-  if (experimentalFeatures.crowdStrikeConnectorOn) {
+  if (experimentalFeatures.crowdstrikeConnectorOn) {
     actions.registerSubActionConnectorType(getCrowdstrikeConnectorType());
   }
 }

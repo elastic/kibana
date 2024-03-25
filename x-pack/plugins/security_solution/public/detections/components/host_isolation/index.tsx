@@ -54,7 +54,7 @@ export const HostIsolationPanel = React.memo(
     );
 
     const { casesInfo } = useCasesFromAlerts({ alertId });
-    // TODO: TC - Crowdstrike handle agentType
+
     const agentType: ResponseActionAgentType = useMemo(() => {
       if (sentinelOneAgentId) {
         return 'sentinel_one';
