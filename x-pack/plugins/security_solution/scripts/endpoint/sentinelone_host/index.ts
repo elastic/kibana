@@ -129,16 +129,18 @@ const runCli: RunFn = async ({ log, flags }) => {
           log,
           memory: '2G',
           disk: '10G',
+        }).then((vm) => {
+          return installSentinelOneAgent({
+            hostVm: vm,
+            log,
+            s1Client,
+          }).then((s1Info) => {
+            log.info(`SentinelOne Agent Status:\n${s1Info.status}`);
+
+            return vm;
+          });
         })
       : createMultipassHostVmClient(runningS1VMs[0], log);
-
-  const s1Info = await installSentinelOneAgent({
-    hostVm,
-    log,
-    s1Client,
-  });
-
-  log.info(`SentinelOne Agent Status:\n${s1Info.status}`);
 
   const {
     id: agentPolicyId,

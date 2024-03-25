@@ -63,7 +63,7 @@ export class NormalizedExternalConnectorClient {
       }
 
       this.log.debug(
-        `Using [${this.connectorTypeId}] stack connector: ${connector.name} (${connector.id})`
+        `Using [${this.connectorTypeId}] stack connector: "${connector.name}" (ID: ${connector.id})`
       );
 
       return connector;
