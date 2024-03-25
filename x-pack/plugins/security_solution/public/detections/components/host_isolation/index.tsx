@@ -38,7 +38,7 @@ export const HostIsolationPanel = React.memo(
       // let id = getCrowdstrikeAgentId(details);
       // // HARDCODED agent id for testing purposes - remove this IF statement when the agent id is available in the alert
       // if (id) {
-      //   id = '42a139dada1a4bb3b39a3436b5de21d5';
+      //   id = 'xxxxx';
       // }
       // return id;
     }, [details]);
