@@ -84,7 +84,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     prefix: 'pendingFieldListId',
   });
 
-  const [isAddingFields, setHidingAddFields] = useState<boolean>(false);
+  const [isAddingFields, setAddingFields] = useState<boolean>(false);
   const newFieldsLength = useMemo(() => {
     return Object.keys(state.fields.byId).length;
   }, [state.fields.byId]);
@@ -145,7 +145,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
 
   const onCancelAddingNewFields = useCallback(() => {
-    setHidingAddFields(!isAddingFields);
+    setAddingFields(!isAddingFields);
 
     //  reset mappings to previous state
     dispatch({
@@ -161,7 +161,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   }, [isAddingFields, dispatch, previousState]);
 
   const addFieldButtonOnClick = useCallback(() => {
-    setHidingAddFields(!isAddingFields);
+    setAddingFields(!isAddingFields);
 
     // when adding new field, save previous state. This state is then used by FieldsList component to show only saved mappings.
     setPreviousStateFields(getFieldsFromState(state));
@@ -401,7 +401,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                     onClick={updateMappings}
                     color="success"
                     fill
-                    disabled={newFieldsLength === 0 ?? true}
+                    disabled={newFieldsLength === 0}
                     data-test-subj="indexDetailsMappingsSaveMappings"
                   >
                     <FormattedMessage

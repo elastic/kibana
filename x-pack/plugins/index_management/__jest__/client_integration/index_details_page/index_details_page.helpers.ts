@@ -46,7 +46,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getCodeBlockContent: () => string;
       getDocsLinkHref: () => string;
       isErrorDisplayed: () => boolean;
-      isSaveMappingsErrorDisplayed:()=>boolean;
+      isSaveMappingsErrorDisplayed: () => boolean;
       clickErrorReloadButton: () => Promise<void>;
       getTreeViewContent: (fieldName: string) => string;
       clickToggleViewButton: () => Promise<void>;
