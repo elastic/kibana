@@ -34,6 +34,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
   public references: SavedObjectType<T>['references'];
   public updatedAt: SavedObjectType<T>['updated_at'];
   public createdAt: SavedObjectType<T>['created_at'];
+  public createdBy: SavedObjectType<T>['created_by'];
   public namespaces: SavedObjectType<T>['namespaces'];
 
   constructor(
@@ -52,6 +53,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
       namespaces,
       updated_at: updatedAt,
       created_at: createdAt,
+      created_by: createdBy,
     }: SavedObjectType<T>
   ) {
     this.id = id;
@@ -66,6 +68,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
     this.namespaces = namespaces;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
+    this.createdBy = createdBy;
     if (error) {
       this.error = error;
     }
