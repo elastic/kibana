@@ -22,6 +22,7 @@ export function NavControl({}: {}) {
 
   const {
     services: {
+      notifications,
       plugins: {
         start: {
           observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
@@ -40,6 +41,19 @@ export function NavControl({}: {}) {
     },
     [service, hasBeenOpened]
   );
+
+  useEffect(() => {
+    if (!chatService.error) {
+      return;
+    }
+
+    notifications.toasts.addError(chatService.error, {
+      title: 'Failed to initialize Observability AI Assistant',
+    });
+
+    setHasBeenOpened(false);
+    setIsOpen(false);
+  }, [chatService.error, notifications.toasts]);
 
   const [isOpen, setIsOpen] = useState(false);
 
