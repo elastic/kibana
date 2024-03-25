@@ -15,12 +15,18 @@
 .mappingsEditor {
   &__createFieldWrapper {
     background-color: $euiColorLightestShade;
-    border-right: $euiBorderThin;
-    border-bottom: $euiBorderThin;
-    border-left: $euiBorderThin;
     padding: $euiSize;
   }
-
+  &__createFieldBorder {
+    border-left: $euiBorderThin;
+    border-right:  $euiBorderThin;
+    border-bottom:  $euiBorderThin;
+  }
+  &__createFieldAddField {
+    border-right: 0px;
+    border-bottom: 0px;
+    border-left: 0px;
+  }
   &__createFieldContent {
     position: relative;
 

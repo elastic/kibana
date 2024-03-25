@@ -89,7 +89,6 @@ function FieldListItemComponent(
   ref: React.Ref<HTMLLIElement>
 ) {
   const {
-    id,
     source,
     isMultiField,
     canHaveChildFields,
@@ -127,6 +126,7 @@ function FieldListItemComponent(
         isMultiField={canHaveMultiFields}
         paddingLeft={indentCreateField}
         maxNestedDepth={maxNestedDepth}
+        isAddingFields={isUsingPreviousStateFields}
       />
     );
   };

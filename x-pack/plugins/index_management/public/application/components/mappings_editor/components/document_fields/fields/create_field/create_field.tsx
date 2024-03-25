@@ -38,6 +38,7 @@ interface Props {
   isCancelable?: boolean;
   maxNestedDepth?: number;
   onCancelAddingNewFields?: () => void;
+  isAddingFields?: boolean;
 }
 
 export const CreateField = React.memo(function CreateFieldComponent({
@@ -48,6 +49,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   isCancelable,
   maxNestedDepth,
   onCancelAddingNewFields,
+  isAddingFields,
 }: Props) {
   const dispatch = useDispatch();
 
@@ -67,10 +69,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
   }, [dispatch, subscribe]);
 
   const cancel = () => {
-    if (onCancelAddingNewFields && isCancelable) {
+    if (isAddingFields && onCancelAddingNewFields) {
       onCancelAddingNewFields();
+    } else {
+      dispatch({ type: 'documentField.changeStatus', value: 'idle' });
     }
-    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
   };
 
   const submitForm = async (e?: React.FormEvent, exitAfter: boolean = false) => {
@@ -141,7 +144,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const renderFormActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-      {isCancelable !== false && (
+      {(isCancelable !== false || isAddingFields) && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={cancel} data-test-subj="cancelButton">
             {i18n.translate('xpack.idxMgmt.mappingsEditor.createField.cancelButtonLabel', {
@@ -169,6 +172,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+  let wrapperClassName = 'mappingsEditor__createFieldWrapper ';
+  isAddingFields !== undefined && isAddingFields
+    ? (wrapperClassName += 'mappingsEditor__createFieldAddField')
+    : (wrapperClassName += 'mappingsEditor__createFieldBorder');
 
   return (
     <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
@@ -179,7 +186,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
         data-test-subj="createFieldForm"
       >
         <div
-          className={classNames('mappingsEditor__createFieldWrapper', {
+          className={classNames(wrapperClassName, {
             'mappingsEditor__createFieldWrapper--toggle':
               Boolean(maxNestedDepth) && maxNestedDepth! > 0,
             'mappingsEditor__createFieldWrapper--multiField': isMultiField,

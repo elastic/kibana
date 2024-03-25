@@ -83,19 +83,20 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     prefix: 'pendingFieldListId',
   });
 
-  const [addFieldComponent, hideAddFieldComponent] = useState<boolean>(false);
+  const [isAddingFields, setHidingAddFields] = useState<boolean>(false);
   const newFieldsLength = useMemo(() => {
     return Object.keys(state.fields.byId).length;
   }, [state.fields.byId]);
 
   const [previousState, setPreviousState] = useState<State>(state);
-  const [isUsingPreviousStateFields, setUsingPreviousStateFields] = useState<boolean>(false);
-  const [staticFields, setStaticFields] = useState<NormalizedField[]>(getFieldsFromState(state));
-
+  const [previousStateFields, setPreviousStateFields] = useState<NormalizedField[]>(
+    getFieldsFromState(state)
+  );
   const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
   const onToggleChange = () => {
     setIsJSONVisible(!isJSONVisible);
   };
+
   const mappingsDefinition = extractMappingsDefinition(jsonData);
   const { parsedDefaultValue } = useMemo<MappingsEditorParsedMetadata>(() => {
     if (mappingsDefinition === null) {
@@ -142,8 +143,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
 
   const onCancelAddingNewFields = useCallback(() => {
-    hideAddFieldComponent(!addFieldComponent);
-    setUsingPreviousStateFields(!isUsingPreviousStateFields);
+    setHidingAddFields(!isAddingFields);
 
     //  reset mappings to previous state
     dispatch({
@@ -151,18 +151,18 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       value: {
         ...previousState,
         documentFields: {
-          status: 'idle',
+          status: 'disabled',
           editor: 'default',
         },
       },
     });
-  }, [addFieldComponent, isUsingPreviousStateFields, dispatch, previousState]);
+  }, [isAddingFields, dispatch, previousState]);
 
   const addFieldButtonOnClick = useCallback(() => {
-    hideAddFieldComponent(!addFieldComponent);
+    setHidingAddFields(!isAddingFields);
+
     // when adding new field, save previous state. This state is then used by FieldsList component to show only saved mappings.
-    setUsingPreviousStateFields(!isUsingPreviousStateFields);
-    setStaticFields(getFieldsFromState(state));
+    setPreviousStateFields(getFieldsFromState(state));
     setPreviousState(state);
 
     // reset mappings and change status to create field.
@@ -177,7 +177,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         },
       },
     });
-  }, [dispatch, addFieldComponent, state, isUsingPreviousStateFields]);
+  }, [dispatch, isAddingFields, state]);
 
   const updateMappings = useCallback(async () => {
     const { error } = await updateIndexMappings(indexName, deNormalize(state.fields));
@@ -193,7 +193,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const onSearchChange = useCallback(
     (value: string) => {
-      if (isUsingPreviousStateFields) {
+      if (isAddingFields) {
         setPreviousState({
           ...previousState,
           search: {
@@ -205,12 +205,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         dispatch({ type: 'search:update', value });
       }
     },
-    [dispatch, previousState, isUsingPreviousStateFields]
+    [dispatch, previousState, isAddingFields]
   );
 
-  const searchTerm = isUsingPreviousStateFields
-    ? previousState.search.term.trim()
-    : state.search.term.trim();
+  const searchTerm = isAddingFields ? previousState.search.term.trim() : state.search.term.trim();
 
   const jsonBlock = (
     <EuiCodeBlock
@@ -224,7 +222,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       {data}
     </EuiCodeBlock>
   );
-  const searchResultComponent = isUsingPreviousStateFields ? (
+  const searchResultComponent = isAddingFields ? (
     <SearchResult
       result={previousState.search.result}
       documentFieldsState={previousState.documentFields}
@@ -233,17 +231,17 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     <SearchResult result={state.search.result} documentFieldsState={state.documentFields} />
   );
 
-  const fieldsListComponent = isUsingPreviousStateFields ? (
+  const fieldsListComponent = isAddingFields ? (
     <FieldsList
-      fields={staticFields}
+      fields={previousStateFields}
       state={previousState}
       setPreviousState={setPreviousState}
-      isUsingPreviousStateFields={isUsingPreviousStateFields}
+      isUsingPreviousStateFields={isAddingFields}
     />
   ) : (
     <FieldsList fields={getFieldsFromState(state)} state={state} />
   );
-  const fieldSearchComponent = isUsingPreviousStateFields ? (
+  const fieldSearchComponent = isAddingFields ? (
     <DocumentFieldsSearch
       searchValue={previousState.search.term}
       onSearchChange={onSearchChange}
@@ -350,11 +348,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           )}
         </EuiFlexItem>
         <EuiFlexGroup direction="column">
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
             <EuiFlexItem>{fieldSearchComponent}</EuiFlexItem>
             {!index.hidden && (
               <EuiFlexItem grow={false}>
-                {!addFieldComponent ? (
+                {!isAddingFields ? (
                   <EuiButton
                     onClick={addFieldButtonOnClick}
                     iconType="plusInCircle"
@@ -410,47 +408,51 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {addFieldComponent && (
+          {isAddingFields && (
             <EuiFlexItem grow={false}>
-              <EuiAccordion
-                id={pendingFieldListId}
-                initialIsOpen
-                buttonContent={
-                  <EuiPanel paddingSize="s" hasShadow={false}>
-                    <EuiFlexGroup
-                      gutterSize="s"
-                      alignItems="baseline"
-                      data-test-subj="indexDetailsMappingsPendingBlock"
-                    >
-                      <EuiFlexItem grow={6}>
-                        <EuiText size="m">
-                          <FormattedMessage
-                            id="xpack.idxMgmt.indexDetails.mappings.addMappingPendingBlock"
-                            defaultMessage="Pending fields"
-                          />
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiNotificationBadge
-                          color={newFieldsLength > 0 ? 'accent' : 'subdued'}
-                          size="m"
-                        >
-                          {newFieldsLength}
-                        </EuiNotificationBadge>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+              <EuiPanel hasBorder>
+                <EuiAccordion
+                  id={pendingFieldListId}
+                  initialIsOpen
+                  buttonContent={
+                    <EuiPanel paddingSize="s" hasShadow={false}>
+                      <EuiFlexGroup
+                        gutterSize="s"
+                        alignItems="baseline"
+                        data-test-subj="indexDetailsMappingsPendingBlock"
+                      >
+                        <EuiFlexItem grow={6}>
+                          <EuiText size="m">
+                            <FormattedMessage
+                              id="xpack.idxMgmt.indexDetails.mappings.addMappingPendingBlock"
+                              defaultMessage="Pending fields"
+                            />
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiNotificationBadge
+                            color={newFieldsLength > 0 ? 'accent' : 'subdued'}
+                            size="m"
+                          >
+                            {newFieldsLength}
+                          </EuiNotificationBadge>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiPanel>
+                  }
+                >
+                  <EuiPanel hasShadow={false}>
+                    {newFieldsLength <= 0 ? (
+                      <DocumentFields
+                        onCancelAddingNewFields={onCancelAddingNewFields}
+                        isAddingFields={isAddingFields}
+                      />
+                    ) : (
+                      <DocumentFields isAddingFields={isAddingFields} />
+                    )}
                   </EuiPanel>
-                }
-                borders="all"
-              >
-                <EuiPanel>
-                  {isUsingPreviousStateFields && newFieldsLength <= 0 ? (
-                    <DocumentFields onCancelAddingNewFields={onCancelAddingNewFields} />
-                  ) : (
-                    <DocumentFields />
-                  )}
-                </EuiPanel>
-              </EuiAccordion>
+                </EuiAccordion>
+              </EuiPanel>
             </EuiFlexItem>
           )}
 
@@ -461,7 +463,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               height: 100%;
             `}
           >
-            <EuiPanel>{isJSONVisible ? jsonBlock : treeViewBlock}</EuiPanel>
+            <EuiPanel hasShadow={false} paddingSize="none">
+              {isJSONVisible ? jsonBlock : treeViewBlock}
+            </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>

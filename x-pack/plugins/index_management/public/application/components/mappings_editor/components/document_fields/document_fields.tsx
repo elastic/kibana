@@ -19,9 +19,10 @@ interface Props {
   searchComponent?: React.ReactElement;
   searchResultComponent?: React.ReactElement;
   onCancelAddingNewFields?: () => void;
+  isAddingFields?: boolean;
 }
 export const DocumentFields = React.memo(
-  ({ searchComponent, searchResultComponent, onCancelAddingNewFields }: Props) => {
+  ({ searchComponent, searchResultComponent, onCancelAddingNewFields, isAddingFields }: Props) => {
     const { fields, documentFields } = useMappingsState();
     const dispatch = useDispatch();
     const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
@@ -40,7 +41,10 @@ export const DocumentFields = React.memo(
       editorType === 'json' ? (
         <DocumentFieldsJsonEditor defaultValue={jsonEditorDefaultValue!} />
       ) : (
-        <DocumentFieldsTreeEditor onCancelAddingNewFields={onCancelAddingNewFields} />
+        <DocumentFieldsTreeEditor
+          onCancelAddingNewFields={onCancelAddingNewFields}
+          isAddingFields={isAddingFields}
+        />
       );
 
     const exitEdit = useCallback(() => {

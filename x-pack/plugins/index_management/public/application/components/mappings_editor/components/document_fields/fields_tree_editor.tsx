@@ -14,9 +14,10 @@ import { FieldsList, CreateField } from './fields';
 
 interface Props {
   onCancelAddingNewFields?: () => void;
+  isAddingFields?: boolean;
 }
 
-export const DocumentFieldsTreeEditor = ({ onCancelAddingNewFields }: Props) => {
+export const DocumentFieldsTreeEditor = ({ onCancelAddingNewFields, isAddingFields }: Props) => {
   const dispatch = useDispatch();
   const {
     fields: { byId, rootLevelFields },
@@ -40,10 +41,11 @@ export const DocumentFieldsTreeEditor = ({ onCancelAddingNewFields }: Props) => 
 
     return (
       <CreateField
-        isCancelable={onCancelAddingNewFields !== undefined || fields.length > 0}
+        isCancelable={fields.length > 0}
         allFields={byId}
         isRootLevelField
         onCancelAddingNewFields={onCancelAddingNewFields}
+        isAddingFields={isAddingFields}
       />
     );
   };
