@@ -222,10 +222,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const onChangeItemsPerPage = useCallback(
-      (itemsChangedPerPage) =>
+      (itemsChangedPerPage) => {
         dispatch(
           timelineActions.updateItemsPerPage({ id: timelineId, itemsPerPage: itemsChangedPerPage })
-        ),
+        );
+      },
       [dispatch, timelineId]
     );
 

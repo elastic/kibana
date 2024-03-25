@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockTimelineData, TestProviders } from '../../../../../common/mock';
+import { createMockStore, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import React from 'react';
 import { TimelineDataTableComponent } from '.';
 import { defaultUdtHeaders } from '../default_headers';
@@ -18,6 +18,9 @@ import { mockBrowserFields } from '../../../../../common/containers/source/mock'
 import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
+import { timelineActions } from '../../../../store';
+import type { ExpandedDetailTimeline } from '../../../../../../common/types';
+
 const mockDataView = createStubDataView({ spec: {} });
 
 jest.mock('../../../../../common/containers/sourcerer');
@@ -32,16 +35,21 @@ const initialEnrichedColumns = getColumnHeaders(
   mockSourcererScope.browserFields
 );
 
-const TestComponent = (props: Partial<ComponentProps<typeof TimelineDataTableComponent>>) => {
+type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTableComponent>> & {
+  store?: ReturnType<typeof createMockStore>;
+};
+
+const TestComponent = (props: TestComponentProps) => {
+  const { store = createMockStore(), ...restProps } = props;
   useSourcererDataView();
   return (
-    <TestProviders>
+    <TestProviders store={store}>
       <TimelineDataTableComponent
         columns={initialEnrichedColumns}
         dataView={mockDataView}
         activeTab={TimelineTabs.query}
         timelineId={TimelineId.test}
-        itemsPerPage={100}
+        itemsPerPage={50}
         itemsPerPageOptions={[10, 25, 50, 100]}
         rowRenderers={[]}
         sort={[['@timestamp', 'desc']]}
@@ -49,7 +57,7 @@ const TestComponent = (props: Partial<ComponentProps<typeof TimelineDataTableCom
         onFieldEdited={onFieldEditedMock}
         refetch={refetchMock}
         dataLoadingState={DataLoadingState.loaded}
-        totalCount={1}
+        totalCount={mockTimelineData.length}
         onEventClosed={onEventClosedMock}
         showExpandedDetails={false}
         expandedDetail={{}}
@@ -57,7 +65,7 @@ const TestComponent = (props: Partial<ComponentProps<typeof TimelineDataTableCom
         updatedAt={Date.now()}
         onSetColumns={jest.fn()}
         onFilter={jest.fn()}
-        {...props}
+        {...restProps}
       />
     </TestProviders>
   );
@@ -71,9 +79,9 @@ describe('unified data table', () => {
     });
   });
 
-  it('should display unified data table', () => {
+  it('should display unified data table', async () => {
     render(<TestComponent />);
-    expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+    expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
   });
 
   describe('custom cell rendering based on data Type', () => {
@@ -171,20 +179,88 @@ describe('unified data table', () => {
     });
   });
 
+  it('should update row Height correctly', async () => {
+    const rowHeight = {
+      initial: 2,
+      new: 1,
+    };
+    const customMockStore = createMockStore();
+
+    customMockStore.dispatch(
+      timelineActions.updateRowHeight({
+        id: TimelineId.test,
+        rowHeight: rowHeight.initial,
+      })
+    );
+
+    render(<TestComponent store={customMockStore} />);
+
+    expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+    const toolbarSettings = screen.getByTestId('dataGridDisplaySelectorButton');
+
+    fireEvent.click(toolbarSettings);
+
+    await waitFor(() => {
+      expect(
+        screen.getAllByTestId('unifiedDataTableRowHeightSettings_lineCountNumber')[0]
+      ).toBeVisible();
+    });
+    expect(
+      screen.getAllByTestId('unifiedDataTableRowHeightSettings_lineCountNumber')[0]
+    ).toHaveValue(String(rowHeight.initial));
+
+    fireEvent.change(
+      screen.getAllByTestId('unifiedDataTableRowHeightSettings_lineCountNumber')[0],
+      {
+        target: { value: String(rowHeight.new) },
+      }
+    );
+
+    await waitFor(() => {
+      expect(customMockStore.getState().timeline.timelineById[TimelineId.test]?.rowHeight).toEqual(
+        rowHeight.new
+      );
+    });
+  });
+
   describe('details flyout', () => {
-    it('should show details flyout', async () => {
+    it('should show defails flyout when clicked on expand event', async () => {
+      render(<TestComponent showExpandedDetails={true} />);
+
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('timeline:details-panel:flyout')).toBeVisible();
+      });
+    });
+
+    it('should show details flyout when expandedDetails state is set', async () => {
+      const customMockStore = createMockStore();
+      const mockExpandedDetail: ExpandedDetailTimeline = {
+        query: {
+          params: {
+            eventId: 'some_id',
+            indexName: 'security-*',
+          },
+          panelView: 'eventDetail',
+        },
+      };
+      customMockStore.dispatch(
+        timelineActions.toggleDetailPanel({
+          id: TimelineId.test,
+          tabType: TimelineTabs.query,
+          ...mockExpandedDetail.query,
+        })
+      );
+
       render(
         <TestComponent
+          store={customMockStore}
           showExpandedDetails={true}
-          expandedDetail={{
-            query: {
-              params: {
-                eventId: 'some_id',
-                indexName: '',
-              },
-              panelView: 'eventDetail',
-            },
-          }}
+          expandedDetail={mockExpandedDetail}
         />
       );
 
@@ -192,6 +268,79 @@ describe('unified data table', () => {
         expect(screen.getByTestId('timeline:details-panel:flyout')).toBeVisible();
       });
     });
-    it('should close details flyout', async () => {});
+    it('should close details flyout when close icon is clicked', async () => {
+      const customMockStore = createMockStore();
+      const mockExpandedDetail: ExpandedDetailTimeline = {
+        query: {
+          params: {
+            eventId: 'some_id',
+            indexName: 'security-*',
+          },
+          panelView: 'eventDetail',
+        },
+      };
+
+      customMockStore.dispatch(
+        timelineActions.toggleDetailPanel({
+          id: TimelineId.test,
+          tabType: TimelineTabs.query,
+          ...mockExpandedDetail.query,
+        })
+      );
+
+      render(
+        <TestComponent
+          store={customMockStore}
+          showExpandedDetails={true}
+          expandedDetail={mockExpandedDetail}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('euiFlyoutCloseButton')).toBeVisible();
+      });
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      expect(onEventClosedMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('pagination', () => {
+    // change the number of items per page
+    it('should change the number of items per page', async () => {
+      const customMockStore = createMockStore();
+      render(<TestComponent store={customMockStore} />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+      fireEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+      fireEvent.click(screen.getByTestId(`tablePagination-25-rows`));
+      await waitFor(() => {
+        expect(
+          customMockStore.getState().timeline.timelineById[TimelineId.test]?.itemsPerPage
+        ).toEqual(25);
+      });
+    });
+
+    it('should be able to load more records once user have seen all the records loaded according to sample size', async () => {
+      const customMockStore = createMockStore();
+      customMockStore.dispatch(
+        timelineActions.updateSampleSize({
+          id: TimelineId.test,
+          sampleSize: 10,
+        })
+      );
+      render(
+        <TestComponent
+          store={customMockStore}
+          itemsPerPage={25}
+          events={structuredClone(mockTimelineData).slice(0, 10)}
+        />
+      );
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+      expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
+      fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
+      await waitFor(() => {
+        expect(onChangePageMock).toHaveBeenNthCalledWith(1, 1);
+      });
+    });
   });
 });
