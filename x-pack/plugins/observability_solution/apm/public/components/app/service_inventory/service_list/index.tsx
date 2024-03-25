@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiSpacer,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
@@ -327,8 +328,9 @@ export function ServiceList({
   isSavingSetting,
   onChangeTableSearchBarVisibility,
 }: Props) {
-  const kibanaEnvironment = useContext(KibanaEnvironmentContext);
-  const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(
+    KibanaEnvironmentContext
+  );
   const breakpoints = useBreakpoints();
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
@@ -383,6 +385,57 @@ export function ServiceList({
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
       <EuiFlexItem>
+        <TryItButton
+          isFeatureEnabled={isTableSearchBarEnabled}
+          promoLabel={i18n.translate('xpack.apm.serviceList.promoLabel', {
+            defaultMessage: 'Want to filter your services faster?',
+          })}
+          linkLabel={
+            isTableSearchBarEnabled
+              ? i18n.translate('xpack.apm.serviceList.turnFastFilterOff', {
+                  defaultMessage: 'Turn off Fast Filter',
+                })
+              : i18n.translate('xpack.apm.serviceList.turnFastFilterOn', {
+                  defaultMessage: 'Try the new Fast Filter',
+                })
+          }
+          icon="beta"
+          onClick={onChangeTableSearchBarVisibility}
+          isLoading={isSavingSetting}
+          popoverContent={
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.apm.serviceList.turnOffFastFilter', {
+                  defaultMessage:
+                    'Fast filtering allows you to instantly search for your services using free text.',
+                })}
+              </EuiFlexItem>
+              {isTableSearchBarEnabled && (
+                <EuiFlexItem grow={false}>
+                  <EuiLink
+                    data-test-subj="apmServiceListGiveFeedbackLink"
+                    href={getSurveyFeedbackURL({
+                      formUrl:
+                        'https://ela.st/service-inventory-fast-filter-feedback',
+                      kibanaVersion,
+                      isCloudEnv,
+                      isServerlessEnv,
+                    })}
+                    target="_blank"
+                  >
+                    {i18n.translate(
+                      'xpack.apm.serviceList.giveFeedbackFlexItemLabel',
+                      { defaultMessage: 'Give feedback' }
+                    )}
+                  </EuiLink>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          }
+        />
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem>
         <EuiFlexGroup
           alignItems="center"
           gutterSize="xs"
@@ -393,7 +446,6 @@ export function ServiceList({
               <AggregatedTransactionsBadge />
             </EuiFlexItem>
           )}
-
           {maxCountExceeded && (
             <EuiFlexItem grow={false}>
               <EuiToolTip
@@ -410,58 +462,6 @@ export function ServiceList({
               </EuiToolTip>
             </EuiFlexItem>
           )}
-
-          <EuiFlexItem>
-            <TryItButton
-              isFeatureEnabled={isTableSearchBarEnabled}
-              promoLabel={i18n.translate('xpack.apm.serviceList.promoLabel', {
-                defaultMessage: 'Want to filter your services faster?',
-              })}
-              linkLabel={
-                isTableSearchBarEnabled
-                  ? i18n.translate('xpack.apm.serviceList.turnFastFilterOff', {
-                      defaultMessage: 'Turn off Fast Filter',
-                    })
-                  : i18n.translate('xpack.apm.serviceList.turnFastFilterOn', {
-                      defaultMessage: 'Try the new Fast Filter',
-                    })
-              }
-              icon="beta"
-              onClick={onChangeTableSearchBarVisibility}
-              isLoading={isSavingSetting}
-              popoverContent={
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    {i18n.translate('xpack.apm.serviceList.turnOffFastFilter', {
-                      defaultMessage:
-                        'Fast filtering allows you to instantly search for your services using free text.',
-                    })}
-                  </EuiFlexItem>
-                  {isTableSearchBarEnabled && (
-                    <EuiFlexItem grow={false}>
-                      <EuiLink
-                        data-test-subj="apmServiceListGiveFeedbackLink"
-                        href={getSurveyFeedbackURL({
-                          formUrl:
-                            'https://ela.st/service-inventory-fast-filter-feedback',
-                          kibanaVersion,
-                          isCloudEnv,
-                          isServerlessEnv,
-                        })}
-                        target="_blank"
-                      >
-                        {i18n.translate(
-                          'xpack.apm.serviceList.giveFeedbackFlexItemLabel',
-                          { defaultMessage: 'Give feedback' }
-                        )}
-                      </EuiLink>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              }
-            />
-          </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
@@ -476,7 +476,6 @@ export function ServiceList({
               <EuiIcon type="questionInCircle" color="subdued" />
             </EuiToolTip>
           </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
               {i18n.translate(
@@ -487,7 +486,6 @@ export function ServiceList({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-
       <EuiFlexItem>
         <ManagedTable<ServiceListItem>
           isLoading={isPending(status)}

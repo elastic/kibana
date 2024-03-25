@@ -16,7 +16,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
+import useToggle from 'react-use/lib/useToggle';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
@@ -42,17 +43,14 @@ export function TryItButton({
   const canEditAdvancedSettings =
     core.application.capabilities.advancedSettings?.save;
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  function togglePopover() {
-    setIsPopoverOpen((state) => !state);
-  }
+  const [isPopoverOpen, togglePopover] = useToggle(false);
 
   function TryItBadge() {
     return (
       <EuiFlexItem grow={false}>
         <EuiBetaBadge
-          color={'accent'}
-          label={i18n.translate('xpack.apm.tryIt', {
+          color="accent"
+          label={i18n.translate('xpack.apm.tryIt.betaBadgeLabel', {
             defaultMessage: 'Try it',
           })}
         />
@@ -61,81 +59,78 @@ export function TryItButton({
   }
 
   function Icon() {
+    if (!icon) {
+      return null;
+    }
     return (
-      <>
-        {icon && (
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              color="hollow"
-              iconType={icon}
-              label={
-                icon === 'beaker'
-                  ? i18n.translate('xpack.apm.tryIt.techPreview', {
-                      defaultMessage: 'Technical preview',
-                    })
-                  : i18n.translate('xpack.apm.tryIt.beta', {
-                      defaultMessage: 'Beta',
-                    })
-              }
-            />
-          </EuiFlexItem>
-        )}
-      </>
+      <EuiFlexItem grow={false}>
+        <EuiBetaBadge
+          color="hollow"
+          iconType={icon}
+          label={
+            icon === 'beaker'
+              ? i18n.translate('xpack.apm.tryIt.techPreview', {
+                  defaultMessage: 'Technical preview',
+                })
+              : i18n.translate('xpack.apm.tryIt.beta', {
+                  defaultMessage: 'Beta',
+                })
+          }
+        />
+      </EuiFlexItem>
     );
   }
 
   function PromoLabel() {
+    if (!promoLabel) {
+      return null;
+    }
     return (
-      <>
-        {!!promoLabel && (
-          <EuiFlexItem grow={false}>
-            <EuiText>{promoLabel}</EuiText>
-          </EuiFlexItem>
-        )}
-      </>
+      <EuiFlexItem grow={false}>
+        <EuiText>{promoLabel}</EuiText>
+      </EuiFlexItem>
     );
   }
 
   function Popover() {
+    if (!popoverContent && canEditAdvancedSettings) {
+      return null;
+    }
     return (
-      <>
-        {popoverContent || !canEditAdvancedSettings ? (
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonIcon
-                  data-test-subj="apmPopoverButton"
-                  iconType="questionInCircle"
-                  aria-label={i18n.translate(
-                    'xpack.apm.tryItButton.euiButtonIcon.tryItHelperButtonLabel',
-                    { defaultMessage: 'Try it helper button' }
-                  )}
-                  onClick={togglePopover}
-                />
-              }
-              isOpen={isPopoverOpen}
-              closePopover={togglePopover}
-              anchorPosition="upCenter"
-            >
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={
+            <EuiButtonIcon
+              data-test-subj="apmPopoverButton"
+              iconType="questionInCircle"
+              aria-label={i18n.translate(
+                'xpack.apm.tryItButton.euiButtonIcon.tryItHelperButtonLabel',
+                { defaultMessage: 'Try it helper button' }
+              )}
+              onClick={togglePopover}
+            />
+          }
+          isOpen={isPopoverOpen}
+          closePopover={togglePopover}
+          anchorPosition="upCenter"
+        >
+          <>
+            {popoverContent}
+            {!canEditAdvancedSettings && (
               <>
-                {popoverContent}
-                {!canEditAdvancedSettings && (
-                  <>
-                    <EuiSpacer size="s" />
-                    {i18n.translate(
-                      'xpack.apm.tryItButton.euiButtonIcon.adminAccess',
-                      {
-                        defaultMessage:
-                          'Please ask your administrator to turn it on by enabling it in within settings.',
-                      }
-                    )}
-                  </>
+                <EuiSpacer size="s" />
+                {i18n.translate(
+                  'xpack.apm.tryItButton.euiButtonIcon.adminAccess',
+                  {
+                    defaultMessage:
+                      'Please ask your administrator to turn it on by enabling it in within settings.',
+                  }
                 )}
               </>
-            </EuiPopover>
-          </EuiFlexItem>
-        ) : null}
-      </>
+            )}
+          </>
+        </EuiPopover>
+      </EuiFlexItem>
     );
   }
 
