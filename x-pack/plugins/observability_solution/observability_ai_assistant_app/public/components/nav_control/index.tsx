@@ -10,6 +10,7 @@ import { EuiButton } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
 import { ChatFlyout } from '../chat/chat_flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -40,7 +41,12 @@ export function NavControl({}: {}) {
       return hasBeenOpened
         ? service.start({ signal }).catch((error) => {
             notifications.toasts.addError(error, {
-              title: 'Failed to initialize Observability AI Assistant',
+              title: i18n.translate(
+                'xpack.observabilityAiAssistant.navControl.initFailureErrorTitle',
+                {
+                  defaultMessage: 'Failed to initialize Observability AI Assistant',
+                }
+              ),
             });
 
             setHasBeenOpened(false);
