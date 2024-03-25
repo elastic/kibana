@@ -8,7 +8,8 @@
 import {
   API_BASE_PATH,
   DEPRECATION_LOGS_INDEX,
-  APP_LOGS_COUNT_PRIVILEGES,
+  APP_LOGS_COUNT_INDEX_PRIVILEGES,
+  APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
 } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { Privileges } from '../shared_imports';
@@ -67,11 +68,11 @@ export function registerAppRoutes({
           cluster,
         } = await client.asCurrentUser.security.hasPrivileges({
           body: {
-            cluster: [...APP_LOGS_COUNT_PRIVILEGES],
+            cluster: APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
             index: [
               {
                 names: [DEPRECATION_LOGS_INDEX],
-                privileges: ['read'],
+                privileges: APP_LOGS_COUNT_INDEX_PRIVILEGES,
               },
             ],
           },

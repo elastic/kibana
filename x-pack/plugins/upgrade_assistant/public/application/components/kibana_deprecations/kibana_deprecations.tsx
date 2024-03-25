@@ -20,7 +20,7 @@ import {
   SectionLoading,
   GlobalFlyout,
 } from '../../../shared_imports';
-import { APP_LOGS_COUNT_PRIVILEGES } from '../../../../common/constants';
+import { APP_LOGS_COUNT_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_KIBANA_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
 import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
@@ -317,7 +317,9 @@ export const KibanaDeprecationsList = ({
 };
 
 export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) => {
-  const requiredPrivileges = APP_LOGS_COUNT_PRIVILEGES.map((privilege) => `cluster.${privilege}`);
+  const requiredPrivileges = APP_LOGS_COUNT_CLUSTER_PRIVILEGES.map(
+    (privilege) => `cluster.${privilege}`
+  );
 
   return (
     <WithPrivileges privileges={requiredPrivileges}>

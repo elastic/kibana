@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { DEPRECATION_LOGS_INDEX, APP_LOGS_COUNT_PRIVILEGES } from '../../../../../common/constants';
+import {
+  DEPRECATION_LOGS_INDEX,
+  APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
+  APP_LOGS_COUNT_INDEX_PRIVILEGES,
+} from '../../../../../common/constants';
 import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { loadLogsCheckpoint } from '../../../lib/logs_checkpoint';
@@ -62,8 +66,9 @@ const i18nTexts = {
   missingIndexPrivilegesDescription: (privilegesMissing: MissingPrivileges) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.logsStep.missingPrivilegesDescription"
-      defaultMessage="The deprecation logs will continue to be indexed, but you won't be able to analyze them until you have the read index {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}"
+      defaultMessage="The deprecation logs will continue to be indexed, but you won't be able to analyze them until you have the {requiredPrivileges} index privileges for: {missingPrivileges}"
       values={{
+        requiredPrivileges: <i>{APP_LOGS_COUNT_INDEX_PRIVILEGES.join(', ')}</i>,
         missingPrivileges: (
           <EuiCode transparentBackground={true}>{privilegesMissing?.index?.join(', ')}</EuiCode>
         ),
@@ -251,7 +256,7 @@ export const getLogsStep = ({
 
   const requiredPrivileges = [
     `index.${DEPRECATION_LOGS_INDEX}`,
-    ...APP_LOGS_COUNT_PRIVILEGES.map((privilege) => `cluster.${privilege}`),
+    ...APP_LOGS_COUNT_CLUSTER_PRIVILEGES.map((privilege) => `cluster.${privilege}`),
   ];
 
   return {

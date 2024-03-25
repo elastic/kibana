@@ -6,7 +6,10 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { DEPRECATION_LOGS_INDEX, APP_LOGS_COUNT_PRIVILEGES } from '../../../../common/constants';
+import {
+  DEPRECATION_LOGS_INDEX,
+  APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
+} from '../../../../common/constants';
 import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
@@ -161,7 +164,7 @@ describe('Overview - Logs Step', () => {
           privileges: {
             hasAllPrivileges: true,
             missingPrivileges: {
-              cluster: [...APP_LOGS_COUNT_PRIVILEGES],
+              cluster: [...APP_LOGS_COUNT_CLUSTER_PRIVILEGES],
               index: [],
             },
           },
