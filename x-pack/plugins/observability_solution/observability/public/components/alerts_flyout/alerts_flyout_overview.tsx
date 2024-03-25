@@ -19,6 +19,7 @@ import {
   ALERT_CASE_IDS,
   ALERT_DURATION,
   ALERT_END,
+  ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
   ALERT_FLAPPING,
   ALERT_GROUP_FIELD,
@@ -265,8 +266,11 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
     if (alert.fields[ALERT_RULE_TYPE_ID] !== OBSERVABILITY_THRESHOLD_RULE_TYPE_ID) {
       const metrics: Array<{ field: string; aggType: string }> = [];
       const ruleCtr = ruleParams.criteria.map((ctr: Record<string, any>) => {
-        metrics.push({ field: ctr.metric, aggType: ctr.aggType });
-        return { ...ctr, metrics };
+        metrics.push({
+          field: ctr.metric || ctr.field,
+          aggType: ctr.aggType,
+        });
+        return { ...ctr, metrics, threshold: ctr.threshold || [ctr.value] };
       });
       setRuleCriteria(ruleCtr);
     } else {
@@ -323,7 +327,7 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
         key: i18n.translate('xpack.observability.alertFlyout.overviewTab.observedValue', {
           defaultMessage: 'Observed value',
         }),
-        value: alert.fields[ALERT_EVALUATION_VALUES],
+        value: alert.fields[ALERT_EVALUATION_VALUES] || [alert.fields[ALERT_EVALUATION_VALUE]],
         meta: {
           ruleCriteria,
         },
