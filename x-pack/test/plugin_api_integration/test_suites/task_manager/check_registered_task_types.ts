@@ -53,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
         'actions:.bedrock',
         'actions:.cases-webhook',
+        'actions:.crowdstrike',
         'actions:.d3security',
         'actions:.email',
         'actions:.gen-ai',

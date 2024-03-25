@@ -21,8 +21,8 @@ export interface CrowdstrikeActionsClientOptionsMock extends ResponseActionsClie
 }
 
 const createCrowdstrikeAgentDetailsMock = (
-  overrides: Partial<CrowdstrikeGetAgentsResponse['resources'][number]> = {}
-): CrowdstrikeGetAgentsResponse['resources'][number] => {
+  overrides: Partial<CrowdstrikeGetAgentsResponse['resources'][number][number]> = {}
+): CrowdstrikeGetAgentsResponse['resources'][number][number] => {
   return merge(
     {
       device_id: '123456789',
@@ -131,7 +131,7 @@ const createCrowdstrikeAgentDetailsMock = (
 };
 
 const createCrowdstrikeGetAgentsApiResponseMock = (
-  data: CrowdstrikeGetAgentsResponse['data'] = [createCrowdstrikeAgentDetailsMock()]
+  data: CrowdstrikeGetAgentsResponse['resources'][number] = [createCrowdstrikeAgentDetailsMock()]
 ): CrowdstrikeGetAgentsResponse => {
   return {
     meta: {

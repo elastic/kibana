@@ -1806,6 +1806,11 @@ describe('Exception helpers', () => {
           label: 'Agent status',
         },
         {
+          id: 'crowdstrike.event.DeviceId',
+          overrideField: 'agent.status',
+          label: 'Agent status',
+        },
+        {
           id: 'user.name',
         },
         {

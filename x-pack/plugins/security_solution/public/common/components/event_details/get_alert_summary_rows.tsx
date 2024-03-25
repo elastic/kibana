@@ -388,7 +388,7 @@ export const getSummaryRows = ({
         ) {
           return acc;
         }
-        // TODO
+
         if (
           field.id === CROWDSTRIKE_AGENT_ID_FIELD &&
           crowdstrikeManualHostActionsEnabled &&

@@ -85,6 +85,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     const agentId = actionRequest.endpoint_ids[0];
     const agentDetails = await this.getAgentDetails(agentId);
 
+    console.log({ agentDetails });
     return super.writeActionRequestToEndpointIndex({
       ...actionRequest,
       hosts: {
@@ -134,7 +135,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     return actionSendResponse;
   }
 
-  private async getAgentDetails(id: string): Promise<CrowdstrikeGetAgentsResponse['data'][number]> {
+  private async getAgentDetails(
+    id: string
+  ): Promise<CrowdstrikeGetAgentsResponse['resources'][number]> {
     const { id: connectorId } = await this.getConnector();
     const executeOptions: CrowdstrikeConnectorExecuteOptions<CrowdstrikeGetAgentsParams> = {
       actionId: connectorId,
@@ -282,7 +285,6 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
 
-    console.log({ actionRequestDoc });
     await this.updateCases({
       command: reqIndexOptions.command,
       caseIds: reqIndexOptions.case_ids,

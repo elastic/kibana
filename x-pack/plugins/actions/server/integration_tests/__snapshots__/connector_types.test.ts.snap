@@ -1456,6 +1456,132 @@ Object {
 }
 `;
 
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 1`] = `
+Object {
+  "flags": Object {
+    "error": [Function],
+  },
+  "type": "any",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 2`] = `
+Object {
+  "flags": Object {
+    "error": [Function],
+  },
+  "type": "any",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 3`] = `
+Object {
+  "flags": Object {
+    "error": [Function],
+  },
+  "type": "any",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 4`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "clientId": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "clientSecret": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 5`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "subAction": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "subActionParams": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+        "unknown": true,
+      },
+      "keys": Object {},
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
+        },
+      },
+      "type": "object",
+    },
+  },
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
+    },
+  },
+  "type": "object",
+}
+`;
+
 exports[`Connector type config checks detect connector type changes for: .d3security 1`] = `
 Object {
   "flags": Object {
