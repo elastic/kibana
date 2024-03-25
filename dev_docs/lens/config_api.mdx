@@ -21,7 +21,7 @@ const config: LensConfig = {
   value: 'sum'
 }
 
-const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
+const configBuilder = new LensConfigBuilder(dataViewsAPI, lensFormulaAPI);
 const lensConfig = configBuilder(config, { 
   timeRange: { from: 'now-30d', to: 'now', type: 'relative' },
   embeddable: true,
@@ -41,8 +41,8 @@ The `LensConfigBuilder` class is the central interface of the API, facilitating 
 
 The constructor requires two parameters:
 
-- `formulaAPI`: An instance of `FormulaPublicApi`, allowing the builder to perform formula calculations necessary for certain visualizations.
 - `dataViewsAPI`: An instance of `DataViewsPublicPluginStart`, enabling the builder to access and manage data views within Kibana.
+- `formulaAPI`: An instance of `FormulaPublicApi`, allowing the builder to perform formula calculations necessary for certain visualizations. You can omit this if you want to create an ES|QL visualization.
 
 #### build Method
 
@@ -80,3 +80,5 @@ Here's a detailed breakdown of each property within the `LensConfigOptions`:
 - **Type:** `Query`
 - **Optional**
 - **Description:** Allows specifying a query to further refine the data displayed in the visualization. The `Query` object includes a `language` property (e.g., `kuery` or `lucene`) and a `query` string, which represents the actual query to be executed. This is useful for dynamically adjusting the data set based on user input or application context, providing a flexible way to interact with the data.
+import { charset } from "mime-types"
+
