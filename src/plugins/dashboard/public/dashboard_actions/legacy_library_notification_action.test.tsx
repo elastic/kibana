@@ -9,14 +9,14 @@
 import { ViewMode } from '@kbn/presentation-publishing';
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { LibraryNotificationAction } from './library_notification_action';
+import { LegacyLibraryNotificationAction } from './legacy_library_notification_action';
 import {
   LegacyUnlinkFromLibraryAction,
   LegacyUnlinkPanelFromLibraryActionApi,
 } from './legacy_unlink_from_library_action';
 
 describe('library notification action', () => {
-  let action: LibraryNotificationAction;
+  let action: LegacyLibraryNotificationAction;
   let unlinkAction: LegacyUnlinkFromLibraryAction;
   let context: { embeddable: LegacyUnlinkPanelFromLibraryActionApi };
 
@@ -27,7 +27,7 @@ describe('library notification action', () => {
     updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
 
     unlinkAction = new LegacyUnlinkFromLibraryAction();
-    action = new LibraryNotificationAction(unlinkAction);
+    action = new LegacyLibraryNotificationAction(unlinkAction);
     context = {
       embeddable: {
         viewMode: viewModeSubject,
