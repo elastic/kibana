@@ -1424,7 +1424,10 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of agent and action types when opened in page view', () => {
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: true });
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+        responseActionsCrowdstrikeEnabled: true,
+      });
       render({ isFlyout: false });
       const { getByTestId, getAllByTestId } = renderResult;
 
