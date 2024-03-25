@@ -84,10 +84,6 @@ export type DatasetsSummaryPanelState =
   | {
       value: 'estimatedData.retrying';
       context: DefaultDatasetsSummaryPanelContext;
-    }
-  | {
-      value: 'estimatedData.disabled';
-      context: DefaultDatasetsSummaryPanelContext;
     };
 
 export type DatasetSummaryPanelEvent =

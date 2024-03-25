@@ -8,7 +8,6 @@ import React, { useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { DatasetQualityConfig } from '../../../common';
 import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
@@ -23,14 +22,12 @@ export interface CreateDatasetQualityArgs {
   core: CoreStart;
   plugins: DatasetQualityStartDeps;
   dataStreamStatsClient: IDataStreamsStatsClient;
-  pluginConfig: DatasetQualityConfig;
 }
 
 export const createDatasetQuality = ({
   core,
   plugins,
   dataStreamStatsClient,
-  pluginConfig,
 }: CreateDatasetQualityArgs) => {
   return ({ controller }: DatasetQualityProps) => {
     const SummaryPanelProvider = dynamic(() => import('../../hooks/use_summary_panel'));
@@ -47,7 +44,6 @@ export const createDatasetQuality = ({
       <SummaryPanelProvider
         dataStreamStatsClient={dataStreamStatsClient}
         toasts={core.notifications.toasts}
-        pluginConfig={pluginConfig}
       >
         <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
           <KibanaContextProviderForPlugin>

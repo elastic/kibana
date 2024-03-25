@@ -8,26 +8,19 @@
 import createContainer from 'constate';
 import { useInterpret, useSelector } from '@xstate/react';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { DatasetQualityConfig } from '../../common';
 import { IDataStreamsStatsClient } from '../services/data_streams_stats';
 import { createDatasetsSummaryPanelStateMachine } from '../state_machines/summary_panel';
 
 interface SummaryPanelContextDeps {
   dataStreamStatsClient: IDataStreamsStatsClient;
   toasts: IToasts;
-  pluginConfig: DatasetQualityConfig;
 }
 
-const useSummaryPanel = ({
-  dataStreamStatsClient,
-  toasts,
-  pluginConfig,
-}: SummaryPanelContextDeps) => {
+const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextDeps) => {
   const summaryPanelStateService = useInterpret(() =>
     createDatasetsSummaryPanelStateMachine({
       dataStreamStatsClient,
       toasts,
-      pluginConfig,
     })
   );
 
@@ -70,16 +63,12 @@ const useSummaryPanel = ({
     summaryPanelStateService,
     (state) => state.matches('estimatedData.fetching') || state.matches('estimatedData.retrying')
   );
-  const isEstimatedDataDisabled = useSelector(summaryPanelStateService, (state) =>
-    state.matches('estimatedData.disabled')
-  );
 
   return {
     datasetsQuality,
     isDatasetsQualityLoading,
 
     isEstimatedDataLoading,
-    isEstimatedDataDisabled,
     estimatedData,
 
     isDatasetsActivityLoading,

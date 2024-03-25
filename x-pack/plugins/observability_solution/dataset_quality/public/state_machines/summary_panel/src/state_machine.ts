@@ -8,7 +8,6 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { DatasetQualityConfig } from '../../../../common';
 import { DEFAULT_TIME_RANGE } from '../../../../common/constants';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { filterInactiveDatasets } from '../../../utils/filter_inactive_datasets';
@@ -113,19 +112,8 @@ export const createPureDatasetsSummaryPanelStateMachine = (
           },
         },
         estimatedData: {
-          initial: 'checkingEnabledStatus',
+          initial: 'fetching',
           states: {
-            checkingEnabledStatus: {
-              always: [
-                {
-                  target: 'fetching',
-                  cond: 'estimatedDataIsEnabled',
-                },
-                {
-                  target: 'disabled',
-                },
-              ],
-            },
             fetching: {
               invoke: {
                 src: 'loadEstimatedData',
@@ -155,9 +143,6 @@ export const createPureDatasetsSummaryPanelStateMachine = (
               },
             },
             loaded: {
-              type: 'final',
-            },
-            disabled: {
               type: 'final',
             },
           },
@@ -205,14 +190,12 @@ export interface DatasetsSummaryPanelStateMachineDependencies {
   initialContext?: DefaultDatasetsSummaryPanelContext;
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
-  pluginConfig: DatasetQualityConfig;
 }
 
 export const createDatasetsSummaryPanelStateMachine = ({
   initialContext = defaultContext,
   toasts,
   dataStreamStatsClient,
-  pluginConfig,
 }: DatasetsSummaryPanelStateMachineDependencies) =>
   createPureDatasetsSummaryPanelStateMachine(initialContext).withConfig({
     actions: {
@@ -247,10 +230,6 @@ export const createDatasetsSummaryPanelStateMachine = ({
           },
         });
       },
-    },
-    guards: {
-      // Estimated data is disabled in serverless for now (until a new _stats API replacement is available)
-      estimatedDataIsEnabled: () => pluginConfig.estimatedDataEnabled,
     },
   });
 
