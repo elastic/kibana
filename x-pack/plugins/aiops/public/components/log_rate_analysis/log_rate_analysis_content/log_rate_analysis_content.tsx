@@ -189,16 +189,19 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       fill: LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
     },
   };
-  const barStyleAccessor: BarStyleAccessor | undefined = documentCountStats?.changePoint
-    ? (d, g) => {
-        return g.specId === 'document_count' &&
-          documentCountStats?.changePoint &&
-          d.x > documentCountStats.changePoint.startTs &&
-          d.x < documentCountStats.changePoint.endTs
-          ? barStyle
-          : null;
-      }
-    : undefined;
+
+  // Used to highlight an auto-detected change point in the date histogram.
+  const barStyleAccessor: BarStyleAccessor | undefined =
+    isBrushCleared && documentCountStats?.changePoint
+      ? (d, g) => {
+          return g.specId === 'document_count' &&
+            documentCountStats?.changePoint &&
+            d.x > documentCountStats.changePoint.startTs &&
+            d.x < documentCountStats.changePoint.endTs
+            ? barStyle
+            : null;
+        }
+      : undefined;
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
