@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  PublishingSubject,
-} from '@kbn/presentation-publishing/publishing_subject';
+import { PublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
 
 export interface CanDuplicatePanels {
   duplicatePanel: (panelId: string) => void;
