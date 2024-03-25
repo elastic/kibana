@@ -115,21 +115,19 @@ export const ComparisonControls = ({
         </EuiDataGridToolbarControl>
       </EuiFlexItem>
 
-      {showDiff && (
-        <EuiFlexItem grow={false}>
-          <DiffOptions
-            diffMode={diffMode}
-            showDiffDecorations={showDiffDecorations}
-            showMatchingValues={showMatchingValues}
-            showAllFields={showAllFields}
-            forceShowAllFields={forceShowAllFields}
-            setDiffMode={setDiffMode}
-            setShowDiffDecorations={setShowDiffDecorations}
-            setShowMatchingValues={setShowMatchingValues}
-            setShowAllFields={setShowAllFields}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <ComparisonSettings
+          diffMode={diffMode}
+          showDiffDecorations={showDiffDecorations}
+          showMatchingValues={showMatchingValues}
+          showAllFields={showAllFields}
+          forceShowAllFields={forceShowAllFields}
+          setDiffMode={setDiffMode}
+          setShowDiffDecorations={setShowDiffDecorations}
+          setShowMatchingValues={setShowMatchingValues}
+          setShowAllFields={setShowAllFields}
+        />
+      </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiDataGridToolbarControl
@@ -149,7 +147,7 @@ export const ComparisonControls = ({
   );
 };
 
-const DiffOptions = ({
+const ComparisonSettings = ({
   diffMode,
   showDiffDecorations,
   showMatchingValues,
@@ -171,7 +169,7 @@ const DiffOptions = ({
   | 'setShowMatchingValues'
   | 'setShowAllFields'
 >) => {
-  const [isDiffOptionsMenuOpen, setIsDiffOptionsMenuOpen] = useState(false);
+  const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
 
   return (
     <EuiPopover
@@ -179,18 +177,18 @@ const DiffOptions = ({
         <EuiDataGridToolbarControl
           iconType="gear"
           onClick={() => {
-            setIsDiffOptionsMenuOpen(!isDiffOptionsMenuOpen);
+            setIsSettingsMenuOpen(!isSettingsMenuOpen);
           }}
         >
           <FormattedMessage
-            id="unifiedDataTable.diffSettings"
+            id="unifiedDataTable.comparisonSettings"
             defaultMessage="Comparison settings"
           />
         </EuiDataGridToolbarControl>
       }
-      isOpen={isDiffOptionsMenuOpen}
+      isOpen={isSettingsMenuOpen}
       closePopover={() => {
-        setIsDiffOptionsMenuOpen(false);
+        setIsSettingsMenuOpen(false);
       }}
       panelPaddingSize="none"
       anchorPosition="downCenter"
