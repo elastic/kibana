@@ -1393,10 +1393,15 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="extension"
       columnName="extension"
-      columnTypes={
+      columnsMeta={
         Object {
-          "extension": "number",
-          "message": "keyword",
+          "extension": Object {
+            "type": "number",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
         }
       }
       dataView={
@@ -1711,10 +1716,15 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
-      columnTypes={
+      columnsMeta={
         Object {
-          "extension": "number",
-          "message": "keyword",
+          "extension": Object {
+            "type": "number",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
         }
       }
       dataView={
@@ -1981,7 +1991,7 @@ Array [
     "displayAsText": "message",
     "id": "message",
     "isSortable": false,
-    "schema": "kibana-json",
+    "schema": "string",
     "visibleCellActions": undefined,
   },
 ]

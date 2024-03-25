@@ -9,14 +9,17 @@ import React from 'react';
 import { useConnectorSetup } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { fireEvent, render } from '@testing-library/react';
-import { alertConvo, welcomeConvo } from '../../mock/conversation';
+import { welcomeConvo } from '../../mock/conversation';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { EuiCommentList } from '@elastic/eui';
 
 const onSetupComplete = jest.fn();
+const onConversationUpdate = jest.fn();
+
 const defaultProps = {
   conversation: welcomeConvo,
   onSetupComplete,
+  onConversationUpdate,
 };
 const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
 jest.mock('../add_connector_modal', () => ({
@@ -32,8 +35,7 @@ jest.mock('../add_connector_modal', () => ({
   ),
 }));
 
-const setConversation = jest.fn();
-const setApiConfig = jest.fn();
+const setApiConfig = jest.fn().mockResolvedValue(welcomeConvo);
 const mockConversation = {
   appendMessage: jest.fn(),
   appendReplacements: jest.fn(),
@@ -41,7 +43,6 @@ const mockConversation = {
   createConversation: jest.fn(),
   deleteConversation: jest.fn(),
   setApiConfig,
-  setConversation,
 };
 
 jest.mock('../../assistant/use_conversation', () => ({
@@ -56,18 +57,7 @@ describe('useConnectorSetup', () => {
   it('should render comments and prompts', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-              }),
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
       expect(
@@ -75,11 +65,11 @@ describe('useConnectorSetup', () => {
       ).toEqual([
         {
           username: 'You',
-          timestamp: 'at: 7/17/2023, 1:00:36 PM',
+          timestamp: `at: ${new Date('2024-03-18T18:59:18.174Z').toLocaleString()}`,
         },
         {
-          username: 'Elastic AI Assistant',
-          timestamp: 'at: 7/17/2023, 1:00:40 PM',
+          username: 'Assistant',
+          timestamp: `at: ${new Date('2024-03-19T18:59:18.174Z').toLocaleString()}`,
         },
       ]);
 
@@ -89,18 +79,7 @@ describe('useConnectorSetup', () => {
   it('should set api config for each conversation when new connector is saved', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-              }),
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
       const { getByTestId, queryByTestId, rerender } = render(result.current.prompt, {
@@ -112,7 +91,7 @@ describe('useConnectorSetup', () => {
 
       rerender(result.current.prompt);
       fireEvent.click(getByTestId('modal-mock'));
-      expect(setApiConfig).toHaveBeenCalledTimes(2);
+      expect(setApiConfig).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -147,21 +126,10 @@ describe('useConnectorSetup', () => {
       expect(queryByTestId('connectorButton')).not.toBeInTheDocument();
     });
   });
-  it('should call onSetupComplete and setConversation when onHandleMessageStreamingComplete', async () => {
+  it('should call onSetupComplete and setConversations when onHandleMessageStreamingComplete', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-              }),
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
       render(<EuiCommentList comments={result.current.comments} />, {
@@ -170,7 +138,6 @@ describe('useConnectorSetup', () => {
 
       expect(clearTimeout).toHaveBeenCalled();
       expect(onSetupComplete).toHaveBeenCalled();
-      expect(setConversation).toHaveBeenCalled();
     });
   });
 });

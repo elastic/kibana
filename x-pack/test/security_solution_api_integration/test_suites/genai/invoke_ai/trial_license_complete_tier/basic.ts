@@ -15,28 +15,11 @@ import { ObjectRemover } from '../utils/object_remover';
 import { createConnector } from '../utils/create_connector';
 
 const mockRequest = {
-  params: {
-    subActionParams: {
-      messages: [
-        { role: 'user', content: '\\n\\n\\n\\nWhat is my name?' },
-        {
-          role: 'assistant',
-          content:
-            "I'm sorry, but I don't have the information about your name. You can tell me your name if you'd like, and we can continue our conversation from there.",
-        },
-        { role: 'user', content: '\\n\\nMy name is Andrew' },
-        {
-          role: 'assistant',
-          content: "Hello, Andrew! It's nice to meet you. What would you like to talk about today?",
-        },
-        { role: 'user', content: '\\n\\nDo you know my name?' },
-      ],
-    },
-    subAction: 'invokeAI',
-  },
+  message: 'Do you know my name?',
+  subAction: 'invokeAI',
   isEnabledKnowledgeBase: false,
   isEnabledRAGAlerts: false,
-  llmType: 'bedrock',
+  replacements: [],
 };
 
 export default ({ getService }: FtrProviderContext) => {
@@ -101,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should execute a chat completion', async () => {
         const response = await postActionsClientExecute(
           openaiActionId,
-          { ...mockRequest, llmType: 'openai' },
+          { ...mockRequest },
           supertest
         );
 

@@ -30,7 +30,6 @@ import { FetchStatus } from '../../types';
 import { changeDataView } from '../hooks/utils/change_data_view';
 import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
-import { getUrlTracker } from '../../../kibana_services';
 import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
@@ -307,12 +306,16 @@ export function getDiscoverStateContainer({
     const newDataView = await services.dataViews.create({ ...prevDataView.toSpec(), id: uuidv4() });
     services.dataViews.clearInstanceCache(prevDataView.id);
 
-    updateFiltersReferences(prevDataView, newDataView);
+    updateFiltersReferences({
+      prevDataView,
+      nextDataView: newDataView,
+      services,
+    });
 
     internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
     await appStateContainer.replaceUrlState({ index: newDataView.id });
     const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearchContainer.getId());
-    getUrlTracker().setTrackingEnabled(trackingEnabled);
+    services.urlTracker.setTrackingEnabled(trackingEnabled);
 
     return newDataView;
   };
@@ -372,6 +375,15 @@ export function getDiscoverStateContainer({
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
   const initializeAndSync = () => {
+    // This needs to be the first thing that's wired up because initAndSync is pulling the current state from the URL which
+    // might change the time filter and thus needs to re-check whether the saved search has changed.
+    const timefilerUnsubscribe = merge(
+      services.timefilter.getTimeUpdate$(),
+      services.timefilter.getRefreshIntervalUpdate$()
+    ).subscribe(() => {
+      savedSearchContainer.updateTimeRange();
+    });
+
     // initialize app state container, syncing with _g and _a part of the URL
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
       savedSearchContainer.getState()
@@ -423,6 +435,7 @@ export function getDiscoverStateContainer({
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
       filterUnsubscribe.unsubscribe();
+      timefilerUnsubscribe.unsubscribe();
     };
   };
 

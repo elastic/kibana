@@ -15,6 +15,7 @@ import {
   serializedFieldFormatSchema,
   fieldSpecSchemaFields,
 } from '../../common/schemas';
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../common/constants';
 
 export const dataViewSpecSchema = schema.object({
   title: schema.string(),
@@ -38,6 +39,11 @@ export const dataViewSpecSchema = schema.object({
       schema.string(),
       schema.object({
         customLabel: schema.maybe(schema.string()),
+        customDescription: schema.maybe(
+          schema.string({
+            maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+          })
+        ),
         count: schema.maybe(schema.number()),
       })
     )

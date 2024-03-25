@@ -68,6 +68,9 @@
     "@kbn/ml-ui-actions",
     "@kbn/core-http-server",
     "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/ml-time-buckets",
+    "@kbn/ebt-tools",
+    "@kbn/aiops-test-utils",
   ],
   "exclude": [
     "target/**/*",
