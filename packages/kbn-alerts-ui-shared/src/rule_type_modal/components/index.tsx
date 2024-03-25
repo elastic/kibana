@@ -9,7 +9,7 @@
 import React, { useMemo, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import { useRuleTypesIndex } from '../hooks';
+import { useLoadRuleTypesIndex } from '../hooks';
 import { RuleTypeModal, type RuleTypeModalProps } from './rule_type_modal';
 import { filterAndCountRuleTypes } from './helpers/filterAndCountRuleTypes';
 
@@ -35,7 +35,7 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
 
   const {
     ruleTypesState: { data: ruleTypeIndex, isLoading: ruleTypesLoading },
-  } = useRuleTypesIndex({
+  } = useLoadRuleTypesIndex({
     http,
     toasts,
     filteredRuleTypes,

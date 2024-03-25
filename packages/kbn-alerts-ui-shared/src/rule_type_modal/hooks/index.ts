@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './use_rule_types_index';
+export * from './use_load_rule_types_index';
