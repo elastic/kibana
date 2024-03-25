@@ -126,7 +126,17 @@ export class RolesGridPage extends Component<Props, State> {
       />
     );
 
-    const emptyResultsMessage = customRolesEnabled ? 'No custom roles found' : 'No items found';
+    const emptyResultsMessage = customRolesEnabled ? (
+      <FormattedMessage
+        id="xpack.security.management.roles.noCustomRolesFound"
+        defaultMessage="No custom roles found"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.management.roles.noRolesFound"
+        defaultMessage="No items found"
+      />
+    );
     const pageRightSideItems = [
       <EuiButton
         data-test-subj="createRoleButton"
