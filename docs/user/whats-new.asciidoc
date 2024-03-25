@@ -66,23 +66,23 @@ image::images/color-mapping-1.png[An image of the color palette options, width=6
 [discrete]
 ==== Visualizing an {esql} query in Observability AI assistant
 
-The observability AI assistant in 8.13 comes with great improvements in query generation and performance. Users can now visualize the generated {esql} queries, edit them using the inline editing flyout, and embed them in a dashboard.
+The {observability} AI assistant in 8.13 comes with great improvements in query generation and performance. Users can now visualize the generated {esql} queries, edit them using the inline editing flyout, and embed them in a dashboard.
 
 [role="screenshot"]
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltd6737b8e5633e948/viz-esql.gif[A gif of an {esql} query in the AI assistant.]
 
 [discrete]
-==== Cross cluster queries support in {esql} and in {kib}
+==== Cross-cluster search support in {esql} and in {kib}
 
-Cross Cluster Queries are now supported in {esql} and in {kib} the feature has been introduced for both validation and autocomplete. The autocomplete feature will show some documentation about the specific settings when navigating the suggestions.
+Cross-cluster searches are now supported in {esql} and in {kib} the feature has been introduced for both validation and autocomplete. The autocomplete feature will show some documentation about the specific settings when navigating the suggestions.
 
 [role="screenshot"]
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt4b3db027b6c7951a/ccs-esql-queries.gif[A gif of an {esql} cross cluster query.]
 
 [discrete]
-==== Quick Fix to help users write {esql}
+==== Quick fix to help users write {esql}
 
-Quick fix helps users when they have misspelled a field,index, or policy name (maybe pasting a query from somewhere else) in {esql} mode.
+Quick fix helps users when they have misspelled a field, index, or policy name (maybe pasting a query from somewhere else) in {esql} mode.
 
 [role="screenshot"]
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt463edc257418dd71/esql-quickfix[A gif showing the quick fix feature in action.]
@@ -125,7 +125,7 @@ image::images/controls-config.png[An image of the filtering control settings.]
 image::images/controls-edit.png[An image of the range slider settings.]
 
 [discrete]
-==== Alert Delay
+==== Alert delay
 
 In order to reduce noise for alerting rules with low sensitivity and ensure created alerts will be actionable and reasonable, we want to allow users to define how many rule executions should match before creating the alert. Foe example, "Generate the alert after 3 threshold matches in a row".
 
