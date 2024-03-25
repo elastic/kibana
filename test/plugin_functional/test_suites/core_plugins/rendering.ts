@@ -348,6 +348,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.legacy_uptime.experimental.ruleFormV2Enabled (boolean)',
         'xpack.ml.experimental.ruleFormV2.enabled (boolean)',
         'xpack.transform.experimental.ruleFormV2Enabled (boolean)',
+        'xpack.apm.featureFlags.ruleFormV2Enabled (boolean)',
+        'xpack.observability.unsafe.ruleFormV2.enabled (boolean)',
+        'xpack.slo.experimental.ruleFormV2.enabled (boolean)',
         /**/
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large

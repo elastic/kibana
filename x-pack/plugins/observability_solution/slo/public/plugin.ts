@@ -151,6 +151,7 @@ export class SloPlugin
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         isServerless: !!pluginsStart.serverless,
+        experimentalFeatures: this.experimentalFeatures,
       }),
     };
   }
