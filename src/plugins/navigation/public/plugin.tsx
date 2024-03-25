@@ -136,6 +136,8 @@ export class NavigationPublicPlugin
       chrome.project.setCloudUrls(cloud);
       this.addDefaultSolutionNavigation({ chrome });
       this.susbcribeToSolutionNavUiSettings({ core, security });
+    } else {
+      chrome.setChromeStyle('classic');
     }
 
     return {
