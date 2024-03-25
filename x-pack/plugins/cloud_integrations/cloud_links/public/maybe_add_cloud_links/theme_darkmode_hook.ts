@@ -40,10 +40,12 @@ export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
     },
   });
 
-  const { userSettings: { darkMode: colorScheme } = { darkMode: undefined } } = userProfileData ?? {
+  const {
     userSettings: {
-      darkMode: uiSettingsClient.get('theme:darkMode') === true ? 'dark' : 'light',
-    },
+      darkMode: colorScheme = uiSettingsClient.get('theme:darkMode') === true ? 'dark' : 'light',
+    } = {},
+  } = userProfileData ?? {
+    userSettings: {},
   };
 
   const toggle = useCallback(
