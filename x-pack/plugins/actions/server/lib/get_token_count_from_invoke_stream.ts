@@ -88,7 +88,6 @@ const parseBedrockStream: StreamParser = async (responseStream, logger) => {
   } catch (e) {
     logger.error('An error occurred while calculating streaming response tokens');
   }
-
   const usage = getUsageFromFinalChunk(responseBuffer[responseBuffer.length - 1]);
   if (usage) {
     return usage;

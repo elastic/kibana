@@ -122,16 +122,17 @@ export const getGenAiTokenTracking = async ({
   // this is a non-streamed Bedrock response used by security solution
   if (actionTypeId === '.bedrock' && validatedParams.subAction === 'invokeAI') {
     try {
+      const rData = result.data as unknown as {
+        message: string;
+        usage?: { input_tokens: number; output_tokens: number };
+      };
       const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
-        response: (
-          result.data as unknown as {
-            message: string;
-          }
-        ).message,
+        response: rData.message,
         body: JSON.stringify({
           prompt: (validatedParams as { subActionParams: { messages: Array<{ content: string }> } })
             .subActionParams.messages[0].content,
         }),
+        usage: rData.usage,
       });
 
       return {
