@@ -128,7 +128,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       />
     ) : (
       <EmptyPrompt
-        hasFleetAllPrivileges={authz.fleet.allAgents}
+        hasFleetAddAgentsPrivileges={authz.fleet.addAgents}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
       />
     );
