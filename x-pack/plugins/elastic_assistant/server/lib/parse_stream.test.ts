@@ -52,11 +52,11 @@ describe('handleStreamStorage', () => {
 
     it('saves the final string successful streaming event', async () => {
       stream.complete();
-      await handleStreamStorage(stream.transform, 'openai', onMessageSent);
+      await handleStreamStorage(stream.transform, '.gen-ai', onMessageSent);
       expect(onMessageSent).toHaveBeenCalledWith('Single.');
     });
     it('saves the error message on a failed streaming event', async () => {
-      const tokenPromise = handleStreamStorage(stream.transform, 'openai', onMessageSent);
+      const tokenPromise = handleStreamStorage(stream.transform, '.gen-ai', onMessageSent);
 
       stream.fail();
       await expect(tokenPromise).resolves.not.toThrow();
@@ -73,11 +73,11 @@ describe('handleStreamStorage', () => {
 
     it('saves the final string successful streaming event', async () => {
       stream.complete();
-      await handleStreamStorage(stream.transform, 'bedrock', onMessageSent);
+      await handleStreamStorage(stream.transform, '.bedrock', onMessageSent);
       expect(onMessageSent).toHaveBeenCalledWith('Simple.');
     });
     it('saves the error message on a failed streaming event', async () => {
-      const tokenPromise = handleStreamStorage(stream.transform, 'bedrock', onMessageSent);
+      const tokenPromise = handleStreamStorage(stream.transform, '.bedrock', onMessageSent);
 
       stream.fail();
       await expect(tokenPromise).resolves.not.toThrow();

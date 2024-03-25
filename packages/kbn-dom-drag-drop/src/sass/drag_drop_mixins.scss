@@ -8,16 +8,15 @@ $domDragDropZLevel3: 3;
 // from mixins
 
 // sass-lint:disable-block indentation, no-color-keywords
-
-// Static styles for a draggable item
-@mixin mixinDomDraggable {
-  @include euiSlightShadow;
-  background: $euiColorEmptyShade;
-  cursor: grab;
+@mixin mixinDomDragDrop {
+  transition: $euiAnimSpeedFast ease-in-out;
+  transition-property: background-color, border-color, opacity;
+  z-index: $domDragDropZLevel1;
+  border-radius: $euiBorderRadius;
 }
 
 // Hovering state for drag item and drop area
-@mixin mixinDomDragDropHover {
+@mixin mixinDomDraggableHover {
   &:hover {
     transform: translateX($euiSizeXS);
     transition: transform $euiAnimSpeedSlow ease-out;
@@ -48,7 +47,7 @@ $domDragDropZLevel3: 3;
 }
 
 // Style for drop area while hovering with item
-@mixin mixinDomDroppableActiveHover($borderWidth: $euiBorderWidthThin) {
+@mixin mixinDomDroppableHover($borderWidth: $euiBorderWidthThin) {
   background-color: transparentize($euiColorVis0, .75) !important;
   &:before {
     border-color: $euiColorVis0 !important;

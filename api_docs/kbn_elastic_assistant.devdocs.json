@@ -1506,7 +1506,7 @@
             "label": "apiConfig",
             "description": [],
             "signature": [
-              "{ connectorId: string; connectorTypeTitle: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; } | undefined"
+              "{ connectorId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; } | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -1793,7 +1793,7 @@
             "label": "apiConfig",
             "description": [],
             "signature": [
-              "{ connectorId: string; connectorTypeTitle: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; } | undefined"
+              "{ connectorId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; } | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api/conversations/use_bulk_actions_conversations.ts",
             "deprecated": false,
