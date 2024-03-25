@@ -158,7 +158,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
 
   return (
     <EuiInputPopover
-      css={{ 'max-width': '100%' }}
+      css={{ maxWidth: '100%' }}
       closePopover={setQueryErrorMessage.bind(null, undefined)}
       input={
         <QueryStringInput

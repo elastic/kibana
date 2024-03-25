@@ -9,11 +9,14 @@
 import { EuiMarkdownEditor, EuiMarkdownFormat } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
-  initializeReactEmbeddableTitles,
   ReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useInheritedViewMode, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  initializeTitles,
+  useInheritedViewMode,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -39,7 +42,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
     /**
      * initialize state (source of truth)
      */
-    const { titlesApi, titleComparators, serializeTitles } = initializeReactEmbeddableTitles(state);
+    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
     const content$ = new BehaviorSubject(state.content);
 
     /**

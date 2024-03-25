@@ -7,6 +7,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { Interpolation, Theme } from '@emotion/react';
 import { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
 import { useSectionSizes } from './hooks/use_sections_sizes';
@@ -26,6 +27,10 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
    * List of all registered panels available for render
    */
   registeredPanels: Panel[];
+  /**
+   * Allows for custom styles to be passed to the EuiFlyout component
+   */
+  customStyles?: Interpolation<Theme>;
 }
 
 /**
@@ -36,6 +41,7 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
  * is already rendered.
  */
 export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
+  customStyles,
   registeredPanels,
   ...flyoutProps
 }) => {
@@ -83,7 +89,13 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   }
 
   return (
-    <EuiFlyout {...flyoutProps} size={flyoutWidth} ownFocus={false} onClose={closeFlyout}>
+    <EuiFlyout
+      {...flyoutProps}
+      size={flyoutWidth}
+      ownFocus={false}
+      onClose={closeFlyout}
+      css={customStyles}
+    >
       <EuiFlexGroup
         direction={leftSection ? 'row' : 'column'}
         wrap={false}

@@ -18,12 +18,11 @@ import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
 } from '@kbn/data-views-plugin/public';
 import {
-  initializeReactEmbeddableTitles,
   ReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
@@ -82,8 +81,7 @@ export const getFieldListFactory = (
     },
     buildEmbeddable: async (initialState, buildApi) => {
       const subscriptions = new Subscription();
-      const { titlesApi, titleComparators, serializeTitles } =
-        initializeReactEmbeddableTitles(initialState);
+      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
 
       const allDataViews = await dataViews.getIdsWithTitle();
       const selectedDataViewId$ = new BehaviorSubject<string | undefined>(

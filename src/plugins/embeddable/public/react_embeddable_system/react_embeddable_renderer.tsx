@@ -12,13 +12,13 @@ import {
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
+import { StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
 import {
   DefaultEmbeddableApi,
-  EmbeddableStateComparators,
   ReactEmbeddableApiRegistration,
 } from './types';
 
@@ -52,7 +52,7 @@ export const ReactEmbeddableRenderer = <
         const factory = await getReactEmbeddableFactory<StateType, ApiType>(type);
         const registerApi = (
           apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
-          comparators: EmbeddableStateComparators<StateType>
+          comparators: StateComparators<StateType>
         ) => {
           const { unsavedChanges, resetUnsavedChanges, cleanup } =
             startTrackingEmbeddableUnsavedChanges(
