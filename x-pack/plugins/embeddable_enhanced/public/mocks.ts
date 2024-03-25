@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EmbeddableEnhancedSetupContract, EmbeddableEnhancedStartContract } from '.';
+import { EmbeddableEnhancedSetupContract, EmbeddableEnhancedPluginStart } from '.';
 
 export type Setup = jest.Mocked<EmbeddableEnhancedSetupContract>;
-export type Start = jest.Mocked<EmbeddableEnhancedStartContract>;
+export type Start = jest.Mocked<EmbeddableEnhancedPluginStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {};
@@ -17,7 +17,9 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = {};
+  const startContract: Start = {
+    initializeReactEmbeddableDynamicActions: jest.fn(),
+  };
 
   return startContract;
 };
