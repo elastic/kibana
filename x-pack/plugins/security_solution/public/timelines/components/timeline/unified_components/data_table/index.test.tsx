@@ -7,14 +7,13 @@
 
 import { createMockStore, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import React from 'react';
-import { TimelineDataTableComponent } from '.';
+import { TimelineDataTable } from '.';
 import { defaultUdtHeaders } from '../default_headers';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
@@ -35,7 +34,7 @@ const initialEnrichedColumns = getColumnHeaders(
   mockSourcererScope.browserFields
 );
 
-type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTableComponent>> & {
+type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
   store?: ReturnType<typeof createMockStore>;
 };
 
@@ -44,9 +43,8 @@ const TestComponent = (props: TestComponentProps) => {
   useSourcererDataView();
   return (
     <TestProviders store={store}>
-      <TimelineDataTableComponent
+      <TimelineDataTable
         columns={initialEnrichedColumns}
-        dataView={mockDataView}
         activeTab={TimelineTabs.query}
         timelineId={TimelineId.test}
         itemsPerPage={50}
@@ -72,11 +70,8 @@ const TestComponent = (props: TestComponentProps) => {
 };
 
 describe('unified data table', () => {
-  beforeAll(() => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      browserFields: mockBrowserFields,
-      runtimeMappings: {},
-    });
+  beforeEach(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
   });
 
   it('should display unified data table', async () => {

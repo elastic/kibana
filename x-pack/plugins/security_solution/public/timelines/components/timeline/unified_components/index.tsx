@@ -9,7 +9,7 @@ import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
-import type { DataViewField } from '@kbn/data-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataLoadingState } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
@@ -25,7 +25,7 @@ import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { useGetScopedSourcererDataView } from '../../../../common/components/sourcerer/use_get_sourcerer_data_view';
+import { withDataView } from '../../../../common/components/with_data_view';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
 import type { TimelineItem } from '../../../../../common/search_strategy';
@@ -40,7 +40,6 @@ import type {
   TimelineTabs,
 } from '../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../common/store';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { getColumnHeader } from '../body/column_headers/helpers';
 import { StyledPageContentWrapper, StyledMainEuiPanel, StyledSplitFlexItem } from './styles';
 import { DRAG_DROP_FIELD } from './data_table/translations';
@@ -114,9 +113,10 @@ interface Props {
   dataLoadingState: DataLoadingState;
   updatedAt: number;
   isTextBasedQuery?: boolean;
+  dataView: DataView;
 }
 
-export const UnifiedTimelineComponent: React.FC<Props> = ({
+const UnifiedTimelineComponent: React.FC<Props> = ({
   columns,
   activeTab,
   timelineId,
@@ -134,6 +134,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   onChangePage,
   updatedAt,
   isTextBasedQuery,
+  dataView,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -187,10 +188,6 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   const columnIds = useMemo(() => {
     return columns.map((c) => c.id);
   }, [columns]);
-
-  const dataView = useGetScopedSourcererDataView({
-    sourcererScope: SourcererScopeName.timeline,
-  });
 
   const sortingColumns = useMemo(() => {
     return (
@@ -414,6 +411,6 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 };
 
-export const UnifiedTimeline = React.memo(UnifiedTimelineComponent);
+export const UnifiedTimeline = withDataView<Props>(React.memo(UnifiedTimelineComponent));
 // eslint-disable-next-line import/no-default-export
 export { UnifiedTimeline as default };

@@ -15,6 +15,7 @@ import type {
 } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { withDataView } from '../../../../../common/components/with_data_view';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
@@ -38,7 +39,6 @@ import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
 import { timelineDefaults } from '../../../../store/defaults';
 import { timelineActions } from '../../../../store';
-import { useGetScopedSourcererDataView } from '../../../../../common/components/sourcerer/use_get_sourcerer_data_view';
 import { transformTimelineItemToUnifiedRows } from '../utils';
 
 export const SAMPLE_SIZE_SETTING = 500;
@@ -68,9 +68,8 @@ interface DataTableProps extends CommonDataTableProps {
   dataView: DataView;
 }
 
-/* eslint-disable react/display-name */
 export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
-  ({
+  function TimelineDataTableMemo({
     columns,
     dataView,
     activeTab,
@@ -93,7 +92,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSetColumns,
     onSort,
     onFilter,
-  }) => {
+  }) {
     const dispatch = useDispatch();
 
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
@@ -108,14 +107,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       services: {
         uiSettings,
         fieldFormats,
-        dataViews,
         storage,
         dataViewFieldEditor,
         notifications: { toasts: toastsService },
-        application: { capabilities },
         theme,
         data: dataPluginContract,
-        timelineFilterManager,
       },
     } = useKibana();
 
@@ -357,13 +353,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
   }
 );
 
-export const TimelineDataTable: React.FC<CommonDataTableProps> = memo((props) => {
-  const dataView = useGetScopedSourcererDataView({ sourcererScope: SourcererScopeName.timeline });
-  if (!dataView) {
-    throw new Error('DataView must be defined');
-  }
-  return <TimelineDataTableComponent dataView={dataView} {...props} />;
-});
+export const TimelineDataTable = withDataView<DataTableProps>(TimelineDataTableComponent);
 
 // eslint-disable-next-line import/no-default-export
 export { TimelineDataTable as default };

@@ -10,11 +10,11 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { isEmpty } from 'lodash';
 import { StyledTableFlexGroup, StyledTableFlexItem } from '../unified_components/styles';
-import { UnifiedTimelineComponent } from '../unified_components';
+import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
 import type { PaginationInputPaginated, TimelineItem } from '../../../../../common/search_strategy';
 
-export interface UnifiedTimelineBodyProps extends ComponentProps<typeof UnifiedTimelineComponent> {
+export interface UnifiedTimelineBodyProps extends ComponentProps<typeof UnifiedTimeline> {
   header: ReactElement;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
 }
@@ -65,7 +65,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
       <StyledTableFlexItem grow={false}>{header}</StyledTableFlexItem>
       <StyledTableFlexItem className="unifiedTimelineBody" data-test-subj="unifiedTimelineBody">
         <RootDragDropProvider>
-          <UnifiedTimelineComponent
+          <UnifiedTimeline
             columns={columnsHeader}
             rowRenderers={rowRenderers}
             timelineId={timelineId}
