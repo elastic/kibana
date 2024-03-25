@@ -33,6 +33,7 @@ import {
 } from './types';
 import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
+import { recallRankingEvent } from './analytics/recall_ranking';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -161,6 +162,8 @@ export class ObservabilityAIAssistantPlugin
         service: this.service,
       },
     });
+
+    core.analytics.registerEventType(recallRankingEvent);
 
     return {
       service,
