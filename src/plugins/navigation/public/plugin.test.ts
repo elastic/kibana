@@ -9,7 +9,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import {
   DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
   ENABLE_SOLUTION_NAV_UI_SETTING_ID,
@@ -18,6 +18,14 @@ import {
 import { NavigationPublicPlugin } from './plugin';
 import { ConfigSchema } from './types';
 import type { BuildFlavor } from '@kbn/config';
+
+jest.mock('rxjs', () => {
+  const original = jest.requireActual('rxjs');
+  return {
+    ...original,
+    debounceTime: () => (source: any) => source,
+  };
+});
 
 const defaultConfig: ConfigSchema['solutionNavigation'] = {
   featureOn: true,
@@ -68,9 +76,12 @@ describe('Navigation Plugin', () => {
       expect(coreStart.chrome.project.changeActiveSolutionNavigation).not.toHaveBeenCalled();
     });
 
-    it('should return flag to indicate that the solution navigation is disabled', () => {
+    it('should return flag to indicate that the solution navigation is disabled', async () => {
       const { plugin, coreStart, unifiedSearch } = setup({ featureOn });
-      expect(plugin.start(coreStart, { unifiedSearch }).isSolutionNavigationEnabled()).toBe(false);
+      const isEnabled = await firstValueFrom(
+        plugin.start(coreStart, { unifiedSearch }).isSolutionNavEnabled$
+      );
+      expect(isEnabled).toBe(false);
     });
   });
 
@@ -146,21 +157,44 @@ describe('Navigation Plugin', () => {
       });
     });
 
-    it('should return flag to indicate that the solution navigation is enabled', () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup({ featureOn });
-      expect(plugin.start(coreStart, { unifiedSearch, cloud }).isSolutionNavigationEnabled()).toBe(
-        true
-      );
+    it('should return flag to indicate that the solution navigation is enabled', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, getGlobalSetting$ } = setup({ featureOn });
+
+      const uiSettingsValues: Record<string, any> = {
+        [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true,
+        [OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID]: 'visible',
+        [DEFAULT_SOLUTION_NAV_UI_SETTING_ID]: 'es',
+      };
+
+      getGlobalSetting$.mockImplementation((settingId: string) => {
+        const value = uiSettingsValues[settingId] ?? 'unknown';
+        return of(value);
+      });
+
+      const { isSolutionNavEnabled$ } = plugin.start(coreStart, { unifiedSearch, cloud });
+      const isEnabled = await firstValueFrom(isSolutionNavEnabled$);
+      expect(isEnabled).toBe(true);
     });
 
-    it('on serverless should return flag to indicate that the solution navigation is disabled', () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup(
+    it('on serverless should return flag to indicate that the solution navigation is disabled', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, getGlobalSetting$ } = setup(
         { featureOn },
         { buildFlavor: 'serverless' }
       );
-      expect(plugin.start(coreStart, { unifiedSearch, cloud }).isSolutionNavigationEnabled()).toBe(
-        false
-      );
+      const uiSettingsValues: Record<string, any> = {
+        [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true, // enabled, but we are on serverless
+        [OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID]: 'visible', // should not matter
+        [DEFAULT_SOLUTION_NAV_UI_SETTING_ID]: 'es',
+      };
+
+      getGlobalSetting$.mockImplementation((settingId: string) => {
+        const value = uiSettingsValues[settingId] ?? 'unknown';
+        return of(value);
+      });
+
+      const { isSolutionNavEnabled$ } = plugin.start(coreStart, { unifiedSearch, cloud });
+      const isEnabled = await firstValueFrom(isSolutionNavEnabled$);
+      expect(isEnabled).toBe(false);
     });
   });
 });
