@@ -126,7 +126,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.searchIndex.mappings.description"
-                  defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type (such as keyword, number, or date) and additional subfields. By default, search optimized mappings are used which can be customized as needed to best fit your search use case."
+                  defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type (such as {keyword}, {number}, or {date}) and additional subfields. By default, search optimized mappings are used which can be customized as needed to best fit your search use case."
                   values={{
                     date: <EuiCode>date</EuiCode>,
                     keyword: <EuiCode>keyword</EuiCode>,
