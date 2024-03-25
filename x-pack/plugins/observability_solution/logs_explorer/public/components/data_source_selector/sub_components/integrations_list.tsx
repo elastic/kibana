@@ -222,7 +222,7 @@ const IntegrationListWrapper = styled(EuiPanel)`
 
 const indentationStyle = css`
   padding-left: ${euiThemeVars.euiSizeL};
-  margin-block-start: ${euiThemeVars.euiSizeXS};
+  margin-inline-start: ${euiThemeVars.euiSizeXS};
 `;
 
 const headerStyle = css`
@@ -237,6 +237,6 @@ const datasetItemStyle = css`
 `;
 
 const StyledListRow = styled(EuiFlexGroup)`
-  padding-right: ${euiThemeVars.euiSizeL};
+  padding-right: ${euiThemeVars.euiSizeM};
   ${({ withIndentation = false }) => (withIndentation ? indentationStyle : '')}
 `;
