@@ -8,16 +8,12 @@
 
 import { PresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
 import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
+import { StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-import {
-  DefaultEmbeddableApi,
-  EmbeddableStateComparators,
-  ReactEmbeddableApiRegistration,
-  ReactEmbeddableFactory,
-} from './types';
+import { DefaultEmbeddableApi, ReactEmbeddableApiRegistration } from './types';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -37,7 +33,7 @@ export const ReactEmbeddableRenderer = <
   maybeId?: string;
   type: string;
   state: SerializedPanelState<StateType>;
-  parentApi?: PresentationContainer<ApiType>;
+  parentApi?: PresentationContainer;
   onApiAvailable?: (api: ApiType) => void;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
@@ -45,15 +41,12 @@ export const ReactEmbeddableRenderer = <
   const componentPromise = useMemo(
     () =>
       (async () => {
-        const factory = getReactEmbeddableFactory(type) as ReactEmbeddableFactory<
-          StateType,
-          ApiType
-        >;
+        const uuid = maybeId ?? generateId();
+        const factory = await getReactEmbeddableFactory<StateType, ApiType>(type);
         const registerApi = (
           apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
-          comparators: EmbeddableStateComparators<StateType>
+          comparators: StateComparators<StateType>
         ) => {
-          const uuid = maybeId ?? generateId();
           const { unsavedChanges, resetUnsavedChanges, cleanup } =
             startTrackingEmbeddableUnsavedChanges(
               uuid,
@@ -76,7 +69,9 @@ export const ReactEmbeddableRenderer = <
 
         const { api, Component } = await factory.buildEmbeddable(
           factory.deserializeState(state),
-          registerApi
+          registerApi,
+          uuid,
+          parentApi
         );
 
         return React.forwardRef<typeof api>((_, ref) => {

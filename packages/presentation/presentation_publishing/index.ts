@@ -15,6 +15,13 @@ export interface EmbeddableApiContext {
 }
 
 export {
+  getInitialValuesFromComparators,
+  runComparators,
+  type ComparatorDefinition,
+  type ComparatorFunction,
+  type StateComparators,
+} from './comparators';
+export {
   apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
@@ -57,36 +64,20 @@ export {
   type PublishesDisabledActionIds,
 } from './interfaces/publishes_disabled_action_ids';
 export {
-  apiPublishesUnifiedSearch,
-  apiPublishesPartialUnifiedSearch,
-  apiPublishesWritableUnifiedSearch,
-  type PublishesUnifiedSearch,
-  type PublishesWritableUnifiedSearch,
-} from './interfaces/publishes_unified_search';
-export {
-  apiPublishesPanelDescription,
-  apiPublishesWritablePanelDescription,
-  useDefaultPanelDescription,
-  usePanelDescription,
-  type PublishesPanelDescription,
-  type PublishesWritablePanelDescription,
-} from './interfaces/publishes_panel_description';
-export {
-  getPanelTitle,
-  apiPublishesPanelTitle,
-  apiPublishesWritablePanelTitle,
-  useDefaultPanelTitle,
-  useHidePanelTitle,
-  usePanelTitle,
-  type PublishesPanelTitle,
-  type PublishesWritablePanelTitle,
-} from './interfaces/publishes_panel_title';
-export {
   apiPublishesPhaseEvents,
   type PhaseEvent,
   type PhaseEventType,
   type PublishesPhaseEvents,
 } from './interfaces/publishes_phase_events';
+export {
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
+  apiPublishesPartialUnifiedSearch,
+  apiPublishesWritableUnifiedSearch,
+  type PublishesTimeRange,
+  type PublishesUnifiedSearch,
+  type PublishesWritableUnifiedSearch,
+} from './interfaces/publishes_unified_search';
 export {
   apiPublishesSavedObjectId,
   useSavedObjectId,
@@ -105,6 +96,22 @@ export {
   type PublishesWritableViewMode,
   type ViewMode,
 } from './interfaces/publishes_view_mode';
+export {
+  apiPublishesPanelDescription,
+  apiPublishesWritablePanelDescription,
+  useDefaultPanelDescription,
+  usePanelDescription,
+  type PublishesPanelDescription,
+  type PublishesWritablePanelDescription,
+} from './interfaces/titles/publishes_panel_description';
+export {
+  apiPublishesPanelTitle,
+  apiPublishesWritablePanelTitle,
+  getPanelTitle,
+  type PublishesPanelTitle,
+  type PublishesWritablePanelTitle,
+} from './interfaces/titles/publishes_panel_title';
+export { initializeTitles, type SerializedTitles } from './interfaces/titles/titles_api';
 export {
   useBatchedPublishingSubjects,
   usePublishingSubject,

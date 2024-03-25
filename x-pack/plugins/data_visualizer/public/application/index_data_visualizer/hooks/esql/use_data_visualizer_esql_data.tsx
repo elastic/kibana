@@ -18,10 +18,10 @@ import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
 import type { SupportedFieldType } from '../../../../../common/types/job_field_type';
-import { useTimeBuckets } from '../../../common/hooks/use_time_buckets';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import type {
   MetricFieldsStats,
@@ -105,7 +105,7 @@ export const useESQLDataVisualizerData = (
 
   useExecutionContext(executionContext, embeddableExecutionContext);
 
-  const _timeBuckets = useTimeBuckets();
+  const _timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({
     timeRangeSelector: true,
     autoRefreshSelector: true,

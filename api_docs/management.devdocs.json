@@ -787,38 +787,6 @@
       "children": [
         {
           "parentPluginId": "management",
-          "id": "def-public.ManagementStart.setIsSidebarEnabled",
-          "type": "Function",
-          "tags": [],
-          "label": "setIsSidebarEnabled",
-          "description": [],
-          "signature": [
-            "(enabled: boolean) => void"
-          ],
-          "path": "src/plugins/management/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "management",
-              "id": "def-public.ManagementStart.setIsSidebarEnabled.$1",
-              "type": "boolean",
-              "tags": [],
-              "label": "enabled",
-              "description": [],
-              "signature": [
-                "boolean"
-              ],
-              "path": "src/plugins/management/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "management",
           "id": "def-public.ManagementStart.setupCardsNavigation",
           "type": "Function",
           "tags": [],

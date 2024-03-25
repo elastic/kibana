@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  DefaultEmbeddableApi,
-  SerializedReactEmbeddableTitles,
-} from '@kbn/embeddable-plugin/public';
-import { PublishesDataViews } from '@kbn/presentation-publishing';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { PublishesDataViews, SerializedTitles } from '@kbn/presentation-publishing';
 import { PublishesSelectedFields } from './publishes_selected_fields';
 
-export type FieldListSerializedStateState = SerializedReactEmbeddableTitles & {
+export type FieldListSerializedStateState = SerializedTitles & {
   dataViewId?: string;
   selectedFieldNames?: string[];
 };
