@@ -81,6 +81,8 @@ export class ObservabilityAIAssistantService {
 
   private readonly registrations: RegistrationCallback[] = [];
 
+  private initSuccessful: boolean = false;
+
   constructor({
     logger,
     core,
@@ -122,7 +124,13 @@ export class ObservabilityAIAssistantService {
     });
   }
 
-  init = once(async () => {
+  init = async () => {
+    if (this.initSuccessful) {
+      // If something breaks AFTER a successful init, then this state becomes stale
+      // which will require a restart to try the setup again
+      return;
+    }
+
     try {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
@@ -237,12 +245,13 @@ export class ObservabilityAIAssistantService {
       });
 
       this.logger.info('Successfully set up index assets');
+      this.initSuccessful = true;
     } catch (error) {
       this.logger.error(`Failed to initialize service: ${error.message}`);
       this.logger.debug(error);
       throw error;
     }
-  });
+  };
 
   async getClient({
     request,
