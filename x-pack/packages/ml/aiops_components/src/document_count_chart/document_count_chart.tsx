@@ -436,7 +436,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           </div>
           <div
             css={{
-              'margin-bottom': '-4px',
+              marginBottom: '-4px',
             }}
           >
             <DualBrush

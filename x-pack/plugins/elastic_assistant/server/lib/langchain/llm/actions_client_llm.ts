@@ -81,9 +81,7 @@ export class ActionsClientLlm extends LLM {
         subActionParams: {
           model: this.#request.body.model,
           messages: [assistantMessage], // the assistant message
-          ...(this.#request.body.llmType === 'openai'
-            ? { n: 1, stop: null, temperature: 0.2 }
-            : {}),
+          ...(this.llmType === '.gen-ai' ? { n: 1, stop: null, temperature: 0.2 } : {}),
         },
       },
     };

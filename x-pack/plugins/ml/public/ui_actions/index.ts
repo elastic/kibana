@@ -6,31 +6,31 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
-import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER } from '@kbn/ml-ui-actions';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { MlPluginStart, MlStartDependencies } from '../plugin';
+import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_action';
+import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
+import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
+import { createClearSelectionAction } from './clear_selection_action';
+import { createEditAnomalyChartsPanelAction } from './edit_anomaly_charts_panel_action';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
-import { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
-import { createVisToADJobAction } from './open_vis_in_ml_action';
 import {
   createCategorizationADJobAction,
   createCategorizationADJobTrigger,
 } from './open_create_categorization_job_action';
-import type { MlPluginStart, MlStartDependencies } from '../plugin';
-import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
+import { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
+import { createVisToADJobAction } from './open_vis_in_ml_action';
 import {
   entityFieldSelectionTrigger,
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
-  SWIM_LANE_SELECTION_TRIGGER,
   swimLaneSelectionTrigger,
+  SWIM_LANE_SELECTION_TRIGGER,
 } from './triggers';
-import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
-import { createClearSelectionAction } from './clear_selection_action';
-import { createEditAnomalyChartsPanelAction } from './edit_anomaly_charts_panel_action';
-import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_action';
+export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
 export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { EDIT_SWIMLANE_PANEL_ACTION } from './edit_swimlane_panel_action';
-export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
 export { OPEN_IN_ANOMALY_EXPLORER_ACTION } from './open_in_anomaly_explorer_action';
 export { CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION } from './open_vis_in_ml_action';
 export { SWIM_LANE_SELECTION_TRIGGER };
@@ -53,18 +53,14 @@ export function registerMlUiActions(
   const categorizationADJobAction = createCategorizationADJobAction(core.getStartServices);
 
   // Register actions
-  uiActions.registerAction(editSwimlanePanelAction);
-  uiActions.registerAction(applyInfluencerFiltersAction);
   uiActions.registerAction(applyEntityFieldFilterAction);
   uiActions.registerAction(applyTimeRangeSelectionAction);
-  uiActions.registerAction(clearSelectionAction);
-  uiActions.registerAction(editExplorerPanelAction);
   uiActions.registerAction(categorizationADJobAction);
 
   // Assign triggers
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, editSwimlanePanelAction.id);
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, editExplorerPanelAction.id);
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, openInExplorerAction.id);
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSwimlanePanelAction);
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editExplorerPanelAction);
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openInExplorerAction);
 
   uiActions.registerTrigger(swimLaneSelectionTrigger);
   uiActions.registerTrigger(entityFieldSelectionTrigger);

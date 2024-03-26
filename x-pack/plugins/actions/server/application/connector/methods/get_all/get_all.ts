@@ -9,12 +9,28 @@
  * Get all actions with in-memory connectors
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AuditLogger } from '@kbn/security-plugin-types-server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { omit } from 'lodash';
+import { InMemoryConnector } from '../../../..';
+import { SavedObjectClientForFind } from '../../../../data/connector/types/params';
 import { connectorWithExtraFindDataSchema } from '../../schemas';
 import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector';
 import { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
 import { ConnectorWithExtraFindData } from '../../types';
+import { GetAllUnsecuredParams } from './types/params';
+
+interface GetAllHelperOpts {
+  auditLogger?: AuditLogger;
+  esClient: ElasticsearchClient;
+  inMemoryConnectors: InMemoryConnector[];
+  kibanaIndices: string[];
+  logger: Logger;
+  namespace?: string;
+  savedObjectsClient: SavedObjectClientForFind;
+}
 
 export async function getAll({
   context,
@@ -32,28 +48,70 @@ export async function getAll({
     throw error;
   }
 
+  return await getAllHelper({
+    auditLogger: context.auditLogger,
+    esClient: context.scopedClusterClient.asInternalUser,
+    inMemoryConnectors: includeSystemActions
+      ? context.inMemoryConnectors
+      : context.inMemoryConnectors.filter((connector) => !connector.isSystemAction),
+    kibanaIndices: context.kibanaIndices,
+    logger: context.logger,
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+  });
+}
+
+export async function getAllUnsecured({
+  esClient,
+  inMemoryConnectors,
+  internalSavedObjectsRepository,
+  kibanaIndices,
+  logger,
+  spaceId,
+}: GetAllUnsecuredParams): Promise<ConnectorWithExtraFindData[]> {
+  const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
+
+  const connectors = await getAllHelper({
+    esClient,
+    // Unsecured execution does not currently support system actions so we filter them out
+    inMemoryConnectors: inMemoryConnectors.filter((connector) => !connector.isSystemAction),
+    kibanaIndices,
+    logger,
+    namespace,
+    savedObjectsClient: internalSavedObjectsRepository,
+  });
+
+  return connectors.map((connector) => omit(connector, 'secrets'));
+}
+
+async function getAllHelper({
+  auditLogger,
+  esClient,
+  inMemoryConnectors,
+  kibanaIndices,
+  logger,
+  namespace,
+  savedObjectsClient,
+}: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
   const savedObjectsActions = (
-    await findConnectorsSo({ unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient })
+    await findConnectorsSo({ savedObjectsClient, namespace })
   ).saved_objects.map((rawAction) =>
     connectorFromSavedObject(rawAction, isConnectorDeprecated(rawAction.attributes))
   );
 
-  savedObjectsActions.forEach(({ id }) =>
-    context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.FIND,
-        savedObject: { type: 'action', id },
-      })
-    )
-  );
-
-  const inMemoryConnectorsFiltered = includeSystemActions
-    ? context.inMemoryConnectors
-    : context.inMemoryConnectors.filter((connector) => !connector.isSystemAction);
+  if (auditLogger) {
+    savedObjectsActions.forEach(({ id }) =>
+      auditLogger.log(
+        connectorAuditEvent({
+          action: ConnectorAuditAction.FIND,
+          savedObject: { type: 'action', id },
+        })
+      )
+    );
+  }
 
   const mergedResult = [
     ...savedObjectsActions,
-    ...inMemoryConnectorsFiltered.map((inMemoryConnector) => ({
+    ...inMemoryConnectors.map((inMemoryConnector) => ({
       id: inMemoryConnector.id,
       actionTypeId: inMemoryConnector.actionTypeId,
       name: inMemoryConnector.name,
@@ -64,8 +122,8 @@ export async function getAll({
   ].sort((a, b) => a.name.localeCompare(b.name));
 
   const connectors = await injectExtraFindData({
-    kibanaIndices: context.kibanaIndices,
-    scopedClusterClient: context.scopedClusterClient,
+    kibanaIndices,
+    esClient,
     connectors: mergedResult,
   });
 
@@ -74,7 +132,7 @@ export async function getAll({
     try {
       connectorWithExtraFindDataSchema.validate(connector);
     } catch (e) {
-      context.logger.warn(`Error validating connector: ${connector.id}, ${e}`);
+      logger.warn(`Error validating connector: ${connector.id}, ${e}`);
     }
   });
 
@@ -83,7 +141,7 @@ export async function getAll({
 
 async function injectExtraFindData({
   kibanaIndices,
-  scopedClusterClient,
+  esClient,
   connectors,
 }: InjectExtraFindDataParams): Promise<ConnectorWithExtraFindData[]> {
   const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
@@ -121,7 +179,7 @@ async function injectExtraFindData({
     };
   }
 
-  const aggregationResult = await searchConnectorsSo({ scopedClusterClient, kibanaIndices, aggs });
+  const aggregationResult = await searchConnectorsSo({ esClient, kibanaIndices, aggs });
 
   return connectors.map((connector) => ({
     ...connector,
