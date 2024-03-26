@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { extractTimeRange, isFilterPinned } from '@kbn/es-query';
-import type { HasParentApi, PublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
+import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 import {
   cleanEmptyKeys,
@@ -25,9 +25,7 @@ import { createExtract, createInject } from '../../../../common';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 
 export type Context = ApplyGlobalFilterActionContext & {
-  embeddable: Partial<
-    PublishesLocalUnifiedSearch & HasParentApi<Partial<PublishesLocalUnifiedSearch>>
-  >;
+  embeddable: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>;
 };
 export type Params = AbstractDashboardDrilldownParams;
 

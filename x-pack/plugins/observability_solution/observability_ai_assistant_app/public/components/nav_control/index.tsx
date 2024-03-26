@@ -10,17 +10,20 @@ import { EuiButton } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
 import { ChatFlyout } from '../chat/chat_flyout';
 import { useKibana } from '../../hooks/use_kibana';
 import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
 import { useTheme } from '../../hooks/use_theme';
+import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 
 export function NavControl({}: {}) {
   const service = useObservabilityAIAssistantAppService();
 
   const {
     services: {
+      notifications,
       plugins: {
         start: {
           observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
@@ -31,9 +34,27 @@ export function NavControl({}: {}) {
 
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
 
+  useNavControlScreenContext();
+
   const chatService = useAbortableAsync(
     ({ signal }) => {
-      return hasBeenOpened ? service.start({ signal }) : undefined;
+      return hasBeenOpened
+        ? service.start({ signal }).catch((error) => {
+            notifications.toasts.addError(error, {
+              title: i18n.translate(
+                'xpack.observabilityAiAssistant.navControl.initFailureErrorTitle',
+                {
+                  defaultMessage: 'Failed to initialize Observability AI Assistant',
+                }
+              ),
+            });
+
+            setHasBeenOpened(false);
+            setIsOpen(false);
+
+            throw error;
+          })
+        : undefined;
     },
     [service, hasBeenOpened]
   );
@@ -77,6 +98,7 @@ export function NavControl({}: {}) {
   return (
     <>
       <EuiButton
+        data-test-subj="observabilityAiAssistantAppNavControlButton"
         css={buttonCss}
         onClick={() => {
           service.conversations.openNewConversation({

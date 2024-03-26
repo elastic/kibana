@@ -50,6 +50,7 @@ export interface UsageStats {
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
   'observability:apmEnableTableSearchBar': boolean;
+  'observability:logsExplorer:allowedDataViews': string[];
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
   'visualization:useLegacyTimeAxis': boolean;
@@ -141,7 +142,6 @@ export interface UsageStats {
   'labs:canvas:useDataService': boolean;
   'labs:presentation:timeToPresent': boolean;
   'labs:dashboard:enable_ui': boolean;
-  'labs:dashboard:linksPanel': boolean;
   'labs:dashboard:deferBelowFold': boolean;
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
