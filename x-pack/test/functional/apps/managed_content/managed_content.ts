@@ -26,7 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const log = getService('log');
 
-  describe('Managed Content', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/177551
+  describe.skip('Managed Content', () => {
     before(async () => {
       esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/managed_content');
