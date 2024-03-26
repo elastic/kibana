@@ -97,8 +97,8 @@ export async function _installPackage({
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
   try {
+    // if some installation already exists
     if (installedPkg) {
-      // if some installation already exists
       const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
       const hasExceededTimeout =
         Date.now() - Date.parse(installedPkg.attributes.install_started_at) <

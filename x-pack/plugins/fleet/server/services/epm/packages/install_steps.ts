@@ -12,8 +12,9 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
+  FLEET_INSTALL_FORMAT_VERSION,
 } from '../../../constants';
-import type { PackageAssetReference, Installation } from '../../../types';
+import type { PackageAssetReference, Installation, EsAssetReference } from '../../../types';
 
 import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 
@@ -41,6 +42,7 @@ import { restartInstallation, createInstallation } from './install';
 import { withPackageSpan } from './utils';
 import type { InstallContext } from './_state_machine_package_install';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
+import { clearLatestFailedAttempts } from './install_errors_helpers';
 
 export async function stepCreateRestartInstallation(context: InstallContext) {
   const {
@@ -131,8 +133,6 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
   const { packageInfo, paths } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
 
-  logger.debug(`Package install - Installing Kibana assets`);
-  // step install_kibana_assets
   const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
     installKibanaAssetsAndReferences({
       savedObjectsClient,
@@ -154,7 +154,8 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
 
 export async function stepInstallILMPolicies(context: InstallContext) {
   const { logger, esReferences, packageInstallContext, esClient, savedObjectsClient } = context;
-  let updatedEsReferences;
+  let updatedEsReferences: EsAssetReference[] = [];
+
   // currently only the base package has an ILM policy
   // at some point ILM policies can be installed/modified
   // per data stream and we should then save them
@@ -170,27 +171,23 @@ export async function stepInstallILMPolicies(context: InstallContext) {
         esReferences || []
       )
     );
-    logger.debug(`Package install - Installing Data Stream ILM policies`);
-    ({ esReferences: updatedEsReferences } = await withPackageSpan(
-      'Install Data Stream ILM policies',
-      () =>
-        installIlmForDataStream(
-          packageInstallContext,
-          esClient,
-          savedObjectsClient,
-          logger,
-          esReferences || []
-        )
-    ));
+
+    const res = await withPackageSpan('Install Data Stream ILM policies', () =>
+      installIlmForDataStream(
+        packageInstallContext,
+        esClient,
+        savedObjectsClient,
+        logger,
+        updatedEsReferences
+      )
+    );
+    return { esReferences: res.esReferences };
   }
-  return { esReferences: updatedEsReferences };
 }
 
 export async function stepInstallMlModel(context: InstallContext) {
   const { logger, esReferences, packageInstallContext, esClient, savedObjectsClient } = context;
 
-  // installs ml models
-  logger.debug(`Package install - installing ML models`);
   const updatedEsReferences = await withPackageSpan('Install ML models', () =>
     installMlModel(packageInstallContext, esClient, savedObjectsClient, logger, esReferences || [])
   );
@@ -209,9 +206,6 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
   const { packageInfo } = packageInstallContext;
 
   if (packageInfo.type === 'integration') {
-    logger.debug(
-      `Package install - Installing index templates and pipelines, packageInfo.type ${packageInfo.type}`
-    );
     const { installedTemplates, esReferences: templateEsReferences } =
       await installIndexTemplatesAndPipelines({
         installedPkg: installedPkg ? installedPkg.attributes : undefined,
@@ -239,9 +233,6 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
     );
 
     if (dataStreams.length) {
-      logger.debug(
-        `Package install - installing index templates and pipelines with datastreams length ${dataStreams.length}`
-      );
       const { installedTemplates, esReferences: templateEsReferences } =
         await installIndexTemplatesAndPipelines({
           installedPkg: installedPkg ? installedPkg.attributes : undefined,
@@ -261,7 +252,6 @@ export async function stepRemoveLegacyTemplates(context: InstallContext) {
   const { esClient, packageInstallContext, logger } = context;
   const { packageInfo } = packageInstallContext;
   try {
-    logger.debug(`Package install - Removing legacy templates`);
     await removeLegacyTemplates({ packageInfo, esClient, logger });
   } catch (e) {
     logger.warn(`Error removing legacy templates: ${e.message}`);
@@ -273,7 +263,6 @@ export async function stepUpdateCurrentWriteIndices(context: InstallContext) {
     context;
 
   // update current backing indices of each data stream
-  logger.debug(`Package install - Updating backing indices of each data stream`);
   await withPackageSpan('Update write indices', () =>
     updateCurrentWriteIndices(esClient, logger, indexTemplates || [], {
       ignoreMappingUpdateErrors,
@@ -292,8 +281,7 @@ export async function stepInstallTransforms(context: InstallContext) {
     force,
     authorizationHeader,
   } = context;
-  logger.debug(`Package install - Installing transforms`);
-  // steps install_transforms
+
   const res = await withPackageSpan('Install transforms', () =>
     installTransforms({
       packageInstallContext,
@@ -358,12 +346,11 @@ export async function stepDeletePreviousPipelines(context: InstallContext) {
 }
 
 export async function stepSaveArchiveEntries(context: InstallContext) {
-  const { packageInstallContext, savedObjectsClient, logger, installSource, kibanaAssetPromise } =
-    context;
+  const { packageInstallContext, savedObjectsClient, installSource, kibanaAssetPromise } = context;
   const installedKibanaAssetsRefs = await kibanaAssetPromise;
 
   const { packageInfo } = packageInstallContext;
-  logger.debug(`Package install - Updating archive entries`);
+
   const packageAssetResults = await withPackageSpan('Update archive entries', () =>
     saveArchiveEntriesFromAssetsMap({
       savedObjectsClient,
@@ -384,16 +371,36 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
 }
 
 export async function stepSaveSystemObject(context: InstallContext) {
-  const { packageInstallContext, savedObjectsClient, logger, esClient } = context;
-
+  const {
+    packageInstallContext,
+    savedObjectsClient,
+    logger,
+    esClient,
+    installedPkg,
+    packageAssetRefs,
+  } = context;
   const { packageInfo } = packageInstallContext;
-  const { name: pkgName } = packageInfo;
+  const { name: pkgName, version: pkgVersion } = packageInfo;
 
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
+
+  await withPackageSpan('Update install status', () =>
+    savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+      version: pkgVersion,
+      install_version: pkgVersion,
+      install_status: 'installed',
+      package_assets: packageAssetRefs,
+      install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+      latest_install_failed_attempts: clearLatestFailedAttempts(
+        pkgVersion,
+        installedPkg?.attributes.latest_install_failed_attempts ?? []
+      ),
+    })
+  );
 
   // Need to refetch the installation again to retrieve all the attributes
   const updatedPackage = await savedObjectsClient.get<Installation>(
@@ -416,5 +423,7 @@ export async function stepSaveSystemObject(context: InstallContext) {
       await packagePolicyService.upgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
     });
   }
-  logger.debug(`Package install - Installation complete`);
+  logger.debug(
+    `Install status ${updatedPackage?.attributes?.install_status} - Installation complete!`
+  );
 }

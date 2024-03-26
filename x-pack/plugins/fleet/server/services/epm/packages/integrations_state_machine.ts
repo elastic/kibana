@@ -32,7 +32,7 @@ export async function handleState(
   let updatedContext = { ...context };
   if (typeof currentState.onTransition === 'function') {
     logger.debug(
-      `Current state ${currentStateName} -  Running transition ${currentState.onTransition.name}`
+      `Current state ${currentStateName}: running transition ${currentState.onTransition.name}`
     );
     try {
       stateResult = await currentState.onTransition.call(undefined, updatedContext);
