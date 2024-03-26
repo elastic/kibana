@@ -88,7 +88,7 @@ const parseBedrockStream: StreamParser = async (responseStream, logger) => {
   } catch (e) {
     logger.error('An error occurred while calculating streaming response tokens');
   }
-  const usage = getUsageFromFinalChunk(responseBuffer[responseBuffer.length - 1]);
+  const usage = getUsageFromFinalChunk(responseBuffer[responseBuffer.length - 1], logger);
   if (usage) {
     return usage;
   }
@@ -217,7 +217,8 @@ const parseOpenAIResponse = (responseBody: string) =>
  * @param finalChunk
  */
 const getUsageFromFinalChunk = (
-  finalChunk: Uint8Array
+  finalChunk: Uint8Array,
+  logger: Logger
 ): {
   total: number;
   prompt: number;
@@ -229,12 +230,26 @@ const getUsageFromFinalChunk = (
     Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
   );
   if (body.type === 'message_stop') {
+    if (
+      body['amazon-bedrock-invocationMetrics'] &&
+      body['amazon-bedrock-invocationMetrics'].inputTokenCount != null &&
+      body['amazon-bedrock-invocationMetrics'].outputTokenCount != null
+    ) {
+      return {
+        total:
+          body['amazon-bedrock-invocationMetrics'].inputTokenCount +
+          body['amazon-bedrock-invocationMetrics'].outputTokenCount,
+        prompt: body['amazon-bedrock-invocationMetrics'].inputTokenCount,
+        completion: body['amazon-bedrock-invocationMetrics'].outputTokenCount,
+      };
+    }
+    logger.error(
+      'Response from Bedrock invoke stream message_stop chunk did not contain amazon-bedrock-invocationMetrics'
+    );
     return {
-      total:
-        body['amazon-bedrock-invocationMetrics'].inputTokenCount +
-        body['amazon-bedrock-invocationMetrics'].outputTokenCount,
-      prompt: body['amazon-bedrock-invocationMetrics'].inputTokenCount,
-      completion: body['amazon-bedrock-invocationMetrics'].outputTokenCount,
+      total: 0,
+      prompt: 0,
+      completion: 0,
     };
   }
   return null;

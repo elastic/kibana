@@ -102,19 +102,28 @@ export const getGenAiTokenTracking = async ({
         completion: string;
         usage?: { input_tokens: number; output_tokens: number };
       };
-      const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
-        response: rData.completion,
-        body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
-        usage: rData.usage,
-      });
+      if (typeof rData.completion === 'string') {
+        const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
+          response: rData.completion,
+          body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
+          usage: rData.usage,
+        });
 
-      return {
-        total_tokens: total,
-        prompt_tokens: prompt,
-        completion_tokens: completion,
-      };
+        return {
+          total_tokens: total,
+          prompt_tokens: prompt,
+          completion_tokens: completion,
+        };
+      } else {
+        logger.error('Response from Bedrock run response did not contain completion string');
+        return {
+          total_tokens: 0,
+          prompt_tokens: 0,
+          completion_tokens: 0,
+        };
+      }
     } catch (e) {
-      logger.error('Failed to calculate tokens from Bedrock invoke response');
+      logger.error('Failed to calculate tokens from Bedrock run response');
       logger.error(e);
     }
   }
@@ -126,20 +135,31 @@ export const getGenAiTokenTracking = async ({
         message: string;
         usage?: { input_tokens: number; output_tokens: number };
       };
-      const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
-        response: rData.message,
-        body: JSON.stringify({
-          prompt: (validatedParams as { subActionParams: { messages: Array<{ content: string }> } })
-            .subActionParams.messages[0].content,
-        }),
-        usage: rData.usage,
-      });
 
-      return {
-        total_tokens: total,
-        prompt_tokens: prompt,
-        completion_tokens: completion,
-      };
+      if (typeof rData.message === 'string') {
+        const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
+          response: rData.message,
+          body: JSON.stringify({
+            prompt: (
+              validatedParams as { subActionParams: { messages: Array<{ content: string }> } }
+            ).subActionParams.messages[0].content,
+          }),
+          usage: rData.usage,
+        });
+
+        return {
+          total_tokens: total,
+          prompt_tokens: prompt,
+          completion_tokens: completion,
+        };
+      } else {
+        logger.error('Response from Bedrock invoke response did not contain message string');
+        return {
+          total_tokens: 0,
+          prompt_tokens: 0,
+          completion_tokens: 0,
+        };
+      }
     } catch (e) {
       logger.error('Failed to calculate tokens from Bedrock invoke response');
       logger.error(e);
