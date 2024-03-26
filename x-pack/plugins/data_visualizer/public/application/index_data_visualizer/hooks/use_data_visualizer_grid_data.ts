@@ -123,7 +123,7 @@ export const useDataVisualizerGridData = (
   const { visibleFieldNames, fieldsToFetch } = useMemo(() => {
     // Helper logic to add multi-fields to the table for embeddables outside of Index data visualizer
     // For example, adding {field} will also add {field.keyword} if it exists
-    const _fieldsToFetch =
+    const visibleFieldsWithSubFields =
       input.id === DATA_VISUALIZER_INDEX_VIEWER_ID
         ? undefined
         : [
@@ -142,13 +142,20 @@ export const useDataVisualizerGridData = (
                 })
                 .map((f) => f.name),
               ...(input.fieldsToFetch ?? []),
-              ...Object.keys(currentDataView.getRuntimeMappings() ?? {}),
+              ,
             ]),
           ];
     return {
       visibleFieldNames:
-        input.id === DATA_VISUALIZER_INDEX_VIEWER_ID ? input.visibleFieldNames : _fieldsToFetch,
-      fieldsToFetch: input.id === DATA_VISUALIZER_INDEX_VIEWER_ID ? _fieldsToFetch : undefined,
+        input.id === DATA_VISUALIZER_INDEX_VIEWER_ID
+          ? input.visibleFieldNames
+          : visibleFieldsWithSubFields,
+      fieldsToFetch: Array.isArray(visibleFieldsWithSubFields)
+        ? [
+            ...visibleFieldsWithSubFields,
+            ...Object.keys(currentDataView.getRuntimeMappings() ?? {}),
+          ]
+        : undefined,
     };
   }, [input.id, input.fieldsToFetch, input.visibleFieldNames, dataViewFields, currentDataView]);
 
