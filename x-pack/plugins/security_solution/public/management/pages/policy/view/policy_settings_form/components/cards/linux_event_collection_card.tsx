@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
 import type { PolicyFormComponentCommonProps } from '../../types';
@@ -91,33 +91,48 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
 
 export type LinuxEventCollectionCardProps = PolicyFormComponentCommonProps;
 
-export const LinuxEventCollectionCard = memo<LinuxEventCollectionCardProps>((props) => {
-  const supplementalOptions = useMemo(() => {
-    if (props.mode === 'edit') {
-      return SUPPLEMENTAL_OPTIONS;
-    }
-
-    // View only mode: remove instructions for session data
-    return SUPPLEMENTAL_OPTIONS.map((option) => {
-      if (option.id === 'sessionDataSection') {
-        return {
-          ...option,
-          description: undefined,
-        };
+export const LinuxEventCollectionCard = memo<LinuxEventCollectionCardProps>(
+  ({ onChange, mode, ...restProps }) => {
+    const supplementalOptions = useMemo(() => {
+      if (mode === 'edit') {
+        return SUPPLEMENTAL_OPTIONS;
       }
 
-      return option;
-    });
-  }, [props.mode]);
+      // View only mode: remove instructions for session data
+      return SUPPLEMENTAL_OPTIONS.map((option) => {
+        if (option.id === 'sessionDataSection') {
+          return {
+            ...option,
+            description: undefined,
+          };
+        }
 
-  return (
-    <EventCollectionCard<OperatingSystem.LINUX>
-      {...props}
-      os={OperatingSystem.LINUX}
-      selection={props.policy.linux.events}
-      supplementalOptions={supplementalOptions}
-      options={OPTIONS}
-    />
-  );
-});
+        return option;
+      });
+    }, [mode]);
+
+    const changeHandler: PolicyFormComponentCommonProps['onChange'] = useCallback(
+      ({ isValid, updatedPolicy }) => {
+        if (isValid && updatedPolicy.linux.events.session_data === false) {
+          updatedPolicy.linux.events.tty_io = false;
+        }
+
+        onChange({ isValid, updatedPolicy });
+      },
+      [onChange]
+    );
+
+    return (
+      <EventCollectionCard<OperatingSystem.LINUX>
+        {...restProps}
+        mode={mode}
+        onChange={changeHandler}
+        os={OperatingSystem.LINUX}
+        selection={restProps.policy.linux.events}
+        supplementalOptions={supplementalOptions}
+        options={OPTIONS}
+      />
+    );
+  }
+);
 LinuxEventCollectionCard.displayName = 'LinuxEventCollectionCard';
