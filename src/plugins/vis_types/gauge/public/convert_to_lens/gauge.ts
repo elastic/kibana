@@ -15,7 +15,7 @@ import {
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
 import { ConvertGaugeVisToLensVisualization } from './types';
-import { getConfiguration } from './configurations/gauge';
+import { getGaugeConfiguration } from './configurations/gauge';
 
 export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
@@ -82,7 +82,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
         ignoreGlobalFilters: false,
       },
     ],
-    configuration: getConfiguration(
+    configuration: getGaugeConfiguration(
       layerId,
       vis.params,
       getPalette(vis.params.gauge, percentageModeConfig, true),

@@ -15,7 +15,8 @@ import {
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
 import { ConvertGoalVisToLensVisualization } from './types';
-import { getConfiguration } from './configurations/goal';
+import { getMetricConfiguration } from './configurations/metric';
+import { getGaugeConfiguration } from './configurations/gauge';
 
 export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
@@ -61,12 +62,40 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
       return null;
     }
   }
-  const { isPercentageMode, max } = percentageModeConfig as PercentageModeConfigWithMinMax;
+  const { max, isPercentageMode } = percentageModeConfig as PercentageModeConfigWithMinMax;
+
   const maxColumn = createStaticValueColumn(isPercentageMode ? 1 : max);
 
   const columns = [...layerConfig.columns, maxColumn];
   const layerId = uuidv4();
   const indexPatternId = dataView.id!;
+
+  if (layerConfig.buckets.all.length === 0) {
+    const [metricAccessor] = layerConfig.metrics;
+
+    return {
+      type: 'lnsGauge',
+      layers: [
+        {
+          indexPatternId,
+          layerId,
+          columns: columns.map(excludeMetaFromColumn),
+          columnOrder: [],
+          ignoreGlobalFilters: false,
+        },
+      ],
+      configuration: getGaugeConfiguration(
+        layerId,
+        vis.params,
+        getPalette(vis.params.gauge, percentageModeConfig, true),
+        {
+          metricAccessor,
+          maxAccessor: maxColumn.columnId,
+        }
+      ),
+      indexPatternIds: [indexPatternId],
+    };
+  }
 
   return {
     type: 'lnsMetric',
@@ -79,7 +108,7 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
         ignoreGlobalFilters: false,
       },
     ],
-    configuration: getConfiguration(
+    configuration: getMetricConfiguration(
       layerId,
       vis.params,
       getPalette(vis.params.gauge, percentageModeConfig, true),

@@ -13,7 +13,8 @@ import { GaugeVisParams } from '../types';
 
 const mockGetColumnsFromVis = jest.fn();
 const mockGetPercentageColumnFormulaColumn = jest.fn();
-const mockGetConfiguration = jest.fn().mockReturnValue({});
+const mockGetMetricConfiguration = jest.fn().mockReturnValue({});
+const mockGetGaugeConfiguration = jest.fn().mockReturnValue({});
 const mockGetPercentageModeConfig = jest.fn();
 const mockGetPalette = jest.fn();
 const mockCreateStaticValueColumn = jest.fn();
@@ -33,8 +34,12 @@ jest.mock('@kbn/visualizations-plugin/public', () => ({
   getDataViewByIndexPatternId: jest.fn(() => ({ id: 'index-pattern' })),
 }));
 
-jest.mock('./configurations/goal', () => ({
-  getConfiguration: jest.fn(() => mockGetConfiguration()),
+jest.mock('./configurations/metric', () => ({
+  getMetricConfiguration: jest.fn(() => mockGetMetricConfiguration()),
+}));
+
+jest.mock('./configurations/gauge', () => ({
+  getGaugeConfiguration: jest.fn(() => mockGetGaugeConfiguration()),
 }));
 
 const params: GaugeVisParams = {
@@ -68,7 +73,7 @@ const params: GaugeVisParams = {
       fontSize: 10,
     },
   },
-  type: 'gauge',
+  type: 'goal',
 };
 
 const vis = {
@@ -139,38 +144,78 @@ describe('convertToLens', () => {
     expect(mockGetColumnsFromVis).toBeCalledTimes(1);
     expect(result).toBeNull();
   });
-  test('should return correct state for valid vis', async () => {
-    const config = {
-      layerType: 'data',
-      metricAccessor: '1',
-    };
 
-    mockGetColumnsFromVis.mockReturnValue([
-      {
-        metrics: ['1'],
-        buckets: { all: ['2'] },
-        columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }],
-        columnsWithoutReferenced: [
-          { columnId: '1', meta: { aggId: 'agg-1' } },
-          { columnId: '2', meta: { aggId: 'agg-2' } },
-        ],
-      },
-    ]);
-    mockGetConfiguration.mockReturnValue(config);
+  describe('to Gauge', () => {
+    test('should return gauge for single metric non-bucketed', async () => {
+      const config = {
+        layerType: 'data',
+        metricAccessor: '1',
+      };
 
-    const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(mockGetConfiguration).toBeCalledTimes(1);
-    expect(mockGetPalette).toBeCalledTimes(1);
-    expect(result?.type).toEqual('lnsMetric');
-    expect(result?.layers.length).toEqual(1);
-    expect(result?.layers[0]).toEqual(
-      expect.objectContaining({
-        columnOrder: [],
-        columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }, {}],
-        indexPatternId: 'index-pattern',
-      })
-    );
-    expect(result?.configuration).toEqual(config);
+      mockGetColumnsFromVis.mockReturnValue([
+        {
+          metrics: ['1'],
+          buckets: { all: [] },
+          columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }],
+          columnsWithoutReferenced: [
+            { columnId: '1', meta: { aggId: 'agg-1' } },
+            { columnId: '2', meta: { aggId: 'agg-2' } },
+          ],
+        },
+      ]);
+      mockGetGaugeConfiguration.mockReturnValue(config);
+
+      const result = await convertToLens(vis, timefilter);
+      expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+      expect(mockGetGaugeConfiguration).toBeCalledTimes(1);
+      expect(mockGetPalette).toBeCalledTimes(1);
+      expect(result?.type).toEqual('lnsGauge');
+      expect(result?.layers.length).toEqual(1);
+      expect(result?.layers[0]).toEqual(
+        expect.objectContaining({
+          columnOrder: [],
+          columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }, {}],
+          indexPatternId: 'index-pattern',
+        })
+      );
+      expect(result?.configuration).toEqual(config);
+    });
+  });
+
+  describe('to Metric', () => {
+    test('should return metric for single metric bucketed', async () => {
+      const config = {
+        layerType: 'data',
+        metricAccessor: '1',
+      };
+
+      mockGetColumnsFromVis.mockReturnValue([
+        {
+          metrics: ['1'],
+          buckets: { all: ['2'] },
+          columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }],
+          columnsWithoutReferenced: [
+            { columnId: '1', meta: { aggId: 'agg-1' } },
+            { columnId: '2', meta: { aggId: 'agg-2' } },
+          ],
+        },
+      ]);
+      mockGetMetricConfiguration.mockReturnValue(config);
+
+      const result = await convertToLens(vis, timefilter);
+      expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+      expect(mockGetMetricConfiguration).toBeCalledTimes(1);
+      expect(mockGetPalette).toBeCalledTimes(1);
+      expect(result?.type).toEqual('lnsMetric');
+      expect(result?.layers.length).toEqual(1);
+      expect(result?.layers[0]).toEqual(
+        expect.objectContaining({
+          columnOrder: [],
+          columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }, {}],
+          indexPatternId: 'index-pattern',
+        })
+      );
+      expect(result?.configuration).toEqual(config);
+    });
   });
 });

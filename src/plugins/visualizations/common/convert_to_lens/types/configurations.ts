@@ -261,7 +261,7 @@ interface GaugeState {
   minAccessor?: string;
   maxAccessor?: string;
   goalAccessor?: string;
-  ticksPosition: GaugeTicksPosition;
+  ticksPosition?: GaugeTicksPosition;
   labelMajorMode: GaugeLabelMajorMode;
   labelMajor?: string;
   labelMinor?: string;

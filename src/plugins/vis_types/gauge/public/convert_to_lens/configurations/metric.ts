@@ -14,7 +14,7 @@ import {
 } from '@kbn/visualizations-plugin/common';
 import { GaugeVisParams } from '../../types';
 
-export const getConfiguration = (
+export const getMetricConfiguration = (
   layerId: string,
   { gauge }: GaugeVisParams,
   palette: PaletteOutput<CustomPaletteParams> | undefined,
@@ -22,7 +22,6 @@ export const getConfiguration = (
     metrics,
     buckets,
     maxAccessor,
-    columnsWithoutReferenced,
     bucketCollapseFn,
   }: {
     metrics: string[];
