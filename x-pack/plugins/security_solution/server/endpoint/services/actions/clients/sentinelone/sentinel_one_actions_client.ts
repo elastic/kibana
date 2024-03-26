@@ -15,8 +15,8 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import type { NormalizedExternalConnectorClientExecuteOptions } from '../lib/external_connector';
-import { NormalizedExternalConnectorClient } from '../lib/external_connector';
+import type { NormalizedExternalConnectorClientExecuteOptions } from '../lib/normalized_external_connector_client';
+import { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
 import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
