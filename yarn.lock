@@ -4611,11 +4611,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-validation-autocomplete@link:packages/kbn-esql-validation-autocomplete":
+"@kbn/esql-utils@link:packages/kbn-esql-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/esql-utils@link:packages/kbn-esql-utils":
+"@kbn/esql-validation-autocomplete@link:packages/kbn-esql-validation-autocomplete":
   version "0.0.0"
   uid ""
 
