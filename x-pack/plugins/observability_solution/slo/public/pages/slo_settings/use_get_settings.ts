@@ -15,10 +15,10 @@ export const useGetSettings = () => {
   const { data: currentSettings } = useFetcher(() => {
     return http?.get<SloSettings>('/internal/slo/settings');
   }, [http]);
-  return (
-    currentSettings ?? {
-      useAllRemoteClusters: false,
-      selectedRemoteClusters: [],
-    }
-  );
+  return currentSettings ?? defaultSettings;
+};
+
+const defaultSettings = {
+  useAllRemoteClusters: false,
+  selectedRemoteClusters: [],
 };

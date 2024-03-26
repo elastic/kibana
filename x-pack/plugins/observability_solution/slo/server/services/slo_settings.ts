@@ -8,6 +8,7 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { getListOfSloSummaryIndices } from '../../common/summary_indices';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { SloSettings } from '../domain/models';
 import { sloSettingsObjectId, SO_SLO_SETTINGS_TYPE } from '../saved_objects/slo_settings';
@@ -33,21 +34,18 @@ export const getListOfSummaryIndices = async (
 ) => {
   const indices: string[] = [SLO_SUMMARY_DESTINATION_INDEX_PATTERN];
 
-  const { useAllRemoteClusters, selectedRemoteClusters } = await getSloSettings(soClient);
+  const settings = await getSloSettings(soClient);
+  const { useAllRemoteClusters, selectedRemoteClusters } = settings;
   if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
     return indices;
   }
+
   const clustersByName = await esClient.cluster.remoteInfo();
   const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
-  clusterNames.forEach((clusterName) => {
-    const cluster = clustersByName[clusterName];
-    if (
-      cluster.connected &&
-      (useAllRemoteClusters || selectedRemoteClusters.includes(clusterName))
-    ) {
-      indices.push(`${clusterName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`);
-    }
-  });
+  const clusterInfo = clusterNames.map((clusterName) => ({
+    name: clusterName,
+    isConnected: clustersByName[clusterName].connected,
+  }));
 
-  return indices.join(',');
+  return getListOfSloSummaryIndices(settings, clusterInfo);
 };

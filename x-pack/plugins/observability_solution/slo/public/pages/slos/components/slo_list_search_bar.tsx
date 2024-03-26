@@ -12,10 +12,9 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { Query } from '@kbn/es-query';
 import { observabilityAppId } from '@kbn/observability-plugin/public';
+import { useSloSummaryDataView } from '../hooks/use_summary_dataview';
 import { useKibana } from '../../../utils/kibana_react';
 import { useSloCrudLoading } from '../hooks/use_crud_loading';
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/constants';
-import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { QuickFilters } from './common/quick_filters';
 
@@ -41,9 +40,7 @@ export function SloListSearchBar() {
   const { state, onStateChange } = useUrlSearchState();
   const loading = useSloCrudLoading();
 
-  const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
-  });
+  const { dataView } = useSloSummaryDataView();
 
   useEffect(() => {
     const sub = query.state$.subscribe(() => {
@@ -65,7 +62,12 @@ export function SloListSearchBar() {
         indexPatterns={dataView ? [dataView] : []}
         isDisabled={loading}
         renderQueryInputAppend={() => (
-          <QuickFilters initialState={state} loading={loading} onStateChange={onStateChange} />
+          <QuickFilters
+            dataView={dataView}
+            initialState={state}
+            loading={loading}
+            onStateChange={onStateChange}
+          />
         )}
         filters={state.filters}
         onFiltersUpdated={(newFilters) => {
