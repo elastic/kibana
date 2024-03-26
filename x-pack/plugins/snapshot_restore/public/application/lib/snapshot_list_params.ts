@@ -49,6 +49,14 @@ const resetSearchOptions = (listParams: SnapshotListParams): SnapshotListParams 
   searchOperator: undefined,
 });
 
+const escapeString = (inputString: string) => {
+  // List of characters to escape
+  const specialChars = /[.*+?^${}()|[\]\\]/g;
+
+  // Escape special characters
+  return inputString.replace(specialChars, '\\$&');
+};
+
 // to init the query for repository and policyName search passed via url
 export const getQueryFromListParams = (
   listParams: SnapshotListParams,
@@ -58,7 +66,8 @@ export const getQueryFromListParams = (
   if (!searchField || !searchValue) {
     return Query.MATCH_ALL;
   }
-  return Query.parse(`${searchField}=${searchValue}`, { schema });
+
+  return Query.parse(`${searchField}=${escapeString(searchValue)}`, { schema });
 };
 
 export const getListParams = (listParams: SnapshotListParams, query: Query): SnapshotListParams => {
