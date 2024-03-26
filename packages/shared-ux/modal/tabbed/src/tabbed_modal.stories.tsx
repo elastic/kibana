@@ -12,10 +12,10 @@ import React, { Fragment } from 'react';
 import {
   StorybookMock as TabbedModalStorybookMock,
   type Params as TabbedModalStorybookParams,
-} from './storybook/setup';
+} from '../storybook/setup';
 
 import { TabbedModal } from './tabbed_modal';
-import { IModalTabDeclaration } from './context';
+import { IModalTabDeclaration, IModalTabState } from './context';
 
 export default {
   title: 'Modal/Tabbed Modal',
@@ -33,8 +33,7 @@ export const TrivialExample = (params: TabbedModalStorybookParams) => {
       tabs={[
         {
           id: 'hello',
-          title: 'Hello',
-          name: 'hello',
+          name: 'Hello',
           content: () => {
             return (
               <Fragment>
@@ -50,8 +49,8 @@ export const TrivialExample = (params: TabbedModalStorybookParams) => {
           },
           modalActionBtn: {
             id: 'wave',
-            dataTestSubj: '',
-            formattedMessageId: '',
+            dataTestSubj: 'wave',
+            formattedMessageId: 'non.existent.id.for.helloWorld.example',
             defaultMessage: 'Say Hi 👋🏾',
             handler: ({ state }) => {
               alert(state.message);
@@ -59,7 +58,7 @@ export const TrivialExample = (params: TabbedModalStorybookParams) => {
           },
         },
       ]}
-      selectedTabId="hello"
+      defaultSelectedTabId="hello"
       onClose={() => {}}
     />
   );
@@ -103,9 +102,11 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
     SelectOption,
   }
 
-  const pizzaSelector: IModalTabDeclaration<{
+  interface IPizzaSelectorTabState extends IModalTabState {
     checkboxIdToSelectedMap: Record<string, boolean>;
-  }> = {
+  }
+
+  const pizzaSelector: IModalTabDeclaration<IPizzaSelectorTabState> = {
     id: 'order',
     name: 'order',
     initialState: {
@@ -158,8 +159,8 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
     },
     modalActionBtn: {
       id: 'pizza',
-      dataTestSubj: '',
-      formattedMessageId: '',
+      dataTestSubj: 'order-pizza',
+      formattedMessageId: 'non.existent.id.for.orderPizza.example',
       defaultMessage: 'Order 🍕',
       handler: ({ state }) => {
         alert(JSON.stringify(state));
@@ -174,7 +175,7 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
       onClose={() => {}}
       modalTitle="Non trivial example"
       tabs={[pizzaSelector]}
-      selectedTabId="order"
+      defaultSelectedTabId="order"
     />
   );
 };
