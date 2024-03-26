@@ -18,6 +18,7 @@ import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import type {
   AggregatableFieldOverallStats,
@@ -117,7 +118,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         // const nonEmptyFields = null;
         // Getting non-empty fields for the index pattern
         // because then we can absolutely exclude these from subsequent requests
-        const nonEmptyFields = await fetchDataWithTimeout(
+        const nonEmptyFields = await fetchDataWithTimeout<Promise<FieldSpec[]>>(
           data.dataViews.getFieldsForWildcard({
             pattern: index,
             indexFilter: {

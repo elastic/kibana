@@ -21,6 +21,7 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { isDefined } from '@kbn/ml-is-defined';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
@@ -144,7 +145,7 @@ export const useDataVisualizerGridData = (
               ...(input.fieldsToFetch ?? []),
               ,
             ]),
-          ];
+          ].filter(isDefined);
     return {
       visibleFieldNames:
         input.id === DATA_VISUALIZER_INDEX_VIEWER_ID
@@ -286,7 +287,6 @@ export const useDataVisualizerGridData = (
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
         aggregatableFields,
         nonAggregatableFields,
-        fieldsToFetch,
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
         embeddableExecutionContext,

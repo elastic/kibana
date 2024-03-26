@@ -9,11 +9,11 @@ import { catchError, timeout } from 'rxjs/operators';
 import { mergeMap, last, map, toArray } from 'rxjs/operators';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
 
-export const fetchDataWithTimeout = async (
-  asyncFunc,
-  abortCtrl,
+export const fetchDataWithTimeout = async <T extends Promise<unknown>>(
+  asyncFunc: T,
+  abortCtrl: AbortController,
   defaultResult = null,
-  timeoutDuration = 7000
+  timeoutDuration = 2000
 ) => {
   return await lastValueFrom(
     from(asyncFunc).pipe(

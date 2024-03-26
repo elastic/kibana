@@ -58,7 +58,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   const { topValues: originalTopValues, fieldName, sampleCount } = stats;
 
   if (originalTopValues?.length === 0) return null;
-  const totalDocuments = Math.min(sampleCount, stats.totalDocuments) ?? 0;
+  const totalDocuments = Math.min(sampleCount ?? 0, stats.totalDocuments ?? 0);
 
   const topValues = originalTopValues.map((bucket) => ({
     ...bucket,
