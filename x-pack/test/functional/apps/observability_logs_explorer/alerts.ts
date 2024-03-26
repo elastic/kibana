@@ -11,10 +11,15 @@ import { FtrProviderContext } from './config';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['observabilityLogsExplorer']);
   const testSubjects = getService('testSubjects');
+  const rules = getService('rules');
 
   describe('Alerts dropdown menu', () => {
     before(async () => {
       await PageObjects.observabilityLogsExplorer.navigateTo();
+    });
+
+    after(async () => {
+      await rules.api.deleteAllRules();
     });
 
     it('should create rule successfully', async () => {

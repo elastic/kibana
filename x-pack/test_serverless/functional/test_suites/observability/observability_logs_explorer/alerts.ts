@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['observabilityLogsExplorer', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
+  const rules = getService('rules');
 
   describe('Alerts dropdown menu', () => {
     before(async () => {
@@ -19,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await rules.api.deleteAllRules();
       await PageObjects.svlCommonPage.forceLogout();
     });
 
