@@ -112,7 +112,8 @@
     "server": "src/legacy/server",
     "share": [
       "src/plugins/share",
-      "packages/kbn-reporting-share"
+      "packages/kbn-reporting-share",
+      "packages/kbn-share-modal"
     ],
     "sharedUXPackages": "packages/shared-ux",
     "searchApiPanels": "packages/kbn-search-api-panels/",

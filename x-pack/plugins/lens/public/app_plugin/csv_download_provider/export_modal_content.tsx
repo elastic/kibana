@@ -224,17 +224,21 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       return <ErrorUrlTooLongPanel isUnsaved={isDirty} />;
     }
 
-    const saveMessage = isDirty
-      ? 'Save your work before copying this URL.'
-      : 'Copy this POST URL to call generation from outside Kibana or from Watcher.';
     return (
       <>
         <EuiToolTip
           content={
-            <FormattedMessage
-              id="xpack.lens.share.modalContent.unsavedStateErrorText"
-              defaultMessage={saveMessage}
-            />
+            isDirty ? (
+              <FormattedMessage
+                id="xpack.lens.share.modalContent.unsavedStateErrorText"
+                defaultMessage="Save your work before copying this URL."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.lens.share.modalContent.savedStateErrorText"
+                defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
+              />
+            )
           }
         >
           <EuiCopy textToCopy={absoluteUrl}>
