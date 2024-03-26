@@ -29,7 +29,7 @@ export const NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH = `${CONNECTORS_PATH}/selec
 export const SEARCH_INDEX_PATH = `${SEARCH_INDICES_PATH}/:indexName`;
 export const SEARCH_INDEX_TAB_PATH = `${SEARCH_INDEX_PATH}/:tabId`;
 export const SEARCH_INDEX_TAB_DETAIL_PATH = `${SEARCH_INDEX_TAB_PATH}/:detailId`;
-export const SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH = `${SEARCH_INDEX_PATH}/domain_management/:domainId`;
+export const SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH = `${SEARCH_INDEX_TAB_PATH}/:domainId`;
 export const OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH = `${SEARCH_INDEX_PATH}/crawler/domains/:domainId`;
 
 export const ML_MANAGE_TRAINED_MODELS_PATH = '/app/ml/trained_models';
