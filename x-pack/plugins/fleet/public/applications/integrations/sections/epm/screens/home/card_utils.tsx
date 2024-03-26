@@ -55,6 +55,7 @@ export interface IntegrationCardItem {
   isQuickstart?: boolean;
   showLabels?: boolean;
   extraLabelsBadges?: React.ReactNode[];
+  onCardClick?: () => void;
 }
 
 export const mapToCard = ({
