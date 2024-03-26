@@ -103,7 +103,7 @@ export class NormalizedExternalConnectorClient {
     }) as Promise<ActionTypeExecutorResult<TResponse>>;
   }
 
-  public async getAll(spaceId: string = 'default'): ReturnType<ActionsClient['getAll']> {
+  protected async getAll(spaceId: string = 'default'): ReturnType<ActionsClient['getAll']> {
     if (this.isUnsecuredActionsClient(this.connectorsClient)) {
       return this.connectorsClient.getAll(spaceId);
     }
