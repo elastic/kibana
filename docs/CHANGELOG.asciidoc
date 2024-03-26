@@ -67,6 +67,19 @@ Review important information about the {kib} 8.x releases.
 For information about the {kib} 8.13.0 release, review the following information.
 
 [float]
+[[known-issues-8.13.0]]
+=== Known issues
+
+[discrete]
+[[known-179457]]
+.Canvas workpad image rendering displays a fail toast notification
+[%collapsible]
+====
+*Details* +
+When opening an ecommerce sample data in a Canvas workpad, a toast notification stating that rending the image has failed is incorrectly displayed. For more information, refer to ({kibana-pull}179457[#179457]).
+====
+
+[float]
 [[breaking-changes-8.13.0]]
 === Breaking changes
 
