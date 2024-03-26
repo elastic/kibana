@@ -109,6 +109,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         renderDocumentView={renderDocumentView}
         renderCustomToolbar={renderCustomToolbarWithElements}
         renderCustomComparisonToolbar={renderCustomToolbar}
+        enableComparisonMode
         showColumnTokens
         configHeaderRowHeight={3}
         showFullScreenButton={false}

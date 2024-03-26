@@ -374,6 +374,10 @@ export interface UnifiedDataTableProps {
    * Optional row line height override. Default is 1.6em.
    */
   rowLineHeightOverride?: string;
+  /**
+   * Set to true to allow users to compare selected documents
+   */
+  enableComparisonMode?: boolean;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -440,6 +444,7 @@ export const UnifiedDataTable = ({
   rowLineHeightOverride,
   customGridColumnsConfiguration,
   customControlColumnsConfiguration,
+  enableComparisonMode,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -843,6 +848,7 @@ export const UnifiedDataTable = ({
           <DataTableDocumentToolbarBtn
             isPlainRecord={isPlainRecord}
             isFilterActive={isFilterActive}
+            enableComparisonMode={enableComparisonMode}
             rows={rows!}
             selectedDocs={usedSelectedDocs}
             setSelectedDocs={setSelectedDocs}
@@ -853,7 +859,14 @@ export const UnifiedDataTable = ({
         {externalAdditionalControls}
       </>
     );
-  }, [externalAdditionalControls, usedSelectedDocs, isPlainRecord, isFilterActive, rows]);
+  }, [
+    externalAdditionalControls,
+    usedSelectedDocs,
+    isPlainRecord,
+    isFilterActive,
+    enableComparisonMode,
+    rows,
+  ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
     () =>

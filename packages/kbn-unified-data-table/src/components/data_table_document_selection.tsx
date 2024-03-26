@@ -84,6 +84,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
 export function DataTableDocumentToolbarBtn({
   isPlainRecord,
   isFilterActive,
+  enableComparisonMode,
   rows,
   selectedDocs,
   setIsFilterActive,
@@ -92,6 +93,7 @@ export function DataTableDocumentToolbarBtn({
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
+  enableComparisonMode?: boolean;
   rows: DataTableRecord[];
   selectedDocs: string[];
   setIsFilterActive: (value: boolean) => void;
@@ -150,7 +152,7 @@ export function DataTableDocumentToolbarBtn({
       ),
     ];
 
-    if (selectedDocs.length > 1) {
+    if (enableComparisonMode && selectedDocs.length > 1) {
       menuItems.push(
         <EuiContextMenuItem
           data-test-subj="dscGridCompareSelectedDocuments"
@@ -220,6 +222,7 @@ export function DataTableDocumentToolbarBtn({
 
     return menuItems;
   }, [
+    enableComparisonMode,
     isFilterActive,
     isPlainRecord,
     rows,
