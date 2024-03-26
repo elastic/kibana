@@ -32,7 +32,9 @@ describe('QueryHistory', () => {
     it('should render the history action component as a button if is spaceReduced is undefined', async () => {
       const component = mount(<QueryHistoryAction toggleHistory={jest.fn()} isHistoryOpen />);
       expect(
-        component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]').length
+        component.find(
+          '[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]'
+        ).length
       ).not.toBe(0);
 
       expect(
