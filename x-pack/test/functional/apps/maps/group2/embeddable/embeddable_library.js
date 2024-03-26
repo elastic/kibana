@@ -46,7 +46,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('save map panel to embeddable library', async () => {
-      await dashboardPanelActions.saveToLibrary('embeddable library map');
+      await dashboardPanelActions.legacySaveToLibrary('embeddable library map');
       await testSubjects.existOrFail('addPanelToLibrarySuccess');
 
       const mapPanel = await testSubjects.find('embeddablePanelHeading-embeddablelibrarymap');
