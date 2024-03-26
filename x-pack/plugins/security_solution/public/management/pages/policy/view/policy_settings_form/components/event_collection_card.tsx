@@ -166,12 +166,7 @@ export const EventCollectionCard = memo(
               isDisabled,
             }) => {
               const keyPath = `${policyOs}.events.${String(protectionField)}`;
-              const isChecked = get(policy, keyPath);
               const fieldString = protectionField as string;
-
-              if (!isEditMode && !isChecked) {
-                return null;
-              }
 
               const isCheckboxDisabled = !isEditMode || (isDisabled ? isDisabled(policy) : false);
 
