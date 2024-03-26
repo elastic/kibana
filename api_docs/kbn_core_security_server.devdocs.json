@@ -1,0 +1,335 @@
+{
+  "id": "@kbn/core-security-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.AuthcRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthcRequestHandlerContext",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/request_handler_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.AuthcRequestHandlerContext.getCurrentUser",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentUser",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null"
+            ],
+            "path": "packages/core/security/core-security-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.CoreAuthenticationService",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreAuthenticationService",
+        "description": [
+          "\nCore's authentication service\n"
+        ],
+        "path": "packages/core/security/core-security-server/src/authc.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CoreAuthenticationService.getCurrentUser",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentUser",
+            "description": [
+              "\nRetrieve the user bound to the provided request, or null if\nno user is authenticated.\n"
+            ],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => ",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null"
+            ],
+            "path": "packages/core/security/core-security-server/src/authc.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.CoreAuthenticationService.getCurrentUser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "The request to retrieve the authenticated user for."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/core/security/core-security-server/src/authc.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.CoreSecurityContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreSecurityContract",
+        "description": [
+          "\nThe contract exposed by the security provider for Core to\nconsume and re-expose via its security service.\n"
+        ],
+        "path": "packages/core/security/core-security-server/src/api_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CoreSecurityContract.authc",
+            "type": "Object",
+            "tags": [],
+            "label": "authc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.CoreAuthenticationService",
+                "text": "CoreAuthenticationService"
+              }
+            ],
+            "path": "packages/core/security/core-security-server/src/api_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.SecurityRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecurityRequestHandlerContext",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/request_handler_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.SecurityRequestHandlerContext.authc",
+            "type": "Object",
+            "tags": [],
+            "label": "authc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.AuthcRequestHandlerContext",
+                "text": "AuthcRequestHandlerContext"
+              }
+            ],
+            "path": "packages/core/security/core-security-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.SecurityServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecurityServiceSetup",
+        "description": [
+          "\nSetup contract for Core's security service.\n"
+        ],
+        "path": "packages/core/security/core-security-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.SecurityServiceSetup.registerSecurityApi",
+            "type": "Function",
+            "tags": [],
+            "label": "registerSecurityApi",
+            "description": [
+              "\nRegister the security implementation that then will be used and re-exposed by Core.\n"
+            ],
+            "signature": [
+              "(api: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.CoreSecurityContract",
+                "text": "CoreSecurityContract"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/security/core-security-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.SecurityServiceSetup.registerSecurityApi.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "api",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.CoreSecurityContract",
+                    "text": "CoreSecurityContract"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.SecurityServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecurityServiceStart",
+        "description": [
+          "\nStart contract for Core's security service.\n"
+        ],
+        "path": "packages/core/security/core-security-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.SecurityServiceStart.authc",
+            "type": "Object",
+            "tags": [],
+            "label": "authc",
+            "description": [
+              "\nThe {@link CoreAuthenticationService | authentication service}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.CoreAuthenticationService",
+                "text": "CoreAuthenticationService"
+              }
+            ],
+            "path": "packages/core/security/core-security-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.AuthenticationServiceContract",
+        "type": "Type",
+        "tags": [],
+        "label": "AuthenticationServiceContract",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.CoreAuthenticationService",
+            "text": "CoreAuthenticationService"
+          }
+        ],
+        "path": "packages/core/security/core-security-server/src/api_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
