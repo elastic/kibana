@@ -181,10 +181,9 @@ export function ObservabilityOnboardingAppRoot({
                       <ObservabilityOnboardingHeaderActionMenu />
                     </HeaderMenuPortal>
                   )}
-                  {experimentalOnboardingFlowEnabled && (
+                  {experimentalOnboardingFlowEnabled ? (
                     <ExperimentalOnboardingFlow />
-                  )}
-                  {!experimentalOnboardingFlowEnabled && (
+                  ) : (
                     <ObservabilityOnboardingApp />
                   )}
                 </EuiErrorBoundary>
