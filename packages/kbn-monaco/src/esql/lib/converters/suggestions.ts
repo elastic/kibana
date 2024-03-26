@@ -7,7 +7,7 @@
  */
 
 import type { SuggestionRawDefinition } from '@kbn/esql-services';
-import type { monaco } from '../../../monaco_imports';
+import { monaco } from '../../../monaco_imports';
 import { MonacoAutocompleteCommandDefinition } from '../types';
 
 export function wrapAsMonacoSuggestions(
@@ -17,13 +17,16 @@ export function wrapAsMonacoSuggestions(
     ({ label, text, asSnippet, kind, detail, documentation, sortText, command }) => ({
       label,
       insertText: text,
-      kind,
+      kind:
+        kind in monaco.languages.CompletionItemKind
+          ? monaco.languages.CompletionItemKind[kind]
+          : kind,
       detail,
       documentation,
       sortText,
       command,
       insertTextRules: asSnippet
-        ? 4 // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+        ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
         : undefined,
       range: undefined as unknown as monaco.IRange,
     })

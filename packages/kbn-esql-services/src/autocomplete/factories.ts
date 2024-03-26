@@ -41,7 +41,7 @@ export function getSuggestionFunctionDefinition(fn: FunctionDefinition): Suggest
     label: fullSignatures[0].declaration,
     text: `${fn.name}($0)`,
     asSnippet: true,
-    kind: 1,
+    kind: 'Function',
     detail: fn.description,
     documentation: {
       value: buildFunctionDocumentation(fullSignatures),
@@ -59,7 +59,7 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
     label: fn.name,
     text: hasArgs ? `${fn.name} $0` : fn.name,
     ...(hasArgs ? { insertTextRules: 4 } : {}), // kbn-esql-services.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-    kind: 11,
+    kind: 'Operator',
     detail: fn.description,
     documentation: {
       value: '',
@@ -103,7 +103,7 @@ export function getSuggestionCommandDefinition(
       ? `${commandDefinition.name} $0`
       : commandDefinition.name,
     asSnippet: true,
-    kind: 0,
+    kind: 'Method',
     detail: commandDefinition.description,
     documentation: {
       value: buildDocumentation(commandSignature.declaration, commandSignature.examples),
@@ -117,7 +117,7 @@ export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinitio
   fields.map((label) => ({
     label,
     text: getSafeInsertText(label),
-    kind: 4,
+    kind: 'Variable',
     detail: i18n.translate('kbn-esql-services.esql.autocomplete.fieldDefinition', {
       defaultMessage: `Field specified by the input table`,
     }),
@@ -128,7 +128,7 @@ export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDef
   variables.map((label) => ({
     label,
     text: label,
-    kind: 4,
+    kind: 'Variable',
     detail: i18n.translate('kbn-esql-services.esql.autocomplete.variableDefinition', {
       defaultMessage: `Variable specified by the user within the ES|QL query`,
     }),
@@ -139,7 +139,7 @@ export const buildSourcesDefinitions = (sources: string[]): SuggestionRawDefinit
   sources.map((label) => ({
     label,
     text: getSafeInsertText(label, { dashSupported: true }),
-    kind: 21,
+    kind: 'Reference',
     detail: i18n.translate('kbn-esql-services.esql.autocomplete.sourceDefinition', {
       defaultMessage: `Index`,
     }),
@@ -153,7 +153,7 @@ export const buildConstantsDefinitions = (
   userConstants.map((label) => ({
     label,
     text: label,
-    kind: 14,
+    kind: 'Constant',
     detail:
       detail ??
       i18n.translate('kbn-esql-services.esql.autocomplete.constantDefinition', {
@@ -166,7 +166,7 @@ export const buildNewVarDefinition = (label: string): SuggestionRawDefinition =>
   return {
     label,
     text: `${label} =`,
-    kind: 21,
+    kind: 'Variable',
     detail: i18n.translate('kbn-esql-services.esql.autocomplete.newVarDoc', {
       defaultMessage: 'Define a new variable',
     }),
@@ -180,7 +180,7 @@ export const buildPoliciesDefinitions = (
   policies.map(({ name: label, sourceIndices }) => ({
     label,
     text: getSafeInsertText(label, { dashSupported: true }),
-    kind: 5,
+    kind: 'Class',
     detail: i18n.translate('kbn-esql-services.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
       values: {
@@ -198,7 +198,7 @@ export const buildMatchingFieldsDefinition = (
   fields.map((label) => ({
     label,
     text: label,
-    kind: 4,
+    kind: 'Variable',
     detail: i18n.translate('kbn-esql-services.esql.autocomplete.matchingFieldDefinition', {
       defaultMessage: `Use to match on {matchingField} on the policy`,
       values: {
@@ -215,7 +215,7 @@ export const buildOptionDefinition = (
   const completeItem: SuggestionRawDefinition = {
     label: option.name,
     text: option.name,
-    kind: 21,
+    kind: 'Reference',
     detail: option.description,
     sortText: '1',
   };
@@ -235,7 +235,7 @@ export const buildSettingDefinitions = (
     label: `${setting.prefix || ''}${name}`,
     text: `${setting.prefix || ''}${name}:$0`,
     asSnippet: true,
-    kind: 21,
+    kind: 'Reference',
     detail: description ? `${setting.description} - ${description}` : setting.description,
     sortText: 'D',
     command: TRIGGER_SUGGESTION_COMMAND,
@@ -247,7 +247,7 @@ export const buildNoPoliciesAvailableDefinition = (): SuggestionRawDefinition =>
     defaultMessage: 'No available policy',
   }),
   text: '',
-  kind: 26,
+  kind: 'Issue',
   detail: i18n.translate('kbn-esql-services.esql.autocomplete.noPoliciesLabelsFound', {
     defaultMessage: 'Click to create',
   }),

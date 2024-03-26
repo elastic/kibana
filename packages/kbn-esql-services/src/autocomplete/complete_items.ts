@@ -103,7 +103,7 @@ function buildCharCompleteItem(
   return {
     label,
     text: quoted ? `"${label}"` : label,
-    kind: 11,
+    kind: 'Operator',
     detail,
     sortText,
   };
@@ -143,7 +143,7 @@ export const listCompleteItem: SuggestionRawDefinition = {
   label: '( ... )',
   text: '( $0 )',
   asSnippet: true,
-  kind: 11,
+  kind: 'Operator',
   detail: i18n.translate('kbn-esql-services.esql.autocomplete.listDoc', {
     defaultMessage: 'List of items ( ...)',
   }),
