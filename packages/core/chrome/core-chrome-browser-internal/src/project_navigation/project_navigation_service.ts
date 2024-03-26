@@ -447,7 +447,7 @@ export class ProjectNavigationService {
 
         this.initNavigation(id, definition.navigationTree$);
       }
-    } else {
+    } else if (id !== null) {
       this.activeSolutionNavDefinitionId$.next(id);
     }
   }
