@@ -569,40 +569,57 @@ describe('buildThreatDetailsItems', () => {
     ]);
   });
 
-  it('parses an object value as undefined', () => {
+  it('parses an object field', () => {
     const enrichment = {
-      object_field: {
-        foo: 'bar',
-        baz: 'qux',
-      },
+      'object_field.foo': ['bar'],
     };
 
-    // @ts-expect-error object_field intentionally does not conform to the CtiEnrichment type
     expect(buildThreatDetailsItems(enrichment)).toEqual([
       {
-        title: 'object_field',
+        title: 'object_field.foo',
         description: {
-          fieldName: 'object_field',
-          value: undefined,
+          fieldName: 'object_field.foo',
+          value: 'bar',
         },
       },
     ]);
   });
 
-  it('does not render fields containing arrays of objects', () => {
-    const enrichment = {
-      array_field: [{ foo: 'bar' }, { baz: 'qux' }],
-    };
+  describe('edge cases', () => {
+    describe('field responses for fields of type "flattened"', () => {
+      it('returns a note for the value of a flattened field containing a single object', () => {
+        const enrichment = {
+          flattened_object: [{ foo: 'bar' }],
+        };
 
-    expect(buildThreatDetailsItems(enrichment)).toEqual([
-      {
-        title: 'array_field',
-        description: {
-          fieldName: 'array_field',
-          value:
-            'This field contains nested object values, which are not rendered here. See the full document for all fields/values',
-        },
-      },
-    ]);
+        expect(buildThreatDetailsItems(enrichment)).toEqual([
+          {
+            title: 'flattened_object',
+            description: {
+              fieldName: 'flattened_object',
+              value:
+                'This field contains nested object values, which are not rendered here. See the full document for all fields/values',
+            },
+          },
+        ]);
+      });
+
+      it('returns a note for the value of a flattened field containing an array of objects', () => {
+        const enrichment = {
+          array_field: [{ foo: 'bar' }, { baz: 'qux' }],
+        };
+
+        expect(buildThreatDetailsItems(enrichment)).toEqual([
+          {
+            title: 'array_field',
+            description: {
+              fieldName: 'array_field',
+              value:
+                'This field contains nested object values, which are not rendered here. See the full document for all fields/values',
+            },
+          },
+        ]);
+      });
+    });
   });
 });
