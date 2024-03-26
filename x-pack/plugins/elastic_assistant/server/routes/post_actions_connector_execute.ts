@@ -216,7 +216,7 @@ export const postActionsConnectorExecuteRoute = (
                   messages: [...(prevMessages ?? []), ...(newMessage ? [newMessage] : [])],
                   ...(connectors[0]?.actionTypeId === '.gen-ai'
                     ? { n: 1, stop: null, temperature: 0.2 }
-                    : {}),
+                    : { temperature: 0, stop_sequences: [] }),
                 },
               },
             });
