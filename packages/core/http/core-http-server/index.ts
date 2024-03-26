@@ -104,7 +104,7 @@ export type {
   RouteValidatorContainer,
   RouteValidatorFullConfigContainer,
 } from './src/router';
-export { validBodyOutput, RouteValidationError } from './src/router';
+export { validBodyOutput, RouteValidationError, getRequestValidation } from './src/router';
 
 export type { ICspConfig } from './src/csp';
 

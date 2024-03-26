@@ -76,3 +76,4 @@ export type {
   LifecycleResponseFactory,
 } from './response_factory';
 export type { RawRequest, FakeRawRequest } from './raw_request';
+export { getRequestValidation, isFullValidatorContainer } from './utils';
