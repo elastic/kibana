@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  CONNECTOR_DEFINITIONS,
   createConnector,
   deleteConnectorById,
   fetchConnectorById,
@@ -62,30 +61,6 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
             headers: { 'content-type': 'application/json' },
           })
         : response.notFound();
-    }
-  );
-
-  router.get(
-    {
-      path: '/internal/serverless_search/connector_types',
-      validate: {},
-    },
-    async (context, request, response) => {
-      const connectors = CONNECTOR_DEFINITIONS.map((connector) => ({
-        ...connector,
-        iconPath: connector.iconPath
-          ? http.basePath.prepend(
-              `/plugins/enterpriseSearch/assets/source_icons/${connector.iconPath}`
-            )
-          : 'logoEnterpriseSearch',
-      }));
-
-      return response.ok({
-        body: {
-          connectors,
-        },
-        headers: { 'content-type': 'application/json' },
-      });
     }
   );
 

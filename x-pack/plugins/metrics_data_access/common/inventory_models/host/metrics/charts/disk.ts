@@ -49,7 +49,7 @@ const diskThroughputReadWrite: LensConfigWithId = {
 };
 
 const diskUsageByMountPoint: LensConfigWithId = {
-  id: 'DiskUsageByMountPoint',
+  id: 'diskUsageByMountPoint',
   chartType: 'xy',
   title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskUsageByMountingPoint', {
     defaultMessage: 'Disk Usage by Mount Point',
