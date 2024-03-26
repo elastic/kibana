@@ -33,7 +33,9 @@ export class CompleteExternalActionsTaskRunner
   constructor(
     private readonly endpointContextServices: EndpointAppContextService,
     private readonly esClient: ElasticsearchClient,
-    private readonly nextRunInterval: string = '60s'
+    private readonly nextRunInterval: string = '60s',
+    private readonly taskId?: string,
+    private readonly taskType?: string
   ) {
     this.log = this.endpointContextServices.createLogger(
       // Adding a unique identifier to the end of the class name to help identify log entries related to this run
@@ -113,7 +115,11 @@ export class CompleteExternalActionsTaskRunner
           }
 
           const agentTypeActionsClient =
-            this.endpointContextServices.getInternalResponseActionsClient({ agentType });
+            this.endpointContextServices.getInternalResponseActionsClient({
+              agentType,
+              taskType: this.taskType,
+              taskId: this.taskId,
+            });
 
           return agentTypeActionsClient
             .processPendingActions({

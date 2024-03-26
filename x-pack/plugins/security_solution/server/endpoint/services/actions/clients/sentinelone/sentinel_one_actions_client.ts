@@ -12,8 +12,8 @@ import {
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
-  SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
+  SentinelOneGetAgentsResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type { NormalizedExternalConnectorClientExecuteOptions } from '../lib/normalized_external_connector_client';
 import { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
@@ -28,8 +28,8 @@ import type { ActionDetails, LogsEndpointAction } from '../../../../../../common
 import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
-  ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientValidateRequestResponse,
+  ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 
@@ -272,5 +272,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     // if (abortSignal.aborted) {
     //   return;
     // }
+    // Dev test entry below
+    // await this.getAgentDetails('123').catch(() => {});
   }
 }
