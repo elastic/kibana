@@ -2319,24 +2319,36 @@
       "error": true
     },
     {
+      "query": "meta",
+      "error": true
+    },
+    {
+      "query": "meta functions",
+      "error": false
+    },
+    {
+      "query": "meta functions()",
+      "error": true
+    },
+    {
+      "query": "meta functions blah",
+      "error": true
+    },
+    {
+      "query": "meta info",
+      "error": true
+    },
+    {
       "query": "show",
       "error": true
     },
     {
       "query": "show functions",
-      "error": false
+      "error": true
     },
     {
       "query": "show info",
       "error": false
-    },
-    {
-      "query": "show functions()",
-      "error": true
-    },
-    {
-      "query": "show functions blah",
-      "error": true
     },
     {
       "query": "show numberField",

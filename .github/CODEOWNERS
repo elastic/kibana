@@ -11,7 +11,6 @@ x-pack/plugins/actions @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
 packages/kbn-actions-types @elastic/response-ops
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
-src/plugins/ai_assistant_management/observability @elastic/obs-knowledge-team
 src/plugins/ai_assistant_management/selection @elastic/obs-knowledge-team
 x-pack/packages/ml/aiops_components @elastic/ml-ui
 x-pack/plugins/aiops @elastic/ml-ui
@@ -583,6 +582,7 @@ src/plugins/no_data_page @elastic/appex-sharedux
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/plugins/observability_solution/observability_ai_assistant_app @elastic/obs-knowledge-team
+x-pack/plugins/observability_solution/observability_ai_assistant_management @elastic/obs-knowledge-team
 x-pack/plugins/observability_solution/observability_ai_assistant @elastic/obs-knowledge-team
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
@@ -682,6 +682,7 @@ x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
 packages/kbn-search-api-panels @elastic/enterprise-search-frontend
 packages/kbn-search-connectors @elastic/enterprise-search-frontend
+x-pack/plugins/search_connectors @elastic/enterprise-search-frontend
 packages/kbn-search-errors @elastic/kibana-data-discovery
 examples/search_examples @elastic/kibana-data-discovery
 packages/kbn-search-index-documents @elastic/enterprise-search-frontend
