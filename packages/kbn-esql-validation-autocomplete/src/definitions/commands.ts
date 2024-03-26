@@ -64,7 +64,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'meta',
-    description: i18n.translate('monaco.esql.definitions.metaDoc', {
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metaDoc', {
       defaultMessage: 'Returns information about the ES|QL environment',
     }),
     examples: ['meta functions'],
