@@ -68,6 +68,8 @@ export default ({ getService }: FtrProviderContext) => {
    * Tests
    */
   describe('Generate CSV from SearchSource', () => {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/179456
+    this.tags(['failsOnMKI']);
     beforeEach(async () => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
@@ -478,8 +480,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('nanosecond formatting', () => {
-      // failsOnMKI, see https://github.com/elastic/kibana/issues/179456
-      this.tags(['failsOnMKI']);
       before(async () => {
         await esArchiver.load(archives.nanos.data);
         await kibanaServer.importExport.load(archives.nanos.savedObjects);
