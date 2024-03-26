@@ -1,5 +1,5 @@
 {
-  "id": "aiAssistantManagementObservability",
+  "id": "observabilityAiAssistantManagement",
   "client": {
     "classes": [],
     "functions": [],
@@ -8,13 +8,13 @@
     "misc": [],
     "objects": [],
     "setup": {
-      "parentPluginId": "aiAssistantManagementObservability",
+      "parentPluginId": "observabilityAiAssistantManagement",
       "id": "def-public.AiAssistantManagementObservabilityPluginSetup",
       "type": "Interface",
       "tags": [],
       "label": "AiAssistantManagementObservabilityPluginSetup",
       "description": [],
-      "path": "src/plugins/ai_assistant_management/observability/public/plugin.ts",
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant_management/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -22,13 +22,13 @@
       "initialIsOpen": true
     },
     "start": {
-      "parentPluginId": "aiAssistantManagementObservability",
+      "parentPluginId": "observabilityAiAssistantManagement",
       "id": "def-public.AiAssistantManagementObservabilityPluginStart",
       "type": "Interface",
       "tags": [],
       "label": "AiAssistantManagementObservabilityPluginStart",
       "description": [],
-      "path": "src/plugins/ai_assistant_management/observability/public/plugin.ts",
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant_management/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
