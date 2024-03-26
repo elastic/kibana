@@ -500,7 +500,7 @@
             "text": "PublishesPanelDescription"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -514,7 +514,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -540,7 +540,7 @@
             "text": "PublishesPanelTitle"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -554,7 +554,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -581,7 +581,7 @@
           },
           ">"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -595,7 +595,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -703,7 +703,7 @@
             "text": "PublishesTimeRange"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -717,7 +717,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -743,7 +743,7 @@
             "text": "PublishesUnifiedSearch"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -757,7 +757,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -865,7 +865,7 @@
             "text": "PublishesWritablePanelDescription"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -879,7 +879,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -905,7 +905,7 @@
             "text": "PublishesWritablePanelTitle"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -919,7 +919,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -945,7 +945,7 @@
             "text": "PublishesWritableUnifiedSearch"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -959,7 +959,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1068,6 +1068,69 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.getInitialValuesFromComparators",
+        "type": "Function",
+        "tags": [],
+        "label": "getInitialValuesFromComparators",
+        "description": [],
+        "signature": [
+          "<StateType extends object = object>(comparators: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.StateComparators",
+            "text": "StateComparators"
+          },
+          "<StateType>, comparatorKeys: (keyof StateType)[]) => Partial<StateType>"
+        ],
+        "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.getInitialValuesFromComparators.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "comparators",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.StateComparators",
+                "text": "StateComparators"
+              },
+              "<StateType>"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.getInitialValuesFromComparators.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "comparatorKeys",
+            "description": [],
+            "signature": [
+              "(keyof StateType)[]"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.getPanelTitle",
         "type": "Function",
         "tags": [],
@@ -1084,7 +1147,7 @@
           },
           ">) => string | undefined"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1106,7 +1169,7 @@
               },
               ">"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1213,6 +1276,252 @@
               "unknown"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.initializeTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "initializeTimeRange",
+        "description": [],
+        "signature": [
+          "(rawState: ",
+          "SerializedTimeRange",
+          ", parentApi?: unknown) => { appliedTimeRange$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined>; cleanupTimeRange: () => void; serializeTimeRange: () => ",
+          "SerializedTimeRange",
+          "; timeRangeApi: ",
+          "PublishesWritableTimeRange",
+          "; timeRangeComparators: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.StateComparators",
+            "text": "StateComparators"
+          },
+          "<",
+          "SerializedTimeRange",
+          ">; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.initializeTimeRange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rawState",
+            "description": [],
+            "signature": [
+              "SerializedTimeRange"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.initializeTimeRange.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "parentApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.initializeTitles",
+        "type": "Function",
+        "tags": [],
+        "label": "initializeTitles",
+        "description": [],
+        "signature": [
+          "(rawState: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.SerializedTitles",
+            "text": "SerializedTitles"
+          },
+          ") => { titlesApi: ",
+          "TitlesApi",
+          "; titleComparators: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.StateComparators",
+            "text": "StateComparators"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.SerializedTitles",
+            "text": "SerializedTitles"
+          },
+          ">; serializeTitles: () => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.SerializedTitles",
+            "text": "SerializedTitles"
+          },
+          "; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.initializeTitles.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rawState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.SerializedTitles",
+                "text": "SerializedTitles"
+              }
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.runComparators",
+        "type": "Function",
+        "tags": [],
+        "label": "runComparators",
+        "description": [],
+        "signature": [
+          "<StateType extends object = object>(comparators: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.StateComparators",
+            "text": "StateComparators"
+          },
+          "<StateType>, comparatorKeys: (keyof StateType)[], lastSavedState: StateType | undefined, latestState: Partial<StateType>) => Partial<StateType> | undefined"
+        ],
+        "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.runComparators.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "comparators",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.StateComparators",
+                "text": "StateComparators"
+              },
+              "<StateType>"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.runComparators.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "comparatorKeys",
+            "description": [],
+            "signature": [
+              "(keyof StateType)[]"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.runComparators.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "lastSavedState",
+            "description": [],
+            "signature": [
+              "StateType | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.runComparators.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "latestState",
+            "description": [],
+            "signature": [
+              "Partial<StateType>"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1441,7 +1750,7 @@
           },
           "> | undefined) => string | undefined"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1463,58 +1772,7 @@
               },
               "> | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useDefaultPanelTitle",
-        "type": "Function",
-        "tags": [],
-        "label": "useDefaultPanelTitle",
-        "description": [
-          "\nA hook that gets this API's default title as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
-          },
-          "> | undefined) => string | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useDefaultPanelTitle.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesPanelTitle",
-                "text": "PublishesPanelTitle"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1566,57 +1824,6 @@
               "> | undefined"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useHidePanelTitle",
-        "type": "Function",
-        "tags": [],
-        "label": "useHidePanelTitle",
-        "description": [
-          "\nA hook that gets this API's hide panel title setting as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
-          },
-          "> | undefined) => boolean | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useHidePanelTitle.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesPanelTitle",
-                "text": "PublishesPanelTitle"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1704,7 +1911,7 @@
           },
           "> | undefined) => string | undefined"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1726,58 +1933,7 @@
               },
               "> | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.usePanelTitle",
-        "type": "Function",
-        "tags": [],
-        "label": "usePanelTitle",
-        "description": [
-          "\nA hook that gets this API's panel title as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
-          },
-          "> | undefined) => string | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.usePanelTitle.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesPanelTitle",
-                "text": "PublishesPanelTitle"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -3366,7 +3522,7 @@
         "tags": [],
         "label": "PublishesPanelDescription",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3530,7 +3686,7 @@
               "Subscription",
               "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3551,7 +3707,7 @@
               },
               "<string | undefined> | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3565,7 +3721,7 @@
         "tags": [],
         "label": "PublishesPanelTitle",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3729,7 +3885,7 @@
               "Subscription",
               "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3893,7 +4049,7 @@
               "Subscription",
               "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3914,7 +4070,7 @@
               },
               "<string | undefined> | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4486,7 +4642,7 @@
         "tags": [],
         "label": "PublishesTimeRange",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4850,7 +5006,7 @@
               },
               " | undefined>; }; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5430,6 +5586,62 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.SerializedTitles",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedTitles",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.SerializedTitles.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.SerializedTitles.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.SerializedTitles.hidePanelTitles",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hidePanelTitles",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -5473,6 +5685,111 @@
         "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.ComparatorDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "ComparatorDefinition",
+        "description": [],
+        "signature": [
+          "[",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<StateType[KeyType]>, (value: StateType[KeyType]) => void, (",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.ComparatorFunction",
+            "text": "ComparatorFunction"
+          },
+          "<StateType, KeyType> | undefined)?]"
+        ],
+        "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.ComparatorFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "ComparatorFunction",
+        "description": [],
+        "signature": [
+          "(last: StateType[KeyType] | undefined, current: StateType[KeyType] | undefined, lastState?: Partial<StateType> | undefined, currentState?: Partial<StateType> | undefined) => boolean"
+        ],
+        "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.ComparatorFunction.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "last",
+            "description": [],
+            "signature": [
+              "StateType[KeyType] | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.ComparatorFunction.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "current",
+            "description": [],
+            "signature": [
+              "StateType[KeyType] | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.ComparatorFunction.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "lastState",
+            "description": [],
+            "signature": [
+              "Partial<StateType> | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.ComparatorFunction.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "currentState",
+            "description": [],
+            "signature": [
+              "Partial<StateType> | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5549,7 +5866,7 @@
           },
           " | undefined>; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5571,7 +5888,7 @@
           },
           " & { setPanelDescription: (newTitle: string | undefined) => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5593,7 +5910,7 @@
           },
           " & { setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5661,7 +5978,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => void; setFilters: (filters: ",
+          " | undefined) => void; } & { setFilters: (filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -5679,7 +5996,7 @@
           },
           " | undefined) => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5879,6 +6196,29 @@
           "; }; toPromise: { (): Promise<T | undefined>; (PromiseCtor: PromiseConstructor): Promise<T | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<T | undefined>; }; }"
         ],
         "path": "packages/presentation/presentation_publishing/publishing_subject/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.StateComparators",
+        "type": "Type",
+        "tags": [],
+        "label": "StateComparators",
+        "description": [],
+        "signature": [
+          "{ [KeyType in keyof StateType]: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.ComparatorDefinition",
+            "text": "ComparatorDefinition"
+          },
+          "<StateType, KeyType>; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/comparators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
