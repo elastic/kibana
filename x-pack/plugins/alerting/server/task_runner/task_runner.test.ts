@@ -3288,52 +3288,6 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test('loadIndirectParams Fetches the ruleData and returns the indirectParams', async () => {
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        },
-      },
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-    });
-
-    const result = await taskRunner.loadIndirectParams();
-
-    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({
-      data: expect.objectContaining({ indirectParams: mockedRawRuleSO.attributes }),
-    });
-  });
-
-  test('loadIndirectParams return error when cannot fetch the ruleData', async () => {
-    const error = new Error('test');
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(error);
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        },
-      },
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-    });
-
-    const result = await taskRunner.loadIndirectParams();
-
-    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({ error });
-    expect(getErrorSource(result.error as Error)).toBe(TaskErrorSource.FRAMEWORK);
-  });
-
   function testAlertingEventLogCalls({
     ruleContext = alertingEventLoggerInitializer,
     activeAlerts = 0,
@@ -3401,7 +3355,6 @@ describe('Task Runner', () => {
           claim_to_start_duration_ms: 0,
           persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
-          prepare_to_run_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
           rule_type_run_duration_ms: 0,
@@ -3437,7 +3390,6 @@ describe('Task Runner', () => {
           claim_to_start_duration_ms: 0,
           persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
-          prepare_to_run_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
           rule_type_run_duration_ms: 0,
@@ -3471,7 +3423,6 @@ describe('Task Runner', () => {
           claim_to_start_duration_ms: 0,
           persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
-          prepare_to_run_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
           rule_type_run_duration_ms: 0,

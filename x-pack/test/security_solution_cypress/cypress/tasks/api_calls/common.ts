@@ -55,48 +55,6 @@ export const deleteAlertsAndRules = () => {
   deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
 };
 
-export const deleteExceptionLists = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'exception-list',
-              },
-            },
-          ],
-        },
-      },
-    },
-  });
-};
-
-export const deleteEndpointExceptionList = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'exception-list-agnostic',
-              },
-            },
-          ],
-        },
-      },
-    },
-  });
-};
-
 export const getConnectors = () =>
   rootRequest<AllConnectorsResponse[]>({
     method: 'GET',
