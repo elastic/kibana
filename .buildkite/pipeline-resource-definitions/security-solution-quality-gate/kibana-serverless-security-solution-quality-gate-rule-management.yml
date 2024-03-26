@@ -7,15 +7,14 @@ metadata:
 spec:
   type: buildkite-pipeline
   owner: 'group:security-engineering-productivity'
+  system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: buildkite-pipeline-kibana-serverless-security-solution-quality-gate-rule-management
+      name: kibana-serverless-security-solution-quality-gate-rule-management
       description: "[MKI] Executes Cypress tests for the Rule Management team"
     spec:
-      env:
-        SLACK_NOTIFICATIONS_ENABLED: 'false'
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/security_solution_quality_gate/mki_security_solution_rule_management.yml
       provider_settings:

@@ -12,11 +12,9 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: buildkite-pipeline-kibana-serverless-security-solution-quality-gate-detection-engine
+      name: kibana-serverless-security-solution-quality-gate-detection-engine
       description: "[MKI] Executes Cypress tests for the Detection Engine team"
     spec:
-      env:
-        SLACK_NOTIFICATIONS_ENABLED: 'false'
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/security_solution_quality_gate/mki_security_solution_detection_engine.yml
       provider_settings:
