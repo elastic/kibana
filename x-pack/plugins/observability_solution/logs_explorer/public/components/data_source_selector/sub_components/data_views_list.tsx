@@ -6,9 +6,10 @@
  */
 
 import { EuiContextMenu, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import React from 'react';
 import { dataViewsLabel, DATA_VIEWS_PANEL_ID } from '../constants';
+import { tabContentHeight } from '../shared_styles';
 
 interface DataViewListProps extends React.HTMLAttributes<HTMLElement> {
   items: EuiContextMenuPanelItemDescriptor[];
@@ -18,11 +19,12 @@ export function DataViewList({ children, items, ...props }: DataViewListProps) {
   return (
     <div {...props}>
       {children}
-      <ContextMenu
+      <EuiContextMenu
         initialPanelId={DATA_VIEWS_PANEL_ID}
         className="eui-yScroll"
         data-test-subj="dataViewsContextMenu"
         size="s"
+        css={contextMenuStyle}
         panels={[
           {
             id: DATA_VIEWS_PANEL_ID,
@@ -36,7 +38,7 @@ export function DataViewList({ children, items, ...props }: DataViewListProps) {
   );
 }
 
-const ContextMenu = styled(EuiContextMenu)`
-  max-height: 440px;
+const contextMenuStyle = css`
+  ${tabContentHeight}
   transition: none !important;
 `;

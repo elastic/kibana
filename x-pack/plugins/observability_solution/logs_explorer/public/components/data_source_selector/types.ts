@@ -89,6 +89,8 @@ export type DataSourceSelectorSearchParams = Pick<SearchParams, 'name' | 'sortOr
 
 export type DataSourceSelectorSearchHandler = (params: DataSourceSelectorSearchParams) => void;
 
+export type DataSourceSelectorScrollHandler = (params: DataSourceSelectorSearchParams) => void;
+
 export type DatasetSelectionHandler = (dataset: Dataset) => void;
 
 export type DataViewSelectionHandler = (dataView: DataViewDescriptor) => void;

@@ -10,6 +10,7 @@ import { useInterpret, useSelector } from '@xstate/react';
 import { isAllDatasetSelection } from '../../../../common/data_source_selection';
 import {
   DatasetSelectionHandler,
+  DataSourceSelectorScrollHandler,
   DataSourceSelectorSearchHandler,
   DataViewSelectionHandler,
 } from '../types';
@@ -63,7 +64,7 @@ export const useDataSourceSelector = ({
     [dataSourceSelectorStateService]
   );
 
-  const scrollToIntegrationsBottom = useCallback(
+  const scrollToIntegrationsBottom = useCallback<DataSourceSelectorScrollHandler>(
     () => dataSourceSelectorStateService.send({ type: 'SCROLL_TO_INTEGRATIONS_BOTTOM' }),
     [dataSourceSelectorStateService]
   );

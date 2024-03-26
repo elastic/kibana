@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo } from 'react';
+import React, { ComponentProps, Fragment, useMemo } from 'react';
 import {
   EuiAccordion,
   useGeneratedHtmlId,
@@ -15,17 +15,40 @@ import {
   EuiText,
   EuiIcon,
   EuiPanel,
+  EuiFlexGroupProps,
+  EuiPanelProps,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
+import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
+import { Dataset, Integration } from '../../../../common/datasets';
 import { useIntersectionRef } from '../../../hooks/use_intersection_ref';
 import { nameColumnLabel } from '../constants';
+import { tabContentHeight } from '../shared_styles';
+import {
+  DataSourceSelectorScrollHandler,
+  DataSourceSelectorSearchHandler,
+  DataSourceSelectorSearchParams,
+} from '../types';
 
-interface IntegrationsListProps {
-  items: unknown[];
+interface TDatasetItem extends Dataset {
+  onClick: () => void;
 }
+
+interface TIntegrationItem extends Integration {
+  content?: React.ReactNode;
+  isLoading?: boolean;
+  datasets: TDatasetItem[];
+}
+
+type IntegrationsListProps = {
+  items: TIntegrationItem[];
+  statusPrompt: React.ReactNode;
+  onScrollEnd: DataSourceSelectorScrollHandler;
+  onSortByName: DataSourceSelectorSearchHandler;
+  search: DataSourceSelectorSearchParams;
+} & EuiPanelProps;
 
 const rule = <EuiHorizontalRule margin="none" />;
 
@@ -51,7 +74,7 @@ export function IntegrationsList({
     >
       {children}
       {rule}
-      <IntegrationListWrapper className="eui-yScroll" paddingSize="none" hasShadow={false}>
+      <EuiPanel className="eui-yScroll" paddingSize="none" hasShadow={false} css={tabContentHeight}>
         <Header onSortByName={onSortByName} search={search} />
         {items.map((integration, pos) => {
           const isLastItem = pos === items.length - 1;
@@ -65,12 +88,16 @@ export function IntegrationsList({
         })}
         <span ref={spyRef} /> {/* Used to trigger integrations infinite scroll loading */}
         {shouldDisplayPrompt && statusPrompt}
-      </IntegrationListWrapper>
+      </EuiPanel>
     </EuiPanel>
   );
 }
 
-function IntegrationItem({ integration }) {
+interface IntegrationItemProps {
+  integration: TIntegrationItem;
+}
+
+function IntegrationItem({ integration }: IntegrationItemProps) {
   const { id, datasets, icons, name, version, isLoading } = integration;
   const accordionId = useGeneratedHtmlId({ prefix: 'integration', suffix: id });
 
@@ -109,13 +136,20 @@ function IntegrationItem({ integration }) {
   );
 }
 
-function Header({ onSortByName, search, ...props }) {
-  const handleNameSort = (sortOrder) => onSortByName({ ...search, sortOrder });
+type HeaderProps = Pick<IntegrationsListProps, 'onSortByName' | 'search'> & ListRowProps;
+
+function Header({ onSortByName, search, ...props }: HeaderProps) {
+  const handleNameSort = (sortOrder: SortOrder) => onSortByName({ ...search, sortOrder });
 
   return (
     <div css={headerStyle}>
-      <ListRow withIndentation {...props}>
-        <NameColumn component={Sortable} sortOrder={search.sortOrder} onSort={handleNameSort}>
+      <ListRow {...props} withIndentation>
+        <NameColumn
+          component={Sortable}
+          // @ts-expect-error This is an issue with EuiFlexItem not correctly inferring the props of the passed component. https://github.com/elastic/eui/issues/7612
+          sortOrder={search.sortOrder}
+          onSort={handleNameSort}
+        >
           <EuiText size="xs">
             <strong>{nameColumnLabel}</strong>
           </EuiText>
@@ -131,7 +165,12 @@ function Header({ onSortByName, search, ...props }) {
   );
 }
 
-function IntegrationItemButton({ integration, icon, ...props }) {
+interface IntegrationItemButtonProps extends ListRowProps {
+  integration: TIntegrationItem;
+  icon: React.ReactNode;
+}
+
+function IntegrationItemButton({ integration, icon, ...props }: IntegrationItemButtonProps) {
   const count = integration.datasets?.length ?? 0;
 
   return (
@@ -148,11 +187,17 @@ function IntegrationItemButton({ integration, icon, ...props }) {
   );
 }
 
-function DatasetItem({ dataset, icon, ...props }) {
+interface DatasetItemProps extends ListRowProps {
+  dataset: TDatasetItem;
+  icon: React.ReactNode;
+}
+
+function DatasetItem({ dataset, icon, ...props }: DatasetItemProps) {
   return (
-    <ListRow withIndentation css={datasetItemStyle} {...props}>
+    <ListRow {...props} withIndentation css={datasetItemStyle}>
       <NameColumn
         component={ButtonWithIcon}
+        // @ts-expect-error This is an issue with EuiFlexItem not correctly inferring the props of the passed component. https://github.com/elastic/eui/issues/7612
         text={dataset.title}
         icon={icon}
         onClick={dataset.onClick}
@@ -161,7 +206,12 @@ function DatasetItem({ dataset, icon, ...props }) {
   );
 }
 
-function ListRow({ css: customCss = '', withIndentation, ...props }) {
+interface ListRowProps extends EuiFlexGroupProps {
+  css?: SerializedStyles;
+  withIndentation?: boolean;
+}
+
+function ListRow({ css: customCss, withIndentation = false, ...props }: ListRowProps) {
   const styles = css`
     padding-right: ${euiThemeVars.euiSizeM};
     ${withIndentation ? indentationStyle : ''}
@@ -171,7 +221,12 @@ function ListRow({ css: customCss = '', withIndentation, ...props }) {
   return <EuiFlexGroup gutterSize="s" alignItems="center" css={styles} {...props} />;
 }
 
-function TextWithIcon({ icon, text, ...props }) {
+interface TextWithIconProps extends EuiFlexGroupProps {
+  icon: React.ReactNode;
+  text: React.ReactNode;
+}
+
+function TextWithIcon({ icon, text, ...props }: TextWithIconProps) {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} {...props}>
       <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
@@ -180,7 +235,11 @@ function TextWithIcon({ icon, text, ...props }) {
   );
 }
 
-function ButtonWithIcon({ icon, text, ...props }) {
+interface ButtonWithIconProps
+  extends React.HTMLAttributes<HTMLButtonElement>,
+    Pick<TextWithIconProps, 'icon' | 'text'> {}
+
+function ButtonWithIcon({ icon, text, ...props }: ButtonWithIconProps) {
   return (
     <button {...props}>
       <TextWithIcon icon={icon} text={text} />
@@ -188,11 +247,13 @@ function ButtonWithIcon({ icon, text, ...props }) {
   );
 }
 
-function NameColumn(props) {
+type ColumnProps = ComponentProps<typeof ListColumn>;
+
+function NameColumn(props: ColumnProps) {
   return <ListColumn grow={3} {...props} />;
 }
 
-function DatasetCountColumn(props) {
+function DatasetCountColumn(props: ColumnProps) {
   return <ListColumn grow={false} {...props} />;
 }
 
@@ -201,7 +262,13 @@ function DatasetCountColumn(props) {
 //   return <ListColumn grow={2} {...props} />;
 // }
 
-function Sortable({ children, sortOrder = 'asc', onSort, ...props }) {
+type SortOrder = 'asc' | 'desc';
+interface SortableProps extends React.HTMLAttributes<HTMLButtonElement> {
+  sortOrder: SortOrder;
+  onSort: (order: SortOrder) => void;
+}
+
+function Sortable({ children, sortOrder = 'asc', onSort, ...props }: SortableProps) {
   const isAscending = sortOrder === 'asc';
 
   const handleSort = () => {
@@ -220,12 +287,11 @@ function Sortable({ children, sortOrder = 'asc', onSort, ...props }) {
   );
 }
 
+/**
+ * Scoped styled
+ */
 const ListColumn = styled(EuiFlexItem)`
   padding: ${euiThemeVars.euiSizeS} 0;
-`;
-
-const IntegrationListWrapper = styled(EuiPanel)`
-  max-height: 400px;
 `;
 
 const indentationStyle = css`

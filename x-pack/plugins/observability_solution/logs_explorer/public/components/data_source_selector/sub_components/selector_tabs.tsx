@@ -30,7 +30,7 @@ const TabIdContext = React.createContext(INTEGRATIONS_TAB_ID);
 
 const actions = {
   [DATA_VIEWS_TAB_ID]: [],
-  [INTEGRATIONS_TAB_ID]: [<AddDataButton />],
+  [INTEGRATIONS_TAB_ID]: [<AddDataButton key="dataSourceSelectorIntegrationsAddData" />],
 };
 
 export function DataSourceSelectorTabs({ children, tabId }: PropsWithChildren<{ tabId: TabId }>) {
