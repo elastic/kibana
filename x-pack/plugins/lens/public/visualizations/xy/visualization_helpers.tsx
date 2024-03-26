@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
-import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
+import {
+  DatasourceLayers,
+  FramePublicAPI,
+  OperationMetadata,
+  VisualizationType,
+} from '../../types';
 import {
   State,
   visualizationTypes,
@@ -418,3 +423,16 @@ export const isNumericMetric = (op: OperationMetadata) =>
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
 export const isBucketed = (op: OperationMetadata) => op.isBucketed;
+
+export const isTimeChart = (
+  dataLayers: XYDataLayerConfig[],
+  frame?: Pick<FramePublicAPI, 'datasourceLayers'> | undefined
+) =>
+  Boolean(
+    dataLayers.length &&
+      dataLayers.every(
+        (dataLayer) =>
+          dataLayer.xAccessor &&
+          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
+      )
+  );
