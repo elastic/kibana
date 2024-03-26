@@ -148,7 +148,7 @@ export const DFAnalyticsJobIdLink = ({ jobId }: { jobId: string }) => {
   });
 
   return (
-    <EuiLink href={href} css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }} title={jobId}>
+    <EuiLink href={href} css={{ overflow: 'hidden', textOverflow: 'ellipsis' }} title={jobId}>
       {jobId}
     </EuiLink>
   );
