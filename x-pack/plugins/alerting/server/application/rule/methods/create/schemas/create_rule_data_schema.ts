@@ -15,7 +15,6 @@ export const createRuleDataSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   consumer: schema.string(),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
   schedule: schema.object({
     interval: schema.string({ validate: validateDuration }),
@@ -39,6 +38,10 @@ export const createRuleDataSchema = schema.object({
     }),
     { defaultValue: [] }
   ),
-  notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   alertDelay: schema.maybe(alertDelaySchema),
+  /**
+   * Deprectated - use action-level `notifyWhen` and `throttle` instead
+   */
+  notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
+  throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
 });
