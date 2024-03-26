@@ -41,6 +41,7 @@ import {
   setRowsPerPageTo,
   sortByTableColumn,
 } from '../../../../tasks/table_pagination';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 function createTestRules(): void {
   createRule(getNewRule({ rule_id: '1', name: 'test 1', tags: ['tag-a'], enabled: false }));
@@ -96,11 +97,9 @@ function expectDefaultRulesTableState(): void {
 }
 
 describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    createTestRules();
-  });
-
   beforeEach(() => {
+    deleteAlertsAndRules();
+    createTestRules();
     login();
     resetRulesTableState();
   });

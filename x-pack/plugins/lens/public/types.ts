@@ -1241,8 +1241,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   DimensionTriggerComponent?: (props: {
     columnId: string;
     label: string;
-    hideTooltip?: boolean;
-  }) => null | ReactElement<{ columnId: string; label: string; hideTooltip?: boolean }>;
+  }) => null | ReactElement<{ columnId: string; label: string }>;
   getAddLayerButtonComponent?: (
     props: AddLayerButtonProps
   ) => null | ReactElement<AddLayerButtonProps>;

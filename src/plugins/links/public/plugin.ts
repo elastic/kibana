@@ -79,7 +79,7 @@ export class LinksPlugin
         title: APP_NAME,
         icon: APP_ICON,
         description: LinksStrings.getDescription(),
-        stage: 'experimental',
+        stage: 'production',
         appExtensions: {
           visualizations: {
             docTypes: [CONTENT_ID],
@@ -97,7 +97,7 @@ export class LinksPlugin
                 updatedAt,
                 icon: APP_ICON,
                 typeTitle: APP_NAME,
-                stage: 'experimental',
+                stage: 'production',
                 savedObjectType: type,
               };
             },
