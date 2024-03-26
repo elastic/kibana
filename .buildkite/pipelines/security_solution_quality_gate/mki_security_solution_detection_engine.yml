@@ -34,6 +34,8 @@ steps:
     label: 'Serverless MKI QA Detection Engine - Security Solution Cypress Tests'
     key: test_detection_engine
     depends_on: build_image
+    env:
+      BK_TEST_SUITE_KEY: "serverless-cypress-detection-engine"
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
@@ -52,6 +54,8 @@ steps:
     label: 'Serverless MKI QA Detection Engine - Exceptions - Security Solution Cypress Tests'
     key: test_detection_engine_exceptions
     depends_on: build_image
+    env:
+      BK_TEST_SUITE_KEY: "serverless-cypress-detection-engine"
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa

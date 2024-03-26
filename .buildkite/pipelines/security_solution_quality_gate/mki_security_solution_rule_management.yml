@@ -34,6 +34,8 @@ steps:
     label: 'Serverless MKI QA Rule Management - Security Solution Cypress Tests'
     depends_on: build_image
     key: test_rule_management
+    env:
+      BK_TEST_SUITE_KEY: "serverless-cypress-rule-management"
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
@@ -52,6 +54,8 @@ steps:
     label: 'Serverless MKI QA Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     depends_on: build_image
     key: test_rule_management_prebuilt_rules
+    env:
+      BK_TEST_SUITE_KEY: "serverless-cypress-rule-management"
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa

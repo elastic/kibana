@@ -34,6 +34,8 @@ steps:
     label: 'Serverless MKI QA AI Assistant - Security Solution Cypress Tests'
     depends_on: build_image
     key: test_ai_assistant
+    env:
+      BK_TEST_SUITE_KEY: "serverless-cypress-gen-ai"
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa

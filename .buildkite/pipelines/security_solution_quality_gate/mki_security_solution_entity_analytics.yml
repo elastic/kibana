@@ -34,6 +34,8 @@ steps:
     label: 'Serverless MKI QA Entity Analytics - Security Solution Cypress Tests'
     depends_on: build_image
     key: test_entity_analytics
+    env:
+      BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
