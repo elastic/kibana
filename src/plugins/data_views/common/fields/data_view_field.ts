@@ -145,6 +145,14 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
+   * Sets custom description for field, or unsets if passed undefined.
+   * @param customDescription custom label value
+   */
+  public set customDescription(customDescription) {
+    this.spec.customDescription = customDescription;
+  }
+
+  /**
    * Description of field type conflicts across different indices in the same index pattern.
    */
   public get conflictDescriptions() {
