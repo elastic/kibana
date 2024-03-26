@@ -31,7 +31,7 @@ import {
 } from './get_azure_credentials_form_options';
 import { AzureCredentialsType } from '../../../../common/types_old';
 import { SetupFormat, useAzureCredentialsForm } from './hooks';
-import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
+import { findVariableDef, getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
 
@@ -260,17 +260,6 @@ export const AzureInputVarFields = ({
   packageInfo: PackageInfo;
   onChange: (key: string, value: string) => void;
 }) => {
-  const findVariableDef = (key: string) => {
-    return packageInfo?.data_streams
-      ?.filter((datastreams) => datastreams !== undefined)
-      .map((ds) => ds.streams)
-      .filter((streams) => streams !== undefined)
-      .flat()
-      .filter((streams) => streams?.vars !== undefined)
-      .map((cis) => cis?.vars)
-      .flat()
-      .find((vars) => vars?.name === key);
-  };
   return (
     <div>
       {fields.map((field) => (
@@ -292,7 +281,7 @@ export const AzureInputVarFields = ({
               >
                 <PackagePolicyInputVarField
                   varDef={{
-                    ...findVariableDef(field.id)!,
+                    ...findVariableDef(packageInfo, field.id)!,
                     required: true,
                     type: 'password',
                   }}

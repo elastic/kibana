@@ -331,3 +331,15 @@ export const isBelowMinVersion = (version: string, minVersion: string) => {
   const versionNumberOnly = semverCoerce(semanticVersion) || '';
   return semverLt(versionNumberOnly, minVersion);
 };
+
+export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
+  return packageInfo?.data_streams
+    ?.filter((datastreams) => datastreams !== undefined)
+    .map((ds) => ds.streams)
+    .filter((streams) => streams !== undefined)
+    .flat()
+    .filter((streams) => streams?.vars !== undefined)
+    .map((cis) => cis?.vars)
+    .flat()
+    .find((vars) => vars?.name === key);
+};

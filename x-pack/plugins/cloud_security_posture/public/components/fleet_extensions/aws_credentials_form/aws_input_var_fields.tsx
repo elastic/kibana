@@ -11,6 +11,7 @@ import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { css } from '@emotion/react';
 import { PackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import { AwsOptions } from './get_aws_credentials_form_options';
+import { findVariableDef } from '../utils';
 
 export const AwsInputVarFields = ({
   fields,
@@ -21,18 +22,6 @@ export const AwsInputVarFields = ({
   onChange: (key: string, value: string) => void;
   packageInfo: PackageInfo;
 }) => {
-  const findVariableDef = (key: string) => {
-    return packageInfo?.data_streams
-      ?.filter((datastreams) => datastreams !== undefined)
-      .map((ds) => ds.streams)
-      .filter((streams) => streams !== undefined)
-      .flat()
-      .filter((streams) => streams?.vars !== undefined)
-      .map((cis) => cis?.vars)
-      .flat()
-      .find((vars) => vars?.name === key);
-  };
-
   return (
     <div>
       {fields.map((field) => (
@@ -54,7 +43,7 @@ export const AwsInputVarFields = ({
               >
                 <PackagePolicyInputVarField
                   varDef={{
-                    ...findVariableDef(field.id)!,
+                    ...findVariableDef(packageInfo, field.id)!,
                     required: true,
                     type: 'password',
                   }}
