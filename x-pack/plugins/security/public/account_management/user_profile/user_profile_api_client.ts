@@ -42,7 +42,9 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
 
   public start() {
     // Fetch the user profile with default path to initialize the user profile observable.
-    this.getCurrent({ dataPath: DEFAULT_DATAPATHS });
+    this.getCurrent({ dataPath: DEFAULT_DATAPATHS }).catch(() => {
+      // silently ignore the error
+    });
   }
 
   /**
@@ -67,6 +69,12 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
         }
 
         return response;
+      })
+      .catch((err) => {
+        if (this._userProfileLoaded$.getValue() === false) {
+          this._userProfileLoaded$.next(true);
+        }
+        return Promise.reject(err);
       });
   }
 
