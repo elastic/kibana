@@ -12,21 +12,22 @@ import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants'
 import { BaseDataGenerator } from './base_data_generator';
 import type {
   ActionDetails,
+  ActionResponseOutput,
+  AgentStatusApiResponse,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   EndpointPendingActions,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ProcessesEntry,
-  EndpointActionDataParameterTypes,
-  ActionResponseOutput,
+  ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   ResponseActionsExecuteParameters,
-  ResponseActionExecuteOutputContent,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
-  EndpointActionResponseDataOutput,
   WithAllKeys,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
@@ -384,6 +385,18 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       },
       overrides
     );
+  }
+
+  generateAgentStatus(
+    overrides: Partial<AgentStatusApiResponse['data'][string]> = {}
+  ): AgentStatusApiResponse['data'][string] {
+    return merge({
+      pendingActions: {
+        isolate: 2,
+        unisolate: 0,
+      },
+      ...overrides,
+    });
   }
 
   generateExecuteActionResponseOutput(

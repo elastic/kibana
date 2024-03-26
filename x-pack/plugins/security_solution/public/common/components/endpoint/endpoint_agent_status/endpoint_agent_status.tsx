@@ -25,7 +25,7 @@ import {
   type ResponseActionsApiCommandNames,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
-import { HostStatus, type EndpointPendingActions } from '../../../../../common/endpoint/types';
+import { type EndpointPendingActions, HostStatus } from '../../../../../common/endpoint/types';
 import { useGetEndpointDetails } from '../../../../management/hooks';
 import { getAgentStatusText } from '../agent_status_text';
 import { useAgentStatus } from '../../../hooks/use_agent_status';

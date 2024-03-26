@@ -47,7 +47,7 @@ export const useAgentStatus = (
 };
 
 // TODO: Remove this function when endpoint list is ported
-//  to use tanstack-query instead of redyx
+//  to use tanstack-query instead of redux
 export const fetchEndpointPendingActionsByAgentId = async (
   agentIds: string[]
 ): Promise<AgentStatusApiResponse['data'][string]> => {
