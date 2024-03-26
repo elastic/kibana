@@ -95,7 +95,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
       );
 
       return agentIds.reduce<AgentStatuses>((acc, agentId) => {
-        const agentInfo = searchHits.find((info) => info?.sentinel_one?.agent?.uuid === agentId)
+        const agentInfo = searchHits?.find((info) => info?.sentinel_one?.agent?.uuid === agentId)
           ?.sentinel_one?.agent;
 
         acc[agentId] = {
