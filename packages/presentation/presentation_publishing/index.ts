@@ -76,7 +76,8 @@ export {
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
-} from './interfaces/publishes_unified_search';
+} from './interfaces/unified_search/publishes_unified_search';
+export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
 export {
   apiPublishesSavedObjectId,
   useSavedObjectId,
