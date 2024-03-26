@@ -93,7 +93,8 @@ export async function onSaveSearch({
 }) {
   const { uiSettings, savedObjectsTagging } = services;
   const dataView = state.internalState.getState().dataView;
-  const latestVisContext = state.internalState.getState().latestVisContext;
+  const overriddenVisContextAfterInvalidation =
+    state.internalState.getState().overriddenVisContextAfterInvalidation;
 
   const onSave = async ({
     newTitle,
@@ -117,11 +118,10 @@ export async function onSaveSearch({
     const currentRowsPerPage = savedSearch.rowsPerPage;
     const currentSampleSize = savedSearch.sampleSize;
     const currentDescription = savedSearch.description;
-    const currentVisContext = savedSearch.visContext;
     const currentTags = savedSearch.tags;
+    const currentVisContext = savedSearch.visContext;
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
-    savedSearch.visContext = latestVisContext;
     savedSearch.timeRestore = newTimeRestore;
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
@@ -138,6 +138,11 @@ export async function onSaveSearch({
     if (savedObjectsTagging) {
       savedSearch.tags = newTags;
     }
+
+    if (overriddenVisContextAfterInvalidation) {
+      savedSearch.visContext = overriddenVisContextAfterInvalidation;
+    }
+
     const saveOptions: SaveSavedSearchOptions = {
       onTitleDuplicate,
       copyOnSave: newCopyOnSave,
@@ -168,6 +173,7 @@ export async function onSaveSearch({
         savedSearch.tags = currentTags;
       }
     } else {
+      state.internalState.transitions.resetOnSavedSearchChange();
       state.appState.resetInitialState();
     }
     onSaveCb?.();

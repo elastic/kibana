@@ -23,7 +23,7 @@ export interface InternalState {
   adHocDataViews: DataView[];
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
-  latestVisContext: UnifiedHistogramVisContext | undefined; // it will be used during saved search saving
+  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | undefined; // it will be used during saved search saving
 }
 
 export interface InternalStateTransitions {
@@ -42,9 +42,12 @@ export interface InternalStateTransitions {
     state: InternalState
   ) => (dataView: DataTableRecord | undefined) => InternalState;
   setCustomFilters: (state: InternalState) => (customFilters: Filter[]) => InternalState;
-  setLatestVisContext: (
+  setOverriddenVisContextAfterInvalidation: (
     state: InternalState
-  ) => (latestVisContext: UnifiedHistogramVisContext | undefined) => InternalState;
+  ) => (
+    overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | undefined
+  ) => InternalState;
+  resetOnSavedSearchChange: (state: InternalState) => () => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -64,7 +67,7 @@ export function getInternalStateContainer() {
       savedDataViews: [],
       expandedDoc: undefined,
       customFilters: [],
-      latestVisContext: undefined,
+      overriddenVisContextAfterInvalidation: undefined,
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -118,12 +121,22 @@ export function getInternalStateContainer() {
         ...prevState,
         customFilters,
       }),
-      setLatestVisContext:
+      setOverriddenVisContextAfterInvalidation:
         (prevState: InternalState) =>
-        (latestVisContext: UnifiedHistogramVisContext | undefined) => ({
+        (overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | undefined) => {
+          // console.log('tmp overriding with', overriddenVisContextAfterInvalidation);
+          return {
+            ...prevState,
+            overriddenVisContextAfterInvalidation,
+          };
+        },
+      resetOnSavedSearchChange: (prevState: InternalState) => () => {
+        // console.log('tmp resetting overriddenVisContextAfterInvalidation');
+        return {
           ...prevState,
-          latestVisContext,
-        }),
+          overriddenVisContextAfterInvalidation: undefined,
+        };
+      },
     },
     {},
     { freeze: (state) => state }

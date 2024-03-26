@@ -54,8 +54,6 @@ export const loadSavedSearch = async (
     services,
   } = deps;
 
-  internalStateContainer.transitions.setLatestVisContext(undefined);
-
   const appStateExists = !appStateContainer.isEmptyURL();
   const appState = appStateExists ? appStateContainer.getState() : initialAppState;
 
@@ -126,6 +124,8 @@ export const loadSavedSearch = async (
   if (!appState && shouldUpdateWithGlobalFilters) {
     nextSavedSearch = savedSearchContainer.updateWithFilterManagerFilters();
   }
+
+  internalStateContainer.transitions.resetOnSavedSearchChange();
 
   return nextSavedSearch;
 };

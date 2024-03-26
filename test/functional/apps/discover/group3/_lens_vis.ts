@@ -323,6 +323,125 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
     });
 
+    it('should be able to load a saved search with custom histogram vis and handle invalidations', async () => {
+      await PageObjects.discover.loadSavedSearch('testCustomESQLHistogram');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await checkESQLHistogramVis(
+        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
+        '10'
+      );
+      expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
+
+      // now we are changing to a different query to check invalidation logic
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageA = avg(bytes) by extension'
+      );
+      await testSubjects.click('querySubmitButton');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await PageObjects.discover.chooseLensChart('Donut');
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await monacoEditor.getCodeEditorValue()).to.contain('averageA');
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
+
+      await PageObjects.discover.saveSearch('testCustomESQLHistogramInvalidation', true);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
+
+      await browser.refresh();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
+    });
+
+    it('should be able to load a saved search with custom histogram vis and save new customization', async () => {
+      await PageObjects.discover.loadSavedSearch('testCustomESQLHistogram');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await checkESQLHistogramVis(
+        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
+        '10'
+      );
+      expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
+
+      // now we are changing to a different query to check invalidation logic
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageA = avg(bytes) by extension'
+      );
+      await testSubjects.click('querySubmitButton');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await PageObjects.discover.chooseLensChart('Donut');
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await monacoEditor.getCodeEditorValue()).to.contain('averageA');
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
+
+      // now we customize the vis again
+      await PageObjects.discover.chooseLensChart('Waffle');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Waffle');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Waffle');
+      expect(await getCurrentVisChartTitle()).to.be('Waffle');
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+
+      await PageObjects.discover.saveSearch(
+        'testCustomESQLHistogramInvalidationPlusCustomization',
+        true
+      );
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Waffle');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Waffle');
+      expect(await getCurrentVisChartTitle()).to.be('Waffle');
+
+      await browser.refresh();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Waffle');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Waffle');
+      expect(await getCurrentVisChartTitle()).to.be('Waffle');
+    });
+
     it('should be able to customize ESQL vis and save it', async () => {
       await PageObjects.discover.selectTextBaseLang();
 
@@ -337,6 +456,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.chooseLensChart('Donut');
 
       await PageObjects.discover.saveSearch('testCustomESQLVis');
+      await PageObjects.discover.saveSearch('testCustomESQLVisDonut', true);
 
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
       expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
@@ -349,6 +469,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
       expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
       expect(await getCurrentVisChartTitle()).to.be('Donut');
+    });
+
+    it('should be able to load a saved search with custom vis, edit query and revert changes', async () => {
+      await PageObjects.discover.loadSavedSearch('testCustomESQLVisDonut');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      // by changing the query we reset the vis customization to histogram
+      await monacoEditor.setCodeEditorValue('from logstash-* | limit 100');
+      await testSubjects.click('querySubmitButton');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Bar vertical stacked');
+
+      await checkESQLHistogramVis(defaultTimespanESQL, '100');
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 100');
+
+      await PageObjects.discover.revertUnsavedChanges();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesSuggestionTypeTitle()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
+
+      expect(await monacoEditor.getCodeEditorValue()).to.contain('averageB');
     });
 
     it('should be able to load a saved search with custom vis, edit vis and revert changes', async () => {

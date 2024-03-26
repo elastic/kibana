@@ -107,6 +107,7 @@ export class LensVisService {
         suggestion: undefined,
         suggestionDeps: undefined,
         type: UnifiedHistogramSuggestionType.unsupported,
+        externalVisContextDep: undefined,
       },
       visContext: undefined,
     });
@@ -252,18 +253,36 @@ export class LensVisService {
   } => {
     let shouldUpdateSelectedSuggestionDueToDepsChange = false;
     let previousSuggestionContext = suggestionContextSelectedPreviously;
+    let type = UnifiedHistogramSuggestionType.lensSuggestion;
+    let currentSuggestion: Suggestion | undefined = allSuggestions[0];
 
     if (
       previousSuggestionContext?.suggestion &&
       externalVisContext &&
-      externalVisContext.suggestionType !== previousSuggestionContext.type
+      externalVisContext !== previousSuggestionContext.externalVisContextDep
     ) {
+      // ignoring the previous suggestion context if the external vis context has changed
       previousSuggestionContext = undefined;
       shouldUpdateSelectedSuggestionDueToDepsChange = true;
     }
 
-    let type = UnifiedHistogramSuggestionType.lensSuggestion;
-    let currentSuggestion: Suggestion | undefined = allSuggestions[0];
+    const prevSuggestionDeps = previousSuggestionContext?.suggestionDeps;
+    const nextSuggestionDeps = getSuggestionDeps({
+      dataView: queryParams.dataView,
+      query: queryParams.query,
+      columns: queryParams.columns,
+      breakdownField,
+    });
+
+    if (
+      previousSuggestionContext?.suggestion &&
+      prevSuggestionDeps &&
+      !isEqual(prevSuggestionDeps, nextSuggestionDeps)
+    ) {
+      // ignoring the previous suggestion context if other deps have changed
+      previousSuggestionContext = undefined;
+      shouldUpdateSelectedSuggestionDueToDepsChange = true;
+    }
 
     if (previousSuggestionContext?.suggestion) {
       currentSuggestion = previousSuggestionContext.suggestion;
@@ -282,30 +301,14 @@ export class LensVisService {
       type = UnifiedHistogramSuggestionType.lensSuggestion;
     }
 
-    const prevSuggestionDeps = previousSuggestionContext?.suggestionDeps;
-    const nextSuggestionDeps = getSuggestionDeps({
-      dataView: queryParams.dataView,
-      query: queryParams.query,
-      columns: queryParams.columns,
-      breakdownField,
-    });
-
-    if (
-      previousSuggestionContext?.suggestion &&
-      prevSuggestionDeps &&
-      !isEqual(prevSuggestionDeps, nextSuggestionDeps)
-    ) {
-      currentSuggestion = allSuggestions[0];
-      type = UnifiedHistogramSuggestionType.lensSuggestion;
-      shouldUpdateSelectedSuggestionDueToDepsChange = true;
-    }
-
-    if (!currentSuggestion) {
+    if (!currentSuggestion && queryParams.isPlainRecord) {
+      // for ES|QL mode it's either a lens suggestion or a histogram as a fallback
       currentSuggestion = this.getHistogramSuggestionForESQL({ queryParams });
       type = UnifiedHistogramSuggestionType.histogramForESQL;
     }
 
-    if (!currentSuggestion && !queryParams.isPlainRecord) {
+    if (!queryParams.isPlainRecord) {
+      // we are not using lens suggestions for data view mode yet so it can be only a histogram
       currentSuggestion = this.getDefaultHistogramSuggestion({
         queryParams,
         breakdownField,
@@ -319,6 +322,7 @@ export class LensVisService {
         type: Boolean(currentSuggestion) ? type : UnifiedHistogramSuggestionType.unsupported,
         suggestion: currentSuggestion,
         suggestionDeps: nextSuggestionDeps,
+        externalVisContextDep: externalVisContext,
       },
       shouldUpdateSelectedSuggestionDueToDepsChange,
     };

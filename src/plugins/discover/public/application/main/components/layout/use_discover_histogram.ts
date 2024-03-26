@@ -338,17 +338,22 @@ export const useDiscoverHistogram = ({
 
   const onVisContextChanged = useCallback(
     (nextVisContext: UnifiedHistogramVisContext | undefined, wasInvalidatedAndRebuilt: boolean) => {
-      if (!wasInvalidatedAndRebuilt) {
+      if (wasInvalidatedAndRebuilt) {
+        // if the visualization was invalidated as incompatible and rebuilt
+        // (it will be used later for saving the visualization via Save button)
+        stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
+          nextVisContext
+        );
+      } else {
         // if user customized the visualization manually
-        // (it will be used later for reverting changes via Unsaved changes badge)
+        // (only this action should trigger Unsaved change badge)
         stateContainer.savedSearchState.updateVisContext({
           nextVisContext,
         });
+        stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
+          undefined
+        );
       }
-
-      // if user customized the visualization manually or if the visualization was invalidated as incompatible and rebuilt
-      // (it will be used later for saving the visualization via Save button)
-      stateContainer.internalState.transitions.setLatestVisContext(nextVisContext);
     },
     [stateContainer]
   );

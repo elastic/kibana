@@ -165,6 +165,7 @@ export interface UnifiedHistogramSuggestionContext {
         string | undefined
       ]
     | undefined;
+  externalVisContextDep: UnifiedHistogramVisContext | undefined;
 }
 
 export interface LensRequestData {
