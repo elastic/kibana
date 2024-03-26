@@ -8,7 +8,6 @@
 
 import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import type { Action, ActionExecutionContext, ActionInternal } from '../actions';
@@ -187,9 +186,6 @@ export async function buildContextMenuForActions({
   wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
   for (const panel of Object.values(panels)) {
-    // panel.items = panel.items.sort(
-    //   ({ _order: orderA }, { _order: orderB }) => (orderB || 0) - (orderA || 0)
-    // );
     if (panel._level === 0) {
       if (panels.mainMenu.items.length > 0) {
         panels.mainMenu.items.push({
