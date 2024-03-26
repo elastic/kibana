@@ -19,6 +19,7 @@ import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import styled from 'styled-components';
 import { RulesParams } from '@kbn/observability-plugin/public';
 import { rulesLocatorID } from '@kbn/observability-plugin/common';
+import { isEmpty } from 'lodash';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useCapabilities } from '../../../hooks/use_capabilities';
@@ -96,7 +97,7 @@ export function SloItemActions({
     }
   };
 
-  const navigateToClone = useCloneSlo();
+  const navigateToClone = useCloneSlo(slo.kibanaUrl);
 
   const handleClone = () => {
     navigateToClone(slo);
@@ -200,11 +201,13 @@ export function SloItemActions({
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="clone"
-            disabled={!hasWriteCapabilities || isRemote}
+            disabled={!hasWriteCapabilities || (isRemote && isEmpty(slo.indicator.params))}
             icon="copy"
             onClick={handleClone}
             data-test-subj="sloActionsClone"
-            toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
+            toolTipContent={
+              isRemote && isEmpty(slo.indicator.params) ? NOT_AVAILABLE_FOR_REMOTE : ''
+            }
           >
             {i18n.translate('xpack.slo.item.actions.clone', { defaultMessage: 'Clone' })}
           </EuiContextMenuItem>,
@@ -222,9 +225,9 @@ export function SloItemActions({
             icon="dashboardApp"
             key="addToDashboard"
             onClick={handleAddToDashboard}
-            disabled={!hasWriteCapabilities || isRemote}
+            // disabled={!hasWriteCapabilities || isRemote}
             data-test-subj="sloActionsAddToDashboard"
-            toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
+            // toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
           >
             {i18n.translate('xpack.slo.item.actions.addToDashboard', {
               defaultMessage: 'Add to Dashboard',

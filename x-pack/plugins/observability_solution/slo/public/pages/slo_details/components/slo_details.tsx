@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
+import { SloRemoteCallout } from './slo_remote_callout';
 import { BurnRateOption, BurnRates } from '../../../components/slo/burn_rate/burn_rates';
 
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
@@ -125,6 +126,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
 
   return selectedTabId === OVERVIEW_TAB_ID ? (
     <EuiFlexGroup direction="column" gutterSize="xl">
+      <SloRemoteCallout slo={slo} />
       <EuiFlexItem>
         <Overview slo={slo} />
       </EuiFlexItem>

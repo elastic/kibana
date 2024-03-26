@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiNotificationBadge } from '@elastic/eui';
+import { EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
@@ -40,9 +40,18 @@ export const useSloDetailsTabs = ({
     },
     {
       id: ALERTS_TAB_ID,
-      label: i18n.translate('xpack.slo.sloDetails.tab.alertsLabel', {
-        defaultMessage: 'Alerts',
-      }),
+      label: slo?.remoteName ? (
+        <EuiToolTip
+          content={i18n.translate('xpack.slo.sloDetails.tab.alertsDisabledTooltip', {
+            defaultMessage: 'Alerts are not available for remote SLOs',
+          })}
+          position="right"
+        >
+          <>{ALERTS_LABEL}</>
+        </EuiToolTip>
+      ) : (
+        ALERTS_LABEL
+      ),
       'data-test-subj': 'alertsTab',
       disabled: Boolean(slo?.remoteName),
       isSelected: selectedTabId === ALERTS_TAB_ID,
@@ -57,3 +66,7 @@ export const useSloDetailsTabs = ({
 
   return { tabs };
 };
+
+const ALERTS_LABEL = i18n.translate('xpack.slo.sloDetails.tab.alertsLabel', {
+  defaultMessage: 'Alerts',
+});

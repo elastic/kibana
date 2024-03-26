@@ -14,6 +14,7 @@ import type { RulesParams } from '@kbn/observability-plugin/public';
 import { rulesLocatorID } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { isEmpty } from 'lodash';
 import { useKibana } from '../../../utils/kibana_react';
 import { paths } from '../../../../common/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
@@ -87,7 +88,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     }
   };
 
-  const navigateToClone = useCloneSlo();
+  const navigateToClone = useCloneSlo(slo?.kibanaUrl);
 
   const handleClone = async () => {
     if (slo) {
@@ -204,11 +205,13 @@ export function HeaderControl({ isLoading, slo }: Props) {
             .concat(
               <EuiContextMenuItem
                 key="clone"
-                disabled={!hasWriteCapabilities || isRemote}
+                disabled={!hasWriteCapabilities || (isRemote && isEmpty(slo.indicator.params))}
                 icon="copy"
                 onClick={handleClone}
                 data-test-subj="sloDetailsHeaderControlPopoverClone"
-                toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
+                toolTipContent={
+                  isRemote && isEmpty(slo.indicator.params) ? NOT_AVAILABLE_FOR_REMOTE : ''
+                }
               >
                 {i18n.translate('xpack.slo.slo.item.actions.clone', {
                   defaultMessage: 'Clone',

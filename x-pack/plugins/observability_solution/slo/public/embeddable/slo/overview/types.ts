@@ -8,8 +8,9 @@ import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { Subject } from 'rxjs';
 
 export interface EmbeddableSloProps {
-  sloId: string | undefined;
-  sloInstanceId: string | undefined;
+  sloId?: string;
+  sloInstanceId?: string;
+  remoteName?: string;
   reloadSubject?: Subject<boolean>;
   onRenderComplete?: () => void;
   showAllGroupByInstances?: boolean;

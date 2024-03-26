@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 import { SloRemoteBadge } from '../../slos/components/card_view/slo_remote_badge';
 import { SLOGroupings } from '../../slos/components/common/slo_groupings';
 import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
-import { createSloDetailsUrl } from '../../../utils/slo/create_slo_details_url';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -33,8 +23,6 @@ export function HeaderTitle({ isLoading, slo }: Props) {
   if (isLoading || !slo) {
     return <EuiSkeletonText lines={1} data-test-subj="loadingTitle" />;
   }
-
-  const sloDetailsUrl = createSloDetailsUrl(slo);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
@@ -74,31 +62,6 @@ export function HeaderTitle({ isLoading, slo }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      {slo.remoteName && (
-        <EuiCallOut
-          title={i18n.translate('xpack.slo.sloDetails.headerTitle.calloutMessage', {
-            defaultMessage: 'Remote SLO',
-          })}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.slo.sloDetails.headerTitle.calloutDescription"
-              defaultMessage="This is a remote SLO which belongs to another Kibana instance. it is fetched from the remote cluster: {remoteName}."
-              values={{ remoteName: <strong>{slo.remoteName}</strong> }}
-            />
-          </p>
-          <EuiButton
-            data-test-subj="o11yHeaderTitleLinkButtonButton"
-            href={sloDetailsUrl}
-            color="primary"
-            target="_blank"
-          >
-            {i18n.translate('xpack.slo.headerTitle.linkButtonButtonLabel', {
-              defaultMessage: 'View remote SLO details',
-            })}
-          </EuiButton>
-        </EuiCallOut>
-      )}
     </EuiFlexGroup>
   );
 }

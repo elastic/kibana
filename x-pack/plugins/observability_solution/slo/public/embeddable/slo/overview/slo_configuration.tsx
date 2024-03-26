@@ -39,6 +39,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
       showAllGroupByInstances,
       sloId: selectedSlo?.sloId,
       sloInstanceId: selectedSlo?.sloInstanceId,
+      remoteName: selectedSlo?.remoteName,
     });
   const [hasError, setHasError] = useState(false);
 
@@ -60,7 +61,11 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
               onSelected={(slo) => {
                 setHasError(slo === undefined);
                 if (slo && 'id' in slo) {
-                  setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
+                  setSelectedSlo({
+                    sloId: slo.id,
+                    sloInstanceId: slo.instanceId,
+                    remoteName: slo.remoteName,
+                  });
                 }
               }}
             />

@@ -24,6 +24,7 @@ import { EmbeddableSloProps } from './types';
 export function SloOverview({
   sloId,
   sloInstanceId,
+  remoteName,
   onRenderComplete,
   reloadSubject,
 }: EmbeddableSloProps) {
@@ -45,6 +46,7 @@ export function SloOverview({
     isRefetching,
   } = useFetchSloDetails({
     sloId,
+    remoteName,
     instanceId: sloInstanceId,
   });
 

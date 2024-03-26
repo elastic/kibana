@@ -76,7 +76,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
 
-    const { sloId, sloInstanceId, showAllGroupByInstances } = this.getInput();
+    const { sloId, sloInstanceId, showAllGroupByInstances, remoteName } = this.getInput();
     const queryClient = new QueryClient();
 
     const I18nContext = this.deps.i18n.Context;
@@ -95,7 +95,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
                       sloId={sloId}
                       sloInstanceId={sloInstanceId}
                       reloadSubject={this.reloadSubject}
-                      showAllGroupByInstances={showAllGroupByInstances}
+                      remoteName={remoteName}
                     />
                   )}
                 </QueryClientProvider>

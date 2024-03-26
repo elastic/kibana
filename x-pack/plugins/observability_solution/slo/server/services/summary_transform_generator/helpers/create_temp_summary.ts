@@ -39,6 +39,8 @@ export interface EsSummaryDocument {
     revision: number;
     objective: Objective;
     tags: string[];
+    createdAt?: string;
+    updatedAt?: string;
   };
   goodEvents: number;
   totalEvents: number;

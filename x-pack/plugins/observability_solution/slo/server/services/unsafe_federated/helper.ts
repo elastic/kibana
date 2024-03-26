@@ -72,6 +72,20 @@ export function fromSummaryDocumentToSlo(
         good: '',
         total: '',
       };
+      break;
+    case 'sli.synthetics.availability':
+      params = {
+        projects: [],
+        tags: [],
+        monitorIds: [
+          {
+            value: '*',
+            label: 'All',
+          },
+        ],
+        index: 'synthetics-*',
+        filter: '',
+      };
   }
   const res = sloSchema.decode({
     ...summaryDoc.slo,
@@ -110,6 +124,8 @@ export function fromSummaryDocumentToSlo(
         // @ts-expect-error
         formattedSlo.indicator.params = rawParams;
       }
+      if (summaryDoc.slo.createdAt) formattedSlo.createdAt = new Date(summaryDoc.slo.createdAt);
+      if (summaryDoc.slo.updatedAt) formattedSlo.updatedAt = new Date(summaryDoc.slo.updatedAt);
       return formattedSlo;
     } else {
       // @ts-expect-error
@@ -118,9 +134,3 @@ export function fromSummaryDocumentToSlo(
     }
   }
 }
-
-export const getNameOfRemoteCluster = (index: string) => {
-  if (index.includes(':')) {
-    return index.split(':')?.[0];
-  }
-};
