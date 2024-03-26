@@ -59,7 +59,10 @@ export function QueryHistoryAction({
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
-        <EuiFlexItem grow={false} data-test-subj="TextBasedLangEditor-toggle-query-history-button">
+        <EuiFlexItem
+          grow={false}
+          data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"
+        >
           <EuiButtonEmpty
             size="xs"
             color="primary"
@@ -68,6 +71,7 @@ export function QueryHistoryAction({
               padding-inline: 0;
             `}
             iconType="clock"
+            data-test-subj="TextBasedLangEditor-toggle-query-history-button"
           >
             {isHistoryOpen
               ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.hideQueriesLabel', {
@@ -98,11 +102,32 @@ export const getTableColumns = (
         switch (status) {
           case 'success':
           default:
-            return <EuiIcon type="checkInCircleFilled" color="success" size="s" />;
+            return (
+              <EuiIcon
+                type="checkInCircleFilled"
+                color="success"
+                size="s"
+                data-test-subj="TextBasedLangEditor-queryHistory-success"
+              />
+            );
           case 'error':
-            return <EuiIcon type="error" color="danger" size="s" />;
+            return (
+              <EuiIcon
+                type="error"
+                color="danger"
+                size="s"
+                data-test-subj="TextBasedLangEditor-queryHistory-error"
+              />
+            );
           case 'warning':
-            return <EuiIcon type="warning" color="warning" size="s" />;
+            return (
+              <EuiIcon
+                type="warning"
+                color="warning"
+                size="s"
+                data-test-subj="TextBasedLangEditor-queryHistory-warning"
+              />
+            );
         }
       },
       width: isOnReducedSpaceLayout ? 'auto' : '40px',
@@ -206,6 +231,7 @@ export function QueryHistory({
                         defaultMessage: 'Run query',
                       }
                     )}
+                    data-test-subj="TextBasedLangEditor-queryHistory-runQuery-button"
                     role="button"
                     iconSize="m"
                     onClick={() => onUpdateAndSubmit(item.queryString)}

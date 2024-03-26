@@ -132,7 +132,7 @@ describe('TextBasedLanguagesEditor', () => {
     };
     const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
     expect(
-      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button"]').length
+      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]').length
     ).not.toBe(0);
   });
 
@@ -143,7 +143,7 @@ describe('TextBasedLanguagesEditor', () => {
     };
     const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
     expect(
-      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button"]').length
+      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]').length
     ).toBe(0);
   });
 
@@ -155,7 +155,7 @@ describe('TextBasedLanguagesEditor', () => {
     };
     const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
     expect(
-      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button"]').length
+      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]').length
     ).toBe(0);
   });
 
