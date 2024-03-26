@@ -48,6 +48,7 @@ export const mockKibanaProps: KibanaLogicProps = {
       enabled: true,
     },
   },
+  connectorTypes: [],
   data: dataPluginMock.createStartContract(),
   esConfig: {
     elasticsearch_host: 'https://your_deployment_url',
