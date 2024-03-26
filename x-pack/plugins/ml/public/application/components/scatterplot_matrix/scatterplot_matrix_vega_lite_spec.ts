@@ -11,7 +11,7 @@ import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
 import type { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
-import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
+import { euiPaletteColorBlind, euiPaletteRed, euiPaletteGreen } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -25,11 +25,11 @@ export const USER_SELECTION = 'user_selection';
 export const SINGLE_POINT_CLICK = 'single_point_click';
 
 export const COLOR_BLUR = '#bbb';
-export const COLOR_OUTLIER = euiPaletteNegative(2)[1];
+export const COLOR_OUTLIER = euiPaletteRed(2)[1];
 export const COLOR_SELECTION = euiPaletteColorBlind()[2];
 export const COLOR_RANGE_OUTLIER = [euiPaletteColorBlind()[1], euiPaletteColorBlind()[2]];
 export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
-export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
+export const COLOR_RANGE_QUANTITATIVE = euiPaletteGreen(5);
 const CUSTOM_VIS_FIELDS_PATH = 'fields';
 
 export const getColorSpec = (

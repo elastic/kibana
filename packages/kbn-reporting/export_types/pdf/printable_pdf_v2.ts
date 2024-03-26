@@ -20,8 +20,8 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
-  REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
+import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import {
