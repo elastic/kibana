@@ -162,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
       await ml.navigation.navigateToAnomalyDetection();
       await ml.jobTable.assertJobRowCalendars('test_calendar_ad_4', [calendarId]);
+      await ml.jobTable.assertJobRowCalendars('test_calendar_ad_3', [calendarId], false);
     });
 
     async function assignJobToCalendar(
