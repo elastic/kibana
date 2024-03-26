@@ -13,11 +13,15 @@ import '../../../../common/mock/react_beautiful_dnd';
 import { TestProviders } from '../../../../common/mock';
 
 import { EndpointOverview } from '.';
-import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
+import type { EndpointFields } from '../../../../../common/search_strategy';
 import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { set } from 'lodash';
+import { useAgentStatus } from '../../../../common/hooks/use_agent_status';
 
+jest.mock('../../../../common/hooks/use_agent_status');
 jest.mock('../../../../common/lib/kibana');
+
+const useAgentStatusMock = useAgentStatus as jest.Mock;
 
 describe('EndpointOverview Component', () => {
   let endpointData: EndpointFields;
@@ -49,6 +53,16 @@ describe('EndpointOverview Component', () => {
         },
       }),
     };
+
+    useAgentStatusMock.mockReturnValue({
+      data: {
+        [endpointData.hostInfo?.metadata.agent.id!]: {
+          isolated: true,
+          pendingActions: {},
+          status: 'healthy',
+        },
+      },
+    });
   });
 
   test('it renders with endpoint data', () => {
