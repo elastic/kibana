@@ -5,9 +5,61 @@
  * 2.0.
  */
 
+import {
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+} from '@kbn/core-saved-objects-api-server';
+import type { Installation } from '@kbn/fleet-plugin/common';
 import { PackageClient } from '@kbn/fleet-plugin/server';
 import { PackageNotFoundError } from '@kbn/fleet-plugin/server/errors';
-import { DataStreamStat, Integration } from '../../../common/api_types';
+import {
+  DASHBOARD_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../common/constants';
+import { Dashboard, DataStreamStat, Integration } from '../../../common/api_types';
+
+export async function getIntegrationDashboards(
+  savedObjectsClient: SavedObjectsClientContract,
+  integration: string
+): Promise<Dashboard[]> {
+  // Retrieve integration savedObject
+  const integrationSavedObjects = await getIntegrationSavedObjects(savedObjectsClient, integration);
+
+  // Extract dashboard ids
+  const dashboardIds: string[] = [];
+  integrationSavedObjects.saved_objects.forEach((intSavedObject) => {
+    (intSavedObject.attributes?.installed_kibana || []).forEach((so) => {
+      if (so.type === DASHBOARD_SAVED_OBJECT_TYPE) {
+        dashboardIds.push(so.id);
+      }
+    });
+  });
+
+  // Fetch dashboards savedObject
+  const dashboardsSavedObjects = await savedObjectsClient.bulkGet<{
+    title?: string;
+  }>(
+    dashboardIds.map((id) => ({
+      id,
+      type: DASHBOARD_SAVED_OBJECT_TYPE,
+      fields: ['title'],
+    }))
+  );
+
+  // Ignore faulty dashboards
+  const allValidDashboardSavedObjects = dashboardsSavedObjects.saved_objects.filter(
+    (so) => !so.error
+  );
+
+  // Construct dashboard result
+  const packageDashboards = allValidDashboardSavedObjects.map((so) => ({
+    id: so.id,
+    title: so.attributes.title || so.id,
+  }));
+
+  return packageDashboards;
+}
 
 export async function getIntegrations(options: {
   packageClient: PackageClient;
@@ -34,6 +86,19 @@ export async function getIntegrations(options: {
       }))
   );
 }
+
+const getIntegrationSavedObjects = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  integration: string,
+  options?: Omit<SavedObjectsFindOptions, 'type'>
+) =>
+  savedObjectsClient.find<Installation>({
+    ...(options || {}),
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.name: "${integration}"`,
+    fields: [`installed_kibana`],
+    perPage: SO_SEARCH_LIMIT,
+  });
 
 const getDatasets = async (options: {
   packageClient: PackageClient;

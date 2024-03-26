@@ -15,6 +15,8 @@ import {
   DataStreamDetails,
   GetDataStreamsEstimatedDataInBytesParams,
   GetDataStreamsEstimatedDataInBytesResponse,
+  GetIntegrationDashboardsParams,
+  GetIntegrationDashboardsResponse,
 } from '../../../common/data_streams_stats';
 
 export type DataStreamsStatsServiceSetup = void;
@@ -36,4 +38,7 @@ export interface IDataStreamsStatsClient {
   getDataStreamsEstimatedDataInBytes(
     params: GetDataStreamsEstimatedDataInBytesParams
   ): Promise<GetDataStreamsEstimatedDataInBytesResponse>;
+  getIntegrationDashboards(
+    params: GetIntegrationDashboardsParams
+  ): Promise<GetIntegrationDashboardsResponse>;
 }

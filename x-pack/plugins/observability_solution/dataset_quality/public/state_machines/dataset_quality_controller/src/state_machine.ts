@@ -9,6 +9,7 @@ import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import {
+  DashboardType,
   DataStreamDetails,
   DataStreamStatServiceResponse,
   GetDataStreamsStatsQuery,
@@ -23,6 +24,7 @@ import {
   fetchDatasetDetailsFailedNotifier,
   fetchDatasetStatsFailedNotifier,
   fetchDegradedStatsFailedNotifier,
+  fetchIntegrationDashboardsFailedNotifier,
   noDatasetSelected,
 } from './notifications';
 import {
@@ -35,7 +37,7 @@ import {
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOggyx1nYDMcAYwAWJWlADEEOmHbiAbtQDWctJmx5CpCjXpMWbTt019B6UeKgJF1IRhJ0A2gAYAuq7eJQAB2qwyR1pvEAAPRAAWADYARnYATgBmAHYo+OSADniYlwBWGIAaEHJEZIAmDPYI+JcImJissuSXDIiAXzai9R4tYjIqOkZmVg4uDV4BYTEJSTYmDh8iDH5qBgBbdm7NAj7dQYMR43H0MymrG1ole3Qgz08QvwCbuhDwhCjKiNqY3OTE9LKEWqZSKJQQ5Vy7GS0Xq8Si0KBETKHS6JhwOx0A30wyMYx6fCI1FQEEgkgAqgAFZAAQQAKgBRAD6tOpACEADJMygAJQAkgy+dT7kgQI9Ai8RW9ctl2IkYpkMnL4oqIolQYgcnkEmVclEorkXPEykb4SiQFt0dp+nohoZRmiTuxCcTSbSAPIAcQ9nMZvIActTKLTeQA1Jk0lkAZXptMjwt8-nFwUliDSyXYaUSZUNSWVLnK6oQGRa7DKctyBuVcpciSiZotvUxNoOuIdBKJJIgkndXp9ADEyez2YyI9To7TGQGALL0uPuB6J57J0BvbOVeFRMvy3IRHcufWFzWQo26-WG41lPX1h0Y637HGjMBQBguiDIOynCzTKQyWhyWyqJsN5Wns2J2pwT4vp275CJ+lgSBcVwOM47jxqKi5BK8pQZJCyQxNmubpBEyTpIeTRxBkZQ6k0NapHWnTmsBuxYrahwks+r4wXB36zAw8zsIsyyrBsDa3qBrG4pBnEfpMX7nLY1y3Kh84imKS5Ye8UTsDEqrlC4LiAlkMTxPEZE4aWGTGS0yQ2Yk+7XscYksS2HD8EQ5DUPg6CSNGnJBpO9IAOojnSY4xmhamYSm4JxFRHzKmUOTRCkpnFIg-yQrq0TxF8dQxGkDk9E5zYPgI7med5lDsm60aMn27IAJpumStIRRhEorqUsWXlklFJVEKWHjpspVoqOVGkaeGFdsIHOaVbkeV5snwT+sjyJcKhqExTb3uBC0Vct36IXYyG0HcKkJk8UWdUWrTsAa8KpJZ+U2alYKJNE2q5JRmR1FE+aJNNlrMSVe3lUt5grbx-GCegKzrEBjmzaDhz7RDZwIQpp3nV4qntcuYSIBkfwZtCMQpNmOT-IWiVaYlLj5RkA2Klk9kMaJyO7aj4PoE6HaklVNVMvVTUtW1V0dYTCDxN991ZNCgJGsTTSHiWlkVv8Ro-ArMRA42d5gdzi2886nbklSdJMv6ka8h6AASsbMryM6Mty1J+h69Li0mGn4SkVQ-GWmSxJThRpQg9SQuT8rQi08J5BkevFVzRho7zQiEtgXZuhS9J+nVjXNa1F3oRLBNvHUETsMW0o5Sktb6eTNO5GU2k1Dp+GbsHyQdAxtDUCS8AihzIMpwwC5lxpAC0xrV7qTQmck+QtAzhZT-q1d2VmBkA9U+FJ5zhutscQ+XT70XZlU3y-P85RAtkUSFrkiTHjUSRZtCGSWci7PbQbEn2hPodKwE9z43RolCD4Nl6hJV6oWTciRZTkxVNWXcP9URI1HkfQB+I+avlAepaK+R4jaRIvCP2ek3qIGyOmOytcMppBlgfLBACIIcWgh+Ah10pYNG0rpbMBkIhGRMkNfIsoG4KjGkvdBjFME7WwWwqCkAuLAIkFwyWFctQ1hlvhLIz8cIRDIokdc310gmWMjuAazD5GsPYkot8MlTaQHUeXSIX9Sy6h3NUOyu4GaP3DuTKIVctbQmaNkGsQjrH-xcmVY2LiNJllLD1BK-UUjExpnEYEA1mhNHlqqKJ4kYlp1UVAeJ0V-qQlqF8Q0vxizEVyDTPUCRdz1DwvUAaG4ClzTBsbPBnYyk3XqEIue1QGapA+pRGmmQMzeOVPlXUTNchdJRqnHm7AM7+GcXjSe0U7Lpi8fKB+0JEgv0PP7FuqpdQtEZkkH+HQgA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOggyx1gGIAqgAVkAQQAqAUQD64gJIBZGQCVRAOQDikgNoAGALqJQAB2qwyJOkZAAPRAEZ7AJgBs7AOz2ArAGYfX+wAOHwBOABZAgBoQckQAWnt-dh8nJxD7MOd-f3sXAF886LRMbDxCUgoaeiYWNk5uUv5lSQAxZoBlAAlpMXFRPUMkEFNzdEtaazsEDJCvdhddXXdMl3dA3UDAr2jYhASklLSMrN8A-MKQYp4y4jIqOkZmVg4uEt5BEQkZOTUpDVV5AB5NTtAbWEYWKxDXZxVJOeZhLyBJzIsLuJa6HzRKZBbzsLZ+fyrOEhJwFIoNHAEW6VB41Z71N7ofjCXoyNSiJTtISiSiSUEGcFmSETaHxHy6ELsEIuQLLJw+dELLxo7GIJz2EJSsLpHKZUlarzky6Um4Ve7VJ51V7XFmfKTSXACSTKACaYKGELGUNAMNC7nYRxcXhcOsyYV0LjVCCcXmW7C8krjukyPjCYWNV1K1PNVUetReptg7AAZjgAMYACxItCgfAgdDA7BrADdqABrJtZqnlO55+nWoulivV2sIVvUcsYcYDD0mYXe0WgKZhFz2aWKlwhNbpXQBHaIdwo9g6lOOQKk9GBDMXbtmvt0q2FpnFsvoKs1utsJgcYxEDAltQDAALbsHeOYPpaBaMraw7vqOUDjrQbZTous6Cp6C7jJMiCyieZ5xv6TjpqSB4IEeczLGumqrOm6ZkrepoQbSUEMjajTsEQ1CoBAkAfGysiiAAQgAMjIlDKHIUiSf0GHzqM2FDFMXjpMk9hrMEmrBGEWIxA4ixzKSIbBpKaSuO4mZMb2LH5mxQ5cTxfHiICGgaGJ0g-Ly8gAGoyL0ojtJI4gCoM8kijhCBbgGW4pJKIShOsR5kesgSBj43iJiEmmYucFJMsxFq2YOL6cdxvEQHwzmue5LQCCJIk9BIAVBdIHJcnOwxYT6tjqhs8zuC4CrqSqKqRtsenTAZ0qxi4JkGq4uUmvl1mFQOLxgFADCORAyCTnaAnyEo0iqJoOhyZ1CndTi3g+B4sb2JKyyIuNMLpnMQYhmGGSRpZy00qtT6cBtW3lbt5ZNK0HTdP5HVeopy4OF4qTzA9ZwKoEW5LGRcRvYG6TBqG4TfYt4Erf2gO8Zt21g6+I6fvWjbNshHZdlZ-3k9BlMg5ANNwR+Y4TqhM4GLDXVLj15FbB4ziSqE25otuZHOJ4+KpEj6KbiTbO5o+nPA9Te18whfDfkB7B-gBQGgaT7O62x+ug4bb784hgvTnQ6GhRd4VKbhbgZIqTiLMRF6aiESsou9gSahs7hxxKWt-TrrF1CWRDkNQ+DoHwgViZQ4itZIADqjV9IF4ii5d4tTCrqSyllGopi4irhxNoRzJ9W4RpkuQhL91wFRzDJpxnWd8JQImAoF0gtCJrqAgIFfnXDV2HuudcXsiD2ri3SsZMkWU+ME4TzZ4-fZmTdup+nmfoEbn737WVztIwYCoMByA4KgJBEPwDa0E2CcnYwLa0gkVDgI9b6PygNA5+r936f0wD-WASEULu1oJ7IUVcIrbnXJsOOwZPBygyGRNIlFERphUumPc8UjSMSTmAtapYb5Z2gbA7gL8GBvw-l-ZBJsGA-nNv+dAgEQIgIYTZJhkDWHOwQuwzAnDuGIO-r-VBk50GYMwtg320w0xhHmCiHusdnBBDIurQMRC-CSj3O4eK58ey2xThAlhd9ZEPzcbWOQ9B9aLjQLASsAAjbiDAIB-0ZkA1mEiAbQWka4umtZoFePQD48YfjAnBNCWooWHsRbLzFtYXYKl4SuEyMRLKAQkoS23lKQkSwg5rBTO4OheUB6Xyccw0ecT4LuPiVAJJKS6BpKCagEJ-BTa-mEaI62oDJGA1iWwjxfTvFU18VgdJIzMluzQrkr2K9q4OCCLdFKKR66Em8GRAauh5izWcM3cy6R7H3lmTElxpVtrj0ntPWe89F6Vx9gjBAsxUpInlmUlER53BKz6tHLwvgtQajjGEDUjzB5X2cZ0t55V+JfA8iCOQGhOjBVkIoFQ6gtB-MXBFLIAZMhI0VBjGWjg95zESOpZYGxVh7kCCitp4COlQPLFxbAFVARCEkGoGec8F5L12fknR4Z8Q0PCIqHwCxdCJFIUjdgMdjiuCcGsVYBQLi0GoLxeAQwbbJ3AVg-5EtYRSi2INWx24AgbHVdjNcUp4rLCPLNVw157A8scXy9ivAbWUp0UHfCtL3BERIrkbG-o8a5AousCMP16GtODUw0NzJoHhvhhLfVVyBpyk8I4FMm8yKDVuulI+aZ0opiRkGq1Ob7JlUgAW1eCAAhSnUjKTwCojySjIukAMEoVLxVmFuWYLbGEUwdjzPaXb9nTFSgHYdugQ7pC1NjXw8I1yIiRYiFEmw+6ZovtmhdVNHbg3zVo21K49zsExLMZwF5fBbDCBHI+8wQXOs1CqZuc7nn2xvUuu9DlyoroihEVKM0VQ6glIidVUYJqJFDNNdSaJJQPTTNyi9DjW1zJcTByNt0N4N23s3NYkKJoahPEZQae5ZQsfPS0y9xGXkYsWWRgFyoX3UKTA0tEL1EApFuoNVI6VvCnuvCB6Jw9XmLPkagRRCDeG-z4xLYMt0UzptmCJppZFMhXPCAEdSjhciqoGgpoe18eO9MScsraqz-HDNGdpqYunBMGbjGm4zE0imBlDM4HUWx1IMQ40R+d3GoFQc7Q+iNALHARHxCqEI6qBr4acKQtYCIp3RwJhjZpS0s1caUxiwVZhEthWSxLCUAZEP9pTTpfwStFQJmIkSDYuQLwpCNXkIAA */
   createMachine<
     DatasetQualityControllerContext,
     DatasetQualityControllerEvent,
@@ -132,17 +134,54 @@ export const createPureDatasetQualityControllerStateMachine = (
         flyout: {
           initial: 'closed',
           states: {
-            fetching: {
-              invoke: {
-                src: 'loadDataStreamDetails',
-                onDone: {
-                  target: 'loaded',
-                  actions: ['storeDatasetDetails'],
+            initializing: {
+              type: 'parallel',
+              states: {
+                dataStreamDetails: {
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: 'loadDataStreamDetails',
+                        onDone: {
+                          target: 'done',
+                          actions: ['storeDatasetDetails'],
+                        },
+                        onError: {
+                          target: 'done',
+                          actions: ['fetchDatasetDetailsFailedNotifier'],
+                        },
+                      },
+                    },
+                    done: {
+                      type: 'final',
+                    },
+                  },
                 },
-                onError: {
-                  target: 'loaded',
-                  actions: ['fetchDatasetDetailsFailedNotifier'],
+                integrationDashboards: {
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: 'loadIntegrationDashboards',
+                        onDone: {
+                          target: 'done',
+                          actions: ['storeIntegrationDashboards'],
+                        },
+                        onError: {
+                          target: 'done',
+                          actions: ['notifyFetchIntegrationDashboardsFailed'],
+                        },
+                      },
+                    },
+                    done: {
+                      type: 'final',
+                    },
+                  },
                 },
+              },
+              onDone: {
+                target: '#DatasetQualityController.flyout.loaded',
               },
             },
             loaded: {
@@ -159,7 +198,7 @@ export const createPureDatasetQualityControllerStateMachine = (
             closed: {
               on: {
                 OPEN_FLYOUT: {
-                  target: '#DatasetQualityController.flyout.fetching',
+                  target: '#DatasetQualityController.flyout.initializing',
                   actions: ['storeFlyoutOptions'],
                 },
               },
@@ -167,7 +206,7 @@ export const createPureDatasetQualityControllerStateMachine = (
           },
           on: {
             SELECT_NEW_DATASET: {
-              target: '#DatasetQualityController.flyout.fetching',
+              target: '#DatasetQualityController.flyout.initializing',
               actions: ['storeFlyoutOptions'],
             },
             CLOSE_FLYOUT: {
@@ -292,6 +331,22 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        storeIntegrationDashboards: assign((context, event) => {
+          return 'data' in event && 'dashboards' in event.data
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  dataset: {
+                    ...context.flyout.dataset,
+                    integration: {
+                      ...context.flyout.dataset?.integration,
+                      dashboards: event.data.dashboards as DashboardType[],
+                    },
+                  } as FlyoutDataset,
+                },
+              }
+            : {};
+        }),
         storeDatasets: assign((context, _event) => {
           return context.dataStreamStats && context.degradedDocStats
             ? {
@@ -327,6 +382,8 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchDegradedStatsFailedNotifier(toasts, event.data),
       notifyFetchDatasetDetailsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchDatasetDetailsFailedNotifier(toasts, event.data),
+      notifyFetchIntegrationDashboardsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchIntegrationDashboardsFailedNotifier(toasts, event.data),
     },
     services: {
       loadDataStreamStats: (context) =>
@@ -360,6 +417,19 @@ export const createDatasetQualityControllerStateMachine = ({
             namespace,
           }),
         });
+      },
+      loadIntegrationDashboards: (context) => {
+        if (!context.flyout.dataset) {
+          fetchDatasetDetailsFailedNotifier(toasts, new Error(noDatasetSelected));
+
+          return Promise.resolve({});
+        }
+
+        const { integration } = context.flyout.dataset;
+
+        return integration
+          ? dataStreamStatsClient.getIntegrationDashboards({ integration: integration.name })
+          : Promise.resolve({});
       },
     },
   });

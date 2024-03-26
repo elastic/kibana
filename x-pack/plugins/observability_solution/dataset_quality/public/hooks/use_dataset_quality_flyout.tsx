@@ -23,8 +23,12 @@ export const useDatasetQualityFlyout = () => {
   } = useSelector(service, (state) => state.context.flyout);
   const { timeRange } = useSelector(service, (state) => state.context.filters);
 
-  const dataStreamDetailsLoading = useSelector(service, (state) =>
-    state.matches('datasets.loaded.flyoutOpen.fetching')
+  const dataStreamDetailsLoading = useSelector(
+    service,
+    (state) =>
+      state.matches('datasets.loaded.flyoutOpen.fetching') ||
+      state.matches('flyout.initializing.dataStreamDetails.fetching') ||
+      state.matches('flyout.initializing.integrationDashboards.fetching')
   );
 
   return {

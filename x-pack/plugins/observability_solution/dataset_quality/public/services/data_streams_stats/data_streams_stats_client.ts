@@ -14,6 +14,7 @@ import {
   getDataStreamsStatsResponseRt,
   getDataStreamsDetailsResponseRt,
   getDataStreamsEstimatedDataInBytesResponseRt,
+  integrationDashboardsRT,
 } from '../../../common/api_types';
 import { DEFAULT_DATASET_TYPE, NONE } from '../../../common/constants';
 import {
@@ -27,6 +28,8 @@ import {
   GetDataStreamDetailsResponse,
   GetDataStreamsEstimatedDataInBytesParams,
   GetDataStreamsEstimatedDataInBytesResponse,
+  GetIntegrationDashboardsParams,
+  GetIntegrationDashboardsResponse,
 } from '../../../common/data_streams_stats';
 import { DataStreamDetails } from '../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
@@ -138,5 +141,25 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     )(response);
 
     return dataStreamsEstimatedDataInBytes;
+  }
+
+  public async getIntegrationDashboards({ integration }: GetIntegrationDashboardsParams) {
+    const response = await this.http
+      .get<GetIntegrationDashboardsResponse>(
+        `/internal/dataset_quality/integrations/${integration}/dashboards`
+      )
+      .catch((error) => {
+        throw new GetDataStreamsStatsError(`Failed to fetch integration dashboards": ${error}`);
+      });
+
+    const integrationDashboards = decodeOrThrow(
+      integrationDashboardsRT,
+      (message: string) =>
+        new GetDataStreamsStatsError(
+          `Failed to decode integration dashboards response: ${message}"`
+        )
+    )(response);
+
+    return integrationDashboards;
   }
 }

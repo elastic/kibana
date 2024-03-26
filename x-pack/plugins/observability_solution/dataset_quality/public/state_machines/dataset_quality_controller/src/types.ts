@@ -11,6 +11,7 @@ import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
+  DashboardType,
   DataStreamDegradedDocsStatServiceResponse,
   DataStreamDetails,
   DataStreamStatServiceResponse,
@@ -115,6 +116,14 @@ export type DatasetQualityControllerTypeState =
   | {
       value: 'datasets.loaded';
       context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'flyout.initializing.dataStreamDetails.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'flyout.initializing.integrationDashboards.fetching';
+      context: DefaultDatasetQualityStateContext;
     };
 
 export type DatasetQualityControllerContext = DatasetQualityControllerTypeState['context'];
@@ -165,5 +174,6 @@ export type DatasetQualityControllerEvent =
       query: string;
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
+  | DoneInvokeEvent<DashboardType>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
   | DoneInvokeEvent<Error>;

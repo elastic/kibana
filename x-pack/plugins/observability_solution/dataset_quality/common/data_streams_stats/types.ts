@@ -41,5 +41,11 @@ export type GetDataStreamsEstimatedDataInBytesParams =
 export type GetDataStreamsEstimatedDataInBytesResponse =
   APIReturnType<`GET /internal/dataset_quality/data_streams/estimated_data`>;
 
+export type GetIntegrationDashboardsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/integrations/{integration}/dashboards`>['params']['path'];
+export type GetIntegrationDashboardsResponse =
+  APIReturnType<`GET /internal/dataset_quality/integrations/{integration}/dashboards`>;
+export type DashboardType = GetIntegrationDashboardsResponse['dashboards'][0];
+
 export type { DataStreamStat } from './data_stream_stat';
 export type { DataStreamDetails } from '../api_types';
