@@ -8,7 +8,6 @@
 import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
-import type { RouteValidatorFullConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
@@ -16,6 +15,7 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { getRequestValidation } from '@kbn/core-http-server';
 
 import { initGetAllSpacesApi } from './get_all';
 import { spacesConfig } from '../../../lib/__fixtures__';
@@ -100,9 +100,8 @@ describe('GET /spaces/space', () => {
           if (routeConfig.validate === false) {
             throw new Error('Test setup failure. Expected route validation');
           }
-          const queryParamsValidation = (
-            routeConfig.validate as RouteValidatorFullConfig<unknown, unknown, unknown>
-          ).query! as ObjectType<any>;
+          const queryParamsValidation = getRequestValidation(routeConfig.validate)
+            .query! as ObjectType<any>;
 
           const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
