@@ -82,7 +82,9 @@ export function getDataVariables(inputAst: ExpressionAstExpression) {
 
   const variables: Record<string, ExpressionValue> = {};
   vars.forEach((v) => {
-    variables[v] = exprCache.get(v)?.value;
+    if (exprCache.get(v)?.value) {
+      variables[v] = exprCache.get(v)?.value;
+    }
   });
 
   return variables;
@@ -192,14 +194,19 @@ export function buildExpression({
   // check if any of the datasource expressions should be loaded from cache
   for (const layerId in datasourceExpressionsByLayers) {
     if (datasourceExpressionsByLayers[layerId]) {
-      const expr = toExpression(datasourceExpressionsByLayers[layerId]);
+      // const expr = toExpression(datasourceExpressionsByLayers[layerId]);
+      const dataFnIndex = datasourceExpressionsByLayers[layerId].chain.findIndex((f) =>
+        ['esdsl', 'essql', 'esaggs', 'esql'].includes(f.function)
+      );
+      const exprFn = toExpression(datasourceExpressionsByLayers[layerId].chain[dataFnIndex]);
 
       const cacheItem = exprCache.get(layerId);
-      if (cacheItem && cacheItem.expression === expr && cacheItem.value && canUseCache) {
+      if (cacheItem && cacheItem.expression === exprFn && cacheItem.value && canUseCache) {
         // and update it to var X
-        datasourceExpressionsByLayers[layerId].chain[1] = loadFromCacheExpression(layerId);
+        datasourceExpressionsByLayers[layerId].chain[dataFnIndex] =
+          loadFromCacheExpression(layerId);
       } else {
-        exprCache.set(layerId, expr);
+        exprCache.set(layerId, exprFn);
       }
     }
   }
