@@ -60,6 +60,16 @@ export const Chat = () => {
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
   const messagesRef = useAutoBottomScroll([showStartPage]);
 
+  const buildFormData = (formData: ChatForm) => ({
+    prompt: formData[ChatFormFields.prompt],
+    indices: formData[ChatFormFields.indices].join(),
+    api_key: formData[ChatFormFields.openAIKey],
+    citations: formData[ChatFormFields.citations],
+    elasticsearchQuery: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
+    summarization_model:
+      formData[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
+  });
+
   const onSubmit = async (data: ChatForm) => {
     await append(
       { content: data.question, role: MessageRole.user, createdAt: new Date() },
