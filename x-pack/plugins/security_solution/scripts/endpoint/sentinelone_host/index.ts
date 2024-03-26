@@ -140,7 +140,13 @@ const runCli: RunFn = async ({ log, flags }) => {
             return vm;
           });
         })
-      : createMultipassHostVmClient(runningS1VMs[0], log);
+      : await Promise.resolve(createMultipassHostVmClient(runningS1VMs[0], log)).then((vm) => {
+          log.info(
+            `A host VM running SentinelOne Agent is already running - will reuse it.\nTIP: Use 'forceNewS1Host' to force the creation of a new one if desired`
+          );
+
+          return vm;
+        });
 
   const {
     id: agentPolicyId,
