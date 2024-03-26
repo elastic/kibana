@@ -26,6 +26,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { ESQLCallbacks, validateQuery } from '@kbn/esql-services';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { StartDependencies } from './plugin';
+import { CodeSnippet } from './CodeSnippet';
 
 export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
   const [currentErrors, setErrors] = useState<string[]>([]);
@@ -164,6 +165,12 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
               </EuiCallOut>
             ) : null}
           </EuiForm>
+          <EuiSpacer />
+          <CodeSnippet
+            currentQuery={currentQuery}
+            callbacks={callbacksEnabled}
+            ignoreErrors={ignoreErrors}
+          />
         </EuiPageSection>
       </EuiPageBody>
     </EuiPage>
