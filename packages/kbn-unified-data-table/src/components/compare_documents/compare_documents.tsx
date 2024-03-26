@@ -25,6 +25,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { GRID_STYLE } from '../../constants';
 import type { UnifiedDataTableRenderCustomToolbar } from '../data_table';
 import { ComparisonControls } from './comparison_controls';
+import { renderComparisonToolbar } from './comparison_toolbar';
 import { useComparisonCellValue } from './hooks/use_comparison_cell_value';
 import { useComparisonColumns } from './hooks/use_comparison_columns';
 import { useComparisonCss } from './hooks/use_comparison_css';
@@ -91,7 +92,7 @@ const CompareDocuments = ({
   );
 
   const fieldColumnId = useGeneratedHtmlId({ prefix: 'fields' });
-  const comparisonFields = useComparisonFields({
+  const { comparisonFields, totalFields } = useComparisonFields({
     dataView,
     selectedFieldNames,
     selectedDocs,
@@ -141,14 +142,12 @@ const CompareDocuments = ({
         setShowDiffDecorations={setShowDiffDecorations}
         setShowMatchingValues={setShowMatchingValues}
         setShowAllFields={setShowAllFields}
-        renderCustomToolbar={renderCustomToolbar}
       />
     ),
     [
       diffMode,
       forceShowAllFields,
       isPlainRecord,
-      renderCustomToolbar,
       selectedDocs,
       setDiffMode,
       setIsCompareActive,
@@ -167,22 +166,18 @@ const CompareDocuments = ({
       showColumnSelector: false,
       showDisplaySelector: false,
       showFullScreenSelector: showFullScreenButton,
-      additionalControls,
     }),
-    [additionalControls, showFullScreenButton]
+    [showFullScreenButton]
   );
   const renderCustomToolbarFn = useMemo<EuiDataGridProps['renderCustomToolbar'] | undefined>(
     () =>
-      renderCustomToolbar
-        ? (toolbarProps) =>
-            renderCustomToolbar({
-              toolbarProps,
-              gridProps: {
-                additionalControls,
-              },
-            })
-        : undefined,
-    [renderCustomToolbar, additionalControls]
+      renderComparisonToolbar({
+        renderCustomToolbar,
+        additionalControls,
+        comparisonFields,
+        totalFields,
+      }),
+    [renderCustomToolbar, additionalControls, comparisonFields, totalFields]
   );
   const ComparisonCellValue = useComparisonCellValue({
     dataView,

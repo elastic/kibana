@@ -11,6 +11,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
 
+const MAX_COMPARISON_FIELDS = 100;
+
 export interface UseComparisonFieldsProps {
   dataView: DataView;
   selectedFieldNames: string[];
@@ -39,11 +41,11 @@ export const useComparisonFields = ({
     };
   }, [getDocById, selectedDocs]);
 
-  const comparisonFields = useMemo(() => {
-    let fieldNames = selectedFieldNames;
+  return useMemo(() => {
+    let comparisonFields = selectedFieldNames;
 
     if (showAllFields) {
-      const sortedFieldNames = dataView.fields
+      const sortedFields = dataView.fields
         .filter((field) => {
           if (field.name === dataView.timeFieldName) {
             return false;
@@ -57,19 +59,25 @@ export const useComparisonFields = ({
         .sort((a, b) => a.displayName.localeCompare(b.displayName))
         .map((field) => field.name);
 
-      fieldNames = dataView.isTimeBased()
-        ? [dataView.timeFieldName, ...sortedFieldNames]
-        : sortedFieldNames;
+      comparisonFields = dataView.isTimeBased()
+        ? [dataView.timeFieldName, ...sortedFields]
+        : sortedFields;
     }
 
-    if (!baseDoc || showMatchingValues) {
-      return fieldNames;
+    if (baseDoc && !showMatchingValues) {
+      comparisonFields = comparisonFields.filter((fieldName) =>
+        comparisonDocs.some(
+          (doc) => !isEqual(doc.flattened[fieldName], baseDoc.flattened[fieldName])
+        )
+      );
     }
 
-    return fieldNames.filter((fieldName) =>
-      comparisonDocs.some((doc) => !isEqual(doc.flattened[fieldName], baseDoc.flattened[fieldName]))
-    );
+    const totalFields = comparisonFields.length;
+
+    if (totalFields > MAX_COMPARISON_FIELDS) {
+      comparisonFields = comparisonFields.slice(0, MAX_COMPARISON_FIELDS);
+    }
+
+    return { comparisonFields, totalFields };
   }, [baseDoc, comparisonDocs, dataView, selectedFieldNames, showAllFields, showMatchingValues]);
-
-  return comparisonFields;
 };

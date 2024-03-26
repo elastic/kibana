@@ -30,7 +30,6 @@ import { i18n } from '@kbn/i18n';
 import React, { FC, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocumentDiffMode } from './types';
-import type { UnifiedDataTableRenderCustomToolbar } from '../data_table';
 
 export interface ComparisonControlsProps {
   isPlainRecord?: boolean;
@@ -47,7 +46,6 @@ export interface ComparisonControlsProps {
   setShowDiffDecorations: (showDiffDecorations: boolean) => void;
   setShowMatchingValues: (showMatchingValues: boolean) => void;
   setShowAllFields: (showAllFields: boolean) => void;
-  renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
 }
 
 export const ComparisonControls = ({
@@ -65,19 +63,12 @@ export const ComparisonControls = ({
   setShowDiffDecorations,
   setShowMatchingValues,
   setShowAllFields,
-  renderCustomToolbar,
 }: ComparisonControlsProps) => {
   const { euiTheme } = useEuiTheme();
   const backgroundSuccess = useEuiBackgroundColor('success');
 
   return (
-    <EuiFlexGroup
-      responsive={false}
-      wrap={true}
-      gutterSize="s"
-      alignItems="center"
-      css={renderCustomToolbar ? undefined : { padding: `0 ${euiTheme.size.s}` }}
-    >
+    <EuiFlexGroup responsive={false} wrap={true} gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.s }}>
         <EuiText size="s">
           <strong>
