@@ -246,8 +246,8 @@ export const useDiscoverHistogram = ({
       return;
     }
 
-    const fetchStart = stateContainer.dataState.data$.documents$.subscribe((value) => {
-      if (value.fetchStatus === FetchStatus.LOADING) {
+    const fetchStart = stateContainer.dataState.fetch$.subscribe(() => {
+      if (!skipRefetch.current) {
         setIsSuggestionLoading(true);
       }
     });
@@ -259,7 +259,7 @@ export const useDiscoverHistogram = ({
       fetchStart.unsubscribe();
       fetchComplete.unsubscribe();
     };
-  }, [isPlainRecord, stateContainer.dataState.data$.documents$, textBasedFetchComplete$]);
+  }, [isPlainRecord, stateContainer.dataState.fetch$, textBasedFetchComplete$]);
 
   /**
    * Data fetching

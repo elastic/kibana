@@ -53,6 +53,9 @@ export const loadSavedSearch = async (
     globalStateContainer,
     services,
   } = deps;
+
+  internalStateContainer.transitions.setLatestVisContext(undefined);
+
   const appStateExists = !appStateContainer.isEmptyURL();
   const appState = appStateExists ? appStateContainer.getState() : initialAppState;
 

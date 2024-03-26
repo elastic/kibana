@@ -322,6 +322,7 @@ export function getDiscoverStateContainer({
 
   const onOpenSavedSearch = async (newSavedSearchId: string) => {
     addLog('[discoverState] onOpenSavedSearch', newSavedSearchId);
+    internalStateContainer.transitions.setLatestVisContext(undefined);
     const currentSavedSearch = savedSearchContainer.getState();
     if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
       addLog('[discoverState] undo changes since saved search did not change');
