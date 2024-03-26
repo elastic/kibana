@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('and the "responseActionsSentinelOneV1Enabled" feature flag is enabled', () => {
       it('should return an error if there is no connector found', async () => {
-        await supertest
+        const response = await supertest
           .post(ISOLATE_HOST_ROUTE_V2)
           .set('kbn-xsrf', 'true')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -27,6 +27,9 @@ export default function ({ getService }: FtrProviderContext) {
             error: 'Bad Request',
             message: 'No SentinelOne stack connector found',
           });
+        expect(response.status).not.toBe(400);
+        expect(response.body.message).toBe('No SentinelOne stack connector found');
+        expect(response.body.message).not.toBe('[request body.agent_type]: feature is disabled');
       });
     });
   });
