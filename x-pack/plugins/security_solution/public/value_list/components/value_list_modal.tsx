@@ -33,14 +33,10 @@ const tableStyle = css`
   overflow: scroll;
 `;
 const info = css`
-  margin-right: 16px;
-`;
-const infoLabel = css`
   margin-right: 8px;
 `;
-
-const searchWrapper = css`
-  // z-index: 20000;
+const infoLabel = css`
+  margin-right: 4px;
 `;
 
 type SortFields = 'updated_at' | 'updated_by';
@@ -96,6 +92,7 @@ export const ValueListModal = ({
       field: 'value',
       name: 'Value',
       render: (value, item) => <InlineEditListItemValue listItem={item} key={value} />,
+      sortable: list?.type && list.type !== 'text',
     },
     {
       field: 'updated_at',
@@ -146,7 +143,11 @@ export const ValueListModal = ({
   }, []);
 
   return (
-    <EuiModal maxWidth={false} css={() => ({ minHeight: '85vh' })} onClose={onCloseModal}>
+    <EuiModal
+      maxWidth={false}
+      css={() => ({ minHeight: '90vh', marginTop: '5vh', maxWidth: '1400px' })}
+      onClose={onCloseModal}
+    >
       {isListLoading || !list ? (
         <EuiLoadingSpinner size="xxl" />
       ) : (
@@ -169,6 +170,7 @@ export const ValueListModal = ({
                     value={<FormattedDate value={list.updated_at} fieldName="updated_at" />}
                   />
                   <Info label="Updated by:" value={list.updated_by} />
+                  {listItems && <Info label="Total items:" value={listItems?.total ?? '-'} />}
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
@@ -180,7 +182,7 @@ export const ValueListModal = ({
             </EuiFlexGroup>
           </EuiModalHeader>
           <EuiFlexGroup className={modalStyle} direction="column">
-            <EuiFlexItem grow={false} className={searchWrapper}>
+            <EuiFlexItem grow={false}>
               <SearchBar
                 appName="siem"
                 isLoading={isLoading}
@@ -189,6 +191,7 @@ export const ValueListModal = ({
                 showDatePicker={false}
                 displayStyle={'inPage'}
                 submitButtonStyle={'iconOnly'}
+                placeholder={`Filter your data using KQL syntax - ${list.type}:*`}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={true} className={tableStyle}>

@@ -56,7 +56,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   showFlyout,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(2);
+  const [pageSize, setPageSize] = useState(5);
   const [cursor, setCursor] = useCursor({ pageIndex, pageSize });
   const { http } = useKibana().services;
   const { start: findLists, ...lists } = useFindLists();

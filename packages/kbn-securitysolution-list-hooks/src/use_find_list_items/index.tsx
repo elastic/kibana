@@ -60,6 +60,7 @@ export const useFindListItems = ({
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,
+      retry: false,
       onSuccess: (data) => {
         if (data?.cursor) {
           setCursor(data?.cursor);
