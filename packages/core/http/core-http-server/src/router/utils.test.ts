@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import type { ObjectType } from '@kbn/config-schema';
+import type { RouteValidatorContainer } from './route_validator';
+import { getRequestValidation, isFullValidatorContainer } from './utils';
+
+type Validator = RouteValidatorContainer<unknown, unknown, unknown>;
+
+describe('isFullValidatorContainer', () => {
+  it('correctly identifies RouteValidatorFullConfigContainer', () => {
+    const fullValidatorContainer: Validator = {
+      request: {
+        body: {} as ObjectType,
+      },
+      responses: {},
+    };
+
+    expect(isFullValidatorContainer(fullValidatorContainer)).toBe(true);
+    expect(isFullValidatorContainer({})).toBe(false);
+  });
+});
+
+describe('getRequestValidation', () => {
+  it('correctly extracts validation config', () => {
+    const validationDummy = {
+      body: {} as unknown as ObjectType,
+    };
+    const fullValidatorContainer: Validator = {
+      request: validationDummy,
+      responses: {},
+    };
+    const fullValidator: Validator = validationDummy;
+
+    expect(getRequestValidation(fullValidatorContainer)).toBe(validationDummy);
+    expect(getRequestValidation(fullValidator)).toBe(validationDummy);
+  });
+});
