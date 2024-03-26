@@ -15,6 +15,7 @@ import { ChatFlyout } from '../chat/chat_flyout';
 import { useKibana } from '../../hooks/use_kibana';
 import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
 import { useTheme } from '../../hooks/use_theme';
+import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 
 export function NavControl({}: {}) {
   const service = useObservabilityAIAssistantAppService();
@@ -30,6 +31,8 @@ export function NavControl({}: {}) {
   } = useKibana();
 
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
+
+  useNavControlScreenContext();
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
@@ -77,6 +80,7 @@ export function NavControl({}: {}) {
   return (
     <>
       <EuiButton
+        data-test-subj="observabilityAiAssistantAppNavControlButton"
         css={buttonCss}
         onClick={() => {
           service.conversations.openNewConversation({
