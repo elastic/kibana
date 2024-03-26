@@ -43,6 +43,7 @@ const INITIAL_STATE_ERROR_RATE: ErrorRate = {
 
 function FailedTransactionChart({
   transactionType,
+  transactionName,
   serviceName,
   environment,
   start,
@@ -51,6 +52,7 @@ function FailedTransactionChart({
   timeZone,
 }: {
   transactionType: string;
+  transactionName?: string;
   serviceName: string;
   environment: string;
   start: string;
@@ -66,7 +68,9 @@ function FailedTransactionChart({
     end,
     kuery: '',
     numBuckets: 100,
-    type: ApmDocumentType.ServiceTransactionMetric,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
 
   const { data: dataErrorRate = INITIAL_STATE_ERROR_RATE, status } = useFetcher(
@@ -85,7 +89,7 @@ function FailedTransactionChart({
                 start,
                 end,
                 transactionType,
-                transactionName: undefined,
+                transactionName,
                 documentType: preferred.source.documentType,
                 rollupInterval: preferred.source.rollupInterval,
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
@@ -95,7 +99,15 @@ function FailedTransactionChart({
         );
       }
     },
-    [environment, serviceName, start, end, transactionType, preferred]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+      preferred,
+    ]
   );
   const timeseriesErrorRate = [
     {
