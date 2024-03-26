@@ -224,6 +224,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
 
         if (brushSelectionUpdate !== undefined) {
+          setInitialAnalysisStart(wpSnap);
           brushSelectionUpdate(
             wpSnap,
             true,
