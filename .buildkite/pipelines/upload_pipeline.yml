@@ -2,4 +2,5 @@
 
 steps:
   - label: Upload tested pipeline
-    command: buildkite-agent pipeline upload .buildkite/pipelines/pipeline_to_test.yml
+    # command: buildkite-agent pipeline upload .buildkite/pipelines/pipeline_to_test.yml
+    command: buildkite-agent pipeline upload .buildkite/pipelines/security_solution_quality_gate/mki_security_solution_detection_engine.yml
