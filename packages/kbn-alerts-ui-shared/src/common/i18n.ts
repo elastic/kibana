@@ -9,37 +9,37 @@
 import { i18n } from '@kbn/i18n';
 
 export const PRODUCER_DISPLAY_NAMES = {
-  apm: i18n.translate('alertsUiShared.producerDisplayNames.apm', {
+  apm: i18n.translate('alertsUIShared.producerDisplayNames.apm', {
     defaultMessage: 'APM and User Experience',
   }),
-  uptime: i18n.translate('alertsUiShared.producerDisplayNames.uptime', {
+  uptime: i18n.translate('alertsUIShared.producerDisplayNames.uptime', {
     defaultMessage: 'Synthetics and Uptime',
   }),
-  stackAlerts: i18n.translate('alertsUiShared.producerDisplayNames.stackAlerts', {
+  stackAlerts: i18n.translate('alertsUIShared.producerDisplayNames.stackAlerts', {
     defaultMessage: 'Stack Alerts',
   }),
-  metrics: i18n.translate('alertsUiShared.producerDisplayNames.metrics', {
+  metrics: i18n.translate('alertsUIShared.producerDisplayNames.metrics', {
     defaultMessage: 'Metrics',
   }),
-  logs: i18n.translate('alertsUiShared.producerDisplayNames.logs', {
+  logs: i18n.translate('alertsUIShared.producerDisplayNames.logs', {
     defaultMessage: 'Logs',
   }),
-  siem: i18n.translate('alertsUiShared.producerDisplayNames.siem', {
+  siem: i18n.translate('alertsUIShared.producerDisplayNames.siem', {
     defaultMessage: 'Security',
   }),
-  observability: i18n.translate('alertsUiShared.producerDisplayNames.observability', {
+  observability: i18n.translate('alertsUIShared.producerDisplayNames.observability', {
     defaultMessage: 'Observability',
   }),
-  ml: i18n.translate('alertsUiShared.producerDisplayNames.ml', {
+  ml: i18n.translate('alertsUIShared.producerDisplayNames.ml', {
     defaultMessage: 'Machine Learning',
   }),
-  slo: i18n.translate('alertsUiShared.producerDisplayNames.slo', {
+  slo: i18n.translate('alertsUIShared.producerDisplayNames.slo', {
     defaultMessage: 'SLOs',
   }),
-  infrastructure: i18n.translate('alertsUiShared.producerDisplayNames.infrastructure', {
+  infrastructure: i18n.translate('alertsUIShared.producerDisplayNames.infrastructure', {
     defaultMessage: 'Infrastructure',
   }),
-  monitoring: i18n.translate('alertsUiShared.producerDisplayNames.monitoring', {
+  monitoring: i18n.translate('alertsUIShared.producerDisplayNames.monitoring', {
     defaultMessage: 'Stack Monitoring',
   }),
 };
