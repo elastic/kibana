@@ -173,6 +173,13 @@ export class ControlGroupContainer extends Container<
       this.setupSubscriptions();
       const { filters, timeslice } = this.recalculateFilters();
       this.publishFilters({ filters, timeslice });
+
+      this.calculateFiltersFromSelections(initialComponentState?.lastSavedInput?.panels ?? {}).then(
+        (filterOutput) => {
+          this.dispatch.setLastSavedFilters(filterOutput);
+        }
+      );
+
       this.initialized$.next(true);
     });
 
@@ -206,29 +213,6 @@ export class ControlGroupContainer extends Container<
   };
 
   private setupSubscriptions = () => {
-    /**
-     * on initialization, in order for comparison to be performed, calculate the last saved filters based on the
-     * selections from the last saved input and save them to component state. This is done as a subscription so that
-     * it can be done async without actually slowing down the loading of the controls.
-     */
-    this.subscriptions.add(
-      this.initialized$
-        .pipe(
-          filter((isInitialized) => isInitialized),
-          first()
-        )
-        .subscribe(async () => {
-          const {
-            componentState: { lastSavedInput },
-            explicitInput: { panels },
-          } = this.getState();
-          const filterOutput = await this.calculateFiltersFromSelections(
-            lastSavedInput?.panels ?? panels
-          );
-          this.dispatch.setLastSavedFilters(filterOutput);
-        })
-    );
-
     /**
      * refresh control order cache and make all panels refreshInputFromParent whenever panel orders change
      */
@@ -292,8 +276,9 @@ export class ControlGroupContainer extends Container<
   public setSavedState(lastSavedInput: PersistableControlGroupInput | undefined): void {
     batch(() => {
       this.dispatch.setLastSavedInput(lastSavedInput);
-      const { filters, timeslice } = this.getState().output;
-      this.dispatch.setLastSavedFilters({ filters, timeslice });
+      this.calculateFiltersFromSelections(lastSavedInput?.panels ?? {}).then((filterOutput) => {
+        this.dispatch.setLastSavedFilters(filterOutput);
+      });
     });
   }
 
