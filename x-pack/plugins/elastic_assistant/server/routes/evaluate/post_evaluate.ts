@@ -154,7 +154,6 @@ export const postEvaluateRoute = (
               isEnabledKnowledgeBase: true,
               isEnabledRAGAlerts: true,
               conversationId: '',
-              llmType: 'openai',
             },
           };
 

@@ -28,17 +28,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('does not allow user that does not have reporting_user role', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        if (await PageObjects.share.checkOldVersion()) {
-          await reportingFunctional.tryDashboardDownloadCsvFail('Ecommerce Data');
-        }
+        await reportingFunctional.tryDashboardGenerateCsvFail('Ecommerce Data');
       });
 
       it('does allow user with reporting_user role', async () => {
-        if (await PageObjects.share.checkOldVersion()) {
-          await reportingFunctional.loginDataAnalyst();
-          await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-          await reportingFunctional.tryDashboardDownloadCsvSuccess('Ecommerce Data');
-        }
+        await reportingFunctional.loginReportingUser();
+        await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
+        await reportingFunctional.tryDashboardGenerateCsvSuccess('Ecommerce Data');
       });
     });
 

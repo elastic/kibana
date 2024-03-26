@@ -5,16 +5,17 @@
  * 2.0.
  */
 
+import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
-import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
-import type { MlCoreSetup } from '../plugin';
+import { isAnomalySwimlaneSelectionTriggerContext } from './triggers';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
 import type { SwimLaneDrilldownContext } from '../embeddables';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
+import type { MlCoreSetup } from '../plugin';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from './constants';
 
 export const APPLY_INFLUENCER_FILTERS_ACTION = 'applyInfluencerFiltersAction';
@@ -27,7 +28,7 @@ export function createApplyInfluencerFiltersAction(
   return {
     id: 'apply-to-current-view',
     type: APPLY_INFLUENCER_FILTERS_ACTION,
-    getIconType(context: SwimLaneDrilldownContext): string {
+    getIconType(): string {
       return 'filter';
     },
     getDisplayName() {
@@ -73,18 +74,18 @@ export function createApplyInfluencerFiltersAction(
         })
       );
     },
-    async isCompatible({ embeddable, data }) {
+    async isCompatible(context: EmbeddableApiContext) {
       const [{ application }] = await getStartServices();
       const appId = await firstValueFrom(application.currentAppId$);
 
       // Only compatible with view by influencer swim lanes and single selection
       return (
-        embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE &&
-        data !== undefined &&
-        data.type === SWIMLANE_TYPE.VIEW_BY &&
-        data.viewByFieldName !== VIEW_BY_JOB_LABEL &&
-        data.lanes.length === 1 &&
-        supportedApps.includes(appId!)
+        supportedApps.includes(appId!) &&
+        isAnomalySwimlaneSelectionTriggerContext(context) &&
+        context.data !== undefined &&
+        context.data.type === SWIMLANE_TYPE.VIEW_BY &&
+        context.data.viewByFieldName !== VIEW_BY_JOB_LABEL &&
+        context.data.lanes.length === 1
       );
     },
   };

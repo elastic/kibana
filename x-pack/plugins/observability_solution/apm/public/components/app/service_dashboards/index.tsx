@@ -83,7 +83,7 @@ export function ServiceDashboards() {
   );
 
   useEffect(() => {
-    const filteredServiceDashbords = (data?.serviceDashboards ?? []).reduce(
+    const filteredServiceDashboards = (data?.serviceDashboards ?? []).reduce(
       (
         result: MergedServiceDashboard[],
         serviceDashboard: SavedApmCustomDashboard
@@ -102,8 +102,8 @@ export function ServiceDashboards() {
       []
     );
 
-    setServiceDashboards(filteredServiceDashbords);
-  }, [allAvailableDashboards, data?.serviceDashboards]);
+    setServiceDashboards(filteredServiceDashboards);
+  }, [allAvailableDashboards, data]);
 
   const getCreationOptions =
     useCallback((): Promise<DashboardCreationOptions> => {
@@ -127,7 +127,6 @@ export function ServiceDashboards() {
       timeRange: { from: rangeFrom, to: rangeTo },
       query: { query: kuery, language: 'kuery' },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataView,
     serviceName,
@@ -136,6 +135,7 @@ export function ServiceDashboards() {
     dashboard,
     rangeFrom,
     rangeTo,
+    currentDashboard,
   ]);
 
   const getLocatorParams = useCallback(

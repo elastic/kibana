@@ -30,6 +30,7 @@ interface EsRunProps {
 interface TestRunProps extends EsRunProps {
   journey: Journey;
   phase: 'TEST' | 'WARMUP';
+  ingestEsData: boolean;
   kibanaInstallDir: string | undefined;
 }
 
@@ -79,7 +80,7 @@ async function startEs(props: EsRunProps) {
 }
 
 async function runFunctionalTest(props: TestRunProps) {
-  const { procRunner, journey, phase, kibanaInstallDir, logsDir } = props;
+  const { procRunner, journey, phase, kibanaInstallDir, logsDir, ingestEsData } = props;
   await procRunner.run('functional-tests', {
     cmd: 'node',
     args: [
@@ -103,6 +104,7 @@ async function runFunctionalTest(props: TestRunProps) {
       TEST_PERFORMANCE_PHASE: phase,
       TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
       TEST_ES_DISABLE_STARTUP: 'true',
+      TEST_INGEST_ES_DATA: ingestEsData.toString(),
     },
   });
 }
@@ -162,10 +164,18 @@ run(
             phase: 'WARMUP',
             kibanaInstallDir,
             logsDir,
+            ingestEsData: true,
           });
         }
         process.stdout.write(`--- Running journey: ${journey.name} [collect metrics]\n`);
-        await runFunctionalTest({ procRunner, log, journey, phase: 'TEST', kibanaInstallDir });
+        await runFunctionalTest({
+          procRunner,
+          log,
+          journey,
+          phase: 'TEST',
+          kibanaInstallDir,
+          ingestEsData: skipWarmup, // if warmup was skipped, we need to ingest data as part of TEST phase
+        });
       } catch (e) {
         log.error(e);
         failedJourneys.push(journey.name);
