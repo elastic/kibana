@@ -220,7 +220,6 @@ describe('BedrockConnector', () => {
               content: 'What is 2+2?',
             },
           ],
-          stopSequences: ['\n\nHuman:'],
         });
         expect(mockRequest).toHaveBeenCalledWith({
           signed: true,
@@ -229,10 +228,9 @@ describe('BedrockConnector', () => {
           method: 'post',
           responseSchema: StreamingResponseSchema,
           data: JSON.stringify({
-            ...JSON.parse(DEFAULT_BODY),
+            anthropic_version: 'bedrock-2023-05-31',
+            system: 'Be a good chatbot',
             messages: [
-              { content: 'Be a good chatbot', role: 'user' },
-              { content: 'Ok.', role: 'assistant' },
               { content: 'Hello world', role: 'user' },
               { content: 'Hi, I am a good chatbot', role: 'assistant' },
               { content: 'What is 2+2?', role: 'user' },
@@ -271,7 +269,6 @@ describe('BedrockConnector', () => {
               content: 'This is extra tricky',
             },
           ],
-          stopSequences: ['\n\nHuman:'],
         });
         expect(mockRequest).toHaveBeenCalledWith({
           signed: true,
@@ -280,12 +277,11 @@ describe('BedrockConnector', () => {
           method: 'post',
           responseSchema: StreamingResponseSchema,
           data: JSON.stringify({
-            ...JSON.parse(DEFAULT_BODY),
+            anthropic_version: 'bedrock-2023-05-31',
+            system: 'Be a good chatbot\nThis is extra tricky',
             messages: [
-              { content: 'Be a good chatbot', role: 'user' },
-              { content: 'Ok.\nHi, I am a good chatbot\nBut I can be naughty', role: 'assistant' },
-              { content: 'What is 2+2?\nI can be naughty too\nThis is extra tricky', role: 'user' },
-              { content: 'Ok.', role: 'assistant' },
+              { content: 'Hi, I am a good chatbot\nBut I can be naughty', role: 'assistant' },
+              { content: 'What is 2+2?\nI can be naughty too', role: 'user' },
             ],
             max_tokens: DEFAULT_TOKEN_LIMIT,
             temperature: 0,
@@ -315,7 +311,6 @@ describe('BedrockConnector', () => {
               content: 'What is 2+2?',
             },
           ],
-          stopSequences: ['\n\nHuman:'],
           model: modelOverride,
         });
         expect(mockRequest).toHaveBeenCalledWith({
@@ -325,10 +320,9 @@ describe('BedrockConnector', () => {
           method: 'post',
           responseSchema: StreamingResponseSchema,
           data: JSON.stringify({
-            ...JSON.parse(DEFAULT_BODY),
+            anthropic_version: 'bedrock-2023-05-31',
+            system: 'Be a good chatbot',
             messages: [
-              { content: 'Be a good chatbot', role: 'user' },
-              { content: 'Ok.', role: 'assistant' },
               { content: 'Hello world', role: 'user' },
               { content: 'Hi, I am a good chatbot', role: 'assistant' },
               { content: 'What is 2+2?', role: 'user' },
@@ -402,7 +396,6 @@ describe('BedrockConnector', () => {
               content: 'What is 2+2?',
             },
           ],
-          stopSequences: ['\n\nHuman:'],
         });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
@@ -412,10 +405,93 @@ describe('BedrockConnector', () => {
           method: 'post',
           responseSchema: RunApiLatestResponseSchema,
           data: JSON.stringify({
-            ...JSON.parse(DEFAULT_BODY),
+            anthropic_version: 'bedrock-2023-05-31',
+            system: 'Be a good chatbot',
             messages: [
-              { content: 'Be a good chatbot', role: 'user' },
-              { content: 'Ok.', role: 'assistant' },
+              { content: 'Hello world', role: 'user' },
+              { content: 'Hi, I am a good chatbot', role: 'assistant' },
+              { content: 'What is 2+2?', role: 'user' },
+            ],
+            max_tokens: DEFAULT_TOKEN_LIMIT,
+            temperature: 0,
+          }),
+        });
+        expect(response.message).toEqual(mockResponseString);
+      });
+
+      it('adds system message from argument', async () => {
+        const response = await connector.invokeAI({
+          messages: [
+            {
+              role: 'user',
+              content: 'Hello world',
+            },
+            {
+              role: 'assistant',
+              content: 'Hi, I am a good chatbot',
+            },
+            {
+              role: 'user',
+              content: 'What is 2+2?',
+            },
+          ],
+          system: 'This is a system message',
+        });
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          signed: true,
+          timeout: 120000,
+          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+          method: 'post',
+          responseSchema: RunApiLatestResponseSchema,
+          data: JSON.stringify({
+            anthropic_version: 'bedrock-2023-05-31',
+            system: 'This is a system message',
+            messages: [
+              { content: 'Hello world', role: 'user' },
+              { content: 'Hi, I am a good chatbot', role: 'assistant' },
+              { content: 'What is 2+2?', role: 'user' },
+            ],
+            max_tokens: DEFAULT_TOKEN_LIMIT,
+            temperature: 0,
+          }),
+        });
+        expect(response.message).toEqual(mockResponseString);
+      });
+
+      it('combines argument system message with conversation system message', async () => {
+        const response = await connector.invokeAI({
+          messages: [
+            {
+              role: 'system',
+              content: 'Be a good chatbot',
+            },
+            {
+              role: 'user',
+              content: 'Hello world',
+            },
+            {
+              role: 'assistant',
+              content: 'Hi, I am a good chatbot',
+            },
+            {
+              role: 'user',
+              content: 'What is 2+2?',
+            },
+          ],
+          system: 'This is a system message',
+        });
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          signed: true,
+          timeout: 120000,
+          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+          method: 'post',
+          responseSchema: RunApiLatestResponseSchema,
+          data: JSON.stringify({
+            anthropic_version: 'bedrock-2023-05-31',
+            system: 'This is a system message\nBe a good chatbot',
+            messages: [
               { content: 'Hello world', role: 'user' },
               { content: 'Hi, I am a good chatbot', role: 'assistant' },
               { content: 'What is 2+2?', role: 'user' },

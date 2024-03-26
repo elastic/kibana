@@ -264,10 +264,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     messages,
     model,
     stopSequences,
+    system,
     temperature,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
-      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, temperature })),
+      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
       model,
     })) as unknown as IncomingMessage;
     return res;
@@ -282,10 +283,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     messages,
     model,
     stopSequences,
+    system,
     temperature,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
-      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, temperature })),
+      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
       model,
     });
     return { message: res.completion.trim() };
@@ -296,13 +298,16 @@ const formatBedrockBody = ({
   messages,
   stopSequences,
   temperature = 0,
+  system,
 }: {
   messages: Array<{ role: string; content: string }>;
   stopSequences?: string[];
   temperature?: number;
+  // optional system message to be sent to the API
+  system?: string;
 }) => ({
   anthropic_version: 'bedrock-2023-05-31',
-  messages: ensureMessageFormat(messages),
+  ...ensureMessageFormat(messages, system),
   max_tokens: DEFAULT_TOKEN_LIMIT,
   stop_sequences: stopSequences,
   temperature,
@@ -316,9 +321,12 @@ const formatBedrockBody = ({
  * @param messages
  */
 const ensureMessageFormat = (
-  messages: Array<{ role: string; content: string }>
-): Array<{ role: string; content: string }> =>
-  messages.reduce((acc: Array<{ role: string; content: string }>, m) => {
+  messages: Array<{ role: string; content: string }>,
+  systemPrompt?: string
+): { messages: Array<{ role: string; content: string }>; system?: string } => {
+  let system = systemPrompt ? systemPrompt : '';
+
+  const newMessages = messages.reduce((acc: Array<{ role: string; content: string }>, m) => {
     const lastMessage = acc[acc.length - 1];
     if (lastMessage && lastMessage.role === m.role) {
       // Bedrock only accepts assistant and user roles.
@@ -329,21 +337,15 @@ const ensureMessageFormat = (
       ];
     }
     if (m.role === 'system') {
-      if (lastMessage && lastMessage.role === 'user') {
-        // Bedrock only accepts assistant and user roles.
-        // If 2 user or 2 assistant messages are sent in a row, combine the messages into a single message
-        return [
-          ...acc.slice(0, -1),
-          { content: `${lastMessage.content}\n${m.content}`, role: 'user' },
-          { content: 'Ok.', role: 'assistant' },
-        ];
-      }
-      return [...acc, { content: m.content, role: 'user' }, { content: 'Ok.', role: 'assistant' }];
+      system = `${system.length ? `${system}\n` : ''}${m.content}`;
+      return acc;
     }
 
-    // force roll outside of system to ensure it is either assistant or user
+    // force role outside of system to ensure it is either assistant or user
     return [...acc, { content: m.content, role: m.role === 'assistant' ? 'assistant' : 'user' }];
   }, []);
+  return system.length ? { system, messages: newMessages } : { messages: newMessages };
+};
 
 function parseContent(content: Array<{ text?: string; type: string }>): string {
   let parsedContent = '';
