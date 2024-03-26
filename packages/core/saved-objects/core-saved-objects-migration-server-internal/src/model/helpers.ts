@@ -44,36 +44,35 @@ export function throwBadResponse(state: { controlState: string }, res: unknown):
 }
 
 /**
- * Merge the _meta.migrationMappingPropertyHashes mappings of an index with
- * the given target mappings.
+ * Merge the mappings._meta information of an index with the given target mappings.
  *
  * @remarks When another instance already completed a migration, the existing
  * target index might contain documents and mappings created by a plugin that
  * is disabled in the current Kibana instance performing this migration.
  * Mapping updates are commutative (deeply merged) by Elasticsearch, except
- * for the `_meta` key. By merging the `_meta.migrationMappingPropertyHashes`
- * mappings from the existing target index index into the targetMappings we
- * ensure that any `migrationPropertyHashes` for disabled plugins aren't lost.
- *
- * Right now we don't use these `migrationPropertyHashes` but it could be used
- * in the future to detect if mappings were changed. If mappings weren't
- * changed we don't need to reindex but can clone the index to save disk space.
+ * for the `_meta` key. By merging the `_meta` from the existing target index
+ * into the targetMappings we ensure that any versions for disabled plugins aren't lost.
  *
  * @param targetMappings
  * @param indexMappings
  */
-export function mergeMigrationMappingPropertyHashes(
-  targetMappings: IndexMapping,
-  indexMappings: IndexMapping
-) {
+export function mergeMappingMeta(targetMappings: IndexMapping, indexMappings: IndexMapping) {
+  const mappingVersions = {
+    ...indexMappings._meta?.mappingVersions,
+    ...targetMappings._meta?.mappingVersions,
+  };
+
+  const migrationMappingPropertyHashes = {
+    ...indexMappings._meta?.migrationMappingPropertyHashes,
+    ...targetMappings._meta?.migrationMappingPropertyHashes,
+  };
+
   return {
     ...targetMappings,
     _meta: {
       ...targetMappings._meta,
-      migrationMappingPropertyHashes: {
-        ...indexMappings._meta?.migrationMappingPropertyHashes,
-        ...targetMappings._meta?.migrationMappingPropertyHashes,
-      },
+      ...(Object.keys(mappingVersions).length && { mappingVersions }),
+      ...(Object.keys(migrationMappingPropertyHashes).length && { migrationMappingPropertyHashes }),
     },
   };
 }
