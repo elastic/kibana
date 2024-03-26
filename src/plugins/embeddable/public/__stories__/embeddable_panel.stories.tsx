@@ -69,6 +69,7 @@ interface HelloWorldEmbeddablePanelProps {
   hideHeader: boolean;
   loading: boolean;
   showShadow: boolean;
+  showBorder: boolean;
   title: string;
   viewMode: boolean;
 }
@@ -83,6 +84,7 @@ const HelloWorldEmbeddablePanel = forwardRef<
       hideHeader,
       loading,
       showShadow,
+      showBorder,
       title,
       viewMode,
     }: HelloWorldEmbeddablePanelProps,
@@ -113,6 +115,7 @@ const HelloWorldEmbeddablePanel = forwardRef<
         getActions={getActions}
         hideHeader={hideHeader}
         showShadow={showShadow}
+        showBorder={showBorder}
       />
     );
   }
@@ -123,7 +126,8 @@ export const Default = HelloWorldEmbeddablePanel as Meta<HelloWorldEmbeddablePan
 Default.args = {
   hideHeader: false,
   loading: false,
-  showShadow: true,
+  showShadow: false,
+  showBorder: true,
   title: 'Hello World',
   viewMode: true,
 };
