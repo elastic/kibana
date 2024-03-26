@@ -26,7 +26,7 @@ import { TextEmbeddingInference } from './models/text_embedding';
 import { useMlApiContext } from '../../contexts/kibana';
 import { type TestTrainedModelsContextType } from './test_trained_models_context';
 import { InferenceInputForm } from './models/inference_input_form';
-import type { InferrerType } from './models';
+import type { InferrerType } from './models/types';
 import type { INPUT_TYPE } from './models/inference_base';
 import { TextExpansionInference } from './models/text_expansion';
 import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
