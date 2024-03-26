@@ -86,3 +86,47 @@ export const getVirtualVersionMap = (types: SavedObjectsType[]): VirtualVersionM
     return versionMap;
   }, {});
 };
+
+/**
+ * Returns the latest version number that includes changes in the mappings, for the given type.
+ * If none of the versions are updating the mappings, it will return 0
+ */
+export const getLatestMappingsVersionNumber = (type: SavedObjectsType): number => {
+  const versionMap =
+    typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};
+  return Object.entries(versionMap)
+    .filter(([version, info]) =>
+      info.changes?.some((change) => change.type === 'mappings_addition')
+    )
+    .reduce<number>((memo, [current]) => {
+      return Math.max(memo, assertValidModelVersion(current));
+    }, 0);
+};
+
+/**
+ * Returns the latest model version that includes changes in the mappings, for the given type.
+ * It will either be a model version if the type
+ * already switched to using them (switchToModelVersionAt is set),
+ * or the latest migration version for the type otherwise.
+ */
+export const getLatestMappingsModelVersion = (type: SavedObjectsType): string => {
+  if (type.switchToModelVersionAt) {
+    const modelVersion = getLatestMappingsVersionNumber(type);
+    return modelVersionToVirtualVersion(modelVersion);
+  } else {
+    return getLatestMigrationVersion(type);
+  }
+};
+
+/**
+ * Returns a map of virtual model version for the given types.
+ * See {@link getLatestMappingsModelVersion}
+ */
+export const getLatestMappingsVirtualVersionMap = (
+  types: SavedObjectsType[]
+): VirtualVersionMap => {
+  return types.reduce<VirtualVersionMap>((versionMap, type) => {
+    versionMap[type.name] = getLatestMappingsModelVersion(type);
+    return versionMap;
+  }, {});
+};
