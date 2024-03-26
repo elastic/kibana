@@ -673,13 +673,6 @@ export const RULES_TAG_SEARCH = i18n.translate(
   }
 );
 
-export const NO_TAGS_AVAILABLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.filters.noTagsAvailableDescription',
-  {
-    defaultMessage: 'No tags available',
-  }
-);
-
 export const RULE_EXECTION_STATUS_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
   {

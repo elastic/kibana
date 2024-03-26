@@ -26,7 +26,7 @@ export const useFilterPrebuiltRulesToInstall = ({
       }
 
       if (tags && tags.length > 0) {
-        return tags.every((tag) => rule.tags.includes(tag));
+        return tags.some((tag) => rule.tags.includes(tag));
       }
 
       return true;
