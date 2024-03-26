@@ -89,7 +89,11 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
     try {
       const byRefState = await new Promise<object>((resolve, reject) => {
         const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
-          await embeddable.checkForDuplicateTitle(props);
+          await embeddable.checkForDuplicateTitle(
+            props.newTitle,
+            props.isTitleDuplicateConfirmed,
+            props.onTitleDuplicate
+          );
           try {
             const { state, savedObjectId } = await embeddable.saveStateToSavedObject(
               props.newTitle

@@ -39,7 +39,6 @@ import {
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
@@ -702,15 +701,19 @@ export class MapEmbeddable
       attributes: this._savedMap.getAttributes(),
     };
   };
-  checkForDuplicateTitle = async (props: OnSaveProps) => {
+  checkForDuplicateTitle = async (
+    newTitle: string,
+    isTitleDuplicateConfirmed: boolean,
+    onTitleDuplicate: () => void
+  ) => {
     return checkForDuplicateTitle(
       {
-        title: props.newTitle,
+        title: newTitle,
         copyOnSave: false,
         lastSavedTitle: '',
-        isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
+        isTitleDuplicateConfirmed,
         getDisplayName: () => MAP_EMBEDDABLE_NAME,
-        onTitleDuplicate: props.onTitleDuplicate,
+        onTitleDuplicate,
       },
       {
         overlays: getCoreOverlays(),

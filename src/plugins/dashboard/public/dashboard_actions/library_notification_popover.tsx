@@ -23,10 +23,11 @@ import {
   LegacyUnlinkPanelFromLibraryActionApi,
 } from './legacy_unlink_from_library_action';
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
+import { UnlinkFromLibraryAction, UnlinkPanelFromLibraryActionApi } from './unlink_from_library_action';
 
 export interface LibraryNotificationProps {
-  api: LegacyUnlinkPanelFromLibraryActionApi;
-  unlinkAction: LegacyUnlinkFromLibraryAction;
+  api: UnlinkPanelFromLibraryActionApi | LegacyUnlinkPanelFromLibraryActionApi;
+  unlinkAction: UnlinkFromLibraryAction | LegacyUnlinkFromLibraryAction;
 }
 
 export function LibraryNotificationPopover({ unlinkAction, api }: LibraryNotificationProps) {
