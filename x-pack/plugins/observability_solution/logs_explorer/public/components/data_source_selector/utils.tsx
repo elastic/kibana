@@ -25,23 +25,23 @@ interface IntegrationsTreeParams {
   datasets: Dataset[] | null;
   datasetsFallback?: React.ReactNode;
   integrations: Integration[] | null;
+  isLoadingUncategorized: boolean;
   onDatasetSelected: DatasetSelectionHandler;
-  onUncategorizedLoad: LoadDatasets;
 }
 
 export const buildIntegrationsTree = ({
   integrations,
   datasets,
   datasetsFallback,
+  isLoadingUncategorized,
   onDatasetSelected,
-  onUncategorizedLoad,
 }: IntegrationsTreeParams) => {
   const uncategorizedIntegration = {
     id: 'integration-uncategorized',
     title: uncategorizedLabel,
     datasets,
-    onClick: onUncategorizedLoad,
     content: datasetsFallback,
+    isLoading: isLoadingUncategorized,
   };
 
   return [uncategorizedIntegration, ...(integrations ?? [])].map((integration) => ({

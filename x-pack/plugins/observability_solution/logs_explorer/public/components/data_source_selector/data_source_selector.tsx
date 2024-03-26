@@ -92,6 +92,7 @@ export function DataSourceSelector({
     onIntegrationsStreamsSort,
     onUncategorizedSearch,
     onUncategorizedSort,
+    onUncategorizedLoad,
     onUncategorizedReload,
     onSelectionChange,
   });
@@ -113,15 +114,14 @@ export function DataSourceSelector({
       datasets,
       datasetsFallback,
       integrations,
+      isLoadingUncategorized,
       onDatasetSelected: selectDataset,
-      onUncategorizedLoad,
     });
   }, [
     datasets,
     datasetsError,
     integrations,
     isLoadingUncategorized,
-    onUncategorizedLoad,
     onUncategorizedReload,
     selectDataset,
   ]);

@@ -51,29 +51,27 @@ export function IntegrationsList({
     >
       {children}
       {rule}
-      {!shouldDisplayPrompt && (
-        <IntegrationListWrapper className="eui-yScroll" paddingSize="none" hasShadow={false}>
-          <Header onSortByName={onSortByName} search={search} />
-          {shouldDisplayPrompt && statusPrompt}
-          {items.map((integration, pos) => {
-            const isLastItem = pos === items.length - 1;
+      <IntegrationListWrapper className="eui-yScroll" paddingSize="none" hasShadow={false}>
+        <Header onSortByName={onSortByName} search={search} />
+        {items.map((integration, pos) => {
+          const isLastItem = pos === items.length - 1;
 
-            return (
-              <Fragment key={integration.id}>
-                <IntegrationItem integration={integration} />
-                {isLastItem ? null : rule}
-              </Fragment>
-            );
-          })}
-          <span ref={spyRef} /> {/* Used to trigger integrations infinite scroll loading */}
-        </IntegrationListWrapper>
-      )}
+          return (
+            <Fragment key={integration.id}>
+              <IntegrationItem integration={integration} />
+              {isLastItem ? null : rule}
+            </Fragment>
+          );
+        })}
+        <span ref={spyRef} /> {/* Used to trigger integrations infinite scroll loading */}
+        {shouldDisplayPrompt && statusPrompt}
+      </IntegrationListWrapper>
     </EuiPanel>
   );
 }
 
 function IntegrationItem({ integration }) {
-  const { id, datasets, icons, name, version, onClick } = integration;
+  const { id, datasets, icons, name, version, isLoading } = integration;
   const accordionId = useGeneratedHtmlId({ prefix: 'integration', suffix: id });
 
   const integrationIcon = useMemo(
@@ -99,10 +97,11 @@ function IntegrationItem({ integration }) {
   return (
     <EuiAccordion
       id={accordionId}
+      css={rowMarginEnd}
       buttonContent={integrationButton}
       buttonContentClassName="eui-fullWidth"
       data-test-subj={integration.id}
-      {...(onClick && { onToggle: onClick })}
+      isLoading={isLoading}
     >
       {rule}
       {content}
@@ -234,11 +233,16 @@ const indentationStyle = css`
   margin-inline-start: ${euiThemeVars.euiSizeXS};
 `;
 
+const rowMarginEnd = css`
+  margin-inline-end: ${euiThemeVars.euiSizeXS};
+`;
+
 const headerStyle = css`
   position: sticky;
   top: 0;
   background-color: ${euiThemeVars.euiColorEmptyShade};
   z-index: ${euiThemeVars.euiZHeader};
+  ${rowMarginEnd}
 `;
 
 const datasetItemStyle = css`

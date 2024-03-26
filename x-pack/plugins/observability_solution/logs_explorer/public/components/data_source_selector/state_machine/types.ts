@@ -11,7 +11,7 @@ import {
   DataSourceSelectionChangeHandler,
 } from '../../../../common/data_source_selection';
 import { Dataset } from '../../../../common/datasets/models/dataset';
-import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
+import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
 import {
   LoadMoreIntegrations,
   ReloadIntegrations,
@@ -126,6 +126,7 @@ export interface DataSourceSelectorStateMachineDependencies {
   onIntegrationsStreamsSearch: SearchIntegrations;
   onIntegrationsStreamsSort: SearchIntegrations;
   onSelectionChange: DataSourceSelectionChangeHandler;
+  onUncategorizedLoad: LoadDatasets;
   onUncategorizedReload: ReloadDatasets;
   onUncategorizedSearch: SearchDatasets;
   onUncategorizedSort: SearchDatasets;

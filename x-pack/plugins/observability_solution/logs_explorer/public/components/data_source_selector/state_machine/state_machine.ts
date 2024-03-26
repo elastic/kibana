@@ -58,6 +58,7 @@ export const createPureDataSourceSelectorStateMachine = (
                 },
                 integrationsTab: {
                   entry: [
+                    'loadUncategorized',
                     'storeIntegrationsTabId',
                     'retrieveSearchFromCache',
                     'maybeRestoreSearchResult',
@@ -223,6 +224,7 @@ export const createDataSourceSelectorStateMachine = ({
   onUncategorizedSearch,
   onUncategorizedSort,
   onSelectionChange,
+  onUncategorizedLoad,
   onUncategorizedReload,
 }: DataSourceSelectorStateMachineDependencies) =>
   createPureDataSourceSelectorStateMachine(initialContext).withConfig({
@@ -232,11 +234,13 @@ export const createDataSourceSelectorStateMachine = ({
       },
       loadMoreIntegrations: onIntegrationsLoadMore,
       relaodIntegrations: onIntegrationsReload,
+      loadUncategorized: onUncategorizedLoad,
       reloadUncategorized: onUncategorizedReload,
       // Search actions
       searchIntegrations: (_context, event) => {
         if ('search' in event) {
           onIntegrationsSearch(event.search);
+          onUncategorizedSearch(event.search);
         }
       },
       sortIntegrations: (_context, event) => {
