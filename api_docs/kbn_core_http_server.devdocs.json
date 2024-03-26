@@ -6831,6 +6831,18 @@
                 "path": "x-pack/plugins/rollup/server/routes/api/search/register_search_route.ts"
               },
               {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
                 "plugin": "searchprofiler",
                 "path": "x-pack/plugins/searchprofiler/server/routes/profile.ts"
               },

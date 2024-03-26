@@ -69,7 +69,7 @@ describe('getStreamObservable', () => {
       });
 
     const source = getStreamObservable({
-      connectorTypeTitle: 'Amazon Bedrock',
+      llmType: '.bedrock',
       isError: false,
       reader: typedReader,
       setLoading,
@@ -142,7 +142,7 @@ describe('getStreamObservable', () => {
       });
 
     const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
+      llmType: '.gen-ai',
       isError: false,
       reader: typedReader,
       setLoading,
@@ -215,7 +215,7 @@ describe('getStreamObservable', () => {
       });
 
     const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
+      llmType: '.gen-ai',
       isError: false,
       reader: typedReader,
       setLoading,
@@ -268,7 +268,7 @@ describe('getStreamObservable', () => {
       });
 
     const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
+      llmType: '.gen-ai',
       isError: true,
       reader: typedReader,
       setLoading,
@@ -299,7 +299,7 @@ describe('getStreamObservable', () => {
     // Simulate an error
     mockReader.read.mockRejectedValue(error);
     const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
+      llmType: '.gen-ai',
       isError: false,
       reader: typedReader,
       setLoading,

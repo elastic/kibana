@@ -232,6 +232,7 @@ function getJiraActionParams({ defaultActionMessage }: Translations): JiraAction
         priority: '2',
         labels: null,
         parent: null,
+        otherFields: null,
       },
       comments: [],
     },

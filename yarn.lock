@@ -1746,10 +1746,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@93.3.0":
-  version "93.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.3.0.tgz#3fc1052aa4b0192deadbee9c9ac48409d7df2cf4"
-  integrity sha512-0JNaioZISY8GGt3G+piER4U+e82jQ41cvE2Wz7WotuWiRYJEWVoJrtERWE/DCXubAj95XVCLSetWuQce3EGzmw==
+"@elastic/eui@93.4.0":
+  version "93.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.4.0.tgz#14a7302125e13c1c324c5169fb320451f6b79e7a"
+  integrity sha512-fDUNvsPninaDdXWAQRFfoEzk4EgZL+OUoDbzDVH9PTcxkA/dr54sMoTV8KrvvXBVQ+X+VXndcXzmluQeWKj+5g==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -3076,10 +3076,6 @@
   uid ""
 
 "@kbn/advanced-settings-plugin@link:src/plugins/advanced_settings":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ai-assistant-management-observability-plugin@link:src/plugins/ai_assistant_management/observability":
   version "0.0.0"
   uid ""
 
@@ -5367,6 +5363,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-ai-assistant-management-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant_management":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant":
   version "0.0.0"
   uid ""
@@ -5756,6 +5756,10 @@
   uid ""
 
 "@kbn/search-api-panels@link:packages/kbn-search-api-panels":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-connectors-plugin@link:x-pack/plugins/search_connectors":
   version "0.0.0"
   uid ""
 
@@ -10343,13 +10347,6 @@
   resolved "https://registry.yarnpkg.com/@types/redux-actions/-/redux-actions-2.6.1.tgz#0940e97fa35ad3004316bddb391d8e01d2efa605"
   integrity sha512-zKgK+ATp3sswXs6sOYo1tk8xdXTy4CTaeeYrVQlClCjeOpag5vzPo0ASWiiBJ7vsiQRAdb3VkuFLnDoBimF67g==
 
-"@types/redux-logger@^3.0.8":
-  version "3.0.8"
-  resolved "https://registry.yarnpkg.com/@types/redux-logger/-/redux-logger-3.0.8.tgz#1fb6d26917bb198792bb1cf57feb31cae1532c5d"
-  integrity sha512-zM+cxiSw6nZtRbxpVp9SE3x/X77Z7e7YAfHD1NkxJyJbAGSXJGF0E9aqajZfPOa/sTYnuwutmlCldveExuCeLw==
-  dependencies:
-    redux "^4.0.0"
-
 "@types/refractor@^3.0.2":
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/@types/refractor/-/refractor-3.0.2.tgz#2d42128d59f78f84d2c799ffc5ab5cadbcba2d82"
@@ -12837,10 +12834,10 @@ buffers@~0.1.1:
   resolved "https://registry.yarnpkg.com/buffers/-/buffers-0.1.1.tgz#b24579c3bed4d6d396aeee6d9a8ae7f5482ab7bb"
   integrity sha512-9q/rDEGSb/Qsvv2qvzIzdluL5k7AaJOTrw23z9reQthrbF7is4CtlT0DXyO1oei2DCp4uojjzQ7igaSHp1kAEQ==
 
-buildkite-test-collector@^1.6.5:
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/buildkite-test-collector/-/buildkite-test-collector-1.6.5.tgz#ab384981d873e7e44451f24d1dda62e9c3197ac8"
-  integrity sha512-7WdRp3R/CKCeL7aSDiu+BFppKXw7rWQEni/+sT4cv6vT852ZHVnTwo+/C1H+gIeMweqZSuLKEHzKGFrv/z8sBw==
+buildkite-test-collector@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/buildkite-test-collector/-/buildkite-test-collector-1.7.0.tgz#3fdd753b185045c7aed0136a0e0713a77313164b"
+  integrity sha512-R2t3KfBmGCu8fllmZ5GBzOyLJxfB2CEwwgOOtLTleKrHLDPXDal+YLz09okOVL0DE+d5GaGhELwY1MD3xfwE4A==
   dependencies:
     axios "^1.0.0"
     dotenv "^16.0.2"
@@ -14927,11 +14924,6 @@ dedent@^0.7.0:
   resolved "https://registry.yarnpkg.com/dedent/-/dedent-0.7.0.tgz#2495ddbaf6eb874abb0e1be9df22d2e5a544326c"
   integrity sha1-JJXduvbrh0q7Dhvp3yLS5aVEMmw=
 
-deep-diff@^0.3.5:
-  version "0.3.8"
-  resolved "https://registry.yarnpkg.com/deep-diff/-/deep-diff-0.3.8.tgz#c01de63efb0eec9798801d40c7e0dae25b582c84"
-  integrity sha1-wB3mPvsO7JeYgB1Ax+Da4ltYLIQ=
-
 deep-equal@^1.0.0, deep-equal@^1.0.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/deep-equal/-/deep-equal-1.1.1.tgz#b5c98c942ceffaf7cb051e24e1434a25a2e6076a"
@@ -15554,9 +15546,9 @@ dotenv-expand@^5.1.0:
   integrity sha512-YXQl1DSa4/PQyRfgrv6aoNjhasp/p4qs9FjJ4q4cQk+8m4r6k4ZSiEyytKG8f8W9gi8WsQtIObNmKd+tMzNTmA==
 
 dotenv@^16.0.2, dotenv@^16.0.3:
-  version "16.3.1"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.3.1.tgz#369034de7d7e5b120972693352a3bf112172cc3e"
-  integrity sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==
+  version "16.4.5"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.5.tgz#cdd3b3b604cb327e286b4762e13502f717cb099f"
+  integrity sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==
 
 dotenv@^8.0.0:
   version "8.2.0"
@@ -22652,6 +22644,14 @@ mocha-junit-reporter@^2.0.2:
     strip-ansi "^6.0.1"
     xml "^1.0.0"
 
+mocha-multi-reporters@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/mocha-multi-reporters/-/mocha-multi-reporters-1.5.1.tgz#c73486bed5519e1d59c9ce39ac7a9792600e5676"
+  integrity sha512-Yb4QJOaGLIcmB0VY7Wif5AjvLMUFAdV57D2TWEva1Y0kU/3LjKpeRVmlMIfuO1SVbauve459kgtIizADqxMWPg==
+  dependencies:
+    debug "^4.1.1"
+    lodash "^4.17.15"
+
 mocha@^10.1.0:
   version "10.1.0"
   resolved "https://registry.yarnpkg.com/mocha/-/mocha-10.1.0.tgz#dbf1114b7c3f9d0ca5de3133906aea3dfc89ef7a"
@@ -26415,13 +26415,6 @@ redux-devtools-extension@^2.13.8:
   version "2.13.8"
   resolved "https://registry.yarnpkg.com/redux-devtools-extension/-/redux-devtools-extension-2.13.8.tgz#37b982688626e5e4993ff87220c9bbb7cd2d96e1"
   integrity sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==
-
-redux-logger@^3.0.6:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/redux-logger/-/redux-logger-3.0.6.tgz#f7555966f3098f3c88604c449cf0baf5778274bf"
-  integrity sha1-91VZZvMJjzyIYExEnPC69XeCdL8=
-  dependencies:
-    deep-diff "^0.3.5"
 
 redux-saga@^1.1.3:
   version "1.1.3"
