@@ -8,13 +8,16 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { getUpdatedHashes } from '../core/build_active_mappings';
+import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
+import { getUpdatedRootFields, getUpdatedTypes } from '../core/compare_mappings';
 
 /** @internal */
 export interface CheckTargetMappingsParams {
-  actualMappings?: IndexMapping;
-  expectedMappings: IndexMapping;
+  indexTypes: string[];
+  indexMappings?: IndexMapping;
+  appMappings: IndexMapping;
+  latestMappingsVersions: VirtualVersionMap;
+  hashToVersionMap?: Record<string, string>;
 }
 
 /** @internal */
@@ -22,40 +25,60 @@ export interface ComparedMappingsMatch {
   type: 'compared_mappings_match';
 }
 
-export interface ActualMappingsIncomplete {
-  type: 'actual_mappings_incomplete';
+export interface IndexMappingsIncomplete {
+  type: 'index_mappings_incomplete';
 }
 
-export interface ComparedMappingsChanged {
-  type: 'compared_mappings_changed';
-  updatedHashes: string[];
+export interface RootFieldsChanged {
+  type: 'root_fields_changed';
+  updatedFields: string[];
+}
+
+export interface TypesChanged {
+  type: 'types_changed';
+  updatedTypes: string[];
 }
 
 export const checkTargetMappings =
   ({
-    actualMappings,
-    expectedMappings,
+    indexTypes,
+    indexMappings,
+    appMappings,
+    latestMappingsVersions,
+    hashToVersionMap = {},
   }: CheckTargetMappingsParams): TaskEither.TaskEither<
-    ActualMappingsIncomplete | ComparedMappingsChanged,
+    IndexMappingsIncomplete | RootFieldsChanged | TypesChanged,
     ComparedMappingsMatch
   > =>
   async () => {
     if (
-      !actualMappings?._meta?.migrationMappingPropertyHashes ||
-      actualMappings.dynamic !== expectedMappings.dynamic
+      (!indexMappings?._meta?.migrationMappingPropertyHashes &&
+        !indexMappings?._meta?.mappingVersions) ||
+      indexMappings.dynamic !== appMappings.dynamic
     ) {
-      return Either.left({ type: 'actual_mappings_incomplete' as const });
+      return Either.left({ type: 'index_mappings_incomplete' as const });
     }
 
-    const updatedHashes = getUpdatedHashes({
-      actual: actualMappings,
-      expected: expectedMappings,
+    const updatedFields = getUpdatedRootFields(indexMappings);
+
+    if (updatedFields.length) {
+      return Either.left({
+        type: 'root_fields_changed',
+        updatedFields,
+      });
+    }
+
+    const updatedTypes = getUpdatedTypes({
+      indexTypes,
+      indexMeta: indexMappings?._meta,
+      latestMappingsVersions,
+      hashToVersionMap,
     });
 
-    if (updatedHashes.length) {
+    if (updatedTypes.length) {
       return Either.left({
-        type: 'compared_mappings_changed' as const,
-        updatedHashes,
+        type: 'types_changed' as const,
+        updatedTypes,
       });
     } else {
       return Either.right({ type: 'compared_mappings_match' as const });

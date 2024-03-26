@@ -19152,7 +19152,7 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ all: boolean; setup: boolean; readEnrollmentTokens: boolean; readAgentPolicies: boolean; allAgentPolicies: boolean; readAgents: boolean; allAgents: boolean; readSettings: boolean; allSettings: boolean; }"
+              "{ all: boolean; setup: boolean; readEnrollmentTokens: boolean; readAgentPolicies: boolean; allAgentPolicies: boolean; readAgents: boolean; allAgents: boolean; readSettings: boolean; allSettings: boolean; addAgents: boolean; addFleetServers: boolean; }"
             ],
             "path": "x-pack/plugins/fleet/common/authz.ts",
             "deprecated": false,

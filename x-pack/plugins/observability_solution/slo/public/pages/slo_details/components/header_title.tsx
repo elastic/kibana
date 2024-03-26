@@ -19,19 +19,14 @@ export interface Props {
   showTitle?: boolean;
 }
 
-export function HeaderTitle({ isLoading, slo, showTitle = true }: Props) {
+export function HeaderTitle({ isLoading, slo }: Props) {
   if (isLoading || !slo) {
     return <EuiSkeletonText lines={1} data-test-subj="loadingTitle" />;
   }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {showTitle && (
-        <>
-          <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>
-          <SLOGroupings slo={slo} />
-        </>
-      )}
+      <SLOGroupings slo={slo} />
 
       <EuiFlexGroup
         direction="row"
