@@ -2,7 +2,7 @@
 
 ## Folder structure
 
-This library enables all the advanced features for ES|QL within Monaco, as validation, autocomplete, hover, etc...
+This library brings all the foundation data structure to enable all advanced features within an editor for ES|QL as validation, autocomplete, hover, etc...
 The package is structure as follow:
 
 ```
@@ -71,17 +71,13 @@ Therefore adding them requires a two step phase:
 * Update the definition files for commands/options
 
 To update the grammar:
-1. start by copying the source grammar `lexer` and `parser` files
-2. make sure to fix all the case insensitive occurrencies in `lexer` file (all non-symbol strings like `"something"` into `S O M E T H I N G`).
-3. run the script into the `package.json` to compile the ES|QL grammar.
-4. open the `ast_factory.ts` file and add a new `exit<Command/Option>` method
-5. write some code in the `ast_walker/ts` to translate the Antlr Parser tree into the custom AST (there are already few utilites for that, but sometimes it is required to write some more code if the `parser` introduced a new flow)
+1. Make sure the `lexer` and `parser` files are up to date with their ES counterparts
+  * an existing Kibana CI job is updating them already automatically
+2. Run the script into the `package.json` to compile the ES|QL grammar.
+3. open the `ast_factory.ts` file and add a new `exit<Command/Option>` method
+4. write some code in the `ast_walker/ts` to translate the Antlr Parser tree into the custom AST (there are already few utilites for that, but sometimes it is required to write some more code if the `parser` introduced a new flow)
   * pro tip: use the `http://lab.antlr.org/` to visualize/debug the parser tree for a given statement (copy and paste the grammar files there)
-6. if a new quoted/unquoted identifier token gets added open the `ast_helpers.ts` and manually add the ids of the new tokens in the `getQuotedText` and `getUnquotedText` functions - please make sure to leave a comment on the token name
-
-To update the definitions:
-1. open either the `commands.ts` or `option.ts` file and add a new entry
-2. write new tests for validation and autocomplete
+5. if something goes wrong with new quoted/unquoted identifier token, open the `ast_helpers.ts` and check the ids of the new tokens in the `getQuotedText` and `getUnquotedText` functions - please make sure to leave a comment on the token name
 
 #### Debug and fix grammar changes (tokens, etc...)
 

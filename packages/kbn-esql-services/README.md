@@ -59,7 +59,7 @@ const { errors, warnings } = await validateQuery(
 
 #### Autocomplete
 
-This is the complete logic for the ES|QL autocomplete language, it is completely indipendent from the actual editor (i.e. Monaco) and the suggestions reported need to be wrapped against the specific editor shape.
+This is the complete logic for the ES|QL autocomplete language, it is completely indepedent from the actual editor (i.e. Monaco) and the suggestions reported need to be wrapped against the specific editor shape.
 
 ```js
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
@@ -179,3 +179,13 @@ Note that autocomplete works most of the time with incomplete/invalid queries, s
 
 Once the AST is produced there's a `getAstContext` function that finds the cursor position node (and its parent command), together with some hint like the type of current context: `expression`, `function`, `newCommand`, `option`.
 The most complex case is the `expression` as it can cover a moltitude of cases. The function is highly commented in order to identify the specific cases, but there's probably some obscure area still to comment/clarify.
+
+### Adding new commands/options/functions/erc...
+
+To update the definitions:
+1. open either approriate definition file within the `definitions` folder and add a new entry to the relative array
+2. write new tests for validation and autocomplete
+  * if a new function is added tests are automatically generated fro both validation and autocomplete with some standard checks
+  * if a new function requires a new field types, make sure to add the new type to the initial part of the test file
+    * this will be automatically picked up by the test generator to produce new test cases
+  * if a new function requires a new type of test, make sure to write it manually
