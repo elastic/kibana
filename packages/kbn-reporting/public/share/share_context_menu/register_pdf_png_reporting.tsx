@@ -88,7 +88,7 @@ export const reportingScreenshotShareProvider = ({
 
     shareActions.push({
       shareMenuItem: {
-        name: i18n.translate('xpack.reporting.shareContextMenu.ExportsButtonLabel', {
+        name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabel', {
           defaultMessage: 'Export',
         }),
         toolTipContent: licenseToolTipContent,
@@ -97,7 +97,7 @@ export const reportingScreenshotShareProvider = ({
       },
       panel: {
         id: 'reportingImageModal',
-        title: i18n.translate('xpack.reporting.shareContextMenu.ReportsButtonLabel', {
+        title: i18n.translate('reporting.shareContextMenu.ReportsButtonLabel', {
           defaultMessage: 'Generate report',
         }),
         content: (

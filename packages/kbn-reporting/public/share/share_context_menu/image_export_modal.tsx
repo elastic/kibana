@@ -180,20 +180,20 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         toasts.addSuccess({
           title: intl.formatMessage(
             {
-              id: 'xpack.reporting.modalContent.successfullyQueuedReportNotificationTitle',
+              id: 'reporting.modalContent.successfullyQueuedReportNotificationTitle',
               defaultMessage: 'Queued report for {objectType}',
             },
             { objectType }
           ),
           text: toMountPoint(
             <FormattedMessage
-              id="xpack.reporting.modalContent.successfullyQueuedReportNotificationDescription"
+              id="reporting.modalContent.successfullyQueuedReportNotificationDescription"
               defaultMessage="Track its progress in {path}."
               values={{
                 path: (
                   <a href={apiClient.getManagementLink()}>
                     <FormattedMessage
-                      id="xpack.reporting.modalContent.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                      id="reporting.modalContent.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
                       defaultMessage="Stack Management &gt; Reporting"
                     />
                   </a>
@@ -214,7 +214,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       .catch((error) => {
         toasts.addError(error, {
           title: intl!.formatMessage({
-            id: 'xpack.reporting.modalContent.notification.reportingErrorTitle',
+            id: 'reporting.modalContent.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),
           toastMessage: (
@@ -239,7 +239,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
           <EuiSwitch
             label={
               <FormattedMessage
-                id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel"
+                id="reporting.screenCapturePanelContent.optimizeForPrintingLabel"
                 defaultMessage="Optimize for printing"
               />
             }
@@ -250,7 +250,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
           <EuiToolTip
             content={
               <FormattedMessage
-                id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingHelpText"
+                id="reporting.screenCapturePanelContent.optimizeForPrintingHelpText"
                 defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
               />
             }
@@ -326,7 +326,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             isLoading={Boolean(createReportingJob)}
           >
             <FormattedMessage
-              id="xpack.reporting.modalContent.generateButtonLabel"
+              id="reporting.modalContent.generateButtonLabel"
               defaultMessage="Generate export"
             />
           </EuiButton>
@@ -341,7 +341,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         isLoading={Boolean(createReportingJob)}
       >
         <FormattedMessage
-          id="xpack.reporting.generateReportButtonLabel"
+          id="reporting.generateReportButtonLabel"
           defaultMessage="Generate export"
         />
       </EuiButton>
