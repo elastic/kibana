@@ -100,17 +100,22 @@ export const SCHEMA_SEARCH_MODEL_VERSION_2 = SCHEMA_SEARCH_MODEL_VERSION_1.exten
 
 export const SCHEMA_SEARCH_MODEL_VERSION_3 = SCHEMA_SEARCH_MODEL_VERSION_2.extends({
   visContext: schema.maybe(
-    schema.object({
-      // unified histogram state
-      suggestionType: schema.string(),
-      requestData: schema.object({
-        dataViewId: schema.maybe(schema.string()),
-        timeField: schema.maybe(schema.string()),
-        timeInterval: schema.maybe(schema.string()),
-        breakdownField: schema.maybe(schema.string()),
+    schema.oneOf([
+      // existing value
+      schema.object({
+        // unified histogram state
+        suggestionType: schema.string(),
+        requestData: schema.object({
+          dataViewId: schema.maybe(schema.string()),
+          timeField: schema.maybe(schema.string()),
+          timeInterval: schema.maybe(schema.string()),
+          breakdownField: schema.maybe(schema.string()),
+        }),
+        // lens attributes
+        attributes: schema.recordOf(schema.string(), schema.any()),
       }),
-      // lens attributes
-      attributes: schema.recordOf(schema.string(), schema.any()),
-    })
+      // cleared previous value
+      schema.object({}),
+    ])
   ),
 });

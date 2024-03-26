@@ -23,7 +23,7 @@ export interface InternalState {
   adHocDataViews: DataView[];
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
-  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | null | undefined; // it will be used during saved search saving
+  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
 }
 
 export interface InternalStateTransitions {
@@ -45,7 +45,7 @@ export interface InternalStateTransitions {
   setOverriddenVisContextAfterInvalidation: (
     state: InternalState
   ) => (
-    overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | null | undefined
+    overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined
   ) => InternalState;
   resetOnSavedSearchChange: (state: InternalState) => () => InternalState;
 }
@@ -123,7 +123,7 @@ export function getInternalStateContainer() {
       }),
       setOverriddenVisContextAfterInvalidation:
         (prevState: InternalState) =>
-        (overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | null | undefined) => ({
+        (overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined) => ({
           ...prevState,
           overriddenVisContextAfterInvalidation,
         }),

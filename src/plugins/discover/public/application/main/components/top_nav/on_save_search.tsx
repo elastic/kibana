@@ -139,8 +139,8 @@ export async function onSaveSearch({
       savedSearch.tags = newTags;
     }
 
-    if (overriddenVisContextAfterInvalidation || overriddenVisContextAfterInvalidation === null) {
-      savedSearch.visContext = overriddenVisContextAfterInvalidation || undefined;
+    if (overriddenVisContextAfterInvalidation) {
+      savedSearch.visContext = overriddenVisContextAfterInvalidation;
     }
 
     const saveOptions: SaveSavedSearchOptions = {

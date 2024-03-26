@@ -20,16 +20,19 @@ export interface DiscoverGridSettingsColumn extends SerializableRecord {
   width?: number;
 }
 
-export interface VisContextUnmapped {
-  attributes: unknown;
-  requestData: {
-    dataViewId?: string;
-    timeField?: string;
-    timeInterval?: string;
-    breakdownField?: string;
-  };
-  suggestionType: string;
-}
+export type VisContextUnmapped =
+  | {
+      // UnifiedHistogramVisContext (can't be referenced here directly due to circular dependency)
+      attributes: unknown;
+      requestData: {
+        dataViewId?: string;
+        timeField?: string;
+        timeInterval?: string;
+        breakdownField?: string;
+      };
+      suggestionType: string;
+    }
+  | {}; // cleared value
 
 /** @internal **/
 export interface SavedSearchAttributes {
@@ -56,7 +59,7 @@ export interface SavedSearchAttributes {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
-  visContext?: VisContextUnmapped; // UnifiedHistogramVisContext (can't be referenced here directly due to circular dependency)
+  visContext?: VisContextUnmapped;
 }
 
 /** @internal **/
@@ -88,7 +91,7 @@ export interface SavedSearch {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
-  visContext?: VisContextUnmapped; // UnifiedHistogramVisContext (can't be referenced here directly due to circular dependency)
+  visContext?: VisContextUnmapped;
 
   // Whether or not this saved search is managed by the system
   managed: boolean;

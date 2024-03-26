@@ -367,7 +367,7 @@ export const useDiscoverHistogram = ({
           );
           break;
         case UnifiedHistogramExternalVisContextStatus.unknown:
-          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(null);
+          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation({});
           break;
       }
     },
