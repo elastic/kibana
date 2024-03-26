@@ -14,8 +14,6 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
   ALERT_FLAPPING,
-  ALERT_GROUP_FIELD,
-  ALERT_GROUP_VALUE,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_NAME,
   ALERT_RULE_UUID,
@@ -25,6 +23,7 @@ import {
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+
 import { paths } from '../../../../common/locators/paths';
 import { TimeRange } from '../../../../common/custom_threshold_rule/types';
 import { TopAlert } from '../../../typings/alerts';
@@ -36,6 +35,7 @@ import {
   mapRuleParamsWithFlyout,
 } from './helpers/map_rules_params_with_flyout';
 import { ColumnIDs, overviewColumns } from './overview_columns';
+import { getGroups } from './helpers/getGroups';
 
 export const Overview = memo(({ alert }: { alert: TopAlert }) => {
   const { http } = useKibana().services;
@@ -46,12 +46,6 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
 
-  const groups = alert.fields[ALERT_GROUP_FIELD]?.map((field, index) => {
-    const values = alert.fields[ALERT_GROUP_VALUE];
-    if (values?.length && values[index]) {
-      return { field, value: values[index] };
-    }
-  });
   useEffect(() => {
     const mappedRuleParams = mapRuleParamsWithFlyout(alert);
     setRuleCriteria(mappedRuleParams);
@@ -83,7 +77,7 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
         meta: {
           alertEnd,
           timeRange,
-          groups: groups || [],
+          groups: getGroups(alert) || [],
         },
       },
       {
@@ -156,11 +150,10 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
       },
     ];
   }, [
-    alert.fields,
+    alert,
     alertEnd,
     cases,
     dateFormat,
-    groups,
     http.basePath,
     isLoading,
     navigateToCaseView,
