@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { deleteTimelines } from '../../../../tasks/api_calls/common';
-import {
-  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  GET_LOCAL_SHOW_DATES_BUTTON,
-} from '../../../../screens/date_picker';
+import { GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON, GET_LOCAL_SHOW_DATES_BUTTON } from '../../../../screens/date_picker';
 import {
   setStartDate,
   showStartEndDate,
@@ -27,10 +23,11 @@ import {
   addFieldToTable,
   convertEditorNonBreakingSpaceToSpace,
 } from '../../../../tasks/discover';
-import { createNewTimeline, goToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
+import { deleteTimelines } from '../../../../tasks/api_calls/timelines';
+import { openActiveTimeline, createNewTimeline, goToEsqlTab } from '../../../../tasks/timeline';
 
 const DEFAULT_DATE = '~ 15 minutes ago';
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';

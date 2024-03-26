@@ -18,6 +18,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     this.tags('smoke');
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
+    });
+
+    beforeEach(async () => {
       await pageObjects.common.navigateToApp('management');
     });
 
@@ -37,11 +40,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    it('navigates to API keys management by clicking the card', async () => {
+      await testSubjects.click('app-card-api_keys');
+      expect(async () => {
+        await pageObjects.common.waitUntilUrlIncludes('/app/management/security/api_keys');
+      }).not.to.throwError();
+    });
+
     describe('Roles management card', () => {
       it('should not be displayed by default', async () => {
-        await pageObjects.common.navigateToApp('management');
-
+        await retry.waitFor('page to be visible', async () => {
+          return await testSubjects.exists('cards-navigation-page');
+        });
         await pageObjects.svlManagementPage.assertRoleManagementCardDoesNotExist();
+      });
+    });
+
+    describe('Organization members management card', () => {
+      it('should not be displayed by default', async () => {
+        await retry.waitFor('page to be visible', async () => {
+          return await testSubjects.exists('cards-navigation-page');
+        });
+        await pageObjects.svlManagementPage.assertOrgMembersManagementCardDoesNotExist();
       });
     });
   });
