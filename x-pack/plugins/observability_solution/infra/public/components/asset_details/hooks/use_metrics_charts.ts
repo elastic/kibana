@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 
-export const useFlyoutMetricsCharts = ({
+export const useHostFlyoutViewMetricsCharts = ({
   metricsDataViewId,
   logsDataViewId,
 }: {
@@ -47,7 +47,7 @@ export const useFlyoutMetricsCharts = ({
   return charts;
 };
 
-export const useHostMetricsCharts = ({
+export const useHostPageViewMetricsCharts = ({
   metricsDataViewId,
   logsDataViewId,
 }: {
@@ -88,7 +88,7 @@ export const useHostMetricsCharts = ({
   return charts;
 };
 
-export const useKubernetesMetricsCharts = ({
+export const useKubernetesSectionMetricsCharts = ({
   metricsDataViewId,
 }: {
   metricsDataViewId?: string;

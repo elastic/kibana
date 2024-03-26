@@ -8,10 +8,10 @@
 import { renderHook } from '@testing-library/react-hooks';
 import type { LensXYConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import {
-  useFlyoutMetricsCharts,
+  useHostFlyoutViewMetricsCharts,
   useHostKpiCharts,
-  useHostMetricsCharts,
-  useKubernetesMetricsCharts,
+  useHostPageViewMetricsCharts,
+  useKubernetesSectionMetricsCharts,
 } from './use_metrics_charts';
 
 const metricsDataViewId = 'metricsDataViewId';
@@ -20,7 +20,7 @@ const logsDataViewId = 'logsDataViewId';
 describe('useFlyoutMetricsCharts', () => {
   it('should return an array of charts with correct order', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useFlyoutMetricsCharts({ metricsDataViewId, logsDataViewId })
+      useHostFlyoutViewMetricsCharts({ metricsDataViewId, logsDataViewId })
     );
     await waitForNextUpdate();
 
@@ -45,7 +45,7 @@ describe('useFlyoutMetricsCharts', () => {
 
   it('should return a chart with id "logRate" using the logsDataViewId', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useFlyoutMetricsCharts({ metricsDataViewId, logsDataViewId })
+      useHostFlyoutViewMetricsCharts({ metricsDataViewId, logsDataViewId })
     );
     await waitForNextUpdate();
 
@@ -58,7 +58,7 @@ describe('useFlyoutMetricsCharts', () => {
 describe('useHostMetricsCharts', () => {
   it('should return an array of charts with correct order', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useHostMetricsCharts({ metricsDataViewId, logsDataViewId })
+      useHostPageViewMetricsCharts({ metricsDataViewId, logsDataViewId })
     );
     await waitForNextUpdate();
 
@@ -86,7 +86,7 @@ describe('useHostMetricsCharts', () => {
 
   it('should return a chart with id "logRate" using the logsDataViewId', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useHostMetricsCharts({ metricsDataViewId, logsDataViewId })
+      useHostPageViewMetricsCharts({ metricsDataViewId, logsDataViewId })
     );
     await waitForNextUpdate();
 
@@ -99,7 +99,7 @@ describe('useHostMetricsCharts', () => {
 describe('useKubernetesMetricsCharts', () => {
   it('should return an array of charts with correct order', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useKubernetesMetricsCharts({ metricsDataViewId })
+      useKubernetesSectionMetricsCharts({ metricsDataViewId })
     );
     await waitForNextUpdate();
 

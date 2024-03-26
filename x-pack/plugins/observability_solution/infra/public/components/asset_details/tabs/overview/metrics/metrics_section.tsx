@@ -18,9 +18,9 @@ import { useMetadataStateContext } from '../../../hooks/use_metadata_state';
 import { MetricsGrid } from './metrics_grid';
 import { CollapsibleSection } from '../section/collapsible_section';
 import {
-  useFlyoutMetricsCharts,
-  useHostMetricsCharts,
-  useKubernetesMetricsCharts,
+  useHostFlyoutViewMetricsCharts,
+  useHostPageViewMetricsCharts,
+  useKubernetesSectionMetricsCharts,
 } from '../../../hooks/use_metrics_charts';
 
 interface Props {
@@ -46,7 +46,7 @@ export const MetricsSectionCompact = ({
   dateRange,
 }: Props) => {
   const model = findInventoryModel('host');
-  const charts = useFlyoutMetricsCharts({
+  const charts = useHostFlyoutViewMetricsCharts({
     metricsDataViewId: metricsDataView?.id,
     logsDataViewId: logsDataView?.id,
   });
@@ -66,7 +66,7 @@ export const MetricsSectionCompact = ({
 
 const HostMetricsSection = ({ assetName, metricsDataView, logsDataView, dateRange }: Props) => {
   const model = findInventoryModel('host');
-  const charts = useHostMetricsCharts({
+  const charts = useHostPageViewMetricsCharts({
     metricsDataViewId: metricsDataView?.id,
     logsDataViewId: logsDataView?.id,
   });
@@ -90,7 +90,7 @@ const KubenetesMetricsSection = ({
   dateRange,
 }: Omit<Props, 'logsDataView'>) => {
   const model = findInventoryModel('host');
-  const charts = useKubernetesMetricsCharts({ metricsDataViewId: metricsDataView?.id });
+  const charts = useKubernetesSectionMetricsCharts({ metricsDataViewId: metricsDataView?.id });
 
   return (
     <Section dependsOn={['kubernetes.node']} title={KubernetesMetricsSectionTitle} collapsible>
