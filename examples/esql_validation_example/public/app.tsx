@@ -26,7 +26,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { ESQLCallbacks, validateQuery } from '@kbn/esql-services';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { StartDependencies } from './plugin';
-import { CodeSnippet } from './CodeSnippet';
+import { CodeSnippet } from './code_snippet';
 
 export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
   const [currentErrors, setErrors] = useState<string[]>([]);
