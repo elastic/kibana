@@ -664,6 +664,7 @@ describe('validation logic', () => {
   });
 
   describe('meta', () => {
+    testErrorsAndWarnings('meta', ["SyntaxError: missing 'functions' at '<EOF>'"]);
     testErrorsAndWarnings('meta functions', []);
     testErrorsAndWarnings('meta functions()', [
       "SyntaxError: token recognition error at: '('",

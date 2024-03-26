@@ -2319,6 +2319,10 @@
       "error": true
     },
     {
+      "query": "meta",
+      "error": true
+    },
+    {
       "query": "meta functions",
       "error": false
     },
