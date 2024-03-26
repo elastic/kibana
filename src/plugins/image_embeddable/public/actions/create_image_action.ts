@@ -7,7 +7,7 @@
  */
 
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
@@ -27,12 +27,16 @@ export const registerCreateImageAction = () => {
       if (!apiIsPresentationContainer(parentApi)) throw new IncompatibleActionError();
 
       const { openImageEditor } = await import('../components/image_editor/open_image_editor');
-      const imageConfig = await openImageEditor({ parentApi });
+      try {
+        const imageConfig = await openImageEditor({ parentApi });
 
-      parentApi.addNewPanel({
-        panelType: IMAGE_EMBEDDABLE_TYPE,
-        initialState: { imageConfig },
-      });
+        parentApi.addNewPanel({
+          panelType: IMAGE_EMBEDDABLE_TYPE,
+          initialState: { imageConfig },
+        });
+      } catch {
+        // swallow the rejection, since this just means the user closed without saving
+      }
     },
     getDisplayName: ImageEmbeddableStrings.getCreateDisplayName,
   });

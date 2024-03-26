@@ -76,7 +76,7 @@ export const openImageEditor = async ({
       ),
       {
         onClose: () => {
-          overlayTracker?.clearOverlays();
+          onCancel();
         },
         ownFocus: true,
         'data-test-subj': 'createImageEmbeddableFlyout',

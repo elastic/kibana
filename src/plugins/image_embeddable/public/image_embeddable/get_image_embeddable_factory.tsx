@@ -62,11 +62,15 @@ export const getImageEmbeddableFactory = ({
           blockingError: blockingError$,
           supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
           onEdit: async () => {
-            const newImageConfig = await openImageEditor({
-              parentApi: embeddable.parentApi as PresentationContainer,
-              initialImageConfig: imageConfig$.getValue(),
-            });
-            imageConfig$.next(newImageConfig);
+            try {
+              const newImageConfig = await openImageEditor({
+                parentApi: embeddable.parentApi as PresentationContainer,
+                initialImageConfig: imageConfig$.getValue(),
+              });
+              imageConfig$.next(newImageConfig);
+            } catch {
+              // swallow the rejection, since this just means the user closed without saving
+            }
           },
           isEditingEnabled: () => true,
           getTypeDisplayName: ImageEmbeddableStrings.getEditDisplayName,

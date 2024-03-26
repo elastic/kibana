@@ -69,14 +69,15 @@ export class ImageEmbeddablePlugin
 
     await untilPluginStartServicesReady();
 
-    const { registerCreateImageAction } = await import('./actions/create_image_action');
-    registerCreateImageAction();
     registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
       const { getImageEmbeddableFactory } = await import(
         './image_embeddable/get_image_embeddable_factory'
       );
       return getImageEmbeddableFactory({ embeddableEnhanced: plugins.embeddableEnhanced });
     });
+
+    const { registerCreateImageAction } = await import('./actions/create_image_action');
+    registerCreateImageAction();
 
     return {};
   }
