@@ -46,7 +46,8 @@ describe('AgentApp', () => {
   beforeEach(() => {
     mockedUseAuthz.mockReturnValue({
       fleet: {
-        all: true,
+        readAgents: true,
+        allAgents: true,
       },
     } as any);
   });
