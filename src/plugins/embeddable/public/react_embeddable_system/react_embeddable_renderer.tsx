@@ -40,7 +40,15 @@ export const ReactEmbeddableRenderer = <
   state: SerializedPanelState<StateType>;
   parentApi?: PresentationContainer;
   onApiAvailable?: (api: ApiType) => void;
-  panelProps?: Omit<PresentationPanelProps<ApiType>, 'Component'>;
+  panelProps?: Pick<
+    PresentationPanelProps<ApiType>,
+    | 'showShadow'
+    | 'showBorder'
+    | 'showBadges'
+    | 'showNotifications'
+    | 'hideHeader'
+    | 'hideInspector'
+  >;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
 
