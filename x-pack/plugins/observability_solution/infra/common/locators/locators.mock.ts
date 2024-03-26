@@ -13,4 +13,5 @@ export const createLocatorMock = (): jest.Mocked<InfraLocators> => ({
   nodeLogsLocator: sharePluginMock.createLocator(),
   assetDetailsLocator: sharePluginMock.createLocator(),
   assetDetailsFlyoutLocator: sharePluginMock.createLocator(),
+  hostsLocator: sharePluginMock.createLocator(),
 });

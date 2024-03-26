@@ -21,6 +21,7 @@ import {
 import {
   AssetDetailsFlyoutLocatorDefinition,
   AssetDetailsLocatorDefinition,
+  HostsLocatorDefinition,
   InfraLocatorDependencies,
 } from '.';
 
@@ -50,6 +51,17 @@ const setupAssetDetailsLocator = async () => {
   };
 };
 
+const setupHostsLocator = async () => {
+  const deps: InfraLocatorDependencies = {
+    core: coreMock.createSetup(),
+  };
+  const hostsLocator = new HostsLocatorDefinition(deps);
+
+  return {
+    hostsLocator,
+  };
+};
+
 describe('Infra Locators', () => {
   describe('Asset Details Locator', () => {
     it('should create a link to Asset Details with no state', async () => {
@@ -71,7 +83,7 @@ describe('Infra Locators', () => {
 
       expect(app).toBe('metrics');
       expect(path).toBe(
-        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}`
+        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}&_a=undefined`
       );
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
@@ -96,7 +108,7 @@ describe('Infra Locators', () => {
 
       expect(app).toBe('metrics');
       expect(path).toBe(
-        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}`
+        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}&_a=undefined`
       );
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
@@ -164,6 +176,52 @@ describe('Infra Locators', () => {
 
       expect(app).toBe('metrics');
       expect(path).toBe(`/hosts?tableProperties=${tableProperties}&assetDetails=${assetDetails}`);
+      expect(state).toBeDefined();
+      expect(Object.keys(state)).toHaveLength(0);
+    });
+  });
+
+  describe('Hosts Locator', () => {
+    it('should create a link to Hosts with no state', async () => {
+      const params = {
+        query: {
+          language: 'kuery',
+          query: 'host.name: "foo"',
+        },
+        dateRange: {
+          from: '2021-01-01T00:00:00.000Z',
+          to: '2021-01-02T00:00:00.000Z',
+        },
+        limit: 10,
+      };
+      const { hostsLocator } = await setupHostsLocator();
+      const { app, path, state } = await hostsLocator.getLocation(params);
+      const searchString = rison.encodeUnknown(params);
+
+      expect(app).toBe('metrics');
+      expect(path).toBe(`/hosts?_a=${searchString}`);
+      expect(state).toBeDefined();
+      expect(Object.keys(state)).toHaveLength(0);
+    });
+
+    it('should return correct structured url', async () => {
+      const params = {
+        query: {
+          language: 'kuery',
+          query: 'host.name: "test"',
+        },
+        dateRange: {
+          from: '2021-01-01T00:00:00.000Z',
+          to: '2021-01-02T00:00:00.000Z',
+        },
+        limit: 10,
+      };
+      const { hostsLocator } = await setupHostsLocator();
+      const { app, path, state } = await hostsLocator.getLocation(params);
+      const searchString = rison.encodeUnknown(params);
+
+      expect(app).toBe('metrics');
+      expect(path).toBe(`/hosts?_a=${searchString}`);
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });

@@ -31,6 +31,7 @@ import {
   InfraNodeLogsLocatorDefinition,
   AssetDetailsLocatorDefinition,
   AssetDetailsFlyoutLocatorDefinition,
+  HostsLocatorDefinition,
 } from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
@@ -191,6 +192,9 @@ export class Plugin implements InfraClientPluginClass {
     );
     const assetDetailsFlyoutLocator = pluginsSetup.share.url.locators.create(
       new AssetDetailsFlyoutLocatorDefinition({ core })
+    );
+    const hostsLocator = pluginsSetup.share.url.locators.create(
+      new HostsLocatorDefinition({ core })
     );
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdRuleType(core, pluginsSetup.share.url)
@@ -377,6 +381,7 @@ export class Plugin implements InfraClientPluginClass {
       nodeLogsLocator,
       assetDetailsLocator,
       assetDetailsFlyoutLocator,
+      hostsLocator,
     };
 
     return {
