@@ -71,7 +71,10 @@ export const ActivityItem: React.FunctionComponent<{
       id="xpack.fleet.agentActivityFlyout.completedDescription"
       defaultMessage="Completed {date}"
       values={{
-        date: formattedTime(action.completionTime),
+        date:
+          action.completionTime === '0001-01-01T00:00:00.000Z'
+            ? null
+            : formattedTime(action.completionTime),
       }}
     />
   );
