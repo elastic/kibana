@@ -76,6 +76,39 @@
     "functions": [
       {
         "parentPluginId": "@kbn/config",
+        "id": "def-common.getConfigFromFiles",
+        "type": "Function",
+        "tags": [],
+        "label": "getConfigFromFiles",
+        "description": [],
+        "signature": [
+          "(configFiles: readonly string[]) => Record<string, any>"
+        ],
+        "path": "packages/kbn-config/src/raw/read_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-common.getConfigFromFiles.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "configFiles",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/kbn-config/src/raw/read_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config",
         "id": "def-common.hasConfigPathIntersection",
         "type": "Function",
         "tags": [],
