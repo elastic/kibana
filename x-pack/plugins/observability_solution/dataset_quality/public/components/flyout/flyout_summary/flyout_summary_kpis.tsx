@@ -38,7 +38,7 @@ export function FlyoutSummaryKpis({
   });
 
   const kpis = useMemo(
-    () => getSummaryKpis(dataStreamDetails, logsExplorerLinkProps.href, true),
+    () => getSummaryKpis(dataStreamDetails, logsExplorerLinkProps.href),
     [dataStreamDetails, logsExplorerLinkProps]
   );
 
