@@ -22,8 +22,6 @@ import type { Observable, Subject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { AggregateQuery, Query } from '@kbn/es-query';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -157,15 +155,6 @@ export enum UnifiedHistogramSuggestionType {
 export interface UnifiedHistogramSuggestionContext {
   suggestion: Suggestion | undefined;
   type: UnifiedHistogramSuggestionType;
-  suggestionDeps:
-    | [
-        string | undefined,
-        DatatableColumn[] | undefined,
-        Query | AggregateQuery | undefined,
-        string | undefined
-      ]
-    | undefined;
-  externalVisContextDep: UnifiedHistogramVisContext | undefined;
 }
 
 export interface LensRequestData {

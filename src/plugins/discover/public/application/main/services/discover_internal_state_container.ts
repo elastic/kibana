@@ -123,20 +123,14 @@ export function getInternalStateContainer() {
       }),
       setOverriddenVisContextAfterInvalidation:
         (prevState: InternalState) =>
-        (overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | undefined) => {
-          // console.log('tmp overriding with', overriddenVisContextAfterInvalidation);
-          return {
-            ...prevState,
-            overriddenVisContextAfterInvalidation,
-          };
-        },
-      resetOnSavedSearchChange: (prevState: InternalState) => () => {
-        // console.log('tmp resetting overriddenVisContextAfterInvalidation');
-        return {
+        (overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | undefined) => ({
           ...prevState,
-          overriddenVisContextAfterInvalidation: undefined,
-        };
-      },
+          overriddenVisContextAfterInvalidation,
+        }),
+      resetOnSavedSearchChange: (prevState: InternalState) => () => ({
+        ...prevState,
+        overriddenVisContextAfterInvalidation: undefined,
+      }),
     },
     {},
     { freeze: (state) => state }

@@ -44,7 +44,6 @@ describe('ChartConfigPanel', () => {
           currentSuggestionContext: {
             suggestion: currentSuggestionMock,
             type: UnifiedHistogramSuggestionType.lensSuggestion,
-            suggestionDeps: [undefined, undefined, undefined, undefined],
           },
         }}
       />
@@ -73,7 +72,6 @@ describe('ChartConfigPanel', () => {
           currentSuggestionContext: {
             suggestion: currentSuggestionMock,
             type: UnifiedHistogramSuggestionType.histogramForDataView,
-            suggestionDeps: [undefined, undefined, undefined, undefined],
           },
         }}
       />

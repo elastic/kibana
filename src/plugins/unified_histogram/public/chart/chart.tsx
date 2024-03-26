@@ -185,11 +185,10 @@ export function Chart({
     (suggestion: Suggestion | undefined) => {
       onSuggestionContextEdit({
         suggestion,
-        suggestionDeps: lensVisServiceCurrentSuggestionContext?.suggestionDeps,
         type: UnifiedHistogramSuggestionType.lensSuggestion,
       });
     },
-    [onSuggestionContextEdit, lensVisServiceCurrentSuggestionContext]
+    [onSuggestionContextEdit]
   );
 
   useEffect(() => {

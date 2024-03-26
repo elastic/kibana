@@ -33,7 +33,7 @@ import { isSuggestionAndVisContextCompatible } from '../utils/external_vis_conte
 import { computeInterval } from '../utils/compute_interval';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
 import { shouldDisplayHistogram } from '../layout/helpers';
-import { updateTablesInLensAttributes } from '../utils/lens_vis_from_table';
+import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 
@@ -105,9 +105,7 @@ export class LensVisService {
       allSuggestions: undefined,
       currentSuggestionContext: {
         suggestion: undefined,
-        suggestionDeps: undefined,
         type: UnifiedHistogramSuggestionType.unsupported,
-        externalVisContextDep: undefined,
       },
       visContext: undefined,
     });
@@ -145,12 +143,9 @@ export class LensVisService {
       wasInvalidatedAndRebuilt: boolean
     ) => void;
   }) => {
-    const suggestionContextSelectedPreviously = this.state$.getValue().currentSuggestionContext;
-
     const allSuggestions = this.getAllSuggestions({ queryParams });
 
     const suggestionState = this.getCurrentSuggestionState({
-      suggestionContextSelectedPreviously,
       externalVisContext,
       queryParams,
       allSuggestions,
@@ -167,14 +162,11 @@ export class LensVisService {
       table,
     });
 
-    if (suggestionState.shouldUpdateSelectedSuggestionDueToDepsChange) {
-      onSuggestionContextChange(suggestionState.currentSuggestionContext);
-    }
+    onSuggestionContextChange(suggestionState.currentSuggestionContext);
 
     if (
       externalVisContext?.attributes &&
-      (suggestionState.shouldUpdateSelectedSuggestionDueToDepsChange ||
-        lensAttributesState.shouldUpdateVisContextDueToIncompatibleSuggestion)
+      lensAttributesState.shouldUpdateVisContextDueToIncompatibleSuggestion
     ) {
       onVisContextChanged?.(lensAttributesState.visContext, true);
     }
@@ -235,58 +227,25 @@ export class LensVisService {
 
   private getCurrentSuggestionState = ({
     allSuggestions,
-    suggestionContextSelectedPreviously,
     externalVisContext,
     queryParams,
     timeInterval,
     breakdownField,
   }: {
     allSuggestions: Suggestion[];
-    suggestionContextSelectedPreviously: UnifiedHistogramSuggestionContext | undefined;
     externalVisContext: UnifiedHistogramVisContext | undefined;
     queryParams: QueryParams;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
   }): {
     currentSuggestionContext: UnifiedHistogramSuggestionContext;
-    shouldUpdateSelectedSuggestionDueToDepsChange: boolean;
   } => {
-    let shouldUpdateSelectedSuggestionDueToDepsChange = false;
-    let previousSuggestionContext = suggestionContextSelectedPreviously;
-    let type = UnifiedHistogramSuggestionType.lensSuggestion;
-    let currentSuggestion: Suggestion | undefined = allSuggestions[0];
+    let type = UnifiedHistogramSuggestionType.unsupported;
+    let currentSuggestion: Suggestion | undefined;
 
-    if (
-      previousSuggestionContext?.suggestion &&
-      externalVisContext &&
-      externalVisContext !== previousSuggestionContext.externalVisContextDep
-    ) {
-      // ignoring the previous suggestion context if the external vis context has changed
-      previousSuggestionContext = undefined;
-      shouldUpdateSelectedSuggestionDueToDepsChange = true;
-    }
-
-    const prevSuggestionDeps = previousSuggestionContext?.suggestionDeps;
-    const nextSuggestionDeps = getSuggestionDeps({
-      dataView: queryParams.dataView,
-      query: queryParams.query,
-      columns: queryParams.columns,
-      breakdownField,
-    });
-
-    if (
-      previousSuggestionContext?.suggestion &&
-      prevSuggestionDeps &&
-      !isEqual(prevSuggestionDeps, nextSuggestionDeps)
-    ) {
-      // ignoring the previous suggestion context if other deps have changed
-      previousSuggestionContext = undefined;
-      shouldUpdateSelectedSuggestionDueToDepsChange = true;
-    }
-
-    if (previousSuggestionContext?.suggestion) {
-      currentSuggestion = previousSuggestionContext.suggestion;
-      type = previousSuggestionContext.type;
+    if (!externalVisContext && allSuggestions.length) {
+      currentSuggestion = allSuggestions[0];
+      type = UnifiedHistogramSuggestionType.lensSuggestion;
     }
 
     if (
@@ -297,7 +256,7 @@ export class LensVisService {
         isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
       );
 
-      currentSuggestion = matchingSuggestion || currentSuggestion;
+      currentSuggestion = matchingSuggestion || allSuggestions[0];
       type = UnifiedHistogramSuggestionType.lensSuggestion;
     }
 
@@ -321,10 +280,7 @@ export class LensVisService {
       currentSuggestionContext: {
         type: Boolean(currentSuggestion) ? type : UnifiedHistogramSuggestionType.unsupported,
         suggestion: currentSuggestion,
-        suggestionDeps: nextSuggestionDeps,
-        externalVisContextDep: externalVisContext,
       },
-      shouldUpdateSelectedSuggestionDueToDepsChange,
     };
   };
 
@@ -653,7 +609,7 @@ export class LensVisService {
     ) {
       visContext = {
         ...visContext,
-        attributes: updateTablesInLensAttributes({
+        attributes: enrichLensAttributesWithTablesData({
           attributes: visContext.attributes,
           table,
         }),
@@ -665,23 +621,4 @@ export class LensVisService {
       visContext,
     };
   };
-}
-
-function getSuggestionDeps({
-  dataView,
-  query,
-  columns,
-  breakdownField,
-}: {
-  dataView: DataView;
-  query?: Query | AggregateQuery;
-  columns?: DatatableColumn[];
-  breakdownField: DataViewField | undefined;
-}): UnifiedHistogramSuggestionContext['suggestionDeps'] {
-  return [
-    `${dataView.id}-${dataView.getIndexPattern()}-${dataView.timeFieldName ?? 'noTimeField'}`,
-    columns,
-    query,
-    breakdownField?.name,
-  ];
 }
