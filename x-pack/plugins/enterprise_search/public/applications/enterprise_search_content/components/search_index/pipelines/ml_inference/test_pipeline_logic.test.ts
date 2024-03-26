@@ -46,6 +46,7 @@ const DEFAULT_VALUES: TestPipelineValues = {
   simulatePipelineStatus: 0,
 };
 
+// @ts-expect-error pipeline._meta defined as mandatory
 const mockInferencePipeline: MlInferencePipeline = {
   processors: [],
   version: 1,

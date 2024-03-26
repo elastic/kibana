@@ -136,6 +136,7 @@ kibana_vars=(
     ops.interval
     path.data
     pid.file
+    profiler.signal
     regionmap
     savedObjects.maxImportExportSize
     savedObjects.maxImportPayloadBytes

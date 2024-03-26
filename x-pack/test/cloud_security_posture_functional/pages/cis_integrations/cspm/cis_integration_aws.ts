@@ -12,14 +12,14 @@ const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
 const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 const AWS_MANUAL_TEST_ID = 'aws-manual-setup-option';
 const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
-const ROLE_ARN_TEST_ID = 'roleArnInput';
-const DIRECT_ACCESS_KEY_ID_TEST_ID = 'directAccessKeyId';
-const DIRECT_ACCESS_SECRET_KEY_TEST_ID = 'directAccessSecretKey';
-const TEMP_ACCESS_KEY_ID_TEST_ID = 'temporaryKeysAccessKeyId';
-const TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID = 'temporaryKeysSecretAccessKey';
-const TEMP_ACCESS_SESSION_TOKEN_TEST_ID = 'temporaryKeysSessionToken';
-const SHARED_CREDENTIALS_FILE_TEST_ID = 'sharedCredentialFile';
-const SHARED_CREDETIALS_PROFILE_NAME_TEST_ID = 'credentialProfileName';
+const ROLE_ARN_TEST_ID = 'awsRoleArnInput';
+const DIRECT_ACCESS_KEY_ID_TEST_ID = 'awsDirectAccessKeyId';
+const DIRECT_ACCESS_SECRET_KEY_TEST_ID = 'awsDirectAccessSecretKey';
+const TEMP_ACCESS_KEY_ID_TEST_ID = 'awsTemporaryKeysAccessKeyId';
+const TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID = 'awsTemporaryKeysSecretAccessKey';
+const TEMP_ACCESS_SESSION_TOKEN_TEST_ID = 'awsTemporaryKeysSessionToken';
+const SHARED_CREDENTIALS_FILE_TEST_ID = 'awsSharedCredentialFile';
+const SHARED_CREDETIALS_PROFILE_NAME_TEST_ID = 'awsCredentialProfileName';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {

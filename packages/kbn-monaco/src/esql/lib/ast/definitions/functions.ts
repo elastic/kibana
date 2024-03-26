@@ -592,7 +592,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'condition', type: 'boolean' },
           { name: 'value', type: 'any' },
         ],
-        minParams: 3,
+        minParams: 2,
         returnType: 'any',
         examples: [
           `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
@@ -677,7 +677,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' }],
-        infiniteParams: true,
+        minParams: 1,
         returnType: 'any',
         examples: [`ROW a=null, b="b" | EVAL COALESCE(a, b)`],
       },
@@ -730,7 +730,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' }],
-        infiniteParams: true,
+        minParams: 1,
         returnType: 'any',
         examples: [`ROW a = 10, b = 20 | EVAL g = GREATEST(a, b)`],
       },
@@ -744,7 +744,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'first', type: 'any' }],
-        infiniteParams: true,
+        minParams: 1,
         returnType: 'any',
         examples: ['from index | eval l = least(a, b)'],
       },

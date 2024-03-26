@@ -11,10 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { AzureCredentialsType } from '../../../../common/types_old';
+import { CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '../../test_subjects';
 
 export type AzureCredentialsFields = Record<
   string,
-  { label: string; type?: 'password' | 'text'; dataTestId?: string }
+  { label: string; type?: 'password' | 'text'; testSubj?: string }
 >;
 
 export interface AzureOptionValue {
@@ -51,8 +52,8 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCr
         id,
         label: field.label,
         type: field.type || 'text',
+        testSubj: field.testSubj,
         value: inputVar.value,
-        dataTestId: field.dataTestId,
       } as const;
     });
 
@@ -97,18 +98,18 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        dataTestId: 'azureCredentialsTenantIdTestId',
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        dataTestId: 'azureCredentialsClientIdTestId',
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_secret': {
         type: 'password',
         label: i18n.translate('xpack.csp.azureIntegration.clientSecretLabel', {
           defaultMessage: 'Client Secret',
         }),
-        dataTestId: 'azureCredentialsClientSecretTestId',
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
       },
     },
   },
@@ -119,24 +120,24 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        dataTestId: 'azureCredentialsTenantIdClientCertificateOptionTestId',
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        dataTestId: 'azureCredentialsClientIdClientCertificateTestOptionId',
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_certificate_path': {
         label: i18n.translate('xpack.csp.azureIntegration.clientCertificatePathLabel', {
           defaultMessage: 'Client Certificate Path',
         }),
-        dataTestId: 'azureCredentialsClientCertificatePathTestId',
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
       },
       'azure.credentials.client_certificate_password': {
         type: 'password',
         label: i18n.translate('xpack.csp.azureIntegration.clientCertificatePasswordLabel', {
           defaultMessage: 'Client Certificate Password',
         }),
-        dataTestId: 'azureCredentialsClientCertificatePasswordTestId',
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
       },
     },
   },
@@ -148,24 +149,24 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        dataTestId: 'azureCredentialsTenantIdUsernameAndPasswordOptionTestId',
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        dataTestId: 'azureCredentialsTenantIdUsernameAndPasswordOptionTestId',
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_username': {
         label: i18n.translate('xpack.csp.azureIntegration.clientUsernameLabel', {
           defaultMessage: 'Client Username',
         }),
-        dataTestId: 'azureCredentialsClientUserNameTestId',
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_USERNAME,
       },
       'azure.credentials.client_password': {
         type: 'password',
         label: i18n.translate('xpack.csp.azureIntegration.clientPasswordLabel', {
           defaultMessage: 'Client Password',
         }),
-        dataTestId: 'azureCredentialsClientPasswordTestId',
+        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_PASSWORD,
       },
     },
   },

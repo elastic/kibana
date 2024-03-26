@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -76,6 +77,7 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
     unifiedSearch,
   } = getPluginsStart();
   const services = {
+    ...coreStart,
     data,
     maps,
     embeddable,
@@ -88,7 +90,6 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
     uiActions,
     charts,
     unifiedSearch,
-    ...coreStart,
   };
   const datePickerDeps = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),

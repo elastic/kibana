@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
+import type { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 
 import type { DataVisualizerTableState } from '../../../../../common/types';

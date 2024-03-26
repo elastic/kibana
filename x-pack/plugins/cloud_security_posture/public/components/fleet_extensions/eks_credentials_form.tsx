@@ -119,7 +119,7 @@ type AwsOptions = Record<
   {
     label: string;
     info: React.ReactNode;
-    fields: Record<string, { label: string; type?: 'password' | 'text'; dataTestId: string }>;
+    fields: Record<string, { label: string; type?: 'password' | 'text'; dataTestSubj: string }>;
     testId: string;
   }
 >;
@@ -135,7 +135,7 @@ const options: AwsOptions = {
         label: i18n.translate('xpack.csp.eksIntegration.roleArnLabel', {
           defaultMessage: 'Role ARN',
         }),
-        dataTestId: 'roleArnInput',
+        dataTestSubj: 'roleArnInput',
       },
     },
     testId: 'assumeRoleTestId',
@@ -146,11 +146,11 @@ const options: AwsOptions = {
     }),
     info: DirectAccessKeysDescription,
     fields: {
-      access_key_id: { label: AWS_FIELD_LABEL.access_key_id, dataTestId: 'directAccessKeyId' },
+      access_key_id: { label: AWS_FIELD_LABEL.access_key_id, dataTestSubj: 'directAccessKeyId' },
       secret_access_key: {
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
-        dataTestId: 'directAccessSecretKey',
+        dataTestSubj: 'directAccessSecretKey',
       },
     },
     testId: 'directAccessKeyTestId',
@@ -163,18 +163,18 @@ const options: AwsOptions = {
     fields: {
       access_key_id: {
         label: AWS_FIELD_LABEL.access_key_id,
-        dataTestId: 'temporaryKeysAccessKeyId',
+        dataTestSubj: 'temporaryKeysAccessKeyId',
       },
       secret_access_key: {
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
-        dataTestId: 'temporaryKeysSecretAccessKey',
+        dataTestSubj: 'temporaryKeysSecretAccessKey',
       },
       session_token: {
         label: i18n.translate('xpack.csp.eksIntegration.sessionTokenLabel', {
           defaultMessage: 'Session Token',
         }),
-        dataTestId: 'temporaryKeysSessionToken',
+        dataTestSubj: 'temporaryKeysSessionToken',
       },
     },
     testId: 'temporaryKeyTestId',
@@ -189,13 +189,13 @@ const options: AwsOptions = {
         label: i18n.translate('xpack.csp.eksIntegration.sharedCredentialFileLabel', {
           defaultMessage: 'Shared Credential File',
         }),
-        dataTestId: 'sharedCredentialFile',
+        dataTestSubj: 'sharedCredentialFile',
       },
       credential_profile_name: {
         label: i18n.translate('xpack.csp.eksIntegration.credentialProfileNameLabel', {
           defaultMessage: 'Credential Profile Name',
         }),
-        dataTestId: 'credentialProfileName',
+        dataTestSubj: 'credentialProfileName',
       },
     },
     testId: 'sharedCredentialsTestId',
@@ -228,7 +228,7 @@ const getInputVarsFields = (
         id,
         label: field.label,
         type: field.type || 'text',
-        dataTestId: field.dataTestId,
+        dataTestSubj: field.dataTestSubj,
         value: inputVar.value,
       } as const;
     });

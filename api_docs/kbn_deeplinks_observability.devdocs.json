@@ -540,7 +540,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"metrics\" | \"synthetics\" | \"apm\" | \"logs\" | \"observability-overview\" | \"observability-logs-explorer\" | \"observabilityOnboarding\""
+          "\"metrics\" | \"synthetics\" | \"apm\" | \"logs\" | \"observability-overview\" | \"observability-logs-explorer\" | \"observabilityOnboarding\" | \"slo\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
         "deprecated": false,
@@ -606,7 +606,7 @@
             "section": "def-common.AppId",
             "text": "AppId"
           },
-          " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"observability-overview:slos\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:services\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:management\" | \"synthetics:overview\""
+          " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:services\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
         "deprecated": false,

@@ -16,12 +16,12 @@ import type {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useReload } from '../../hooks/use_reload';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import {
+import type {
   ChangePointAnnotation,
   ChangePointDetectionRequestParams,
   FieldConfig,
-  useChangePointDetectionControlsContext,
 } from './change_point_detection_context';
+import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
 import {

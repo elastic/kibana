@@ -17,7 +17,7 @@ export const AwsInputVarFields = ({
     AwsOptions[keyof AwsOptions]['fields'][number] & {
       value: string;
       id: string;
-      dataTestId: string;
+      dataTestSubj: string;
     }
   >;
   onChange: (key: string, value: string) => void;
@@ -33,7 +33,7 @@ export const AwsInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
-              data-test-subj={field.dataTestId}
+              data-test-subj={field.dataTestSubj}
             />
           )}
           {field.type === 'text' && (
@@ -42,7 +42,7 @@ export const AwsInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
-              data-test-subj={field.dataTestId}
+              data-test-subj={field.dataTestSubj}
             />
           )}
         </>
