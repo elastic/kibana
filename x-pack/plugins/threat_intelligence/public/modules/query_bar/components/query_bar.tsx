@@ -7,7 +7,7 @@
 
 import React, { useEffect, VFC } from 'react';
 import { useSecurityContext } from '../../../hooks/use_security_context';
-import { SecuritySolutionDataViewBase, SelectedDataView } from '../../../types';
+import { SecuritySolutionDataViewBase, SourcererDataView } from '../../../types';
 
 interface QueryBarProps {
   indexPattern: SecuritySolutionDataViewBase;
@@ -16,7 +16,7 @@ interface QueryBarProps {
     refetch: VoidFunction;
     loading: boolean;
   }>;
-  sourcererDataView: SelectedDataView | undefined;
+  sourcererDataView: SourcererDataView | undefined;
 }
 
 export const QueryBar: VFC<QueryBarProps> = ({ queries, sourcererDataView }) => {

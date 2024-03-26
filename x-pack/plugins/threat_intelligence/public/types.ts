@@ -8,7 +8,11 @@
 import { ComponentType, NamedExoticComponent, ReactElement, ReactNode, VFC } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart, FieldSpec } from '@kbn/data-views-plugin/public';
+import {
+  DataViewField,
+  DataViewsPublicPluginStart,
+  FieldSpec,
+} from '@kbn/data-views-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -22,7 +26,7 @@ import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-
 import { Policy } from './modules/block_list/hooks/use_policies';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {
-  fields: FieldSpec[];
+  fields: Array<FieldSpec & DataViewField>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -60,7 +64,12 @@ export interface LicenseAware {
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
-export type SourcererDataView = any;
+export interface SourcererDataView {
+  indexPattern: SecuritySolutionDataViewBase;
+  browserFields: BrowserFields;
+  selectedPatterns: string[];
+  loading: boolean;
+}
 
 export interface UseInvestigateInTimelineProps {
   dataProviders: DataProvider[];
@@ -93,35 +102,6 @@ export interface Blocking {
 }
 
 /**
- * Combined data from SourcererDataView and SourcererScope to create
- * selected data view state
- */
-export interface SelectedDataView {
-  /**
-   * @deprecated use EcsFlat or fields / indexFields from data view
-   */
-  browserFields: SourcererDataView['browserFields'];
-
-  /**
-   * @deprecated use sourcererDataView
-   * DataViewBase with enhanced index fields used in timelines
-   */
-  indexPattern: SecuritySolutionDataViewBase;
-  /** do the selected indices exist  */
-  indicesExist: boolean;
-  /** is an update being made to the data view */
-  loading: boolean;
-
-  /**
-   * Easier to add this additional data rather than
-   * try to extend the SelectedDataView type from DataView.
-   */
-  sourcererDataView: SourcererDataView;
-
-  selectedPatterns: string[];
-}
-
-/**
  * Methods exposed from the security solution to the threat intelligence application.
  */
 export interface SecuritySolutionPluginContext {
@@ -143,7 +123,7 @@ export interface SecuritySolutionPluginContext {
   /**
    * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView.
    */
-  selectedDataView: SelectedDataView;
+  sourcererDataView: SourcererDataView;
 
   /**
    * Security Solution store

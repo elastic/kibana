@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import type { SecuritySolutionPluginContext } from '@kbn/threat-intelligence-plugin/public';
 import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/public';
+import type { SourcererDataView } from '@kbn/threat-intelligence-plugin/public/types';
 import type { Store } from 'redux';
 import { useSelector } from 'react-redux';
 import { useUserPrivileges } from '../common/components/user_privileges';
@@ -44,11 +45,11 @@ const ThreatIntelligence = memo(() => {
   const securitySolutionContext: SecuritySolutionPluginContext = useMemo(
     () => ({
       securitySolutionStore,
-      selectedDataView: sourcererDataView,
 
       getFiltersGlobalComponent: () => FiltersGlobal,
       getPageWrapper: () => SecuritySolutionPageWrapper,
       licenseService,
+      sourcererDataView: sourcererDataView as unknown as SourcererDataView,
       getUseInvestigateInTimeline: useInvestigateInTimeline,
 
       blockList: {
@@ -60,6 +61,10 @@ const ThreatIntelligence = memo(() => {
         // @ts-ignore
         getFormComponent: () => BlockListForm,
       } as unknown as SecuritySolutionPluginContext['blockList'],
+
+      useQuery: () => useSelector(inputsSelectors.globalQuerySelector()),
+      useFilters: () => useSelector(inputsSelectors.globalFiltersQuerySelector()),
+      useGlobalTime,
 
       registerQuery: (query) =>
         securitySolutionStore.dispatch(
@@ -80,10 +85,6 @@ const ThreatIntelligence = memo(() => {
         ),
 
       SiemSearchBar,
-
-      useQuery: () => useSelector(inputsSelectors.globalQuerySelector()),
-      useFilters: () => useSelector(inputsSelectors.globalFiltersQuerySelector()),
-      useGlobalTime,
     }),
     [canWriteBlocklist, http, securitySolutionStore, sourcererDataView]
   );

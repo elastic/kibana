@@ -27,7 +27,7 @@ const COMBOBOX_SINGLE_SELECTION = { asPlainText: true };
 export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
   ({ indexPattern, valueChange, defaultStackByValue = DEFAULT_STACK_BY_VALUE }) => {
     const styles = useStyles();
-    const defaultStackByValueInfo = Object.values(indexPattern.fields).find(
+    const defaultStackByValueInfo = indexPattern.fields.find(
       (f: DataViewField) => f.name === defaultStackByValue
     );
     const [selectedField, setSelectedField] = useState<Array<EuiComboBoxOptionOption<string>>>([
@@ -39,7 +39,7 @@ export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
     const fields: Array<EuiComboBoxOptionOption<string>> = useMemo(
       () =>
         indexPattern
-          ? Object.values(indexPattern.fields).map((f: DataViewField) => ({
+          ? indexPattern.fields.map((f: DataViewField) => ({
               label: f.name,
               value: f.type,
             }))

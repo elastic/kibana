@@ -84,7 +84,7 @@ const IndicatorsPageContent: VFC = () => {
           <QueryBar
             queries={[indicatorChartQuery, indicatorListQuery]}
             indexPattern={indexPattern}
-            sourcererDataView={sourcererDataView.sourcererDataView}
+            sourcererDataView={sourcererDataView}
           />
         </FiltersGlobal>
 
