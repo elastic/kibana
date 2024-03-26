@@ -29,7 +29,6 @@ import { timelineSelectors } from '../../../store';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../../store/defaults';
 import { savedSearchComparator } from './utils';
-import { setIsDiscoverSavedSearchLoaded, endTimelineSaving } from '../../../store/actions';
 import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
@@ -71,7 +70,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     getAppStateFromSavedSearch,
     updateSavedSearch,
     initializeLocalSavedSearch,
-    resetDiscoverAppState,
     defaultDiscoverAppState,
   } = useDiscoverInTimelineContext();
 
@@ -96,64 +94,12 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     savedObjectId,
     title,
     description,
-    isDiscoverSavedSearchLoaded = false,
   } = timeline;
-
-  const setSavedSearchLoaded = useCallback(
-    (value: boolean) => {
-      dispatch(
-        setIsDiscoverSavedSearchLoaded({
-          id: timelineId,
-          isDiscoverSavedSearchLoaded: value,
-        })
-      );
-    },
-    [dispatch, timelineId]
-  );
 
   const { data: savedSearchById, isFetching } = useQuery({
     queryKey: ['savedSearchById', savedSearchId ?? ''],
     queryFn: () => (savedSearchId ? savedSearchService.get(savedSearchId) : Promise.resolve(null)),
   });
-
-  useEffect(() => {
-    if (!savedObjectId) return;
-    setSavedSearchLoaded(false);
-  }, [savedObjectId, setSavedSearchLoaded]);
-
-  useEffect(() => {
-    if (isFetching) return; // no-op is fetch is in progress
-    if (isDiscoverSavedSearchLoaded) return; // no-op if saved search has been already loaded
-    if (!savedSearchById) {
-      // nothing to restore if savedSearchById is null
-      if (status === 'draft') {
-        setSavedSearchLoaded(true);
-      } else {
-        dispatch(
-          endTimelineSaving({
-            id: timelineId,
-          })
-        );
-        setSavedSearchLoaded(true);
-      }
-      return;
-    }
-    resetDiscoverAppState(savedSearchId);
-    setSavedSearchLoaded(true);
-  }, [
-    discoverStateContainer,
-    savedSearchId,
-    isDiscoverSavedSearchLoaded,
-    status,
-    activeTab,
-    resetDiscoverAppState,
-    savedSearchById,
-    getAppStateFromSavedSearch,
-    isFetching,
-    setSavedSearchLoaded,
-    dispatch,
-    timelineId,
-  ]);
 
   const getCombinedDiscoverSavedSearchState: () => SavedSearch | undefined = useCallback(() => {
     if (!discoverSavedSearchState) return;
@@ -178,7 +124,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   useEffect(() => {
     if (isFetching) return;
-    if (!isDiscoverSavedSearchLoaded) return;
     if (!savedObjectId) return;
     if (!status || status === 'draft') return;
     const latestState = getCombinedDiscoverSavedSearchState();
@@ -194,7 +139,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     getCombinedDiscoverSavedSearchState,
     savedSearchById,
     updateSavedSearch,
-    isDiscoverSavedSearchLoaded,
     activeTab,
     status,
     discoverTimerange,
@@ -310,7 +254,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const DiscoverContainer = discover.DiscoverContainer;
 
-  const isLoading = Boolean(!dataView) || !isDiscoverSavedSearchLoaded;
+  const isLoading = Boolean(!dataView);
 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">
