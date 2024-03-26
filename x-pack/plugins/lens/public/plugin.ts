@@ -406,7 +406,7 @@ export class LensPlugin {
       const startServices$ = Rx.from(getStartServices());
       startServices$.subscribe(([, { licensing }]) => {
         licensing.license$.subscribe((license) => {
-          share.register(
+          return share.register(
             downloadCsvShareProvider({
               uiSettings: core.uiSettings,
               formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,

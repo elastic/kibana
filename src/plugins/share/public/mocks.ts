@@ -42,6 +42,7 @@ const createSetupContract = (): Setup => {
     url,
     navigate: jest.fn(),
     setAnonymousAccessServiceProvider: jest.fn(),
+    kibanaVersion: '',
   };
   return setupContract;
 };
