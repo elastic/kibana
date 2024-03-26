@@ -315,7 +315,10 @@ export const ChartSwitch = memo(function ChartSwitch({
               visualizations
                 // alphabetical order within each group
                 .sort((a, b) => {
-                  return (a.fullLabel || a.label).localeCompare(b.fullLabel || b.label);
+                  return (
+                    (b.sortOrder ?? 0) - (a.sortOrder ?? 0) ||
+                    (a.fullLabel || a.label).localeCompare(b.fullLabel || b.label)
+                  );
                 })
                 .map((v): SelectableEntry => {
                   return {
