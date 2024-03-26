@@ -28,10 +28,6 @@ allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
 
-|{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/observability/README.md[aiAssistantManagementObservability]
-|The aiAssistantManagementObservability plugin manages the Ai Assistant for Observability management section.
-
-
 |{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/selection/README.md[aiAssistantManagementSelection]
 |The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
 
@@ -694,6 +690,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_app/README.md[observabilityAIAssistantApp]
 |This app registers defaults functions. It exists as a separate plugin to avoid cyclical dependencies.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
+|The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability management section.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_logs_explorer/README.md[observabilityLogsExplorer]

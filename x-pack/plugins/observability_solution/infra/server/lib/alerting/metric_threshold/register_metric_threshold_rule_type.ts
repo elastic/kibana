@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import {
   GetViewInAppRelativeUrlFnOpts,
-  IRuleTypeAlerts,
   PluginSetupContract,
   RuleType,
 } from '@kbn/alerting-plugin/server';
@@ -45,7 +44,6 @@ import {
   FIRED_ACTIONS,
   WARNING_ACTIONS,
   NO_DATA_ACTIONS,
-  MetricThresholdAlert,
 } from './metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
@@ -199,10 +197,7 @@ export async function registerMetricThresholdRuleType(
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'infrastructure',
-    alerts: {
-      ...MetricsRulesTypeAlertDefinition,
-      shouldWrite: true,
-    } as IRuleTypeAlerts<MetricThresholdAlert>,
+    alerts: MetricsRulesTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });
