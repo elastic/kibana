@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON, GET_LOCAL_SHOW_DATES_BUTTON } from '../../../../screens/date_picker';
+import {
+  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
+  GET_LOCAL_SHOW_DATES_BUTTON,
+} from '../../../../screens/date_picker';
 import {
   setStartDate,
   showStartEndDate,
