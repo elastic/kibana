@@ -47,6 +47,7 @@ import {
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
 import { resolveTimeline } from '../../containers/api';
+import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../../common/utils/normalize_time_range');
@@ -488,6 +489,60 @@ describe('helpers', () => {
         title: 'Awesome Timeline',
       });
     });
+
+    test('should produce correct model if unifiedComponentsInTimelineEnabled is true', () => {
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        title: 'Awesome Timeline',
+        version: '1',
+        status: TimelineStatus.active,
+        timelineType: TimelineType.default,
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(
+        timeline,
+        false,
+        TimelineType.default,
+        true
+      );
+      expect(newTimeline).toEqual({
+        ...defaultTimeline,
+        dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
+        status: TimelineStatus.active,
+        title: 'Awesome Timeline',
+        timelineType: TimelineType.default,
+        defaultColumns: defaultUdtHeaders,
+        columns: defaultUdtHeaders,
+      });
+    });
+
+    test('should produce correct model if unifiedComponentsInTimelineEnabled is true and custom set of columns is passed', () => {
+      const customColumns = defaultUdtHeaders.slice(0, 2);
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        title: 'Awesome Timeline',
+        version: '1',
+        status: TimelineStatus.active,
+        timelineType: TimelineType.default,
+        columns: customColumns,
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(
+        timeline,
+        false,
+        TimelineType.default,
+        true
+      );
+      expect(newTimeline).toEqual({
+        ...defaultTimeline,
+        dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
+        status: TimelineStatus.active,
+        title: 'Awesome Timeline',
+        timelineType: TimelineType.default,
+        defaultColumns: defaultUdtHeaders,
+        columns: customColumns,
+      });
+    });
   });
 
   describe('queryTimelineById', () => {
@@ -709,6 +764,116 @@ describe('helpers', () => {
           id: TimelineId.active,
           isLoading: false,
         });
+      });
+    });
+    describe('open a timeline when unifiedComponentsInTimelineEnabled is true', () => {
+      const updateIsLoading = jest.fn();
+      const untitledTimeline = { ...mockSelectedTimeline, title: '' };
+      const onOpenTimeline = jest.fn();
+
+      const updateTimelineHandler = jest.fn();
+
+      const updateTimeline = jest.fn(() => updateTimelineHandler);
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should update timeline correctly when timeline is untitled', async () => {
+        const args: QueryTimelineById<{}> = {
+          duplicate: false,
+          graphEventId: '',
+          timelineId: undefined,
+          timelineType: TimelineType.default,
+          onOpenTimeline,
+          openTimeline: true,
+          updateIsLoading,
+          updateTimeline,
+          unifiedComponentsInTimelineEnabled: true,
+        };
+        (resolveTimeline as jest.Mock).mockResolvedValue(untitledTimeline);
+        queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
+
+        expect(updateIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
+          isLoading: true,
+        });
+
+        expect(updateTimeline).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            id: TimelineId.active,
+            timeline: expect.objectContaining({
+              columns: defaultUdtHeaders,
+            }),
+          })
+        );
+        expect(updateIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
+          isLoading: false,
+        });
+      });
+
+      it('should update timeline correctly when timeline is already saved and onOpenTimeline is not provided', async () => {
+        const args: QueryTimelineById<{}> = {
+          duplicate: false,
+          graphEventId: '',
+          timelineId: TimelineId.active,
+          timelineType: TimelineType.default,
+          onOpenTimeline: undefined,
+          openTimeline: true,
+          updateIsLoading,
+          updateTimeline,
+          unifiedComponentsInTimelineEnabled: true,
+        };
+
+        (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
+
+        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
+
+        expect(updateTimeline).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            timeline: expect.objectContaining({
+              columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
+                columnHeaderType: col.columnHeaderType,
+                id: col.id,
+                initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
+                  ?.initialWidth,
+              })),
+            }),
+          })
+        );
+      });
+
+      it('should update timeline correctly when timeline is already saved and onOpenTimeline IS provided', async () => {
+        const args: QueryTimelineById<{}> = {
+          duplicate: false,
+          graphEventId: '',
+          timelineId: TimelineId.active,
+          timelineType: TimelineType.default,
+          onOpenTimeline,
+          openTimeline: true,
+          updateIsLoading,
+          updateTimeline,
+          unifiedComponentsInTimelineEnabled: true,
+        };
+
+        (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
+
+        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
+
+        expect(onOpenTimeline).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
+              columnHeaderType: col.columnHeaderType,
+              id: col.id,
+              initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
+                ?.initialWidth,
+            })),
+          })
+        );
       });
     });
   });

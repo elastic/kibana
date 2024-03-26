@@ -400,6 +400,7 @@ export const queryTimelineById = <TCache>({
             from: getOr(null, 'dateRange.start', timeline),
             to: getOr(null, 'dateRange.end', timeline),
           });
+
           updateTimeline({
             duplicate,
             from,
