@@ -17,7 +17,14 @@ export function mappingsApi(getService: FtrProviderContext['getService']) {
       .set('kbn-xsrf', 'xxx')
       .set('x-elastic-internal-origin', 'xxx');
 
+  const updateMappings = (index: string) =>
+    supertest
+      .put(`${API_BASE_PATH}/mapping/${index}`)
+      .set('kbn-xsrf', 'xxx')
+      .set('x-elastic-internal-origin', 'xxx')
+      .send({ name: { type: 'text' } });
   return {
     getMapping,
+    updateMappings,
   };
 }

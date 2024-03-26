@@ -1,7 +1,6 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
-  aiAssistantManagementObservability: 19279
   aiAssistantManagementSelection: 19146
   aiops: 10000
   alerting: 106936
@@ -106,6 +105,7 @@ pageLoadAssetSize:
   observability: 167673
   observabilityAIAssistant: 58230
   observabilityAIAssistantApp: 27680
+  observabilityAiAssistantManagement: 19279
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
   observabilityShared: 72039
@@ -126,6 +126,7 @@ pageLoadAssetSize:
   savedSearch: 16225
   screenshotMode: 17856
   screenshotting: 22870
+  searchConnectors: 30000
   searchPlayground: 19325
   searchprofiler: 67080
   security: 81771
