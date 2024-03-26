@@ -15,7 +15,6 @@ import {
 } from './constants';
 import { DatasetSelectionHandler } from './types';
 import ListStatus, { ListStatusProps } from './sub_components/list_status';
-import { LoadDatasets } from '../../hooks/use_datasets';
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_SOURCE_SELECTOR_WIDTH,
@@ -37,11 +36,16 @@ export const buildIntegrationsTree = ({
   onDatasetSelected,
 }: IntegrationsTreeParams) => {
   const uncategorizedIntegration = {
-    id: 'integration-uncategorized',
+    id: 'integration-uncategorized-1.0.0',
     title: uncategorizedLabel,
+    name: 'uncategorized',
+    status: 'installed',
+    version: '1.0.0',
     datasets,
     content: datasetsFallback,
     isLoading: isLoadingUncategorized,
+  } as Omit<Integration, 'dataStreams'> & {
+    datasets: Dataset[] | null;
   };
 
   return [uncategorizedIntegration, ...(integrations ?? [])].map((integration) => ({

@@ -32,14 +32,18 @@ import {
   DataSourceSelectorSearchParams,
 } from '../types';
 
-interface TDatasetItem extends Dataset {
+interface TDatasetItem extends Pick<Dataset, 'id' | 'iconType' | 'name' | 'title'> {
   onClick: () => void;
 }
 
-interface TIntegrationItem extends Integration {
+interface TIntegrationItem
+  extends Pick<
+    Integration,
+    'id' | 'name' | 'title' | 'description' | 'icons' | 'status' | 'version'
+  > {
   content?: React.ReactNode;
   isLoading?: boolean;
-  datasets: TDatasetItem[];
+  datasets?: TDatasetItem[];
 }
 
 type IntegrationsListProps = {
@@ -115,7 +119,8 @@ function IntegrationItem({ integration }: IntegrationItemProps) {
     <IntegrationItemButton integration={integration} icon={integrationIcon} />
   );
 
-  const content = Boolean(datasets?.length > 0)
+  const hasDatasets = Array.isArray(datasets) && datasets.length > 0;
+  const content = hasDatasets
     ? datasets.map((dataset) => (
         <DatasetItem key={dataset.id} dataset={dataset} icon={integrationIcon} />
       ))
