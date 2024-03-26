@@ -1358,6 +1358,8 @@
       "@kbn/search-api-panels/*": ["packages/kbn-search-api-panels/*"],
       "@kbn/search-connectors": ["packages/kbn-search-connectors"],
       "@kbn/search-connectors/*": ["packages/kbn-search-connectors/*"],
+      "@kbn/search-connectors-plugin": ["x-pack/plugins/search_connectors"],
+      "@kbn/search-connectors-plugin/*": ["x-pack/plugins/search_connectors/*"],
       "@kbn/search-errors": ["packages/kbn-search-errors"],
       "@kbn/search-errors/*": ["packages/kbn-search-errors/*"],
       "@kbn/search-examples-plugin": ["examples/search_examples"],
