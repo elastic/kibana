@@ -14,27 +14,24 @@ const paramsSchema = schema.object({
   indexName: schema.string(),
 });
 
-function formatHit(hit: { [key: string]: { mappings: any } }, indexName: string) {
-  const mappings = hit[indexName].mappings;
-  return {
-    mappings,
-  };
-}
-
-export function registerGetMappingRoute({ router, lib: { handleEsError } }: RouteDependencies) {
-  router.get(
-    { path: addBasePath('/mapping/{indexName}'), validate: { params: paramsSchema } },
+export function registerUpdateMappingRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+  router.put(
+    {
+      path: addBasePath('/mapping/{indexName}'),
+      validate: {
+        body: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+        params: paramsSchema,
+      },
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { indexName } = request.params as typeof paramsSchema.type;
-      const params = {
-        expand_wildcards: 'none' as const,
-        index: indexName,
-      };
 
       try {
-        const hit = await client.asCurrentUser.indices.getMapping(params);
-        const responseBody = formatHit(hit, indexName);
+        const responseBody = await client.asCurrentUser.indices.putMapping({
+          properties: request.body,
+          index: indexName,
+        });
         return response.ok({ body: responseBody });
       } catch (error) {
         return handleEsError({ error, response });
