@@ -1,6 +1,6 @@
 # RFC: Prebuilt Rules Customization
 
-_Status_: Completed, pending correction after team's feedback.
+_Status_: Completed, feedback addressed. Awaiting further feedback, or closing off.
 
 Covers:
 
@@ -27,27 +27,20 @@ pandoc prebuilt_rules_customization_rfc.md --toc --toc-depth=6 --wrap=none  -s -
 -   [Note about scope of RFC](#note-about-scope-of-rfc)
 -   [Necessary rule schema changes](#necessary-rule-schema-changes)
     -   [`rule_source` field](#rule_source-field)
-    -   [Deprecating the `immutable` field](#deprecating-the-immutable-field)
-    -   [Subfields in the `rule_source` field](#subfields-in-the-rule_source-field)
-        -   [`type` subfield](#type-subfield)
-        -   [`is_customized` subfield](#is_customized-subfield)
-        -   [`source_updated_at` subfield](#source_updated_at-subfield)
+    -   [`immutable` field](#immutable-field)
     -   [Changes needed in rule schema](#changes-needed-in-rule-schema)
-        -   [API schema](#api-schema)
-            -   [API request and response rule schema](#api-request-and-response-rule-schema)
-            -   [Rule Import request schema](#rule-import-request-schema)
+        -   [API request and response rule schema](#api-request-and-response-rule-schema)
+        -   [Rule Import request schema](#rule-import-request-schema)
         -   [Internal rule schema](#internal-rule-schema)
-            -   [Prebuilt Rule asset schema](#prebuilt-rule-asset-schema)
-    -   [Deprecating the `immutable` field](#deprecating-the-immutable-field-1)
+        -   [Prebuilt Rule asset schema](#prebuilt-rule-asset-schema)
+    -   [Deprecating the `immutable` field](#deprecating-the-immutable-field)
 -   [Mapping changes](#mapping-changes)
 -   [Plan for carrying out migrations of rule SOs](#plan-for-carrying-out-migrations-of-rule-sos)
     -   [Context](#context)
     -   [Problem with tightly coupled logic in our endpoints](#problem-with-tightly-coupled-logic-in-our-endpoints)
     -   [Migration strategy](#migration-strategy)
         -   [Normalization on read](#normalization-on-read)
-            -   [Rule Management endpoints that will perform normalization-on-read](#rule-management-endpoints-that-will-perform-normalization-on-read)
         -   [Migration on write](#migration-on-write)
-            -   [Rule Management endpoints that should include migration-on-write logic](#rule-management-endpoints-that-should-include-migration-on-write-logic)
     -   [Technical implementation of migration-on-write](#technical-implementation-of-migration-on-write)
         -   [Updating and upgrading rules](#updating-and-upgrading-rules)
         -   [Bulk editing rules](#bulk-editing-rules)
@@ -68,29 +61,24 @@ pandoc prebuilt_rules_customization_rfc.md --toc --toc-depth=6 --wrap=none  -s -
         -   [Updating the `is_customized` field](#updating-the-is_customized-field)
     -   [In the UI](#in-the-ui)
         -   [Via the Rule Edit Page](#via-the-rule-edit-page)
+        -   [Via Rules Table page](#via-rules-table-page)
         -   [Via Bulk Actions](#via-bulk-actions)
         -   [Via the Rules Details Page](#via-the-rules-details-page)
         -   [Via the Shared Exception Lists page](#via-the-shared-exception-lists-page)
         -   [Via the Stack Management \> Rules UI](#via-the-stack-management-rules-ui)
--   [List of things to fix (create tickets)](#list-of-things-to-fix-create-tickets)
+-   [Design Discussion link](#design-discussion-link)
 -   [Upgrading Prebuilt Rules](#upgrading-prebuilt-rules)
-    -   [Changes to upgrade `_review` endpoint](#changes-to-upgrade-_review-endpoint)
-        -   [Concrete field diff algorithms by type](#concrete-field-diff-algorithms-by-type)
-            -   [String fields](#string-fields)
-            -   [Number fields](#number-fields)
-            -   [Array fields](#array-fields)
-                -   [Array of strings fields](#array-of-strings-fields)
-                -   [Array of objects fields](#array-of-objects-fields)
-                -   [Proposed algorithm](#proposed-algorithm)
-            -   [MITRE ATT&CK framework (`threat` field)](#mitre-attck-framework-threat-field)
-        -   [Changes to `/upgrade/_review` endpoint contract](#changes-to-upgrade_review-endpoint-contract)
     -   [Changes to `/upgrade/_perform` endpoint](#changes-to-upgrade_perform-endpoint)
-        -   [Changes to `/upgrade/_perform` endpoint contract](#changes-to-upgrade_perform-endpoint-contract)
+    -   [Changes to `/upgrade/_review` endpoint](#changes-to-upgrade_review-endpoint)
+    -   [Concrete field diff algorithms by type](#concrete-field-diff-algorithms-by-type)
+        -   [Single-line string fields](#single-line-string-fields)
+        -   [Multi-line string fields](#multi-line-string-fields)
+        -   [Number fields](#number-fields)
+        -   [Array of scalar value (strings/numbers) fields](#array-of-scalar-value-stringsnumbers-fields)
+        -   [Array of objects fields](#array-of-objects-fields)
     -   [Changes to Rule Upgrade UX/UI flow](#changes-to-rule-upgrade-uxui-flow)
         -   [Bulk accepting upgrades with no conflicts](#bulk-accepting-upgrades-with-no-conflicts)
         -   [Upgrading rules with conflicts](#upgrading-rules-with-conflicts)
--   [Scenario for bulk accepting updates](#scenario-for-bulk-accepting-updates)
--   [Other open questions](#other-open-questions)
 
 ## Note about scope of RFC
 
@@ -786,7 +774,7 @@ As explained before, all these endpoints suffer from the tightly-coupled logic p
 
 We should therefore create new CRUD methods as needed to uncouple them logically and cleanly apply migrations to them.
 
----
+----
 
 #### Bulk editing rules
 
@@ -815,7 +803,7 @@ The `RulesClient` class has a `bulkEdit` method, which is called by our **Bulk A
 
 _See Source: [x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/bulk_edit_rules.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/bulk_edit_rules.ts)_
 
----
+----
 
 ## Endpoints and utilities that will need to be adapted to the new schema
 
@@ -1075,7 +1063,6 @@ In this case, we will the rule's params to be:
 
 And we can finally create a rule or update an existing rule using the request payload and the calculated `rule_source` field.
 
---- 
 Given the requirements described above, the following table shows the behaviour of our endpoint for a combination of inputs and Kibana states.
 
 (All situation assume that the Elastic prebuilt rules package will be installed, since we have set this as a precondition of the endpoint)
@@ -1092,8 +1079,6 @@ Given the requirements described above, the following table shows the behaviour 
     </tr>
   </thead>
   <tbody>
-
-  
   <tr>
     <td>Not installed</td>
     <td>No</td>
@@ -1117,9 +1102,6 @@ Given the requirements described above, the following table shows the behaviour 
 </pre>
       </td>
     </tr>
-  
-
-
   <tr>
     <td>
 <pre>
@@ -1177,8 +1159,6 @@ Given the requirements described above, the following table shows the behaviour 
 </pre>
       </td>
     <tr>
-
-
   <tr>
     <td>
       Not installed
@@ -1211,10 +1191,6 @@ Given the requirements described above, the following table shows the behaviour 
 </pre>
       </td>
     <tr>
-
-
-
-
   <tr>
     <td>
       Not installed
@@ -1247,9 +1223,6 @@ Given the requirements described above, the following table shows the behaviour 
 </pre>
       </td>
     <tr>
-
-
-
   <tr>
     <td>
       Not installed
@@ -1282,8 +1255,6 @@ Given the requirements described above, the following table shows the behaviour 
 </pre>
       </td>
     <tr>
-
-
   <tr>
     <td>
 <pre>
@@ -1316,10 +1287,6 @@ Given the requirements described above, the following table shows the behaviour 
     Rule import rejected<br> because of rule_id match and overwrite flag is false
       </td>
     <tr>
-
-
-
-
   <tr>
     <td>
 <pre>
@@ -1360,12 +1327,6 @@ Given the requirements described above, the following table shows the behaviour 
 </pre>
       </td>
     <tr>
-
-
-
-
-
-
   <tr>
     <td>
 <pre>
@@ -1406,10 +1367,6 @@ Given the requirements described above, the following table shows the behaviour 
 </pre>
       </td>
     <tr>
-
-
-
-
   </tbody>
 </table>
 
@@ -2397,7 +2354,7 @@ So there are two possible results:
 - Conflict: no acceptable merge proposal can be built, mark as `conflict` and propose the `current` version
 
 
----
+----
 The possible scenarios are:
 
 <table>
