@@ -268,7 +268,7 @@ export class DashboardPanelActionsService extends FtrService {
     }
     await this.testSubjects.click(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ);
     await this.testSubjects.waitForDeleted(
-      'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+      'embeddablePanelNotification-LEGACY_ACTION_LIBRARY_NOTIFICATION'
     );
   }
 
@@ -299,7 +299,7 @@ export class DashboardPanelActionsService extends FtrService {
     await this.testSubjects.click('confirmSaveSavedObjectButton');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+        'embeddablePanelNotification-LEGACY_ACTION_LIBRARY_NOTIFICATION'
       );
     });
   }

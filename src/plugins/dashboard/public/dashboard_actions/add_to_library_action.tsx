@@ -98,7 +98,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
             const { state, savedObjectId } = await embeddable.saveStateToSavedObject(
               props.newTitle
             );
-            resolve(state);
+            resolve({ ...state, title: props.newTitle });
             return { id: savedObjectId };
           } catch (error) {
             reject(error);
@@ -122,7 +122,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
       });
       await embeddable.parentApi.replacePanel(embeddable.uuid, {
         panelType: embeddable.type,
-        initialState: { ...byRefState, title },
+        initialState: byRefState,
       });
       this.toastsService.addSuccess({
         title: dashboardAddToLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),
