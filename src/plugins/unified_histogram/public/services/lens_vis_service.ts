@@ -243,37 +243,50 @@ export class LensVisService {
     let type = UnifiedHistogramSuggestionType.unsupported;
     let currentSuggestion: Suggestion | undefined;
 
-    if (!externalVisContext && allSuggestions.length) {
-      currentSuggestion = allSuggestions[0];
-      type = UnifiedHistogramSuggestionType.lensSuggestion;
+    // takes lens suggestions if provided
+    const availableSuggestionsWithType = allSuggestions.map((lensSuggestion) => ({
+      suggestion: lensSuggestion,
+      type: UnifiedHistogramSuggestionType.lensSuggestion,
+    }));
+
+    if (queryParams.isPlainRecord) {
+      // appends an ES|QL histogram
+      const histogramSuggestion = this.getHistogramSuggestionForESQL({ queryParams });
+      if (histogramSuggestion) {
+        availableSuggestionsWithType.push({
+          suggestion: histogramSuggestion,
+          type: UnifiedHistogramSuggestionType.histogramForESQL,
+        });
+      }
+    } else {
+      // appends histogram for the data view mode
+      const histogramSuggestion = this.getDefaultHistogramSuggestion({
+        queryParams,
+        timeInterval,
+        breakdownField,
+      });
+      availableSuggestionsWithType.push({
+        suggestion: histogramSuggestion,
+        type: UnifiedHistogramSuggestionType.histogramForDataView,
+      });
     }
 
-    if (
-      externalVisContext &&
-      externalVisContext?.suggestionType === UnifiedHistogramSuggestionType.lensSuggestion
-    ) {
-      const matchingSuggestion = allSuggestions.find((suggestion) =>
-        isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
+    if (externalVisContext) {
+      // try to find a suggestion that is compatible with the external vis context
+      const matchingItem = availableSuggestionsWithType.find((item) =>
+        isSuggestionAndVisContextCompatible(item.suggestion, externalVisContext)
       );
 
-      currentSuggestion = matchingSuggestion || allSuggestions[0];
-      type = UnifiedHistogramSuggestionType.lensSuggestion;
+      if (matchingItem) {
+        currentSuggestion = matchingItem.suggestion;
+        type = matchingItem.type;
+      }
     }
 
-    if (!currentSuggestion && queryParams.isPlainRecord) {
-      // for ES|QL mode it's either a lens suggestion or a histogram as a fallback
-      currentSuggestion = this.getHistogramSuggestionForESQL({ queryParams });
-      type = UnifiedHistogramSuggestionType.histogramForESQL;
-    }
-
-    if (!queryParams.isPlainRecord) {
-      // we are not using lens suggestions for data view mode yet so it can be only a histogram
-      currentSuggestion = this.getDefaultHistogramSuggestion({
-        queryParams,
-        breakdownField,
-        timeInterval,
-      });
-      type = UnifiedHistogramSuggestionType.histogramForDataView;
+    if (!currentSuggestion && availableSuggestionsWithType.length) {
+      // otherwise pick any first available suggestion
+      currentSuggestion = availableSuggestionsWithType[0].suggestion;
+      type = availableSuggestionsWithType[0].type;
     }
 
     return {
