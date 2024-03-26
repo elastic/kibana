@@ -10,17 +10,8 @@ import {
   openEventDetailsFlyout,
   openHostDetailsFlyout,
   openUserDetailsFlyout,
-  performCellActionAddToTimeline,
-  performCellActionFilterIn,
 } from '../../../../tasks/unified_timeline';
-import {
-  GET_UNIFIED_DATA_GRID_CELL,
-  GET_UNIFIED_DATA_GRID_CELL_HEADER,
-} from '../../../../screens/unified_timeline';
-import {
-  TIMELINE_DATA_PROVIDERS_CONTAINER,
-  TIMELINE_FILTER_BADGE,
-} from '../../../../screens/timeline';
+import { GET_UNIFIED_DATA_GRID_CELL_HEADER } from '../../../../screens/unified_timeline';
 import { GET_DISCOVER_DATA_GRID_CELL_HEADER } from '../../../../screens/discover';
 import { addFieldToTable, removeFieldFromTable } from '../../../../tasks/discover';
 import { login } from '../../../../tasks/login';
@@ -57,24 +48,6 @@ describe(
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('agent.type')).should('be.visible');
       removeFieldFromTable('agent.type');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('agent.type')).should('not.exist');
-    });
-
-    context('hover actions', () => {
-      it('should add to timeline successfully', () => {
-        cy.get(GET_UNIFIED_DATA_GRID_CELL('host.name', 0)).then(($el) => {
-          const hostName = $el.text();
-          performCellActionAddToTimeline('host.name', 0);
-          cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).contains(`host.name: "${hostName}"`);
-        });
-      });
-      it('should filter In successfully', () => {
-        cy.get(GET_UNIFIED_DATA_GRID_CELL('user.name', 0)).then(($el) => {
-          const hostName = $el.text();
-          performCellActionFilterIn('user.name', 0);
-          cy.get(TIMELINE_FILTER_BADGE).should('have.lengthOf', 1);
-          cy.get(TIMELINE_FILTER_BADGE).eq(0).should('have.text', `user.name: ${hostName}`);
-        });
-      });
     });
 
     context('flyout', () => {

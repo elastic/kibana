@@ -118,6 +118,7 @@ describe('helpers', () => {
             },
           ],
         },
+        { label: 'process', options: [{ label: 'process.args' }] },
         { label: 'source', options: [{ label: 'source.ip' }, { label: 'source.port' }] },
         {
           label: 'user',

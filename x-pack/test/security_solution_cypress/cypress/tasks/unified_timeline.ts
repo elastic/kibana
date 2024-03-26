@@ -6,8 +6,6 @@
  */
 
 import {
-  CELL_ADD_TO_TIMELINE_BUTTON,
-  CELL_FILTER_IN_BUTTON,
   GET_UNIFIED_DATA_GRID_CELL,
   GET_UNIFIED_DATA_GRID_CELL_HEADER,
   HOST_DETAILS_FLYOUT,
@@ -32,26 +30,12 @@ export const openUserDetailsFlyout = (rowIndex: number) => {
   cy.get(TIMELINE_DETAILS_FLYOUT).should('be.visible');
 };
 
-export const hoverActionUnifiedCell = (columnName: string, rowIndex: number) => {
-  getUnifiedTableHeaderColumnCell(columnName, rowIndex).realHover();
-};
-
 export const getUnifiedTableHeaderColumn = (columnName: string) => {
   return cy.get(GET_UNIFIED_DATA_GRID_CELL_HEADER(columnName));
 };
 
 export const getUnifiedTableHeaderColumnCell = (columnName: string, rowIndex: number) => {
   return cy.get(GET_UNIFIED_DATA_GRID_CELL(columnName, rowIndex));
-};
-
-export const performCellActionAddToTimeline = (columnName: string, rowIndex: number) => {
-  hoverActionUnifiedCell(columnName, rowIndex);
-  cy.get(CELL_ADD_TO_TIMELINE_BUTTON).click();
-};
-
-export const performCellActionFilterIn = (columnName: string, rowIndex: number) => {
-  hoverActionUnifiedCell(columnName, rowIndex);
-  cy.get(CELL_FILTER_IN_BUTTON).click();
 };
 
 export const closeTimelineFlyout = () => {

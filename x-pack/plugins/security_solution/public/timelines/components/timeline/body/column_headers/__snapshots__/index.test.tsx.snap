@@ -648,6 +648,21 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
           },
         },
       },
+      "process": Object {
+        "fields": Object {
+          "process.args": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "format": "",
+            "name": "process.args",
+            "readFromDocValues": true,
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
       "source": Object {
         "fields": Object {
           "source.ip": Object {
