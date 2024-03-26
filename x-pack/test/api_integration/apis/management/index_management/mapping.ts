@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
-  const { getMapping } = mappingsApi(getService);
+  const { getMapping, updateMappings } = mappingsApi(getService);
   const { createIndex, deleteAllIndices } = indicesHelpers(getService);
 
   describe('mappings', () => {
@@ -53,6 +53,14 @@ export default function ({ getService }: FtrProviderContext) {
       const { body } = await getMapping(indexName).expect(200);
 
       expect(body.mappings).to.eql(mappings);
+    });
+    it('show update the index mappings', async () => {
+      await updateMappings(indexName).expect(200);
+      const { body } = await getMapping(indexName).expect(200);
+      expect(body.mappings).to.eql({
+        ...mappings,
+        properties: { ...mappings.properties, name: { type: 'text' } },
+      });
     });
   });
 }
