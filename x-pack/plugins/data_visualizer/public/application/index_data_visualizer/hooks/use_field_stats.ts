@@ -87,7 +87,6 @@ export function useFieldStatsSearchStrategy(
   const startFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
     retries$.current?.unsubscribe();
-
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
     setFetchState({
@@ -174,7 +173,6 @@ export function useFieldStatsSearchStrategy(
 
     const { sessionId, embeddableExecutionContext } = searchStrategyParams;
     const searchOptions: ISearchOptions = {
-      abortSignal: abortCtrl.current.signal,
       sessionId,
       ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
     };
@@ -317,8 +315,11 @@ export function useFieldStatsSearchStrategy(
   // auto-update
   useEffect(() => {
     startFetch();
+  }, [startFetch]);
+
+  useEffect(() => {
     return cancelFetch;
-  }, [startFetch, cancelFetch]);
+  }, [cancelFetch]);
 
   return {
     progress: fetchState,

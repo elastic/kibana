@@ -6,9 +6,8 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
-import type { Subscription, Observable } from 'rxjs';
-import { from } from 'rxjs';
-import { mergeMap, last, map, toArray } from 'rxjs/operators';
+import type { Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { chunk } from 'lodash';
 import type {
   IKibanaSearchRequest,
@@ -47,30 +46,10 @@ import {
   MAX_CONCURRENT_REQUESTS,
 } from '../constants/index_data_visualizer_viewer';
 import { displayError } from '../../common/util/display_error';
-
-/**
- * Helper function to run forkJoin
- * with restrictions on how many input observables can be subscribed to concurrently
- */
-export function rateLimitingForkJoin<T>(
-  observables: Array<Observable<T>>,
-  maxConcurrentRequests = MAX_CONCURRENT_REQUESTS
-): Observable<T[]> {
-  return from(observables).pipe(
-    mergeMap(
-      (observable, index) =>
-        observable.pipe(
-          last(),
-          map((value) => ({ index, value }))
-        ),
-      maxConcurrentRequests
-    ),
-    toArray(),
-    map((indexedObservables) =>
-      indexedObservables.sort((l, r) => l.index - r.index).map((obs) => obs.value)
-    )
-  );
-}
+import {
+  fetchDataWithTimeout,
+  rateLimitingForkJoin,
+} from '../search_strategy/requests/fetch_utils';
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   esql = false,
@@ -103,18 +82,25 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   );
 
   const abortCtrl = useRef(new AbortController());
+  const populatedFieldsAbortCtrl = useRef(new AbortController());
+
   const searchSubscription$ = useRef<Subscription>();
 
   useEffect(
     function updatePopulatedFields() {
       let unmounted = false;
 
-      if (!searchStrategyParams) return;
+      // If null, that mean we tried to fetch populated fields already but it timed out
+      // so don't try again
+      if (!searchStrategyParams || populatedFieldsInIndex === null) return;
 
       const { index, searchQuery, timeFieldName, earliest, latest, runtimeFieldMap } =
         searchStrategyParams;
 
       const fetchPopulatedFields = async () => {
+        populatedFieldsAbortCtrl.current.abort();
+        populatedFieldsAbortCtrl.current = new AbortController();
+
         // Trick to avoid duplicate getFieldsForWildcard requests
         // wouldn't make sense to make time-based query if either earliest & latest timestamps is undefined
         if (timeFieldName !== undefined && (earliest === undefined || latest === undefined)) {
@@ -128,20 +114,22 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           searchQuery
         );
 
-        const nonEmptyFields = null;
+        // const nonEmptyFields = null;
         // Getting non-empty fields for the index pattern
         // because then we can absolutely exclude these from subsequent requests
-        // const nonEmptyFields = await data.dataViews.getFieldsForWildcard({
-        //   pattern: index,
-        //   indexFilter: {
-        //     bool: {
-        //       filter: filterCriteria,
-        //     },
-        //   },
-        //   includeEmptyFields: false,
-        // });
-        // @TODO: remove
-        console.log(`--@@nonEmptyFields`, nonEmptyFields);
+        const nonEmptyFields = await fetchDataWithTimeout(
+          data.dataViews.getFieldsForWildcard({
+            pattern: index,
+            indexFilter: {
+              bool: {
+                filter: filterCriteria,
+              },
+            },
+            includeEmptyFields: false,
+          }),
+          populatedFieldsAbortCtrl.current
+        );
+
         if (!unmounted) {
           if (Array.isArray(nonEmptyFields)) {
             setPopulatedFieldsInIndex(
@@ -411,7 +399,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
     searchSubscription$.current = undefined;
-    abortCtrl.current.abort();
+    abortCtrl.current?.abort();
+    populatedFieldsAbortCtrl.current?.abort();
   }, []);
 
   // auto-update
