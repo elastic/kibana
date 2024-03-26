@@ -27,10 +27,10 @@ export class ContextService {
    * Registers a context provider, and subscribes to any updates from it.
    * @param contextProviderOpts The options to register the context provider {@link ContextProviderOpts}
    */
-  public registerContextProvider<Context>({
+  public registerContextProvider<Context extends Partial<EventContext>>({
     name,
     context$,
-    schema, // @ts-expect-error upgrade typescript v4.9.5
+    schema,
   }: ContextProviderOpts<Context>) {
     if (this.contextProvidersSubscriptions.has(name)) {
       throw new Error(`Context provider with name '${name}' already registered`);
@@ -58,9 +58,8 @@ export class ContextService {
         })
       )
       .subscribe((context) => {
-        // We store each context linked to the context provider so they can increase and reduce
+        // We store each context linked to the context provider, so they can increase and reduce
         // the number of fields they report without having left-overs in the global context.
-        // @ts-expect-error upgrade typescript v4.9.5
         this.contextProvidersRegistry.set(name, context);
 
         // For every context change, we rebuild the global context.
