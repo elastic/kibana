@@ -16,11 +16,43 @@ const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>
 const getAccessorById = (accessor: DatatableColumn['id'], columns: Datatable['columns']) =>
   columns.find((c) => c.id === accessor);
 
-export const findAccessorOrFail = (accessor: string | number, columns: DatatableColumn[]) => {
-  const foundAccessor =
-    typeof accessor === 'number'
-      ? getAccessorByIndex(accessor, columns)
-      : getAccessorById(accessor, columns);
+export function findAccessor(
+  accessor: string,
+  columns: DatatableColumn[]
+): DatatableColumn | undefined;
+export function findAccessor(
+  accessor: number,
+  columns: DatatableColumn[]
+): number | DatatableColumn | undefined;
+export function findAccessor(
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  accessor: string | number,
+  columns: DatatableColumn[]
+): number | DatatableColumn | undefined;
+export function findAccessor(
+  accessor: string | number,
+  columns: DatatableColumn[]
+): number | DatatableColumn | undefined {
+  return typeof accessor === 'number'
+    ? getAccessorByIndex(accessor, columns)
+    : getAccessorById(accessor, columns);
+}
+
+export function findAccessorOrFail(accessor: string, columns: DatatableColumn[]): DatatableColumn;
+export function findAccessorOrFail(
+  accessor: number,
+  columns: DatatableColumn[]
+): number | DatatableColumn;
+export function findAccessorOrFail(
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  accessor: string | number,
+  columns: DatatableColumn[]
+): number | DatatableColumn;
+export function findAccessorOrFail(
+  accessor: string | number,
+  columns: DatatableColumn[]
+): number | DatatableColumn {
+  const foundAccessor = findAccessor(accessor, columns);
 
   if (foundAccessor === undefined) {
     throw new Error(
@@ -32,7 +64,7 @@ export const findAccessorOrFail = (accessor: string | number, columns: Datatable
   }
 
   return foundAccessor;
-};
+}
 
 export const getAccessorByDimension = (
   dimension: string | ExpressionValueVisDimension,
