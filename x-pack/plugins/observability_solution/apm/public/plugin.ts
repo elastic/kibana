@@ -27,7 +27,10 @@ import {
   DiscoverSetup,
   DiscoverStart,
 } from '@kbn/discover-plugin/public/plugin';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableSetup,
+  EmbeddableStart,
+} from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -93,6 +96,7 @@ export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
   discover?: DiscoverSetup;
+  embeddable: EmbeddableSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
@@ -423,6 +427,64 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     registerApmRuleTypes(observabilityRuleTypeRegistry);
+    const registerAPMThroughputChartEmbeddableFactory = async () => {
+      const { APMThroughputChartEmbeddableFactoryDefinition } = await import(
+        './embeddable/throughput_chart/embeddable_factory'
+      );
+      const factory = new APMThroughputChartEmbeddableFactoryDefinition(
+        core.getStartServices,
+        plugins
+      );
+      plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    };
+    const registerAPMLatencyChartEmbeddableFactory = async () => {
+      const { APMLatencyChartEmbeddableFactoryDefinition } = await import(
+        './embeddable/latency_chart/embeddable_factory'
+      );
+      const factory = new APMLatencyChartEmbeddableFactoryDefinition(
+        core.getStartServices,
+        plugins
+      );
+      plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    };
+    const registerAPMAlertingLatencyChartEmbeddableFactory = async () => {
+      const { APMLatencyChartEmbeddableFactoryDefinition } = await import(
+        './embeddable/alerting/alerting_latency_chart/embeddable_factory'
+      );
+      const factory = new APMLatencyChartEmbeddableFactoryDefinition(
+        core.getStartServices,
+        plugins
+      );
+      plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    };
+    const registerAPMAlertingThroughputChartEmbeddableFactory = async () => {
+      const { APMThroughputChartEmbeddableFactoryDefinition } = await import(
+        './embeddable/alerting/alerting_throughput_chart/embeddable_factory'
+      );
+      const factory = new APMThroughputChartEmbeddableFactoryDefinition(
+        core.getStartServices,
+        plugins
+      );
+      plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    };
+    const registerAPMAlertingFailedTransactionsChartEmbeddableFactory =
+      async () => {
+        const { APMFailedTransactionsChartEmbeddableFactoryDefinition } =
+          await import(
+            './embeddable/alerting/alerting_failed_transactions_chart/embeddable_factory'
+          );
+        const factory =
+          new APMFailedTransactionsChartEmbeddableFactoryDefinition(
+            core.getStartServices,
+            plugins
+          );
+        plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+      };
+    registerAPMAlertingLatencyChartEmbeddableFactory();
+    registerAPMAlertingFailedTransactionsChartEmbeddableFactory();
+    registerAPMAlertingThroughputChartEmbeddableFactory();
+    registerAPMThroughputChartEmbeddableFactory();
+    registerAPMLatencyChartEmbeddableFactory();
 
     const locator = plugins.share.url.locators.create(
       new APMServiceDetailLocator(core.uiSettings)
