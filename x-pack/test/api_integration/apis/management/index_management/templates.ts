@@ -361,6 +361,21 @@ export default function ({ getService }: FtrProviderContext) {
         // one of the item of the cause array should point to our script
         expect(body.attributes.causes.join(',')).contain('"hello with error');
       });
+
+      it('should update a deprecated index template', async () => {
+        const templateName = `deprecated_template-${getRandomString()}`;
+        const indexTemplate: TemplateDeserialized = {
+          _kbnMeta: { hasDatastream: false, type: 'default' },
+          name: templateName,
+          indexPatterns: [getRandomString()],
+          template: {},
+          deprecated: true,
+        };
+
+        await createTemplate(indexTemplate).expect(200);
+
+        await updateTemplate({ ...indexTemplate }, templateName).expect(200);
+      });
     });
 
     describe('delete', () => {

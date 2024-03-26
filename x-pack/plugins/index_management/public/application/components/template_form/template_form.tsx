@@ -206,6 +206,7 @@ export const TemplateForm = ({
         const outputTemplate = {
           ...wizardData.logistics,
           _kbnMeta: initialTemplate._kbnMeta,
+          deprecated: initialTemplate.deprecated,
           composedOf: wizardData.components,
           template: {
             settings: wizardData.settings,

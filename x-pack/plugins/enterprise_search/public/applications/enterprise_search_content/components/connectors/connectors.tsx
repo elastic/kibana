@@ -25,20 +25,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
-
-import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
 import {
-  NEW_INDEX_METHOD_PATH,
+  NEW_CRAWLER_PATH,
   NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH,
   NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH,
   NEW_INDEX_SELECT_CONNECTOR_PATH,
 } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
-import { SelectConnector } from '../new_index/select_connector/select_connector';
 
 import { CannotConnect } from '../search_index/components/cannot_connect';
 
@@ -49,10 +45,17 @@ import { ConnectorsLogic } from './connectors_logic';
 import { ConnectorsTable } from './connectors_table';
 import { CrawlerEmptyState } from './crawler_empty_state';
 import { DeleteConnectorModal } from './delete_connector_modal';
+import { SelectConnector } from './select_connector/select_connector';
 
-export const baseBreadcrumbs = [
+export const connectorsBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
     defaultMessage: 'Connectors',
+  }),
+];
+
+export const crawlersBreadcrumbs = [
+  i18n.translate('xpack.enterpriseSearch.content.crawlers.breadcrumb', {
+    defaultMessage: 'Web crawlers',
   }),
 ];
 
@@ -83,7 +86,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
     <>
       <DeleteConnectorModal isCrawler={isCrawler} />
       <EnterpriseSearchContentPageTemplate
-        pageChrome={baseBreadcrumbs}
+        pageChrome={!isCrawler ? connectorsBreadcrumbs : crawlersBreadcrumbs}
         pageViewTelemetry={!isCrawler ? 'Connectors' : 'Web Crawlers'}
         isLoading={isLoading}
         pageHeader={{
@@ -202,11 +205,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                   iconType="plusInCircle"
                   fill
                   onClick={() => {
-                    KibanaLogic.values.navigateToUrl(
-                      generateEncodedPath(NEW_INDEX_METHOD_PATH, {
-                        type: INGESTION_METHOD_IDS.CRAWLER,
-                      })
-                    );
+                    KibanaLogic.values.navigateToUrl(NEW_CRAWLER_PATH);
                   }}
                 >
                   {i18n.translate('xpack.enterpriseSearch.connectors.newCrawlerButtonLabel', {

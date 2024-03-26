@@ -43,17 +43,9 @@ export const fetchAgentMetrics = async (
     return;
   }
 
-  const fleetAgentsIndexExists = await esClient.indices
-    .get({
-      index: AGENTS_INDEX,
-    })
-    .catch((error) => {
-      if (error.statusCode === 404) {
-        return;
-      }
-
-      throw error;
-    });
+  const fleetAgentsIndexExists = await esClient.indices.exists({
+    index: AGENTS_INDEX,
+  });
 
   if (!fleetAgentsIndexExists) {
     return;

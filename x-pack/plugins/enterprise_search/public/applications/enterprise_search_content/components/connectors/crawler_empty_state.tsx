@@ -11,10 +11,9 @@ import { useValues } from 'kea';
 import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
-import { NEW_INDEX_METHOD_PATH } from '../../routes';
+import { NEW_CRAWLER_PATH } from '../../routes';
 
 export const CrawlerEmptyState: React.FC = () => {
   const { errorConnectingMessage } = useValues(HttpLogic);
@@ -46,11 +45,7 @@ export const CrawlerEmptyState: React.FC = () => {
             disabled={Boolean(errorConnectingMessage)}
             fill
             iconType="plusInCircle"
-            onClick={() =>
-              KibanaLogic.values.navigateToUrl(
-                generateEncodedPath(NEW_INDEX_METHOD_PATH, { type: 'crawler' })
-              )
-            }
+            onClick={() => KibanaLogic.values.navigateToUrl(NEW_CRAWLER_PATH)}
           >
             {i18n.translate('xpack.enterpriseSearch.crawlerEmptyState.newWebCrawlerButtonLabel', {
               defaultMessage: 'New web crawler',

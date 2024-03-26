@@ -44,6 +44,7 @@ import {
   InfluencerAnomalyAlertDoc,
   type RecordAnomalyAlertDoc,
 } from '../../../common/types/alerts';
+import type { AnomalyDetectionRuleState } from './alerting_service';
 
 /**
  * Base Anomaly detection alerting rule context.
@@ -161,6 +162,8 @@ export function registerAnomalyDetectionAlertType({
   alerting,
   mlSharedServices,
 }: RegisterAlertParams) {
+  const fieldFormatCache = new Map<string, AnomalyDetectionRuleState>();
+
   alerting.registerType<
     MlAnomalyDetectionAlertParams,
     never, // Only use if defining useSavedObjectReferences hook
@@ -254,9 +257,10 @@ export function registerAnomalyDetectionAlertType({
       services,
       params,
       spaceId,
+      rule,
     }: ExecutorOptions<MlAnomalyDetectionAlertParams>) => {
       const fakeRequest = {} as KibanaRequest;
-      const { execute } = mlSharedServices.alertingServiceProvider(
+      const alertingService = mlSharedServices.alertingServiceProvider(
         services.savedObjectsClient,
         fakeRequest
       );
@@ -266,11 +270,17 @@ export function registerAnomalyDetectionAlertType({
         throw new AlertsClientError();
       }
 
-      const executionResult = await execute(params, spaceId);
+      const executionResult = await alertingService.execute(
+        params,
+        spaceId,
+        fieldFormatCache.get(rule.id)
+      );
 
       if (!executionResult) return { state: {} };
 
-      const { isHealthy, name, context, payload } = executionResult;
+      const { isHealthy, name, context, payload, stateUpdate } = executionResult;
+
+      fieldFormatCache.set(rule.id, stateUpdate);
 
       if (!isHealthy) {
         const { alertDoc } = alertsClient.report({

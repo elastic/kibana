@@ -67,6 +67,8 @@ image::images/cases-custom-fields-add.png[Add a custom field in case settings]
 
 . If you want the text field to be mandatory in all cases, select *Make this field required*.
 
+. Optionally add a default value.
+
 . Click *Save field*.
 
 You can subsequently remove or edit custom fields on the *Settings* page.

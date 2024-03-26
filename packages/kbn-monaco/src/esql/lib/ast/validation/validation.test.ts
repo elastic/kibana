@@ -399,7 +399,18 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings(`from ind*, other*`, []);
     testErrorsAndWarnings(`from index*`, []);
+    testErrorsAndWarnings(`from *a_i*dex*`, []);
+    testErrorsAndWarnings(`from in*ex*`, []);
+    testErrorsAndWarnings(`from *n*ex`, []);
+    testErrorsAndWarnings(`from *n*ex*`, []);
+    testErrorsAndWarnings(`from i*d*x*`, []);
+    testErrorsAndWarnings(`from i*d*x`, []);
+    testErrorsAndWarnings(`from i***x*`, []);
+    testErrorsAndWarnings(`from i****`, []);
+    testErrorsAndWarnings(`from i**`, []);
+    testErrorsAndWarnings(`from index**`, []);
     testErrorsAndWarnings(`from *ex`, []);
+    testErrorsAndWarnings(`from *ex*`, []);
     testErrorsAndWarnings(`from in*ex`, []);
     testErrorsAndWarnings(`from ind*ex`, []);
     testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
@@ -735,6 +746,9 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from index | drop `any#Char$Field`', []);
     testErrorsAndWarnings('from index | drop s*', []);
+    testErrorsAndWarnings('from index | drop s**Field', []);
+    testErrorsAndWarnings('from index | drop *Field*', []);
+    testErrorsAndWarnings('from index | drop s*F*d', []);
     testErrorsAndWarnings('from index | drop *Field', []);
     testErrorsAndWarnings('from index | drop s*Field', []);
     testErrorsAndWarnings('from index | drop string*Field', []);

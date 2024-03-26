@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Conversation } from '../../common';
-
-export function useConversations(): Conversation[] {
-  return [];
+export function asInteger(value: number) {
+  return Math.round(value).toString();
 }

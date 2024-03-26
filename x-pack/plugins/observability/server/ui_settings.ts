@@ -528,7 +528,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.profilingAWSCostDiscountRateUiSettingName', {
       defaultMessage: 'AWS EDP discount rate (%)',
     }),
-    value: '0',
+    value: 0,
     schema: schema.number({ min: 0, max: 100 }),
     requiresPageReload: true,
     description: i18n.translate(
@@ -544,7 +544,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.profilingAzureCostDiscountRateUiSettingName', {
       defaultMessage: 'Azure discount rate (%)',
     }),
-    value: '0',
+    value: 0,
     schema: schema.number({ min: 0, max: 100 }),
     requiresPageReload: true,
     description: i18n.translate(
