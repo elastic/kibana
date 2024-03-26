@@ -30,9 +30,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
+  apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   getInheritedViewMode,
   getPanelTitle,
+  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 
 import { core } from '../../kibana_services';
@@ -225,7 +227,10 @@ export const CustomizePanelEditor = ({
   };
 
   const renderCustomTimeRangeComponent = () => {
-    if (!apiPublishesUnifiedSearch(api) || !(api.isCompatibleWithUnifiedSearch?.() ?? true))
+    if (
+      !apiPublishesTimeRange(api) ||
+      !((api as PublishesUnifiedSearch).isCompatibleWithUnifiedSearch?.() ?? true)
+    )
       return null;
 
     return (

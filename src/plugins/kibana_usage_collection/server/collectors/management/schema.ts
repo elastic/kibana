@@ -515,10 +515,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'labs:dashboard:linksPanel': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'discover:showFieldStatistics': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
