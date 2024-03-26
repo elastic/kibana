@@ -220,6 +220,7 @@ export class ProjectNavigationService {
    * Initialize a "serverless style" navigation. For stateful deployments (not serverless), this
    * handler initialize one of the solution navigations registered.
    *
+   * @param id Id for the navigation tree definition
    * @param navTreeDefinition$ The navigation tree definition
    * @param location Optional location to use to detect the active node in the new navigation tree
    */
@@ -297,6 +298,7 @@ export class ProjectNavigationService {
    * and update the activeNodes$ Observable.
    *
    * @param location Optional location to use to detect the active node in the new navigation tree, if not set the current location is used
+   * @param forceUpdate Optional flag to force the update of the active nodes even if the active nodes are the same
    */
   private updateActiveProjectNavigationNodes({
     location,
