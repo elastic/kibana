@@ -662,16 +662,10 @@ export const getXyVisualization = ({
   },
 
   isSubtypeCompatible(subtype1, subtype2) {
-    if (isHorizontalSeries(subtype1 as SeriesType) && isHorizontalSeries(subtype2 as SeriesType)) {
-      return true;
-    }
-    if (
-      !isHorizontalSeries(subtype1 as SeriesType) &&
-      !isHorizontalSeries(subtype2 as SeriesType)
-    ) {
-      return true;
-    }
-    return false;
+    return (
+      (isHorizontalSeries(subtype1 as SeriesType) && isHorizontalSeries(subtype2 as SeriesType)) ||
+      (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
+    );
   },
 
   getCustomLayerHeader(props) {
