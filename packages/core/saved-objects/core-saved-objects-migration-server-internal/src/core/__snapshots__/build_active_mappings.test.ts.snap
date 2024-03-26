@@ -16,6 +16,9 @@ Object {
     "created_at": Object {
       "type": "date",
     },
+    "created_by": Object {
+      "type": "keyword",
+    },
     "managed": Object {
       "type": "boolean",
     },
@@ -64,6 +67,9 @@ Object {
     },
     "created_at": Object {
       "type": "date",
+    },
+    "created_by": Object {
+      "type": "keyword",
     },
     "firstType": Object {
       "dynamic": "strict",
