@@ -45,7 +45,7 @@ export const useCreateTimeline = ({
   timelineId,
   timelineType,
   onClick,
-}: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => void) => {
+}: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
   const { id: dataViewId, patternList: selectedPatterns } = useSelector(
     sourcererSelectors.defaultDataView

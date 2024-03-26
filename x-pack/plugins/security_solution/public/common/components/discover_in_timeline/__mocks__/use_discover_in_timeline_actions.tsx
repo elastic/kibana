@@ -8,7 +8,6 @@
 export const useDiscoverInTimelineActions = () => {
   return {
     resetDiscoverAppState: jest.fn().mockResolvedValue(true),
-    restoreDiscoverAppStateFromSavedSearch: jest.fn(),
     updateSavedSearch: jest.fn(),
     getAppStateFromSavedSearch: jest.fn(),
     defaultDiscoverAppState: {

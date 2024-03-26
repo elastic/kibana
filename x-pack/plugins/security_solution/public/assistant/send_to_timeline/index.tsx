@@ -137,6 +137,12 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
                 activeTab: TimelineTabs.eql,
               })
             );
+            dispatch(
+              showTimeline({
+                id: TimelineId.active,
+                show: true,
+              })
+            );
             break;
           case 'kql':
             // is KQL
@@ -158,6 +164,12 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
                 activeTab: TimelineTabs.query,
               })
             );
+            dispatch(
+              showTimeline({
+                id: TimelineId.active,
+                show: true,
+              })
+            );
             break;
           case 'dsl':
             const filter = {
@@ -177,6 +189,12 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
               setActiveTabTimeline({
                 id: TimelineId.active,
                 activeTab: TimelineTabs.query,
+              })
+            );
+            dispatch(
+              showTimeline({
+                id: TimelineId.active,
+                show: true,
               })
             );
             break;

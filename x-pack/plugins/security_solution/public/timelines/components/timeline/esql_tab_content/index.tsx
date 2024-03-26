@@ -71,7 +71,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     getAppStateFromSavedSearch,
     updateSavedSearch,
     initializeLocalSavedSearch,
-    restoreDiscoverAppStateFromSavedSearch,
     resetDiscoverAppState,
     defaultDiscoverAppState,
   } = useDiscoverInTimelineContext();
@@ -139,7 +138,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       }
       return;
     }
-    restoreDiscoverAppStateFromSavedSearch(savedSearchById);
+    resetDiscoverAppState(savedSearchId);
     setSavedSearchLoaded(true);
   }, [
     discoverStateContainer,
@@ -150,7 +149,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     resetDiscoverAppState,
     savedSearchById,
     getAppStateFromSavedSearch,
-    restoreDiscoverAppStateFromSavedSearch,
     isFetching,
     setSavedSearchLoaded,
     dispatch,

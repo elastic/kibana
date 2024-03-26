@@ -113,25 +113,6 @@ export const useDiscoverInTimelineActions = (
   );
 
   /*
-   * restores the url state of discover in timeline
-   *
-   * @param savedSearch
-   * */
-  const restoreDiscoverAppStateFromSavedSearch = useCallback(
-    (savedSearch: SavedSearch) => {
-      const { appState } = getAppStateFromSavedSearch(savedSearch);
-      if (!appState) return;
-      discoverStateContainer.current?.appState.set(appState);
-      const timeRangeFromSavedSearch = savedSearch.timeRange;
-      discoverStateContainer.current?.globalState.set({
-        ...discoverStateContainer.current?.globalState.get(),
-        time: timeRangeFromSavedSearch ?? defaultDiscoverTimeRange,
-      });
-    },
-    [getAppStateFromSavedSearch, discoverStateContainer]
-  );
-
-  /*
    * resets discover state to a default value
    *
    * */
@@ -291,7 +272,6 @@ export const useDiscoverInTimelineActions = (
   const actions = useMemo(
     () => ({
       resetDiscoverAppState,
-      restoreDiscoverAppStateFromSavedSearch,
       updateSavedSearch,
       initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
@@ -299,7 +279,6 @@ export const useDiscoverInTimelineActions = (
     }),
     [
       resetDiscoverAppState,
-      restoreDiscoverAppStateFromSavedSearch,
       updateSavedSearch,
       initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
