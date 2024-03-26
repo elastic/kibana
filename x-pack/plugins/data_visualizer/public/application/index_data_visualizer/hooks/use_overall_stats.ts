@@ -18,6 +18,7 @@ import type {
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import { isDefined } from '@kbn/ml-is-defined';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import type {
   AggregatableFieldOverallStats,
@@ -88,7 +89,13 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   } = useDataVisualizerKibana();
 
   const [stats, setOverallStats] = useState<OverallStats>(getDefaultPageState().overallStats);
-  const [populatedFieldsInIndex, setPopulatedFieldsInIndex] = useState<Set<string> | undefined>();
+  const [populatedFieldsInIndex, setPopulatedFieldsInIndex] = useState<
+    | Set<string>
+    // request to fields caps has not been made yet
+    | undefined
+    // null is set when field caps api is too slow, and we should not retry anymore
+    | null
+  >();
 
   const [fetchState, setFetchState] = useReducer(
     getReducer<DataStatsFetchProgress>(),
@@ -121,27 +128,34 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           searchQuery
         );
 
+        const nonEmptyFields = null;
         // Getting non-empty fields for the index pattern
         // because then we can absolutely exclude these from subsequent requests
-        const nonEmptyFields = await data.dataViews.getFieldsForWildcard({
-          pattern: index,
-          indexFilter: {
-            bool: {
-              filter: filterCriteria,
-            },
-          },
-          includeEmptyFields: false,
-        });
+        // const nonEmptyFields = await data.dataViews.getFieldsForWildcard({
+        //   pattern: index,
+        //   indexFilter: {
+        //     bool: {
+        //       filter: filterCriteria,
+        //     },
+        //   },
+        //   includeEmptyFields: false,
+        // });
+        // @TODO: remove
+        console.log(`--@@nonEmptyFields`, nonEmptyFields);
         if (!unmounted) {
-          setPopulatedFieldsInIndex(
-            new Set([
-              ...nonEmptyFields.map((field) => field.name),
-              // Field caps API don't know about runtime fields
-              // so by default we expect runtime fields to be populated
-              // so we can later check as needed
-              ...Object.keys(runtimeFieldMap ?? {}),
-            ])
-          );
+          if (Array.isArray(nonEmptyFields)) {
+            setPopulatedFieldsInIndex(
+              new Set([
+                ...nonEmptyFields.map((field) => field.name),
+                // Field caps API don't know about runtime fields
+                // so by default we expect runtime fields to be populated
+                // so we can later check as needed
+                ...Object.keys(runtimeFieldMap ?? {}),
+              ])
+            );
+          } else {
+            setPopulatedFieldsInIndex(null);
+          }
         }
       };
 
@@ -198,12 +212,13 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
       };
 
-      const aggregatableFields = originalAggregatableFields.filter((field) =>
-        populatedFieldsInIndex.has(field.name)
-      );
-      const nonAggregatableFields = originalNonAggregatableFields.filter((fieldName) =>
-        populatedFieldsInIndex.has(fieldName)
-      );
+      const hasPopulatedFieldsInfo = isDefined(populatedFieldsInIndex);
+      const aggregatableFields = hasPopulatedFieldsInfo
+        ? originalAggregatableFields.filter((field) => populatedFieldsInIndex.has(field.name))
+        : originalAggregatableFields;
+      const nonAggregatableFields = hasPopulatedFieldsInfo
+        ? originalNonAggregatableFields.filter((fieldName) => populatedFieldsInIndex.has(fieldName))
+        : originalNonAggregatableFields;
 
       const documentCountStats = await getDocumentCountStats(
         data.search,
