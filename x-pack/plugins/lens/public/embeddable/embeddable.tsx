@@ -34,7 +34,7 @@ import {
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { merge, Subscription, switchMap } from 'rxjs';
-import { toExpression } from '@kbn/interpreter';
+import { fromExpression, toExpression } from '@kbn/interpreter';
 import {
   Datatable,
   DefaultInspectorAdapters,
@@ -85,6 +85,10 @@ import {
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  exprCache,
+  getDataVariables,
+} from '../editor_frame_service/editor_frame/expression_helpers';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -994,6 +998,12 @@ export class Embeddable
 
     const newActiveData = adapters?.tables?.tables;
 
+    if (newActiveData) {
+      Object.entries(newActiveData).forEach((table) => {
+        exprCache.setValue(table[0], table[1]);
+      });
+    }
+
     this.removeActiveDataWarningMessages();
     const searchWarningMessages = this.getSearchWarningMessages(adapters);
     this.removeActiveDataWarningMessages = this.addUserMessages(
@@ -1138,6 +1148,7 @@ export class Embeddable
                 ...(input.palette ? { theme: { palette: input.palette } } : {}),
                 ...('overrides' in input ? { overrides: input.overrides } : {}),
                 ...getInternalTables(this.savedVis.state.datasourceStates),
+                ...getDataVariables(fromExpression(this.expression)),
               }}
               searchSessionId={this.getInput().searchSessionId}
               handleEvent={this.handleEvent}
