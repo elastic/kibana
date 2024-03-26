@@ -7,6 +7,7 @@ metadata:
 spec:
   type: buildkite-pipeline
   owner: 'group:security-engineering-productivity'
+  system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
