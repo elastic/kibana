@@ -69,9 +69,8 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly MenuItem = MenuItem as any;
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) return false;
-    if (getInheritedViewMode(embeddable) !== 'edit') return false;
-    return embeddable.enhancements.dynamicActions.state.get().events.length > 0;
+    if (!isApiCompatible(embeddable) || getInheritedViewMode(embeddable) !== 'edit') return false;
+    return (embeddable.dynamicActionsState$.getValue()?.dynamicActions.events ?? []).length > 0;
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
