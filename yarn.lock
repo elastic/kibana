@@ -3079,10 +3079,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-assistant-management-observability-plugin@link:src/plugins/ai_assistant_management/observability":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ai-assistant-management-plugin@link:src/plugins/ai_assistant_management/selection":
   version "0.0.0"
   uid ""
@@ -5367,6 +5363,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-ai-assistant-management-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant_management":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant":
   version "0.0.0"
   uid ""
@@ -5756,6 +5756,10 @@
   uid ""
 
 "@kbn/search-api-panels@link:packages/kbn-search-api-panels":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-connectors-plugin@link:x-pack/plugins/search_connectors":
   version "0.0.0"
   uid ""
 
@@ -12830,10 +12834,10 @@ buffers@~0.1.1:
   resolved "https://registry.yarnpkg.com/buffers/-/buffers-0.1.1.tgz#b24579c3bed4d6d396aeee6d9a8ae7f5482ab7bb"
   integrity sha512-9q/rDEGSb/Qsvv2qvzIzdluL5k7AaJOTrw23z9reQthrbF7is4CtlT0DXyO1oei2DCp4uojjzQ7igaSHp1kAEQ==
 
-buildkite-test-collector@^1.6.5:
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/buildkite-test-collector/-/buildkite-test-collector-1.6.5.tgz#ab384981d873e7e44451f24d1dda62e9c3197ac8"
-  integrity sha512-7WdRp3R/CKCeL7aSDiu+BFppKXw7rWQEni/+sT4cv6vT852ZHVnTwo+/C1H+gIeMweqZSuLKEHzKGFrv/z8sBw==
+buildkite-test-collector@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/buildkite-test-collector/-/buildkite-test-collector-1.7.0.tgz#3fdd753b185045c7aed0136a0e0713a77313164b"
+  integrity sha512-R2t3KfBmGCu8fllmZ5GBzOyLJxfB2CEwwgOOtLTleKrHLDPXDal+YLz09okOVL0DE+d5GaGhELwY1MD3xfwE4A==
   dependencies:
     axios "^1.0.0"
     dotenv "^16.0.2"
@@ -15542,9 +15546,9 @@ dotenv-expand@^5.1.0:
   integrity sha512-YXQl1DSa4/PQyRfgrv6aoNjhasp/p4qs9FjJ4q4cQk+8m4r6k4ZSiEyytKG8f8W9gi8WsQtIObNmKd+tMzNTmA==
 
 dotenv@^16.0.2, dotenv@^16.0.3:
-  version "16.3.1"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.3.1.tgz#369034de7d7e5b120972693352a3bf112172cc3e"
-  integrity sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==
+  version "16.4.5"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.5.tgz#cdd3b3b604cb327e286b4762e13502f717cb099f"
+  integrity sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==
 
 dotenv@^8.0.0:
   version "8.2.0"
@@ -22639,6 +22643,14 @@ mocha-junit-reporter@^2.0.2:
     mkdirp "~0.5.1"
     strip-ansi "^6.0.1"
     xml "^1.0.0"
+
+mocha-multi-reporters@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/mocha-multi-reporters/-/mocha-multi-reporters-1.5.1.tgz#c73486bed5519e1d59c9ce39ac7a9792600e5676"
+  integrity sha512-Yb4QJOaGLIcmB0VY7Wif5AjvLMUFAdV57D2TWEva1Y0kU/3LjKpeRVmlMIfuO1SVbauve459kgtIizADqxMWPg==
+  dependencies:
+    debug "^4.1.1"
+    lodash "^4.17.15"
 
 mocha@^10.1.0:
   version "10.1.0"
