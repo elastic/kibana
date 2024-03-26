@@ -48,7 +48,9 @@ export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSl
           body,
         });
 
-        const rules = response.data.map((rule) => transformRule(rule));
+        const rules = response.data.map((rule) => transformRule(rule)) as Array<
+          Rule<BurnRateRuleParams>
+        >;
 
         const init = sloIds.reduce((acc, sloId) => ({ ...acc, [sloId]: [] }), {});
 
