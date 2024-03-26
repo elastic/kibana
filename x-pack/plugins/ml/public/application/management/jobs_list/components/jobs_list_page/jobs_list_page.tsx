@@ -28,6 +28,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { getMlGlobalServices } from '../../../../util/get_services';
 import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
 import { type MlFeatures, PLUGIN_ID } from '../../../../../../common/constants/app';
 
@@ -36,7 +37,6 @@ import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check
 import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
 import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
-import { getMlGlobalServices } from '../../../../app';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
 import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
 
