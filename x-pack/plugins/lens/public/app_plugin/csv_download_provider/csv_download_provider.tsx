@@ -14,7 +14,7 @@ import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import { CoreSetup, ToastsSetup } from '@kbn/core/public';
-import { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { FormatFactory } from '../../../common/types';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
