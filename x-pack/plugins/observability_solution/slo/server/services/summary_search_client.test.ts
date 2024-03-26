@@ -30,7 +30,14 @@ describe('Summary Search Client', () => {
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    const soClientMock = {} as any;
+    const soClientMock = {
+      get: jest.fn().mockResolvedValue({
+        attributes: {
+          selectedRemoteClusters: [],
+          useAllRemoteClusters: false,
+        },
+      }),
+    } as any;
     service = new DefaultSummarySearchClient(
       esClientMock,
       soClientMock,
