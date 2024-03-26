@@ -832,8 +832,6 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
   getMetaFields: ['unknownMetadataField'],
-  getPolicyFields: [],
-  getPolicyMatchingField: [],
 };
 
 /**

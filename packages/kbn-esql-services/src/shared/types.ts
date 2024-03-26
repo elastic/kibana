@@ -18,8 +18,6 @@ export interface ESQLCallbacks {
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
   >;
-  getPolicyFields?: CallbackFn;
-  getPolicyMatchingField?: CallbackFn;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

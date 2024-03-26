@@ -2464,8 +2464,6 @@ describe('validation logic', () => {
         getPolicies: /Unknown policy/,
         getFieldsFor: /Unknown column|Argument of|it is unsupported or not indexed/,
         getMetaFields: /Metadata field/,
-        getPolicyFields: undefined,
-        getPolicyMatchingField: undefined,
       };
       return excludedCallback.map((callback) => contentByCallback[callback]) || [];
     }
@@ -2539,8 +2537,6 @@ describe('validation logic', () => {
         'getPolicies',
         'getFieldsFor',
         'getMetaFields',
-        'getPolicyFields',
-        'getPolicyMatchingField',
       ] as Array<keyof typeof ignoreErrorsMap>;
       for (const testCase of fixtures.testCases.filter((t) =>
         t.error.some((message) =>
