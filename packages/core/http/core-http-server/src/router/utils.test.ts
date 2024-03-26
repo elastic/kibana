@@ -18,7 +18,7 @@ describe('isFullValidatorContainer', () => {
       request: {
         body: {} as ObjectType,
       },
-      responses: {},
+      response: {},
     };
 
     expect(isFullValidatorContainer(fullValidatorContainer)).toBe(true);
@@ -33,7 +33,7 @@ describe('getRequestValidation', () => {
     };
     const fullValidatorContainer: Validator = {
       request: validationDummy,
-      responses: {},
+      response: {},
     };
     const fullValidator: Validator = validationDummy;
 

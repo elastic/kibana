@@ -103,7 +103,7 @@ export type {
   RouteValidator,
   RouteValidatorRequestAndResponses,
   RouteValidatorFullConfigRequest,
-  RouteValidatorFullConfigResponses,
+  RouteValidatorFullConfigResponse,
 } from './src/router';
 export { validBodyOutput, RouteValidationError, getRequestValidation } from './src/router';
 

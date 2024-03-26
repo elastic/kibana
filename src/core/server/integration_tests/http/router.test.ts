@@ -1403,7 +1403,7 @@ describe('Response factory', () => {
             request: {
               body: runtimeValidation,
             },
-            responses: {
+            response: {
               200: {
                 body: runtimeValidation,
               },

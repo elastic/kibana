@@ -58,7 +58,7 @@ export type {
   RouteValidationSpec,
   RouteValidatorConfig,
   RouteValidatorFullConfigRequest,
-  RouteValidatorFullConfigResponses,
+  RouteValidatorFullConfigResponse,
   RouteValidatorOptions,
   RouteValidator,
   RouteValidatorRequestAndResponses,
