@@ -14,7 +14,6 @@ import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-pl
 import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
 import { observabilityFeatureId, observabilityPaths } from '../../../../common';
@@ -42,12 +41,14 @@ import {
 } from './custom_threshold_executor';
 import { CUSTOM_THRESHOLD_AAD_FIELDS, FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { ObservabilityConfig } from '../../..';
+import { CustomThresholdAlert } from './types';
 
-export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
+export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAlert> = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,
   mappings: { fieldMap: legacyExperimentalFieldMap },
   useEcs: true,
   useLegacyAlerts: false,
+  shouldWrite: true,
 };
 
 export const searchConfigurationSchema = schema.object({
@@ -68,14 +69,10 @@ export const searchConfigurationSchema = schema.object({
   ),
 });
 
-type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
-
 export function thresholdRuleType(
-  createLifecycleRuleExecutor: CreateLifecycleExecutor,
   basePath: IBasePath,
   config: ObservabilityConfig,
   logger: Logger,
-  ruleDataClient: IRuleDataClient,
   locators: CustomThresholdLocators
 ) {
   const baseCriterion = {
@@ -145,9 +142,7 @@ export function thresholdRuleType(
     actionGroups: [FIRED_ACTION, NO_DATA_ACTION],
     minimumLicenseRequired: 'basic' as LicenseType,
     isExportable: true,
-    executor: createLifecycleRuleExecutor(
-      createCustomThresholdExecutor({ basePath, logger, config, locators })
-    ),
+    executor: createCustomThresholdExecutor({ basePath, logger, config, locators }),
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
