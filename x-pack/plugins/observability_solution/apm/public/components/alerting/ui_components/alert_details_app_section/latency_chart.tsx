@@ -42,6 +42,7 @@ import { DEFAULT_DATE_FORMAT } from './constants';
 function LatencyChart({
   alert,
   transactionType,
+  transactionName,
   serviceName,
   environment,
   start,
@@ -54,6 +55,7 @@ function LatencyChart({
 }: {
   alert: TopAlert;
   transactionType: string;
+  transactionName?: string;
   serviceName: string;
   environment: string;
   start: string;
@@ -69,7 +71,9 @@ function LatencyChart({
     end,
     kuery: '',
     numBuckets: 100,
-    type: ApmDocumentType.ServiceTransactionMetric,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
   const { euiTheme } = useEuiTheme();
   const {
@@ -96,7 +100,7 @@ function LatencyChart({
                 start,
                 end,
                 transactionType,
-                transactionName: undefined,
+                transactionName,
                 latencyAggregationType,
                 documentType: preferred.source.documentType,
                 rollupInterval: preferred.source.rollupInterval,
@@ -117,6 +121,7 @@ function LatencyChart({
       serviceName,
       start,
       transactionType,
+      transactionName,
       preferred,
     ]
   );

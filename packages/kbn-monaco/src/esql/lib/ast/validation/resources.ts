@@ -56,7 +56,7 @@ export async function retrieveSources(
   if (!callbacks || commands.length < 1) {
     return new Set();
   }
-  if (['row', 'show'].includes(commands[0].name)) {
+  if (['row', 'show', 'meta'].includes(commands[0].name)) {
     return new Set();
   }
   const sources = await getSourcesHelper(callbacks)();
