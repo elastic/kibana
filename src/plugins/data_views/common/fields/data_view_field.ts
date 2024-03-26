@@ -144,22 +144,6 @@ export class DataViewField implements DataViewFieldBase {
     return this.spec.customDescription;
   }
 
-  public get description() {
-    if (this.spec.customDescription) {
-      return this.spec.customDescription;
-    }
-    const { description } = EcsFlat[this.name as keyof typeof EcsFlat] ?? {};
-    return description || '';
-  }
-
-  /**
-   * Sets custom description for field, or unsets if passed undefined.
-   * @param customDescription custom label value
-   */
-  public set customDescription(customDescription) {
-    this.spec.customDescription = customDescription;
-  }
-
   /**
    * Description of field type conflicts across different indices in the same index pattern.
    */
@@ -195,6 +179,14 @@ export class DataViewField implements DataViewFieldBase {
       : this.spec.shortDotsEnable
       ? shortenDottedString(this.spec.name)
       : this.spec.name;
+  }
+
+  public get description() {
+    if (this.spec.customDescription) {
+      return this.spec.customDescription;
+    }
+    const { description } = EcsFlat[this.name as keyof typeof EcsFlat] ?? {};
+    return description || '';
   }
 
   /**
