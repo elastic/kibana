@@ -41,7 +41,8 @@
     "@kbn/deeplinks-management",
     "@kbn/deeplinks-analytics",
     "@kbn/core-elasticsearch-server",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/metrics-data-access-plugin"
   ],
   "exclude": ["target/**/*"]
 }
