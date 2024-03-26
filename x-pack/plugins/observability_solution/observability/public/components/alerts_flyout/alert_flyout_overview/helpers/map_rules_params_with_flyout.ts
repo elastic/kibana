@@ -14,7 +14,9 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   LOG_THRESHOLD_ALERT_TYPE_ID,
   ALERT_EVALUATION_THRESHOLD,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
+import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../pages/alert_details/alert_details';
 import {
   BaseMetricExpressionParams,
@@ -78,6 +80,27 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         comparator,
       } as unknown as FlyoutThresholdData;
       return [flyoutMap];
+
+    case ApmRuleType.ErrorCount:
+    case ApmRuleType.TransactionDuration:
+    case ApmRuleType.TransactionErrorRate:
+      const APMFlyoutMap = {
+        observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
+        threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
+        fields: [],
+        comparator: '>',
+      } as unknown as FlyoutThresholdData;
+      return [APMFlyoutMap];
+
+    case '.es-query':
+      const { thresholdComparator, threshold } = ruleParams as EsQueryRuleParams;
+      const ESQueryFlyoutMap = {
+        observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
+        threshold,
+        fields: [],
+        comparator: thresholdComparator,
+      } as unknown as FlyoutThresholdData;
+      return [ESQueryFlyoutMap];
     default:
       return [];
   }
