@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { ActionGroup, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ActionGroup, ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleExecutionSummaryAndChart } from './rule_execution_summary_and_chart';
 import { useKibana } from '../../../../common/lib/kibana';
 import { mockRule, mockRuleType, mockRuleSummary } from './test_helpers';
@@ -24,13 +24,13 @@ const onChangeDurationMock = jest.fn();
 const ruleMock = mockRule();
 
 const authorizedConsumers = {
-  [ALERTS_FEATURE_ID]: { read: true, all: true },
+  [ALERTING_FEATURE_ID]: { read: true, all: true },
 };
 
 const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
 
 const ruleType: RuleType = mockRuleType({
-  producer: ALERTS_FEATURE_ID,
+  producer: ALERTING_FEATURE_ID,
   authorizedConsumers,
   recoveryActionGroup,
 });

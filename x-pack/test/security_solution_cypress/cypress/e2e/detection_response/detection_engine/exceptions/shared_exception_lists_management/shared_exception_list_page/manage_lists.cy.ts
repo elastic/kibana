@@ -30,9 +30,13 @@ import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../../../../screens/exceptions';
-import { createExceptionList } from '../../../../../../tasks/api_calls/exceptions';
+import {
+  createExceptionList,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/exceptions';
 
 import { TOASTER } from '../../../../../../screens/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
 
 const EXCEPTION_LIST_NAME = 'My test list';
 const EXCEPTION_LIST_TO_DUPLICATE_NAME = 'A test list 2';
@@ -56,7 +60,9 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     describe('Create/Export/Delete List', () => {
-      before(() => {
+      beforeEach(() => {
+        deleteAlertsAndRules();
+        deleteExceptionLists();
         createRule(getNewRule({ name: 'Another rule' }));
 
         // Create exception list associated with a rule
@@ -79,9 +85,7 @@ describe(
         createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) => {
           exceptionListResponse = response;
         });
-      });
 
-      beforeEach(() => {
         login();
         visit(EXCEPTIONS_URL);
         waitForExceptionsTableToBeLoaded();
@@ -124,13 +128,13 @@ describe(
       it('Delete exception list without rule reference', () => {
         // Using cy.contains because we do not care about the exact text,
         // just checking number of lists shown
-        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '4');
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
 
         deleteExceptionListWithoutRuleReferenceByListId(getExceptionList1().list_id);
 
         // Using cy.contains because we do not care about the exact text,
         // just checking number of lists shown
-        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
       });
 
       it('Deletes exception list with rule reference', () => {
