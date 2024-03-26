@@ -69,10 +69,7 @@ export interface DataSourceSelectorProps {
   onDataViewsSort: SearchDataViews;
   onIntegrationsSearch: SearchIntegrations;
   onIntegrationsSort: SearchIntegrations;
-  onIntegrationsStreamsSearch: SearchIntegrations;
-  onIntegrationsStreamsSort: SearchIntegrations;
   onUncategorizedSearch: SearchDatasets;
-  onUncategorizedSort: SearchDatasets;
   /* Triggered when retrying to load the data streams */
   onUncategorizedReload: ReloadDatasets;
   /* Triggered when the uncategorized tab is selected */

@@ -49,10 +49,6 @@ export type DataSourceSelectorTypestate =
       context: DefaultDataSourceSelectorContext;
     }
   | {
-      value: 'popover.open.integrationsTab.listingIntegrations';
-      context: DefaultDataSourceSelectorContext;
-    }
-  | {
       value: 'popover.open.dataViewsTab';
       context: DefaultDataSourceSelectorContext;
     }
@@ -123,11 +119,8 @@ export interface DataSourceSelectorStateMachineDependencies {
   onIntegrationsReload: ReloadIntegrations;
   onIntegrationsSearch: SearchIntegrations;
   onIntegrationsSort: SearchIntegrations;
-  onIntegrationsStreamsSearch: SearchIntegrations;
-  onIntegrationsStreamsSort: SearchIntegrations;
   onSelectionChange: DataSourceSelectionChangeHandler;
   onUncategorizedLoad: LoadDatasets;
   onUncategorizedReload: ReloadDatasets;
   onUncategorizedSearch: SearchDatasets;
-  onUncategorizedSort: SearchDatasets;
 }

@@ -35,9 +35,7 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
     loadMore,
     reloadIntegrations,
     searchIntegrations,
-    searchIntegrationsStreams,
     sortIntegrations,
-    sortIntegrationsStreams,
   } = useIntegrationsContext();
 
   const {
@@ -47,7 +45,6 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
     loadDatasets,
     reloadDatasets,
     searchDatasets,
-    sortDatasets,
   } = useDatasetsContext();
 
   const {
@@ -67,15 +64,15 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
   return (
     <DataSourceSelector
       datasets={datasets}
-      dataSourceSelection={dataSourceSelection}
       datasetsError={datasetsError}
+      dataSourceSelection={dataSourceSelection}
       dataViews={dataViews}
       dataViewsError={dataViewsError}
       discoverEsqlUrlProps={discoverEsqlUrlProps}
-      isDataViewAllowed={isDataViewAllowed}
-      isDataViewAvailable={isDataViewAvailable}
       integrations={integrations}
       integrationsError={integrationsError}
+      isDataViewAllowed={isDataViewAllowed}
+      isDataViewAvailable={isDataViewAvailable}
       isEsqlEnabled={isEsqlEnabled}
       isLoadingDataViews={isLoadingDataViews}
       isLoadingIntegrations={isLoadingIntegrations}
@@ -89,13 +86,10 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
       onIntegrationsReload={reloadIntegrations}
       onIntegrationsSearch={searchIntegrations}
       onIntegrationsSort={sortIntegrations}
-      onIntegrationsStreamsSearch={searchIntegrationsStreams}
-      onIntegrationsStreamsSort={sortIntegrationsStreams}
       onSelectionChange={handleDataSourceSelectionChange}
+      onUncategorizedLoad={loadDatasets}
       onUncategorizedReload={reloadDatasets}
       onUncategorizedSearch={searchDatasets}
-      onUncategorizedSort={sortDatasets}
-      onUncategorizedLoad={loadDatasets}
     />
   );
 });

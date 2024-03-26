@@ -5,25 +5,32 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiContextMenuProps } from '@elastic/eui';
+import { EuiContextMenu, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import styled from '@emotion/styled';
 import React from 'react';
-import { DATA_VIEWS_PANEL_ID } from '../constants';
+import { dataViewsLabel, DATA_VIEWS_PANEL_ID } from '../constants';
 
 interface DataViewListProps extends React.HTMLAttributes<HTMLElement> {
-  panels: EuiContextMenuProps['panels'];
+  items: EuiContextMenuPanelItemDescriptor[];
 }
 
-export function DataViewList({ children, panels, ...props }: DataViewListProps) {
+export function DataViewList({ children, items, ...props }: DataViewListProps) {
   return (
     <div {...props}>
       {children}
       <ContextMenu
         initialPanelId={DATA_VIEWS_PANEL_ID}
-        panels={panels}
         className="eui-yScroll"
         data-test-subj="dataViewsContextMenu"
         size="s"
+        panels={[
+          {
+            id: DATA_VIEWS_PANEL_ID,
+            title: dataViewsLabel,
+            width: '100%',
+            items,
+          },
+        ]}
       />
     </div>
   );

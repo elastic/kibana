@@ -60,15 +60,6 @@ const useDatasets = ({ datasetsClient }: DatasetsContextDeps) => {
     [datasetsStateService]
   );
 
-  const sortDatasets: SearchDatasets = useCallback(
-    (searchParams) =>
-      datasetsStateService.send({
-        type: 'SORT_DATASETS',
-        search: formatSearchParams(searchParams),
-      }),
-    [datasetsStateService]
-  );
-
   return {
     // Underlying state machine
     datasetsStateService,
@@ -86,7 +77,6 @@ const useDatasets = ({ datasetsClient }: DatasetsContextDeps) => {
     loadDatasets,
     reloadDatasets,
     searchDatasets,
-    sortDatasets,
   };
 };
 

@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
-import styled from '@emotion/styled';
+import { EuiHorizontalRule } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
 import {
-  dataViewsLabel,
-  DATA_VIEWS_PANEL_ID,
   DATA_VIEWS_TAB_ID,
-  integrationsLabel,
   INTEGRATIONS_TAB_ID,
   noDatasetsDescriptionLabel,
   noDatasetsLabel,
@@ -28,10 +23,10 @@ import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
 import { DataSourceSelectorProps } from './types';
 import { buildIntegrationsTree, createDataViewsStatusItem } from './utils';
-import { AddDataButton } from './sub_components/add_data_button';
 import { IntegrationsList } from './sub_components/integrations_list';
 import { DataViewList } from './sub_components/data_views_list';
 import ListStatus from './sub_components/list_status';
+import { DataSourceSelectorTabs } from './sub_components/selector_tabs';
 
 export function DataSourceSelector({
   datasets,
@@ -57,13 +52,10 @@ export function DataSourceSelector({
   onIntegrationsReload,
   onIntegrationsSearch,
   onIntegrationsSort,
-  onIntegrationsStreamsSearch,
-  onIntegrationsStreamsSort,
   onSelectionChange,
   onUncategorizedLoad,
   onUncategorizedReload,
   onUncategorizedSearch,
-  onUncategorizedSort,
 }: DataSourceSelectorProps) {
   const {
     search,
@@ -88,10 +80,7 @@ export function DataSourceSelector({
     onIntegrationsReload,
     onIntegrationsSearch,
     onIntegrationsSort,
-    onIntegrationsStreamsSearch,
-    onIntegrationsStreamsSort,
     onUncategorizedSearch,
-    onUncategorizedSort,
     onUncategorizedLoad,
     onUncategorizedReload,
     onSelectionChange,
@@ -169,34 +158,10 @@ export function DataSourceSelector({
     selectDataView,
   ]);
 
-  const tabs = [
-    {
-      id: INTEGRATIONS_TAB_ID,
-      name: integrationsLabel,
-      onClick: switchToIntegrationsTab,
-      'data-test-subj': 'dataSourceSelectorIntegrationsTab',
-    },
-    {
-      id: DATA_VIEWS_TAB_ID,
-      name: dataViewsLabel,
-      onClick: () => {
-        onDataViewsTabClick(); // Lazy-load data views only when accessing the Data Views tab
-        switchToDataViewsTab();
-      },
-      'data-test-subj': 'dataSourceSelectorDataViewsTab',
-    },
-  ];
-
-  const tabEntries = tabs.map((tab) => (
-    <EuiTab
-      key={tab.id}
-      onClick={tab.onClick}
-      isSelected={tab.id === tabId}
-      data-test-subj={tab['data-test-subj']}
-    >
-      {tab.name}
-    </EuiTab>
-  ));
+  const handleDataViewTabClick = () => {
+    onDataViewsTabClick(); // Lazy-load data views only when accessing the Data Views tab
+    switchToDataViewsTab();
+  };
 
   return (
     <SelectorPopover
@@ -205,10 +170,10 @@ export function DataSourceSelector({
       closePopover={closePopover}
       onClick={togglePopover}
     >
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <Tabs bottomBorder={false}>{tabEntries}</Tabs>
-        {tabId === INTEGRATIONS_TAB_ID && <AddDataButton />}
-      </EuiFlexGroup>
+      <DataSourceSelectorTabs tabId={tabId}>
+        <DataSourceSelectorTabs.Integrations onClick={switchToIntegrationsTab} />
+        <DataSourceSelectorTabs.DataViews onClick={handleDataViewTabClick} />
+      </DataSourceSelectorTabs>
       <EuiHorizontalRule margin="none" />
       {/* For a smoother user experience, we keep each tab content mount and we only show the select one
       "hiding" all the others. Unmounting mounting each tab content on change makes it feel glitchy,
@@ -230,17 +195,7 @@ export function DataSourceSelector({
         />
       </IntegrationsList>
       {/* Data views tab content */}
-      <DataViewList
-        hidden={tabId !== DATA_VIEWS_TAB_ID}
-        panels={[
-          {
-            id: DATA_VIEWS_PANEL_ID,
-            title: dataViewsLabel,
-            width: '100%',
-            items: dataViewsItems,
-          },
-        ]}
-      >
+      <DataViewList hidden={tabId !== DATA_VIEWS_TAB_ID} items={dataViewsItems}>
         <SearchControls
           key={DATA_VIEWS_TAB_ID}
           search={search}
@@ -257,7 +212,3 @@ export function DataSourceSelector({
     </SelectorPopover>
   );
 }
-
-const Tabs = styled(EuiTabs)`
-  padding: 0 ${euiThemeVars.euiSizeS};
-`;

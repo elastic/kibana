@@ -24,12 +24,9 @@ export const useDataSourceSelector = ({
   onIntegrationsReload,
   onIntegrationsSearch,
   onIntegrationsSort,
-  onIntegrationsStreamsSearch,
-  onIntegrationsStreamsSort,
   onSelectionChange,
   onUncategorizedLoad,
   onUncategorizedSearch,
-  onUncategorizedSort,
   onUncategorizedReload,
 }: DataSourceSelectorStateMachineDependencies) => {
   const dataSourceSelectorStateService = useInterpret(() =>
@@ -41,12 +38,9 @@ export const useDataSourceSelector = ({
       onIntegrationsReload,
       onIntegrationsSearch,
       onIntegrationsSort,
-      onIntegrationsStreamsSearch,
-      onIntegrationsStreamsSort,
       onSelectionChange,
       onUncategorizedLoad,
       onUncategorizedSearch,
-      onUncategorizedSort,
       onUncategorizedReload,
     })
   );

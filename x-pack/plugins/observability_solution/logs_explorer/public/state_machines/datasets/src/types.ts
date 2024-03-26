@@ -84,8 +84,4 @@ export type DatasetsEvent =
       type: 'SEARCH_DATASETS';
       search: DatasetsSearchParams;
     }
-  | {
-      type: 'SORT_DATASETS';
-      search: DatasetsSearchParams;
-    }
   | DoneInvokeEvent<FindDatasetValue | Error>;
