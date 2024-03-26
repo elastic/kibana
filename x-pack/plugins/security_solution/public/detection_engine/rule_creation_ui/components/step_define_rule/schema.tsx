@@ -130,9 +130,10 @@ export const schema: FormSchema<DefineStepRule> = {
     ),
     validations: [],
   },
-  eqlOptions: {},
+  eqlOptions: {
+    fieldsToValidateOnChange: ['eqlOptions', 'queryBar'],
+  },
   queryBar: {
-    fieldsToValidateOnChange: ['queryBar'],
     validations: [
       {
         validator: (

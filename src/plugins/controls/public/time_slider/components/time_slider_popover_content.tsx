@@ -14,10 +14,11 @@ import { TimeSliderStrings } from './time_slider_strings';
 import { useTimeSlider } from '../embeddable/time_slider_embeddable';
 import { TimeSliderAnchoredRange } from './time_slider_anchored_range';
 import { TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range';
+import { TimeSlice } from '../../../common/types';
 
 interface Props {
-  value: [number, number];
-  onChange: (value?: [number, number]) => void;
+  value: TimeSlice;
+  onChange: (value?: TimeSlice) => void;
   stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeMin: number;
