@@ -220,23 +220,11 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         );
 
         const snapTimestamps = getSnappedTimestamps(timeRangeEarliest, timeRangeLatest, interval);
-
         const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
 
-        if (brushSelectionUpdate !== undefined) {
-          setInitialAnalysisStart(wpSnap);
-          brushSelectionUpdate(
-            wpSnap,
-            true,
-            changePoint.type === LOG_RATE_ANALYSIS_TYPE.DIP
-              ? LOG_RATE_ANALYSIS_TYPE.DIP
-              : LOG_RATE_ANALYSIS_TYPE.SPIKE
-          );
-        }
+        setInitialAnalysisStart(wpSnap);
       }
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentCountStats]);
 
   return (
