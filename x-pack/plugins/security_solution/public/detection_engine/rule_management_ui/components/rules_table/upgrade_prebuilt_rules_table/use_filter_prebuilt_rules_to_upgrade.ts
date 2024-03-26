@@ -26,7 +26,7 @@ export const useFilterPrebuiltRulesToUpgrade = ({
       }
 
       if (tags && tags.length > 0) {
-        return tags.every((tag) => ruleInfo.current_rule.tags.includes(tag));
+        return tags.some((tag) => ruleInfo.current_rule.tags.includes(tag));
       }
 
       return true;

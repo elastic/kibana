@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import React, { useState, useMemo } from 'react';
+import { css } from '@emotion/css';
+import { EuiComboBox, EuiFilterButton, EuiPopover } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { toggleSelectedGroup } from '../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
 import { caseInsensitiveSort } from '../helpers';
 
-const TAGS_POPOVER_WIDTH = 274;
+const TAGS_POPOVER_WIDTH = 400;
+
+const popoverContentClassName = css`
+  /* Subtract margins to ensure popover content fits on smaller screen widths */
+  width: calc(100vw - ${euiThemeVars.euiSizeL} - ${euiThemeVars.euiSizeL});
+  max-width: ${TAGS_POPOVER_WIDTH}px;
+`;
 
 interface TagsFilterPopoverProps {
   selectedTags: string[];
@@ -31,37 +37,14 @@ const TagsFilterPopoverComponent = ({
   selectedTags,
   onSelectedTagsChanged,
 }: TagsFilterPopoverProps) => {
-  const sortedTags = useMemo(
-    () => caseInsensitiveSort(Array.from(new Set([...tags, ...selectedTags]))),
-    [selectedTags, tags]
-  );
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
-  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>(() => {
-    const selectedTagsSet = new Set(selectedTags);
 
-    return sortedTags.map((label) => ({
-      label,
-      checked: selectedTagsSet.has(label) ? 'on' : undefined,
-    }));
-  });
-  const handleSelectableOptionsChange = (
-    newOptions: EuiSelectableOption[],
-    _: unknown,
-    changedOption: EuiSelectableOption
-  ) => {
-    setSelectableOptions(newOptions);
-    toggleSelectedGroup(changedOption.label, selectedTags, onSelectedTagsChanged);
-  };
+  const options = useMemo(() => caseInsensitiveSort(tags).map((tag) => ({ label: tag })), [tags]);
 
-  useEffect(() => {
-    const selectedTagsSet = new Set(selectedTags);
-    const newSelectableOptions: EuiSelectableOption[] = sortedTags.map((label) => ({
-      label,
-      checked: selectedTagsSet.has(label) ? 'on' : undefined,
-    }));
-
-    setSelectableOptions(newSelectableOptions);
-  }, [sortedTags, selectedTags]);
+  const selectedOptions = useMemo(
+    () => selectedTags.map((tag) => ({ label: tag })),
+    [selectedTags]
+  );
 
   const triggerButton = (
     <EuiFilterButton
@@ -84,30 +67,24 @@ const TagsFilterPopoverComponent = ({
       button={triggerButton}
       isOpen={isTagPopoverOpen}
       closePopover={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       repositionOnScroll
       panelProps={{
         'data-test-subj': 'tags-filter-popover',
       }}
     >
-      <EuiSelectable
-        searchable
-        searchProps={{
-          placeholder: i18n.SEARCH_TAGS,
-        }}
-        aria-label={i18n.RULES_TAG_SEARCH}
-        options={selectableOptions}
-        onChange={handleSelectableOptionsChange}
-        emptyMessage={i18n.NO_TAGS_AVAILABLE}
-        noMatchesMessage={i18n.NO_TAGS_AVAILABLE}
-      >
-        {(list, search) => (
-          <div style={{ width: TAGS_POPOVER_WIDTH }}>
-            <EuiPopoverTitle>{search}</EuiPopoverTitle>
-            {list}
-          </div>
-        )}
-      </EuiSelectable>
+      <div className={popoverContentClassName}>
+        <EuiComboBox
+          placeholder={i18n.SEARCH_TAGS}
+          options={options}
+          selectedOptions={selectedOptions}
+          onChange={(updatedOptions) =>
+            onSelectedTagsChanged(updatedOptions.map((option) => option.label))
+          }
+          autoFocus
+          aria-label={i18n.RULES_TAG_SEARCH}
+        />
+      </div>
     </EuiPopover>
   );
 };
