@@ -28,8 +28,28 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
     error: 'MISSING_SECURITY',
   };
 
+  const isSubfeaturePrivilegesEnabled =
+    appContextService.getExperimentalFeatures().subfeaturePrivileges ?? false;
+
   if (!appContextService.getSecurityLicense().isEnabled()) {
     return response.ok({ body: missingSecurityBody });
+  } else if (isSubfeaturePrivilegesEnabled) {
+    const fleetContext = await context.fleet;
+    if (
+      !fleetContext.authz.fleet.all &&
+      !fleetContext.authz.fleet.readAgents &&
+      !fleetContext.authz.fleet.readAgentPolicies &&
+      !fleetContext.authz.fleet.readSettings
+    ) {
+      return response.ok({
+        body: {
+          success: false,
+          error: 'MISSING_PRIVILEGES',
+        } as CheckPermissionsResponse,
+      });
+    }
+
+    return response.ok({ body: { success: true } as CheckPermissionsResponse });
   } else {
     const fleetContext = await context.fleet;
     if (!fleetContext.authz.fleet.all) {

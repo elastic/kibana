@@ -17,11 +17,7 @@ import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-import {
-  DefaultEmbeddableApi,
-  ReactEmbeddableApiRegistration,
-  ReactEmbeddableFactory,
-} from './types';
+import { DefaultEmbeddableApi, ReactEmbeddableApiRegistration } from './types';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -50,10 +46,7 @@ export const ReactEmbeddableRenderer = <
     () =>
       (async () => {
         const uuid = maybeId ?? generateId();
-        const factory = getReactEmbeddableFactory(type) as ReactEmbeddableFactory<
-          StateType,
-          ApiType
-        >;
+        const factory = await getReactEmbeddableFactory<StateType, ApiType>(type);
         const registerApi = (
           apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
           comparators: StateComparators<StateType>

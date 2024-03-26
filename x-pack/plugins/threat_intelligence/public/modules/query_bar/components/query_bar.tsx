@@ -6,17 +6,16 @@
  */
 
 import React, { useEffect, VFC } from 'react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useSecurityContext } from '../../../hooks/use_security_context';
-import { SecuritySolutionDataViewBase, SourcererDataView } from '../../../types';
 
 interface QueryBarProps {
-  indexPattern: SecuritySolutionDataViewBase;
   queries: Array<{
     id: string;
     refetch: VoidFunction;
     loading: boolean;
   }>;
-  sourcererDataView: SourcererDataView | undefined;
+  sourcererDataView: DataViewSpec | undefined;
 }
 
 export const QueryBar: VFC<QueryBarProps> = ({ queries, sourcererDataView }) => {
