@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { OperatingSystem, hasWildcardAndInvalidOperator } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
@@ -142,8 +142,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       [exception]
     );
     const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(exception?.tags));
-
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
+    const [hasWildcardWithWrongOperator, sethasWildcardWithWrongOperator] =
+      useState<boolean>(false);
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
@@ -412,6 +413,16 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           if (!hasFormChanged) setHasFormChanged(true);
           return;
         }
+
+        // handle wildcard with wrong operator case
+        arg.exceptionItems[0]?.entries.forEach((e) => {
+          if (hasWildcardAndInvalidOperator({ operator: e.type, value: e.value })) {
+            sethasWildcardWithWrongOperator(true);
+          }
+        });
+        console.log(hasWildcardWithWrongOperator);
+        // do i have to change hasFormChanged?
+
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
           arg.exceptionItems[0] !== undefined
             ? {
@@ -561,6 +572,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
+        {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
         {hasDuplicateFields && (
           <>
             <EuiSpacer size="xs" />
