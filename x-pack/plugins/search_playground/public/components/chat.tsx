@@ -43,6 +43,7 @@ export const Chat = () => {
     formState: { isValid, isSubmitting },
     resetField,
     handleSubmit,
+    getValues,
   } = useFormContext<ChatForm>();
   const { messages, append, stop: stopRequest, setMessages, reload } = useChat();
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
@@ -78,13 +79,20 @@ export const Chat = () => {
     [messages]
   );
 
-  const onClear = () => {
-    setMessages([]);
-  }
-
   const regenerateMessages = () => {
-    reload();
-  }
+    const data = getValues();
+    reload({
+      data: {
+        prompt: data[ChatFormFields.prompt],
+        indices: data[ChatFormFields.indices].join(),
+        api_key: data[ChatFormFields.openAIKey],
+        citations: data[ChatFormFields.citations],
+        elasticsearchQuery: JSON.stringify(data[ChatFormFields.elasticsearchQuery]),
+        summarization_model:
+          data[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
+      },
+    });
+  };
 
   if (showStartPage) {
     return <StartNewChat onStartClick={() => setShowStartPage(false)} />;
@@ -142,7 +150,9 @@ export const Chat = () => {
                   <EuiButtonEmpty
                     iconType="refresh"
                     disabled={chatMessages.length <= 1}
-                    onClick={onClear}
+                    onClick={() => {
+                      setMessages([]);
+                    }}
                   >
                     <FormattedMessage
                       id="xpack.searchPlayground.chat.clearChatBtn"
