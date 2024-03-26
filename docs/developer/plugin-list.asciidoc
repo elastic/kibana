@@ -753,6 +753,10 @@ Elastic.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]
+|This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/search_playground/README.md[searchPlayground]
 |The Search Playground is a tool for developers to experiment with their own data using LLMs.
 
