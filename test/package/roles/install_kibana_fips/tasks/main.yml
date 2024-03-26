@@ -6,12 +6,15 @@
 
 - name: set image tag
   set_fact:
-    kibana_image_tag: "{{ lookup('env','BUILDKITE_COMMIT') }}"  
+    kibana_commit: "{{ lookup('env','BUILDKITE_COMMIT') }}"  
+    kibana_ver: "{{ kibana_docker.files[0].path | basename| regex_search('kibana-ubi-fips-(.*)-docker-image.tar.gz', '\\1') | first }}" 
+    kibana_image_tag: "{{ kibana_ver }}-{{ kibana_commit }}"
 
 - name: load image
   become: yes
   docker_image:
-    name: "{{ kibana_fips.files[0].path | basename| regex_search('docker.elastic.co/kibana-ci/kibana-ubi-fips:[0-9]*-{{ kibana_image_tag }}') }}"
+    name: "docker.elastic.co/kibana-ci/kibana-ubi-fips"
+    tag: "{{ kibana_image_tag }}"
     load_path: '{{ kibana_fips.files[0].path }}'
     timeout: 300
     source: load
@@ -21,7 +24,7 @@
   become: yes
   docker_container:
     name: kibana
-    image: "{{ kibana_fips.files[0].path | basename| regex_search('docker.elastic.co/kibana-ci/kibana-ubi-fips:[0-9]*-{{ kibana_image_tag }}') }}"
+    image: "docker.elastic.co/kibana-ci/kibana-ubi-fips:{{ kibana_image_tag }}"
     network_mode: host
     env:
       SERVER_HOST: 0.0.0.0
