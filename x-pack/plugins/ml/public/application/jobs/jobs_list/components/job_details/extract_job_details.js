@@ -79,7 +79,7 @@ export function extractJobDetails(job, basePath, refreshJobList) {
       '',
       <EuiLink
         href={basePath.prepend(`/app/ml/settings/calendars_list/edit_calendar/${c}?_g=()`)}
-        data-test-subj={`${job.job_id}-${c}`}
+        data-test-subj={`mlJobDetailsCalendar-${c}`}
       >
         {c}
       </EuiLink>,

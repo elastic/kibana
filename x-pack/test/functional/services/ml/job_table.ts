@@ -50,13 +50,21 @@ export function MachineLearningJobTableProvider(
   const retry = getService('retry');
 
   return new (class MlJobTable {
-    public async clickJobRowCalendar(jobId: string, calendarId: string) {
-      await this.withDetailsOpen(jobId, async function clickJobRowCalendar() {
-        const calendarSelector = `${jobId}-${calendarId}`;
+    public async assertCalendarSettingsPage(jobId: string, calendarId: string) {
+      await this.withDetailsOpen(jobId, async function openCalendarSettingsPageForCalendar() {
+        const calendarSelector = `mlJobDetailsCalendar-${calendarId}`;
         await testSubjects.existOrFail(calendarSelector, {
           timeout: 3_000,
         });
         await testSubjects.click(calendarSelector, 3_000);
+        await testSubjects.existOrFail('mlPageCalendarEdit > mlCalendarFormEdit', {
+          timeout: 3_000,
+        });
+        const calendarTitleVisibleText = await testSubjects.getVisibleText('mlCalendarTitle');
+        expect(calendarTitleVisibleText).to.contain(
+          calendarId,
+          `Expect [${calendarTitleVisibleText}] to contain [${calendarId}]`
+        );
       });
     }
 
@@ -67,7 +75,7 @@ export function MachineLearningJobTableProvider(
     ): Promise<void> {
       await this.withDetailsOpen(jobId, async function verifyJobRowCalendars(): Promise<void> {
         for await (const expectedCalendar of expectedCalendars) {
-          const calendarSelector = `${jobId}-${expectedCalendar}`;
+          const calendarSelector = `mlJobDetailsCalendar-${expectedCalendar}`;
           await testSubjects[checkForExists ? 'existOrFail' : 'missingOrFail'](calendarSelector, {
             timeout: 3_000,
           });

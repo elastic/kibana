@@ -18,17 +18,26 @@ export function MachineLearningSettingsCalendarProvider(
   const retry = getService('retry');
   const comboBox = getService('comboBox');
 
+  const localeCompare = (a: string, b: string) => a.localeCompare(b);
+
   return {
-    async assertCalendarRowJobs(calendarId: string, expectedConnectedJobs: string[]) {
+    async assertCalendarRowJobs(
+      calendarId: string,
+      expectedConnectedJobs: string[]
+    ): Promise<void> {
       await this.filterWithSearchString(calendarId, 1); // makes sure the table only has the one row we want to check
       const calendarRow = (await this.parseCalendarTable())[0];
-      const actualJobs: string[] = calendarRow.jobs.replaceAll(',', '').split(' ');
+      const sortedActual: string[] = calendarRow.jobs
+        .replaceAll(',', '')
+        .split(' ')
+        .sort(localeCompare);
 
-      const expectedWithinActual = expectedConnectedJobs.every((expected) =>
-        actualJobs.some((actual) => actual === expected)
+      const sortedExpected = expectedConnectedJobs.sort(localeCompare);
+
+      expect(sortedActual).to.eql(
+        sortedExpected,
+        `Expect [${sortedActual}] to eql [${sortedExpected}]`
       );
-
-      expect(expectedWithinActual).to.be(true);
     },
 
     async parseCalendarTable() {
