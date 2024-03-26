@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLCallbacks } from '@kbn/esql-services';
+import type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../monaco_imports';
 
 import { ESQL_LANG_ID } from './lib/constants';

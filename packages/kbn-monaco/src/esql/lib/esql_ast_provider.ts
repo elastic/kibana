@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 import type { EditorError } from '@kbn/esql-ast';
-import { type ESQLCallbacks, getActions, suggest, validateQuery } from '@kbn/esql-services';
+import {
+  type ESQLCallbacks,
+  getActions,
+  suggest,
+  validateQuery,
+} from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../../monaco_imports';
 import type { ESQLWorker } from '../worker/esql_worker';
 import { wrapAsMonacoMessages } from './converters/positions';

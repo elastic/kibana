@@ -36,12 +36,12 @@ export class ESQLValidationExamplePlugin
     developerExamples.register({
       appId: 'esql_validation_example',
       title: 'ES|QL Validation',
-      description: 'Validate ES|QL queries using the @kbn/esql-services package.',
+      description: 'Validate ES|QL queries using the '@kbn/esql-validation-autocomplete' package.',
       image,
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/main/packages/kbn-esql-services/README.md',
+          href: 'https://github.com/elastic/kibana/tree/main/packages/kbn-esql-validation-autocomplete/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

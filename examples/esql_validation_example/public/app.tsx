@@ -23,7 +23,7 @@ import {
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { ESQLCallbacks, validateQuery } from '@kbn/esql-services';
+import { ESQLCallbacks, validateQuery } from '@kbn/esql-validation-autocomplete';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { StartDependencies } from './plugin';
 import { CodeSnippet } from './code_snippet';

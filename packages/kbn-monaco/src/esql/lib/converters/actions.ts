@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CodeAction } from '@kbn/esql-services';
+import type { CodeAction } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../../../monaco_imports';
 import { MonacoCodeAction } from '../types';
 import { wrapAsMonacoMessages } from './positions';

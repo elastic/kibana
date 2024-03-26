@@ -16,7 +16,13 @@ import { groupBy, mapValues } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 function getConfigPath() {
-  return Path.resolve(REPO_ROOT, 'packages', 'kbn-esql-services', 'src', 'validation');
+  return Path.resolve(
+    REPO_ROOT,
+    'packages',
+    'kbn-esql-validation-autocomplete',
+    'src',
+    'validation'
+  );
 }
 
 function getSetupPath() {

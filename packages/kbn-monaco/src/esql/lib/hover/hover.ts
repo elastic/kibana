@@ -17,7 +17,7 @@ import {
   getCommandDefinition,
   type ESQLCallbacks,
   getPolicyHelper,
-} from '@kbn/esql-services';
+} from '@kbn/esql-validation-autocomplete';
 import type { monaco } from '../../../monaco_imports';
 import { monacoPositionToOffset } from '../shared/utils';
 

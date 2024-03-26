@@ -9,7 +9,11 @@
 import { monaco } from '../../../monaco_imports';
 import { getHoverItem } from './hover';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { ENRICH_MODES, getFunctionDefinition, getFunctionSignatures } from '@kbn/esql-services';
+import {
+  ENRICH_MODES,
+  getFunctionDefinition,
+  getFunctionSignatures,
+} from '@kbn/esql-validation-autocomplete';
 
 const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
   ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
