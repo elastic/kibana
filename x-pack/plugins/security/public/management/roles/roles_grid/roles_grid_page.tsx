@@ -28,7 +28,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ConfirmDelete } from './confirm_delete';
@@ -50,7 +49,7 @@ interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   history: ScopedHistory;
   readOnly?: boolean;
-  buildFlavor?: BuildFlavor;
+  buildFlavor: BuildFlavor;
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
   cloudOrgUrl?: string;
@@ -183,6 +182,10 @@ export class RolesGridPage extends Component<Props, State> {
             callback={this.handleDelete}
             notifications={this.props.notifications}
             rolesAPIClient={this.props.rolesAPIClient}
+            buildFlavor={this.props.buildFlavor}
+            theme={this.props.theme}
+            i18nStart={this.props.i18nStart}
+            cloudOrgUrl={this.props.cloudOrgUrl}
           />
         ) : null}
 
@@ -414,7 +417,7 @@ export class RolesGridPage extends Component<Props, State> {
     const deprecated = isRoleDeprecated(role);
     const reserved = isRoleReserved(role);
 
-    const badges = [];
+    const badges: JSX.Element[] = [];
     if (!enabled) {
       badges.push(<DisabledBadge data-test-subj="roleDisabled" />);
     }
@@ -456,30 +459,6 @@ export class RolesGridPage extends Component<Props, State> {
       selection: [],
       showDeleteConfirmation: false,
     });
-    if (this.props.buildFlavor === 'serverless') {
-      this.props.notifications.toasts.addDanger({
-        title: i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
-          defaultMessage: 'Custom role deleted',
-        }),
-        text: toMountPoint(
-          <>
-            <p>A good toast message is short and to the point</p>
-
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s" href={this.props.cloudOrgUrl}>
-                  Manage Members
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>,
-          {
-            i18n: this.props.i18nStart,
-            theme: this.props.theme,
-          }
-        ),
-      });
-    }
     this.loadRoles();
   };
 

@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import type { AsyncState } from 'react-use/lib/useAsync';
 import useAsync from 'react-use/lib/useAsync';
 
 import type { BuildFlavor } from '@kbn/config';
@@ -102,23 +103,46 @@ function useRemoteClusters(http: HttpStart) {
   return useAsync(() => http.get<Cluster[]>(REMOTE_CLUSTERS_PATH));
 }
 
-function useFeatureCheck(http: HttpStart) {
-  return useAsync(() =>
-    http.get<CheckRoleMappingFeaturesResponse>('/internal/security/_check_role_mapping_features')
-  );
+interface CheckRoleMappingFeaturesResponseWhenServerless {
+  value: boolean;
+}
+function useFeatureCheck(
+  http: HttpStart,
+  buildFlavor: 'serverless'
+): AsyncState<CheckRoleMappingFeaturesResponseWhenServerless>;
+
+function useFeatureCheck(
+  http: HttpStart,
+  buildFlavor: BuildFlavor
+): AsyncState<CheckRoleMappingFeaturesResponse>;
+
+function useFeatureCheck(http: HttpStart, buildFlavor?: BuildFlavor) {
+  return useAsync(async () => {
+    if (buildFlavor !== 'serverless') {
+      return http.get<CheckRoleMappingFeaturesResponse>(
+        '/internal/security/_check_role_mapping_features'
+      );
+    }
+    return { value: true };
+  }, [http, buildFlavor]);
 }
 
 function useRunAsUsers(
   userAPIClient: PublicMethodsOf<UserAPIClient>,
-  fatalErrors: FatalErrorsSetup
+  fatalErrors: FatalErrorsSetup,
+  buildFlavor: BuildFlavor
 ) {
   const [userNames, setUserNames] = useState<string[] | null>(null);
   useEffect(() => {
-    userAPIClient.getUsers().then(
-      (users) => setUserNames(users.map((user) => user.username)),
-      (err) => fatalErrors.add(err)
-    );
-  }, [fatalErrors, userAPIClient]);
+    if (buildFlavor !== 'serverless') {
+      userAPIClient.getUsers().then(
+        (users) => setUserNames(users.map((user) => user.username)),
+        (err) => fatalErrors.add(err)
+      );
+    } else {
+      setUserNames([]);
+    }
+  }, [fatalErrors, userAPIClient, buildFlavor]);
 
   return userNames;
 }
@@ -334,12 +358,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const [creatingRoleAlreadyExists, setCreatingRoleAlreadyExists] = useState<boolean>(false);
   const [previousName, setPreviousName] = useState<string>('');
-  const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
+  const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors, buildFlavor);
   const indexPatternsTitles = useIndexPatternsTitles(dataViews, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
   const spaces = useSpaces(http, fatalErrors);
   const features = useFeatures(getFeatures, fatalErrors);
-  const featureCheckState = useFeatureCheck(http);
+  const featureCheckState = useFeatureCheck(http, buildFlavor);
   const remoteClustersState = useRemoteClusters(http);
   const [role, setRole] = useRole(
     rolesAPIClient,
@@ -439,7 +463,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
             />
           }
           helpText={
-            !isRoleReserved && isEditingExistingRole ? (
+            !isEditingExistingRole ? (
+              <FormattedMessage
+                id="xpack.security.management.createRole.roleNameFormRowHelpText"
+                defaultMessage="Once the role is created you can no longer edit its name."
+              />
+            ) : !isRoleReserved ? (
               <FormattedMessage
                 id="xpack.security.management.editRole.roleNameFormRowHelpText"
                 defaultMessage="A role's name cannot be changed once it has been created."
@@ -496,8 +525,11 @@ export const EditRolePage: FunctionComponent<Props> = ({
           builtinESPrivileges={builtInESPrivileges}
           license={license}
           docLinks={docLinks}
-          canUseRemoteIndices={featureCheckState.value?.canUseRemoteIndices}
+          canUseRemoteIndices={
+            buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteIndices
+          }
           isDarkMode={isDarkMode}
+          buildFlavor={buildFlavor}
         />
       </div>
     );

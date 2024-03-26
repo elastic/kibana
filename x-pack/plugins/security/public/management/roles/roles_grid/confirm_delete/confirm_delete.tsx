@@ -8,6 +8,8 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -17,9 +19,12 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
-import type { NotificationsStart } from '@kbn/core/public';
+import type { BuildFlavor } from '@kbn/config';
+import type { I18nStart, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { RolesAPIClient } from '../../roles_api_client';
@@ -30,6 +35,10 @@ interface Props {
   onCancel: () => void;
   notifications: NotificationsStart;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
+  buildFlavor: BuildFlavor;
+  theme: ThemeServiceStart;
+  i18nStart: I18nStart;
+  cloudOrgUrl?: string;
 }
 
 interface State {
@@ -132,12 +141,37 @@ export class ConfirmDelete extends Component<Props, State> {
       const deleteRoleTask = async () => {
         try {
           await rolesAPIClient.deleteRole(roleName);
-          notifications.toasts.addSuccess(
-            i18n.translate(
-              'xpack.security.management.roles.confirmDelete.roleSuccessfullyDeletedNotificationMessage',
-              { defaultMessage: 'Deleted role {roleName}', values: { roleName } }
-            )
-          );
+          if (this.props.buildFlavor === 'traditional') {
+            notifications.toasts.addSuccess(
+              i18n.translate(
+                'xpack.security.management.roles.confirmDelete.roleSuccessfullyDeletedNotificationMessage',
+                { defaultMessage: 'Deleted role {roleName}', values: { roleName } }
+              )
+            );
+          } else {
+            this.props.notifications.toasts.addDanger({
+              title: i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
+                defaultMessage: 'Custom role deleted',
+              }),
+              text: toMountPoint(
+                <>
+                  <p>A good toast message is short and to the point</p>
+
+                  <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton size="s" href={this.props.cloudOrgUrl}>
+                        Manage Members
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>,
+                {
+                  i18n: this.props.i18nStart,
+                  theme: this.props.theme,
+                }
+              ),
+            });
+          }
         } catch (e) {
           errors.push(roleName);
           notifications.toasts.addDanger(
