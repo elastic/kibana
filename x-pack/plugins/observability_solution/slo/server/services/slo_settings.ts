@@ -13,13 +13,16 @@ import { sloSettingsObjectId, SO_SLO_SETTINGS_TYPE } from '../saved_objects/slo_
 
 export const getSloSettings = async (soClient: SavedObjectsClientContract) => {
   try {
-    const object = await soClient.get<SloSettings>(SO_SLO_SETTINGS_TYPE, sloSettingsObjectId);
-    return object.attributes;
+    const soObject = await soClient.get<SloSettings>(SO_SLO_SETTINGS_TYPE, sloSettingsObjectId);
+    return soObject.attributes;
   } catch (e) {
-    return {
-      useAllRemoteClusters: true,
-      selectedRemoteClusters: [],
-    };
+    if (e.isBoom && e.output?.statusCode === 404) {
+      return {
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: [],
+      };
+    }
+    throw e;
   }
 };
 
