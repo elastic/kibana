@@ -76,7 +76,8 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
         ariaLabel={i18n.BODY_DESCRIPTION}
         errors={errors.body as string[]}
         onDocumentsChange={(json: string) => {
-          editSubActionParams({ body: json });
+          // trim to prevent sending extra space at the end of JSON, which causes a timeout error in Bedrock
+          editSubActionParams({ body: json.trim() });
         }}
         onBlur={() => {
           if (!body) {
