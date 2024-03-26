@@ -44,6 +44,8 @@ const fleetAuthzMock: FleetAuthz = {
     allAgentPolicies: true,
     allAgents: true,
     allSettings: true,
+    addAgents: true,
+    addFleetServers: true,
   },
   integrations: {
     readPackageInfo: true,

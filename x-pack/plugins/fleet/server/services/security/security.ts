@@ -168,8 +168,8 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
             all: fleetAgentsAllAuth,
           },
           agentPolicies: {
-            read: fleetAgentPoliciesAllAuth,
-            all: fleetAgentPoliciesReadAuth,
+            read: fleetAgentPoliciesReadAuth,
+            all: fleetAgentPoliciesAllAuth,
           },
           settings: {
             read: fleetSettingsReadAuth,
