@@ -45,6 +45,7 @@ import { v4 } from 'uuid';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_LOADED_EVENT,
@@ -427,7 +428,7 @@ export class DashboardContainer
     const onSuccess = (id?: string, title?: string) => {
       if (!displaySuccessMessage) return;
       toasts.addSuccess({
-        title: .getSuccessMessage(title),
+        title: dashboardReplacePanelActionStrings.getSuccessMessage(title),
         'data-test-subj': 'addEmbeddableToDashboardSuccess',
       });
       this.setScrollToPanelId(id);
