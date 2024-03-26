@@ -19,6 +19,7 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { imageClickTrigger } from './actions';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { IMAGE_EMBEDDABLE_TYPE } from './image_embeddable/constants';
+import { registerCreateImageAction } from './actions/create_image_action';
 
 export interface ImageEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -61,23 +62,19 @@ export class ImageEmbeddablePlugin
     return {};
   }
 
-  public async start(
-    core: CoreStart,
-    plugins: ImageEmbeddableStartDependencies
-  ): Promise<StartContract> {
+  public start(core: CoreStart, plugins: ImageEmbeddableStartDependencies): StartContract {
     setKibanaServices(core, plugins);
 
-    await untilPluginStartServicesReady();
+    untilPluginStartServicesReady().then(() => {
+      registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
+        const { getImageEmbeddableFactory } = await import(
+          './image_embeddable/get_image_embeddable_factory'
+        );
+        return getImageEmbeddableFactory({ embeddableEnhanced: plugins.embeddableEnhanced });
+      });
 
-    registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
-      const { getImageEmbeddableFactory } = await import(
-        './image_embeddable/get_image_embeddable_factory'
-      );
-      return getImageEmbeddableFactory({ embeddableEnhanced: plugins.embeddableEnhanced });
+      registerCreateImageAction();
     });
-
-    const { registerCreateImageAction } = await import('./actions/create_image_action');
-    registerCreateImageAction();
 
     return {};
   }

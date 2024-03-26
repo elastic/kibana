@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import {
@@ -16,21 +16,30 @@ import {
 import { ImageEmbeddableStrings } from '../image_embeddable/image_embeddable_strings';
 import { uiActionsService } from '../services/kibana_services';
 
+const parentApiIsCompatible = async (
+  parentApi: unknown
+): Promise<PresentationContainer | undefined> => {
+  const { apiIsPresentationContainer } = await import('@kbn/presentation-containers');
+  // we cannot have an async type check, so return the casted parentApi rather than a boolean
+  return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
+};
+
 export const registerCreateImageAction = () => {
   uiActionsService.registerAction<EmbeddableApiContext>({
     id: ADD_IMAGE_EMBEDDABLE_ACTION_ID,
     getIconType: () => 'image',
     isCompatible: async ({ embeddable: parentApi }) => {
-      return apiIsPresentationContainer(parentApi);
+      return Boolean(await parentApiIsCompatible(parentApi));
     },
     execute: async ({ embeddable: parentApi }) => {
-      if (!apiIsPresentationContainer(parentApi)) throw new IncompatibleActionError();
+      const presentationContainerParent = await parentApiIsCompatible(parentApi);
+      if (!presentationContainerParent) throw new IncompatibleActionError();
 
       const { openImageEditor } = await import('../components/image_editor/open_image_editor');
       try {
-        const imageConfig = await openImageEditor({ parentApi });
+        const imageConfig = await openImageEditor({ parentApi: presentationContainerParent });
 
-        parentApi.addNewPanel({
+        presentationContainerParent.addNewPanel({
           panelType: IMAGE_EMBEDDABLE_TYPE,
           initialState: { imageConfig },
         });
