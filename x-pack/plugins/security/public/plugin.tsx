@@ -200,6 +200,7 @@ export class SecurityPlugin
 
     this.sessionTimeout.start();
     this.securityCheckupService.start({ http, notifications, docLinks });
+    this.securityApiClients.userProfiles.start();
 
     if (management) {
       this.managementService.start({

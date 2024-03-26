@@ -38,7 +38,10 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
   public readonly userProfile$ = this._userProfile$.asObservable();
   public readonly userProfileLoaded$ = this._userProfileLoaded$.asObservable();
 
-  constructor(private readonly http: HttpStart) {
+  constructor(private readonly http: HttpStart) {}
+
+  public start() {
+    // Fetch the user profile with default path to initialize the user profile observable.
     this.getCurrent({ dataPath: DEFAULT_DATAPATHS });
   }
 
