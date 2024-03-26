@@ -8,7 +8,6 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { ExpandableSection } from './expandable_section';
 import { ABOUT_SECTION_TEST_ID } from './test_ids';
@@ -35,8 +34,7 @@ export const AboutSection: FC = memo(() => {
   const eventKind = getField(getFieldsData('event.kind'));
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
 
-  const { storage } = useKibana().services;
-  const expanded = useExpandSection({ title: KEY, defaultValue: true, storage });
+  const expanded = useExpandSection({ title: KEY, defaultValue: true });
 
   const content =
     eventKind === EventKind.signal ? (
@@ -69,7 +67,6 @@ export const AboutSection: FC = memo(() => {
       }
       localStorageKey={KEY}
       gutterSize="s"
-      storage={storage}
       data-test-subj={ABOUT_SECTION_TEST_ID}
     >
       {content}

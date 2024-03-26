@@ -12,6 +12,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const mockSet = jest.fn();
+
 describe('useAccordionState', () => {
   let hookResult: RenderHookResult<boolean, UseAccordionStateValue>;
 
@@ -38,7 +39,7 @@ describe('toggleReducer', () => {
     const mockLocalStorageKey = 'test';
     const mockAction = {
       storage: mockStorage,
-      localStorageKey: mockLocalStorageKey,
+      title: mockLocalStorageKey,
     } as unknown as ToggleReducerAction;
     const mockState = 'closed';
 

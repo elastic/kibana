@@ -8,7 +8,6 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { ResponseButton } from './response_button';
 import { ExpandableSection } from './expandable_section';
@@ -25,8 +24,7 @@ const KEY = 'response';
 export const ResponseSection: FC = memo(() => {
   const { isPreview, getFieldsData } = useRightPanelContext();
 
-  const { storage } = useKibana().services;
-  const expanded = useExpandSection({ title: KEY, defaultValue: false, storage });
+  const expanded = useExpandSection({ title: KEY, defaultValue: false });
 
   const eventKind = getField(getFieldsData('event.kind'));
   if (eventKind !== EventKind.signal) {
@@ -43,7 +41,6 @@ export const ResponseSection: FC = memo(() => {
         />
       }
       localStorageKey={KEY}
-      storage={storage}
       data-test-subj={RESPONSE_SECTION_TEST_ID}
     >
       {isPreview ? (

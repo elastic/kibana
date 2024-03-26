@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { ExpandableSection } from './expandable_section';
 import { HighlightedFields } from './highlighted_fields';
@@ -29,8 +28,7 @@ export const InvestigationSection: FC = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
-  const { storage } = useKibana().services;
-  const expanded = useExpandSection({ title: KEY, defaultValue: true, storage });
+  const expanded = useExpandSection({ title: KEY, defaultValue: true });
 
   return (
     <ExpandableSection
@@ -43,7 +41,6 @@ export const InvestigationSection: FC = memo(() => {
       }
       localStorageKey={KEY}
       gutterSize="s"
-      storage={storage}
       data-test-subj={INVESTIGATION_SECTION_TEST_ID}
     >
       {eventKind === EventKind.signal && (

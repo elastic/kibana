@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'react';
 import { useReducer } from 'react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const CLOSED = 'closed' as const;
@@ -20,9 +20,9 @@ export interface ToggleReducerAction {
    */
   storage: Storage | undefined;
   /**
-   * Key to store in local storage
+   * Title to save expanded value in local storage
    */
-  localStorageKey: string | undefined;
+  title: string | undefined;
 }
 
 /**
@@ -31,12 +31,12 @@ export interface ToggleReducerAction {
  * The object stored is a map of section names to expanded boolean values.
  */
 export const toggleReducer = (state: ToggleReducerState, action: ToggleReducerAction) => {
-  const { storage, localStorageKey } = action;
-  if (storage && localStorageKey) {
+  const { storage, title } = action;
+  if (storage && title) {
     const localStorage = storage.get(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS);
     storage.set(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS, {
       ...localStorage,
-      [localStorageKey]: state !== OPEN,
+      [title]: state !== OPEN,
     });
   }
 
@@ -52,11 +52,10 @@ export interface UseAccordionStateValue {
    * Use this to control the accordion visual state
    */
   state: ToggleReducerState;
-
   /**
    * Handler function for cycling between the states
    */
-  toggle: Dispatch<ToggleReducerAction>;
+  toggle: (title: string | undefined) => void;
 }
 
 /**
@@ -64,9 +63,15 @@ export interface UseAccordionStateValue {
  * @param expandedInitially - is accordion expanded on first render
  */
 export const useAccordionState = (expandedInitially: boolean): UseAccordionStateValue => {
+  const { storage } = useKibana().services;
+
   const initialState = expandedInitially ? OPEN : CLOSED;
-  const [state, toggle] = useReducer(toggleReducer, initialState);
+  const [state, toggleState] = useReducer(toggleReducer, initialState);
   const renderContent = state === OPEN;
+
+  const toggle = (title: string | undefined) => {
+    toggleState({ storage, title });
+  };
 
   return {
     renderContent,

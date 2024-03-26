@@ -19,7 +19,6 @@ import { ExpandableSection } from './expandable_section';
 import { useRightPanelContext } from '../context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
-import { useKibana } from '../../../../common/lib/kibana';
 
 const KEY = 'insights';
 
@@ -30,8 +29,7 @@ export const InsightsSection: FC = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
-  const { storage } = useKibana().services;
-  const expanded = useExpandSection({ title: KEY, defaultValue: false, storage });
+  const expanded = useExpandSection({ title: KEY, defaultValue: false });
 
   return (
     <ExpandableSection
@@ -43,7 +41,6 @@ export const InsightsSection: FC = memo(() => {
         />
       }
       localStorageKey={KEY}
-      storage={storage}
       data-test-subj={INSIGHTS_TEST_ID}
     >
       <EntitiesOverview />

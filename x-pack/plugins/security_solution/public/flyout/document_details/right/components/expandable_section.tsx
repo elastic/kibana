@@ -9,7 +9,6 @@ import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } f
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { type VFC } from 'react';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useAccordionState } from '../hooks/use_accordion_state';
 
 export const HEADER_TEST_ID = 'Header';
@@ -33,10 +32,6 @@ export interface ExpandableSectionProps {
    */
   children: React.ReactNode;
   /**
-   * From useKibana().services.storage
-   */
-  storage?: Storage;
-  /**
    * Optional string, if provided it will be used as the key to store the expanded/collapsed state boolean in local storage
    */
   localStorageKey?: string;
@@ -52,7 +47,6 @@ export interface ExpandableSectionProps {
  * This allows the state to be preserved when opening new flyouts or when refreshing the page.
  */
 export const ExpandableSection: VFC<ExpandableSectionProps> = ({
-  storage,
   expanded,
   title,
   children,
@@ -61,7 +55,7 @@ export const ExpandableSection: VFC<ExpandableSectionProps> = ({
   'data-test-subj': dataTestSub,
 }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
-  const { renderContent, toggle, state } = useAccordionState(expanded);
+  const { renderContent, state, toggle } = useAccordionState(expanded);
 
   const headerDataTestSub = dataTestSub + HEADER_TEST_ID;
   const contentDataTestSub = dataTestSub + CONTENT_TEST_ID;
@@ -75,7 +69,7 @@ export const ExpandableSection: VFC<ExpandableSectionProps> = ({
   return (
     <EuiAccordion
       forceState={state}
-      onToggle={() => toggle({ storage, localStorageKey })}
+      onToggle={() => toggle(localStorageKey)}
       id={accordionId}
       buttonContent={header}
     >

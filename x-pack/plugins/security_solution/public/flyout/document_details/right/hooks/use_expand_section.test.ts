@@ -7,21 +7,27 @@
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UseExpandSectionParams } from './use_expand_section';
 import { useExpandSection } from './use_expand_section';
+import { useKibana } from '../../../../common/lib/kibana';
+
+jest.mock('../../../../common/lib/kibana');
 
 describe('useExpandSection', () => {
   let hookResult: RenderHookResult<UseExpandSectionParams, boolean>;
 
   it('should return default value if nothing in localStorage', () => {
-    const mockStorage = {
-      get: jest.fn().mockReturnValue(undefined),
-    };
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        storage: {
+          get: () => undefined,
+        },
+      },
+    });
+
     const initialProps: UseExpandSectionParams = {
       title: 'test',
       defaultValue: true,
-      storage: mockStorage as unknown as Storage,
     };
 
     hookResult = renderHook((props: UseExpandSectionParams) => useExpandSection(props), {
@@ -32,13 +38,16 @@ describe('useExpandSection', () => {
   });
 
   it(`should return default value if localStorage doesn't have the correct key`, () => {
-    const mockStorage = {
-      get: jest.fn().mockReturnValue({ other: false }),
-    };
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        storage: {
+          get: () => ({ other: false }),
+        },
+      },
+    });
     const initialProps: UseExpandSectionParams = {
       title: 'test',
       defaultValue: true,
-      storage: mockStorage as unknown as Storage,
     };
 
     hookResult = renderHook((props: UseExpandSectionParams) => useExpandSection(props), {
@@ -49,13 +58,36 @@ describe('useExpandSection', () => {
   });
 
   it('should return value from local storage', () => {
-    const mockStorage = {
-      get: jest.fn().mockReturnValue({ test: false }),
-    };
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        storage: {
+          get: () => ({ test: false }),
+        },
+      },
+    });
     const initialProps: UseExpandSectionParams = {
       title: 'test',
       defaultValue: true,
-      storage: mockStorage as unknown as Storage,
+    };
+
+    hookResult = renderHook((props: UseExpandSectionParams) => useExpandSection(props), {
+      initialProps,
+    });
+
+    expect(hookResult.result.current).toBe(false);
+  });
+
+  it('should check against lowercase values', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        storage: {
+          get: () => ({ test: false }),
+        },
+      },
+    });
+    const initialProps: UseExpandSectionParams = {
+      title: 'Test',
+      defaultValue: true,
     };
 
     hookResult = renderHook((props: UseExpandSectionParams) => useExpandSection(props), {

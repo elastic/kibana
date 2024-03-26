@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 export interface UseExpandSectionParams {
@@ -17,20 +17,14 @@ export interface UseExpandSectionParams {
    * Default value for the section
    */
   defaultValue: boolean;
-  /**
-   * From useKibana().services.storage
-   */
-  storage: Storage;
 }
 
 /**
  * Hook to get the expanded state of a section from local storage.
  */
-export const useExpandSection = ({
-  title,
-  defaultValue,
-  storage,
-}: UseExpandSectionParams): boolean => {
+export const useExpandSection = ({ title, defaultValue }: UseExpandSectionParams): boolean => {
+  const { storage } = useKibana().services;
+
   const localStorage = storage.get(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS);
   const key = title.toLowerCase();
   const expanded =
