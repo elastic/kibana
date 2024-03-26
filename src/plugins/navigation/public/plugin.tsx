@@ -16,6 +16,7 @@ import type {
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { definition as esDefinition } from '@kbn/solution-nav-es';
 import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
+import { definition as analyticsDefinition } from '@kbn/solution-nav-analytics';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import {
   ENABLE_SOLUTION_NAV_UI_SETTING_ID,
@@ -204,6 +205,10 @@ export class NavigationPublicPlugin
       oblt: {
         ...obltDefinition,
         sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'svlObservabilitySideNav' }),
+      },
+      analytics: {
+        ...analyticsDefinition,
+        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'analyticsSideNav' }),
       },
     };
 
