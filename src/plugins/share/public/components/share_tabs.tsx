@@ -108,6 +108,7 @@ export const ShareMenuTabs = ({
             objectType={objectType}
             urlParamExtensions={embedUrlParamExtensions}
             urlService={urlService}
+            isEmbedded={allowEmbed}
           />
         ),
       });
