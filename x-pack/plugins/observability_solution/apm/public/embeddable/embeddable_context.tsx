@@ -24,19 +24,17 @@ import { ChartPointerEventContextProvider } from '../context/chart_pointer_event
 import { APMEmbeddableInput } from './types';
 import { ENVIRONMENT_ALL_VALUE } from '../../common/environment_filter_values';
 
-export const APM_LATENCY_CHART_EMBEDDABLE = 'APM_LATENCY_CHART_EMBEDDABLE';
-
 interface APMEmbeddableDeps {
   core: CoreStart;
   plugins: ApmPluginStartDeps;
 }
 
-type APMEmbeddableWrapperProps = Omit<APMEmbeddableInput, 'id'> & {
+type APMEmbeddableContextProps = Omit<APMEmbeddableInput, 'id'> & {
   deps: APMEmbeddableDeps;
   children: React.ReactNode;
 };
 
-export function APMEmbeddableWrapper({
+export function APMEmbeddableContext({
   serviceName,
   transactionName,
   transactionType,
@@ -45,17 +43,23 @@ export function APMEmbeddableWrapper({
   rangeTo = 'now',
   deps,
   children,
-}: APMEmbeddableWrapperProps) {
+}: APMEmbeddableContextProps) {
   const params = getQueryParams({
     transactionName,
     transactionType,
-    environment: environment === '*' ? undefined : environment,
+    environment,
     rangeFrom,
     rangeTo,
   });
+  /* Many APM components rely on URL state. To account for this,
+   * we create history with a spoofed initial URL to match
+   * the data type for the embeddable input. */
+  const routeContext = transactionName
+    ? `/services/${serviceName}/transactions/view`
+    : `/services/${serviceName}/overview`;
   const history = createMemoryHistory({
     initialEntries: [
-      `/services/${serviceName}/overview?comparisonEnabled=true&kuery=&latencyAggregationType=avg&offset=1d&${params}`,
+      `${routeContext}?comparisonEnabled=true&kuery=&latencyAggregationType=avg&offset=1d&${params}`,
     ],
   });
   const services: ApmPluginContextValue = {
@@ -96,18 +100,15 @@ const getQueryParams = ({
   rangeTo = 'now',
   rangeFrom = 'now-15m',
 }: Omit<APMLatencyChartEmbeddableInput, 'serviceName' | 'id'>) => {
-  const transactionNameParam =
-    transactionName && transactionName !== '*'
-      ? `transactionName=${encodeURIComponent(transactionName)}`
-      : null;
-  const transactionTypeParam =
-    transactionType && transactionType !== '*'
-      ? `transactionType=${encodeURIComponent(transactionType)}`
-      : null;
-  const environmentParam =
-    environment && environment !== '*'
-      ? `environment=${encodeURIComponent(environment)}`
-      : null;
+  const transactionNameParam = transactionName
+    ? `transactionName=${encodeURIComponent(transactionName)}`
+    : null;
+  const transactionTypeParam = transactionType
+    ? `transactionType=${encodeURIComponent(transactionType)}`
+    : null;
+  const environmentParam = environment
+    ? `environment=${encodeURIComponent(environment)}`
+    : null;
   const params = [
     transactionNameParam,
     transactionTypeParam,

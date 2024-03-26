@@ -15,7 +15,7 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { type CoreStart } from '@kbn/core/public';
-import { APMEmbeddableWrapper } from '../../embeddable_wrapper';
+import { APMEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingThroughputChart } from './chart';
 import type { APMAlertingThroughputChartEmbeddableInput } from './types';
 import type { ApmPluginStartDeps } from '../../../plugin';
@@ -64,7 +64,7 @@ export class APMThroughputChartEmbeddable extends AbstractEmbeddable<
     const input = this.getInput();
 
     ReactDOM.render(
-      <APMEmbeddableWrapper
+      <APMEmbeddableContext
         deps={this.deps}
         serviceName={input.serviceName}
         transactionName={input.transactionName}
@@ -80,7 +80,7 @@ export class APMThroughputChartEmbeddable extends AbstractEmbeddable<
           rangeFrom={input.rangeFrom}
           rangeTo={input.rangeTo}
         />
-      </APMEmbeddableWrapper>,
+      </APMEmbeddableContext>,
       node
     );
   }

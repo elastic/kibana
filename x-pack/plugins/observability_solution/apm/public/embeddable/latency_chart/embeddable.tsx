@@ -15,7 +15,7 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { type CoreStart } from '@kbn/core/public';
-import { APMEmbeddableWrapper } from '../embeddable_wrapper';
+import { APMEmbeddableContext } from '../embeddable_context';
 import { APMLatencyChartEmbeddableComponent } from './chart';
 import type { APMLatencyChartEmbeddableInput } from './types';
 import type { ApmPluginStartDeps } from '../../plugin';
@@ -63,7 +63,7 @@ export class APMLatencyChartEmbeddable extends AbstractEmbeddable<
     const input = this.getInput();
 
     ReactDOM.render(
-      <APMEmbeddableWrapper
+      <APMEmbeddableContext
         deps={this.deps}
         serviceName={input.serviceName}
         transactionName={input.transactionName}
@@ -72,8 +72,8 @@ export class APMLatencyChartEmbeddable extends AbstractEmbeddable<
         rangeFrom={input.rangeFrom}
         rangeTo={input.rangeTo}
       >
-        <APMLatencyChartEmbeddableComponent />
-      </APMEmbeddableWrapper>,
+        <APMLatencyChartEmbeddableComponent alert={input.alert} />
+      </APMEmbeddableContext>,
       node
     );
   }

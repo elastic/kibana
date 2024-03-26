@@ -15,7 +15,7 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { type CoreStart } from '@kbn/core/public';
-import { APMEmbeddableWrapper } from '../../embeddable_wrapper';
+import { APMEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingFailedTransactionsChart } from './chart';
 import type { APMAlertingFailedTransactionsChartEmbeddableInput } from './types';
 import type { ApmPluginStartDeps } from '../../../plugin';
@@ -64,7 +64,7 @@ export class APMFailedTransactionsChartEmbeddable extends AbstractEmbeddable<
     const input = this.getInput();
 
     ReactDOM.render(
-      <APMEmbeddableWrapper
+      <APMEmbeddableContext
         deps={this.deps}
         serviceName={input.serviceName}
         transactionName={input.transactionName}
@@ -79,8 +79,10 @@ export class APMFailedTransactionsChartEmbeddable extends AbstractEmbeddable<
           timeZone={input.timeZone}
           rangeFrom={input.rangeFrom}
           rangeTo={input.rangeTo}
+          offset={input.offset}
+          comparisonEnabled={input.comparisonEnabled}
         />
-      </APMEmbeddableWrapper>,
+      </APMEmbeddableContext>,
       node
     );
   }
