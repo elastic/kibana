@@ -131,11 +131,13 @@ describe('document selection', () => {
   describe('DataTableDocumentToolbarBtn', () => {
     test('it renders a button clickable button', () => {
       const props = {
+        isPlainRecord: false,
         isFilterActive: false,
         rows: dataTableContextMock.rows,
         selectedDocs: ['i::1::'],
         setIsFilterActive: jest.fn(),
         setSelectedDocs: jest.fn(),
+        setIsCompareActive: jest.fn(),
       };
       const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
       const button = findTestSubject(component, 'dscGridSelectionBtn');
