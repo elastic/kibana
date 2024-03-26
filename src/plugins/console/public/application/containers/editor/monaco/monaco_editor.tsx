@@ -12,8 +12,7 @@ import { css } from '@emotion/react';
 import { CONSOLE_LANG_ID } from '@kbn/monaco';
 import { parse } from 'query-string';
 import { debounce } from 'lodash';
-import { decompressFromEncodedURIComponent } from 'lz-string';
-import { i18n } from '@kbn/i18n';
+import { useLoadBufferFromRemote } from './use_load_buffer_from_remote';
 import { useServicesContext, useEditorReadContext } from '../../../contexts';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
 
@@ -33,53 +32,17 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
 
   const [value, setValue] = useState(initialTextValue);
 
+  const loadBufferFromRemote = useLoadBufferFromRemote({
+    initialTextValue,
+    setValue,
+    notifications,
+  });
+
   useEffect(() => {
     const readQueryParams = () => {
       const [, queryString] = (window.location.hash || window.location.search || '').split('?');
 
       return parse(queryString || '', { sort: false }) as Required<QueryParams>;
-    };
-
-    const loadBufferFromRemote = (url: string) => {
-      // Normalize and encode the URL to avoid issues with spaces and other special characters.
-      const encodedUrl = new URL(url).toString();
-      if (/^https?:\/\//.test(encodedUrl)) {
-        const loadFrom: Record<string, any> = {
-          url,
-          // Having dataType here is required as it doesn't allow jQuery to `eval` content
-          // coming from the external source thereby preventing XSS attack.
-          dataType: 'text',
-          kbnXsrfToken: false,
-        };
-
-        if (/https?:\/\/api\.github\.com/.test(url)) {
-          loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
-        }
-
-        // Fire and forget.
-        $.ajax(loadFrom).done((data) => {
-          // when we load data from another Api we also must pass history
-          setValue(`${initialTextValue}\n ${data}`);
-        });
-      }
-
-      // If we have a data URI instead of HTTP, LZ-decode it. This enables
-      // opening requests in Console from anywhere in Kibana.
-      if (/^data:/.test(url)) {
-        const data = decompressFromEncodedURIComponent(url.replace(/^data:text\/plain,/, ''));
-
-        // Show a toast if we have a failure
-        if (data === null || data === '') {
-          notifications.toasts.addWarning(
-            i18n.translate('console.loadFromDataUriErrorMessage', {
-              defaultMessage: 'Unable to load data from the load_from query parameter in the URL',
-            })
-          );
-          return;
-        }
-
-        setValue(data);
-      }
     };
 
     // Support for loading a console snippet from a remote source, like support docs.
@@ -103,7 +66,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     return () => {
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [notifications.toasts, initialTextValue]);
+  }, [notifications.toasts, initialTextValue, loadBufferFromRemote]);
 
   return (
     <div
