@@ -101,7 +101,8 @@ export class NavigationPublicPlugin
         }),
         map((profile) => {
           return profile?.userSettings?.solutionNavOptOut;
-        })
+        }),
+        distinctUntilChanged()
       );
     }
 
@@ -144,7 +145,7 @@ export class NavigationPublicPlugin
         core.settings.globalClient.get$<SolutionNavigationOptInStatus>(
           OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID
         ),
-        this.userProfileOptOut$.pipe(distinctUntilChanged()),
+        this.userProfileOptOut$,
       ]).pipe(
         takeUntil(this.stop$),
         debounceTime(10),
@@ -200,7 +201,7 @@ export class NavigationPublicPlugin
         OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID
       ),
       core.settings.globalClient.get$<SolutionType>(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
-      this.userProfileOptOut$.pipe(distinctUntilChanged()),
+      this.userProfileOptOut$,
     ])
       .pipe(takeUntil(this.stop$), debounceTime(10))
       .subscribe(([enabled, status, defaultSolution, userOptedOut]) => {

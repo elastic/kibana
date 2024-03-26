@@ -22,7 +22,6 @@ import { SecurityPlugin } from './plugin';
 
 stubBroadcastChannel();
 
-// as CoreSetup<PluginStartDependencies>
 const getCoreSetupMock = () => {
   const coreSetup = coreMock.createSetup({
     basePath: '/some-base-path',
