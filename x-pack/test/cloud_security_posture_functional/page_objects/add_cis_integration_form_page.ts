@@ -133,10 +133,6 @@ export function AddCisIntegrationFormPageProvider({
     return currentUrl;
   };
 
-  const waitForElementToAppear = async () => {
-    await PageObjects.common.sleep(10000);
-  };
-
   const getIntegrationFormEntirePage = () => testSubjects.find('dataCollectionSetupStep');
 
   const getIntegrationPolicyTable = () => testSubjects.find('integrationPolicyTable');
@@ -234,7 +230,6 @@ export function AddCisIntegrationFormPageProvider({
     clickFirstElementOnIntegrationTable,
     clickFirstElementOnIntegrationTableAddAgent,
     clickLaunchAndGetCurrentUrl,
-    waitForElementToAppear,
     getIntegrationFormEntirePage,
     getIntegrationPolicyTable,
     getIntegrationFormEditPage,

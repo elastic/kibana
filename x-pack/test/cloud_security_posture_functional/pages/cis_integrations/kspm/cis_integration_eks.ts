@@ -27,7 +27,7 @@ export default function (providerContext: FtrProviderContext) {
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
   const kibanaServer = getService('kibanaServer');
 
-  describe('Test adding Cloud Security Posture Integrations', function () {
+  describe('Test adding Cloud Security Posture Integrations KSPM EKS', function () {
     this.tags(['cloud_security_posture_cis_integration_kspm_eks']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
@@ -36,7 +36,7 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationKspmPage();
     });
 
-    after(async () => {
+    afterEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
