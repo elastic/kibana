@@ -1,0 +1,186 @@
+@import './drag_drop_mixins';
+
+// Drop area
+.domDroppable {
+  @include mixinDomDragDrop;
+  &:not(.domDroppable__overlayWrapper) {
+    @include mixinDomDroppable;
+  }
+}
+
+.domDraggable_ghost {
+  position: absolute !important;  // sass-lint:disable-line no-important
+  margin: 0 !important;  // sass-lint:disable-line no-important
+  top: 0;
+  width: 100%;
+  left: 0;
+  opacity: .9;
+  transform: translate($euiSizeS, $euiSizeL);
+  z-index: $domDragDropZLevel3;
+  pointer-events: none;
+  outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
+  outline-style: auto; // Chrome
+}
+
+// Drop area when there's an item being dragged
+.domDroppable--active {
+  &:not(.domDroppable__overlayWrapper) {
+    @include mixinDomDroppable;
+    @include mixinDomDroppableActive;
+  }
+
+  > * {
+    pointer-events: none;
+  }
+}
+
+// Drop area while hovering with item
+.domDroppable--hover:not(.domDroppable__overlayWrapper) {
+  z-index: $domDragDropZLevel3;
+  @include mixinDomDroppableHover;
+}
+
+// Drop area that is not allowed for current item
+.domDroppable--notAllowed {
+  @include mixinDomDroppableNotAllowed;
+}
+
+// Drop area will be replacing existing content
+.domDroppable--replacing {
+  text-decoration: line-through;
+}
+
+.domDroppable--incompatible:not(.domDroppable__overlayWrapper) {
+  background-color: $euiColorHighlight !important;
+  &:before {
+    border: $euiBorderWidthThin dashed $euiColorVis5 !important;
+  }
+  &.domDroppable--hover {
+    background-color: rgba(251, 208, 17, .25) !important;
+    &:before {
+      border-color: $euiColorVis5 !important;
+    }
+  }
+}
+
+.domDroppable__container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  &.domDroppable__container-active {
+    z-index: $domDragDropZLevel3;
+  }
+  .domDroppable__container {
+    position: static;
+  }
+}
+
+$reorderItemMargin: $euiSizeS;
+.domDroppable--reorderable {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  height: calc(100% + #{calc($reorderItemMargin / 2)});
+}
+
+.domDroppable--translatable {
+  transform: translateY(0);
+  transition: transform $euiAnimSpeedFast ease-in-out;
+  pointer-events: none;
+
+  .domDroppable--hover {
+    z-index: $domDragDropZLevel3;
+  }
+}
+
+.domDroppable__extraTargets {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  z-index: $domDragDropZLevel2;
+  right: calc(100% + #{$euiSizeS});
+  top: 0;
+  transition: opacity $euiAnimSpeedFast ease-in-out;
+  width: 100%;
+  max-width: $euiFormMaxWidth;
+}
+
+.domDroppable__extraTargets-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.domDroppable__extraDropWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: $euiColorLightestShade;
+  border-radius: $euiSizeXS;
+
+  .domDroppable__extraTarget,
+  .domDroppable__extraTarget:before {
+    border-radius: 0;
+  }
+
+  &:first-child .domDroppable__extraTarget,
+  &:first-child .domDroppable__extraTarget:before {
+    border-top-left-radius: $euiSizeXS;
+    border-top-right-radius: $euiSizeXS;
+  }
+
+  &:last-child .domDroppable__extraTarget,
+  &:last-child .domDroppable__extraTarget:before {
+    border-bottom-left-radius: $euiSizeXS;
+    border-bottom-right-radius: $euiSizeXS;
+  }
+}
+
+// collapse borders
+.domDroppable__extraDropWrapper + .domDroppable__extraDropWrapper {
+  margin-top: -1px;
+}
+
+.domDroppable__extraTarget {
+  position: relative;
+  height: $euiSizeXS * 8;
+  min-width: $euiSize * 7;
+  color: $euiColorSuccessText;
+  padding: $euiSizeXS;
+  &.domDroppable--incompatibleExtraTarget {
+    color: $euiColorWarningText;
+  }
+}
+
+.domDroppable__overlayWrapper {
+  position: relative;
+  height: 100%;
+}
+
+.domDroppable_overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: $domDragDropZLevel3;
+  transition: $euiAnimSpeedFast ease-in-out;
+  transition-property: background-color, border-color, opacity;
+
+  .domDroppable--active & {
+    @include mixinDomDroppable($euiBorderWidthThick);
+    @include mixinDomDroppableActive($euiBorderWidthThick);
+  }
+
+  .domDroppable--hover & {
+    @include mixinDomDroppableHover($euiBorderWidthThick);
+  }
+}
+
+.domDragDrop-isActiveGroup {
+  background-color: transparentize($euiColorVis0, .75);
+  .domDraggable_active_keyboard--reorderable {
+    .domDraggable_dragover_keyboard--copy {
+      opacity: 1;
+    }
+  }
+}

@@ -2,7 +2,6 @@
   "paths": {
     "advancedSettings": "src/plugins/advanced_settings",
     "aiAssistantManagementSelection": "src/plugins/ai_assistant_management/selection",
-    "aiAssistantManagementObservability": "src/plugins/ai_assistant_management/observability",
     "alerts": "packages/kbn-alerts/src",
     "alertsUIShared": "packages/kbn-alerts-ui-shared/src",
     "alertingTypes": "packages/kbn-alerting-types",
@@ -97,10 +96,7 @@
       "packages/kbn-management"
     ],
     "monaco": "packages/kbn-monaco/src",
-    "navigation": [
-      "src/plugins/navigation",
-      "packages/solution-nav"
-    ],
+    "navigation": ["src/plugins/navigation", "packages/solution-nav"],
     "links": "src/plugins/links",
     "newsfeed": "src/plugins/newsfeed",
     "presentationUtil": "src/plugins/presentation_util",

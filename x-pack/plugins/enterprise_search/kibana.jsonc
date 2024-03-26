@@ -25,6 +25,7 @@
       "share",
       "console",
       "searchConnectors",
+      "searchPlayground"
     ],
     "optionalPlugins": [
       "customIntegrations",
