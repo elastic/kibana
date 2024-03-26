@@ -106,7 +106,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<DataStreamDetails> {
-    const { context, params } = resources;
+    const { context, params, getEsCapabilities } = resources;
     const { dataStream } = params.path;
     const { start, end } = params.query;
     const coreContext = await context.core;
@@ -115,6 +115,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     const { type, dataset, namespace } = indexNameToDataStreamParts(dataStream);
+    const sizeStatsAvailable = !(await getEsCapabilities()).serverless;
 
     const [dataStreamsStats, dataStreamDetails] = await Promise.all([
       getDataStreamsStats({
@@ -122,7 +123,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
         type,
         datasetQuery: `${dataset}-${namespace}`,
       }),
-      getDataStreamDetails({ esClient, dataStream, start, end }),
+      getDataStreamDetails({ esClient, dataStream, start, end, sizeStatsAvailable }),
     ]);
 
     return {

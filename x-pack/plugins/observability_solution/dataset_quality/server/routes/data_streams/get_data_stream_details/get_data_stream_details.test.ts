@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { SearchTotalHitsRelation } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { findInventoryFields, inventoryModels } from '@kbn/metrics-data-access-plugin/common';
+import {
+  findInventoryFields,
+  InventoryItemType,
+  inventoryModels,
+} from '@kbn/metrics-data-access-plugin/common';
 
 import { getDataStreamDetails } from '.';
 const accessLogsDataStream = 'logs-nginx.access-default';
@@ -33,6 +38,9 @@ const defaultSummaryStats = {
   sizeBytes: 72596354,
 };
 
+const start = Number(new Date('2020-01-01T00:00:00.000Z'));
+const end = Number(new Date('2020-01-30T00:00:00.000Z'));
+
 describe('getDataStreamDetails', () => {
   afterAll(() => {
     jest.clearAllMocks();
@@ -46,6 +54,8 @@ describe('getDataStreamDetails', () => {
       await getDataStreamDetails({
         esClient: esClientMock,
         dataStream: 'non-existent',
+        start,
+        end,
       });
     } catch (e) {
       expect(e).toBe(MOCK_INDEX_ERROR);
@@ -63,6 +73,8 @@ describe('getDataStreamDetails', () => {
     const dataStreamDetails = await getDataStreamDetails({
       esClient: esClientMock,
       dataStream: errorLogsDataStream,
+      start,
+      end,
     });
     expect(dataStreamDetails).toEqual({ createdOn: Number(dateStr3), ...defaultSummaryStats });
   });
@@ -78,6 +90,8 @@ describe('getDataStreamDetails', () => {
     const dataStreamDetails = await getDataStreamDetails({
       esClient: esClientMock,
       dataStream: accessLogsDataStream,
+      start,
+      end,
     });
     expect(dataStreamDetails).toEqual({ createdOn: Number(dateStr1), ...defaultSummaryStats });
   });
@@ -101,6 +115,8 @@ describe('getDataStreamDetails', () => {
     const dataStreamDetails = await getDataStreamDetails({
       esClient: esClientMock,
       dataStream: accessLogsDataStream,
+      start,
+      end,
     });
     expect(dataStreamDetails.services).toEqual({ [serviceName]: testServiceName });
   });
@@ -114,11 +130,13 @@ describe('getDataStreamDetails', () => {
 
     const hostName = 'host.name';
     const testHostName = ['tst-host-0', 'tst-host-1'];
-    const hostFields = inventoryModels.map((model) => findInventoryFields(model.id).id);
+    const hostFields = inventoryModels.map(
+      (model) => findInventoryFields(model.id as InventoryItemType).id
+    );
     const mockSearchResponse = { ...MOCK_SEARCH_RESPONSE };
     // Make all hosts buckets to []
     hostFields.forEach((field) => {
-      mockSearchResponse.aggregations[field] = { buckets: [] };
+      mockSearchResponse.aggregations[field as 'host.name'] = { buckets: [] } as any;
     });
 
     // Set the host.name buckets to testHostName
@@ -132,6 +150,8 @@ describe('getDataStreamDetails', () => {
     const dataStreamDetails = await getDataStreamDetails({
       esClient: esClientMock,
       dataStream: accessLogsDataStream,
+      start,
+      end,
     });
 
     // Expect all host fields to be empty
@@ -162,8 +182,29 @@ describe('getDataStreamDetails', () => {
     const dataStreamDetails = await getDataStreamDetails({
       esClient: esClientMock,
       dataStream: accessLogsDataStream,
+      start,
+      end,
     });
     expect(dataStreamDetails.sizeBytes).toEqual(expectedSizeInBytes);
+  });
+
+  // This covers https://github.com/elastic/kibana/issues/178954
+  it('returns size as NaN for when sizeStatsAvailable is false (serverless mode)', async () => {
+    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock.indices.getSettings.mockReturnValue(
+      Promise.resolve(MOCK_NGINX_ACCESS_INDEX_SETTINGS)
+    );
+    esClientMock.indices.stats.mockReturnValue(Promise.resolve(MOCK_STATS_RESPONSE));
+    esClientMock.search.mockReturnValue(Promise.resolve(MOCK_SEARCH_RESPONSE));
+
+    const dataStreamDetails = await getDataStreamDetails({
+      esClient: esClientMock,
+      dataStream: accessLogsDataStream,
+      start,
+      end,
+      sizeStatsAvailable: false,
+    });
+    expect(dataStreamDetails.sizeBytes).toBeNaN();
   });
 });
 
@@ -345,7 +386,7 @@ const MOCK_SEARCH_RESPONSE = {
   hits: {
     total: {
       value: 10000,
-      relation: 'gte',
+      relation: 'gte' as SearchTotalHitsRelation,
     },
     max_score: null,
     hits: [],

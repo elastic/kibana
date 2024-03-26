@@ -19,14 +19,19 @@ import { DataStreamDetails } from '../../../../common/api_types';
 import { createDatasetQualityESClient } from '../../../utils';
 import { dataStreamService } from '../../../services';
 
-export async function getDataStreamDetails(args: {
+export async function getDataStreamDetails({
+  esClient,
+  dataStream,
+  start,
+  end,
+  sizeStatsAvailable = true,
+}: {
   esClient: ElasticsearchClient;
   dataStream: string;
   start: number;
   end: number;
+  sizeStatsAvailable?: boolean; // Only Needed to determine whether `_stats` endpoint is available https://github.com/elastic/kibana/issues/178954
 }): Promise<DataStreamDetails> {
-  const { esClient, dataStream, start, end } = args;
-
   if (!dataStream?.trim()) {
     throw badRequest(`Data Stream name cannot be empty. Received value "${dataStream}"`);
   }
@@ -38,8 +43,13 @@ export async function getDataStreamDetails(args: {
   }
 
   const dataStreamSummaryStats = await getDataStreamSummaryStats(esClient, dataStream, start, end);
-  const avgDocSizeInBytes =
-    dataStreamSummaryStats.docsCount > 0 ? await getAvgDocSizeInBytes(esClient, dataStream) : 0;
+
+  const whenSizeStatsNotAvailable = NaN; // This will indicate size cannot be calculated
+  const avgDocSizeInBytes = sizeStatsAvailable
+    ? dataStreamSummaryStats.docsCount > 0
+      ? await getAvgDocSizeInBytes(esClient, dataStream)
+      : 0
+    : whenSizeStatsNotAvailable;
   const sizeBytes = Math.ceil(avgDocSizeInBytes * dataStreamSummaryStats.docsCount);
 
   return {
