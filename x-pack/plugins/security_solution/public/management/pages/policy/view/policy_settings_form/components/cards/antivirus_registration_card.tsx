@@ -86,16 +86,13 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
 
         <EuiSpacer size="s" />
 
-        {isEditMode ? (
-          <EuiSwitch
-            label={label}
-            checked={isChecked}
-            onChange={handleSwitchChange}
-            data-test-subj={getTestId('switch')}
-          />
-        ) : (
-          <div data-test-subj={getTestId('value')}>{label}</div>
-        )}
+        <EuiSwitch
+          label={label}
+          checked={isChecked}
+          disabled={!isEditMode}
+          onChange={handleSwitchChange}
+          data-test-subj={getTestId('switch')}
+        />
       </SettingCard>
     );
   }

@@ -145,7 +145,7 @@ export const EventCollectionCard = memo(
                 keyPath={keyPath}
                 policy={policy}
                 onChange={onChange}
-                mode={mode}
+                disabled={!isEditMode}
                 data-test-subj={getTestId(protectionField as string)}
               />
             );
@@ -174,6 +174,8 @@ export const EventCollectionCard = memo(
               if (!isEditMode && !isChecked) {
                 return null;
               }
+
+              const isCheckboxDisabled = !isEditMode || (isDisabled ? isDisabled(policy) : false);
 
               return (
                 <div
@@ -214,8 +216,7 @@ export const EventCollectionCard = memo(
                         keyPath={keyPath}
                         policy={policy}
                         onChange={onChange}
-                        mode={mode}
-                        disabled={isDisabled ? isDisabled(policy) : false}
+                        disabled={isCheckboxDisabled}
                         data-test-subj={getTestId(fieldString)}
                       />
                     </EuiFlexItem>
@@ -251,7 +252,7 @@ export const EventCollectionCard = memo(
 EventCollectionCard.displayName = 'EventCollectionCard';
 
 interface EventCheckboxProps
-  extends PolicyFormComponentCommonProps,
+  extends Omit<PolicyFormComponentCommonProps, 'mode'>,
     Pick<EuiCheckboxProps, 'label' | 'disabled'> {
   keyPath: string;
   unCheckedLabel?: ReactNode;
@@ -263,13 +264,11 @@ const EventCheckbox = memo<EventCheckboxProps>(
     onChange,
     label,
     unCheckedLabel,
-    mode,
     keyPath,
     disabled,
     'data-test-subj': dataTestSubj,
   }) => {
     const isChecked: boolean = get(policy, keyPath);
-    const isEditMode = mode === 'edit';
     const displayLabel = isChecked ? label : unCheckedLabel ? unCheckedLabel : label;
 
     const checkboxOnChangeHandler = useCallback(
@@ -282,7 +281,7 @@ const EventCheckbox = memo<EventCheckboxProps>(
       [keyPath, onChange, policy]
     );
 
-    return isEditMode ? (
+    return (
       <EuiCheckbox
         key={keyPath}
         id={keyPath}
@@ -292,9 +291,7 @@ const EventCheckbox = memo<EventCheckboxProps>(
         onChange={checkboxOnChangeHandler}
         disabled={disabled}
       />
-    ) : isChecked ? (
-      <div data-test-subj={dataTestSubj}>{displayLabel}</div>
-    ) : null;
+    );
   }
 );
 EventCheckbox.displayName = 'EventCheckbox';
