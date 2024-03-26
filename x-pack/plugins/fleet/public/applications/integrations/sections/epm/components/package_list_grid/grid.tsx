@@ -120,7 +120,7 @@ export const GridColumn = ({
                       index={index}
                       // this extra top offset is necessary to prevent clipping of the first row
                       // during animaiton, or if the cards have a badge
-                      style={{ ...style, top: (Number(style.top) ?? 0) + 15 }}
+                      style={{ ...style, top: (Number(style.top) ?? 0) + 16 }}
                       onHeightChange={onHeightChange}
                     >
                       <EuiFlexGrid gutterSize="l" columns={3}>
