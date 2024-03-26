@@ -153,6 +153,14 @@ export type ActionsLogPopupFilters = Extract<
   'actions' | 'hosts' | 'statuses' | 'types'
 >;
 
+interface GetTypesFilterInitialStateArguments {
+  isSentinelOneV1Enabled: boolean;
+  isFlyout: boolean;
+  agentTypes?: string[];
+  types?: string[];
+  isCrowdstrikeEnabled: boolean;
+}
+
 /**
  *
  * @param isSentinelOneV1Enabled
@@ -163,12 +171,13 @@ export type ActionsLogPopupFilters = Extract<
  * @description
  * sets the initial state of the types filter options
  */
-const getTypesFilterInitialState = (
-  isSentinelOneV1Enabled: boolean,
-  isFlyout: boolean,
-  agentTypes?: string[],
-  types?: string[]
-): FilterItems => {
+const getTypesFilterInitialState = ({
+  isSentinelOneV1Enabled,
+  isCrowdstrikeEnabled,
+  isFlyout,
+  agentTypes,
+  types,
+}: GetTypesFilterInitialStateArguments): FilterItems => {
   const getFilterOptions = ({ key, label, checked }: FilterItems[number]): FilterItems[number] => ({
     key,
     label,
@@ -188,7 +197,7 @@ const getTypesFilterInitialState = (
 
   // v8.13 onwards
   // for showing agent types and action types in the same filter
-  if (isSentinelOneV1Enabled) {
+  if (isSentinelOneV1Enabled || isCrowdstrikeEnabled) {
     if (!isFlyout) {
       return [
         {
@@ -249,6 +258,7 @@ export const useActionsLogFilter = ({
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
     'responseActionsSentinelOneV1Enabled'
   );
+  const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled('responseActionsCrowdstrikeEnabled');
 
   const {
     agentTypes = [],
@@ -284,7 +294,13 @@ export const useActionsLogFilter = ({
   // filter options
   const [items, setItems] = useState<FilterItems>(
     isTypesFilter
-      ? getTypesFilterInitialState(isSentinelOneV1Enabled, isFlyout, agentTypes, types)
+      ? getTypesFilterInitialState({
+          isCrowdstrikeEnabled,
+          isSentinelOneV1Enabled,
+          isFlyout,
+          agentTypes,
+          types,
+        })
       : isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((statusName) => ({
           key: statusName,

@@ -114,7 +114,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
         'Content-Type': 'application/x-www-form-urlencoded',
         authorization: 'Basic ' + base64encodedData,
       },
-      // responseSchema: CrowdstrikeGetAgentsResponseSchema,
       responseSchema: CrowdstrikeGetTokenResponseSchema,
     });
     const token = response.data.access_token;
