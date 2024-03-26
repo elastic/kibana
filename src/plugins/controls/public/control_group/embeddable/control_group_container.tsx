@@ -289,7 +289,7 @@ export class ControlGroupContainer extends Container<
     );
   };
 
-  public setSavedState(lastSavedInput: PersistableControlGroupInput): void {
+  public setSavedState(lastSavedInput: PersistableControlGroupInput | undefined): void {
     batch(() => {
       this.dispatch.setLastSavedInput(lastSavedInput);
       const { filters, timeslice } = this.getState().output;
