@@ -13,17 +13,6 @@ import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
 import { flowTarget } from './model/flow_target';
 
-export const networkTopNFlowOldSchema = requestOptionsPaginatedSchema.extend({
-  ip: z.string().ip().nullable().optional(),
-  flowTarget,
-  sort,
-  timerange,
-  factoryQueryType: z.literal(NetworkQueries.topNFlowOld),
-});
-
-export type NetworkTopNFlowOldRequestOptionsInput = z.input<typeof networkTopNFlowOldSchema>;
-export type NetworkTopNFlowOldRequestOptions = z.infer<typeof networkTopNFlowOldSchema>;
-
 export const networkTopNFlowSchema = requestOptionsPaginatedSchema.extend({
   ip: z.string().ip().nullable().optional(),
   flowTarget,

@@ -21,7 +21,7 @@ import { networkHttp } from './http';
 import { networkOverview } from './overview';
 import { networkTls } from './tls';
 import { networkTopCountries } from './top_countries';
-import { networkTopNFlow, networkTopNFlowCount, networkTopNFlowOld } from './top_n_flow';
+import { networkTopNFlow, networkTopNFlowCount } from './top_n_flow';
 import { networkUsers } from './users';
 
 // TODO: add safer type for the strategy map
@@ -35,7 +35,6 @@ export const networkFactory: Record<NetworkQueries | NetworkKpiQueries, any> = {
   [NetworkQueries.topCountries]: networkTopCountries,
   [NetworkQueries.topNFlowCount]: networkTopNFlowCount,
   [NetworkQueries.topNFlow]: networkTopNFlow,
-  [NetworkQueries.topNFlowOld]: networkTopNFlowOld,
   [NetworkQueries.users]: networkUsers,
   [NetworkKpiQueries.dns]: networkKpiDns,
   [NetworkKpiQueries.networkEvents]: networkKpiNetworkEvents,

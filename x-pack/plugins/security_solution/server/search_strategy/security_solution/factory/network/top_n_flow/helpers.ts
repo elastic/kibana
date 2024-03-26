@@ -27,7 +27,7 @@ import {
 
 export const getTopNFlowEdges = (
   response: IEsSearchResponse<unknown>,
-  options: NetworkTopNFlowRequestOptions | NetworkTopNFlowOldRequestOptions
+  options: NetworkTopNFlowRequestOptions
 ): NetworkTopNFlowEdges[] =>
   formatTopNFlowEdges(
     getOr([], `aggregations.${options.flowTarget}.buckets`, response.rawResponse),

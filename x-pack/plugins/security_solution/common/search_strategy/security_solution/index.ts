@@ -32,7 +32,6 @@ import type {
   NetworkKpiUniqueFlowsStrategyResponse,
   NetworkKpiUniquePrivateIpsStrategyResponse,
   NetworkTopNFlowCountStrategyResponse,
-  NetworkTopNFlowOldStrategyResponse,
 } from './network';
 import type { MatrixHistogramQuery, MatrixHistogramStrategyResponse } from './matrix_histogram';
 import type {
@@ -108,8 +107,6 @@ import type {
   NetworkTopCountriesRequestOptionsInput,
   NetworkTopNFlowCountRequestOptions,
   NetworkTopNFlowCountRequestOptionsInput,
-  NetworkTopNFlowOldRequestOptions,
-  NetworkTopNFlowOldRequestOptionsInput,
   NetworkTopNFlowRequestOptions,
   NetworkTopNFlowRequestOptionsInput,
   NetworkUsersRequestOptions,
@@ -193,8 +190,6 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkTlsStrategyResponse
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesStrategyResponse
-  : T extends NetworkQueries.topNFlowOld
-  ? NetworkTopNFlowOldStrategyResponse
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowStrategyResponse
   : T extends NetworkQueries.topNFlowCount
@@ -267,8 +262,6 @@ export type StrategyRequestInputType<T extends FactoryQueryTypes> = T extends Ho
   ? NetworkTlsRequestOptionsInput
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesRequestOptionsInput
-  : T extends NetworkQueries.topNFlowOld
-  ? NetworkTopNFlowOldRequestOptionsInput
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowRequestOptionsInput
   : T extends NetworkQueries.topNFlowCount
@@ -341,8 +334,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkTlsRequestOptions
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesRequestOptions
-  : T extends NetworkQueries.topNFlowOld
-  ? NetworkTopNFlowOldRequestOptions
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowRequestOptions
   : T extends NetworkQueries.topNFlowCount
