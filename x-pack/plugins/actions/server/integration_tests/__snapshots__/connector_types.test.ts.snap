@@ -1459,27 +1459,162 @@ Object {
 exports[`Connector type config checks detect connector type changes for: .crowdstrike 1`] = `
 Object {
   "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
     "error": [Function],
+    "presence": "optional",
   },
-  "type": "any",
+  "keys": Object {
+    "ids": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      ],
+      "type": "array",
+    },
+  },
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
+    },
+  },
+  "type": "object",
 }
 `;
 
 exports[`Connector type config checks detect connector type changes for: .crowdstrike 2`] = `
 Object {
   "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
     "error": [Function],
+    "presence": "optional",
   },
-  "type": "any",
+  "keys": Object {
+    "alertIds": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      ],
+      "type": "array",
+    },
+    "command": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "contain",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "lift_containment",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "ids": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      ],
+      "type": "array",
+    },
+  },
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
+    },
+  },
+  "type": "object",
 }
 `;
 
 exports[`Connector type config checks detect connector type changes for: .crowdstrike 3`] = `
 Object {
   "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
     "error": [Function],
+    "presence": "optional",
   },
-  "type": "any",
+  "keys": Object {},
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
+    },
+  },
+  "type": "object",
 }
 `;
 

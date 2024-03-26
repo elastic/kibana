@@ -153,6 +153,12 @@ export const CrowdstrikeHostActionsResponseSchema = schema.object(
         path: schema.string(),
       })
     ),
+    meta: schema.object({
+      query_time: schema.number(),
+      powered_by: schema.string(),
+      trace_id: schema.string(),
+    }),
+    errors: schema.nullable(schema.arrayOf(schema.any())),
   },
   { unknowns: 'allow' }
 );
@@ -160,7 +166,7 @@ export const CrowdstrikeHostActionsResponseSchema = schema.object(
 export const CrowdstrikeHostActionsParamsSchema = schema.object({
   command: schema.oneOf([schema.literal('contain'), schema.literal('lift_containment')]),
   ids: schema.arrayOf(schema.string()),
-  alertIds: schema.nullable(schema.arrayOf(schema.string())),
+  alertIds: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const CrowdstrikeGetAgentsParamsSchema = schema.object({

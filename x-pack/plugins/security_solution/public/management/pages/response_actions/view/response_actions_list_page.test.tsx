@@ -683,7 +683,9 @@ describe('Response actions history page', () => {
         userEvent.click(option);
       });
 
-      expect(history.location.search).toEqual('?types=automated%2Cmanual');
+      expect(history.location.search).toEqual(
+        '?types=endpoint%2Csentinel_one%2Ccrowdstrike%2Cautomated%2Cmanual'
+      );
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       clearAllButton.style.pointerEvents = 'all';
