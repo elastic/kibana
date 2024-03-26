@@ -16,7 +16,7 @@ export interface PluginContextValue {
   appMountParameters?: AppMountParameters;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
-  experimentalFeatures: ExperimentalFeatures;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 export const PluginContext = createContext({} as PluginContextValue);
