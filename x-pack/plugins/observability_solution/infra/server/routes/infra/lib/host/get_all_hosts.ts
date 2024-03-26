@@ -32,7 +32,7 @@ export const getAllHosts = async (
         .flatMap((top) => Object.entries(top.metrics))
         .map(([key, value]) => ({
           name: key as InfraAssetMetadataType,
-          value: typeof value === 'string' ? (value.trim().length === 0 ? null : value) : value,
+          value: typeof value === 'string' && value.trim().length === 0 ? null : value,
         }));
 
       const metrics = params.metrics.map((metric) => ({

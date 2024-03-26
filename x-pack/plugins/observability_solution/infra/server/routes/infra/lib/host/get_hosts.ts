@@ -45,7 +45,7 @@ export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsRespo
   }, {} as Record<string, { alertsCount: number }>);
 
   const hosts = hostMetrics.map(({ name, metrics, metadata }) => {
-    const { alertsCount } = alertsByHostName[name];
+    const { alertsCount } = alertsByHostName[name] ?? {};
     return { name, metrics, metadata, alertsCount };
   });
 

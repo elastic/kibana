@@ -48,10 +48,18 @@ export const getInventoryModelAggregations = (
   metrics: InfraAssetMetricType[]
 ) => {
   const inventoryModel = findInventoryModel(assetType);
-  return metrics.reduce(
-    (acc, metric) => Object.assign(acc, inventoryModel.metrics.snapshot?.[metric]),
-    {} as {
-      [key in InfraAssetMetricType]: NonNullable<typeof inventoryModel.metrics.snapshot[key]>;
-    }
+  return metrics.reduce<
+    Partial<
+      Record<
+        InfraAssetMetricType,
+        typeof inventoryModel.metrics.snapshot[keyof typeof inventoryModel.metrics.snapshot]
+      >
+    >
+  >(
+    (acc, metric) =>
+      inventoryModel.metrics.snapshot?.[metric]
+        ? Object.assign(acc, inventoryModel.metrics.snapshot[metric])
+        : acc,
+    {}
   );
 };
