@@ -199,7 +199,15 @@ export async function createChatService({
         shareReplay()
       );
     },
-    complete({ getScreenContexts, connectorId, conversationId, messages, persist, signal }) {
+    complete({
+      getScreenContexts,
+      connectorId,
+      conversationId,
+      messages,
+      persist,
+      signal,
+      responseLanguage,
+    }) {
       return complete(
         {
           getScreenContexts,
@@ -209,6 +217,7 @@ export async function createChatService({
           persist,
           signal,
           client,
+          responseLanguage,
         },
         ({ params }) => {
           return from(

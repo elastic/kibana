@@ -13,6 +13,7 @@ import { safeDump, safeLoad } from 'js-yaml';
 import {
   sendPostFleetProxy,
   sendPutFleetProxy,
+  useAuthz,
   useInput,
   useStartServices,
   validateInputs,
@@ -85,31 +86,28 @@ export function validateName(value: string) {
 
 export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess: () => void) {
   const [isLoading, setIsLoading] = useState(false);
+  const authz = useAuthz();
   const { notifications } = useStartServices();
   const { confirm } = useConfirmModal();
-  const isPreconfigured = fleetProxy?.is_preconfigured ?? false;
+  const isEditDisabled = (!authz.fleet.allSettings || fleetProxy?.is_preconfigured) ?? false;
 
-  const nameInput = useInput(fleetProxy?.name ?? '', validateName, isPreconfigured);
-  const urlInput = useInput(fleetProxy?.url ?? '', validateUrl, isPreconfigured);
+  const nameInput = useInput(fleetProxy?.name ?? '', validateName, isEditDisabled);
+  const urlInput = useInput(fleetProxy?.url ?? '', validateUrl, isEditDisabled);
   const proxyHeadersInput = useInput(
     fleetProxy?.proxy_headers ? safeDump(fleetProxy.proxy_headers) : '',
     validateProxyHeaders,
-    isPreconfigured
+    isEditDisabled
   );
   const certificateAuthoritiesInput = useInput(
     fleetProxy?.certificate_authorities ?? '',
     () => undefined,
-    isPreconfigured
+    isEditDisabled
   );
-  const certificateInput = useInput(
-    fleetProxy?.certificate ?? '',
-    () => undefined,
-    isPreconfigured
-  );
+  const certificateInput = useInput(fleetProxy?.certificate ?? '', () => undefined, isEditDisabled);
   const certificateKeyInput = useInput(
     fleetProxy?.certificate_key ?? '',
     () => undefined,
-    isPreconfigured
+    isEditDisabled
   );
 
   const inputs = useMemo(
