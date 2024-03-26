@@ -35,7 +35,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   const { appId } = useApplication();
   const owner = getCaseOwnerByAppId(appId);
 
-  const { dataViews, loading } = useAlertDataViews(
+  const { dataViews, loading: loadingAlertDataViews } = useAlertDataViews(
     producerId ? [producerId as ValidFeatureId] : []
   );
 
@@ -45,7 +45,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       ({
         timeWindow: `${DEFAULT_TIME_WINDOW_SIZE}${DEFAULT_TIME_WINDOW_UNIT}`,
         reopenClosedCases: false,
-        groupingBy: [''],
+        groupingBy: [],
       } as unknown as CasesActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
@@ -63,7 +63,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         {
           timeWindow: `${DEFAULT_TIME_WINDOW_SIZE}${DEFAULT_TIME_WINDOW_UNIT}`,
           reopenClosedCases: false,
-          groupingBy: [''],
+          groupingBy: [],
           owner,
         },
         index
@@ -97,7 +97,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   };
 
   const options: Array<EuiSuperSelectOption<string>> = useMemo(() => {
-    if (loading || !dataViews?.length) {
+    if (!dataViews?.length) {
       return [];
     }
     return dataViews
@@ -111,7 +111,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         }));
       })
       .flat();
-  }, [loading, dataViews]);
+  }, [dataViews]);
 
   return (
     <>
@@ -123,10 +123,10 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
               name="groupByAlertField"
               data-test-subj="group-by-alert-field"
               prepend={i18n.GROUP_BY_ALERT}
-              isLoading={loading}
-              disabled={loading}
+              isLoading={loadingAlertDataViews}
+              disabled={loadingAlertDataViews}
               options={options}
-              valueOfSelected={groupingBy[0]}
+              valueOfSelected={groupingBy?.[0] ?? ''}
               onChange={(value: string) => {
                 editSubActionProperty('groupingBy', [value]);
               }}
@@ -138,10 +138,10 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       <EuiFormRow
         fullWidth
         id="timeWindow"
-        error={errors['subActionParams.timeWindow.size']}
+        error={errors.timeWindow}
         isInvalid={
-          errors['subActionParams.timeWindow.size'] !== undefined &&
-          errors['subActionParams.timeWindow.size'].length > 0 &&
+          errors.timeWindow !== undefined &&
+          errors.timeWindow.length > 0 &&
           timeWindow !== undefined
         }
       >
@@ -175,8 +175,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiCheckbox
-            id="reopenCase"
-            name="reopenCase"
+            id={`reopen-case-${index}`}
+            name={`reopen-case-${index}`}
             data-test-subj="reopen-case"
             checked={reopenClosedCases}
             label={i18n.REOPEN_WHEN_CASE_IS_CLOSED}

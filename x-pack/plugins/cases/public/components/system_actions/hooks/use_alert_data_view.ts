@@ -47,7 +47,7 @@ export function useAlertDataViews(featureIds: ValidFeatureId[]): UserAlertDataVi
 
   const onErrorFn = () => {
     toasts.addDanger(
-      i18n.translate('xpack.triggersActionsUI.useAlertDataView.useAlertDataMessage', {
+      i18n.translate('xpack.cases.systemActions.useAlertDataView.useAlertDataMessage', {
         defaultMessage: 'Unable to load alert data view',
       })
     );
@@ -81,9 +81,7 @@ export function useAlertDataViews(featureIds: ValidFeatureId[]): UserAlertDataVi
 
   useEffect(() => {
     return () => {
-      dataViews?.map((dv) => {
-        return dataService.dataViews.clearInstanceCache(dv.id);
-      });
+      dataViews?.map((dv) => dataService.dataViews.clearInstanceCache(dv.id));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViews]);
@@ -92,7 +90,7 @@ export function useAlertDataViews(featureIds: ValidFeatureId[]): UserAlertDataVi
   // we are using the user privilege to access the security alert index
   useEffect(() => {
     async function createDataView() {
-      const localDataview = await dataService.dataViews.create({
+      const localDataview = await dataService?.dataViews.create({
         title: (indexNames ?? []).join(','),
         allowNoIndex: true,
       });
@@ -102,7 +100,7 @@ export function useAlertDataViews(featureIds: ValidFeatureId[]): UserAlertDataVi
     if (isOnlySecurity && isIndexNameSuccess) {
       createDataView();
     }
-  }, [dataService.dataViews, indexNames, isIndexNameSuccess, isOnlySecurity]);
+  }, [dataService?.dataViews, indexNames, isIndexNameSuccess, isOnlySecurity]);
 
   // FUTURE ENGINEER this useEffect is for o11y and stack solution user since
   // we are using the kibana user privilege to access the alert index
@@ -129,7 +127,7 @@ export function useAlertDataViews(featureIds: ValidFeatureId[]): UserAlertDataVi
     }
   }, [
     alertFields,
-    dataService.dataViews,
+    dataService?.dataViews,
     indexNames,
     isIndexNameSuccess,
     isOnlySecurity,

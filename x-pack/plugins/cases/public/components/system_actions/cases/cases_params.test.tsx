@@ -27,7 +27,7 @@ const actionParams = {
     owner: 'cases',
     timeWindow: '6w',
     reopenClosedCases: false,
-    groupingBy: [''],
+    groupingBy: [],
   },
 };
 
@@ -84,6 +84,13 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
   });
 
+  it('renders loading state of grouping by fields correctly', async () => {
+    useAlertDataViewsMock.mockReturnValue({ loading: true });
+    render(<CasesParamsFields {...defaultProps} />);
+
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
+  });
+
   it('disables dropdown when loading grouping by fields', async () => {
     useAlertDataViewsMock.mockReturnValue({ loading: true });
     render(<CasesParamsFields {...defaultProps} />);
@@ -112,7 +119,7 @@ describe('CasesParamsFields renders', () => {
     expect(editAction.mock.calls[0][1]).toEqual({
       timeWindow: '7d',
       reopenClosedCases: false,
-      groupingBy: [''],
+      groupingBy: [],
       owner: 'cases',
     });
   });
@@ -132,7 +139,7 @@ describe('CasesParamsFields renders', () => {
   it('If timeWindow has errors, form row is invalid', async () => {
     const newProps = {
       ...defaultProps,
-      errors: { 'subActionParams.timeWindow.size': ['error'] },
+      errors: { timeWindow: ['error'] },
     };
 
     render(<CasesParamsFields {...newProps} />);
