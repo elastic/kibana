@@ -10,16 +10,16 @@ import semverCoerce from 'semver/functions/coerce';
 import semverValid from 'semver/functions/valid';
 import { css } from '@emotion/react';
 import {
+  EuiCallOut,
   EuiFieldText,
+  EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTitle,
-  EuiSelect,
-  EuiForm,
-  EuiCallOut,
   EuiTextArea,
-  EuiHorizontalRule,
+  EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
@@ -42,16 +42,11 @@ import { MIN_VERSION_GCP_CIS } from '../../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
 import { GCP_ORGANIZATION_ACCOUNT } from '../policy_template_form';
-import { GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from '../../test_subjects';
+import {
+  CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
+  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
+} from '../../test_subjects';
 
-export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
-  GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
-  PROJECT_ID: 'project_id_test_id',
-  ORGANIZATION_ID: 'organization_id_test_id',
-  CREDENTIALS_TYPE: 'credentials_type_test_id',
-  CREDENTIALS_FILE: 'credentials_file_test_id',
-  CREDENTIALS_JSON: 'credentials_json_test_id',
-};
 type SetupFormatGCP = 'google_cloud_shell' | 'manual';
 export const GCPSetupInfoContent = () => (
   <>
@@ -354,7 +349,7 @@ const useCloudShellUrl = ({
 
 export const getGcpCredentialsType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
-): GcpCredentialsType | undefined => input.streams[0].vars?.setup_access.value;
+): GcpCredentialsType | undefined => input.streams[0].vars?.['gcp.credentials.type'].value;
 
 export const GcpCredentialsForm = ({
   input,
@@ -376,7 +371,7 @@ export const GcpCredentialsForm = ({
   const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
   const isInvalid = semverLt(integrationVersionNumberOnly, MIN_VERSION_GCP_CIS);
   const fieldsSnapshot = useRef({});
-  const lastSetupAccessType = useRef<string | undefined>(undefined);
+  const lastCredentialsType = useRef<string | undefined>(undefined);
   const setupFormat = getSetupFormatFromInput(input);
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === 'organization-account';
@@ -406,12 +401,16 @@ export const GcpCredentialsForm = ({
         fieldsToHide.map((field) => [field.id, { value: field.value }])
       );
       // We need to store the last manual credentials type to restore it later
-      lastSetupAccessType.current = getGcpCredentialsType(input);
+      lastCredentialsType.current = getGcpCredentialsType(input);
 
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
-            value: 'google_cloud_shell',
+            value: SETUP_ACCESS_CLOUD_SHELL,
+            type: 'text',
+          },
+          'gcp.credentials.type': {
+            value: 'credentials-none',
             type: 'text',
           },
           // Clearing fields from previous setup format to prevent exposing credentials
@@ -423,8 +422,12 @@ export const GcpCredentialsForm = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
+            value: SETUP_ACCESS_MANUAL,
+            type: 'text',
+          },
+          'gcp.credentials.type': {
             // Restoring last manual credentials type
-            value: lastSetupAccessType.current || SETUP_ACCESS_MANUAL,
+            value: lastCredentialsType.current || 'credentials-file',
             type: 'text',
           },
           // Restoring fields from manual setup format if any

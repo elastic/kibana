@@ -100,15 +100,18 @@ export const renderApp = (
     user = null;
   }
 
+  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
+
   const unmountKibanaLogic = mountKibanaLogic({
     application,
     capabilities,
     charts,
     cloud,
     config,
+    connectorTypes,
     console: plugins.console,
-    esConfig,
     data: plugins.data,
+    esConfig,
     guidedOnboarding,
     history,
     isSidebarEnabled,
@@ -121,6 +124,7 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
+    searchPlayground: plugins.searchPlayground,
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,

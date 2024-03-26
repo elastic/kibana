@@ -40,7 +40,6 @@ export const ExecuteConnectorRequestBody = z.object({
   isEnabledRAGAlerts: z.boolean().optional(),
   replacements: z.array(Replacement),
   size: z.number().optional(),
-  llmType: z.enum(['bedrock', 'openai']),
 });
 export type ExecuteConnectorRequestBodyInput = z.input<typeof ExecuteConnectorRequestBody>;
 

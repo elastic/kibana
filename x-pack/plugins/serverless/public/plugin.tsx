@@ -15,7 +15,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 import { ServerlessConfig } from './config';
-import { SideNavComponent } from './navigation';
+import {
+  generateManageOrgMembersNavCard,
+  manageOrgMembersNavCardName,
+  SideNavComponent,
+} from './navigation';
 import {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
@@ -65,15 +69,11 @@ export class ServerlessPlugin
     // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = core.chrome as InternalChromeStart;
     const { cloud } = dependencies;
-    if (cloud.projectsUrl) {
-      project.setProjectsUrl(cloud.projectsUrl);
-    }
+
     if (cloud.serverless.projectName) {
       project.setProjectName(cloud.serverless.projectName);
     }
-    if (cloud.deploymentUrl) {
-      project.setProjectUrl(cloud.deploymentUrl);
-    }
+    project.setCloudUrls(cloud);
 
     const activeNavigationNodes$ = project.getActiveNavigationNodes$();
     const navigationTreeUi$ = project.getNavigationTreeUi$();
@@ -82,8 +82,7 @@ export class ServerlessPlugin
       setSideNavComponentDeprecated: (sideNavigationComponent) =>
         project.setSideNavComponent(sideNavigationComponent),
       initNavigation: (navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
-        project.initNavigation(navigationTree$, { cloudUrls: cloud });
-
+        project.initNavigation(navigationTree$);
         project.setSideNavComponent(() => (
           <SideNavComponent
             navProps={{
@@ -100,6 +99,16 @@ export class ServerlessPlugin
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
+      getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
+        if (!roleManagementEnabled) return extendCardNavDefinitions;
+
+        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.organizationUrl);
+        if (extendCardNavDefinitions) {
+          extendCardNavDefinitions[manageOrgMembersNavCardName] = manageOrgMembersNavCard;
+          return extendCardNavDefinitions;
+        }
+        return { [manageOrgMembersNavCardName]: manageOrgMembersNavCard };
+      },
     };
   }
 

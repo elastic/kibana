@@ -50,6 +50,9 @@ const HostNameComponent: React.FC<Props> = ({
   value,
 }) => {
   const isNewHostDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newHostDetailsFlyout');
+  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
+    'expandableTimelineFlyoutEnabled'
+  );
   const { openRightPanel } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
@@ -57,6 +60,7 @@ const HostNameComponent: React.FC<Props> = ({
   const hostName = `${value}`;
   const isInTimelineContext =
     hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
+
   const openHostDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
@@ -65,49 +69,63 @@ const HostNameComponent: React.FC<Props> = ({
         onClick();
       }
 
-      if (eventContext && isInTimelineContext) {
-        const { timelineID, tabType } = eventContext;
+      if (!eventContext || !isInTimelineContext) {
+        return;
+      }
 
-        if (isNewHostDetailsFlyoutEnabled && !isTimelineScope(timelineID)) {
-          openRightPanel({
-            id: HostPanelKey,
-            params: {
-              hostName,
-              contextID: contextId,
-              scopeId: TableId.alertsOnAlertsPage,
-              isDraggable,
-            },
-          });
-        } else {
-          const updatedExpandedDetail: ExpandedDetailType = {
-            panelView: 'hostDetail',
-            params: {
-              hostName,
-            },
-          };
-          const scopedActions = getScopedActions(timelineID);
-          if (scopedActions) {
-            dispatch(
-              scopedActions.toggleDetailPanel({
-                ...updatedExpandedDetail,
-                id: timelineID,
-                tabType: tabType as TimelineTabs,
-              })
-            );
-          }
+      const { timelineID, tabType } = eventContext;
+
+      const openNewFlyout = () =>
+        openRightPanel({
+          id: HostPanelKey,
+          params: {
+            hostName,
+            contextID: contextId,
+            scopeId: TableId.alertsOnAlertsPage,
+            isDraggable,
+          },
+        });
+      const openOldFlyout = () => {
+        const updatedExpandedDetail: ExpandedDetailType = {
+          panelView: 'hostDetail',
+          params: {
+            hostName,
+          },
+        };
+        const scopedActions = getScopedActions(timelineID);
+        if (scopedActions) {
+          dispatch(
+            scopedActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              id: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
         }
+      };
+
+      if (
+        (isTimelineScope(timelineID) &&
+          isNewHostDetailsFlyoutEnabled &&
+          expandableTimelineFlyoutEnabled) ||
+        isNewHostDetailsFlyoutEnabled
+      ) {
+        openNewFlyout();
+      } else {
+        openOldFlyout();
       }
     },
     [
-      onClick,
+      contextId,
+      dispatch,
       eventContext,
+      expandableTimelineFlyoutEnabled,
+      hostName,
+      isDraggable,
       isInTimelineContext,
       isNewHostDetailsFlyoutEnabled,
+      onClick,
       openRightPanel,
-      hostName,
-      contextId,
-      isDraggable,
-      dispatch,
     ]
   );
 
