@@ -27,10 +27,12 @@ export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMoun
         <EuiFlexItem>
           <ActionMenuContent />
         </EuiFlexItem>
+        {ObservabilityAIAssistantActionMenuItem && (
+          <EuiFlexItem>
+            <ObservabilityAIAssistantActionMenuItem />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
-      <EuiFlexItem>
-        {ObservabilityAIAssistantActionMenuItem ? <ObservabilityAIAssistantActionMenuItem /> : null}
-      </EuiFlexItem>
     </HeaderMenuPortal>
   );
 };

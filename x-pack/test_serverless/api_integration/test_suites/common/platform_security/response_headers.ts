@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     const defaultPermissionsPolicy =
       'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()';
     const defaultStrictTransportSecurity = 'max-age=31536000; includeSubDomains';
-    const defaultReferrerPolicy = 'no-referrer-when-downgrade';
+    const defaultReferrerPolicy = 'strict-origin-when-cross-origin';
     const defaultXContentTypeOptions = 'nosniff';
     const defaultXFrameOptions = 'SAMEORIGIN';
 

@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportRequestParams } from '@elastic/elasticsearch';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { ElasticsearchClient, RouteConfig, SavedObjectsClientContract } from '@kbn/core/server';
 import { CoreSetup, IRouter, KibanaRequest, RequestHandler, RouteMethod } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
@@ -59,25 +59,30 @@ export class KibanaFramework {
     const routeConfig = {
       path: config.path,
       validate: config.validate,
-      // Currently we have no use of custom options beyond tags, this can be extended
-      // beyond defaultOptions if it's needed.
-      options: defaultOptions,
+      /**
+       * Supported `options` for each type of request method
+       * are a bit different and generic method like this cannot
+       * properly ensure type safety. Hence the need to cast
+       * using `as ...` below to ensure the route config has
+       * the correct options type.
+       */
+      options: { ...config.options, ...defaultOptions },
     };
     switch (config.method) {
       case 'get':
-        this.router.get(routeConfig, handler);
+        this.router.get(routeConfig as RouteConfig<Params, Query, Body, 'get'>, handler);
         break;
       case 'post':
-        this.router.post(routeConfig, handler);
+        this.router.post(routeConfig as RouteConfig<Params, Query, Body, 'post'>, handler);
         break;
       case 'delete':
-        this.router.delete(routeConfig, handler);
+        this.router.delete(routeConfig as RouteConfig<Params, Query, Body, 'delete'>, handler);
         break;
       case 'put':
-        this.router.put(routeConfig, handler);
+        this.router.put(routeConfig as RouteConfig<Params, Query, Body, 'put'>, handler);
         break;
       case 'patch':
-        this.router.patch(routeConfig, handler);
+        this.router.patch(routeConfig as RouteConfig<Params, Query, Body, 'patch'>, handler);
         break;
     }
   }

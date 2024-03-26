@@ -19,7 +19,7 @@ import { processBedrockStream } from './process_bedrock_stream';
 import type { LlmApiAdapterFactory } from './types';
 
 function replaceFunctionsWithTools(content: string) {
-  return content.replaceAll(/(function)(s)?(?!\scall)/g, (match, p1, p2) => {
+  return content.replaceAll(/(function)(s|[\s*\.])?(?!\scall)/g, (match, p1, p2) => {
     return `tool${p2 || ''}`;
   });
 }
@@ -137,6 +137,8 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
       </function_calls>
 
       `;
+    } else {
+      functionsPrompt = `No tools are available anymore. Do not call any tool.`;
     }
 
     const formattedMessages = [
@@ -214,7 +216,7 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
     };
   },
   streamIntoObservable: (readable) =>
-    eventstreamSerdeIntoObservable(readable).pipe(
+    eventstreamSerdeIntoObservable(readable, logger).pipe(
       tap((value) => {
         if ('modelStreamErrorException' in value) {
           throw createInternalServerError(value.modelStreamErrorException.originalMessage);

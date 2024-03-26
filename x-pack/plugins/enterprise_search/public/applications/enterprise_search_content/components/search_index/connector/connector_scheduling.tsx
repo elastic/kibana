@@ -30,12 +30,9 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
-import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
-import { IngestionStatus } from '../../../types';
-import * as indices from '../../../utils/indices';
-import { IndexViewLogic } from '../index_view_logic';
-
-import { SearchIndexTabId } from '../search_index';
+import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
+import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 
 import { ConnectorContentScheduling } from './connector_scheduling/full_content';
 import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
@@ -67,9 +64,8 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description
 
 export const ConnectorSchedulingComponent: React.FC = () => {
   const { productFeatures } = useValues(KibanaLogic);
-  const { ingestionStatus, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
-    useValues(IndexViewLogic);
-  const { index } = useValues(IndexViewLogic);
+  const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
+    useValues(ConnectorViewLogic);
   const { hasChanges } = useValues(ConnectorSchedulingLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
@@ -77,16 +73,16 @@ export const ConnectorSchedulingComponent: React.FC = () => {
     hasIncrementalSyncFeature && productFeatures.hasIncrementalSyncEnabled;
   const shouldShowAccessControlSync =
     hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
-  if (!indices.isConnectorIndex(index)) {
+  if (!connector) {
     return <></>;
   }
 
   const isDocumentLevelSecurityDisabled =
-    !index.connector.configuration.use_document_level_security?.value;
+    !connector.configuration.use_document_level_security?.value;
 
   if (
-    index.connector.status === ConnectorStatus.CREATED ||
-    index.connector.status === ConnectorStatus.NEEDS_CONFIGURATION
+    connector.status === ConnectorStatus.CREATED ||
+    connector.status === ConnectorStatus.NEEDS_CONFIGURATION
   ) {
     return (
       <>
@@ -112,9 +108,9 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           <EuiSpacer size="s" />
           <EuiButtonTo
             data-telemetry-id="entSearchContent-connector-scheduling-configure"
-            to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-              indexName: index.name,
-              tabId: SearchIndexTabId.CONFIGURATION,
+            to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+              connectorId: connector.id,
+              tabId: ConnectorDetailTabId.CONFIGURATION,
             })}
             fill
             size="s"
@@ -141,7 +137,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
       />
 
       <EuiSpacer size="l" />
-      {ingestionStatus === IngestionStatus.ERROR ? (
+      {connector.status === ConnectorStatus.ERROR ? (
         <>
           <EuiCallOut
             color="warning"
@@ -191,11 +187,14 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           >
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
-                <ConnectorContentScheduling type={SyncJobType.FULL} index={index} />
+                <ConnectorContentScheduling type={SyncJobType.FULL} connector={connector} />
               </EuiFlexItem>
               {shouldShowIncrementalSync && (
                 <EuiFlexItem>
-                  <ConnectorContentScheduling type={SyncJobType.INCREMENTAL} index={index} />
+                  <ConnectorContentScheduling
+                    type={SyncJobType.INCREMENTAL}
+                    connector={connector}
+                  />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
@@ -220,7 +219,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                 >
                   <ConnectorContentScheduling
                     type={SyncJobType.ACCESS_CONTROL}
-                    index={index}
+                    connector={connector}
                     hasPlatinumLicense={hasPlatinumLicense}
                   />
                 </SchedulePanel>
@@ -242,9 +241,9 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                         values={{
                           link: (
                             <EuiLinkTo
-                              to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-                                indexName: index.name,
-                                tabId: SearchIndexTabId.CONFIGURATION,
+                              to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                                connectorId: connector.id,
+                                tabId: ConnectorDetailTabId.CONFIGURATION,
                               })}
                             >
                               {i18n.translate(

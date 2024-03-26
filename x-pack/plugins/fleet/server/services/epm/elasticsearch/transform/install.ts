@@ -457,7 +457,6 @@ const installTransformsAssets = async (
         })
       : // No need to generate api key/secondary auth if all transforms are run as kibana_system user
         undefined;
-
     // delete all previous transform
     await Promise.all([
       deleteTransforms(
@@ -724,7 +723,7 @@ async function handleTransformInstall({
             body: transform.content,
           },
           // add '{ headers: { es-secondary-authorization: 'ApiKey {encodedApiKey}' } }'
-          secondaryAuth ? { ...secondaryAuth } : undefined
+          { ignore: [409], ...(secondaryAuth ? { ...secondaryAuth } : {}) }
         ),
       { logger }
     );
@@ -737,7 +736,9 @@ async function handleTransformInstall({
       err?.body?.error?.reason?.includes('unauthorized for API key');
 
     const isAlreadyExistError =
-      isResponseError && err?.body?.error?.type === 'resource_already_exists_exception';
+      isResponseError &&
+      (err?.body?.error?.type === 'resource_already_exists_exception' ||
+        err?.body?.error?.caused_by?.type?.includes('version_conflict_engine_exception'));
 
     // swallow the error if the transform already exists or if API key has insufficient permissions
     if (!isUnauthorizedAPIKey && !isAlreadyExistError) {
@@ -767,12 +768,14 @@ async function handleTransformInstall({
         err?.body?.error?.type === 'security_exception' &&
         err?.body?.error?.reason?.includes('lacks the required permissions');
 
-      // swallow the error if the transform can't be started if API key has insufficient permissions
+      // No need to throw error if transform cannot be started, as failure to start shouldn't block package installation
       if (!isUnauthorizedAPIKey) {
-        throw err;
+        logger.debug(`Error starting transform: ${transform.installationName} cause ${err}`);
       }
     }
-  } else {
+  }
+
+  if (startTransform === false || transform?.content?.settings?.unattended === true) {
     // if transform was not set to start automatically in yml config,
     // we need to check using _stats if the transform had insufficient permissions
     try {
@@ -780,11 +783,15 @@ async function handleTransformInstall({
         () =>
           esClient.transform.getTransformStats(
             { transform_id: transform.installationName },
-            { ignore: [409] }
+            { ignore: [409, 404] }
           ),
         { logger, additionalResponseStatuses: [400] }
       );
-      if (Array.isArray(transformStats.transforms) && transformStats.transforms.length === 1) {
+      if (
+        transformStats &&
+        Array.isArray(transformStats.transforms) &&
+        transformStats.transforms.length === 1
+      ) {
         const transformHealth = transformStats.transforms[0].health;
         if (
           transformHealth &&

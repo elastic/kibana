@@ -117,44 +117,44 @@ describe('useMonitorsSortedByStatus', () => {
           overviewStatus: {
             status: {
               upConfigs: {
-                [`test-monitor-1-${location2.label}`]: {
+                [`test-monitor-1-${location2.id}`]: {
                   configId: 'test-monitor-1',
                   monitorQueryId: 'test-monitor-1',
-                  locationId: location2.label,
+                  locationId: location2.id,
                 },
-                [`test-monitor-2-${location2.label}`]: {
+                [`test-monitor-2-${location2.id}`]: {
                   configId: 'test-monitor-2',
                   monitorQueryId: 'test-monitor-2',
-                  locationId: location2.label,
+                  locationId: location2.id,
                 },
-                [`test-monitor-3-${location2.label}`]: {
+                [`test-monitor-3-${location2.id}`]: {
                   configId: 'test-monitor-3',
                   monitorQueryId: 'test-monitor-3',
-                  locationId: location2.label,
+                  locationId: location2.id,
                 },
               },
               downConfigs: {
-                [`test-monitor-1-${location1.label}`]: {
+                [`test-monitor-1-${location1.id}`]: {
                   configId: 'test-monitor-1',
                   monitorQueryId: 'test-monitor-1',
-                  locationId: location1.label,
+                  locationId: location1.id,
                 },
-                [`test-monitor-2-${location1.label}`]: {
+                [`test-monitor-2-${location1.id}`]: {
                   configId: 'test-monitor-2',
                   monitorQueryId: 'test-monitor-2',
-                  locationId: location1.label,
+                  locationId: location1.id,
                 },
-                [`test-monitor-3${location1.label}`]: {
+                [`test-monitor-3${location1.id}`]: {
                   configId: 'test-monitor-3',
                   monitorQueryId: 'test-monitor-3',
-                  locationId: location1.label,
+                  locationId: location1.id,
                 },
               },
               pendingConfigs: {
-                [`test-monitor-4-${location1.label}`]: {
+                [`test-monitor-4-${location1.id}`]: {
                   configId: 'test-monitor-4',
                   monitorQueryId: 'test-monitor-4',
-                  location: location1.label,
+                  location: location1.id,
                 },
               },
             },
@@ -223,9 +223,9 @@ describe('useMonitorsSortedByStatus', () => {
         },
       ],
       downMonitors: {
-        'test-monitor-1': ['US Central'],
-        'test-monitor-2': ['US Central'],
-        'test-monitor-3': ['US Central'],
+        'test-monitor-1': ['us_central'],
+        'test-monitor-2': ['us_central'],
+        'test-monitor-3': ['us_central'],
       },
     });
   });
@@ -289,9 +289,9 @@ describe('useMonitorsSortedByStatus', () => {
         },
       ],
       downMonitors: {
-        'test-monitor-1': ['US Central'],
-        'test-monitor-2': ['US Central'],
-        'test-monitor-3': ['US Central'],
+        'test-monitor-1': ['us_central'],
+        'test-monitor-2': ['us_central'],
+        'test-monitor-3': ['us_central'],
       },
     });
   });
@@ -331,9 +331,9 @@ describe('useMonitorsSortedByStatus', () => {
         },
       ],
       downMonitors: {
-        'test-monitor-1': ['US Central'],
-        'test-monitor-2': ['US Central'],
-        'test-monitor-3': ['US Central'],
+        'test-monitor-1': ['us_central'],
+        'test-monitor-2': ['us_central'],
+        'test-monitor-3': ['us_central'],
       },
     });
   });
@@ -366,9 +366,9 @@ describe('useMonitorsSortedByStatus', () => {
         },
       ],
       downMonitors: {
-        'test-monitor-1': ['US Central'],
-        'test-monitor-2': ['US Central'],
-        'test-monitor-3': ['US Central'],
+        'test-monitor-1': ['us_central'],
+        'test-monitor-2': ['us_central'],
+        'test-monitor-3': ['us_central'],
       },
     });
   });
@@ -394,9 +394,9 @@ describe('useMonitorsSortedByStatus', () => {
         },
       ],
       downMonitors: {
-        'test-monitor-1': ['US Central'],
-        'test-monitor-2': ['US Central'],
-        'test-monitor-3': ['US Central'],
+        'test-monitor-1': ['us_central'],
+        'test-monitor-2': ['us_central'],
+        'test-monitor-3': ['us_central'],
       },
     });
   });

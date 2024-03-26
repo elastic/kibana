@@ -107,7 +107,6 @@ describe('ConditionalToolTip', () => {
         filterQuery: expectedQuery,
         metrics: expectedMetrics,
         groupBy: [],
-        includeTimeseries: false,
         nodeType: 'host',
         sourceId: 'default',
         currentTime,

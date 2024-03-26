@@ -10,6 +10,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
+import { getPanelTitle } from '@kbn/presentation-publishing';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -664,10 +665,7 @@ export class DashboardContainer
     for (const [id, panel] of Object.entries(this.getInput().panels)) {
       const title = await (async () => {
         if (reactEmbeddableRegistryHasKey(panel.type)) {
-          return (
-            this.reactEmbeddableChildren.value[id]?.panelTitle?.value ??
-            this.reactEmbeddableChildren.value[id]?.defaultPanelTitle?.value
-          );
+          return getPanelTitle(this.reactEmbeddableChildren.value[id]);
         }
         await this.untilEmbeddableLoaded(id);
         const child: IEmbeddable<EmbeddableInput, EmbeddableOutput> = this.getChild(id);

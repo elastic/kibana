@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,20 +13,19 @@ import {
   EuiListGroupItem,
   EuiLoadingSpinner,
   EuiPanel,
+  euiScrollBarStyles,
   EuiSpacer,
   EuiText,
   useEuiTheme,
-  euiScrollBarStyles,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { noop } from 'lodash';
+import React, { MouseEvent } from 'react';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
-import { useKibana } from '../../hooks/use_kibana';
-import { NewChatButton } from '../buttons/new_chat_button';
-import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
-import { useAbortableAsync } from '../../hooks/use_abortable_async';
+import { UseConversationListResult } from '../../hooks/use_conversation_list';
+import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
+import { NewChatButton } from '../buttons/new_chat_button';
 
 const titleClassName = css`
   text-transform: uppercase;
@@ -48,24 +46,22 @@ const newChatButtonWrapperClassName = css`
 `;
 
 export function ConversationList({
-  selected,
-  onClickChat,
-  onClickNewChat,
-  onClickDeleteConversation,
+  selectedConversationId,
+  onConversationSelect,
+  onConversationDeleteClick,
+  conversations,
+  isLoading,
 }: {
-  selected: string;
-  onClickChat?: (id: string) => void;
-  onClickNewChat: () => void;
-  onClickDeleteConversation: (id: string) => void;
+  selectedConversationId?: string;
+  onConversationSelect?: (conversationId?: string) => void;
+  onConversationDeleteClick: (conversationId: string) => void;
+  conversations: UseConversationListResult['conversations'];
+  isLoading: boolean;
 }) {
-  const {
-    services: { notifications },
-  } = useKibana();
+  const router = useObservabilityAIAssistantRouter();
 
   const euiTheme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(euiTheme);
-
-  const service = useObservabilityAIAssistant();
 
   const containerClassName = css`
     height: 100%;
@@ -73,7 +69,7 @@ export function ConversationList({
     padding: ${euiTheme.euiTheme.size.s};
   `;
 
-  const { element: confirmDeleteElement, confirm: confirmDeleteFunction } = useConfirmModal({
+  const { element: confirmDeleteElement, confirm: confirmDeleteCallback } = useConfirmModal({
     title: i18n.translate('xpack.observabilityAiAssistant.flyout.confirmDeleteConversationTitle', {
       defaultMessage: 'Delete this conversation?',
     }),
@@ -91,93 +87,28 @@ export function ConversationList({
     ),
   });
 
-  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
-
-  const [isUpdatingList, setIsUpdatingList] = useState(false);
-
-  const conversations = useAbortableAsync(
-    ({ signal }) => {
-      setIsUpdatingList(true);
-      return service.callApi('POST /internal/observability_ai_assistant/conversations', {
-        signal,
-      });
-    },
-    [service]
-  );
-
-  useEffect(() => {
-    setIsUpdatingList(conversations.loading);
-  }, [conversations.loading]);
-
-  const displayedConversations = useMemo(() => {
-    return [
-      ...(!conversationId
-        ? [{ id: '', label: EMPTY_CONVERSATION_TITLE, lastUpdated: '', href: '' }]
-        : []),
-      ...(conversations.value?.conversations ?? []).map(({ conversation }) => ({
-        id: conversation.id,
-        label: conversation.title,
-        lastUpdated: conversation.last_updated,
-        onClick: () => {
-          onClickChat?.(conversation.id);
-        },
-      })),
-    ];
-  }, [conversationId, conversations.value?.conversations, onClickChat]);
-
-  const handleDeleteConversation = (id: string) => {
-    confirmDeleteFunction()
-      .then(async (confirmed) => {
-        if (!confirmed) {
-          return;
-        }
-
-        setIsUpdatingList(true);
-
-        await service.callApi(
-          'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+  const displayedConversations = [
+    ...(!selectedConversationId
+      ? [
           {
-            params: {
-              path: {
-                conversationId: id,
-              },
-            },
-            signal: null,
-          }
-        );
-
-        const isCurrentConversation = id === conversationId;
-        const hasOtherConversations = conversations.value?.conversations.find(
-          (conv) => 'id' in conv.conversation && conv.conversation.id !== id
-        );
-
-        if (isCurrentConversation) {
-          setConversationId(
-            hasOtherConversations ? hasOtherConversations.conversation.id : undefined
-          );
-        }
-
-        conversations.refresh();
-      })
-      .catch((err) => {
-        notifications.toasts.addError(err, {
-          title: i18n.translate(
-            'xpack.observabilityAiAssistant.flyout.failedToDeleteConversation',
-            {
-              defaultMessage: 'Could not delete conversation',
-            }
-          ),
-        });
-      })
-      .finally(() => {
-        setIsUpdatingList(false);
-        onClickDeleteConversation(id);
-      });
-  };
-
-  const handleClickNewChat = () => {
-    onClickNewChat();
-  };
+            id: '',
+            label: EMPTY_CONVERSATION_TITLE,
+            lastUpdated: '',
+            href: router.link('/conversations/new'),
+          },
+        ]
+      : []),
+    ...(conversations.value?.conversations ?? []).map(({ conversation }) => ({
+      id: conversation.id,
+      label: conversation.title,
+      lastUpdated: conversation.last_updated,
+      href: router.link('/conversations/{conversationId}', {
+        path: {
+          conversationId: conversation.id,
+        },
+      }),
+    })),
+  ];
 
   return (
     <>
@@ -198,7 +129,7 @@ export function ConversationList({
                         </strong>
                       </EuiText>
                     </EuiFlexItem>
-                    {isUpdatingList ? (
+                    {isLoading ? (
                       <EuiFlexItem grow={false}>
                         <EuiLoadingSpinner size="s" />
                       </EuiFlexItem>
@@ -234,20 +165,21 @@ export function ConversationList({
                   <EuiListGroup flush={false} gutterSize="none">
                     {displayedConversations?.map((conversation) => (
                       <EuiListGroupItem
+                        data-test-subj="observabilityAiAssistantConversationsLink"
                         key={conversation.id}
                         label={conversation.label}
                         size="s"
-                        isActive={conversation.id === selected}
-                        isDisabled={isUpdatingList}
+                        isActive={conversation.id === selectedConversationId}
+                        isDisabled={isLoading}
                         wrapText
                         showToolTip
-                        onClick={
-                          onClickChat
-                            ? (e) => {
-                                onClickChat(conversation.id);
-                              }
-                            : noop
-                        }
+                        href={conversation.href}
+                        onClick={(event) => {
+                          if (onConversationSelect) {
+                            event.preventDefault();
+                            onConversationSelect(conversation.id);
+                          }
+                        }}
                         extraAction={
                           conversation.id
                             ? {
@@ -259,7 +191,13 @@ export function ConversationList({
                                   }
                                 ),
                                 onClick: () => {
-                                  handleDeleteConversation(conversation.id);
+                                  confirmDeleteCallback().then((confirmed) => {
+                                    if (!confirmed) {
+                                      return;
+                                    }
+
+                                    onConversationDeleteClick(conversation.id);
+                                  });
                                 },
                               }
                             : undefined
@@ -270,7 +208,7 @@ export function ConversationList({
                 </EuiFlexItem>
               ) : null}
 
-              {!isUpdatingList && !conversations.error && !displayedConversations?.length ? (
+              {!isLoading && !conversations.error && !displayedConversations?.length ? (
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
                   <EuiText color="subdued" size="s">
                     {i18n.translate(
@@ -289,7 +227,17 @@ export function ConversationList({
             <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow className={newChatButtonWrapperClassName}>
-                  <NewChatButton onClick={handleClickNewChat} />
+                  <NewChatButton
+                    href={router.link('/conversations/new')}
+                    onClick={(
+                      event: MouseEvent<HTMLButtonElement> | MouseEvent<HTMLAnchorElement>
+                    ) => {
+                      if (onConversationSelect) {
+                        event.preventDefault();
+                        onConversationSelect(undefined);
+                      }
+                    }}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

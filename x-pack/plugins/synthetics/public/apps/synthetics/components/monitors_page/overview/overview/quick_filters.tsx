@@ -6,36 +6,49 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
+import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
 
 export const QuickFilters = () => {
   const { statusFilter } = useGetUrlParams();
   const [_, updateUrlParams] = useUrlParams();
+  const { status } = useOverviewStatus({ scopeStatusByLocation: true });
 
   const handleFilterUpdate = (monitorStatus: string) => {
-    return () => {
-      updateUrlParams({ statusFilter: statusFilter !== monitorStatus ? monitorStatus : undefined });
-    };
+    updateUrlParams({ statusFilter: statusFilter !== monitorStatus ? monitorStatus : undefined });
   };
+
+  const statusButtons = [
+    {
+      id: 'up',
+      label: UP_LABEL,
+    },
+    {
+      id: 'down',
+      label: DOWN_LABEL,
+    },
+    {
+      id: 'disabled',
+      label: DISABLED_LABEL,
+    },
+  ];
+  if (status?.pending && status?.pending > 0) {
+    statusButtons.push({
+      id: 'pending',
+      label: PENDING_LABEL,
+    });
+  }
   return (
-    <EuiFilterGroup>
-      <EuiFilterButton hasActiveFilters={statusFilter === 'up'} onClick={handleFilterUpdate('up')}>
-        {UP_LABEL}
-      </EuiFilterButton>
-      <EuiFilterButton
-        hasActiveFilters={statusFilter === 'down'}
-        onClick={handleFilterUpdate('down')}
-      >
-        {DOWN_LABEL}
-      </EuiFilterButton>
-      <EuiFilterButton
-        hasActiveFilters={statusFilter === 'disabled'}
-        onClick={handleFilterUpdate('disabled')}
-      >
-        {DISABLED_LABEL}
-      </EuiFilterButton>
-    </EuiFilterGroup>
+    <EuiButtonGroup
+      buttonSize="m"
+      legend={i18n.translate('xpack.synthetics.overview.status.filters.legend', {
+        defaultMessage: 'Monitor status',
+      })}
+      options={statusButtons}
+      idSelected={statusFilter}
+      onChange={handleFilterUpdate}
+    />
   );
 };
 
@@ -49,4 +62,8 @@ const UP_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.up', {
 
 const DISABLED_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.disabled', {
   defaultMessage: 'Disabled',
+});
+
+const PENDING_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.pending', {
+  defaultMessage: 'Pending',
 });

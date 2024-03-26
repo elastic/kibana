@@ -173,7 +173,8 @@ export async function suggest(
       unclosedRoundBrackets === 0 &&
       getLastCharFromTrimmed(innerText) !== '_') ||
     (context.triggerCharacter === ' ' &&
-      (isMathFunction(innerText, offset) || isComma(innerText[offset - 2])))
+      (isMathFunction(innerText, offset) ||
+        isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
   ) {
     finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
   }
@@ -1078,17 +1079,23 @@ async function getFunctionArgsSuggestions(
     if (signature.params.length > argIndex) {
       return signature.params[argIndex].type;
     }
-    if (signature.infiniteParams) {
-      return signature.params[0].type;
+    if (signature.infiniteParams || signature.minParams) {
+      return signature.params[signature.params.length - 1].type;
     }
     return [];
   });
 
   const arg = node.args[argIndex];
 
+  // the first signature is used as reference
+  const refSignature = fnDefinition.signatures[0];
+
   const hasMoreMandatoryArgs =
-    fnDefinition.signatures[0].params.filter(({ optional }, index) => !optional && index > argIndex)
-      .length > argIndex;
+    refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
+      argIndex ||
+    ('minParams' in refSignature && refSignature.minParams
+      ? refSignature.minParams - 1 > argIndex
+      : false);
 
   const suggestions = [];
   const noArgDefined = !arg;

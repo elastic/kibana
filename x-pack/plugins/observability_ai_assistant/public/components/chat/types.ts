@@ -17,7 +17,7 @@ type ChatActionClickPayloadExecuteEsql = ChatActionClickPayloadBase<
   { query: string; userOverrides?: TypedLensByValueInput }
 >;
 
-type ChatActionClickPayload = ChatActionClickPayloadExecuteEsql;
+export type ChatActionClickPayload = ChatActionClickPayloadExecuteEsql;
 
 export enum ChatActionClickType {
   executeEsqlQuery = 'executeEsqlQuery',

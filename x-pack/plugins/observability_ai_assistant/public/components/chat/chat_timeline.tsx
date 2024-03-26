@@ -13,7 +13,7 @@ import { omit } from 'lodash';
 import type { Feedback } from '../feedback_buttons';
 import type { Message } from '../../../common';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-import type { ChatActionClickHandler } from './types';
+import type { ChatActionClickPayload } from './types';
 import type { ObservabilityAIAssistantChatService } from '../../types';
 import type { TelemetryEventTypeWithPayload } from '../../analytics';
 import { ChatItem } from './chat_item';
@@ -59,7 +59,13 @@ export interface ChatTimelineProps {
   onRegenerate: (message: Message) => void;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onStopGenerating: () => void;
-  onActionClick: ChatActionClickHandler;
+  onActionClick: ({
+    message,
+    payload,
+  }: {
+    message: Message;
+    payload: ChatActionClickPayload;
+  }) => void;
 }
 
 export function ChatTimeline({
@@ -132,7 +138,9 @@ export function ChatTimeline({
             // use index, not id to prevent unmounting of component when message is persisted
             key={index}
             {...omit(item, 'message')}
-            onActionClick={onActionClick}
+            onActionClick={(payload) => {
+              onActionClick({ message: item.message, payload });
+            }}
             onFeedbackClick={(feedback) => {
               onFeedback(item.message, feedback);
             }}

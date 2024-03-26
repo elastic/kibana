@@ -18,13 +18,48 @@ import Path from 'path';
 import * as table from 'table';
 import { TableUserConfig } from 'table';
 import { format, parse } from 'url';
+import { ToolingLog } from '@kbn/tooling-log';
 import { MessageRole } from '../../common';
-import { options } from './cli';
+import { EvaluateWith, options } from './cli';
 import { getServiceUrls } from './get_service_urls';
 import { KibanaClient } from './kibana_client';
 import { initServices } from './services';
 import { setupSynthtrace } from './setup_synthtrace';
 import { EvaluationResult } from './types';
+
+async function selectConnector({
+  connectors,
+  preferredId,
+  log,
+  message = 'Select a connector',
+}: {
+  connectors: Awaited<ReturnType<KibanaClient['getConnectors']>>;
+  preferredId?: string;
+  log: ToolingLog;
+  message?: string;
+}) {
+  let connector = connectors.find((item) => item.id === preferredId);
+
+  if (!connector && preferredId) {
+    log.warning(`Could not find connector ${preferredId}`);
+  }
+
+  if (!connector && connectors.length === 1) {
+    connector = connectors[0];
+    log.debug('Using the only connector found');
+  } else if (!connector) {
+    const connectorChoice = await inquirer.prompt({
+      type: 'list',
+      name: 'connector',
+      message,
+      choices: connectors.map((item) => ({ name: `${item.name} (${item.id})`, value: item.id })),
+    });
+
+    connector = connectors.find((item) => item.id === connectorChoice.connector)!;
+  }
+
+  return connector;
+}
 
 function runEvaluations() {
   yargs(process.argv.slice(2))
@@ -48,27 +83,26 @@ function runEvaluations() {
             throw new Error('No connectors found');
           }
 
-          let connector = connectors.find((item) => item.id === argv.connectorId);
-
-          if (!connector && argv.connectorId) {
-            log.warning(`Could not find connector ${argv.connectorId}`);
-          }
-
-          if (!connector && connectors.length === 1) {
-            connector = connectors[0];
-            log.debug('Using the only connector found');
-          } else {
-            const connectorChoice = await inquirer.prompt({
-              type: 'list',
-              name: 'connector',
-              message: 'Select a connector',
-              choices: connectors.map((item) => item.name),
-            });
-
-            connector = connectors.find((item) => item.name === connectorChoice.connector)!;
-          }
+          const connector = await selectConnector({
+            connectors,
+            preferredId: argv.connectorId,
+            log,
+          });
 
           log.info(`Using connector ${connector.id}`);
+
+          const evaluationConnector =
+            argv.evaluateWith === EvaluateWith.same
+              ? connector
+              : await selectConnector({
+                  connectors,
+                  preferredId:
+                    argv.evaluateWith === EvaluateWith.other ? undefined : argv.evaluateWith,
+                  log,
+                  message: 'Select a connector for evaluation',
+                });
+
+          log.info(`Using connector ${evaluationConnector.id} for evaluation`);
 
           await kibanaClient.installKnowledgeBase();
 
@@ -96,6 +130,7 @@ function runEvaluations() {
 
           const chatClient = kibanaClient.createChatClient({
             connectorId: connector.id!,
+            evaluationConnectorId: evaluationConnector.id!,
             persist: argv.persist,
             suite: mocha.suite,
           });

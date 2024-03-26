@@ -36,9 +36,8 @@ const ConnectedMalformedDocs = ({
 }) => {
   const [state] = useActor(service);
 
-  if (state.matches('initialized') && state.context.rows) {
-    const row = state.context.rows[rowIndex];
-    return <MalformedDocs row={row} rowIndex={rowIndex} />;
+  if (state.matches('initialized') && state.context.rows[rowIndex]) {
+    return <MalformedDocs row={state.context.rows[rowIndex]} rowIndex={rowIndex} />;
   }
 
   return null;
@@ -52,17 +51,15 @@ const ConnectedStacktraceDocs = ({
   service: LogsExplorerControllerStateService;
 }) => {
   const [state] = useActor(service);
-
-  if (state.matches('initialized') && state.context.rows) {
-    const row = state.context.rows[rowIndex];
-    return <Stacktrace row={row} rowIndex={rowIndex} />;
+  if (state.matches('initialized') && state.context.rows[rowIndex]) {
+    return <Stacktrace row={state.context.rows[rowIndex]} rowIndex={rowIndex} />;
   }
 
   return null;
 };
 
 const MalformedDocs = ({ row, rowIndex }: { row: DataTableRecord; rowIndex: number }) => {
-  const isMalformedDocumentExists = !!row.raw[constants.MALFORMED_DOCS_FIELD];
+  const isMalformedDocumentExists = constants.MALFORMED_DOCS_FIELD in row.raw;
 
   return isMalformedDocumentExists ? (
     <DataTableRowControl>

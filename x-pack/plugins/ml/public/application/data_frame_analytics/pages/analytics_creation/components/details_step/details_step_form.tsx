@@ -22,6 +22,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import { useCanCreateDataView } from '../../hooks/use_can_create_data_view';
 import { useDataViewTimeFields } from '../../hooks/use_data_view_time_fields';
 import { AdditionalSection } from './additional_section';
+import { IndexPermissionsCallout } from '../index_permissions_callout';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
 
@@ -158,6 +159,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
 
   return (
     <Fragment>
+      <IndexPermissionsCallout indexName={destinationIndex} docsType="start" />
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {

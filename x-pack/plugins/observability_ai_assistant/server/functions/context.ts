@@ -19,6 +19,7 @@ import { FunctionVisibility, MessageRole, type Message } from '../../common/type
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
 import { createFunctionResponseMessage } from '../service/util/create_function_response_message';
+import { parseSuggestionScores } from './parse_suggestion_scores';
 
 const MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN = 1000;
 
@@ -121,7 +122,7 @@ export function registerContextFunction({
           };
         }
 
-        const relevantDocuments = await scoreSuggestions({
+        const { relevantDocuments, scores } = await scoreSuggestions({
           suggestions,
           queries: queriesOrUserPrompt,
           messages,
@@ -133,16 +134,21 @@ export function registerContextFunction({
 
         return {
           content: { ...content, learnings: relevantDocuments as unknown as Serializable },
+          data: {
+            scores,
+            suggestions,
+          },
         };
       }
 
       return new Observable<MessageAddEvent>((subscriber) => {
         getContext()
-          .then(({ content }) => {
+          .then(({ content, data }) => {
             subscriber.next(
               createFunctionResponseMessage({
                 name: 'context',
                 content,
+                data,
               })
             );
 
@@ -208,7 +214,7 @@ async function scoreSuggestions({
 
   const newUserMessageContent =
     dedent(`Given the following question, score the documents that are relevant to the question. on a scale from 0 to 7,
-    0 being completely relevant, and 7 being extremely relevant. Information is relevant to the question if it helps in
+    0 being completely irrelevant, and 7 being extremely relevant. Information is relevant to the question if it helps in
     answering the question. Judge it according to the following criteria:
 
     - The document is relevant to the question, and the rest of the conversation
@@ -271,17 +277,16 @@ async function scoreSuggestions({
     scoreFunctionRequest.message.function_call.arguments
   );
 
-  const scores = scoresAsString.split('\n').map((line) => {
-    const [index, score] = line
-      .split(',')
-      .map((value) => value.trim())
-      .map(Number);
-
-    return { id: suggestions[index].id, score };
+  const scores = parseSuggestionScores(scoresAsString).map(({ index, score }) => {
+    return {
+      id: suggestions[index].id,
+      score,
+    };
   });
 
   if (scores.length === 0) {
-    return [];
+    // seemingly invalid or no scores, return all
+    return { relevantDocuments: suggestions, scores: [] };
   }
 
   const suggestionIds = suggestions.map((document) => document.id);
@@ -299,5 +304,5 @@ async function scoreSuggestions({
 
   logger.debug(`Relevant documents: ${JSON.stringify(relevantDocuments, null, 2)}`);
 
-  return relevantDocuments;
+  return { relevantDocuments, scores };
 }

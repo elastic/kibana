@@ -68,6 +68,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/code-editor",
     "@kbn/console-plugin",
-    "@kbn/core-notifications-browser"
+    "@kbn/core-notifications-browser",
+    "@kbn/es-errors"
   ]
 }

@@ -104,6 +104,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         getAlertStartedDate,
         getAlertUuid,
         getAlertByAlertUuid,
+        alertFactory: baseAlertFactory,
       } = services;
       const alertFactory: InventoryMetricThresholdAlertFactory = (
         id,
@@ -194,8 +195,15 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       );
 
       let scheduledActionsCount = 0;
+      const alertLimit = baseAlertFactory.alertLimit.getValue();
+      let hasReachedLimit = false;
       const inventoryItems = Object.keys(first(results)!);
       for (const group of inventoryItems) {
+        if (scheduledActionsCount >= alertLimit) {
+          // need to set this so that warning is displayed in the UI and in the logs
+          hasReachedLimit = true;
+          break; // once limit is reached, we break out of the loop and don't schedule any more alerts
+        }
         // AND logic; all criteria must be across the threshold
         const shouldAlertFire = results.every((result) => result[group]?.shouldFire);
         const shouldAlertWarn = results.every((result) => result[group]?.shouldWarn);
@@ -300,6 +308,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         }
       }
 
+      baseAlertFactory.alertLimit.setLimitReached(hasReachedLimit);
       const { getRecoveredAlerts } = services.alertFactory.done();
       const recoveredAlerts = getRecoveredAlerts();
 

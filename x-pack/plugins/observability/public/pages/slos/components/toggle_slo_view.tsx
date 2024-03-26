@@ -64,7 +64,7 @@ export function ToggleSLOView({
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={true}>
-        {!state.groupBy && (
+        {(!state.groupBy || state.groupBy === 'ungrouped') && (
           <EuiText size="s">
             <FormattedMessage
               id="xpack.observability.overview.pagination.description"

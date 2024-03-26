@@ -6,10 +6,13 @@
  */
 
 import { AggregationsTopHitsAggregation } from '@elastic/elasticsearch/lib/api/types';
-import { SERVICE_GROUP_SUPPORTED_FIELDS } from '../../../../common/service_groups';
+import {
+  LABELS,
+  SERVICE_GROUP_SUPPORTED_FIELDS,
+} from '../../../../common/service_groups';
 
 export interface SourceDoc {
-  [key: string]: string | SourceDoc;
+  [key: string]: string | string[] | SourceDoc;
 }
 
 export function getServiceGroupFieldsAgg(
@@ -48,12 +51,15 @@ export function getServiceGroupFields(bucket?: AggResultBucket) {
 export function flattenSourceDoc(
   val: SourceDoc | string,
   path: string[] = []
-): Record<string, string> {
-  if (typeof val !== 'object') {
+): Record<string, string | object> {
+  if (typeof val !== 'object' || (path.length > 0 && path[0] === LABELS)) {
     return { [path.join('.')]: val };
   }
   return Object.keys(val).reduce((acc, key) => {
-    const fieldMap = flattenSourceDoc(val[key], [...path, key]);
+    const fieldMap = flattenSourceDoc(val[key] as SourceDoc | string, [
+      ...path,
+      key,
+    ]);
     return Object.assign(acc, fieldMap);
   }, {});
 }

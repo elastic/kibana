@@ -398,6 +398,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
         id={`mini_changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
         style={{ height: 80 }}
         timeRange={timeRange}
+        noPadding
         query={query}
         filters={filters}
         // @ts-ignore

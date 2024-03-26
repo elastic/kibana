@@ -49,11 +49,24 @@ enum ChartType {
   Treemap = 'Treemap',
   Tagcloud = 'Tag cloud',
   Waffle = 'Waffle',
+  Table = 'Table',
 }
 
-interface VisualizeLensResponse {
+interface VisualizeQueryResponsev0 {
   content: DatatableColumn[];
 }
+
+interface VisualizeQueryResponsev1 {
+  data: {
+    columns: DatatableColumn[];
+    userOverrides?: unknown;
+  };
+  content: {
+    message: string;
+  };
+}
+
+type VisualizeQueryResponse = VisualizeQueryResponsev0 | VisualizeQueryResponsev1;
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */
@@ -303,7 +316,13 @@ export function registerVisualizeQueryRenderFunction({
       response,
       onActionClick,
     }: Parameters<RenderFunction<VisualizeESQLFunctionArguments, {}>>[0]) => {
-      const { content } = response as VisualizeLensResponse;
+      const typedResponse = response as VisualizeQueryResponse;
+
+      const columns = 'data' in typedResponse ? typedResponse.data.columns : typedResponse.content;
+
+      if ('data' in typedResponse && 'userOverrides' in typedResponse.data) {
+        userOverrides = typedResponse.data.userOverrides;
+      }
 
       let preferredChartType: ChartType | undefined;
 
@@ -333,6 +352,10 @@ export function registerVisualizeQueryRenderFunction({
           preferredChartType = ChartType.Area;
           break;
 
+        case VisualizeESQLUserIntention.visualizeTable:
+          preferredChartType = ChartType.Table;
+          break;
+
         case VisualizeESQLUserIntention.visualizeTagcloud:
           preferredChartType = ChartType.Tagcloud;
           break;
@@ -357,7 +380,7 @@ export function registerVisualizeQueryRenderFunction({
           lens={pluginsStart.lens}
           dataViews={pluginsStart.dataViews}
           uiActions={pluginsStart.uiActions}
-          columns={content}
+          columns={columns}
           query={trimmedQuery}
           onActionClick={onActionClick}
           userOverrides={userOverrides}

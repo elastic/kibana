@@ -76,7 +76,7 @@ const loadDependencies = async (
     theme: { theme$ },
   } = core;
   const trackUiMetric = createUsageTracker(usageCollection);
-  trackUiMetric.load('opened_remote_app');
+  trackUiMetric.load('opened_embedded_app');
 
   await loadActiveApi(core.http);
   const autocompleteInfo = getAutocompleteInfo();
@@ -114,8 +114,10 @@ type ConsoleWrapperProps = Omit<EmbeddableConsoleDependencies, 'setDispatch'>;
 export const ConsoleWrapper: React.FunctionComponent<ConsoleWrapperProps> = (props) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
   useEffect(() => {
-    loadDependencies(props.core, props.usageCollection).then(setDependencies);
-  }, [setDependencies, props]);
+    if (dependencies === null) {
+      loadDependencies(props.core, props.usageCollection).then(setDependencies);
+    }
+  }, [dependencies, setDependencies, props]);
   useEffect(() => {
     return () => {
       if (dependencies) {

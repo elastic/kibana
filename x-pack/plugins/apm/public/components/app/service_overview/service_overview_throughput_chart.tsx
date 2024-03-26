@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { AnomalyDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
@@ -32,6 +32,8 @@ import {
 } from '../../shared/charts/helper/get_timeseries_color';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../common/document_type';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { getThroughputScreenContext } from './get_throughput_screen_context';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -151,6 +153,32 @@ export function ServiceOverviewThroughputChart({
         ]
       : []),
   ];
+
+  const { setScreenContext } =
+    useApmPluginContext().observabilityAIAssistant.service;
+
+  useEffect(() => {
+    return setScreenContext(
+      getThroughputScreenContext({
+        serviceName,
+        transactionName,
+        transactionType,
+        environment,
+        preferred,
+        start,
+        end,
+      })
+    );
+  }, [
+    serviceName,
+    transactionName,
+    transactionType,
+    environment,
+    setScreenContext,
+    preferred,
+    start,
+    end,
+  ]);
 
   return (
     <EuiPanel hasBorder={true}>

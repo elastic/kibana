@@ -288,7 +288,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
       if (usageCollection) {
         registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-        registerCNTelemetryUsageCollector(usageCollection);
+        registerCNTelemetryUsageCollector(usageCollection, this.logger);
         if (config.canDeployEntSearch) {
           registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
           registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
@@ -343,7 +343,7 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
 
     if (globalSearch) {
-      globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config));
+      globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config, isCloud));
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.basePath));
     }
   }

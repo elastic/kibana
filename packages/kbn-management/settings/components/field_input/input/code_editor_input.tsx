@@ -90,14 +90,17 @@ export const CodeEditorInput = ({
   );
 
   const debouncedUpdateValue = useMemo(() => {
-    // Trigger update 1000 ms after the user stopped typing to reduce validation requests to the server
-    return debounce(updateValue, 1000);
+    // Trigger update 500 ms after the user stopped typing to reduce validation requests to the server
+    return debounce(updateValue, 500);
   }, [updateValue]);
 
   const onChange: CodeEditorProps['onChange'] = async (newValue) => {
-    // @ts-expect-error
-    setValue(newValue);
-    await debouncedUpdateValue(newValue, onUpdate);
+    // Only update the value when the onChange handler is called with a different value from the current one
+    if (newValue !== value) {
+      // @ts-expect-error
+      setValue(newValue);
+      await debouncedUpdateValue(newValue, onUpdate);
+    }
   };
 
   useEffect(() => {

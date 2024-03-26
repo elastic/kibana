@@ -88,6 +88,10 @@ export interface LoadParams {
    */
   dataView?: DataView;
   /**
+   * Custom initial app state for loading a saved search
+   */
+  initialAppState?: DiscoverAppState;
+  /**
    * the data view spec to use, if undefined, the saved search's data view will be used
    */
   dataViewSpec?: DataViewSpec;

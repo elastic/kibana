@@ -8,13 +8,13 @@
 import React from 'react';
 import { css, keyframes } from '@emotion/css';
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -79,18 +79,20 @@ export function WelcomeMessageConnectors({
               'Start working with the Elastic AI Assistant by setting up a connector for your AI provider. The OpenAI model needs to support function calls. We strongly recommend using GPT4.',
           }
         )}
-        <EuiBetaBadge
-          label=""
-          css={{ boxShadow: 'none', inlineSize: 'unset', lineHeight: 'initial' }}
-          tooltipContent={i18n.translate(
+        <EuiIconTip
+          content={i18n.translate(
             'xpack.observabilityAiAssistant.technicalPreviewBadgeDescription',
             {
               defaultMessage:
                 "GPT4 is required for a more consistent experience when using function calls (for example when performing root cause analysis, visualizing data and more). GPT3.5 can work for some of the simpler workflows, such as explaining errors or for a ChatGPT like experience within Kibana which don't require the use of frequent function calls.",
             }
           )}
-          iconType="iInCircle"
+          anchorProps={{
+            css: { verticalAlign: 'text-bottom' },
+          }}
           size="s"
+          type="iInCircle"
+          position="top"
         />
       </EuiText>
 

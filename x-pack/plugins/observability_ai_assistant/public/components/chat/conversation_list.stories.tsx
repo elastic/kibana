@@ -40,14 +40,14 @@ export const ChatHeaderError: ComponentStoryObj<typeof Component> = {
 
 export const ChatHeaderLoaded: ComponentStoryObj<typeof Component> = {
   args: {
-    selected: '',
+    selectedConversationId: '',
   },
   render: Wrapper,
 };
 
 export const ChatHeaderEmpty: ComponentStoryObj<typeof Component> = {
   args: {
-    selected: '',
+    selectedConversationId: '',
   },
   render: Wrapper,
 };

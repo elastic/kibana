@@ -7,3 +7,4 @@
 
 export * from './inventory_view';
 export * from './metrics_explorer_view';
+export * from './custom_dashboards/custom_dashboards_saved_object';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { toUtf8 } from '@smithy/util-utf8';
 import { Observable } from 'rxjs';
 import { v4 } from 'uuid';
 import { Parser } from 'xml2js';
@@ -18,6 +17,7 @@ import {
 } from '../../../../common/conversation_complete';
 import type { BedrockChunkMember } from '../../util/eventstream_serde_into_observable';
 import { convertDeserializedXmlWithJsonSchema } from '../../util/convert_deserialized_xml_with_json_schema';
+import { parseSerdeChunkBody } from './parse_serde_chunk_body';
 
 async function parseFunctionCallXml({
   xml,
@@ -29,9 +29,10 @@ async function parseFunctionCallXml({
   const parser = new Parser();
 
   const parsedValue = await parser.parseStringPromise(xml);
-  const invoke = parsedValue.function_calls.invoke[0];
-  const fnName = invoke.tool_name[0];
-  const parameters: Array<Record<string, string[]>> = invoke.parameters ?? [];
+  const fnName = parsedValue.function_calls.invoke[0].tool_name[0];
+  const parameters = (
+    parsedValue.function_calls.invoke as Array<{ parameters: Array<Record<string, string[]>> }>
+  ).flatMap((invoke) => invoke.parameters ?? []);
   const functionDef = functions?.find((fn) => fn.name === fnName);
 
   if (!functionDef) {
@@ -77,9 +78,7 @@ export function processBedrockStream({
           completion: string;
           stop_reason: string | null;
           stop: null | string;
-        } = JSON.parse(
-          Buffer.from(JSON.parse(toUtf8(value.chunk.body)).bytes, 'base64').toString('utf-8')
-        );
+        } = parseSerdeChunkBody(value.chunk);
 
         let completion = response.completion;
 

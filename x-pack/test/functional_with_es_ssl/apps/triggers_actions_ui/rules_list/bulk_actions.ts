@@ -35,7 +35,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  describe('rules list bulk actions', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/177130
+  describe.skip('rules list bulk actions', () => {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');

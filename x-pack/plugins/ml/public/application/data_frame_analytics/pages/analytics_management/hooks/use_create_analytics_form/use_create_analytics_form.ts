@@ -10,6 +10,7 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -91,14 +92,21 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     const analyticsJobConfig = (
       isAdvancedEditorEnabled ? jobConfig : getJobConfigFromFormState(form)
     ) as DataFrameAnalyticsConfig;
+    const errorMessage = i18n.translate(
+      'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
+      {
+        defaultMessage: 'An error occurred creating the data frame analytics job:',
+      }
+    );
 
     try {
-      await ml.dataFrameAnalytics.createDataFrameAnalytics(
+      const creationResp = await ml.dataFrameAnalytics.createDataFrameAnalytics(
         jobId,
         analyticsJobConfig,
         createDataView,
         form.timeFieldName
       );
+
       addRequestMessage({
         message: i18n.translate(
           'xpack.ml.dataframe.stepCreateForm.createDataFrameAnalyticsSuccessMessage',
@@ -108,21 +116,29 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsJobCreated(true);
-      refresh();
-      return true;
+
+      if (
+        creationResp.dataFrameAnalyticsJobsCreated.length &&
+        creationResp.dataFrameAnalyticsJobsErrors.length === 0
+      ) {
+        setIsJobCreated(true);
+        refresh();
+        return true;
+      } else if (creationResp.dataFrameAnalyticsJobsErrors.length) {
+        addRequestMessage({
+          error: extractErrorProperties(creationResp.dataFrameAnalyticsJobsErrors[0].error).message,
+          message: errorMessage,
+        });
+        return false;
+      }
     } catch (e) {
       addRequestMessage({
         error: extractErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
-          {
-            defaultMessage: 'An error occurred creating the data frame analytics job:',
-          }
-        ),
+        message: errorMessage,
       });
       return false;
     }
+    return false;
   };
 
   const prepareFormValidation = async () => {

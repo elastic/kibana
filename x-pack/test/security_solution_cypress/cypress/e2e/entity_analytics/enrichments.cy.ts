@@ -34,7 +34,8 @@ import { mockRiskEngineEnabled } from '../../tasks/entity_analytics';
 const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
 const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
-describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/176965
+describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverUnload', 'risk_scores_new');
     cy.task('esArchiverUnload', 'risk_scores_new_updated');

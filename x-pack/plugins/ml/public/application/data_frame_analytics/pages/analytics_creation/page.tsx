@@ -103,6 +103,7 @@ export const Page: FC<Props> = ({ jobId }) => {
           setCurrentStep={setCurrentStep}
           step={currentStep}
           stepActivated={activatedSteps[ANALYTICS_STEPS.CONFIGURATION]}
+          sourceDataViewTitle={selectedDataView.getIndexPattern()}
         />
       ),
       status:
@@ -188,7 +189,7 @@ export const Page: FC<Props> = ({ jobId }) => {
                   <FormattedMessage
                     id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
                     defaultMessage="Source data view: {dataViewTitle}"
-                    values={{ dataViewTitle: selectedDataView.title }}
+                    values={{ dataViewTitle: selectedDataView.getIndexPattern() }}
                   />
                 </h2>
               </EuiFlexItem>
