@@ -49,7 +49,7 @@ Object {
                   class="euiExpression__value emotion-euiExpression__value"
                 >
                   <span
-                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    class="css-ffm88e"
                   >
                     list_id
                   </span>
@@ -106,7 +106,7 @@ Object {
                 class="euiExpression__value emotion-euiExpression__value"
               >
                 <span
-                  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                  class="css-ffm88e"
                 >
                   list_id
                 </span>

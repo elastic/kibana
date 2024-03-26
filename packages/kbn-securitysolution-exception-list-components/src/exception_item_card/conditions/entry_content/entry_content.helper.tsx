@@ -7,21 +7,19 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { EuiExpression, EuiBadge } from '@elastic/eui';
 import type { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ValueWithSpaceWarning } from '../../../..';
 import { OPERATOR_TYPE_LABELS_EXCLUDED, OPERATOR_TYPE_LABELS_INCLUDED } from '../conditions.config';
 import type { Entry } from '../types';
 
+const entryValueWrapStyle = css`
+  white-space: pre-wrap;
+`;
+
 const EntryValueWrap = ({ children }: { children: React.ReactNode }) => (
-  <span
-    css={css`
-      white-space: pre-wrap;
-    `}
-  >
-    {children}
-  </span>
+  <span className={entryValueWrapStyle}>{children}</span>
 );
 const getEntryValue = (type: string, value?: string | string[]) => {
   if (type === 'match_any' && Array.isArray(value)) {
