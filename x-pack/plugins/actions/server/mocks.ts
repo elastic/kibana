@@ -9,12 +9,13 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
+  savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { Logger } from '@kbn/core/server';
 import { actionsClientMock } from './actions_client/actions_client.mock';
 import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
-import { Services } from './types';
+import { Services, UnsecuredServices } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
@@ -86,8 +87,26 @@ const createServicesMock = () => {
   return mock;
 };
 
+const createUnsecuredServicesMock = () => {
+  const mock: jest.Mocked<
+    UnsecuredServices & {
+      savedObjectsClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
+    }
+  > = {
+    savedObjectsClient: savedObjectsRepositoryMock.create(),
+    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+    connectorTokenClient: new ConnectorTokenClient({
+      unsecuredSavedObjectsClient: savedObjectsRepositoryMock.create(),
+      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+      logger,
+    }),
+  };
+  return mock;
+};
+
 export const actionsMock = {
   createServices: createServicesMock,
+  createUnsecuredServices: createUnsecuredServicesMock,
   createSetup: createSetupMock,
   createStart: createStartMock,
 };

@@ -23,7 +23,8 @@
       "lens",
       "embeddable",
       "share",
-      "console"
+      "console",
+      "searchPlayground"
     ],
     "optionalPlugins": [
       "customIntegrations",

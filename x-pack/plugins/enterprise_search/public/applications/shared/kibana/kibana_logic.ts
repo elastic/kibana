@@ -26,6 +26,7 @@ import { IndexMappingProps } from '@kbn/index-management-plugin/public/applicati
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
+import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -57,6 +58,7 @@ export interface KibanaLogicProps {
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchPlayground: SearchPlaygroundPluginStart;
   security: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -103,6 +105,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productAccess: [props.productAccess, {}],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
+    searchPlayground: [props.searchPlayground || {}, {}],
     security: [props.security, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
