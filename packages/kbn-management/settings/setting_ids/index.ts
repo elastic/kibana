@@ -134,13 +134,6 @@ export const OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID =
   'observability:apmEnableContinuousRollups';
 export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =
   'observability:apmEnableProfilingIntegration';
-export const OBSERVABILITY_AI_ASSISTANT_LOGS_INDEX_PATTERN =
-  'observability:aiAssistantLogsIndexPattern';
-export const OBSERVABILITY_AI_ASSISTANT_DEFAULT_CONNECTOR =
-  'observability:aiAssistantDefaultConnector';
-export const OBSERVABILITY_AI_ASSISTANT_RESPONSE_LANGUAGE =
-  'observability:aiAssistantResponseLanguage';
-
 export const OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR = 'observability:apmEnableTableSearchBar';
 export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
   'observability:logsExplorer:allowedDataViews';
