@@ -92,6 +92,7 @@ export const ShareMenuTabs = ({
         ...shareMenuItem,
         dataTestSubj: 'export',
         id: panel.id,
+        content: panel.content,
       });
     });
 

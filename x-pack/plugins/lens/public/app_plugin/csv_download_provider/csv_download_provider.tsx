@@ -9,11 +9,17 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import type { JobParamsProviderOptions } from '@kbn/reporting-public/share';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { ReportingAPIClient } from '@kbn/reporting-public';
+import { CoreSetup, ToastsSetup } from '@kbn/core/public';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { FormatFactory } from '../../../common/types';
-import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
+import { ReportingModalContent } from './export_modal_content';
+import { DownloadPanelContent } from './csv_download_panel_content';
 
 declare global {
   interface Window {
@@ -96,60 +102,119 @@ function getWarnings(activeData: TableInspectorAdapter) {
 interface DownloadPanelShareOpts {
   uiSettings: IUiSettingsClient;
   formatFactoryFn: () => FormatFactory;
+  reportingApiClient: ReportingAPIClient;
+  toasts: ToastsSetup;
+  theme: CoreSetup['theme'];
+  license: ILicense;
 }
 
 export const downloadCsvShareProvider = ({
   uiSettings,
   formatFactoryFn,
+  reportingApiClient,
+  toasts,
+  theme,
+  license,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
+  const getShareMenuItems = ({
+    objectType,
+    sharingData,
+    onClose,
+    shareableUrl,
+    shareableUrlForSavedObject,
+    isDirty,
+  }: ShareContext) => {
     if ('lens' !== objectType) {
       return [];
     }
-
-    const { title, activeData, csvEnabled, columnsSorting } = sharingData as {
-      title: string;
-      activeData: TableInspectorAdapter;
-      csvEnabled: boolean;
-      columnsSorting?: string[];
-    };
+    const { title, activeData, csvEnabled, columnsSorting, layout, locatorParams } =
+      sharingData as {
+        title: string;
+        activeData: TableInspectorAdapter;
+        csvEnabled: boolean;
+        columnsSorting?: string[];
+        layout: LayoutParams;
+        locatorParams: {};
+      };
 
     const panelTitle = i18n.translate(
       'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
       {
-        defaultMessage: 'CSV Download',
+        defaultMessage: 'Export',
       }
     );
 
+    const jobProviderOptions: JobParamsProviderOptions = {
+      shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
+      objectType,
+      sharingData: { title, layout, locatorParams },
+    };
+
     return [
-      {
-        shareMenuItem: {
-          name: panelTitle,
-          icon: 'document',
-          disabled: !csvEnabled,
-          sortOrder: 1,
-        },
-        panel: {
-          id: 'csvDownloadPanel',
-          title: panelTitle,
-          content: (
-            <DownloadPanelContent
-              isDisabled={!csvEnabled}
-              warnings={getWarnings(activeData)}
-              onClick={async () => {
-                await downloadCSVs({
-                  title,
-                  formatFactory: formatFactoryFn(),
-                  activeData,
-                  uiSettings,
-                  columnsSorting,
-                });
-                onClose?.();
-              }}
-            />
-          ),
-        },
-      },
+      license.hasAtLeast('gold')
+        ? {
+            shareMenuItem: {
+              name: panelTitle,
+              disabled: !csvEnabled,
+              sortOrder: 1,
+            },
+            panel: {
+              id: 'csvDownloadPanel',
+              title: panelTitle,
+              content: (
+                <ReportingModalContent
+                  objectType={objectType}
+                  apiClient={reportingApiClient}
+                  toasts={toasts}
+                  uiSettings={uiSettings}
+                  requiresSavedState={false}
+                  onClose={onClose}
+                  isDisabled={!csvEnabled}
+                  warnings={getWarnings(activeData)}
+                  theme={theme}
+                  jobProviderOptions={jobProviderOptions}
+                  isDirty={isDirty}
+                  downloadCsvFromLens={async () => {
+                    await downloadCSVs({
+                      title,
+                      formatFactory: formatFactoryFn(),
+                      activeData,
+                      uiSettings,
+                      columnsSorting,
+                    });
+                  }}
+                />
+              ),
+            },
+          }
+        : {
+            shareMenuItem: {
+              name: panelTitle,
+              icon: 'document',
+              disabled: !csvEnabled,
+              sortOrder: 1,
+            },
+            panel: {
+              id: 'csvDownloadPanel',
+              title: panelTitle,
+              content: (
+                <DownloadPanelContent
+                  isDisabled={!csvEnabled}
+                  warnings={getWarnings(activeData)}
+                  onClick={async () => {
+                    await downloadCSVs({
+                      title,
+                      formatFactory: formatFactoryFn(),
+                      activeData,
+                      uiSettings,
+                      columnsSorting,
+                    });
+                    onClose?.();
+                  }}
+                />
+              ),
+            },
+          },
     ];
   };
 
