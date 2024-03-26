@@ -7,6 +7,7 @@
 
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import { renderHook } from '@testing-library/react-hooks';
+import { PAGE_SIZE_OPTIONS } from '../constants';
 import { useMetricsCharts } from './use_metrics_charts';
 
 describe('useMetricsCharts', () => {
@@ -23,7 +24,7 @@ describe('useMetricsCharts', () => {
       expect(seriesLayer).toHaveProperty('breakdown');
       expect(seriesLayer.breakdown).toHaveProperty('type', 'topValues');
       expect(seriesLayer.breakdown).toHaveProperty('field', 'host.name');
-      expect(seriesLayer.breakdown).toHaveProperty('size', 10);
+      expect(seriesLayer.breakdown).toHaveProperty('size', PAGE_SIZE_OPTIONS.at(-1));
     });
   });
 

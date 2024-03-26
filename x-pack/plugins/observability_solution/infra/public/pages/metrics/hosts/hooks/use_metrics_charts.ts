@@ -8,6 +8,7 @@
 import useAsync from 'react-use/lib/useAsync';
 import type { LensBreakdownConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { PAGE_SIZE_OPTIONS } from '../constants';
 
 export const useMetricsCharts = ({ dataViewId }: { dataViewId?: string }) => {
   const model = findInventoryModel('host');
@@ -37,7 +38,7 @@ export const useMetricsCharts = ({ dataViewId }: { dataViewId?: string }) => {
               breakdown: {
                 type: 'topValues',
                 field: 'host.name',
-                size: 10,
+                size: PAGE_SIZE_OPTIONS.at(-1),
               } as LensBreakdownConfig,
             }
           : layer
