@@ -54,7 +54,7 @@ export const isKibanaDataViewOption = (dataViews: string[]) => {
 };
 
 export const isSourcererSelection = (patternName: string) => {
-  return cy.get(SOURCERER.comboBoxInput).find(`span[title="${patternName}"]`).should('exist');
+  return cy.get(SOURCERER.comboBoxInput).find(`span[title="${patternName}"]`).should('be.visible');
 };
 
 export const isHostsStatValue = (value: string) => {
