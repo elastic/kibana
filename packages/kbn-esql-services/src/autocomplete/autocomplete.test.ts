@@ -1172,12 +1172,14 @@ describe('autocomplete', () => {
       // test that all functions will retrigger suggestions
       expect(
         suggestions
-          .filter(({ kind }) => kind === 1)
+          .filter(({ kind }) => kind === 'Function')
           .every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
       ).toBeTruthy();
       // now test that non-function won't retrigger
       expect(
-        suggestions.filter(({ kind }) => kind !== 1).every(({ command }) => command == null)
+        suggestions
+          .filter(({ kind }) => kind !== 'Function')
+          .every(({ command }) => command == null)
       ).toBeTruthy();
     });
     it('should trigger further suggestions for commands', async () => {
