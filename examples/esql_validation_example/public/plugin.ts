@@ -36,7 +36,7 @@ export class ESQLValidationExamplePlugin
     developerExamples.register({
       appId: 'esql_validation_example',
       title: 'ES|QL Validation',
-      description: 'Validate ES|QL queries using the '@kbn/esql-validation-autocomplete' package.',
+      description: 'Validate ES|QL queries using the @kbn/esql-validation-autocomplete package.',
       image,
       links: [
         {
