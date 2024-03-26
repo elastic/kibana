@@ -129,6 +129,10 @@ export interface RouteValidatorOptions {
 export type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> &
   RouteValidatorOptions;
 
+/**
+ * Map of status codes to response schemas.
+ * @public
+ */
 export interface RouteValidatorFullConfigResponses {
   [statusCode: number]: { body: ObjectType | Type<any> };
   unsafe?: {
@@ -145,6 +149,10 @@ export interface RouteValidatorFullConfigContainer<P, Q, B> {
   responses?: RouteValidatorFullConfigResponses;
 }
 
+/**
+ * Type container for schemas used in route related validations
+ * @public
+ */
 export type RouteValidatorContainer<P, Q, B> =
   | RouteValidatorFullConfig<P, Q, B>
   | RouteValidatorFullConfigContainer<P, Q, B>;
