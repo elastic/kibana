@@ -15,6 +15,7 @@ import type {
 } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { withDataView } from '../../../../../common/components/with_data_view';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
@@ -324,7 +325,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             services={dataGridServices}
             visibleCellActions={3}
             externalCustomRenderers={customColumnRenderers}
-            renderDocumentView={() => <></>}
+            renderDocumentView={EmptyComponent}
             rowsPerPageOptions={itemsPerPageOptions}
             showFullScreenButton={false}
             useNewFieldsApi={true}

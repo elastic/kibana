@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { CELL_ADD_TO_TIMELINE_BUTTON } from '../../../../screens/alerts';
 import {
+  closeTimelineFlyout,
   openEventDetailsFlyout,
   openHostDetailsFlyout,
   openUserDetailsFlyout,
+  performCellActionAddToTimeline,
+  performCellActionFilterIn,
 } from '../../../../tasks/unified_timeline';
 import {
-  CELL_FILTER_IN_BUTTON,
   GET_UNIFIED_DATA_GRID_CELL,
   GET_UNIFIED_DATA_GRID_CELL_HEADER,
-  TIMELINE_DETAILS_FLYOUT,
-  TIMELINE_DETAILS_FLYOUT_CLOSE_BTN,
 } from '../../../../screens/unified_timeline';
 import {
   TIMELINE_DATA_PROVIDERS_CONTAINER,
@@ -64,16 +63,14 @@ describe(
       it('should add to timeline successfully', () => {
         cy.get(GET_UNIFIED_DATA_GRID_CELL('host.name', 0)).then(($el) => {
           const hostName = $el.text();
-          cy.get(GET_UNIFIED_DATA_GRID_CELL('host.name', 0)).realHover();
-          cy.get(CELL_ADD_TO_TIMELINE_BUTTON).click();
+          performCellActionAddToTimeline('host.name', 0);
           cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).contains(`host.name: "${hostName}"`);
         });
       });
       it('should filter In successfully', () => {
         cy.get(GET_UNIFIED_DATA_GRID_CELL('user.name', 0)).then(($el) => {
           const hostName = $el.text();
-          cy.get(GET_UNIFIED_DATA_GRID_CELL('user.name', 0)).realHover();
-          cy.get(CELL_FILTER_IN_BUTTON).click();
+          performCellActionFilterIn('user.name', 0);
           cy.get(TIMELINE_FILTER_BADGE).should('have.lengthOf', 1);
           cy.get(TIMELINE_FILTER_BADGE).eq(0).should('have.text', `user.name: ${hostName}`);
         });
@@ -84,16 +81,13 @@ describe(
       it('should be able to open/close details details/host/user flyout', () => {
         cy.log('Event Details Flyout');
         openEventDetailsFlyout(0);
-        cy.get(TIMELINE_DETAILS_FLYOUT_CLOSE_BTN).click();
-        cy.get(TIMELINE_DETAILS_FLYOUT).should('not.exist');
+        closeTimelineFlyout();
         cy.log('Host Details Flyout');
         openHostDetailsFlyout(0);
-        cy.get(TIMELINE_DETAILS_FLYOUT_CLOSE_BTN).click();
-        cy.get(TIMELINE_DETAILS_FLYOUT).should('not.exist');
+        closeTimelineFlyout();
         cy.log('User Details Flyout');
         openUserDetailsFlyout(0);
-        cy.get(TIMELINE_DETAILS_FLYOUT_CLOSE_BTN).click();
-        cy.get(TIMELINE_DETAILS_FLYOUT).should('not.exist');
+        closeTimelineFlyout();
       });
     });
   }
