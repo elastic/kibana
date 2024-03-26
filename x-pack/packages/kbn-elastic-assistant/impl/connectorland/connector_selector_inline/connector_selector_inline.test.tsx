@@ -78,7 +78,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+      apiConfig: { connectorId: '123' },
       replacements: [],
       title: 'conversation_id',
     };
@@ -100,7 +100,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+      apiConfig: { connectorId: '123' },
       replacements: [],
       title: 'conversation_id',
     };
@@ -125,7 +125,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+      apiConfig: { connectorId: '123' },
       replacements: [],
       title: 'conversation_id',
     };
@@ -147,12 +147,11 @@ describe('ConnectorSelectorInline', () => {
     expect(setApiConfig).toHaveBeenCalledWith({
       apiConfig: {
         connectorId: connectorTwo.id,
-        connectorTypeTitle: 'OpenAI',
         model: undefined,
         provider: 'OpenAI',
       },
       conversation: {
-        apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+        apiConfig: { connectorId: '123' },
         replacements: [],
         category: 'assistant',
         id: 'conversation_id',
@@ -166,7 +165,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+      apiConfig: { connectorId: '123' },
       replacements: [],
       title: 'conversation_id',
     };

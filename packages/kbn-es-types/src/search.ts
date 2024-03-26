@@ -646,15 +646,6 @@ export type InferSearchResponseOf<
       };
   };
 
-export interface ClusterDetails {
-  status: 'running' | 'successful' | 'partial' | 'skipped' | 'failed';
-  indices: string;
-  took?: number;
-  timed_out: boolean;
-  _shards?: estypes.ShardStatistics;
-  failures?: estypes.ShardFailure[];
-}
-
 export interface ESQLColumn {
   name: string;
   type: string;

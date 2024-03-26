@@ -100,7 +100,7 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServe
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'exceptions');
+    cy.task('esArchiverUnload', { archiveName: 'exceptions' });
   });
 
   it('Validates empty entry values correctly', () => {

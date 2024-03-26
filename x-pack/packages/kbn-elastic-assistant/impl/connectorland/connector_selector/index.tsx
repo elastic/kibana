@@ -30,8 +30,6 @@ interface Props {
 }
 
 export type AIConnector = ActionConnector & {
-  // ex: Bedrock, OpenAI
-  connectorTypeTitle: string;
   // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
   apiProvider?: OpenAiProviderType;
 };
@@ -57,7 +55,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       isLoading: isLoadingConnectors,
       isFetching: isFetchingConnectors,
       refetch: refetchConnectors,
-    } = useLoadConnectors({ actionTypeRegistry, http });
+    } = useLoadConnectors({ http });
 
     const isLoading = isLoadingConnectors || isFetchingConnectors;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
@@ -91,7 +89,8 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       () =>
         (aiConnectors ?? []).map((connector) => {
           const connectorTypeTitle =
-            getGenAiConfig(connector)?.apiProvider ?? connector.connectorTypeTitle;
+            getGenAiConfig(connector)?.apiProvider ??
+            getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
           const connectorDetails = connector.isPreconfigured
             ? i18n.PRECONFIGURED_CONNECTOR
             : connectorTypeTitle;
@@ -111,7 +110,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             ),
           };
         }),
-      [aiConnectors, displayFancy]
+      [actionTypeRegistry, aiConnectors, displayFancy]
     );
 
     // Only include add new connector option if user has privilege
@@ -151,12 +150,11 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       (connector: ActionConnector) => {
         onConnectorSelectionChange({
           ...connector,
-          connectorTypeTitle: getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId)),
         });
         refetchConnectors?.();
         cleanupAndCloseModal();
       },
-      [actionTypeRegistry, cleanupAndCloseModal, onConnectorSelectionChange, refetchConnectors]
+      [cleanupAndCloseModal, onConnectorSelectionChange, refetchConnectors]
     );
 
     return (

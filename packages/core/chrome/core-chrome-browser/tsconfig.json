@@ -20,7 +20,10 @@
     "@kbn/deeplinks-management",
     "@kbn/deeplinks-search",
     "@kbn/deeplinks-observability",
-    "@kbn/core-application-browser"
+    "@kbn/core-application-browser",
+    "@kbn/deeplinks-security",
+    "@kbn/deeplinks-fleet",
+    "@kbn/deeplinks-shared"
   ],
   "exclude": [
     "target/**/*",
