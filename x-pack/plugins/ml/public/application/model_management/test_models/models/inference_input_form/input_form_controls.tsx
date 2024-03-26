@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InferrerType } from '..';
+import type { InferrerType } from '../types';
 
 interface Props {
   testButtonDisabled: boolean;

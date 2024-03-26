@@ -5,11 +5,28 @@
  * 2.0.
  */
 
-export * from './index_or_search';
-export * from './job_type';
-export * from './new_job';
-export * from './wizard';
-export * from './recognize';
-export * from './from_lens';
-export * from './from_map';
-export * from './from_pattern_analysis';
+export {
+  indexOrSearchRouteFactory,
+  dataVizIndexOrSearchRouteFactory,
+  logRateAnalysisIndexOrSearchRouteFactory,
+  explainLogRateSpikesIndexOrSearchRouteFactory,
+  logCategorizationIndexOrSearchRouteFactory,
+  changePointDetectionIndexOrSearchRouteFactory,
+} from './index_or_search';
+export { jobTypeRouteFactory } from './job_type';
+export { newJobRouteFactory } from './new_job';
+export {
+  singleMetricRouteFactory,
+  multiMetricRouteFactory,
+  multiMetricRouteFactoryRedirect,
+  populationRouteFactory,
+  advancedRouteFactory,
+  advancedRouteFactoryRedirect,
+  categorizationRouteFactory,
+  rareRouteFactory,
+  geoRouteFactory,
+} from './wizard';
+export { recognizeRouteFactory, checkViewOrCreateRouteFactory } from './recognize';
+export { fromLensRouteFactory } from './from_lens';
+export { fromMapRouteFactory } from './from_map';
+export { fromPatternAnalysisRouteFactory } from './from_pattern_analysis';

@@ -21,7 +21,7 @@ import {
   EuiModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AnomalyChartsEmbeddableInput } from '..';
+import type { AnomalyChartsEmbeddableInput } from '../types';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 
 export const MAX_ANOMALY_CHARTS_ALLOWED = 50;

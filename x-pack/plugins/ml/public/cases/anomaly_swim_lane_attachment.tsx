@@ -14,7 +14,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import deepEqual from 'fast-deep-equal';
-import type { AnomalySwimlaneEmbeddableInput } from '..';
+import type { AnomalySwimlaneEmbeddableInput } from '../embeddables/types';
 
 export const initComponent = memoize(
   (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<AnomalySwimlaneEmbeddableInput>) => {

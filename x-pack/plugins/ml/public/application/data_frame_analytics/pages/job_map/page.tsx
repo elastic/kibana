@@ -14,7 +14,7 @@ import { useUrlState } from '@kbn/ml-url-state';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
-import { JobMap } from '.';
+import { JobMap } from './job_map';
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';

@@ -12,7 +12,7 @@ import React from 'react';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
-import type { MlRoute } from '../..';
+import type { MlRoute } from '../../router';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';

@@ -11,8 +11,40 @@ import type { MlCoreSetup } from '../plugin';
 import { AnomalyChartsEmbeddableFactory } from './anomaly_charts';
 import { SingleMetricViewerEmbeddableFactory } from './single_metric_viewer';
 
-export * from './constants';
-export * from './types';
+export {
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
+  type AnomalySwimLaneEmbeddableType,
+  type AnomalyExplorerChartsEmbeddableType,
+  type MlEmbeddableTypes,
+} from './constants';
+export type {
+  MlEmbeddableBaseApi,
+  AnomalySwimlaneEmbeddableUserInput,
+  AnomalySwimlaneEmbeddableCustomInput,
+  AnomalySwimlaneEmbeddableInput,
+  AnomalySwimlaneServices,
+  AnomalySwimlaneEmbeddableServices,
+  AnomalySwimlaneEmbeddableCustomOutput,
+  AnomalySwimlaneEmbeddableOutput,
+  EditSwimLaneActionApi,
+  EditSwimlanePanelContext,
+  SwimLaneDrilldownContext,
+  AnomalyChartsEmbeddableCustomInput,
+  AnomalyChartsEmbeddableInput,
+  SingleMetricViewerEmbeddableCustomInput,
+  SingleMetricViewerEmbeddableInput,
+  AnomalyChartsServices,
+  SingleMetricViewerServices,
+  AnomalyChartsEmbeddableServices,
+  SingleMetricViewerEmbeddableServices,
+  AnomalyChartsCustomOutput,
+  AnomalyChartsEmbeddableOutput,
+  EditAnomalyChartsPanelContext,
+  AnomalyChartsFieldSelectionContext,
+  MappedEmbeddableTypeOf,
+} from './types';
 
 export { getEmbeddableComponent } from './get_embeddable_component';
 

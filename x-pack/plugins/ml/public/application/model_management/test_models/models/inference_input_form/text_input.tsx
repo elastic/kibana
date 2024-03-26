@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { ErrorMessage } from '../../inference_error';
-import type { InferrerType } from '..';
+import type { InferrerType } from '../types';
 import { OutputLoadingContent } from '../../output_loading';
 import { RUNNING_STATE } from '../inference_base';
 import { RawOutput } from '../raw_output';

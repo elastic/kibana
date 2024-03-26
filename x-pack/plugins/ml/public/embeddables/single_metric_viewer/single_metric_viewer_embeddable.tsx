@@ -25,8 +25,8 @@ import type {
   SingleMetricViewerEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   SingleMetricViewerServices,
-} from '..';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
+} from '../types';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../constants';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 
 export const getDefaultSingleMetricViewerPanelTitle = (jobIds: JobId[]) =>

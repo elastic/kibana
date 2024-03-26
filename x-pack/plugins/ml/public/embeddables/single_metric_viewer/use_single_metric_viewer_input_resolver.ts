@@ -11,7 +11,7 @@ import { combineLatest } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import type { SingleMetricViewerEmbeddableInput } from '..';
+import type { SingleMetricViewerEmbeddableInput } from '../types';
 
 export function useSingleMetricViewerInputResolver(
   embeddableInput: Observable<SingleMetricViewerEmbeddableInput>,

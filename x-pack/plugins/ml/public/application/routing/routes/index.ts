@@ -5,15 +5,64 @@
  * 2.0.
  */
 
-export * from './overview';
-export * from './jobs_list';
-export * from './new_job';
-export * from './datavisualizer';
-export * from './settings';
-export * from './data_frame_analytics';
-export * from './aiops';
+export { overviewRouteFactory } from './overview';
+export { jobListRouteFactory } from './jobs_list';
+export {
+  indexOrSearchRouteFactory,
+  dataVizIndexOrSearchRouteFactory,
+  logRateAnalysisIndexOrSearchRouteFactory,
+  explainLogRateSpikesIndexOrSearchRouteFactory,
+  logCategorizationIndexOrSearchRouteFactory,
+  changePointDetectionIndexOrSearchRouteFactory,
+  jobTypeRouteFactory,
+  newJobRouteFactory,
+  singleMetricRouteFactory,
+  multiMetricRouteFactory,
+  multiMetricRouteFactoryRedirect,
+  populationRouteFactory,
+  advancedRouteFactory,
+  advancedRouteFactoryRedirect,
+  categorizationRouteFactory,
+  rareRouteFactory,
+  geoRouteFactory,
+  recognizeRouteFactory,
+  checkViewOrCreateRouteFactory,
+  fromLensRouteFactory,
+  fromMapRouteFactory,
+  fromPatternAnalysisRouteFactory,
+} from './new_job';
+export {
+  selectorRouteFactory,
+  dataDriftRouteIndexOrSearchFactory,
+  dataDriftRouteFactory,
+  indexBasedRouteFactory,
+  indexESQLBasedRouteFactory,
+  fileBasedRouteFactory,
+} from './datavisualizer';
+export {
+  settingsRouteFactory,
+  calendarListRouteFactory,
+  newCalendarRouteFactory,
+  editCalendarRouteFactory,
+  filterListRouteFactory,
+  newFilterListRouteFactory,
+  editFilterListRouteFactory,
+} from './settings';
+export {
+  analyticsJobsListRouteFactory,
+  analyticsJobExplorationRouteFactory,
+  analyticsJobsCreationRouteFactory,
+  analyticsMapRouteFactory,
+  analyticsSourceSelectionRouteFactory,
+} from './data_frame_analytics';
+export {
+  explainLogRateSpikesRouteFactory,
+  logRateAnalysisRouteFactory,
+  logCategorizationRouteFactory,
+  changePointDetectionRouteFactory,
+} from './aiops';
 export { timeSeriesExplorerRouteFactory } from './timeseriesexplorer';
-export * from './explorer';
-export * from './trained_models';
-export * from './notifications';
-export * from './memory_usage';
+export { explorerRouteFactory } from './explorer';
+export { modelsListRouteFactory } from './trained_models';
+export { notificationsRouteFactory } from './notifications';
+export { nodesListRouteFactory } from './memory_usage';

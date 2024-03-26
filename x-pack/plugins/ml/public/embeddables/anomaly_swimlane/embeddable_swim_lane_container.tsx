@@ -28,8 +28,8 @@ import type {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
-} from '..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+} from '../types';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/constants';
 
 export interface ExplorerSwimlaneContainerProps {

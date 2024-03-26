@@ -23,7 +23,7 @@ import type {
   AnomalyChartsEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsServices,
-} from '..';
+} from '../types';
 import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
 import { processFilters } from '../common/process_filters';
 import { getJobsObservable } from '../common/get_jobs_observable';

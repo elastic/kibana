@@ -18,8 +18,8 @@ import type {
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneEmbeddableUserInput,
   AnomalySwimlaneServices,
-} from '..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+} from '../types';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';

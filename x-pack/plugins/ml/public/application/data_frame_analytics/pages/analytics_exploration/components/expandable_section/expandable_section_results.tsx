@@ -54,8 +54,8 @@ import {
 import { replaceStringTokens } from '../../../../../util/string_utils';
 import { parseInterval } from '../../../../../../../common/util/parse_interval';
 
-import type { ExpandableSectionProps } from '.';
-import { ExpandableSection, HEADER_ITEMS_LOADING } from '.';
+import type { ExpandableSectionProps } from './expandable_section';
+import { ExpandableSection, HEADER_ITEMS_LOADING } from './expandable_section';
 import { DataViewPrompt } from '../data_view_prompt';
 
 const showingDocs = i18n.translate(

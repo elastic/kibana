@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import type { SingleMetricViewerServices } from '..';
+import type { SingleMetricViewerServices } from '../types';
 import { SeriesControls } from '../../application/timeseriesexplorer/components/series_controls';
 import {
   APP_STATE_ACTION,

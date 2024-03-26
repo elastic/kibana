@@ -26,14 +26,14 @@ import type {
   AnomalyChartsEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsEmbeddableServices,
-} from '..';
+} from '../types';
 
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import type { MlLocatorParams } from '../../../common/types/locator';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../constants';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 

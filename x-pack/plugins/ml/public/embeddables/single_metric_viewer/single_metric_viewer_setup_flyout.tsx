@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDefaultSingleMetricViewerPanelTitle } from './single_metric_viewer_embeddable';
-import type { SingleMetricViewerEmbeddableInput, SingleMetricViewerServices } from '..';
+import type { SingleMetricViewerEmbeddableInput, SingleMetricViewerServices } from '../types';
 import { resolveJobSelection } from '../common/resolve_job_selection';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
 import type { MlStartDependencies } from '../../plugin';

@@ -6,7 +6,7 @@
  */
 
 import type { DependencyList } from 'react';
-import type { MlPluginSetup } from '..';
+import type { MlPluginSetup } from '../plugin';
 import type { MlLocatorParams } from '../../common/types/locator';
 
 /**

@@ -15,8 +15,8 @@ import { PLUGIN_ID, PLUGIN_ICON, ML_APP_NAME } from '../../../common/constants/a
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
-import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableServices } from '..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableServices } from '../types';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput>

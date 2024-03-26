@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export * from './datavisualizer';
-export * from './data_drift';
-export * from './index_based';
-export * from './file_based';
+export { selectorRouteFactory } from './datavisualizer';
+export { dataDriftRouteIndexOrSearchFactory } from './data_drift';
+export { indexBasedRouteFactory, indexESQLBasedRouteFactory } from './index_based';
+export { fileBasedRouteFactory } from './file_based';
+export { dataDriftRouteFactory } from './data_comparison';

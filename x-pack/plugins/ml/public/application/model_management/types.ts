@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { explainLogRateSpikesRouteFactory, logRateAnalysisRouteFactory } from './log_rate_analysis';
-export { logCategorizationRouteFactory } from './log_categorization';
-export { changePointDetectionRouteFactory } from './change_point_detection';
+export const ModelsTableToConfigMapping = {
+  id: 'model_id',
+  description: 'description',
+  createdAt: 'create_time',
+  type: 'type',
+  modelType: 'model_type',
+} as const;

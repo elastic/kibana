@@ -15,7 +15,7 @@ import { useRouteResolver } from '../use_resolver';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import type { MlRoute } from '..';
+import type { MlRoute } from '../router';
 import type { NavigateToPath } from '../../contexts/kibana';
 
 const NotificationsPage = React.lazy(() => import('../../notifications/page'));

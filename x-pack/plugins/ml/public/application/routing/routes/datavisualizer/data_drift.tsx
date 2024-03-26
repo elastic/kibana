@@ -13,8 +13,7 @@ import {
   DataDriftIndexPatternsPicker,
 } from '../../../datavisualizer/data_drift/index_patterns_picker';
 import type { NavigateToPath } from '../../../contexts/kibana';
-import type { MlRoute } from '../..';
-import type { PageProps } from '../../router';
+import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import {

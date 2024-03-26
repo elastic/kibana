@@ -22,7 +22,10 @@ import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useCurrentThemeVars } from '../../../../contexts/kibana';
-import type { TextExpansionInference, FormattedTextExpansionResponse } from '.';
+import type {
+  TextExpansionInference,
+  FormattedTextExpansionResponse,
+} from './text_expansion_inference';
 
 const MAX_TOKENS = 5;
 

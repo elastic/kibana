@@ -26,6 +26,7 @@ import {
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { MlClient } from '../../lib/ml_client';
 import type {
   MetricData,
@@ -55,7 +56,6 @@ import { findAggField } from '../../../common/util/validation_utils';
 import type { ChartType } from '../../../common/constants/charts';
 import { CHART_TYPE } from '../../../common/constants/charts';
 import { getChartType } from '../../../common/util/chart_utils';
-import type { MlJob } from '../..';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {

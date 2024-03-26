@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Field } from '@kbn/ml-anomaly-utils';
 import { optionCss } from './eui_combo_box_with_field_stats';
-import { useFieldStatsFlyoutContext } from '.';
+import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import type { FieldForStats } from './field_stats_info_button';
 import { FieldStatsInfoButton } from './field_stats_info_button';
 interface Option extends EuiComboBoxOptionOption<string> {

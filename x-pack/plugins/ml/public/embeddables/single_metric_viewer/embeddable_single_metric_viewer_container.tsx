@@ -21,8 +21,8 @@ import type {
   SingleMetricViewerEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   SingleMetricViewerEmbeddableServices,
-} from '..';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
+} from '../types';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../constants';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
 import { useTimeSeriesExplorerService } from '../../application/util/time_series_explorer_service';

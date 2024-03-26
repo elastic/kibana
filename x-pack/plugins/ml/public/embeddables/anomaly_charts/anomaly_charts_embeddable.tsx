@@ -22,8 +22,8 @@ import type {
   AnomalyChartsEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsServices,
-} from '..';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
+} from '../types';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../constants';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 import { AnomalyDetectionEmbeddable } from '../common/anomaly_detection_embeddable';
 

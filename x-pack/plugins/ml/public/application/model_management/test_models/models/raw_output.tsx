@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { MLJobEditor } from '../../../jobs/jobs_list/components/ml_job_editor';
 
-import type { InferrerType } from '.';
+import type { InferrerType } from './types';
 import type { NerResponse } from './ner';
 import type { TextClassificationResponse } from './text_classification';
 import type { TextEmbeddingResponse } from './text_embedding';

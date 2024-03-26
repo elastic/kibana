@@ -29,7 +29,7 @@ import { newJobCapsService } from '../../../../../services/new_job_capabilities/
 import type { NavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { mlJobService } from '../../../../../services/job_service';
-import type { JobCreatorType } from '..';
+import type { JobCreatorType } from '../type_guards';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {

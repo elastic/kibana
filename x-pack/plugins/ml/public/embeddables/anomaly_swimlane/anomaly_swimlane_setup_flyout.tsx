@@ -14,7 +14,7 @@ import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { HttpService } from '../../application/services/http_service';
-import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableUserInput } from '..';
+import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableUserInput } from '../types';
 import { resolveJobSelection } from '../common/resolve_job_selection';
 import { mlApiServicesProvider } from '../../application/services/ml_api_service';
 

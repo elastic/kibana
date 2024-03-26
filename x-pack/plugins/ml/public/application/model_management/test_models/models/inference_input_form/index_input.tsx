@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { ErrorMessage } from '../../inference_error';
-import type { InferrerType } from '..';
+import type { InferrerType } from '../types';
 import { useIndexInput, InferenceInputFormIndexControls } from '../index_input';
 import { RUNNING_STATE } from '../inference_base';
 import { InputFormControls } from './input_form_controls';

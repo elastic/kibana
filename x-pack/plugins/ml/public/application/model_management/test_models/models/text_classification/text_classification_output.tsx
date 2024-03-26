@@ -16,13 +16,12 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import type {
-  TextClassificationInference,
-  ZeroShotClassificationInference,
-  FillMaskInference,
-  LangIdentInference,
-  FormattedTextClassificationResponse,
-} from '.';
+import type { TextClassificationInference } from './text_classification_inference';
+import type { ZeroShotClassificationInference } from './zero_shot_classification_inference';
+import type { FillMaskInference } from './fill_mask_inference';
+import type { LangIdentInference } from './lang_ident_inference';
+
+import type { FormattedTextClassificationResponse } from './common';
 
 export const getTextClassificationOutputComponent = (
   inferrer:

@@ -19,7 +19,7 @@ import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { SwimlaneContainer } from '../../application/explorer/swimlane_container';
 import type { MlDependencies } from '../../application/app';
 import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
-import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
+import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '../types';
 import { createCoreStartMock } from '../../__mocks__/core_start';
 import { createMlStartDepsMock } from '../../__mocks__/ml_start_deps';
 

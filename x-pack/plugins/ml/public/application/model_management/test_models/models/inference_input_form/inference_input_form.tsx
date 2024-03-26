@@ -11,7 +11,7 @@ import React from 'react';
 import { INPUT_TYPE } from '../inference_base';
 import { TextInputForm } from './text_input';
 import { IndexInputForm } from './index_input';
-import type { InferrerType } from '..';
+import type { InferrerType } from '../types';
 
 interface Props {
   inferrer: InferrerType;

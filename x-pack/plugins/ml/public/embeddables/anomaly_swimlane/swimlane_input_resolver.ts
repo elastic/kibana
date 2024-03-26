@@ -37,9 +37,9 @@ import type {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
-} from '..';
+} from '../types';
 import { processFilters } from '../common/process_filters';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import { getJobsObservable } from '../common/get_jobs_observable';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;

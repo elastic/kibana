@@ -17,7 +17,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { MlDependencies } from '../../application/app';
 import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
-import type { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '..';
+import type { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '../types';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { createMlResultsServiceMock } from '../../application/services/ml_results_service';
 import { createCoreStartMock } from '../../__mocks__/core_start';
