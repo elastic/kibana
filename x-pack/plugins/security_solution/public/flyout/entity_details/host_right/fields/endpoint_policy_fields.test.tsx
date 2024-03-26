@@ -13,24 +13,21 @@ import { policyFields } from './endpoint_policy_fields';
 
 const TestWrapper = ({ el }: { el: JSX.Element | undefined }) => <>{el}</>;
 
-jest.mock(
-  '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary',
-  () => {
-    const original = jest.requireActual(
-      '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary'
-    );
-    return {
-      ...original,
-      useGetEndpointPendingActionsSummary: () => ({
-        pendingActions: [],
-        isLoading: false,
-        isError: false,
-        isTimeout: false,
-        fetch: jest.fn(),
-      }),
-    };
-  }
-);
+jest.mock('../../../../common/hooks/use_agent_status', () => {
+  const original = jest.requireActual('../../../../common/hooks/use_agent_status');
+  return {
+    ...original,
+    useAgentStatus: () => ({
+      data: {
+        // @ts-ignore
+        [mockObservedHostData.details.endpoint?.hostInfo?.metadata.agent.id]: {
+          pendingActions: {},
+          status: 'healthy',
+        },
+      },
+    }),
+  };
+});
 
 describe('Endpoint Policy Fields', () => {
   it('renders policy name', () => {
