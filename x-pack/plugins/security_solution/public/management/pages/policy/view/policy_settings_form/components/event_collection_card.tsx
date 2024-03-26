@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ThemeContext } from 'styled-components';
@@ -53,7 +53,6 @@ export interface SupplementalEventFormOption<T extends OperatingSystem> {
   id?: string;
   title?: string;
   description?: string;
-  uncheckedName?: string;
   tooltipText?: string;
   beta?: boolean;
   isDisabled?(policyConfig: UIPolicyConfig): boolean;
@@ -160,7 +159,6 @@ export const EventCollectionCard = memo(
               title,
               description,
               name,
-              uncheckedName,
               protectionField,
               tooltipText,
               beta,
@@ -211,7 +209,6 @@ export const EventCollectionCard = memo(
 
                       <EventCheckbox
                         label={name}
-                        unCheckedLabel={uncheckedName}
                         key={keyPath}
                         keyPath={keyPath}
                         policy={policy}
@@ -255,21 +252,11 @@ interface EventCheckboxProps
   extends Omit<PolicyFormComponentCommonProps, 'mode'>,
     Pick<EuiCheckboxProps, 'label' | 'disabled'> {
   keyPath: string;
-  unCheckedLabel?: ReactNode;
 }
 
 const EventCheckbox = memo<EventCheckboxProps>(
-  ({
-    policy,
-    onChange,
-    label,
-    unCheckedLabel,
-    keyPath,
-    disabled,
-    'data-test-subj': dataTestSubj,
-  }) => {
+  ({ policy, onChange, label, keyPath, disabled, 'data-test-subj': dataTestSubj }) => {
     const isChecked: boolean = get(policy, keyPath);
-    const displayLabel = isChecked ? label : unCheckedLabel ? unCheckedLabel : label;
 
     const checkboxOnChangeHandler = useCallback(
       (ev) => {
@@ -285,7 +272,7 @@ const EventCheckbox = memo<EventCheckboxProps>(
       <EuiCheckbox
         key={keyPath}
         id={keyPath}
-        label={displayLabel}
+        label={label}
         data-test-subj={dataTestSubj}
         checked={isChecked}
         onChange={checkboxOnChangeHandler}

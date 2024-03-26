@@ -57,15 +57,9 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
       }
     ),
     name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_dataChecked',
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data.label',
       {
         defaultMessage: 'Collect session data',
-      }
-    ),
-    uncheckedName: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_dataUnChecked',
-      {
-        defaultMessage: 'Do not collect session data',
       }
     ),
     protectionField: 'session_data',
@@ -75,15 +69,9 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
   },
   {
     name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.tty_ioChecked',
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.tty_io.label',
       {
         defaultMessage: 'Capture terminal output',
-      }
-    ),
-    uncheckedName: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.tty_ioUnChecked',
-      {
-        defaultMessage: 'Do not capture terminal output',
       }
     ),
     protectionField: 'tty_io',

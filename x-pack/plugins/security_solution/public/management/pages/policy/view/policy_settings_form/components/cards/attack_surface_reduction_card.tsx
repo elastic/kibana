@@ -33,17 +33,10 @@ const CARD_TITLE = i18n.translate(
   }
 );
 
-export const SWITCH_ENABLED_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.credentialHardening.toggleEnabled',
+export const SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.credentialHardening',
   {
-    defaultMessage: 'Credential hardening enabled',
-  }
-);
-
-export const SWITCH_DISABLED_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.credentialHardening.toggleDisabled',
-  {
-    defaultMessage: 'Credential hardening disabled',
+    defaultMessage: 'Credential hardening',
   }
 );
 
@@ -56,7 +49,6 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const isChecked = policy.windows.attack_surface_reduction.credential_hardening.enabled;
     const isEditMode = mode === 'edit';
-    const label = isChecked ? SWITCH_ENABLED_LABEL : SWITCH_DISABLED_LABEL;
 
     const handleSwitchChange = useCallback(
       (event) => {
@@ -90,7 +82,7 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
         dataTestSubj={getTestId()}
       >
         <EuiSwitch
-          label={label}
+          label={SWITCH_LABEL}
           checked={isChecked}
           disabled={!isEditMode}
           onChange={handleSwitchChange}

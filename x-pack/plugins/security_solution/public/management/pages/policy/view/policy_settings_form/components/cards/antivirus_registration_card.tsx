@@ -31,17 +31,10 @@ const DESCRIPTION = i18n.translate(
   }
 );
 
-export const REGISTERED_LABEL = i18n.translate(
+export const LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.type',
   {
     defaultMessage: 'Register as antivirus',
-  }
-);
-
-export const NOT_REGISTERED_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.notRegisteredLabel',
-  {
-    defaultMessage: 'Do not register as antivirus',
   }
 );
 
@@ -53,7 +46,6 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const isChecked = policy.windows.antivirus_registration.enabled;
     const isEditMode = mode === 'edit';
-    const label = isChecked ? REGISTERED_LABEL : NOT_REGISTERED_LABEL;
 
     const handleSwitchChange = useCallback(
       (event) => {
@@ -87,7 +79,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
         <EuiSpacer size="s" />
 
         <EuiSwitch
-          label={label}
+          label={LABEL}
           checked={isChecked}
           disabled={!isEditMode}
           onChange={handleSwitchChange}
