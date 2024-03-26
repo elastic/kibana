@@ -8,11 +8,12 @@
 
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import {
+  canImportVisContext,
   UnifiedHistogramApi,
+  UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
-  canImportVisContext,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -337,22 +338,37 @@ export const useDiscoverHistogram = ({
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
 
   const onVisContextChanged = useCallback(
-    (nextVisContext: UnifiedHistogramVisContext | undefined, wasInvalidatedAndRebuilt: boolean) => {
-      if (wasInvalidatedAndRebuilt) {
-        // if the visualization was invalidated as incompatible and rebuilt
-        // (it will be used later for saving the visualization via Save button)
-        stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
-          nextVisContext
-        );
-      } else {
-        // if user customized the visualization manually
-        // (only this action should trigger Unsaved change badge)
-        stateContainer.savedSearchState.updateVisContext({
-          nextVisContext,
-        });
-        stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
-          undefined
-        );
+    (
+      nextVisContext: UnifiedHistogramVisContext | undefined,
+      externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
+    ) => {
+      switch (externalVisContextStatus) {
+        case UnifiedHistogramExternalVisContextStatus.manuallyCustomized:
+          // if user customized the visualization manually
+          // (only this action should trigger Unsaved changes badge)
+          stateContainer.savedSearchState.updateVisContext({
+            nextVisContext,
+          });
+          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
+            undefined
+          );
+          break;
+        case UnifiedHistogramExternalVisContextStatus.automaticallyOverridden:
+          // if the visualization was invalidated as incompatible and rebuilt
+          // (it will be used later for saving the visualization via Save button)
+          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
+            nextVisContext
+          );
+          break;
+        case UnifiedHistogramExternalVisContextStatus.automaticallyCreated:
+        case UnifiedHistogramExternalVisContextStatus.applied:
+          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
+            undefined
+          );
+          break;
+        case UnifiedHistogramExternalVisContextStatus.unknown:
+          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(null);
+          break;
       }
     },
     [stateContainer]

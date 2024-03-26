@@ -145,6 +145,14 @@ export type UnifiedHistogramInputMessage = UnifiedHistogramRefetchMessage;
  */
 export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;
 
+export enum UnifiedHistogramExternalVisContextStatus {
+  unknown = 'unknown',
+  applied = 'applied',
+  automaticallyCreated = 'automaticallyCreated',
+  automaticallyOverridden = 'automaticallyOverridden',
+  manuallyCustomized = 'manuallyCustomized',
+}
+
 export enum UnifiedHistogramSuggestionType {
   unsupported = 'unsupported',
   lensSuggestion = 'lensSuggestion',

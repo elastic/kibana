@@ -27,8 +27,12 @@ import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { UnifiedHistogramVisContext, UnifiedHistogramSuggestionContext } from '../types';
-import { UnifiedHistogramSuggestionType } from '../types';
+import {
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramSuggestionContext,
+  UnifiedHistogramSuggestionType,
+  UnifiedHistogramVisContext,
+} from '../types';
 import { isSuggestionAndVisContextCompatible } from '../utils/external_vis_context';
 import { computeInterval } from '../utils/compute_interval';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
@@ -91,7 +95,7 @@ export class LensVisService {
         ) => void;
         onVisContextChanged?: (
           visContext: UnifiedHistogramVisContext | undefined,
-          wasInvalidatedAndRebuilt: boolean
+          externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
         ) => void;
       }
     | undefined;
@@ -140,7 +144,7 @@ export class LensVisService {
     ) => void;
     onVisContextChanged?: (
       visContext: UnifiedHistogramVisContext | undefined,
-      wasInvalidatedAndRebuilt: boolean
+      externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
     ) => void;
   }) => {
     const allSuggestions = this.getAllSuggestions({ queryParams });
@@ -163,13 +167,10 @@ export class LensVisService {
     });
 
     onSuggestionContextChange(suggestionState.currentSuggestionContext);
-
-    if (
-      externalVisContext?.attributes &&
-      lensAttributesState.shouldUpdateVisContextDueToIncompatibleSuggestion
-    ) {
-      onVisContextChanged?.(lensAttributesState.visContext, true);
-    }
+    onVisContextChanged?.(
+      lensAttributesState.visContext,
+      lensAttributesState.externalVisContextStatus
+    );
 
     this.state$.next({
       status: LensVisServiceStatus.completed,
@@ -222,7 +223,10 @@ export class LensVisService {
     });
 
     onSuggestionContextChange(editedSuggestionContext);
-    onVisContextChanged?.(lensAttributesState.visContext, false);
+    onVisContextChanged?.(
+      lensAttributesState.visContext,
+      UnifiedHistogramExternalVisContextStatus.manuallyCustomized
+    );
   };
 
   private getCurrentSuggestionState = ({
@@ -251,24 +255,26 @@ export class LensVisService {
 
     if (queryParams.isPlainRecord) {
       // appends an ES|QL histogram
-      const histogramSuggestion = this.getHistogramSuggestionForESQL({ queryParams });
-      if (histogramSuggestion) {
+      const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({ queryParams });
+      if (histogramSuggestionForESQL) {
         availableSuggestionsWithType.push({
-          suggestion: histogramSuggestion,
+          suggestion: histogramSuggestionForESQL,
           type: UnifiedHistogramSuggestionType.histogramForESQL,
         });
       }
     } else {
       // appends histogram for the data view mode
-      const histogramSuggestion = this.getDefaultHistogramSuggestion({
+      const histogramSuggestionForDataView = this.getDefaultHistogramSuggestion({
         queryParams,
         timeInterval,
         breakdownField,
       });
-      availableSuggestionsWithType.push({
-        suggestion: histogramSuggestion,
-        type: UnifiedHistogramSuggestionType.histogramForDataView,
-      });
+      if (histogramSuggestionForDataView) {
+        availableSuggestionsWithType.push({
+          suggestion: histogramSuggestionForDataView,
+          type: UnifiedHistogramSuggestionType.histogramForDataView,
+        });
+      }
     }
 
     if (externalVisContext) {
@@ -537,7 +543,7 @@ export class LensVisService {
     breakdownField: DataViewField | undefined;
     table: Datatable | undefined;
   }): {
-    shouldUpdateVisContextDueToIncompatibleSuggestion: boolean;
+    externalVisContextStatus: UnifiedHistogramExternalVisContextStatus;
     visContext: UnifiedHistogramVisContext | undefined;
   } => {
     const { dataView, query, filters, timeRange } = queryParams;
@@ -545,7 +551,7 @@ export class LensVisService {
 
     if (!suggestion || !suggestion.datasourceId || !query || !filters) {
       return {
-        shouldUpdateVisContextDueToIncompatibleSuggestion: false,
+        externalVisContextStatus: UnifiedHistogramExternalVisContextStatus.unknown,
         visContext: undefined,
       };
     }
@@ -565,7 +571,7 @@ export class LensVisService {
           }
         : query;
 
-    let shouldUpdateVisContextDueToIncompatibleSuggestion = false;
+    let externalVisContextStatus: UnifiedHistogramExternalVisContextStatus;
     let visContext: UnifiedHistogramVisContext | undefined;
 
     if (externalVisContext?.attributes) {
@@ -579,10 +585,13 @@ export class LensVisService {
       ) {
         // using the external lens attributes
         visContext = externalVisContext;
+        externalVisContextStatus = UnifiedHistogramExternalVisContextStatus.applied;
       } else {
         // external vis is not compatible with the current suggestion
-        shouldUpdateVisContextDueToIncompatibleSuggestion = true;
+        externalVisContextStatus = UnifiedHistogramExternalVisContextStatus.automaticallyOverridden;
       }
+    } else {
+      externalVisContextStatus = UnifiedHistogramExternalVisContextStatus.automaticallyCreated;
     }
 
     if (!visContext) {
@@ -630,7 +639,7 @@ export class LensVisService {
     }
 
     return {
-      shouldUpdateVisContextDueToIncompatibleSuggestion,
+      externalVisContextStatus,
       visContext,
     };
   };

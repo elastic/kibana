@@ -27,7 +27,7 @@ import {
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
 import { Chart, checkChartAvailability } from '../chart';
-import type {
+import {
   UnifiedHistogramVisContext,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -38,6 +38,7 @@ import type {
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
+  UnifiedHistogramExternalVisContextStatus,
 } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
 import { LensVisService } from '../services/lens_vis_service';
@@ -169,7 +170,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   onVisContextChanged?: (
     visContext: UnifiedHistogramVisContext | undefined,
-    wasInvalidatedAndRebuilt: boolean
+    externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
   ) => void;
   /**
    * Callback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status
