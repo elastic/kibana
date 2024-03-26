@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -13,7 +14,6 @@ import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
 } from '../image_embeddable/constants';
-import { ImageEmbeddableStrings } from '../image_embeddable/image_embeddable_strings';
 import { uiActionsService } from '../services/kibana_services';
 
 const parentApiIsCompatible = async (
@@ -47,7 +47,10 @@ export const registerCreateImageAction = () => {
         // swallow the rejection, since this just means the user closed without saving
       }
     },
-    getDisplayName: ImageEmbeddableStrings.getCreateDisplayName,
+    getDisplayName: () =>
+      i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName', {
+        defaultMessage: 'Image',
+      }),
   });
 
   uiActionsService.attachAction('ADD_PANEL_TRIGGER', ADD_IMAGE_EMBEDDABLE_ACTION_ID);

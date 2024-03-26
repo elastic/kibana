@@ -9,10 +9,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const ImageEmbeddableStrings = {
-  getCreateDisplayName: () =>
-    i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName', {
-      defaultMessage: 'Image',
-    }),
   getEditDisplayName: () =>
     i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName.edit', {
       defaultMessage: 'image',
