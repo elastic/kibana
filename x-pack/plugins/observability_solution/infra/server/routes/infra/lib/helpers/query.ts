@@ -31,12 +31,9 @@ export const createFilters = ({
       : [extrafilterClause]
     : [];
 
-  const hostNamesFilter =
-    hostNamesShortList.length > 0 ? termsQuery(BUCKET_KEY, ...hostNamesShortList) : [];
-
   return [
-    ...hostNamesFilter,
     ...extraFilterList,
+    ...termsQuery(BUCKET_KEY, ...hostNamesShortList),
     ...rangeQuery(new Date(params.range.from).getTime(), new Date(params.range.to).getTime()),
     {
       exists: {

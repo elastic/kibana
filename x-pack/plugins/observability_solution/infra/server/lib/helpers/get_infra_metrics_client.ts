@@ -10,7 +10,7 @@ import type { InfraPluginRequestHandlerContext } from '../../types';
 import { InfraSources } from '../sources';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 
-export type RequiredParams = Omit<ESSearchRequest, 'index'> & {
+type RequiredParams = Omit<ESSearchRequest, 'index'> & {
   body: {
     size: number;
     track_total_hits: boolean | number;
