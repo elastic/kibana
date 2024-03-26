@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import React, { FunctionComponent, useMemo, useState } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,18 +14,13 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { Index } from '../../../../..';
 import { DetailsPageMappingsContent } from './details_page_mappings_content';
 
-import { loadIndexMapping, useLoadIndexMappings } from '../../../../services';
+import { useLoadIndexMappings } from '../../../../services';
 
 export const DetailsPageMappings: FunctionComponent<{
   index?: Index;
   showAboutMappings?: boolean;
 }> = ({ index, showAboutMappings = true }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index?.name || '');
-  useEffect(() => {
-    if (index?.name) {
-      loadIndexMapping(index.name);
-    }
-  }, [index?.name]);
   const [jsonError, setJsonError] = useState<boolean>(false);
 
   const stringifiedData = useMemo(() => {
