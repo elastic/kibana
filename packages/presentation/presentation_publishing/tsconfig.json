@@ -1,4 +1,4 @@
-{
+packages/presentation/presentation_publishing/tsconfig.json{
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
@@ -10,6 +10,5 @@
     "@kbn/es-query",
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
-    "@kbn/saved-objects-plugin",
   ]
 }

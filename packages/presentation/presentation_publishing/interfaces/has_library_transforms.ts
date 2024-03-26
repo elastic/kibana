@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+// can not import OnSaveProps from @kbn/saved-objects-plugin/public because it creates a circular dependancy
+export interface OnSaveProps {
+  newTitle: string;
+  newCopyOnSave: boolean;
+  isTitleDuplicateConfirmed: boolean;
+  onTitleDuplicate: () => void;
+  newDescription: string;
+}
 
 export interface HasLibraryTransforms<StateT extends object = object> {
   canLinkToLibrary: () => Promise<boolean>;
