@@ -51,7 +51,7 @@ const resetSearchOptions = (listParams: SnapshotListParams): SnapshotListParams 
 
 const escapeString = (inputString: string) => {
   // List of characters to escape
-  const specialChars = /[.*+?^${}()|[\]\\]/g;
+  const specialChars = /[{}()\\]/g;
 
   // Escape special characters
   return inputString.replace(specialChars, '\\$&');
