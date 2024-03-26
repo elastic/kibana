@@ -51,6 +51,6 @@ export class ResponseActionsConnectorNotConfiguredError extends ResponseActionsC
     public readonly statusCode: number = 400,
     public readonly meta?: unknown
   ) {
-    super(`No stack connector configured for [${connectorTypeId}]`, statusCode, meta);
+    super(`No stack connector instance configured for [${connectorTypeId}]`, statusCode, meta);
   }
 }

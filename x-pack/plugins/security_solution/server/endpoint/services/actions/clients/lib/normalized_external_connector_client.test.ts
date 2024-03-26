@@ -46,7 +46,7 @@ describe('`NormalizedExternalConnectorClient` class', () => {
 
       expect(actionPluginConnectorClient.getAll).toHaveBeenCalledTimes(1);
 
-      // Sub-squent callls to `.execute()` should not trigger logic to find Connector instance again
+      // Subsequent calls to `.execute()` should not trigger logic to find Connector instance again
       await testInstance.execute(executeInputOptions);
 
       expect(actionPluginConnectorClient.getAll).toHaveBeenCalledTimes(1);
@@ -70,8 +70,25 @@ describe('`NormalizedExternalConnectorClient` class', () => {
       await expect(executePromise).rejects.toHaveProperty('statusCode', 400);
     });
 
-    it('should error if a connector instance is not defined', async () => {
-      (actionPluginConnectorClient.getAll as jest.Mock).mockResolvedValue([]);
+    it.each([
+      ['is not defined', () => []],
+      [
+        'is deprecated',
+        () => [
+          responseActionsClientMock.createConnector({ actionTypeId: 'foo', isDeprecated: true }),
+        ],
+      ],
+      [
+        'is missing secrets',
+        () => [
+          responseActionsClientMock.createConnector({
+            actionTypeId: 'foo',
+            isMissingSecrets: true,
+          }),
+        ],
+      ],
+    ])('should error if a connector instance %s', async (_, getResponse) => {
+      (actionPluginConnectorClient.getAll as jest.Mock).mockResolvedValue(getResponse());
       const testInstance = new NormalizedExternalConnectorClient(
         'foo',
         actionPluginConnectorClient,
@@ -79,8 +96,8 @@ describe('`NormalizedExternalConnectorClient` class', () => {
       );
       const executePromise = testInstance.execute(executeInputOptions);
 
-      await expect(executePromise).rejects.toBeInstanceOf(
-        ResponseActionsConnectorNotConfiguredError
+      await expect(executePromise).rejects.toEqual(
+        new ResponseActionsConnectorNotConfiguredError('foo')
       );
     });
   });
