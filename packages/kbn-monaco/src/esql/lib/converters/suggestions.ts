@@ -20,7 +20,7 @@ export function wrapAsMonacoSuggestions(
       kind:
         kind in monaco.languages.CompletionItemKind
           ? monaco.languages.CompletionItemKind[kind]
-          : kind,
+          : monaco.languages.CompletionItemKind.Method, // fallback to Method
       detail,
       documentation,
       sortText,
