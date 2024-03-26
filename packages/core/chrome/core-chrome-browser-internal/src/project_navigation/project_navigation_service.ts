@@ -222,7 +222,6 @@ export class ProjectNavigationService {
    *
    * @param id Id for the navigation tree definition
    * @param navTreeDefinition$ The navigation tree definition
-   * @param location Optional location to use to detect the active node in the new navigation tree
    */
   private initNavigation(id: string, navTreeDefinition$: Observable<NavigationTreeDefinition>) {
     if (this.activeSolutionNavDefinitionId$.getValue() === id) return;
