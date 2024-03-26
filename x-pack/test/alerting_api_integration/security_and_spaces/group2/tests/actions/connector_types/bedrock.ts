@@ -417,12 +417,11 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(simulator.requestData).to.eql({
               anthropic_version: 'bedrock-2023-05-31',
               messages: [
-                { role: 'user', content: 'Be a good chatbot' },
-                { content: 'Ok.', role: 'assistant' },
                 { role: 'user', content: 'Hello world' },
                 { role: 'assistant', content: 'Hi, I am a good chatbot' },
                 { role: 'user', content: 'What is 2+2?' },
               ],
+              system: 'Be a good chatbot',
               max_tokens: DEFAULT_TOKEN_LIMIT,
               temperature: 0,
             });

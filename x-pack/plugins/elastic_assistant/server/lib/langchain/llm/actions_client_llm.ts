@@ -83,7 +83,7 @@ export class ActionsClientLlm extends LLM {
           messages: [assistantMessage], // the assistant message
           ...(this.llmType === '.gen-ai'
             ? { n: 1, stop: null, temperature: 0.2 }
-            : { temperature: 0, stop_sequences: [] }),
+            : { temperature: 0, stopSequences: [] }),
         },
       },
     };
