@@ -16,7 +16,7 @@ import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DropType } from '@kbn/dom-drag-drop';
 import styled from 'styled-components';
-import { DragDrop, DropOverlayWrapper, useDragDropContext } from '@kbn/dom-drag-drop';
+import { Droppable, DropOverlayWrapper, useDragDropContext } from '@kbn/dom-drag-drop';
 import type {
   UnifiedFieldListSidebarContainerApi,
   UnifiedFieldListSidebarContainerProps,
@@ -368,8 +368,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
               hasBorder={false}
               color="transparent"
             >
-              <DragDrop
-                draggable={false}
+              <Droppable
                 dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
                 value={DROP_PROPS.value}
                 order={DROP_PROPS.order}
@@ -402,7 +401,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                     />
                   </EventDetailsWidthProvider>
                 </DropOverlayWrapper>
-              </DragDrop>
+              </Droppable>
             </StyledMainEuiPanel>
           </StyledPageContentWrapper>
         }

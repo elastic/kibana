@@ -44,7 +44,7 @@ describe('Overflow items', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'network');
+      cy.task('esArchiverUnload', { archiveName: 'network' });
     });
 
     it('Shows more items in the popover', () => {

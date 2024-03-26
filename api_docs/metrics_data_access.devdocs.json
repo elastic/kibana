@@ -517,7 +517,7 @@
         "label": "findInventoryFields",
         "description": [],
         "signature": [
-          "(type: \"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\") => { id: string; name: string; os?: string | undefined; ip?: string | undefined; cloudProvider?: string | undefined; }"
+          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\") => { id: string; name: string; os?: string | undefined; ip?: string | undefined; cloudProvider?: string | undefined; }"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
@@ -531,7 +531,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
+              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
             ],
             "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
@@ -550,7 +550,7 @@
         "label": "findInventoryModel",
         "description": [],
         "signature": [
-          "<T extends \"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\">(type: T) => InventoryModels<T>"
+          "<T extends \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\">(type: T) => InventoryModels<T>"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
@@ -583,7 +583,7 @@
         "label": "getFieldByType",
         "description": [],
         "signature": [
-          "(type: \"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\") => \"container.id\" | \"host.name\" | \"kubernetes.pod.uid\" | undefined"
+          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\") => \"container.id\" | \"host.name\" | \"kubernetes.pod.uid\" | undefined"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
@@ -597,7 +597,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
+              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
             ],
             "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
@@ -775,7 +775,7 @@
         "label": "InventoryItemType",
         "description": [],
         "signature": [
-          "\"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
+          "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
@@ -939,11 +939,11 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; readonly metric: { readonly cpuUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"h\" | \"s\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; readonly normalizedLoad1m: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"h\" | \"s\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly disk: { readonly xy: { readonly diskSpaceUsageAvailable: { title: string; dataset?: ",
           "LensDataset",
@@ -1127,7 +1127,7 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; readonly metric: { readonly diskUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"h\" | \"s\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly memory: { xy: { memoryUsageBreakdown: { title: string; dataset?: ",
           "LensDataset",
@@ -1185,7 +1185,7 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"h\" | \"s\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly network: { readonly xy: { readonly rxTx: { title: string; dataset?: ",
           "LensDataset",
@@ -1397,7 +1397,7 @@
         "label": "SnapshotMetricType",
         "description": [],
         "signature": [
-          "\"count\" | \"memory\" | \"custom\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"logRate\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
+          "\"count\" | \"custom\" | \"memory\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"logRate\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
@@ -1412,7 +1412,7 @@
         "label": "TSVBMetricModel",
         "description": [],
         "signature": [
-          "{ id: \"custom\" | \"hostSystemOverview\" | \"hostCpuUsage\" | \"hostFilesystem\" | \"hostK8sOverview\" | \"hostK8sCpuCap\" | \"hostK8sDiskCap\" | \"hostK8sMemoryCap\" | \"hostK8sPodCap\" | \"hostLoad\" | \"hostMemoryUsage\" | \"hostNetworkTraffic\" | \"hostDockerOverview\" | \"hostDockerInfo\" | \"hostDockerTop5ByCpu\" | \"hostDockerTop5ByMemory\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"containerOverview\" | \"containerCpuKernel\" | \"containerCpuUsage\" | \"containerDiskIOOps\" | \"containerDiskIOBytes\" | \"containerMemory\" | \"containerNetworkTraffic\" | \"containerK8sOverview\" | \"containerK8sCpuUsage\" | \"containerK8sMemoryUsage\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"node\" | \"cloud\" | undefined; drop_last_bucket?: boolean | undefined; }"
+          "{ id: \"custom\" | \"hostSystemOverview\" | \"hostCpuUsage\" | \"hostFilesystem\" | \"hostK8sOverview\" | \"hostK8sCpuCap\" | \"hostK8sDiskCap\" | \"hostK8sMemoryCap\" | \"hostK8sPodCap\" | \"hostLoad\" | \"hostMemoryUsage\" | \"hostNetworkTraffic\" | \"hostDockerOverview\" | \"hostDockerInfo\" | \"hostDockerTop5ByCpu\" | \"hostDockerTop5ByMemory\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"containerOverview\" | \"containerCpuKernel\" | \"containerCpuUsage\" | \"containerDiskIOOps\" | \"containerDiskIOBytes\" | \"containerMemory\" | \"containerNetworkTraffic\" | \"containerK8sOverview\" | \"containerK8sCpuUsage\" | \"containerK8sMemoryUsage\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cumulative_sum\" | \"derivative\" | \"cardinality\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
@@ -1427,7 +1427,7 @@
         "label": "TSVBMetricModelCreator",
         "description": [],
         "signature": [
-          "(timeField: string, indexPattern: string | string[], interval: string) => { id: \"custom\" | \"hostSystemOverview\" | \"hostCpuUsage\" | \"hostFilesystem\" | \"hostK8sOverview\" | \"hostK8sCpuCap\" | \"hostK8sDiskCap\" | \"hostK8sMemoryCap\" | \"hostK8sPodCap\" | \"hostLoad\" | \"hostMemoryUsage\" | \"hostNetworkTraffic\" | \"hostDockerOverview\" | \"hostDockerInfo\" | \"hostDockerTop5ByCpu\" | \"hostDockerTop5ByMemory\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"containerOverview\" | \"containerCpuKernel\" | \"containerCpuUsage\" | \"containerDiskIOOps\" | \"containerDiskIOBytes\" | \"containerMemory\" | \"containerNetworkTraffic\" | \"containerK8sOverview\" | \"containerK8sCpuUsage\" | \"containerK8sMemoryUsage\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"node\" | \"cloud\" | undefined; drop_last_bucket?: boolean | undefined; }"
+          "(timeField: string, indexPattern: string | string[], interval: string) => { id: \"custom\" | \"hostSystemOverview\" | \"hostCpuUsage\" | \"hostFilesystem\" | \"hostK8sOverview\" | \"hostK8sCpuCap\" | \"hostK8sDiskCap\" | \"hostK8sMemoryCap\" | \"hostK8sPodCap\" | \"hostLoad\" | \"hostMemoryUsage\" | \"hostNetworkTraffic\" | \"hostDockerOverview\" | \"hostDockerInfo\" | \"hostDockerTop5ByCpu\" | \"hostDockerTop5ByMemory\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"containerOverview\" | \"containerCpuKernel\" | \"containerCpuUsage\" | \"containerDiskIOOps\" | \"containerDiskIOBytes\" | \"containerMemory\" | \"containerNetworkTraffic\" | \"containerK8sOverview\" | \"containerK8sCpuUsage\" | \"containerK8sMemoryUsage\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cumulative_sum\" | \"derivative\" | \"cardinality\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,

@@ -9,7 +9,6 @@ import { createMockStore, mockTimelineData, TestProviders } from '../../../../..
 import React from 'react';
 import { TimelineDataTable } from '.';
 import { defaultUdtHeaders } from '../default_headers';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
@@ -19,8 +18,6 @@ import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
 import { timelineActions } from '../../../../store';
 import type { ExpandedDetailTimeline } from '../../../../../../common/types';
-
-const mockDataView = createStubDataView({ spec: {} });
 
 jest.mock('../../../../../common/containers/sourcerer');
 

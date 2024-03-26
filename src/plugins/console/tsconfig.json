@@ -29,7 +29,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/code-editor",
     "@kbn/monaco",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": [
     "target/**/*",

@@ -110,6 +110,8 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
           readSettings: true,
           readAgentPolicies: true,
           allAgentPolicies: true,
+          addAgents: true,
+          addFleetServers: true,
         },
         integrations: {
           readPackageInfo: true,
