@@ -66,14 +66,13 @@ export class ImageEmbeddablePlugin
     setKibanaServices(core, plugins);
 
     untilPluginStartServicesReady().then(() => {
+      registerCreateImageAction();
       registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
         const { getImageEmbeddableFactory } = await import(
           './image_embeddable/get_image_embeddable_factory'
         );
         return getImageEmbeddableFactory({ embeddableEnhanced: plugins.embeddableEnhanced });
       });
-
-      registerCreateImageAction();
     });
 
     return {};
