@@ -56,7 +56,7 @@ export interface MappingsFields {
   [key: string]: any;
 }
 
-export type DocumentFieldsStatus = 'idle' | 'editingField' | 'creatingField';
+export type DocumentFieldsStatus = 'idle' | 'editingField' | 'creatingField' | 'disabled';
 
 export interface DocumentFieldsState {
   status: DocumentFieldsStatus;

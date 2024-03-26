@@ -53,6 +53,11 @@ export const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
 export const PLUGIN_NAME = 'DataViews';
 
 /**
+ * Max length for the custom field description
+ */
+export const MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH = 300;
+
+/**
  * Fields for wildcard path.
  * @public
  */
