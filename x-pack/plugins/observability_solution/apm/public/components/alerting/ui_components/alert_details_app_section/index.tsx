@@ -35,6 +35,7 @@ import {
   AlertDetailsAppSectionProps,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from './types';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 
@@ -52,6 +53,8 @@ export function AlertDetailsAppSection({
   const alertEvaluationThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
   const environment = alert.fields[SERVICE_ENVIRONMENT];
   const serviceName = String(alert.fields[SERVICE_NAME]);
+  const transactionName = alert.fields[TRANSACTION_NAME];
+  const transactionType = alert.fields[TRANSACTION_TYPE];
 
   useEffect(() => {
     const alertSummaryFields = [
@@ -114,7 +117,6 @@ export function AlertDetailsAppSection({
     alert.fields[ALERT_START]!,
     alert.fields[ALERT_END]
   );
-  const transactionType = alert.fields[TRANSACTION_TYPE];
   const comparisonChartTheme = getComparisonChartTheme();
   const historicalRange = useMemo(() => {
     return {
@@ -160,6 +162,7 @@ export function AlertDetailsAppSection({
             <LatencyChart
               alert={alert}
               transactionType={transactionType}
+              transactionName={transactionName}
               serviceName={serviceName}
               environment={environment}
               start={from}
@@ -174,6 +177,7 @@ export function AlertDetailsAppSection({
             <EuiFlexGroup direction="row" gutterSize="s">
               <ThroughputChart
                 transactionType={transactionType}
+                transactionName={transactionName}
                 serviceName={serviceName}
                 environment={environment}
                 start={from}
@@ -185,6 +189,7 @@ export function AlertDetailsAppSection({
               />
               <FailedTransactionChart
                 transactionType={transactionType}
+                transactionName={transactionName}
                 serviceName={serviceName}
                 environment={environment}
                 start={from}
