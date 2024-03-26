@@ -174,6 +174,7 @@ describe('bulkEnableRulesRoute', () => {
       },
       uuid: '123-456',
     };
+
     const systemAction: RuleSystemAction = {
       actionTypeId: 'test-2',
       id: 'system_action-id',
@@ -182,6 +183,7 @@ describe('bulkEnableRulesRoute', () => {
       },
       uuid: '123-456',
     };
+
     const mockedRules: Array<Rule<{}>> = [
       {
         ...mockedRule,
@@ -197,7 +199,7 @@ describe('bulkEnableRulesRoute', () => {
       taskIdsFailedToBeEnabled: [],
     };
 
-    it('Should merge actions and systemActions correctly before sending the response', async () => {
+    it('should merge actions and systemActions correctly before sending the response', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
       const actionsClient = actionsClientMock.create();

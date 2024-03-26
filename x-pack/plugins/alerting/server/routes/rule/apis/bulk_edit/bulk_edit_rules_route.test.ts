@@ -306,6 +306,8 @@ describe('bulkEditRulesRoute', () => {
       const routeRes = await handler(context, req, res);
 
       // @ts-expect-error: body exists
+      expect(routeRes.body.systemActions).toBeUndefined();
+      // @ts-expect-error: body exists
       expect(routeRes.body.rules[0].actions).toEqual([
         {
           connector_type_id: 'test',

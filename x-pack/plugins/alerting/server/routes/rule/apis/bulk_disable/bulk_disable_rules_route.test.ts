@@ -195,7 +195,7 @@ describe('bulkDisableRulesRoute', () => {
       skipped: [],
     };
 
-    it('removes the type from the actions correctly before sending the response', async () => {
+    it('merges actions and systemActions correctly before sending the response', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
       const actionsClient = actionsClientMock.create();
@@ -216,6 +216,8 @@ describe('bulkDisableRulesRoute', () => {
 
       const routeRes = await handler(context, req, res);
 
+      // @ts-expect-error: body exists
+      expect(routeRes.body.systemActions).toBeUndefined();
       // @ts-expect-error: body exists
       expect(routeRes.body.rules[0].actions).toEqual([
         {

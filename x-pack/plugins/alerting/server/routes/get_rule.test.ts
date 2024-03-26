@@ -12,7 +12,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { SanitizedRule } from '../types';
+import { RuleAction, RuleSystemAction, SanitizedRule } from '../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -24,6 +24,37 @@ beforeEach(() => {
 });
 
 describe('getRuleRoute', () => {
+  const action: RuleAction = {
+    group: 'default',
+    id: '2',
+    actionTypeId: 'test',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+    alertsFilter: {
+      query: {
+        kql: 'name:test',
+        dsl: '{"must": {"term": { "name": "test" }}}',
+        filters: [],
+      },
+      timeframe: {
+        days: [1],
+        hours: { start: '08:00', end: '17:00' },
+        timezone: 'UTC',
+      },
+    },
+  };
+
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+  };
+
   const mockedAlert: SanitizedRule<{
     bar: boolean;
   }> = {
@@ -35,30 +66,7 @@ describe('getRuleRoute', () => {
     },
     createdAt: new Date(),
     updatedAt: new Date(),
-    actions: [
-      {
-        group: 'default',
-        id: '2',
-        actionTypeId: 'test',
-        params: {
-          foo: true,
-        },
-        uuid: '123-456',
-        alertsFilter: {
-          query: {
-            kql: 'name:test',
-            // @ts-expect-error upgrade typescript v4.9.5
-            dsl: '{"must": {"term": { "name": "test" }}}',
-            filters: [],
-          },
-          timeframe: {
-            days: [1],
-            hours: { start: '08:00', end: '17:00' },
-            timezone: 'UTC',
-          },
-        },
-      },
-    ],
+    actions: [action],
     consumer: 'bar',
     name: 'abc',
     tags: ['foo'],
@@ -183,5 +191,67 @@ describe('getRuleRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('transforms the system actions in the response of the rules client correctly', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getRuleRoute(router, licenseState);
+    const [_, handler] = router.get.mock.calls[0];
+
+    rulesClient.get.mockResolvedValueOnce({
+      ...mockedAlert,
+      actions: [action],
+      systemActions: [systemAction],
+    });
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: { id: '1' },
+      },
+      ['ok']
+    );
+
+    const routeRes = await handler(context, req, res);
+
+    // @ts-expect-error: body exists
+    expect(routeRes.body.systemActions).toBeUndefined();
+    // @ts-expect-error: body exists
+    expect(routeRes.body.actions).toEqual([
+      {
+        alerts_filter: {
+          query: {
+            dsl: '{"must": {"term": { "name": "test" }}}',
+            filters: [],
+            kql: 'name:test',
+          },
+          timeframe: {
+            days: [1],
+            hours: {
+              end: '17:00',
+              start: '08:00',
+            },
+            timezone: 'UTC',
+          },
+        },
+        connector_type_id: 'test',
+        group: 'default',
+        id: '2',
+        params: {
+          foo: true,
+        },
+        uuid: '123-456',
+      },
+      {
+        connector_type_id: 'test-2',
+        id: 'system_action-id',
+        params: {
+          foo: true,
+        },
+        uuid: '123-456',
+      },
+    ]);
   });
 });
