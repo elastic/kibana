@@ -937,11 +937,11 @@ describe('helpers', () => {
     });
 
     test('it invokes add timeline dispatch', () => {
-      timelineDispatch(defaultArgs)();
+      timelineDispatch({ ...defaultArgs, duplicate: false })();
 
       expect(dispatchAddTimeline).toHaveBeenCalledWith({
         id: TimelineId.active,
-        savedTimeline: true,
+        savedTimeline: false,
         timeline: {
           ...mockTimelineModel,
           version: '1',
@@ -1063,6 +1063,21 @@ describe('helpers', () => {
       expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
         id: TimelineId.active,
         noteId: 'uuidv4()',
+      });
+    });
+
+    test('should create a new timeline with empty updated, changed and version ', () => {
+      timelineDispatch(defaultArgs)();
+
+      expect(dispatchAddTimeline).toHaveBeenNthCalledWith(1, {
+        id: TimelineId.active,
+        savedTimeline: true,
+        timeline: {
+          ...mockTimelineModel,
+          version: null,
+          updated: undefined,
+          changed: undefined,
+        },
       });
     });
   });

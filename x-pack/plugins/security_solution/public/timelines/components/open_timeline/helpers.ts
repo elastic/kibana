@@ -454,6 +454,10 @@ export const dispatchUpdateTimeline =
     preventSettingQuery,
   }: UpdateTimeline): (() => void) =>
   () => {
+    let _timeline = timeline;
+    if (duplicate) {
+      _timeline = { ...timeline, updated: undefined, changed: undefined, version: null };
+    }
     if (!isEmpty(timeline.indexNames)) {
       dispatch(
         sourcererActions.setSelectedDataView({
@@ -464,8 +468,8 @@ export const dispatchUpdateTimeline =
       );
     }
     if (
-      timeline.status === TimelineStatus.immutable &&
-      timeline.timelineType === TimelineType.template
+      _timeline.status === TimelineStatus.immutable &&
+      _timeline.timelineType === TimelineType.template
     ) {
       dispatch(
         dispatchSetRelativeRangeDatePicker({
@@ -480,24 +484,29 @@ export const dispatchUpdateTimeline =
       dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
     }
     dispatch(
-      dispatchAddTimeline({ id, timeline, resolveTimelineConfig, savedTimeline: duplicate })
+      dispatchAddTimeline({
+        id,
+        timeline: _timeline,
+        resolveTimelineConfig,
+        savedTimeline: duplicate,
+      })
     );
     if (
       !preventSettingQuery &&
-      timeline.kqlQuery != null &&
-      timeline.kqlQuery.filterQuery != null &&
-      timeline.kqlQuery.filterQuery.kuery != null &&
-      timeline.kqlQuery.filterQuery.kuery.expression !== ''
+      _timeline.kqlQuery != null &&
+      _timeline.kqlQuery.filterQuery != null &&
+      _timeline.kqlQuery.filterQuery.kuery != null &&
+      _timeline.kqlQuery.filterQuery.kuery.expression !== ''
     ) {
       dispatch(
         dispatchApplyKqlFilterQuery({
           id,
           filterQuery: {
             kuery: {
-              kind: timeline.kqlQuery.filterQuery.kuery.kind ?? 'kuery',
-              expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
+              kind: _timeline.kqlQuery.filterQuery.kuery.kind ?? 'kuery',
+              expression: _timeline.kqlQuery.filterQuery.kuery.expression || '',
             },
-            serializedQuery: timeline.kqlQuery.filterQuery.serializedQuery || '',
+            serializedQuery: _timeline.kqlQuery.filterQuery.serializedQuery || '',
           },
         })
       );
