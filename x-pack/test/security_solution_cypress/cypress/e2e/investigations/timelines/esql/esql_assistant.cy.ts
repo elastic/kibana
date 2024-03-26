@@ -18,7 +18,7 @@ const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const ESQL_QUERY = 'from auditbeat-* | where ecs.version == "8.0.0"';
 const KQL_QUERY = '_index : "auditbeat-*" and ecs.version : "8.0.0"';
-const EQL_QUERY = 'process where process.name == "zsh"'
+const EQL_QUERY = 'process where process.name == "zsh"';
 
 describe(
   'Basic Assistant tests',
@@ -50,7 +50,9 @@ describe(
       login();
       visitWithTimeRange(ALERTS_URL);
       cy.get(AI_ASSISTANT_BUTTON).click();
-      cy.get('[data-test-subj="conversation-selector"] [data-test-subj="comboBoxSearchInput"]').should('not.be.disabled');
+      cy.get(
+        '[data-test-subj="conversation-selector"] [data-test-subj="comboBoxSearchInput"]'
+      ).should('not.be.disabled');
       cy.get('[data-test-subj="prompt-textarea"]').then(($el) => {
         if ($el.is(':disabled')) {
           cy.get('[data-test-subj="connectorMissingCallout"]').find('button').click();
@@ -58,8 +60,8 @@ describe(
           cy.get('[data-test-subj="preconfigured-openai"]').click();
           cy.get('[data-test-subj="save-button"]').click();
         }
-      })
-    })
+      });
+    });
 
     describe('ES|QL', () => {
       beforeEach(() => {
@@ -136,7 +138,9 @@ describe(
           .click();
         cy.contains('[data-test-subj="timelineQueryInput"]', KQL_QUERY);
         cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').filter(':visible').click();
-        cy.get('[data-test-subj="server-side-event-count"]').filter(':visible').should('have.text', 1);
+        cy.get('[data-test-subj="server-side-event-count"]')
+          .filter(':visible')
+          .should('have.text', 1);
       });
     });
 
@@ -148,7 +152,7 @@ describe(
         cy.get('[data-test-subj="conversation-selector"]')
           .find('[data-test-subj="comboBoxSearchInput"]')
           .type(`New conversation-` + Date.now());
-        });
+      });
 
       it('should properly propagate EQL query', () => {
         cy.get('[data-test-subj="prompt-textarea"]').type(
@@ -166,7 +170,9 @@ describe(
           .click();
         cy.contains('[data-test-subj="eqlQueryBarTextInput"]', `${EQL_QUERY}`);
         cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').filter(':visible').click();
-        cy.get('[data-test-subj="server-side-event-count"]').filter(':visible').should('have.text', 1);
+        cy.get('[data-test-subj="server-side-event-count"]')
+          .filter(':visible')
+          .should('have.text', 1);
       });
     });
   }
