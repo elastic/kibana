@@ -91,10 +91,10 @@ const randomAgentPolicyName = (() => {
 })();
 
 /**
- * Used for filtering out any versions in the format "8.13.0+build202403222138"
+ * Check if the given version string is a valid artifact version
  * @param version Version string
  */
-const hasNoBuildLabel = (version: string) => !version.includes('+build');
+const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.\d+(-SNAPSHOT)?$/);
 
 export const checkInFleetAgent = async (
   esClient: Client,
@@ -404,7 +404,7 @@ export const getAgentVersionMatchingCurrentStack = async (
     .get('https://artifacts-api.elastic.co/v1/versions')
     .then((response) =>
       map(
-        response.data.versions.filter(hasNoBuildLabel),
+        response.data.versions.filter(isValidArtifactVersion),
         (version) => version.split('-SNAPSHOT')[0]
       )
     );
@@ -531,7 +531,7 @@ export const getLatestAgentDownloadVersion = async (
   );
 
   const stackVersionToArtifactVersion: Record<string, string> = artifactVersionsResponse.versions
-    .filter(hasNoBuildLabel)
+    .filter(isValidArtifactVersion)
     .reduce((acc, artifactVersion) => {
       const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
       acc[stackVersion] = artifactVersion;
