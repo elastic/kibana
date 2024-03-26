@@ -32,4 +32,11 @@ import { registerLanguage } from './src/helpers';
 export { BarePluginApi, registerLanguage };
 export * from './src/types';
 
-export { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from './src/console';
+export {
+  CONSOLE_LANG_ID,
+  CONSOLE_THEME_ID,
+  getParsedRequestsProvider,
+  ConsoleParsedRequestsProvider,
+} from './src/console';
+
+export type { ParsedRequest } from './src/console';

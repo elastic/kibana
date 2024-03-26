@@ -6,30 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { ParserWorker } from './types';
+import { ConsoleWorkerProxyService } from './console_worker_proxy';
+import { CONSOLE_LANG_ID } from './constants';
 import { monaco } from '../monaco_imports';
-import { WorkerProxyService } from './worker_proxy';
 
-export const setupWorker = (
-  langId: string,
-  owner: string,
-  worker: WorkerProxyService<ParserWorker>
-) => {
-  worker.setup(langId);
-
-  const updateAnnotations = async (model: monaco.editor.IModel): Promise<void> => {
+export const setupConsoleErrorsProvider = (workerProxyService: ConsoleWorkerProxyService) => {
+  const updateErrorMarkers = async (model: monaco.editor.IModel): Promise<void> => {
     if (model.isDisposed()) {
       return;
     }
-    const parseResult = await worker.getAnnos(model.uri);
+    const parseResult = await workerProxyService.getParseResult(model.uri);
+
     if (!parseResult) {
       return;
     }
-    const { annotations } = parseResult;
+    const { errors } = parseResult;
     monaco.editor.setModelMarkers(
       model,
-      owner,
-      annotations.map(({ at, text, type }) => {
+      CONSOLE_LANG_ID,
+      errors.map(({ at, text }) => {
         const { column, lineNumber } = model.getPositionAt(at);
         return {
           startLineNumber: lineNumber,
@@ -37,27 +32,25 @@ export const setupWorker = (
           endLineNumber: lineNumber,
           endColumn: column,
           message: text,
-          severity: type === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
+          severity: monaco.MarkerSeverity.Error,
         };
       })
     );
   };
-
   const onModelAdd = (model: monaco.editor.IModel) => {
-    if (model.getLanguageId() !== langId) {
+    if (model.getLanguageId() !== CONSOLE_LANG_ID) {
       return;
     }
 
     const { dispose } = model.onDidChangeContent(async () => {
-      await updateAnnotations(model);
+      await updateErrorMarkers(model);
     });
 
     model.onWillDispose(() => {
       dispose();
     });
 
-    updateAnnotations(model);
+    updateErrorMarkers(model);
   };
-
   monaco.editor.onDidCreateModel(onModelAdd);
 };

@@ -27,6 +27,35 @@ export const createParser = () => {
     annotate = function (type, text) {
       annos.push({ type: type, text: text, at: at });
     },
+    requestEvents,
+    getLastRequest = function() {
+      return requestEvents.length > 0 ? requestEvents.pop() : {};
+    },
+    addRequestStart = function() {
+      requestEvents.push({startOffset: at});
+    },
+    addRequestEnd = function() {
+      const lastRequest = getLastRequest();
+      lastRequest.endOffset = at;
+      requestEvents.push(lastRequest);
+    },
+    addRequestMethod = function(method) {
+      const lastRequest = getLastRequest();
+      lastRequest.method = method;
+      requestEvents.push(lastRequest);
+    },
+    addRequestUrl = function(url) {
+      const lastRequest = getLastRequest();
+      lastRequest.url = url;
+      requestEvents.push(lastRequest);
+    },
+    addRequestData = function(data) {
+      const lastRequest = getLastRequest();
+      const dataArray = lastRequest.data || [];
+      dataArray.push(data);
+      lastRequest.data = dataArray;
+      requestEvents.push(lastRequest);
+    },
     error = function (m) {
       throw {
         name: 'SyntaxError',
@@ -373,14 +402,18 @@ export const createParser = () => {
     },
     request = function () {
       white();
-      method();
+      addRequestStart();
+      const parsedMethod = method();
+      addRequestMethod(parsedMethod);
       strictWhite();
-      url();
+      const parsedUrl = url();
+      addRequestUrl(parsedUrl );
       strictWhite(); // advance to one new line
       newLine();
       strictWhite();
       if (ch == '{') {
-        object();
+        const parsedObject = object();
+        addRequestData(parsedObject);
       }
       // multi doc request
       strictWhite(); // advance to one new line
@@ -388,11 +421,13 @@ export const createParser = () => {
       strictWhite();
       while (ch == '{') {
         // another object
-        object();
+        const parsedObject = object();
+        addRequestData(parsedObject);
         strictWhite();
         newLine();
         strictWhite();
       }
+      addRequestEnd();
     },
     comment = function () {
       while (ch == '#') {
@@ -433,6 +468,7 @@ export const createParser = () => {
     text = source;
     at = 0;
     annos = [];
+    requestEvents = [];
     next();
     multi_request();
     white();
@@ -440,7 +476,7 @@ export const createParser = () => {
       annotate('error', 'Syntax error');
     }
 
-    result = { annotations: annos };
+    result = { errors: annos, requests: requestEvents };
 
     return typeof reviver === 'function'
       ? (function walk(holder, key) {
