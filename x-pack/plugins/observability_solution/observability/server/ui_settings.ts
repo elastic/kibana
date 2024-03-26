@@ -8,11 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
-import {
-  aiAssistantLogsIndexPattern,
-  aiAssistantResponseLanguage,
-  aiAssistantDefaultConnector,
-} from '@kbn/observability-ai-assistant-plugin/server';
 import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
 import {
   enableComparisonByDefault,
@@ -582,36 +577,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: true,
     schema: schema.boolean(),
-    requiresPageReload: true,
-  },
-
-  [aiAssistantDefaultConnector]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.aifoobar', {
-      defaultMessage: 'ai assistant stuff',
-    }),
-    value: 'foo',
-    schema: schema.string(),
-    requiresPageReload: true,
-  },
-
-  [aiAssistantLogsIndexPattern]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.aifoobar', {
-      defaultMessage: 'ai assistant stuff',
-    }),
-    value: 'foo',
-    schema: schema.string(),
-    requiresPageReload: true,
-  },
-
-  [aiAssistantResponseLanguage]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.aifoobar', {
-      defaultMessage: 'ai assistant stuff',
-    }),
-    value: 'foo',
-    schema: schema.string(),
     requiresPageReload: true,
   },
 };
