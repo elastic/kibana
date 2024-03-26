@@ -25,7 +25,3 @@ steps:
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
       queue: kibana-default
-
-notify:
-  - slack: "#fleet-notifications"
-    if: build.branch == "main" && build.state == "failed"
