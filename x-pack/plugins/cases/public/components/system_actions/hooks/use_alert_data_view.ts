@@ -6,14 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import type { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
 import { fetchAlertIndexNames } from './alert_index';
 import { fetchAlertFields } from './alert_fields';
-import { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface UserAlertDataViews {
   dataViews?: DataView[];
@@ -81,7 +82,7 @@ export function useAlertDataViews(featureIds: ValidFeatureId[]): UserAlertDataVi
   useEffect(() => {
     return () => {
       dataViews?.map((dv) => {
-        dataService.dataViews.clearInstanceCache(dv.id);
+        return dataService.dataViews.clearInstanceCache(dv.id);
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

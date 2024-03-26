@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiCheckbox,
   EuiFieldNumber,
@@ -17,27 +18,20 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiSuperSelect,
-  EuiSuperSelectOption,
 } from '@elastic/eui';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
-import { CASES_CONNECTOR_SUB_ACTION } from '../../../../server/connectors/cases/constants';
+import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
 import * as i18n from './translations';
-import { CasesActionParams } from './types';
+import type { CasesActionParams } from './types';
 import { DEFAULT_TIME_WINDOW_SIZE, DEFAULT_TIME_WINDOW_UNIT } from './constants';
 import { getTimeUnitOptions } from './utils';
 import { useAlertDataViews } from '../hooks/use_alert_data_view';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { isEmpty } from 'lodash';
 
-export const CasesParamsFields: React.FunctionComponent<ActionParamsProps<CasesActionParams>> = ({
-  actionConnector,
-  actionParams,
-  editAction,
-  errors,
-  index,
-  producerId,
-}) => {
+export const CasesParamsFieldsComponent: React.FunctionComponent<
+  ActionParamsProps<CasesActionParams>
+> = ({ actionParams, editAction, errors, index, producerId }) => {
   const { appId } = useApplication();
   const owner = getCaseOwnerByAppId(appId);
 
@@ -56,7 +50,7 @@ export const CasesParamsFields: React.FunctionComponent<ActionParamsProps<CasesA
     [actionParams.subActionParams]
   );
 
-  const [timeWindowSize, timeWindowUnit] = timeWindow.match(/[a-zA-Z]+|[0-9]+/g) ?? [];
+  const [timeWindowSize, timeWindowUnit] = timeWindow.match(/[a-zA-Z]+|-?[0-9]+/g) ?? [];
 
   useEffect(() => {
     if (!actionParams.subAction) {
@@ -79,7 +73,7 @@ export const CasesParamsFields: React.FunctionComponent<ActionParamsProps<CasesA
   }, [actionParams, owner]);
 
   const editSubActionProperty = useCallback(
-    (key: string, value: any) => {
+    (key: string, value: unknown) => {
       return editAction(
         'subActionParams',
         { ...actionParams.subActionParams, [key]: value },
@@ -90,7 +84,7 @@ export const CasesParamsFields: React.FunctionComponent<ActionParamsProps<CasesA
   );
 
   const handleTimeWindowChange = (key: 'timeWindowSize' | 'timeWindowUnit', value: string) => {
-    if (!value || isEmpty(value)) {
+    if (!value) {
       return;
     }
 
@@ -143,6 +137,7 @@ export const CasesParamsFields: React.FunctionComponent<ActionParamsProps<CasesA
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
+        id="timeWindow"
         error={errors['subActionParams.timeWindow.size']}
         isInvalid={
           errors['subActionParams.timeWindow.size'] !== undefined &&
@@ -156,7 +151,6 @@ export const CasesParamsFields: React.FunctionComponent<ActionParamsProps<CasesA
               prepend={i18n.TIME_WINDOW}
               name="timeWindowSize"
               data-test-subj="time-window-size-input"
-              min={0}
               value={timeWindowSize}
               onChange={(e) => {
                 handleTimeWindowChange('timeWindowSize', e.target.value);
@@ -196,5 +190,10 @@ export const CasesParamsFields: React.FunctionComponent<ActionParamsProps<CasesA
   );
 };
 
+CasesParamsFieldsComponent.displayName = 'CasesParamsFields';
+
+export const CasesParamsFields = memo(CasesParamsFieldsComponent);
+
+// default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
 export { CasesParamsFields as default };

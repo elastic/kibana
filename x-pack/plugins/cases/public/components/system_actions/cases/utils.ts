@@ -8,13 +8,14 @@
 import { TIME_UNITS } from './constants';
 import * as i18n from './translations';
 
-export const getTimeUnitOptions = (unitSize: number) =>
-  Object.entries(TIME_UNITS).map(([_key, value]) => {
+export const getTimeUnitOptions = (unitSize: number) => {
+  return Object.entries(TIME_UNITS).map(([_key, value]) => {
     return {
       text: getTimeUnitLabels(value, unitSize.toString()),
       value,
     };
   });
+};
 
 export const getTimeUnitLabels = (timeUnit = TIME_UNITS.DAYS, timeValue = '0') => {
   switch (timeUnit) {

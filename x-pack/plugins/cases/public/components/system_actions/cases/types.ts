@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { CasesConnectorRunParams } from '../../../../server/connectors/cases/types';
+import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { CasesConnectorRunParams } from '../../../../server/connectors/cases/types';
 
-export type CasesActionConnector = UserConfiguredActionConnector<CasesConfig, CasesSecrets>;
-
-export type CasesConfig = {};
-export type CasesSecrets = {};
+export type CasesActionConnector = UserConfiguredActionConnector<{}, {}>;
 
 export type CasesSubActionParams = Pick<
   CasesConnectorRunParams,
   'groupingBy' | 'owner' | 'timeWindow' | 'reopenClosedCases'
 >;
 
-export type CasesActionParams = {
+export interface CasesActionParams {
   subAction: string;
   subActionParams: CasesSubActionParams;
-};
+}

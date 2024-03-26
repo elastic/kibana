@@ -6,20 +6,12 @@
  */
 
 import React from 'react';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import {
-  act,
-  fireEvent,
-  render,
-  waitFor,
-  within,
-  screen,
-  findByText,
-} from '@testing-library/react';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { useAlertDataViews } from '../hooks/use_alert_data_view';
-import CasesParamsFields from './cases_params';
+import { CasesParamsFields } from './cases_params';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -137,6 +129,17 @@ describe('CasesParamsFields renders', () => {
     expect(editAction.mock.calls[0][1].owner).toBeUndefined();
   });
 
+  it('If timeWindow has errors, form row is invalid', async () => {
+    const newProps = {
+      ...defaultProps,
+      errors: { 'subActionParams.timeWindow.size': ['error'] },
+    };
+
+    render(<CasesParamsFields {...newProps} />);
+
+    expect(await screen.findByText('error')).toBeInTheDocument();
+  });
+
   describe('UI updates', () => {
     it('renders grouping by field options', async () => {
       render(<CasesParamsFields {...defaultProps} />);
@@ -150,7 +153,7 @@ describe('CasesParamsFields renders', () => {
       ).toBeInTheDocument();
     });
 
-    it('updates grouping by field ', async () => {
+    it('updates grouping by field', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
       userEvent.click(await screen.findByTestId('group-by-alert-field'));
@@ -161,6 +164,39 @@ describe('CasesParamsFields renders', () => {
       userEvent.click(await screen.findByTestId('group-by-alert-field-host.ip'));
 
       expect(editAction.mock.calls[0][1].groupingBy).toEqual(['host.ip']);
+    });
+
+    it('updates time window size', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
+
+      userEvent.clear(await screen.findByTestId('time-window-size-input'));
+      userEvent.paste(await screen.findByTestId('time-window-size-input'), '5');
+
+      expect(editAction.mock.calls[0][1].timeWindow).toEqual('5w');
+    });
+
+    it('updates time window unit', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
+
+      fireEvent.change(await screen.findByTestId('time-window-unit-select'), {
+        target: { value: 'm' },
+      });
+
+      expect(editAction.mock.calls[0][1].timeWindow).toEqual('6m');
+    });
+
+    it('updates reopenClosedCases', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
+
+      userEvent.click(await screen.findByTestId('reopen-case'));
+
+      expect(editAction.mock.calls[0][1].reopenClosedCases).toEqual(true);
     });
   });
 });

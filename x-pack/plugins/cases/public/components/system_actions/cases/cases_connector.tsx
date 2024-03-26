@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
 
-const CasesConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+const CasesConnectorFieldsComponent: React.FC<ActionConnectorFieldsProps> = ({
+  readOnly,
+  isEdit,
+}) => {
   return (
     <SimpleConnectorForm
       isEdit={isEdit}
@@ -20,5 +23,10 @@ const CasesConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, 
   );
 };
 
+CasesConnectorFieldsComponent.displayName = 'CasesConnectorFields';
+
+export const CasesConnectorFields = memo(CasesConnectorFieldsComponent);
+
+// default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
 export { CasesConnectorFields as default };

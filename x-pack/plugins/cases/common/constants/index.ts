@@ -211,6 +211,10 @@ export const LOCAL_STORAGE_KEYS = {
  * Connectors
  */
 
+export enum CASES_CONNECTOR_SUB_ACTION {
+  RUN = 'run',
+}
+
 export const NONE_CONNECTOR_ID: string = 'none';
 export const CASES_CONNECTOR_ID = '.cases';
 export const CASES_CONNECTOR_TITLE = 'Cases';
