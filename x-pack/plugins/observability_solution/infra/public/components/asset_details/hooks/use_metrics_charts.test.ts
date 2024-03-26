@@ -17,7 +17,7 @@ import {
 const metricsDataViewId = 'metricsDataViewId';
 const logsDataViewId = 'logsDataViewId';
 
-describe('useFlyoutMetricsCharts', () => {
+describe('useHostFlyoutViewMetricsCharts', () => {
   it('should return an array of charts with correct order', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useHostFlyoutViewMetricsCharts({ metricsDataViewId, logsDataViewId })
@@ -55,7 +55,7 @@ describe('useFlyoutMetricsCharts', () => {
   });
 });
 
-describe('useHostMetricsCharts', () => {
+describe('useHostPageViewMetricsCharts', () => {
   it('should return an array of charts with correct order', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useHostPageViewMetricsCharts({ metricsDataViewId, logsDataViewId })
@@ -96,7 +96,7 @@ describe('useHostMetricsCharts', () => {
   });
 });
 
-describe('useKubernetesMetricsCharts', () => {
+describe('useKubernetesSectionMetricsCharts', () => {
   it('should return an array of charts with correct order', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useKubernetesSectionMetricsCharts({ metricsDataViewId })
