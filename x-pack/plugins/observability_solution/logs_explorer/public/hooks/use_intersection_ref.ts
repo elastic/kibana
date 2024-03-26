@@ -19,7 +19,7 @@ export function useIntersectionRef<ElementType extends HTMLElement = HTMLElement
 
   const intersection = useIntersection(
     { current: intersectionRef },
-    { root: null, threshold: 0.5 }
+    { root: null, threshold: 0.75 }
   );
 
   useEffect(() => {

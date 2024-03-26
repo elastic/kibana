@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import {
   EuiAccordion,
   useGeneratedHtmlId,
@@ -59,13 +59,13 @@ export function IntegrationsList({
             const isLastItem = pos === items.length - 1;
 
             return (
-              <>
-                {isLastItem && <span ref={spyRef} />}
+              <Fragment key={integration.id}>
                 <IntegrationItem integration={integration} />
                 {isLastItem ? null : rule}
-              </>
+              </Fragment>
             );
           })}
+          <span ref={spyRef} /> {/* Used to trigger integrations infinite scroll loading */}
         </IntegrationListWrapper>
       )}
     </EuiPanel>
@@ -91,7 +91,9 @@ function IntegrationItem({ integration }) {
   );
 
   const content = Boolean(datasets?.length > 0)
-    ? datasets.map((dataset) => <DatasetItem dataset={dataset} icon={integrationIcon} />)
+    ? datasets.map((dataset) => (
+        <DatasetItem key={dataset.id} dataset={dataset} icon={integrationIcon} />
+      ))
     : integration.content;
 
   return (
@@ -160,8 +162,14 @@ function DatasetItem({ dataset, icon, ...props }) {
   );
 }
 
-function ListRow(props) {
-  return <StyledListRow gutterSize="s" alignItems="center" {...props} />;
+function ListRow({ css: customCss = '', withIndentation, ...props }) {
+  const styles = css`
+    padding-right: ${euiThemeVars.euiSizeM};
+    ${withIndentation ? indentationStyle : ''}
+    ${customCss}
+  `;
+
+  return <EuiFlexGroup gutterSize="s" alignItems="center" css={styles} {...props} />;
 }
 
 function TextWithIcon({ icon, text, ...props }) {
@@ -235,9 +243,4 @@ const headerStyle = css`
 
 const datasetItemStyle = css`
   border-top: 1px solid ${euiThemeVars.euiColorLightestShade};
-`;
-
-const StyledListRow = styled(EuiFlexGroup)`
-  padding-right: ${euiThemeVars.euiSizeM};
-  ${({ withIndentation = false }) => (withIndentation ? indentationStyle : '')}
 `;

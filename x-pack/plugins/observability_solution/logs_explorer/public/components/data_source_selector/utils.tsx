@@ -37,6 +37,7 @@ export const buildIntegrationsTree = ({
   onUncategorizedLoad,
 }: IntegrationsTreeParams) => {
   const uncategorizedIntegration = {
+    id: 'integration-uncategorized',
     title: uncategorizedLabel,
     datasets,
     onClick: onUncategorizedLoad,
