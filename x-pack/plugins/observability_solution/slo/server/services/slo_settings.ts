@@ -7,6 +7,7 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { SloSettings } from '../domain/models';
 import { sloSettingsObjectId, SO_SLO_SETTINGS_TYPE } from '../saved_objects/slo_settings';
@@ -16,7 +17,7 @@ export const getSloSettings = async (soClient: SavedObjectsClientContract) => {
     const soObject = await soClient.get<SloSettings>(SO_SLO_SETTINGS_TYPE, sloSettingsObjectId);
     return soObject.attributes;
   } catch (e) {
-    if (e.isBoom && e.output?.statusCode === 404) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       return {
         useAllRemoteClusters: true,
         selectedRemoteClusters: [],
