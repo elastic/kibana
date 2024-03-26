@@ -7,7 +7,10 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import { GeoPointExample, LatLongExample } from '../../../../common/types/field_request_config';
+import type {
+  GeoPointExample,
+  LatLongExample,
+} from '../../../../common/types/field_request_config';
 
 export function isGeoPointExample(arg: unknown): arg is GeoPointExample {
   return isPopulatedObject(arg, ['coordinates']) && Array.isArray(arg.coordinates);

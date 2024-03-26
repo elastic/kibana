@@ -6,13 +6,16 @@
  */
 
 import { parse } from 'query-string';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
-import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import { useMlKibana } from '../../../contexts/kibana';
 import { basicResolvers } from '../../resolvers';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
+import type { MlRoute, PageProps } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { Page } from '../../../jobs/new_job/pages/new_job';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';

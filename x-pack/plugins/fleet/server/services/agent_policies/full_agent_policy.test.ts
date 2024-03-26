@@ -93,6 +93,15 @@ jest.mock('../output', () => {
       type: 'elasticsearch',
       hosts: ['http://127.0.0.1:9201'],
     },
+    'test-remote-id': {
+      id: 'test-remote-id',
+      is_default: true,
+      is_default_monitoring: true,
+      name: 'default',
+      // @ts-ignore
+      type: 'remote_elasticsearch',
+      hosts: ['http://127.0.0.1:9201'],
+    },
   };
   return {
     outputService: {
@@ -373,6 +382,23 @@ describe('getFullAgentPolicy', () => {
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
 
     expect(agentPolicy?.outputs.default).toBeDefined();
+  });
+
+  it('should use output id as the default policy id when remote elasticsearch', async () => {
+    mockAgentPolicy({
+      id: 'policy',
+      status: 'active',
+      package_policies: [],
+      is_managed: false,
+      namespace: 'default',
+      revision: 1,
+      data_output_id: 'test-remote-id',
+      monitoring_output_id: 'test-remote-id',
+    });
+
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy?.outputs['test-remote-id']).toBeDefined();
   });
 
   it('should return the sourceURI from the agent policy', async () => {
@@ -818,6 +844,69 @@ ssl.test: 123
           "host.fr:3332",
         ],
         "type": "logstash",
+      }
+    `);
+  });
+
+  it('should work with kafka output', () => {
+    const policyOutput = transformOutputToFullPolicyOutput({
+      id: 'id123',
+      hosts: ['test:9999'],
+      topics: [
+        {
+          topic: 'test',
+        },
+        // Deprecated conditionnal topic
+        {
+          topic: 'deprecated',
+          when: { condition: 'test:100', type: 'equals' },
+        },
+      ],
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'test output',
+      type: 'kafka',
+      config_yaml: '',
+      client_id: 'Elastic',
+      version: '1.0.0',
+      compression: 'none',
+      auth_type: 'none',
+      connection_type: 'plaintext',
+      partition: 'random',
+      random: {
+        group_events: 1,
+      },
+      headers: [
+        {
+          key: '',
+          value: '',
+        },
+      ],
+      timeout: 30,
+      broker_timeout: 30,
+      required_acks: 1,
+    });
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "broker_timeout": 30,
+        "client_id": "Elastic",
+        "compression": "none",
+        "headers": Array [],
+        "hosts": Array [
+          "test:9999",
+        ],
+        "key": undefined,
+        "partition": Object {
+          "random": Object {
+            "group_events": 1,
+          },
+        },
+        "required_acks": 1,
+        "timeout": 30,
+        "topic": "test",
+        "type": "kafka",
+        "version": "1.0.0",
       }
     `);
   });

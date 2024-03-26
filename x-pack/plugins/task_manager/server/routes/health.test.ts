@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Observable, of, Subject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, of, Subject } from 'rxjs';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
@@ -277,7 +276,7 @@ describe('healthRoute', () => {
       docLinks,
     });
 
-    const serviceStatus = getLatest(serviceStatus$);
+    const serviceStatus = firstValueFrom(serviceStatus$);
 
     stats$.next(warnRuntimeStat);
     await sleep(1001);
@@ -362,7 +361,7 @@ describe('healthRoute', () => {
       docLinks,
     });
 
-    const serviceStatus = getLatest(serviceStatus$);
+    const serviceStatus = firstValueFrom(serviceStatus$);
 
     stats$.next(errorRuntimeStat);
     await sleep(1001);
@@ -435,7 +434,7 @@ describe('healthRoute', () => {
       docLinks,
     });
 
-    const serviceStatus = getLatest(serviceStatus$);
+    const serviceStatus = firstValueFrom(serviceStatus$);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -519,7 +518,7 @@ describe('healthRoute', () => {
       docLinks,
     });
 
-    const serviceStatus = getLatest(serviceStatus$);
+    const serviceStatus = firstValueFrom(serviceStatus$);
 
     await sleep(0);
 
@@ -600,7 +599,7 @@ describe('healthRoute', () => {
       shouldRunTasks: true,
       docLinks,
     });
-    const serviceStatus = getLatest(serviceStatus$);
+    const serviceStatus = firstValueFrom(serviceStatus$);
     await sleep(0);
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -659,6 +658,54 @@ describe('healthRoute', () => {
             getTaskManagerConfig()
           )
         ),
+      },
+    });
+  });
+
+  it('returns a OK status for empty if shouldRunTasks is false', async () => {
+    const router = httpServiceMock.createRouter();
+
+    const stats$ = new Subject<MonitoringStats>();
+    const { serviceStatus$ } = healthRoute({
+      router,
+      monitoringStats$: stats$,
+      logger,
+      taskManagerId: uuidv4(),
+      config: getTaskManagerConfig({
+        monitored_stats_required_freshness: 1000,
+        monitored_aggregated_stats_refresh_rate: 60000,
+      }),
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+      shouldRunTasks: false,
+      docLinks,
+    });
+    const serviceStatus = firstValueFrom(serviceStatus$);
+    await sleep(0);
+
+    const lastUpdate = new Date().toISOString();
+    stats$.next({
+      last_update: lastUpdate,
+      stats: {},
+    });
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
+
+    expect(await serviceStatus).toMatchObject({
+      level: ServiceStatusLevels.available,
+      summary: 'Task Manager is healthy',
+    });
+    expect(await handler(context, req, res)).toMatchObject({
+      body: {
+        id: expect.any(String),
+        timestamp: expect.any(String),
+        status: 'OK',
+        last_update: lastUpdate,
+        stats: {},
       },
     });
   });
@@ -752,10 +799,6 @@ function mockHealthStats(overrides = {}) {
     },
   };
   return merge(stub, overrides) as unknown as MonitoringStats;
-}
-
-async function getLatest<T>(stream$: Observable<T>) {
-  return new Promise<T>((resolve) => stream$.pipe(take(1)).subscribe((stats) => resolve(stats)));
 }
 
 const getTaskManagerConfig = (overrides: Partial<TaskManagerConfig> = {}) =>

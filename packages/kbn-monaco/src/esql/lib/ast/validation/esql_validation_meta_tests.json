@@ -251,7 +251,51 @@
       "error": false
     },
     {
+      "query": "from *a_i*dex*",
+      "error": false
+    },
+    {
+      "query": "from in*ex*",
+      "error": false
+    },
+    {
+      "query": "from *n*ex",
+      "error": false
+    },
+    {
+      "query": "from *n*ex*",
+      "error": false
+    },
+    {
+      "query": "from i*d*x*",
+      "error": false
+    },
+    {
+      "query": "from i*d*x",
+      "error": false
+    },
+    {
+      "query": "from i***x*",
+      "error": false
+    },
+    {
+      "query": "from i****",
+      "error": false
+    },
+    {
+      "query": "from i**",
+      "error": false
+    },
+    {
+      "query": "from index**",
+      "error": false
+    },
+    {
       "query": "from *ex",
+      "error": false
+    },
+    {
+      "query": "from *ex*",
       "error": false
     },
     {
@@ -567,19 +611,19 @@
       "error": false
     },
     {
-      "query": "row var = concat(\"a\")",
+      "query": "row var = concat(\"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row concat(\"a\")",
+      "query": "row concat(\"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row var = concat(to_string(\"a\"))",
+      "query": "row var = concat(to_string(\"a\"), to_string(\"a\"))",
       "error": false
     },
     {
-      "query": "row var = concat(5)",
+      "query": "row var = concat(5, 5)",
       "error": true
     },
     {
@@ -2439,6 +2483,18 @@
       "error": false
     },
     {
+      "query": "from index | drop s**Field",
+      "error": false
+    },
+    {
+      "query": "from index | drop *Field*",
+      "error": false
+    },
+    {
+      "query": "from index | drop s*F*d",
+      "error": false
+    },
+    {
       "query": "from index | drop *Field",
       "error": false
     },
@@ -3487,6 +3543,78 @@
       "error": false
     },
     {
+      "query": "from a_index | where avg(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | where avg(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | where max(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | where max(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | where min(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | where min(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | where sum(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | where sum(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | where median(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | where median(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | where median_absolute_deviation(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | where median_absolute_deviation(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | where percentile(numberField, 5)",
+      "error": true
+    },
+    {
+      "query": "from a_index | where percentile(numberField, 5) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | where count(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | where count(stringField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | where count_distinct(stringField, numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | where count_distinct(stringField, numberField) > 0",
+      "error": true
+    },
+    {
       "query": "from a_index | where abs(numberField) > 0",
       "error": false
     },
@@ -3535,11 +3663,11 @@
       "error": true
     },
     {
-      "query": "from a_index | where length(concat(stringField)) > 0",
+      "query": "from a_index | where length(concat(stringField, stringField)) > 0",
       "error": false
     },
     {
-      "query": "from a_index | where length(concat(numberField)) > 0",
+      "query": "from a_index | where length(concat(numberField, numberField)) > 0",
       "error": true
     },
     {
@@ -4427,6 +4555,182 @@
       "error": true
     },
     {
+      "query": "from a_index | eval var = avg(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = avg(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval avg(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval avg(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = max(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = max(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval max(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval max(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = min(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = min(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval min(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval min(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = sum(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = sum(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval sum(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval sum(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = median(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = median(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval median(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval median(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = median_absolute_deviation(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = median_absolute_deviation(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval median_absolute_deviation(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval median_absolute_deviation(numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = percentile(numberField, 5)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = percentile(numberField, 5) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval percentile(numberField, 5)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval percentile(numberField, 5) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = count(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = count(stringField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval count(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval count(stringField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = count_distinct(stringField, numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = count_distinct(stringField, numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval count_distinct(stringField, numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval count_distinct(stringField, numberField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = st_centroid(cartesianPointField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = st_centroid(cartesianPointField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval st_centroid(cartesianPointField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval st_centroid(cartesianPointField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = st_centroid(geoPointField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = st_centroid(geoPointField) > 0",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval st_centroid(geoPointField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval st_centroid(geoPointField) > 0",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = abs(numberField)",
       "error": false
     },
@@ -4623,27 +4927,19 @@
       "error": false
     },
     {
-      "query": "from a_index | eval var = coalesce(*)",
-      "error": true
-    },
-    {
-      "query": "from a_index | eval var = concat(stringField)",
+      "query": "from a_index | eval var = concat(stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval concat(stringField)",
+      "query": "from a_index | eval concat(stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval var = concat(to_string(stringField))",
+      "query": "from a_index | eval var = concat(to_string(stringField), to_string(stringField))",
       "error": false
     },
     {
-      "query": "from a_index | eval concat(numberField)",
-      "error": true
-    },
-    {
-      "query": "from a_index | eval var = concat(*)",
+      "query": "from a_index | eval concat(numberField, numberField)",
       "error": true
     },
     {
@@ -4847,20 +5143,12 @@
       "error": false
     },
     {
-      "query": "from a_index | eval var = greatest(*)",
-      "error": true
-    },
-    {
       "query": "from a_index | eval var = least(stringField)",
       "error": false
     },
     {
       "query": "from a_index | eval least(stringField)",
       "error": false
-    },
-    {
-      "query": "from a_index | eval var = least(*)",
-      "error": true
     },
     {
       "query": "from a_index | eval var = left(stringField, numberField)",
@@ -7983,27 +8271,27 @@
       "error": false
     },
     {
-      "query": "from a_index | stats var = count_distinct(stringField)",
+      "query": "from a_index | stats var = count_distinct(stringField, numberField)",
       "error": false
     },
     {
-      "query": "from a_index | stats count_distinct(stringField)",
+      "query": "from a_index | stats count_distinct(stringField, numberField)",
       "error": false
     },
     {
-      "query": "from a_index | stats var = round(count_distinct(stringField))",
+      "query": "from a_index | stats var = round(count_distinct(stringField, numberField))",
       "error": false
     },
     {
-      "query": "from a_index | stats round(count_distinct(stringField))",
+      "query": "from a_index | stats round(count_distinct(stringField, numberField))",
       "error": false
     },
     {
-      "query": "from a_index | stats var = round(count_distinct(stringField)) + count_distinct(stringField)",
+      "query": "from a_index | stats var = round(count_distinct(stringField, numberField)) + count_distinct(stringField, numberField)",
       "error": false
     },
     {
-      "query": "from a_index | stats round(count_distinct(stringField)) + count_distinct(stringField)",
+      "query": "from a_index | stats round(count_distinct(stringField, numberField)) + count_distinct(stringField, numberField)",
       "error": false
     },
     {
@@ -8056,6 +8344,10 @@
     },
     {
       "query": "FROM index\n    | EVAL numberField * 3.281\n    | STATS avg_numberField = AVG(`numberField * 3.281`)",
+      "error": false
+    },
+    {
+      "query": "FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL `round(numberField) + 1` / 2",
       "error": false
     },
     {
@@ -8356,6 +8648,22 @@
     },
     {
       "query": "from a_index | eval numberField = \"5\"",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval round(numberField) + 1 | eval `round(numberField) + 1` + 1 | keep ```round(numberField) + 1`` + 1`",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval round(numberField) + 1 | eval `round(numberField) + 1` + 1 | eval ```round(numberField) + 1`` + 1` + 1 | keep ```````round(numberField) + 1```` + 1`` + 1`",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval round(numberField) + 1 | eval `round(numberField) + 1` + 1 | eval ```round(numberField) + 1`` + 1` + 1 | eval ```````round(numberField) + 1```` + 1`` + 1` + 1 | keep ```````````````round(numberField) + 1```````` + 1```` + 1`` + 1`",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval round(numberField) + 1 | eval `round(numberField) + 1` + 1 | eval ```round(numberField) + 1`` + 1` + 1 | eval ```````round(numberField) + 1```` + 1`` + 1` + 1 | eval ```````````````round(numberField) + 1```````` + 1```` + 1`` + 1` + 1 | keep ```````````````````````````````round(numberField) + 1```````````````` + 1```````` + 1```` + 1`` + 1`",
       "error": false
     }
   ]

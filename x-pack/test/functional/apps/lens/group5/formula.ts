@@ -136,6 +136,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         formula: `asdf`,
       });
 
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics')).to.eql('asdf');
+
       await PageObjects.lens.assertMessageListContains('Field asdf was not found.', 'error');
     });
 

@@ -472,6 +472,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:logsExplorer:allowedDataViews': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Non-default value of setting.' },
+    },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -505,10 +512,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:dashboard:deferBelowFold': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:dashboard:linksPanel': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -608,7 +611,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableInfrastructureHostsCustomDashboards': {
+  'observability:enableInfrastructureAssetCustomDashboards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -644,7 +647,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'devTools:enableDockedConsole': {
+  'devTools:enablePersistentConsole': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

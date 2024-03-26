@@ -24,8 +24,8 @@ import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import {
   DataLoadingState,
   useColumns,
-  type DataTableColumnTypes,
-  getTextBasedColumnTypes,
+  type DataTableColumnsMeta,
+  getTextBasedColumnsMeta,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -66,6 +66,7 @@ import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
+import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 
 const containerStyles = css`
   position: relative;
@@ -86,12 +87,7 @@ export const onResize = (
   stateContainer: DiscoverStateContainer
 ) => {
   const state = stateContainer.appState.getState();
-  const grid = { ...(state.grid || {}) };
-  const newColumns = { ...(grid.columns || {}) };
-  newColumns[colSettings.columnId] = {
-    width: Math.round(colSettings.width),
-  };
-  const newGrid = { ...grid, columns: newColumns };
+  const newGrid = onResizeGridColumn(colSettings, state.grid);
   stateContainer.appState.update({ grid: newGrid });
 };
 
@@ -229,19 +225,16 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
-    () =>
-      // for ES|QL we want to show the time column only when is on Document view
-      (!isTextBasedQuery || !columns?.length) &&
-      !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
-      !!dataView.timeFieldName,
-    [isTextBasedQuery, columns, uiSettings, dataView.timeFieldName]
+    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+    [uiSettings]
   );
 
-  const columnTypes: DataTableColumnTypes | undefined = useMemo(
+  const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
     () =>
       documentState.textBasedQueryColumns
-        ? getTextBasedColumnTypes(documentState.textBasedQueryColumns)
+        ? getTextBasedColumnsMeta(documentState.textBasedQueryColumns)
         : undefined,
     [documentState.textBasedQueryColumns]
   );
@@ -251,7 +244,7 @@ function DiscoverDocumentsComponent({
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      customColumnTypes?: DataTableColumnTypes
+      customColumnsMeta?: DataTableColumnsMeta
     ) => (
       <DiscoverGridFlyout
         dataView={dataView}
@@ -259,7 +252,7 @@ function DiscoverDocumentsComponent({
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        columnTypes={customColumnTypes}
+        columnsMeta={customColumnsMeta}
         savedSearchId={savedSearch.id}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumn}
@@ -402,7 +395,7 @@ function DiscoverDocumentsComponent({
                 <DiscoverGridMemoized
                   ariaLabelledBy="documentsAriaLabel"
                   columns={currentColumns}
-                  columnTypes={columnTypes}
+                  columnsMeta={columnsMeta}
                   expandedDoc={expandedDoc}
                   dataView={dataView}
                   loadingState={

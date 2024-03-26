@@ -62,26 +62,23 @@ describe(
     },
   },
   () => {
-    before(() => {
+    beforeEach(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
       cy.task('esArchiverLoad', { archiveName: 'user_managed_data' });
       enableAssetCriticality();
-    });
-
-    after(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new_complete_data');
-      cy.task('esArchiverUnload', 'user_managed_data');
-      deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
-      deleteCriticality({ idField: 'host.name', idValue: SIEM_KIBANA_HOST_NAME });
-      deleteCriticality({ idField: 'user.name', idValue: USER_NAME });
-    });
-
-    beforeEach(() => {
       mockRiskEngineEnabled();
       login();
       visitWithTimeRange(ALERTS_URL);
       waitForAlerts();
+    });
+
+    afterEach(() => {
+      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_complete_data' });
+      cy.task('esArchiverUnload', { archiveName: 'user_managed_data' });
+      deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
+      deleteCriticality({ idField: 'host.name', idValue: SIEM_KIBANA_HOST_NAME });
+      deleteCriticality({ idField: 'user.name', idValue: USER_NAME });
     });
 
     describe('User details', () => {
@@ -134,7 +131,8 @@ describe(
         });
       });
 
-      describe('Managed data section', () => {
+      // https://github.com/elastic/kibana/issues/179248
+      describe('Managed data section', { tags: ['@brokenInServerlessQA'] }, () => {
         beforeEach(() => {
           mockFleetInstalledIntegrations([
             {

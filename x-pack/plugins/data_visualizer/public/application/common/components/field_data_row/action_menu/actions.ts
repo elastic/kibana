@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import type { MutableRefObject } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { mlTimefilterRefresh$, Refresh } from '@kbn/ml-date-picker';
+import type { Refresh } from '@kbn/ml-date-picker';
+import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import type { FieldVisConfig } from '../../stats_table/types';

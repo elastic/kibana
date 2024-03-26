@@ -41,6 +41,7 @@ export default function (ftrContext: FtrProviderContext) {
               name: 'My new tag',
               description: 'I just created that',
               color: '#009000',
+              managed: false,
             },
           });
         },

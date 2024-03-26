@@ -436,4 +436,46 @@ describe('Mappings editor: core', () => {
       expect(data).toEqual(updatedMappings);
     });
   });
+
+  describe('multi-fields support', () => {
+    it('allows multi-fields for most types', async () => {
+      const value = {
+        properties: {
+          name1: {
+            type: 'wildcard',
+          },
+        },
+      };
+      await act(async () => {
+        testBed = setup({ onChange: onChangeHandler, value });
+      });
+
+      const { component, exists } = testBed;
+      component.update();
+      expect(exists('addMultiFieldButton')).toBe(true);
+    });
+
+    it('keeps the fields property in the field', async () => {
+      const value = {
+        properties: {
+          name1: {
+            type: 'wildcard',
+            fields: {
+              text: {
+                type: 'match_only_text',
+              },
+            },
+          },
+        },
+      };
+      await act(async () => {
+        testBed = setup({ onChange: onChangeHandler, value });
+      });
+
+      const { component } = testBed;
+      component.update();
+      ({ data } = await getMappingsEditorData(component));
+      expect(data).toEqual(value);
+    });
+  });
 });

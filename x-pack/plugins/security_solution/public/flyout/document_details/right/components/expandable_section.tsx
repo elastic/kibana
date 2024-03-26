@@ -6,6 +6,7 @@
  */
 
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import type { EuiFlexGroupProps } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { type VFC } from 'react';
 import { useAccordionState } from '../hooks/use_accordion_state';
@@ -22,6 +23,10 @@ export interface DescriptionSectionProps {
    * Title value to render in the header of the accordion
    */
   title: ReactElement;
+  /**
+   * Gutter size between contents in expandable section
+   */
+  gutterSize?: EuiFlexGroupProps['gutterSize'];
   /**
    * React component to render in the expandable section of the accordion
    */
@@ -43,6 +48,7 @@ export const ExpandableSection: VFC<DescriptionSectionProps> = ({
   expanded,
   title,
   children,
+  gutterSize = 'none',
   'data-test-subj': dataTestSub,
 }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
@@ -61,7 +67,7 @@ export const ExpandableSection: VFC<DescriptionSectionProps> = ({
   return (
     <EuiAccordion forceState={state} onToggle={toggle} id={accordionId} buttonContent={header}>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="none" direction="column" data-test-subj={contentDataTestSub}>
+      <EuiFlexGroup gutterSize={gutterSize} direction="column" data-test-subj={contentDataTestSub}>
         {renderContent && children}
       </EuiFlexGroup>
     </EuiAccordion>

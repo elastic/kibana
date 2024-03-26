@@ -134,7 +134,7 @@ describe('split .kibana index into multiple system indices', () => {
           mappings: {
             dynamic: 'strict',
             _meta: {
-              migrationMappingPropertyHashes: expect.any(Object),
+              mappingVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),
@@ -149,7 +149,7 @@ describe('split .kibana index into multiple system indices', () => {
           mappings: {
             dynamic: 'strict',
             _meta: {
-              migrationMappingPropertyHashes: expect.any(Object),
+              mappingVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),
@@ -164,7 +164,7 @@ describe('split .kibana index into multiple system indices', () => {
           mappings: {
             dynamic: 'strict',
             _meta: {
-              migrationMappingPropertyHashes: expect.any(Object),
+              mappingVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),
@@ -223,6 +223,7 @@ describe('split .kibana index into multiple system indices', () => {
             "guided-onboarding-guide-state",
             "guided-onboarding-plugin-state",
             "index-pattern",
+            "infra-custom-dashboards",
             "infrastructure-monitoring-log-view",
             "infrastructure-ui-source",
             "ingest-agent-policies",

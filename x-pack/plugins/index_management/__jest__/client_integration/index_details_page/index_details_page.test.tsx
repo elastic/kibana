@@ -125,7 +125,8 @@ describe('<IndexDetailsPage />', () => {
     it('updates the breadcrumbs to index details stats', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
-        IndexManagementBreadcrumb.indexDetailsStats
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'Statistics' }
       );
     });
 
@@ -237,7 +238,8 @@ describe('<IndexDetailsPage />', () => {
   describe('Overview tab', () => {
     it('updates the breadcrumbs to index details overview', async () => {
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
-        IndexManagementBreadcrumb.indexDetailsOverview
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'Overview' }
       );
     });
 
@@ -455,7 +457,8 @@ describe('<IndexDetailsPage />', () => {
     it('updates the breadcrumbs to index details mappings', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
-        IndexManagementBreadcrumb.indexDetailsMappings
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'Mappings' }
       );
     });
     it('loads mappings from the API', async () => {
@@ -471,6 +474,24 @@ describe('<IndexDetailsPage />', () => {
 
       const tabContent = testBed.actions.mappings.getCodeBlockContent();
       expect(tabContent).toEqual(JSON.stringify(testIndexMappings, null, 2));
+    });
+
+    it('displays the mappings in the table view', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      await testBed.actions.mappings.clickToggleViewButton();
+      const tabContent = testBed.actions.mappings.getTreeViewContent();
+      expect(tabContent).toContain('@timestamp');
+    });
+
+    it('search bar is enabled in JSON view', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(true);
+    });
+
+    it('search bar is disabled in Tree view', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      await testBed.actions.mappings.clickToggleViewButton();
+      expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(false);
     });
 
     it('sets the docs link href from the documentation service', async () => {
@@ -551,7 +572,8 @@ describe('<IndexDetailsPage />', () => {
     it('updates the breadcrumbs to index details settings', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
-        IndexManagementBreadcrumb.indexDetailsSettings
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'Settings' }
       );
     });
 
@@ -936,6 +958,34 @@ describe('<IndexDetailsPage />', () => {
       await testBed.actions.clickIndexDetailsTab(testTabId);
       const content = testBed.actions.getActiveTabContent();
       expect(content).toEqual(testContent);
+    });
+
+    it("sets breadcrumbs for the tab using the tab's name", async () => {
+      await testBed.actions.clickIndexDetailsTab(testTabId);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'Test tab' }
+      );
+    });
+
+    it('sets breadcrumbs for the tab using the tab property', async () => {
+      const extensionsServiceMock = {
+        indexDetailsTabs: [{ ...additionalTab, breadcrumb: { text: 'special breadcrumb' } }],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(testTabId);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'special breadcrumb' }
+      );
     });
 
     it('additional tab is the first in the order', () => {

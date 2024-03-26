@@ -8,10 +8,33 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts", "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/reporting-common",
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/share-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/core-http-common",
+    "@kbn/i18n",
+    "@kbn/rison",
+    "@kbn/reporting-export-types-png-common",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/licensing-plugin",
+    "@kbn/screenshotting-plugin",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/discover-utils",
+    "@kbn/saved-search-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/react-kibana-mount",
+  ]
 }

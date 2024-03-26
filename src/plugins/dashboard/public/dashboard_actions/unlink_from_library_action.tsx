@@ -14,6 +14,7 @@ import {
   CanAccessViewMode,
   EmbeddableApiContext,
   getInheritedViewMode,
+  getPanelTitle,
   PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
 import { pluginServices } from '../services/plugin_services';
@@ -60,7 +61,7 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!unlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
-    const title = embeddable.panelTitle?.value ?? embeddable.defaultPanelTitle?.value;
+    const title = getPanelTitle(embeddable);
     try {
       await embeddable.unlinkFromLibrary();
       this.toastsService.addSuccess({

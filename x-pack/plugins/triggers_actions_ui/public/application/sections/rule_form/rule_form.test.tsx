@@ -26,7 +26,7 @@ import {
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 
 const toMapById = [
@@ -143,9 +143,9 @@ describe('rule_form', () => {
         defaultActionGroupId: 'testActionGroup',
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: RecoveredActionGroup,
-        producer: ALERTS_FEATURE_ID,
+        producer: ALERTING_FEATURE_ID,
         authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          [ALERTING_FEATURE_ID]: { read: true, all: true },
           test: { read: true, all: true },
         },
         actionVariables: {
@@ -166,9 +166,9 @@ describe('rule_form', () => {
         defaultActionGroupId: 'testActionGroup',
         minimumLicenseRequired: 'gold',
         recoveryActionGroup: RecoveredActionGroup,
-        producer: ALERTS_FEATURE_ID,
+        producer: ALERTING_FEATURE_ID,
         authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          [ALERTING_FEATURE_ID]: { read: true, all: true },
           test: { read: true, all: true },
         },
         actionVariables: {
@@ -212,7 +212,7 @@ describe('rule_form', () => {
       const initialRule = {
         name: 'test',
         params: {},
-        consumer: ALERTS_FEATURE_ID,
+        consumer: ALERTING_FEATURE_ID,
         schedule: {
           interval: schedule,
         },
@@ -298,9 +298,9 @@ describe('rule_form', () => {
           defaultActionGroupId: 'testActionGroup',
           minimumLicenseRequired: 'basic',
           recoveryActionGroup: RecoveredActionGroup,
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { read: true, all: true },
+            [ALERTING_FEATURE_ID]: { read: true, all: true },
             test: { read: true, all: true },
           },
           actionVariables: {
@@ -321,9 +321,9 @@ describe('rule_form', () => {
           defaultActionGroupId: 'testActionGroup',
           minimumLicenseRequired: 'gold',
           recoveryActionGroup: RecoveredActionGroup,
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { read: true, all: true },
+            [ALERTING_FEATURE_ID]: { read: true, all: true },
             test: { read: true, all: true },
           },
           actionVariables: {
@@ -365,7 +365,7 @@ describe('rule_form', () => {
       const initialRule = {
         name: 'test',
         params: {},
-        consumer: ALERTS_FEATURE_ID,
+        consumer: ALERTING_FEATURE_ID,
         schedule: {
           interval: schedule,
         },
@@ -556,7 +556,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               alerts: { read: true, all: true },
               apm: { read: true, all: true },
@@ -629,7 +629,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               infrastructure: { read: true, all: true },
               logs: { read: true, all: true },
@@ -683,65 +683,6 @@ describe('rule_form', () => {
       expect(wrapper.find('[data-test-subj="ruleFormConsumerSelect"]').exists()).toBeFalsy();
     });
 
-    it('Do not show alert query in action when multi consumer rule type does not have a consumer selected', async () => {
-      await setup({
-        initialRuleOverwrite: {
-          name: 'Simple rule',
-          consumer: 'alerts',
-          ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-          schedule: {
-            interval: '1h',
-          },
-        },
-        ruleTypesOverwrite: [
-          {
-            id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-            name: 'Threshold Rule',
-            actionGroups: [
-              {
-                id: 'testActionGroup',
-                name: 'Test Action Group',
-              },
-            ],
-            enabledInLicense: true,
-            defaultActionGroupId: 'threshold.fired',
-            minimumLicenseRequired: 'basic',
-            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
-            authorizedConsumers: {
-              infrastructure: { read: true, all: true },
-              logs: { read: true, all: true },
-            },
-            actionVariables: {
-              context: [],
-              state: [],
-              params: [],
-            },
-            hasFieldsForAAD: true,
-            hasAlertsMappings: true,
-          },
-        ],
-        ruleTypeModelOverwrite: {
-          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-          iconClass: 'test',
-          description: 'test',
-          documentationUrl: null,
-          validate: (): ValidationResult => {
-            return { errors: {} };
-          },
-          ruleParamsExpression: TestExpression,
-          requiresAppContext: false,
-        },
-      });
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      expect(wrapper.find(ActionForm).props().hasFieldsForAAD).toEqual(false);
-    });
-
     it('Do not show alert query in action when we do not have  hasFieldsForAAD or hasAlertsMappings or belong to security', async () => {
       await setup({
         initialRuleOverwrite: {
@@ -766,7 +707,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               infrastructure: { read: true, all: true },
               logs: { read: true, all: true },
@@ -825,7 +766,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               infrastructure: { read: true, all: true },
               logs: { read: true, all: true },
@@ -884,7 +825,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               infrastructure: { read: true, all: true },
               logs: { read: true, all: true },
@@ -1002,7 +943,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               infrastructure: { read: true, all: true },
               logs: { read: true, all: true },
@@ -1044,6 +985,9 @@ describe('rule_form', () => {
       };
 
       await setup();
+      // expect the accordion to be closed by default
+      expect(wrapper.find('.euiAccordion-isOpen').exists()).toBeFalsy();
+
       expect(getAlertDelayInput().props().value).toEqual(1);
 
       getAlertDelayInput().simulate('change', { target: { value: '2' } });
@@ -1077,9 +1021,9 @@ describe('rule_form', () => {
               defaultActionGroupId: 'testActionGroup',
               minimumLicenseRequired: 'basic',
               recoveryActionGroup: RecoveredActionGroup,
-              producer: ALERTS_FEATURE_ID,
+              producer: ALERTING_FEATURE_ID,
               authorizedConsumers: {
-                [ALERTS_FEATURE_ID]: { read: true, all: true },
+                [ALERTING_FEATURE_ID]: { read: true, all: true },
                 test: { read: true, all: true },
               },
             },
@@ -1097,7 +1041,7 @@ describe('rule_form', () => {
               recoveryActionGroup: RecoveredActionGroup,
               producer: 'test',
               authorizedConsumers: {
-                [ALERTS_FEATURE_ID]: { read: true, all: true },
+                [ALERTING_FEATURE_ID]: { read: true, all: true },
                 test: { read: true, all: true },
               },
             },
@@ -1208,7 +1152,7 @@ describe('rule_form', () => {
         name: 'test',
         ruleTypeId: ruleType.id,
         params: {},
-        consumer: ALERTS_FEATURE_ID,
+        consumer: ALERTING_FEATURE_ID,
         schedule: {
           interval: '1m',
         },

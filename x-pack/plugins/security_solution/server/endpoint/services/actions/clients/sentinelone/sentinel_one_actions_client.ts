@@ -17,18 +17,20 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type {
+  CommonResponseActionMethodOptions,
+  ProcessPendingActionsMethodOptions,
+} from '../../..';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { SentinelOneConnectorExecuteOptions } from './types';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type { ActionDetails, LogsEndpointAction } from '../../../../../../common/endpoint/types';
-import type {
-  IsolationRouteRequestBody,
-  BaseActionRequestBody,
-} from '../../../../../../common/api/endpoint';
+import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
+  ResponseActionsClientValidateRequestResponse,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 
@@ -168,80 +170,144 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return s1ApiResponse.data[0];
   }
 
-  private async validateRequest(payload: BaseActionRequestBody): Promise<void> {
+  protected async validateRequest(
+    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): Promise<ResponseActionsClientValidateRequestResponse> {
     // TODO:PT support multiple agents
     if (payload.endpoint_ids.length > 1) {
-      throw new ResponseActionsClientError(
-        `[body.endpoint_ids]: Multiple agents IDs not currently supported for SentinelOne`,
-        400
-      );
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(
+          `[body.endpoint_ids]: Multiple agents IDs not currently supported for SentinelOne`,
+          400
+        ),
+      };
     }
+
+    return super.validateRequest(payload);
   }
 
-  async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    await this.validateRequest(options);
-    await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: options.endpoint_ids[0] });
+  async isolate(
+    actionRequest: IsolationRouteRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'isolate',
+    };
 
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
-      ...options,
-      command: 'isolate',
-    });
-    await this.writeActionResponseToEndpointIndex({
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      agentId: actionRequestDoc.agent.id,
-      data: {
-        command: actionRequestDoc.EndpointActions.data.command,
-      },
-    });
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: actionRequest.endpoint_ids[0] });
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
     await this.updateCases({
-      command: 'isolate',
-      caseIds: options.case_ids,
-      alertIds: options.alert_ids,
-      hosts: options.endpoint_ids.map((agentId) => {
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      hosts: actionRequest.endpoint_ids.map((agentId) => {
         return {
           hostId: agentId,
           hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
         };
       }),
-      comment: options.comment,
-      actionId: actionRequestDoc.EndpointActions.action_id,
+      comment: reqIndexOptions.comment,
     });
+
+    if (!actionRequestDoc.error) {
+      await this.writeActionResponseToEndpointIndex({
+        actionId: actionRequestDoc.EndpointActions.action_id,
+        agentId: actionRequestDoc.agent.id,
+        data: {
+          command: actionRequestDoc.EndpointActions.data.command,
+        },
+      });
+    }
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
 
-  async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    await this.validateRequest(options);
-    await this.sendAction(SUB_ACTION.RELEASE_HOST, {
-      uuid: options.endpoint_ids[0],
-    });
-
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
-      ...options,
+  async release(
+    actionRequest: IsolationRouteRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
       command: 'unisolate',
-    });
+    };
 
-    await this.writeActionResponseToEndpointIndex({
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      agentId: actionRequestDoc.agent.id,
-      data: {
-        command: actionRequestDoc.EndpointActions.data.command,
-      },
-    });
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.RELEASE_HOST, { uuid: actionRequest.endpoint_ids[0] });
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
     await this.updateCases({
-      command: 'unisolate',
-      caseIds: options.case_ids,
-      alertIds: options.alert_ids,
-      hosts: options.endpoint_ids.map((agentId) => {
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      hosts: actionRequest.endpoint_ids.map((agentId) => {
         return {
           hostId: agentId,
           hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
         };
       }),
-      comment: options.comment,
-      actionId: actionRequestDoc.EndpointActions.action_id,
+      comment: reqIndexOptions.comment,
     });
 
+    if (!actionRequestDoc.error) {
+      await this.writeActionResponseToEndpointIndex({
+        actionId: actionRequestDoc.EndpointActions.action_id,
+        agentId: actionRequestDoc.agent.id,
+        data: {
+          command: actionRequestDoc.EndpointActions.data.command,
+        },
+      });
+    }
+
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  async processPendingActions({
+    abortSignal,
+    addToQueue,
+  }: ProcessPendingActionsMethodOptions): Promise<void> {
+    // TODO:PT implement resolving of pending S1 actions
+    // if (abortSignal.aborted) {
+    //   return;
+    // }
   }
 }

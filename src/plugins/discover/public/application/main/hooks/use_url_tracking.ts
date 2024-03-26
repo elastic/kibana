@@ -7,12 +7,14 @@
  */
 import { useEffect } from 'react';
 import { DiscoverSavedSearchContainer } from '../services/discover_saved_search_container';
-import { getUrlTracker } from '../../../kibana_services';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 /**
  * Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
  */
 export function useUrlTracking(savedSearchContainer: DiscoverSavedSearchContainer) {
+  const { urlTracker } = useDiscoverServices();
+
   useEffect(() => {
     const subscription = savedSearchContainer.getCurrent$().subscribe((savedSearch) => {
       const dataView = savedSearch.searchSource.getField('index');
@@ -20,11 +22,11 @@ export function useUrlTracking(savedSearchContainer: DiscoverSavedSearchContaine
         return;
       }
       const trackingEnabled = Boolean(dataView.isPersisted() || savedSearch.id);
-      getUrlTracker().setTrackingEnabled(trackingEnabled);
+      urlTracker.setTrackingEnabled(trackingEnabled);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [savedSearchContainer]);
+  }, [savedSearchContainer, urlTracker]);
 }

@@ -8308,7 +8308,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",
@@ -8824,7 +8829,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",

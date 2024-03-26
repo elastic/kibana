@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import d3 from 'd3';
 
-import { Dictionary } from '../../../../common/types/common';
-import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type { Dictionary } from '../../../../common/types/common';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 export function getGroupsFromJobs(jobs: MlJobWithTimeRange[]) {
   const groups: Dictionary<any> = {};

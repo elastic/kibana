@@ -1544,6 +1544,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Search for anything...',
       }
     ),
+    'euiSideNav.mobileToggleAriaLabel': i18n.translate('core.euiSideNav.mobileToggleAriaLabel', {
+      defaultMessage: 'Toggle navigation',
+    }),
     'euiStat.loadingText': i18n.translate('core.euiStat.loadingText', {
       defaultMessage: 'Statistic is loading',
     }),
@@ -1736,11 +1739,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Step {number} {status}',
         values: { status, number },
         description: 'Screen reader text describing the state of a tour step',
-      }),
-    'euiTreeView.ariaLabel': ({ nodeLabel, ariaLabel }: EuiValues) =>
-      i18n.translate('core.euiTreeView.ariaLabel', {
-        defaultMessage: '{nodeLabel} child of {ariaLabel}',
-        values: { nodeLabel, ariaLabel },
       }),
     'euiTreeView.listNavigationInstructions': i18n.translate(
       'core.euiTreeView.listNavigationInstructions',

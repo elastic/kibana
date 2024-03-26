@@ -9,13 +9,8 @@
 
 import { useMemo } from 'react';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import {
-  MlEntityField,
-  type InfluencersFilterQuery,
-  type MlAnomalyRecordDoc,
-  ML_JOB_ID,
-  ML_PARTITION_FIELD_VALUE,
-} from '@kbn/ml-anomaly-utils';
+import type { MlEntityField, ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-anomaly-utils';
+import { type InfluencersFilterQuery, type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {

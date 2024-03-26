@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { finalSignificantItemGroups } from '../../../common/__mocks__/artificial_logs/final_significant_item_groups';
-import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
+import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
+import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
 
 import { getGroupTableItems } from './get_group_table_items';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
@@ -20,9 +20,8 @@ describe('getTableItemAsKQL', () => {
   });
   it('returns a KQL syntax for a group of significant items', () => {
     const groupTableItems = getGroupTableItems(finalSignificantItemGroups);
-    expect(getTableItemAsKQL(groupTableItems[0])).toBe('user:Peter AND url:login.php');
-    expect(getTableItemAsKQL(groupTableItems[1])).toBe('response_code:500 AND url:home.php');
-    expect(getTableItemAsKQL(groupTableItems[2])).toBe('url:login.php AND response_code:500');
-    expect(getTableItemAsKQL(groupTableItems[3])).toBe('user:Peter AND url:home.php');
+    expect(getTableItemAsKQL(groupTableItems[0])).toBe('response_code:500 AND url:home.php');
+    expect(getTableItemAsKQL(groupTableItems[1])).toBe('url:login.php AND response_code:500');
+    expect(getTableItemAsKQL(groupTableItems[2])).toBe('user:Peter AND url:home.php');
   });
 });
