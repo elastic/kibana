@@ -110,7 +110,7 @@ describe('createAddToExistingCaseLensAction', () => {
   });
 
   test('it should return display name', () => {
-    expect(action.getDisplayName(context)).toEqual('Add to existing case');
+    expect(action.getDisplayName(context)).toEqual('Add to case');
   });
 
   it('should return icon type', () => {
