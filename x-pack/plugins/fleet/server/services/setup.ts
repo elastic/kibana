@@ -86,6 +86,7 @@ async function createSetupSideEffects(
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
+  console.log('Beginning fleet setup');
 
   await cleanUpOldFileIndices(esClient, logger);
 
