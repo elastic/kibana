@@ -114,6 +114,11 @@
     "@kbn/unified-data-table",
     "@kbn/shared-ux-markdown",
     "@kbn/licensing-plugin",
+    "@kbn/reporting-public",
+    "@kbn/screenshotting-plugin",
+    "@kbn/reporting-common",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-png-common",
   ],
   "exclude": ["target/**/*"]
 }
