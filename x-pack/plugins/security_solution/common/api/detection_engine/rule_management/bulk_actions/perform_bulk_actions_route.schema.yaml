@@ -5,7 +5,7 @@ info:
 paths:
   /api/detection_engine/rules/_bulk_action:
     post:
-      operationId: PerformBulkAction
+      operationId: PerformBulkActions
       x-codegen-enabled: true
       summary: Applies a bulk action to multiple rules
       description: The bulk action is applied to all rules that match the filter or to the list of rules by their IDs.

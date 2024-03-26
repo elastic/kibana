@@ -16,6 +16,11 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   });
   handlebarsInstance.registerHelper('snakeCase', snakeCase);
   handlebarsInstance.registerHelper('camelCase', camelCase);
+  handlebarsInstance.registerHelper('capitalize', (str: string) => {
+    const chars = str.split('');
+    chars[0] = chars[0].toUpperCase();
+    return chars.join('');
+  });
   handlebarsInstance.registerHelper('toJSON', (value: unknown) => {
     return JSON.stringify(value);
   });
@@ -24,6 +29,9 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
       return false;
     }
     return array.includes(value);
+  });
+  handlebarsInstance.registerHelper('and', (value1, value2) => {
+    return value1 && value2;
   });
   handlebarsInstance.registerHelper('or', (...args) => {
     // Last arguments is the handlebars context, so we ignore it

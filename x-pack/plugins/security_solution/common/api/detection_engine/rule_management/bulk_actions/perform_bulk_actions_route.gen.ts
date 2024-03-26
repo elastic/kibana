@@ -268,17 +268,17 @@ export const BulkEditRules = BulkActionBase.merge(
   })
 );
 
-export type PerformBulkActionRequestQuery = z.infer<typeof PerformBulkActionRequestQuery>;
-export const PerformBulkActionRequestQuery = z.object({
+export type PerformBulkActionsRequestQuery = z.infer<typeof PerformBulkActionsRequestQuery>;
+export const PerformBulkActionsRequestQuery = z.object({
   /**
    * Enables dry run mode for the request call.
    */
   dry_run: BooleanFromString.optional(),
 });
-export type PerformBulkActionRequestQueryInput = z.input<typeof PerformBulkActionRequestQuery>;
+export type PerformBulkActionsRequestQueryInput = z.input<typeof PerformBulkActionsRequestQuery>;
 
-export type PerformBulkActionRequestBody = z.infer<typeof PerformBulkActionRequestBody>;
-export const PerformBulkActionRequestBody = z.union([
+export type PerformBulkActionsRequestBody = z.infer<typeof PerformBulkActionsRequestBody>;
+export const PerformBulkActionsRequestBody = z.union([
   BulkDeleteRules,
   BulkDisableRules,
   BulkEnableRules,
@@ -286,10 +286,10 @@ export const PerformBulkActionRequestBody = z.union([
   BulkDuplicateRules,
   BulkEditRules,
 ]);
-export type PerformBulkActionRequestBodyInput = z.input<typeof PerformBulkActionRequestBody>;
+export type PerformBulkActionsRequestBodyInput = z.input<typeof PerformBulkActionsRequestBody>;
 
-export type PerformBulkActionResponse = z.infer<typeof PerformBulkActionResponse>;
-export const PerformBulkActionResponse = z.union([
+export type PerformBulkActionsResponse = z.infer<typeof PerformBulkActionsResponse>;
+export const PerformBulkActionsResponse = z.union([
   BulkEditActionResponse,
   BulkExportActionResponse,
 ]);

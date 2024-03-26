@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { HttpFetchOptions } from '@kbn/core-http-browser';
+{{#each this}}
+{{#if operation.requestBody}}
+  {{#if operation.requestQuery}}
+    import type { {{capitalize (camelCase @key)}}RequestBody, {{capitalize (camelCase @key)}}RequestQuery } from '{{paths.schemaTypesRelativePath}}';
+  {{else}}
+    import type { {{capitalize (camelCase @key)}}RequestBody } from '{{paths.schemaTypesRelativePath}}';
+  {{/if}}
+{{else}}
+  {{#if operation.requestQuery}}
+    import type { {{capitalize (camelCase @key)}}RequestQuery } from '{{paths.schemaTypesRelativePath}}';
+  {{/if}}
+{{/if}}
+import { {{@key}} } from '{{paths.apiMethodRelativePath}}';
+{{/each}}
+
+interface HttpClient {
+  fetch<T>(url: string, options: HttpFetchOptions): Promise<T>;
+}
+
+export class ApiClient<TClient extends HttpClient> {
+
+  private client: TClient;
+
+  constructor(client: TClient) {
+    this.client = client;
+  }
+
+  {{#each this}}
+  {{#if operation.description}}
+ /*
+  * {{operation.description}}
+  */
+  {{/if}}
+  public async {{@key}}(
+  {{#if operation.requestBody}}
+  params: {{capitalize (camelCase @key)}}RequestBody, 
+  {{/if}}
+  {{#if operation.requestQuery}}
+  query: {{capitalize (camelCase @key)}}RequestQuery,
+  {{/if}}
+  signal?: AbortSignal
+  ) {
+    return {{@key}}(
+      this.client,
+      {{#if operation.requestBody}}
+        params,
+      {{/if}}
+      {{#if operation.requestQuery}}
+      query,
+      {{/if}}
+      signal
+    );
+  }
+
+  {{/each}}
+}

@@ -6,7 +6,7 @@ paths:
   /api/endpoint/suggestions/{suggestion_type}:
     post:
       summary: Get suggestions
-      operationId: GetEndpointSuggestions
+      operationId: GetSuggestions
       x-codegen-enabled: true
       requestBody:
         required: true

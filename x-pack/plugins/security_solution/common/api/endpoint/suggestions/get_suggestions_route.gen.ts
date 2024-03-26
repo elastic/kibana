@@ -18,28 +18,22 @@ import { z } from 'zod';
 
 import { SuccessResponse } from '../model/schema/common.gen';
 
-export type GetEndpointSuggestionsRequestParams = z.infer<
-  typeof GetEndpointSuggestionsRequestParams
->;
-export const GetEndpointSuggestionsRequestParams = z.object({
+export type GetSuggestionsRequestParams = z.infer<typeof GetSuggestionsRequestParams>;
+export const GetSuggestionsRequestParams = z.object({
   query: z.object({
     suggestion_type: z.literal('eventFilters').optional(),
   }),
 });
-export type GetEndpointSuggestionsRequestParamsInput = z.input<
-  typeof GetEndpointSuggestionsRequestParams
->;
+export type GetSuggestionsRequestParamsInput = z.input<typeof GetSuggestionsRequestParams>;
 
-export type GetEndpointSuggestionsRequestBody = z.infer<typeof GetEndpointSuggestionsRequestBody>;
-export const GetEndpointSuggestionsRequestBody = z.object({
+export type GetSuggestionsRequestBody = z.infer<typeof GetSuggestionsRequestBody>;
+export const GetSuggestionsRequestBody = z.object({
   field: z.string().optional(),
   query: z.string().optional(),
   filters: z.unknown(),
   fieldMeta: z.unknown(),
 });
-export type GetEndpointSuggestionsRequestBodyInput = z.input<
-  typeof GetEndpointSuggestionsRequestBody
->;
+export type GetSuggestionsRequestBodyInput = z.input<typeof GetSuggestionsRequestBody>;
 
-export type GetEndpointSuggestionsResponse = z.infer<typeof GetEndpointSuggestionsResponse>;
-export const GetEndpointSuggestionsResponse = SuccessResponse;
+export type GetSuggestionsResponse = z.infer<typeof GetSuggestionsResponse>;
+export const GetSuggestionsResponse = SuccessResponse;

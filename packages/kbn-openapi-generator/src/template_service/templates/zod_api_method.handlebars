@@ -1,0 +1,47 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { HttpFetchOptions } from '@kbn/core-http-browser';
+{{#each operations}}
+import type {
+  {{#if requestQuery}}
+    {{operationId}}RequestQuery,
+  {{/if}}
+  {{#if requestBody}}
+    {{operationId}}RequestBody,
+  {{/if}}
+  {{operationId}}Response
+} from './{{snakeCase operationId}}_route.gen';
+{{/each}}
+
+interface HttpClient {
+  fetch<T>(url: string, options: HttpFetchOptions): Promise<T>;
+}
+
+{{#each operations}}
+export const {{camelCase operationId}} = async <TClient extends HttpClient>(
+  client: TClient, 
+  {{#if requestBody}}
+  params: {{operationId}}RequestBody, 
+  {{/if}}
+  {{#if requestQuery}}
+  query: {{operationId}}RequestQuery,
+  {{/if}}
+  signal?: AbortSignal
+) => {
+  return client.fetch<{{operationId}}Response>('{{path}}', {
+    method: '{{method}}', 
+    version: '{{../info.version}}',
+    {{#if requestBody}}
+      body: JSON.stringify(params),
+    {{/if}}
+    {{#if requestQuery}}
+    query,
+    {{/if}}
+    signal
+  });
+}  
+{{/each}}
