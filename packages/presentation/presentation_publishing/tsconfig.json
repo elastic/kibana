@@ -1,4 +1,4 @@
-packages/presentation/presentation_publishing/tsconfig.json{
+{
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
