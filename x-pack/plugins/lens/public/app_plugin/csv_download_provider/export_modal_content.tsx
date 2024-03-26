@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiForm,
   EuiFormRow,
+  EuiIcon,
   EuiModalFooter,
   EuiRadioGroup,
   EuiSpacer,
@@ -80,6 +81,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     objectType,
     downloadCsvFromLens,
     getJobParams,
+    isDirty,
   } = props;
   const isSaved = Boolean(objectId);
   const [isStale, setIsStale] = useState(false);
@@ -217,22 +219,21 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       });
   };
 
-  const renderCopyURLButton = ({
-    isUnsaved,
-  }: {
-    isUnsaved: boolean;
-    exceedsMaxLength: boolean;
-  }) => {
-    if (isUnsaved) {
-      if (exceedsMaxLength) {
-        return <ErrorUrlTooLongPanel isUnsaved />;
-      }
-      return (
+  const renderCopyURLButton = useCallback(() => {
+    if (exceedsMaxLength) {
+      return <ErrorUrlTooLongPanel isUnsaved={isDirty} />;
+    }
+
+    const saveMessage = isDirty
+      ? 'Save your work before copying this URL.'
+      : 'Copy this POST URL to call generation from outside Kibana or from Watcher.';
+    return (
+      <>
         <EuiToolTip
           content={
             <FormattedMessage
               id="xpack.lens.share.modalContent.unsavedStateErrorText"
-              defaultMessage="Save your work before copying this URL."
+              defaultMessage={saveMessage}
             />
           }
         >
@@ -240,7 +241,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             {(copy) => (
               <EuiButtonEmpty
                 iconType="copy"
-                disabled={isUnsaved}
+                disabled={isDirty}
                 flush="both"
                 onClick={copy}
                 data-test-subj="shareReportingCopyURL"
@@ -253,30 +254,19 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             )}
           </EuiCopy>
         </EuiToolTip>
-      );
-    } else if (exceedsMaxLength) {
-      return <ErrorUrlTooLongPanel isUnsaved={false} />;
-    }
-    return (
-      <EuiToolTip content="Copy this POST URL to call generation from outside Kibana or from Watcher.">
-        <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
-          {(copy) => (
-            <EuiButtonEmpty
-              iconType="copy"
-              flush="both"
-              onClick={copy}
-              data-test-subj="shareReportingCopyURL"
-            >
-              <FormattedMessage
-                id="xpack.lens.modalContent.copyUrlButtonLabel"
-                defaultMessage="Copy POST URL  "
-              />
-            </EuiButtonEmpty>
-          )}
-        </EuiCopy>
-      </EuiToolTip>
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.lens.share.postURLWatcherMessage"
+              defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher. Unsaved changes: URL may change if you upgrade Kibana"
+            />
+          }
+        >
+          <EuiIcon type="questionInCircle" />
+        </EuiToolTip>
+      </>
     );
-  };
+  }, [absoluteUrl, exceedsMaxLength, isDirty]);
 
   const saveWarningMessageWithButton =
     objectId === undefined || objectId === '' || !isSaved || props.isDirty || isStale ? (
@@ -284,7 +274,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         <EuiToolTip content="Please save your work before generating a report.">
           <EuiButton
             disabled={Boolean(createReportingJob)}
-            fill
+            fill={!isDirty}
             onClick={() => generateReportingJob()}
             data-test-subj="generateReportButton"
             isLoading={Boolean(createReportingJob)}
@@ -335,7 +325,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         <EuiSpacer size="m" />
       </EuiForm>
       <EuiModalFooter>
-        {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
+        {renderCopyURLButton()}
         {saveWarningMessageWithButton}
       </EuiModalFooter>
     </>
