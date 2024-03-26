@@ -255,27 +255,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
 
-  useEffect(() => {
-    if (isQueryLoading || isLoading) {
-      addQueriesToCache({
-        queryString,
-        timeZone,
-      });
-      setRefetchHistoryItems(false);
-    } else {
-      updateCachedQueries({
-        queryString,
-        status: clientParserMessages.errors?.length
-          ? 'error'
-          : clientParserMessages.warnings.length
-          ? 'warning'
-          : 'success',
-      });
-
-      setRefetchHistoryItems(true);
-    }
-  }, [clientParserMessages, isLoading, isQueryLoading, queryString, timeZone]);
-
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
 
@@ -456,32 +435,68 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     ]
   );
 
+  const parseMessages = useCallback(async () => {
+    if (editorModel.current) {
+      return await ESQLLang.validate(editorModel.current, queryString, esqlCallbacks);
+    }
+    return {
+      errors: [],
+      warnings: [],
+    };
+  }, [esqlCallbacks, queryString]);
+
+  useEffect(() => {
+    const validateQuery = async () => {
+      if (editorModel?.current) {
+        const parserMessages = await parseMessages();
+        setClientParserMessages({
+          errors: parserMessages?.errors ?? [],
+          warnings: parserMessages?.warnings ?? [],
+        });
+      }
+    };
+    if (isQueryLoading || isLoading) {
+      addQueriesToCache({
+        queryString,
+        timeZone,
+      });
+      validateQuery();
+      setRefetchHistoryItems(false);
+    } else {
+      updateCachedQueries({
+        queryString,
+        status: clientParserMessages.errors?.length
+          ? 'error'
+          : clientParserMessages.warnings.length
+          ? 'warning'
+          : 'success',
+      });
+
+      setRefetchHistoryItems(true);
+    }
+  }, [clientParserMessages, isLoading, isQueryLoading, parseMessages, queryString, timeZone]);
+
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
       if (!editorModel.current || language !== 'esql' || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const { warnings: parserWarnings, errors: parserErrors } = await ESQLLang.validate(
-        editorModel.current,
-        code,
-        esqlCallbacks
-      );
+      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
       const markers = [];
 
       if (parserErrors.length) {
         markers.push(...parserErrors);
       }
       if (active) {
-        setClientParserMessages({ errors: parserErrors, warnings: parserWarnings });
         setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
         monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
         return;
       }
     },
-    [esqlCallbacks, language, code]
+    [language, parseMessages]
   );
 
   useDebounceWithOptions(
-    () => {
+    async () => {
       if (!editorModel.current) return;
       const subscription = { active: true };
       if (code === codeWhenSubmitted) {
@@ -497,6 +512,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             'Unified search',
             parsedErrors.length ? parsedErrors : []
           );
+          const parserMessages = await parseMessages();
+          setClientParserMessages({
+            errors: parserMessages?.errors ?? [],
+            warnings: parserMessages?.warnings ?? [],
+          });
           return;
         }
       } else {

@@ -233,6 +233,12 @@ export function QueryHistory({
                       css={css`
                         cursor: pointer;
                       `}
+                      aria-label={i18n.translate(
+                        'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryCopy',
+                        {
+                          defaultMessage: 'Copy query to clipboard',
+                        }
+                      )}
                     />
                   )}
                 </EuiCopy>
