@@ -14,13 +14,24 @@ import {
   apiIsOfType,
   EmbeddableApiContext,
   getInheritedViewMode,
+  CanAccessViewMode,
+  HasType,
 } from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { SLOAlertsEmbeddable } from '../embeddable/slo/alerts/slo_alerts_embeddable';
 import { SLO_ALERTS_EMBEDDABLE } from '../embeddable/slo/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
+import { HasSloAlertsConfig } from '../embeddable/slo/alerts/types';
 
 export const EDIT_SLO_ALERTS_ACTION = 'editSloAlertsPanelAction';
+type EditSloAlertsPanelApi = CanAccessViewMode & HasType & HasSloAlertsConfig;
+const isEditSloAlertsPanelApi = (api: unknown): api is EditSloAlertsPanelApi =>
+  Boolean(
+    apiHasType(api) &&
+      apiIsOfType(api, SLO_ALERTS_EMBEDDABLE) &&
+      apiCanAccessViewMode(api) &&
+      getInheritedViewMode(api) === ViewMode.EDIT
+  );
 
 export function createEditSloAlertsPanelAction(
   getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
@@ -58,11 +69,6 @@ export function createEditSloAlertsPanelAction(
       }
     },
     isCompatible: async ({ embeddable }: EmbeddableApiContext) =>
-      Boolean(
-        apiHasType(embeddable) &&
-          apiIsOfType(embeddable, SLO_ALERTS_EMBEDDABLE) &&
-          apiCanAccessViewMode(embeddable) &&
-          getInheritedViewMode(embeddable) === ViewMode.EDIT
-      ),
+      isEditSloAlertsPanelApi(embeddable),
   });
 }
