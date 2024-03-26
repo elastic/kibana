@@ -18,7 +18,7 @@ export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {
   /**
    * The name of the field the content resides in
    */
-  content_field: string | ((hit: SearchHit<any>) => Document);
+  content_field: string | Record<string, string>;
 
   index: string;
 
@@ -42,7 +42,7 @@ export class ElasticsearchRetriever extends BaseRetriever {
 
   index: string;
 
-  content_field: string | ((hit: SearchHit<any>) => Document);
+  content_field: Record<string, string> | string;
 
   hit_doc_mapper?: HitDocMapper;
 
@@ -71,12 +71,19 @@ export class ElasticsearchRetriever extends BaseRetriever {
 
       const hits = results.hits.hits;
 
+      // default elasticsearch doc to LangChain doc
       let mapper: HitDocMapper = (hit: SearchHit<any>) => {
+        const pageContentFieldKey =
+          typeof this.content_field === 'string'
+            ? this.content_field
+            : this.content_field[hit._index as string];
+
         return new Document({
-          pageContent: hit._source[this.content_field as string],
+          pageContent: hit._source[pageContentFieldKey],
           metadata: {
             score: hit._score,
             id: hit._id,
+            index: hit._index,
           },
         });
       };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesQuerySourceFields } from '../types';
+import { IndicesQuerySourceFields, QuerySourceFields } from '../types';
 
 type IndexFields = Record<string, string[]>;
 
@@ -30,8 +30,8 @@ interface Matches {
 export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQuerySourceFields) {
   const boolMatches = Object.keys(fields).reduce<Matches>(
     (acc, index) => {
-      const indexFields = fields[index];
-      const indexFieldDescriptors = fieldDescriptors[index];
+      const indexFields: string[] = fields[index];
+      const indexFieldDescriptors: QuerySourceFields = fieldDescriptors[index];
 
       const sparseMatches =
         indexFields.map((field) => {
@@ -39,7 +39,8 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
             (x) => x.field === field
           );
 
-          if (elserField) {
+          // not supporting nested fields for now
+          if (elserField && !elserField.nested) {
             // when another index has the same field, we don't want to duplicate the match rule
             const hasExistingSparseMatch = acc.queryMatches.find(
               (x: any) =>
@@ -83,7 +84,8 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
             (x) => x.field === field
           );
 
-          if (denseVectorField) {
+          // not supporting nested fields for now
+          if (denseVectorField && !denseVectorField.nested) {
             return {
               field: denseVectorField.field,
               k: 10,

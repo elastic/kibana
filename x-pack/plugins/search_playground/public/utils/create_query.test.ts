@@ -131,6 +131,44 @@ describe('create_query', () => {
       });
     });
 
+    it('should throw for nested dense query', () => {
+      const fields = {
+        index1: ['passages.field1.predicted_value'],
+      };
+
+      const fieldDescriptors: IndicesQuerySourceFields = {
+        index1: {
+          elser_query_fields: [],
+          dense_vector_query_fields: [
+            { field: 'passages.field1.predicted_value', model_id: 'model1', nested: true },
+          ],
+          bm25_query_fields: [],
+          source_fields: [],
+        },
+      };
+
+      expect(createQuery(fields, fieldDescriptors)).toEqual({});
+    });
+
+    it('should throw for nested sparse query', () => {
+      const fields = {
+        index1: ['passages.field1.tokens'],
+      };
+
+      const fieldDescriptors: IndicesQuerySourceFields = {
+        index1: {
+          elser_query_fields: [
+            { field: 'passages.field1.tokens', model_id: 'model1', nested: true },
+          ],
+          dense_vector_query_fields: [],
+          bm25_query_fields: [],
+          source_fields: [],
+        },
+      };
+
+      expect(createQuery(fields, fieldDescriptors)).toEqual({});
+    });
+
     it('should return a hybrid query', () => {
       const fields = {
         index1: ['field1', 'content', 'title'],

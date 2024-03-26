@@ -75,6 +75,8 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
               log.error('Failed to parse the Elasticsearch query', e);
             }
           },
+          content_field: JSON.parse(data.source_fields),
+          size: data.size ? Number(data.size) : 3,
         },
         prompt: Prompt(data.prompt, {
           citations: data.citations,

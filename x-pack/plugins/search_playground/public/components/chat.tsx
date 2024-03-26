@@ -58,6 +58,8 @@ export const Chat = () => {
           elasticsearchQuery: JSON.stringify(data[ChatFormFields.elasticsearchQuery]),
           summarization_model:
             data[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
+          source_fields: JSON.stringify(data[ChatFormFields.sourceFields]),
+          size: data[ChatFormFields.size] ?? 3,
         },
       }
     );
