@@ -119,7 +119,7 @@ export const GridColumn = ({
                     <VirtualizedRow
                       index={index}
                       // this extra top offset is necessary if the cards ever have a beta badge specified
-                      style={{ ...style, top: (Number(style.top) ?? 0) + 15 }}
+                      style={{ ...style, top: (Number(style.top) ?? 0) + 16 }}
                       onHeightChange={onHeightChange}
                     >
                       <EuiFlexGrid gutterSize="l" columns={3}>
