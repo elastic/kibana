@@ -278,7 +278,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         <EuiToolTip
           content={
             <FormattedMessage
-              id="share.modalContent.unsavedStateErrorText"
+              id="reporting.share.modalContent.unsavedStateErrorText"
               defaultMessage="Save your work before copying this URL."
             />
           }
@@ -293,7 +293,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
                 data-test-subj="shareReportingCopyURL"
               >
                 <FormattedMessage
-                  id="share.modalContent.copyUrlButtonLabel"
+                  id="reporting.share.modalContent.copyPostUrlButtonLabel"
                   defaultMessage="Post URL"
                 />
               </EuiButtonEmpty>
@@ -341,7 +341,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         isLoading={Boolean(createReportingJob)}
       >
         <FormattedMessage
-          id="reporting.generateReportButtonLabel"
+          id="reporting.share.generateReportButtonLabel"
           defaultMessage="Generate export"
         />
       </EuiButton>

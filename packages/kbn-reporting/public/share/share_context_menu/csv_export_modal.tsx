@@ -161,7 +161,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
                 data-test-subj="shareReportingCopyURL"
               >
                 <FormattedMessage
-                  id="reporting.share.modalContent.copyUrlButtonLabel"
+                  id="reporting.share.modalContent.copyPostUrlButtonLabel"
                   defaultMessage="Post URL"
                 />
               </EuiButtonEmpty>
@@ -191,7 +191,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
               data-test-subj="shareReportingCopyURL"
             >
               <FormattedMessage
-                id="share.modalContent.copyUrlButtonLabel"
+                id="reporting.share.modalContent.copyUrlButtonLabel"
                 defaultMessage="Post URL  "
               />
             </EuiButtonEmpty>
