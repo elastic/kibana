@@ -179,16 +179,17 @@ export async function buildContextMenuForActions({
 
   for (const panel of Object.values(panels)) {
     const items = panel.items.filter(Boolean) as ItemDescriptor[];
-    panel.items = _.sortBy(
-      items,
-      (a) => -1 * (a._order ?? 0),
-      (a) => a._title
+    panel.items = items.sort(
+      ({ _order: orderA }, { _order: orderB }) => (orderB || 0) - (orderA || 0)
     );
   }
 
   wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
   for (const panel of Object.values(panels)) {
+    // panel.items = panel.items.sort(
+    //   ({ _order: orderA }, { _order: orderB }) => (orderB || 0) - (orderA || 0)
+    // );
     if (panel._level === 0) {
       if (panels.mainMenu.items.length > 0) {
         panels.mainMenu.items.push({
