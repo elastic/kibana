@@ -52,6 +52,7 @@ export function PackageCard({
   showLabels = true,
   extraLabelsBadges,
   isQuickstart = false,
+  onCardClick: onClickProp = undefined,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -163,7 +164,7 @@ export function PackageCard({
               size="xl"
             />
           }
-          onClick={onCardClick}
+          onClick={onClickProp ?? onCardClick}
         >
           <EuiFlexGroup gutterSize="xs" wrap={true}>
             {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
