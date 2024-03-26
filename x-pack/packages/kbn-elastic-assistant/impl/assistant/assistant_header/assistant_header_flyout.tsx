@@ -27,23 +27,25 @@ import { ConnectorSelectorInline } from '../../connectorland/connector_selector_
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
 import * as i18n from './translations';
+import { AIConnector } from '../../connectorland/connector_selector';
 
 interface OwnProps {
-  currentConversation: Conversation;
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
+  selectedConversation: Conversation;
+  defaultConnector?: AIConnector;
   docLinks: Omit<DocLinksStart, 'links'>;
   isDisabled: boolean;
   isSettingsModalVisible: boolean;
   onToggleShowAnonymizedValues: () => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   showAnonymizedValues: boolean;
   title: string | JSX.Element;
   onChatCleared: () => void;
   onCloseFlyout?: () => void;
   chatHistoryVisible: boolean;
   setChatHistoryVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
+  conversations: Record<string, Conversation>;
+  refetchConversationsState: () => Promise<void>;
 }
 
 type Props = OwnProps;
@@ -53,33 +55,34 @@ type Props = OwnProps;
  * toggling the display of anonymized values, and accessing the assistant settings.
  */
 export const AssistantHeaderFlyout: React.FC<Props> = ({
-  currentConversation,
-  defaultConnectorId,
-  defaultProvider,
+  selectedConversation,
+  defaultConnector,
   docLinks,
   isDisabled,
   isSettingsModalVisible,
   onToggleShowAnonymizedValues,
   setIsSettingsModalVisible,
-  setSelectedConversationId,
   showAnonymizedValues,
   title,
   onChatCleared,
   chatHistoryVisible,
   setChatHistoryVisible,
   onCloseFlyout,
+  onConversationSelected,
+  conversations,
+  refetchConversationsState,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
-      currentConversation.replacements != null &&
-      Object.keys(currentConversation.replacements).length > 0 &&
+      selectedConversation.replacements != null &&
+      Object.keys(selectedConversation.replacements).length > 0 &&
       showAnonymizedValues,
-    [currentConversation.replacements, showAnonymizedValues]
+    [selectedConversation.replacements, showAnonymizedValues]
   );
 
   const selectedConnectorId = useMemo(
-    () => currentConversation?.apiConfig?.connectorId,
-    [currentConversation?.apiConfig?.connectorId]
+    () => selectedConversation?.apiConfig?.connectorId,
+    [selectedConversation?.apiConfig?.connectorId]
   );
 
   const [isPopoverOpen, setPopover] = useState(false);
@@ -126,7 +129,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
                 data-test-subj="showAnonymizedValues"
                 checked={showAnonymizedValuesChecked}
                 compressed={true}
-                disabled={currentConversation.replacements == null}
+                disabled={selectedConversation.replacements == null}
                 label={i18n.SHOW_ANONYMIZED}
                 onChange={onToggleShowAnonymizedValues}
               />
@@ -137,7 +140,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
     ],
 
     [
-      currentConversation,
+      selectedConversation,
       onToggleShowAnonymizedValues,
       showAnonymizedValuesChecked,
       showDestroyModal,
@@ -164,13 +167,14 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AssistantSettingsButton
-              defaultConnectorId={defaultConnectorId}
-              defaultProvider={defaultProvider}
+              defaultConnector={defaultConnector}
               isDisabled={isDisabled}
               isSettingsModalVisible={isSettingsModalVisible}
-              selectedConversation={currentConversation}
+              selectedConversation={selectedConversation}
               setIsSettingsModalVisible={setIsSettingsModalVisible}
-              setSelectedConversationId={setSelectedConversationId}
+              onConversationSelected={onConversationSelected}
+              conversations={conversations}
+              refetchConversationsState={refetchConversationsState}
               isFlyoutMode={true}
             />
           </EuiFlexItem>
@@ -204,9 +208,9 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
           >
             <AssistantTitle
               docLinks={docLinks}
-              title={currentConversation.id ?? title}
-              selectedConversation={currentConversation}
-              setSelectedConversationId={setSelectedConversationId}
+              title={selectedConversation.id ?? title}
+              selectedConversation={selectedConversation}
+              onChange={onConversationSelected}
               isFlyoutMode={true}
             />
           </EuiFlexItem>
@@ -215,10 +219,11 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 <ConnectorSelectorInline
-                  isDisabled={isDisabled || currentConversation === undefined}
+                  isDisabled={isDisabled || selectedConversation === undefined}
                   selectedConnectorId={selectedConnectorId}
-                  selectedConversation={currentConversation}
+                  selectedConversation={selectedConversation}
                   isFlyoutMode={true}
+                  onConnectorSelected={onChange}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -7,22 +7,23 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
+import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 
 interface Props {
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
+  defaultConnector?: AIConnector;
   isSettingsModalVisible: boolean;
   selectedConversation: Conversation;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   isDisabled?: boolean;
   isFlyoutMode: boolean;
+  conversations: Record<string, Conversation>;
+  refetchConversationsState: () => Promise<void>;
 }
 
 /**
@@ -30,14 +31,15 @@ interface Props {
  */
 export const AssistantSettingsButton: React.FC<Props> = React.memo(
   ({
-    defaultConnectorId,
-    defaultProvider,
+    defaultConnector,
     isDisabled = false,
     isSettingsModalVisible,
     setIsSettingsModalVisible,
     selectedConversation,
-    setSelectedConversationId,
     isFlyoutMode,
+    onConversationSelected,
+    conversations,
+    refetchConversationsState,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
@@ -50,13 +52,19 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
       cleanupAndCloseModal();
     }, [cleanupAndCloseModal]);
 
-    const handleSave = useCallback(() => {
-      cleanupAndCloseModal();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
-      });
-    }, [cleanupAndCloseModal, toasts]);
+    const handleSave = useCallback(
+      async (success: boolean) => {
+        cleanupAndCloseModal();
+        await refetchConversationsState();
+        if (success) {
+          toasts?.addSuccess({
+            iconType: 'check',
+            title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
+          });
+        }
+      },
+      [cleanupAndCloseModal, refetchConversationsState, toasts]
+    );
 
     const handleShowConversationSettings = useCallback(() => {
       setSelectedSettingsTab(CONVERSATIONS_TAB);
@@ -79,13 +87,13 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
 
         {isSettingsModalVisible && (
           <AssistantSettings
-            defaultConnectorId={defaultConnectorId}
-            defaultProvider={defaultProvider}
+            defaultConnector={defaultConnector}
             selectedConversation={selectedConversation}
-            setSelectedConversationId={setSelectedConversationId}
+            onConversationSelected={onConversationSelected}
             onClose={handleCloseModal}
             onSave={handleSave}
             isFlyoutMode={isFlyoutMode}
+            conversations={conversations}
           />
         )}
       </>

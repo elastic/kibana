@@ -28,7 +28,7 @@ const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
   selectedConversationId: string | undefined;
-  onConversationSelected: (conversationId: string) => void;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;

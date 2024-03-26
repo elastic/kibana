@@ -66,6 +66,7 @@ describe('ConnectorSelectorInline', () => {
           selectedConnectorId={undefined}
           selectedConversation={undefined}
           isFlyoutMode={false}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -75,8 +76,11 @@ describe('ConnectorSelectorInline', () => {
   it('renders empty view if selectedConnectorId is NOT in list of connectors', () => {
     const conversation: Conversation = {
       id: 'conversation_id',
+      category: 'assistant',
       messages: [],
-      apiConfig: {},
+      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+      replacements: [],
+      title: 'conversation_id',
     };
     const { getByText } = render(
       <TestProviders>
@@ -85,6 +89,7 @@ describe('ConnectorSelectorInline', () => {
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
           isFlyoutMode={false}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -93,8 +98,11 @@ describe('ConnectorSelectorInline', () => {
   it('Clicking add connector button opens the connector selector', () => {
     const conversation: Conversation = {
       id: 'conversation_id',
+      category: 'assistant',
       messages: [],
-      apiConfig: {},
+      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+      replacements: [],
+      title: 'conversation_id',
     };
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
@@ -103,6 +111,7 @@ describe('ConnectorSelectorInline', () => {
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
           isFlyoutMode={false}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -114,8 +123,11 @@ describe('ConnectorSelectorInline', () => {
     const connectorTwo = mockConnectors[1];
     const conversation: Conversation = {
       id: 'conversation_id',
+      category: 'assistant',
       messages: [],
-      apiConfig: {},
+      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+      replacements: [],
+      title: 'conversation_id',
     };
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
@@ -124,6 +136,7 @@ describe('ConnectorSelectorInline', () => {
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
           isFlyoutMode={false}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -138,14 +151,24 @@ describe('ConnectorSelectorInline', () => {
         model: undefined,
         provider: 'OpenAI',
       },
-      conversationId: 'conversation_id',
+      conversation: {
+        apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+        replacements: [],
+        category: 'assistant',
+        id: 'conversation_id',
+        messages: [],
+        title: 'conversation_id',
+      },
     });
   });
   it('On connector change to add new connector, onchange event does nothing', () => {
     const conversation: Conversation = {
       id: 'conversation_id',
+      category: 'assistant',
       messages: [],
-      apiConfig: {},
+      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+      replacements: [],
+      title: 'conversation_id',
     };
     const { getByTestId } = render(
       <TestProviders>
@@ -154,6 +177,7 @@ describe('ConnectorSelectorInline', () => {
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
           isFlyoutMode={false}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );

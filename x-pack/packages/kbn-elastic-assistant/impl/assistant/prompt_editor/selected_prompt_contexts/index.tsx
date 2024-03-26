@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
+import { Conversation } from '../../../assistant_context/types';
 import { DataAnonymizationEditor } from '../../../data_anonymization_editor';
 import type { PromptContext, SelectedPromptContext } from '../../prompt_context/types';
 import * as i18n from './translations';
@@ -32,7 +32,7 @@ export interface Props {
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
-  currentReplacements: AnonymizedData['replacements'] | undefined;
+  currentReplacements: Conversation['replacements'] | undefined;
   isFlyoutMode: boolean;
 }
 

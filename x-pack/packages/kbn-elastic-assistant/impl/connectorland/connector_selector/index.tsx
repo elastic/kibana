@@ -10,6 +10,7 @@ import React, { Suspense, useCallback, useMemo, useState } from 'react';
 
 import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
@@ -29,7 +30,10 @@ interface Props {
 }
 
 export type AIConnector = ActionConnector & {
+  // ex: Bedrock, OpenAI
   connectorTypeTitle: string;
+  // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
+  apiProvider?: OpenAiProviderType;
 };
 
 export const ConnectorSelector: React.FC<Props> = React.memo(
@@ -49,22 +53,11 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
     const {
-      data: connectorsWithoutActionContext,
+      data: aiConnectors,
       isLoading: isLoadingConnectors,
       isFetching: isFetchingConnectors,
       refetch: refetchConnectors,
-    } = useLoadConnectors({ http });
-
-    const aiConnectors: AIConnector[] = useMemo(
-      () =>
-        connectorsWithoutActionContext
-          ? connectorsWithoutActionContext.map((c) => ({
-              ...c,
-              connectorTypeTitle: getActionTypeTitle(actionTypeRegistry.get(c.actionTypeId)),
-            }))
-          : [],
-      [actionTypeRegistry, connectorsWithoutActionContext]
-    );
+    } = useLoadConnectors({ actionTypeRegistry, http });
 
     const isLoading = isLoadingConnectors || isFetchingConnectors;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
@@ -96,7 +89,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     const connectorOptions = useMemo(
       () =>
-        aiConnectors.map((connector) => {
+        (aiConnectors ?? []).map((connector) => {
           const connectorTypeTitle =
             getGenAiConfig(connector)?.apiProvider ?? connector.connectorTypeTitle;
           const connectorDetails = connector.isPreconfigured
@@ -146,7 +139,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           return;
         }
 
-        const connector = aiConnectors.find((c) => c.id === connectorId);
+        const connector = (aiConnectors ?? []).find((c) => c.id === connectorId);
         if (connector) {
           onConnectorSelectionChange(connector);
         }
