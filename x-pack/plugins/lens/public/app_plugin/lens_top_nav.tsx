@@ -537,7 +537,9 @@ export const LensTopNavMenu = ({
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
 
-    const showSaveAndReturn = !(showReplaceInDashboard || showReplaceInCanvas);
+    const showSaveAndReturn =
+      !(showReplaceInDashboard || showReplaceInCanvas) &&
+      (isLinkedToOriginatingApp || Boolean(initialContextIsEmbedded));
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -752,6 +754,7 @@ export const LensTopNavMenu = ({
     initialContext,
     initialInput,
     isLinkedToOriginatingApp,
+    initialContextIsEmbedded,
     activeData,
     isSaveable,
     application,
@@ -764,6 +767,8 @@ export const LensTopNavMenu = ({
     lensInspector,
     title,
     share,
+    visualization,
+    visualizationMap,
     shortUrlService,
     data,
     filters,
@@ -771,12 +776,11 @@ export const LensTopNavMenu = ({
     activeDatasourceId,
     datasourceStates,
     datasourceMap,
-    visualizationMap,
-    visualization,
     currentDoc,
     adHocDataViews,
-    defaultLensTitle,
     isCurrentStateDirty,
+    dataViews.indexPatterns,
+    defaultLensTitle,
     onAppLeave,
     runSave,
     attributeService,
@@ -786,7 +790,6 @@ export const LensTopNavMenu = ({
     discoverLocator,
     indexPatterns,
     uiSettings,
-    dataViews.indexPatterns,
     isOnTextBasedMode,
     lensStore,
     theme$,

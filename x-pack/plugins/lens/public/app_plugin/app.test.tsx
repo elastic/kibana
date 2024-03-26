@@ -647,6 +647,12 @@ describe('Lens App', () => {
             .find(services.navigation.ui.AggregateQueryTopNavMenu)
             .prop('config');
           expect(topNavMenuConfig).not.toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
+          );
+          expect(topNavMenuConfig).not.toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveAsButton)
+          );
+          expect(topNavMenuConfig).toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveButton)
           );
         });
