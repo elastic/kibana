@@ -33,7 +33,6 @@ const navTree: NavigationTreeDefinition = {
       isCollapsible: false,
       breadcrumbStatus: 'hidden',
       children: [
-        { link: 'home' },
         { link: 'discover' },
         {
           link: 'dashboards',
@@ -83,6 +82,7 @@ const navTree: NavigationTreeDefinition = {
       }),
       icon: 'launch',
       type: 'navItem',
+      link: 'home',
     },
     {
       type: 'navItem',
@@ -181,6 +181,6 @@ export const definition: SolutionNavigationDefinition = {
   id: 'analytics',
   title,
   icon,
-  homePage: 'home', // Temp. Wil be updated when all links are registered
+  homePage: 'discover', // Temp. Wil be updated when all links are registered
   navigationTree$: of(navTree),
 };
