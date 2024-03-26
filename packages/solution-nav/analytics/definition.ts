@@ -49,7 +49,6 @@ const navTree: NavigationTreeDefinition = {
             return (
               pathNameSerialized.startsWith(prepend('/app/visualize')) ||
               pathNameSerialized.startsWith(prepend('/app/lens')) ||
-              pathNameSerialized.startsWith(prepend('/app/maps'))
             );
           },
         },
