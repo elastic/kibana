@@ -215,20 +215,26 @@ export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLa
   return options[layerTypes.ANNOTATIONS](layer);
 };
 
-export function getVisualizationType(state: State): VisualizationType | 'mixed' {
+export function getVisualizationType(state: State, layerId?: string): VisualizationType | 'mixed' {
   if (!state.layers.length) {
     return (
       visualizationTypes.find((t) => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
     );
   }
   const dataLayers = getDataLayers(state?.layers);
-  const visualizationType = visualizationTypes.find((t) => t.id === dataLayers?.[0].seriesType);
+  if (layerId) {
+    const dataLayerSeries = layerId
+      ? dataLayers.find((d) => d.layerId === layerId)?.seriesType
+      : dataLayers[0].seriesType;
+    return visualizationTypes.find((t) => t.id === dataLayerSeries) || 'mixed';
+  }
+  const visualizationType = visualizationTypes.find((t) => t.id === dataLayers[0].seriesType);
   const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
 
-export function getDescription(state?: State) {
+export function getDescription(state?: State, layerId?: string) {
   if (!state) {
     return {
       icon: defaultIcon,
@@ -238,7 +244,7 @@ export function getDescription(state?: State) {
     };
   }
 
-  const visualizationType = getVisualizationType(state);
+  const visualizationType = getVisualizationType(state, layerId);
 
   if (visualizationType === 'mixed' && isHorizontalChart(state.layers)) {
     return {
