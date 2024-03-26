@@ -15,6 +15,19 @@ export const CrowdstrikeSecretsSchema = schema.object({
   clientSecret: schema.string(),
 });
 
+export const CrowdstrikeBaseApiResponseSchema = schema.object(
+  {
+    resources: schema.arrayOf(schema.any()),
+    errors: schema.nullable(schema.arrayOf(schema.any())),
+    meta: schema.object({
+      query_time: schema.number(),
+      powered_by: schema.string(),
+      trace_id: schema.string(),
+    }),
+  },
+  { unknowns: 'allow' }
+);
+
 export const CrowdstrikeGetAgentsResponseSchema = schema.object(
   {
     resources: schema.arrayOf(
