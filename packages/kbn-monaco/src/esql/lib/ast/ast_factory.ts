@@ -9,7 +9,7 @@
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
 import {
   type ShowInfoContext,
-  type ShowFunctionsContext,
+  type MetaFunctionsContext,
   type SingleStatementContext,
   type RowCommandContext,
   type FromCommandContext,
@@ -27,9 +27,16 @@ import {
   type EnrichCommandContext,
   type WhereCommandContext,
   default as esql_parser,
+  type MetaCommandContext,
 } from '../../antlr/esql_parser';
 import { default as ESQLParserListener } from '../../antlr/esql_parser_listener';
-import { createCommand, createFunction, createOption, createLiteral } from './ast_helpers';
+import {
+  createCommand,
+  createFunction,
+  createOption,
+  createLiteral,
+  textExistsAndIsValid,
+} from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import {
   collectAllSourceIdentifiers,
@@ -64,7 +71,9 @@ export class AstListener implements ESQLParserListener {
 
     this.ast.push(commandAst);
     commandAst.text = ctx.getText();
-    commandAst?.args.push(createFunction('info', ctx, getPosition(ctx.INFO().symbol)));
+    if (textExistsAndIsValid(ctx.INFO().getText())) {
+      commandAst?.args.push(createFunction('info', ctx, getPosition(ctx.INFO().symbol)));
+    }
   }
 
   /**
@@ -72,12 +81,14 @@ export class AstListener implements ESQLParserListener {
    * labeled alternative in `esql_parser.showCommand`.
    * @param ctx the parse tree
    */
-  exitShowFunctions(ctx: ShowFunctionsContext) {
-    const commandAst = createCommand('show', ctx);
+  exitMetaFunctions(ctx: MetaFunctionsContext) {
+    const commandAst = createCommand('meta', ctx);
     this.ast.push(commandAst);
     // update the text
     commandAst.text = ctx.getText();
-    commandAst?.args.push(createFunction('functions', ctx, getPosition(ctx.FUNCTIONS().symbol)));
+    if (textExistsAndIsValid(ctx.FUNCTIONS().getText())) {
+      commandAst?.args.push(createFunction('functions', ctx, getPosition(ctx.FUNCTIONS().symbol)));
+    }
   }
 
   /**
@@ -247,6 +258,15 @@ export class AstListener implements ESQLParserListener {
    */
   enterShowCommand(ctx: ShowCommandContext) {
     const command = createCommand('show', ctx);
+    this.ast.push(command);
+  }
+
+  /**
+   * Enter a parse tree produced by `esql_parser.metaCommand`.
+   * @param ctx the parse tree
+   */
+  enterMetaCommand(ctx: MetaCommandContext) {
+    const command = createCommand('meta', ctx);
     this.ast.push(command);
   }
   /**
