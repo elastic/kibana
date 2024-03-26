@@ -201,16 +201,13 @@ export function computeLocationExtends(fn: ESQLFunction) {
 
 /* SCRIPT_MARKER_START */
 function getQuotedText(ctx: ParserRuleContext) {
-  return [66 /* esql_parser.QUOTED_IDENTIFIER */]
+  return [67 /* esql_parser.QUOTED_IDENTIFIER */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
-  return [
-    65 /* esql_parser.UNQUOTED_IDENTIFIER */, 71 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */,
-    105 /* esql_parser.UNQUOTED_ID_PATTERN */,
-  ]
+  return [66 /* esql_parser.UNQUOTED_IDENTIFIER */, 72 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }

@@ -403,7 +403,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.functionsDoc', {
       defaultMessage: 'Show ES|QL avaialble functions with signatures',
     }),
-    supportedCommands: ['show'],
+    supportedCommands: ['meta'],
     signatures: [
       {
         params: [],

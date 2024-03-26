@@ -685,6 +685,7 @@ x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
 packages/kbn-search-api-panels @elastic/enterprise-search-frontend
 packages/kbn-search-connectors @elastic/enterprise-search-frontend
+x-pack/plugins/search_connectors @elastic/enterprise-search-frontend
 packages/kbn-search-errors @elastic/kibana-data-discovery
 examples/search_examples @elastic/kibana-data-discovery
 packages/kbn-search-index-documents @elastic/enterprise-search-frontend

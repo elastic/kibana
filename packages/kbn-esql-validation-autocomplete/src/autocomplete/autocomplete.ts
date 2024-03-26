@@ -648,7 +648,7 @@ async function getExpressionSuggestionsByType(
             }
           ))
         );
-        if (command.name === 'show') {
+        if (['show', 'meta'].includes(command.name)) {
           suggestions.push(
             ...getBuiltinCompatibleFunctionDefinition(command.name, undefined, 'any')
           );

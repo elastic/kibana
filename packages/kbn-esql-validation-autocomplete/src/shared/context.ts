@@ -172,24 +172,6 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
       return { type: 'setting' as const, command, node, option, setting };
     }
   }
-  if (!command && queryString.trim().toLowerCase() === 'show') {
-    return {
-      type: 'expression' as const,
-      // The ES grammar makes the "SHOW" command an invalid type at grammar level
-      // so we need to create a fake command to make it work the AST in this case
-      command: {
-        type: 'command',
-        name: 'show',
-        text: queryString.trim(),
-        location: { min: 0, max: queryString.length },
-        incomplete: true,
-        args: [],
-      } as ESQLCommand,
-      node,
-      option,
-    };
-  }
-
   if (!command || (queryString.length <= offset && getLastCharFromTrimmed(queryString) === '|')) {
     //   // ... | <here>
     return { type: 'newCommand' as const, command: undefined, node, option, setting };

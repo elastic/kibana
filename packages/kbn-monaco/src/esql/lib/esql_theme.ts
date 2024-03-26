@@ -76,6 +76,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'expr_ws',
         'row',
         'show',
+        'meta',
         'limit',
         'nulls_ordering_direction',
         'nulls_ordering',
