@@ -45,7 +45,7 @@ export function FlyoutSummaryKpis({
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexGroup wrap={true} gutterSize="m">
-        {kpis.map((kpi, index) => (
+        {kpis.map((kpi) => (
           <EuiFlexItem key={kpi.title}>
             <FlyoutSummaryKpiItem {...kpi} isLoading={isLoading} />
           </EuiFlexItem>
@@ -59,7 +59,7 @@ export function FlyoutSummaryKpisLoading() {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexGroup wrap={true} gutterSize="m">
-        {getSummaryKpis(undefined, undefined, true).map(({ title }, index) => (
+        {getSummaryKpis(undefined, undefined).map(({ title }) => (
           <EuiFlexItem key={title}>
             <FlyoutSummaryKpiItemLoading title={title} />
           </EuiFlexItem>
@@ -69,11 +69,10 @@ export function FlyoutSummaryKpisLoading() {
   );
 }
 
-// includeSizeMetric is for Serverless where `_stats` API and thus size metric isn't available
+// dataStreamDetails.sizeBytes = null indicates it's Serverless where `_stats` API isn't available
 function getSummaryKpis(
   dataStreamDetails?: DataStreamDetails,
-  degradedDocsHref?: string,
-  includeSizeMetric: boolean = true
+  degradedDocsHref?: string
 ): Array<{ title: string; value: string; link?: { label: string; href: string } }> {
   const services = dataStreamDetails?.services ?? {};
   const serviceKeys = Object.keys(services);
@@ -99,7 +98,7 @@ function getSummaryKpis(
       title: flyoutDocsCountTotalText,
       value: formatNumber(dataStreamDetails?.docsCount ?? 0, NUMBER_FORMAT),
     },
-    ...(includeSizeMetric
+    ...(dataStreamDetails?.sizeBytes !== null // Only show when not in Serverless
       ? [
           {
             title: flyoutSizeText,

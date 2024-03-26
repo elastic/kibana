@@ -185,7 +185,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                         },
                         onError: {
                           target: 'done',
-                          actions: ['fetchDatasetDetailsFailedNotifier'],
+                          actions: ['notifyFetchDatasetDetailsFailed'],
                         },
                       },
                     },

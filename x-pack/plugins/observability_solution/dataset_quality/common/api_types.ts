@@ -77,11 +77,11 @@ export const degradedDocsRt = rt.type({
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
 
 export const dataStreamDetailsRt = rt.partial({
-  createdOn: rt.number,
+  createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
   lastActivity: rt.number,
   degradedDocsCount: rt.number,
   docsCount: rt.number,
-  sizeBytes: rt.number,
+  sizeBytes: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
   services: rt.record(rt.string, rt.array(rt.string)),
   hosts: rt.record(rt.string, rt.array(rt.string)),
 });
