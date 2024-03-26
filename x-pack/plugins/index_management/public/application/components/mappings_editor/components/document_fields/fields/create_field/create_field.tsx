@@ -172,9 +172,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-  const wrapperClassName =
-    'mappingsEditor__createFieldWrapper ' +
-    (isAddingFields ? 'mappingsEditor__createFieldAddField' : 'mappingsEditor__createFieldBorder');
 
   return (
     <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
@@ -185,7 +182,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
         data-test-subj="createFieldForm"
       >
         <div
-          className={classNames(wrapperClassName, {
+          className={classNames('mappingsEditor__createFieldWrapper', {
             'mappingsEditor__createFieldWrapper--toggle':
               Boolean(maxNestedDepth) && maxNestedDepth! > 0,
             'mappingsEditor__createFieldWrapper--multiField': isMultiField,
