@@ -5,20 +5,19 @@
  * 2.0.
  */
 import React from 'react';
-import { useApmParams } from '../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../hooks/use_apm_params';
 import { ServiceOverviewThroughputChart } from '../../components/app/service_overview/service_overview_throughput_chart';
 
 export const APM_THROUGHPUT_CHART_EMBEDDABLE =
   'APM_THROUGHPUT_CHART_EMBEDDABLE';
 
-export function APMThroughputChartEmbeddableComponent({
-  transactionName,
-}: {
-  transactionName?: string;
-}) {
+export function APMThroughputChartEmbeddableComponent() {
   const {
-    query: { kuery },
-  } = useApmParams('/services/{serviceName}/overview');
+    query: { kuery, transactionName },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/overview',
+    '/services/{serviceName}/transactions/view'
+  );
 
   return (
     <ServiceOverviewThroughputChart
