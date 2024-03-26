@@ -90,6 +90,12 @@ const randomAgentPolicyName = (() => {
   };
 })();
 
+/**
+ * Used for filtering out any versions in the format "8.13.0+build202403222138"
+ * @param version Version string
+ */
+const hasNoBuildLabel = (version: string) => !version.includes('+build');
+
 export const checkInFleetAgent = async (
   esClient: Client,
   agentId: string,
@@ -396,7 +402,12 @@ export const getAgentVersionMatchingCurrentStack = async (
   const kbnStatus = await fetchKibanaStatus(kbnClient);
   const agentVersions = await axios
     .get('https://artifacts-api.elastic.co/v1/versions')
-    .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
+    .then((response) =>
+      map(
+        response.data.versions.filter(hasNoBuildLabel),
+        (version) => version.split('-SNAPSHOT')[0]
+      )
+    );
 
   let version =
     semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
@@ -519,8 +530,9 @@ export const getLatestAgentDownloadVersion = async (
     }
   );
 
-  const stackVersionToArtifactVersion: Record<string, string> =
-    artifactVersionsResponse.versions.reduce((acc, artifactVersion) => {
+  const stackVersionToArtifactVersion: Record<string, string> = artifactVersionsResponse.versions
+    .filter(hasNoBuildLabel)
+    .reduce((acc, artifactVersion) => {
       const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
       acc[stackVersion] = artifactVersion;
       return acc;
