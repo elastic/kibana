@@ -49,19 +49,21 @@ export const Chat = () => {
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
   const messagesRef = useAutoBottomScroll([showStartPage]);
 
+  const buildFormData = (formData: ChatForm) => ({
+    prompt: formData[ChatFormFields.prompt],
+    indices: formData[ChatFormFields.indices].join(),
+    api_key: formData[ChatFormFields.openAIKey],
+    citations: formData[ChatFormFields.citations],
+    elasticsearchQuery: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
+    summarization_model:
+      formData[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
+  });
+
   const onSubmit = async (data: ChatForm) => {
     await append(
       { content: data.question, role: MessageRole.user, createdAt: new Date() },
       {
-        data: {
-          prompt: data[ChatFormFields.prompt],
-          indices: data[ChatFormFields.indices].join(),
-          api_key: data[ChatFormFields.openAIKey],
-          citations: data[ChatFormFields.citations],
-          elasticsearchQuery: JSON.stringify(data[ChatFormFields.elasticsearchQuery]),
-          summarization_model:
-            data[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
-        },
+        data: buildFormData(data),
       }
     );
 
@@ -80,17 +82,9 @@ export const Chat = () => {
   );
 
   const regenerateMessages = () => {
-    const data = getValues();
+    const formData = getValues();
     reload({
-      data: {
-        prompt: data[ChatFormFields.prompt],
-        indices: data[ChatFormFields.indices].join(),
-        api_key: data[ChatFormFields.openAIKey],
-        citations: data[ChatFormFields.citations],
-        elasticsearchQuery: JSON.stringify(data[ChatFormFields.elasticsearchQuery]),
-        summarization_model:
-          data[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
-      },
+      data: buildFormData(formData),
     });
   };
 
