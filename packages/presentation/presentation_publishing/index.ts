@@ -44,22 +44,18 @@ export {
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
 export {
   apiPublishesBlockingError,
-  useBlockingError,
   type PublishesBlockingError,
 } from './interfaces/publishes_blocking_error';
 export {
   apiPublishesDataLoading,
-  useDataLoading,
   type PublishesDataLoading,
 } from './interfaces/publishes_data_loading';
 export {
   apiPublishesDataViews,
-  useDataViews,
   type PublishesDataViews,
 } from './interfaces/publishes_data_views';
 export {
   apiPublishesDisabledActionIds,
-  useDisabledActionIds,
   type PublishesDisabledActionIds,
 } from './interfaces/publishes_disabled_action_ids';
 export {
@@ -80,18 +76,15 @@ export {
 export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
 export {
   apiPublishesSavedObjectId,
-  useSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
 export {
   apiPublishesUnsavedChanges,
-  useUnsavedChanges,
   type PublishesUnsavedChanges,
 } from './interfaces/publishes_unsaved_changes';
 export {
   apiPublishesViewMode,
   apiPublishesWritableViewMode,
-  useViewMode,
   type PublishesViewMode,
   type PublishesWritableViewMode,
   type ViewMode,
@@ -99,8 +92,6 @@ export {
 export {
   apiPublishesPanelDescription,
   apiPublishesWritablePanelDescription,
-  useDefaultPanelDescription,
-  usePanelDescription,
   type PublishesPanelDescription,
   type PublishesWritablePanelDescription,
 } from './interfaces/titles/publishes_panel_description';
