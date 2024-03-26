@@ -30,6 +30,10 @@ export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is Ca
   return Boolean((unknownApi as CanExpandPanels)?.expandPanel !== undefined);
 };
 
+export const apiHasExpandedPanel = (unknownApi: unknown | null): unknownApi is CanExpandPanels => {
+  return Boolean((unknownApi as CanExpandPanels)?.expandedPanelId.getValue() !== undefined);
+};
+
 /**
  * Gets this API's expanded panel state as a reactive variable which will cause re-renders on change.
  */
