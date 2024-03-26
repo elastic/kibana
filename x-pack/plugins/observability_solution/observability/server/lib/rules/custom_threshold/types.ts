@@ -12,8 +12,15 @@ import {
   RecoveredActionGroup,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
+import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
+} from '@kbn/rule-data-utils';
 import {
   CustomMetricExpressionParams,
+  Group,
   SearchConfigurationWithExtractedReferenceType,
 } from '../../../../common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';
@@ -64,3 +71,13 @@ export interface AlertExecutionDetails {
   alertId: string;
   executionId: string;
 }
+
+export type CustomThresholdAlert = Omit<
+  ObservabilityMetricsAlert,
+  'kibana.alert.evaluation.values' | 'kibana.alert.evaluation.threshold' | 'kibana.alert.group'
+> & {
+  // Defining a custom type for this because the schema generation script doesn't allow explicit null values
+  [ALERT_EVALUATION_VALUES]?: Array<number | null>;
+  [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
+  [ALERT_GROUP]?: Group[];
+};

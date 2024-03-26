@@ -37,11 +37,11 @@ import {
 import { oneOfLiterals, validateKQLStringFilter } from './utils';
 import {
   createCustomThresholdExecutor,
-  CustomThresholdAlert,
   CustomThresholdLocators,
 } from './custom_threshold_executor';
 import { CUSTOM_THRESHOLD_AAD_FIELDS, FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { ObservabilityConfig } from '../../..';
+import { CustomThresholdAlert } from './types';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAlert> = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,

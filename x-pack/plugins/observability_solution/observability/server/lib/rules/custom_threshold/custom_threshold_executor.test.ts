@@ -271,7 +271,7 @@ describe('The custom threshold alert type', () => {
     test('alerts as expected with the > comparator', async () => {
       setResults(Comparator.GT, [0.75], true);
       await execute(Comparator.GT, [0.75]);
-      expect(getLastReportedAlert(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.GT, [1.5], false);
       await execute(Comparator.GT, [1.5]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
@@ -279,7 +279,7 @@ describe('The custom threshold alert type', () => {
     test('alerts as expected with the < comparator', async () => {
       setResults(Comparator.LT, [1.5], true);
       await execute(Comparator.LT, [1.5]);
-      expect(getLastReportedAlert(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.LT, [0.75], false);
       await execute(Comparator.LT, [0.75]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
@@ -287,10 +287,10 @@ describe('The custom threshold alert type', () => {
     test('alerts as expected with the >= comparator', async () => {
       setResults(Comparator.GT_OR_EQ, [0.75], true);
       await execute(Comparator.GT_OR_EQ, [0.75]);
-      expect(getLastReportedAlert(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.GT_OR_EQ, [1.0], true);
       await execute(Comparator.GT_OR_EQ, [1.0]);
-      expect(getLastReportedAlert(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.GT_OR_EQ, [1.5], false);
       await execute(Comparator.GT_OR_EQ, [1.5]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
@@ -298,10 +298,10 @@ describe('The custom threshold alert type', () => {
     test('alerts as expected with the <= comparator', async () => {
       setResults(Comparator.LT_OR_EQ, [1.5], true);
       await execute(Comparator.LT_OR_EQ, [1.5]);
-      expect(getLastReportedAlert(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.LT_OR_EQ, [1.0], true);
       await execute(Comparator.LT_OR_EQ, [1.0]);
-      expect(getLastReportedAlert(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.LT_OR_EQ, [0.75], false);
       await execute(Comparator.LT_OR_EQ, [0.75]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
@@ -309,7 +309,7 @@ describe('The custom threshold alert type', () => {
     test('alerts as expected with the between comparator', async () => {
       setResults(Comparator.BETWEEN, [0, 1.5], true);
       await execute(Comparator.BETWEEN, [0, 1.5]);
-      expect(getLastReportedAlert(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.BETWEEN, [0, 0.75], false);
       await execute(Comparator.BETWEEN, [0, 0.75]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
@@ -317,7 +317,7 @@ describe('The custom threshold alert type', () => {
     test('alerts as expected with the outside range comparator', async () => {
       setResults(Comparator.OUTSIDE_RANGE, [0, 0.75], true);
       await execute(Comparator.OUTSIDE_RANGE, [0, 0.75]);
-      expect(getLastReportedAlert(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.OUTSIDE_RANGE, [0, 1.5], false);
       await execute(Comparator.OUTSIDE_RANGE, [0, 1.5]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
@@ -387,8 +387,8 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(Comparator.GT, [0.75]);
-      expect(getLastReportedAlert(instanceIdA)).toBeAlertAction();
-      expect(getLastReportedAlert(instanceIdB)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
     });
     test('sends an alert when only some groups pass the threshold', async () => {
       setEvaluationResults([
@@ -416,7 +416,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(Comparator.LT, [1.5]);
-      expect(getLastReportedAlert(instanceIdA)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
       expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
     });
     test('sends no alert when no groups pass the threshold', async () => {
@@ -1021,7 +1021,7 @@ describe('The custom threshold alert type', () => {
       ]);
       const instanceID = '*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
-      expect(getLastReportedAlert(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
     });
     test('sends no alert when some, but not all, criteria cross the threshold', async () => {
       setEvaluationResults([
@@ -1107,7 +1107,7 @@ describe('The custom threshold alert type', () => {
       const instanceIdA = 'a';
       const instanceIdB = 'b';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0], 'groupByField');
-      expect(getLastReportedAlert(instanceIdA)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
       expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
     });
     test('sends all criteria to the action context', async () => {
@@ -1189,7 +1189,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(Comparator.GT, [0.9]);
-      expect(getLastReportedAlert(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setEvaluationResults([
         {
           '*': {
@@ -1287,8 +1287,8 @@ describe('The custom threshold alert type', () => {
           },
         ]);
         await executeGroupBy(Comparator.LT_OR_EQ, [0], 'empty-response', resultState);
-        expect(getLastReportedAlert(instanceIdA)).toBeAlertAction();
-        expect(getLastReportedAlert(instanceIdB)).toBeAlertAction();
+        expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+        expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
       });
     });
   });
@@ -1409,7 +1409,7 @@ describe('The custom threshold alert type', () => {
       expect(reportedAlert?.context?.reason).toEqual(
         'Average test.metric.3 reported no data in the last 1m'
       );
-      expect(reportedAlert).toBeNoDataAction();
+      expect(reportedAlert).toHaveNoDataAction();
     });
     test('does not send a No Data alert when not configured to do so', async () => {
       setEvaluationResults([
@@ -1503,7 +1503,7 @@ describe('The custom threshold alert type', () => {
         tags: [],
         viewInAppUrl: 'mockedViewInApp',
       });
-      expect(recentAlert).toBeNoDataAction();
+      expect(recentAlert).toHaveNoDataAction();
     });
   });
 
@@ -1567,7 +1567,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       let resultState = await executeEmptyResponse();
-      expect(getLastReportedAlert(instanceID)).toBeNoDataAction();
+      expect(getLastReportedAlert(instanceID)).toHaveNoDataAction();
       setEvaluationResults([
         {
           '*': {
@@ -1590,7 +1590,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       resultState = await executeEmptyResponse(true, resultState);
-      expect(getLastReportedAlert(instanceID)).toBeNoDataAction();
+      expect(getLastReportedAlert(instanceID)).toHaveNoDataAction();
       setEvaluationResults([
         {
           a: {
@@ -1617,8 +1617,8 @@ describe('The custom threshold alert type', () => {
       ]);
       resultState = await execute2GroupsABResponse(true, resultState);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
-      expect(getLastReportedAlert(instanceIdA)).toBeAlertAction();
-      expect(getLastReportedAlert(instanceIdB)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
       interTestStateStorage.push(resultState); // Hand off resultState to the next test
     });
     test('sends No Data alerts for the previously detected groups when they stop reporting data, but not the * group', async () => {
@@ -1665,8 +1665,8 @@ describe('The custom threshold alert type', () => {
       ]);
       await executeEmptyResponse(true, resultState);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
-      expect(getLastReportedAlert(instanceIdA)).toBeNoDataAction();
-      expect(getLastReportedAlert(instanceIdB)).toBeNoDataAction();
+      expect(getLastReportedAlert(instanceIdA)).toHaveNoDataAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveNoDataAction();
     });
     test('does not send individual No Data alerts when groups disappear if alertOnGroupDisappear is disabled', async () => {
       setEvaluationResults([
@@ -1726,9 +1726,9 @@ describe('The custom threshold alert type', () => {
       ]);
       const resultState = await execute3GroupsABCResponse(false);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
-      expect(getLastReportedAlert(instanceIdA)).toBeAlertAction();
-      expect(getLastReportedAlert(instanceIdB)).toBeAlertAction();
-      expect(getLastReportedAlert(instanceIdC)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdC)).toHaveAlertAction();
       setEvaluationResults([
         {
           a: {
@@ -1755,8 +1755,8 @@ describe('The custom threshold alert type', () => {
       ]);
       await execute2GroupsABResponse(false, resultState);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
-      expect(getLastReportedAlert(instanceIdA)).toBeAlertAction();
-      expect(getLastReportedAlert(instanceIdB)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
       expect(getLastReportedAlert(instanceIdC)).toBe(undefined);
     });
 
@@ -1861,8 +1861,8 @@ describe('The custom threshold alert type', () => {
         ]);
         resultState = await executeWeird2GroupsABResponse(resultState);
         expect(getLastReportedAlert(instanceID)).toBe(undefined);
-        expect(getLastReportedAlert(instanceIdA)).toBeAlertAction();
-        expect(getLastReportedAlert(instanceIdB)).toBeAlertAction();
+        expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+        expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
         interTestStateStorage.push(resultState); // Hand off resultState to the next test
       });
       test('sends No Data alerts for the previously detected groups when they stop reporting data, but not the * group', async () => {
@@ -1907,8 +1907,8 @@ describe('The custom threshold alert type', () => {
         ]);
         await executeWeirdEmptyResponse(resultState);
         expect(getLastReportedAlert(instanceID)).toBe(undefined);
-        expect(getLastReportedAlert(instanceIdA)).toBeNoDataAction();
-        expect(getLastReportedAlert(instanceIdB)).toBeNoDataAction();
+        expect(getLastReportedAlert(instanceIdA)).toHaveNoDataAction();
+        expect(getLastReportedAlert(instanceIdB)).toHaveNoDataAction();
       });
     });
   });
@@ -1934,7 +1934,7 @@ interface Action {
 }
 
 expect.extend({
-  toBeAlertAction(action?: Action) {
+  toHaveAlertAction(action?: Action) {
     const pass =
       action?.actionGroup === FIRED_ACTION.id && !action?.context?.reason?.includes('no data');
     const message = () => `expected ${action} to be an ALERT action`;
@@ -1943,7 +1943,7 @@ expect.extend({
       pass,
     };
   },
-  toBeNoDataAction(action?: Action) {
+  toHaveNoDataAction(action?: Action) {
     const pass =
       action?.actionGroup === NO_DATA_ACTION.id && action?.context?.reason?.includes('no data');
     const message = () => `expected ${action} to be a NO DATA action`;
@@ -1958,8 +1958,8 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
-      toBeAlertAction(action?: Action): R;
-      toBeNoDataAction(action?: Action): R;
+      toHaveAlertAction(action?: Action): R;
+      toHaveNoDataAction(action?: Action): R;
     }
   }
 }

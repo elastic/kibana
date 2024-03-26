@@ -17,7 +17,6 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { Group } from '../../../../common/custom_threshold_rule/types';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
@@ -32,6 +31,7 @@ import {
   CustomThresholdAlertContext,
   CustomThresholdSpecificActionGroups,
   CustomThresholdActionGroup,
+  CustomThresholdAlert,
 } from './types';
 import {
   buildFiredAlertReason,
@@ -56,16 +56,6 @@ export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
   logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>;
 }
-
-export type CustomThresholdAlert = Omit<
-  ObservabilityMetricsAlert,
-  'kibana.alert.evaluation.values' | 'kibana.alert.evaluation.threshold' | 'kibana.alert.group'
-> & {
-  // Defining a custom type for this because the schema generation script doesn't allow explicit null values
-  [ALERT_EVALUATION_VALUES]?: Array<number | null>;
-  [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
-  [ALERT_GROUP]?: Group[];
-};
 
 export const createCustomThresholdExecutor = ({
   basePath,
