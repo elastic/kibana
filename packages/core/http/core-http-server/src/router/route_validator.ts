@@ -136,6 +136,10 @@ export interface RouteValidatorFullConfigResponses {
   };
 }
 
+/**
+ * An alternative form to register both request schema and all response schemas.
+ * @public
+ */
 export interface RouteValidatorFullConfigContainer<P, Q, B> {
   request: RouteValidatorFullConfig<P, Q, B>;
   responses?: RouteValidatorFullConfigResponses;
@@ -143,5 +147,4 @@ export interface RouteValidatorFullConfigContainer<P, Q, B> {
 
 export type RouteValidatorContainer<P, Q, B> =
   | RouteValidatorFullConfig<P, Q, B>
-  /** Extended form to allow specifying request and response schemas */
   | RouteValidatorFullConfigContainer<P, Q, B>;
