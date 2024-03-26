@@ -68,8 +68,6 @@ export default ({ getService }: FtrProviderContext) => {
    * Tests
    */
   describe('Generate CSV from SearchSource', () => {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/179456
-    this.tags(['failsOnMKI']);
     beforeEach(async () => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
