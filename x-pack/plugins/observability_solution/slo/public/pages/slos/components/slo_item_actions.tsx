@@ -197,7 +197,7 @@ export function SloItemActions({
             onClick={handleNavigateToRules}
             data-test-subj="sloActionsManageRules"
           >
-            {i18n.translate('xpack.slo.item.actions.manageRules', {
+            {i18n.translate('xpack.slo.item.actions.manageBurnRateRules', {
               defaultMessage: 'Manage burn rate {count, plural, one {rule} other {rules}}',
               values: { count: rules?.length ?? 0 },
             })}

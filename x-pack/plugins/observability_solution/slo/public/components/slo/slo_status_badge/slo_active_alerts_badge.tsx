@@ -45,7 +45,7 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
     <EuiFlexItem grow={false}>
       <EuiToolTip
         position="top"
-        content={i18n.translate('xpack.slo.slo.activeAlertsBadge.label', {
+        content={i18n.translate('xpack.slo.slo.activeAlertsBadge.tooltip', {
           defaultMessage:
             '{count, plural, one {# burn rate alert} other {# burn rate alerts}}, click to view.',
           values: { count: activeAlerts },
