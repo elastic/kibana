@@ -29,8 +29,9 @@ export type PackageCardProps = IntegrationCardItem;
 
 // Min-height is roughly 3 lines of content.
 // This keeps the cards from looking overly unbalanced because of content differences.
-const Card = styled(EuiCard)`
+const Card = styled(EuiCard)<{ isQuickstart?: boolean }>`
   min-height: 127px;
+  border-color: ${({ isQuickstart }) => (isQuickstart ? '#ba3d76' : null)};
 `;
 
 export function PackageCard({
@@ -49,6 +50,7 @@ export function PackageCard({
   isUpdateAvailable,
   showLabels = true,
   extraLabelsBadges,
+  isQuickstart = false,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -144,6 +146,8 @@ export function PackageCard({
       <TrackApplicationView viewId={testid}>
         <Card
           data-test-subj={testid}
+          isQuickstart={isQuickstart}
+          betaBadgeProps={isQuickstart ? { label: 'Quickstart', color: 'accent' } : undefined}
           layout="horizontal"
           title={title || ''}
           titleSize="xs"

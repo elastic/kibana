@@ -265,7 +265,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
             {callout}
           </>
         ) : null}
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         <EuiFlexItem>
           <GridColumn
             isLoading={!!isLoading}

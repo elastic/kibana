@@ -116,7 +116,12 @@ export const GridColumn = ({
               >
                 {({ index, style }) => {
                   return (
-                    <VirtualizedRow index={index} style={style} onHeightChange={onHeightChange}>
+                    <VirtualizedRow
+                      index={index}
+                      // this extra top offset is necessary if the cards ever have a beta badge specified
+                      style={{ ...style, top: (Number(style.top) ?? 0) + 15 }}
+                      onHeightChange={onHeightChange}
+                    >
                       <EuiFlexGrid gutterSize="l" columns={3}>
                         {list.slice(index * 3, index * 3 + 3).map((item) => {
                           return (
