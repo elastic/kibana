@@ -13,14 +13,19 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { of } from 'rxjs';
 
+const title = i18n.translate('navigation.searchNav.headerSolutionSwitcher.searchSolutionTitle', {
+  defaultMessage: 'Search',
+});
+const icon = 'logoElasticsearch';
+
 const navTree: NavigationTreeDefinition = {
   body: [
     { type: 'recentlyAccessed' },
     {
       type: 'navGroup',
       id: 'search_project_nav',
-      title: 'Search',
-      icon: 'logoElasticsearch',
+      title,
+      icon,
       defaultIsCollapsed: false,
       isCollapsible: false,
       breadcrumbStatus: 'hidden',
@@ -296,8 +301,8 @@ const navTree: NavigationTreeDefinition = {
 
 export const definition: SolutionNavigationDefinition = {
   id: 'es',
-  title: 'Search',
-  icon: 'logoElasticsearch',
+  title,
+  icon,
   homePage: 'home', // Temp. Wil be updated when all links are registered
   navigationTree$: of(navTree),
 };

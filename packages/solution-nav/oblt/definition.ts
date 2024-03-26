@@ -12,14 +12,19 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { of } from 'rxjs';
 
+const title = i18n.translate('navigation.obltNav.headerSolutionSwitcher.obltSolutionTitle', {
+  defaultMessage: 'Observability',
+});
+const icon = 'logoObservability';
+
 const navTree: NavigationTreeDefinition = {
   body: [
     { type: 'recentlyAccessed' },
     {
       type: 'navGroup',
       id: 'observability_project_nav',
-      title: 'Observability',
-      icon: 'logoObservability',
+      title,
+      icon,
       defaultIsCollapsed: false,
       isCollapsible: false,
       breadcrumbStatus: 'hidden',
@@ -293,7 +298,7 @@ const navTree: NavigationTreeDefinition = {
 
 export const definition: SolutionNavigationDefinition = {
   id: 'oblt',
-  title: 'Observability',
+  title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
   navigationTree$: of(navTree),
