@@ -350,14 +350,14 @@ describe('validation logic', () => {
     ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
       (command) =>
         testErrorsAndWarnings(command, [
-          `SyntaxError: mismatched input '${command}' expecting {'explain', 'from', 'row', 'show'}`,
+          `SyntaxError: mismatched input '${command}' expecting {'explain', 'from', 'meta', 'row', 'show'}`,
         ])
     );
   });
 
   describe('from', () => {
     testErrorsAndWarnings('f', [
-      "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'row', 'show'}",
+      "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'row', 'show'}",
     ]);
     testErrorsAndWarnings(`from `, [
       "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
@@ -663,20 +663,41 @@ describe('validation logic', () => {
     });
   });
 
-  describe('show', () => {
-    testErrorsAndWarnings('show', ["SyntaxError: no viable alternative at input 'show'"]);
-    testErrorsAndWarnings('show functions', []);
-    testErrorsAndWarnings('show info', []);
-    testErrorsAndWarnings('show functions()', [
+  describe('meta', () => {
+    testErrorsAndWarnings('meta', ["SyntaxError: missing 'functions' at '<EOF>'"]);
+    testErrorsAndWarnings('meta functions', []);
+    testErrorsAndWarnings('meta functions()', [
       "SyntaxError: token recognition error at: '('",
       "SyntaxError: token recognition error at: ')'",
     ]);
-    testErrorsAndWarnings('show functions blah', [
+    testErrorsAndWarnings('meta functions blah', [
       "SyntaxError: token recognition error at: 'b'",
       "SyntaxError: token recognition error at: 'l'",
       "SyntaxError: token recognition error at: 'a'",
       "SyntaxError: token recognition error at: 'h'",
     ]);
+    testErrorsAndWarnings('meta info', [
+      "SyntaxError: token recognition error at: 'i'",
+      "SyntaxError: token recognition error at: 'n'",
+      "SyntaxError: token recognition error at: 'fo'",
+      "SyntaxError: missing 'functions' at '<EOF>'",
+    ]);
+  });
+
+  describe('show', () => {
+    testErrorsAndWarnings('show', ["SyntaxError: missing 'info' at '<EOF>'"]);
+    testErrorsAndWarnings('show functions', [
+      "SyntaxError: token recognition error at: 'f'",
+      "SyntaxError: token recognition error at: 'u'",
+      "SyntaxError: token recognition error at: 'n'",
+      "SyntaxError: token recognition error at: 'c'",
+      "SyntaxError: token recognition error at: 't'",
+      "SyntaxError: token recognition error at: 'io'",
+      "SyntaxError: token recognition error at: 'n'",
+      "SyntaxError: token recognition error at: 's'",
+      "SyntaxError: missing 'info' at '<EOF>'",
+    ]);
+    testErrorsAndWarnings('show info', []);
     testErrorsAndWarnings('show numberField', [
       "SyntaxError: token recognition error at: 'n'",
       "SyntaxError: token recognition error at: 'u'",
@@ -684,11 +705,11 @@ describe('validation logic', () => {
       "SyntaxError: token recognition error at: 'b'",
       "SyntaxError: token recognition error at: 'e'",
       "SyntaxError: token recognition error at: 'r'",
-      "SyntaxError: token recognition error at: 'Fi'",
-      "SyntaxError: token recognition error at: 'e'",
+      "SyntaxError: token recognition error at: 'F'",
+      "SyntaxError: token recognition error at: 'ie'",
       "SyntaxError: token recognition error at: 'l'",
       "SyntaxError: token recognition error at: 'd'",
-      "SyntaxError: no viable alternative at input 'show '",
+      "SyntaxError: missing 'info' at '<EOF>'",
     ]);
   });
 
@@ -2337,14 +2358,25 @@ describe('validation logic', () => {
       });
     });
 
-    it('should call fields callbacks also for show command', async () => {
+    it('should call fields callbacks also for meta command', async () => {
       const callbackMocks = getCallbackMocks();
-      await validateAst(`show functions | keep name`, getAstAndErrors, callbackMocks);
+      await validateAst(`meta functions | keep name`, getAstAndErrors, callbackMocks);
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
       expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
       expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
       expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
-        query: 'show functions',
+        query: 'meta functions',
+      });
+    });
+
+    it('should call fields callbacks also for show command', async () => {
+      const callbackMocks = getCallbackMocks();
+      await validateAst(`show info | keep name`, getAstAndErrors, callbackMocks);
+      expect(callbackMocks.getSources).not.toHaveBeenCalled();
+      expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
+      expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
+      expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
+        query: 'show info',
       });
     });
 
