@@ -6,22 +6,20 @@
  */
 
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import {
-  InfraGetCustomDashboardsRequestParamsRT,
-  InfraGetCustomDashboardsResponseBodyRT,
-} from '../../../common/http_api/custom_dashboards_api';
+import { InfraDeleteCustomDashboardsRequestParamsRT } from '../../../common/http_api/custom_dashboards_api';
 import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { handleRouteErrors } from '../../utils/handle_route_errors';
 import { checkCustomDashboardsEnabled } from './lib/check_custom_dashboards_enabled';
+import { deleteCustomDashboard } from './lib/delete_custom_dashboard';
 import { findCustomDashboard } from './lib/find_custom_dashboard';
 
-export function initGetCustomDashboardRoute(framework: KibanaFramework) {
-  const validateParams = createRouteValidationFunction(InfraGetCustomDashboardsRequestParamsRT);
+export function initDeleteCustomDashboardRoute(framework: KibanaFramework) {
+  const validateParams = createRouteValidationFunction(InfraDeleteCustomDashboardsRequestParamsRT);
 
   framework.registerRoute(
     {
-      method: 'get',
-      path: '/api/infra/{assetType}/custom-dashboards',
+      method: 'delete',
+      path: '/api/infra/{assetType}/custom-dashboards/{dashboardSavedObjectId}',
       validate: {
         params: validateParams,
       },
@@ -37,26 +35,18 @@ export function initGetCustomDashboardRoute(framework: KibanaFramework) {
       const params = request.params;
       const customDashboards = await findCustomDashboard(params.assetType, savedObjectsClient);
 
-      if (customDashboards.total === 0) {
-        return response.ok({
-          body: InfraGetCustomDashboardsResponseBodyRT.encode([
-            {
-              dashboardSavedObjectId: '',
-              dashboardFilterAssetIdEnabled: false,
-              assetType: params.assetType,
-            },
-          ]),
-        });
-      }
+      // WIP
+      const existingCustomDashboard = customDashboards.saved_objects.find(
+        ({ attributes }) => attributes.dashboardSavedObjectId === params.dashboardSavedObjectId
+      );
 
-      const responseBody = customDashboards.saved_objects.map(({ attributes }) => ({
-        assetType: attributes.assetType,
-        dashboardSavedObjectId: attributes.dashboardSavedObjectId,
-        dashboardFilterAssetIdEnabled: attributes.dashboardFilterAssetIdEnabled,
-      }));
+      const deletedDashboard = await deleteCustomDashboard({
+        savedObjectsClient,
+        savedObjectId: existingCustomDashboard?.id ?? '',
+      });
 
       return response.ok({
-        body: InfraGetCustomDashboardsResponseBodyRT.encode(responseBody),
+        body: existingCustomDashboard?.id,
       });
     })
   );

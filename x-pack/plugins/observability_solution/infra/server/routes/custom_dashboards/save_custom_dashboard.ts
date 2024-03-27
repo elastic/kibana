@@ -11,6 +11,7 @@ import {
   InfraSaveCustomDashboardsRequestPayloadRT,
   InfraSaveCustomDashboardsRequestPayload,
   InfraSaveCustomDashboardsResponseBodyRT,
+  InfraGetCustomDashboardsRequestParamsRT,
 } from '../../../common/http_api/custom_dashboards_api';
 import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -20,13 +21,15 @@ import { handleRouteErrors } from '../../utils/handle_route_errors';
 
 export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
   const validatePayload = createRouteValidationFunction(InfraSaveCustomDashboardsRequestPayloadRT);
+  const validateParams = createRouteValidationFunction(InfraGetCustomDashboardsRequestParamsRT);
 
   framework.registerRoute(
     {
       method: 'post',
-      path: '/api/infra/custom-dashboards',
+      path: '/api/infra/{assetType}/custom-dashboards',
       validate: {
         body: validatePayload,
+        params: validateParams,
       },
       options: {
         access: 'internal',
@@ -37,10 +40,18 @@ export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
 
       await checkCustomDashboardsEnabled(uiSettingsClient);
 
-      const payload: InfraSaveCustomDashboardsRequestPayload = request.body;
+      const payload: InfraSaveCustomDashboardsRequestPayload = {
+        ...request.body,
+        assetType: request.params.assetType,
+      };
       const customDashboards = await findCustomDashboard(payload.assetType, savedObjectsClient);
 
-      if (customDashboards.total === 0) {
+      // WIP
+      const existingCustomDashboard = customDashboards.saved_objects.find(
+        ({ attributes }) => attributes.dashboardSavedObjectId === payload.dashboardSavedObjectId
+      );
+
+      if (customDashboards.total === 0 || !existingCustomDashboard) {
         const savedCustomDashboard = await savedObjectsClient.create<InfraCustomDashboard>(
           INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
           payload
@@ -51,27 +62,9 @@ export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
         });
       }
 
-      const customDashboardExist = customDashboards.saved_objects.find(
-        ({ attributes }) => attributes.dashboardSavedObjectId === payload.dashboardSavedObjectId
-      );
-
-      if (!customDashboardExist) {
-        const savedCustomDashboard = await savedObjectsClient.create<InfraCustomDashboard>(
-          INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-          payload
-        );
-
-        return response.ok({
-          body: InfraSaveCustomDashboardsResponseBodyRT.encode({
-            ...payload,
-            ...savedCustomDashboard.attributes,
-          }),
-        });
-      }
-
       const savedCustomDashboard = await savedObjectsClient.update<InfraCustomDashboard>(
         INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-        payload.dashboardSavedObjectId,
+        existingCustomDashboard.id,
         payload
       );
 
