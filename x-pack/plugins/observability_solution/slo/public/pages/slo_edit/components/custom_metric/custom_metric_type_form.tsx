@@ -83,12 +83,9 @@ export function CustomMetricIndicatorTypeForm() {
           <QueryBuilder
             dataTestSubj="customMetricIndicatorFormQueryFilterInput"
             dataView={dataView}
-            label={i18n.translate(
-              'xpack.slo.sloEdit.sliType.customMetric.queryFilter',
-              {
-                defaultMessage: 'Query filter',
-              }
-            )}
+            label={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.queryFilter', {
+              defaultMessage: 'Query filter',
+            })}
             name="indicator.params.filter"
             placeholder={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.customFilter', {
               defaultMessage: 'Custom filter to apply on the index',

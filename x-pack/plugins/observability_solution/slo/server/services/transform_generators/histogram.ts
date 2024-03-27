@@ -12,9 +12,9 @@ import {
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { InvalidTransformError } from '../../errors';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,

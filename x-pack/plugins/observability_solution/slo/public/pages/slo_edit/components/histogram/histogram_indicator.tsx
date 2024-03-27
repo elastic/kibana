@@ -288,12 +288,9 @@ export function HistogramIndicator({
           <QueryBuilder
             dataTestSubj={`histogramIndicatorForm${type}QueryInput`}
             dataView={dataView}
-            label={i18n.translate(
-              'xpack.slo.sloEdit.sliType.histogram.kqlFilterLabel',
-              {
-                defaultMessage: 'KQL filter',
-              }
-            )}
+            label={i18n.translate('xpack.slo.sloEdit.sliType.histogram.kqlFilterLabel', {
+              defaultMessage: 'KQL filter',
+            })}
             name={`indicator.params.${type}.filter`}
             placeholder=""
             required={false}
