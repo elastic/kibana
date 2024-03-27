@@ -34,6 +34,16 @@ import { StartNewChat } from './start_new_chat';
 import { TelegramIcon } from './telegram_icon';
 import { transformFromChatMessages } from '../utils/transform_to_messages';
 
+const buildFormData = (formData: ChatForm) => ({
+  prompt: formData[ChatFormFields.prompt],
+  indices: formData[ChatFormFields.indices].join(),
+  api_key: formData[ChatFormFields.openAIKey],
+  citations: formData[ChatFormFields.citations],
+  elasticsearchQuery: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
+  summarization_model:
+    formData[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
+});
+
 export const Chat = () => {
   const [showStartPage, setShowStartPage] = useState(true);
   const { euiTheme } = useEuiTheme();
@@ -48,16 +58,6 @@ export const Chat = () => {
   const { messages, append, stop: stopRequest, setMessages, reload } = useChat();
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
   const messagesRef = useAutoBottomScroll([showStartPage]);
-
-  const buildFormData = (formData: ChatForm) => ({
-    prompt: formData[ChatFormFields.prompt],
-    indices: formData[ChatFormFields.indices].join(),
-    api_key: formData[ChatFormFields.openAIKey],
-    citations: formData[ChatFormFields.citations],
-    elasticsearchQuery: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
-    summarization_model:
-      formData[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
-  });
 
   const onSubmit = async (data: ChatForm) => {
     await append(
