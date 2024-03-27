@@ -8,15 +8,24 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+} from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type {
   EmbeddableApiContext,
   HasParentApi,
   HasType,
+  PublishesDataLoading,
+  PublishesDataViews,
   PublishesUnifiedSearch,
   PublishesViewMode,
+  PublishesWritableUnifiedSearch,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
@@ -37,9 +46,19 @@ import type {
   MlEmbeddableTypes,
 } from './constants';
 
-export type MlEmbeddableBaseApi = Partial<
-  HasParentApi<PublishesUnifiedSearch> & PublishesViewMode & PublishesUnifiedSearch
->;
+/**
+ * Common API for all ML embeddables
+ */
+export interface MlEmbeddableBaseApi<StateType extends object = object>
+  extends DefaultEmbeddableApi<StateType>,
+    Pick<PublishesWritableUnifiedSearch, 'timeRange$' | 'setTimeRange'>,
+    PublishesDataViews,
+    PublishesViewMode {
+  /**
+   * Result time range based on the parent and panel time range APIs
+   */
+  appliedTimeRange$?: PublishingSubject<TimeRange>;
+}
 
 /** Manual input by the user */
 export interface AnomalySwimlaneEmbeddableUserInput {
@@ -56,10 +75,10 @@ export interface AnomalySwimlaneEmbeddableCustomInput {
   perPage?: number;
 
   // Embeddable inputs which are not included in the default interface
-  filters: Filter[];
-  query: Query;
-  refreshConfig: RefreshInterval;
-  timeRange: TimeRange;
+  filters?: Filter[];
+  query?: Query;
+  refreshConfig?: RefreshInterval;
+  timeRange?: TimeRange;
 }
 
 export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;

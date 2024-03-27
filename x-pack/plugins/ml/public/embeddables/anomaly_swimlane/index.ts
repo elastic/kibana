@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
+export { registerAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';

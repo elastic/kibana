@@ -5,92 +5,73 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useState, useEffect } from 'react';
 import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { Observable } from 'rxjs';
 
+import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/swimlane_annotation_container';
-import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
-import type { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
-import { useSwimlaneInputResolver } from './swimlane_input_resolver';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import type { AnomalySwimlaneServices } from '..';
+import type { MlDependencies } from '../../application/app';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
+import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
+import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/swimlane_annotation_container';
 import {
   isViewBySwimLaneData,
   SwimlaneContainer,
 } from '../../application/explorer/swimlane_container';
-import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import type { MlDependencies } from '../../application/app';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
-import type {
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneEmbeddableOutput,
-  AnomalySwimlaneServices,
-} from '..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+import { useSwimlaneInputResolver } from './swimlane_input_resolver';
+import type { AnomalySwimLaneEmbeddableApi } from './types';
+// import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
-  embeddableContext: InstanceType<IAnomalySwimlaneEmbeddable>;
-  embeddableInput$: Observable<AnomalySwimlaneEmbeddableInput>;
   services: [CoreStart, MlDependencies, AnomalySwimlaneServices];
   refresh: Observable<void>;
-  onInputChange: (input: Partial<AnomalySwimlaneEmbeddableInput>) => void;
-  onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
   onRenderComplete: () => void;
   onLoading: () => void;
   onError: (error: Error) => void;
+  api: AnomalySwimLaneEmbeddableApi;
 }
 
 export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   id,
-  embeddableContext,
-  embeddableInput$,
   services,
   refresh,
-  onInputChange,
-  onOutputChange,
   onRenderComplete,
   onLoading,
   onError,
+  api,
 }) => {
-  useEmbeddableExecutionContext<AnomalySwimlaneEmbeddableInput>(
-    services[0].executionContext,
-    embeddableInput$,
-    ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-    id
-  );
+  // useEmbeddableExecutionContext<AnomalySwimlaneEmbeddableInput>(
+  //   services[0].executionContext,
+  //   embeddableInput$,
+  //   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  //   id
+  // );
 
   const [chartWidth, setChartWidth] = useState<number>(0);
 
-  const [fromPage, setFromPage] = useState<number>(1);
+  const [fromPage, perPage] = useBatchedPublishingSubjects(api.fromPage, api.perPage);
 
   const [{}, { uiActions, charts: chartsService }] = services;
 
   const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
-  const [swimlaneType, swimlaneData, perPage, setPerPage, timeBuckets, isLoading, error] =
-    useSwimlaneInputResolver(
-      embeddableInput$,
-      onInputChange,
-      refresh,
-      services,
-      chartWidth,
-      fromPage,
-      { onError, onLoading }
-    );
-
-  useEffect(() => {
-    onOutputChange({
-      perPage,
-      fromPage,
-      interval: swimlaneData?.interval,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [perPage, fromPage, swimlaneData]);
+  const [swimlaneType, swimlaneData, timeBuckets, isLoading, error] = useSwimlaneInputResolver(
+    api,
+    refresh,
+    services,
+    chartWidth,
+    {
+      onError,
+      onLoading,
+    }
+  );
 
   const onCellsSelection = useCallback(
     (update?: AppStateSelectedCells) => {
@@ -98,14 +79,14 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
 
       if (update) {
         uiActions.getTrigger(SWIM_LANE_SELECTION_TRIGGER).exec({
-          embeddable: embeddableContext,
+          embeddable: api,
           data: update,
           updateCallback: setSelectedCells.bind(null, undefined),
         });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [swimlaneData, perPage, fromPage, setSelectedCells]
+    [swimlaneData, perPage, setSelectedCells]
   );
 
   if (error) {
@@ -137,7 +118,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
     >
       <SwimlaneContainer
         id={id}
-        data-test-subj={`mlSwimLaneEmbeddable_${embeddableContext.id}`}
+        data-test-subj={`mlSwimLaneEmbeddable_${id}`}
         timeBuckets={timeBuckets}
         swimlaneData={swimlaneData!}
         swimlaneType={swimlaneType as SwimlaneType}
@@ -149,11 +130,10 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
         onCellsSelection={onCellsSelection}
         onPaginationChange={(update) => {
           if (update.fromPage) {
-            setFromPage(update.fromPage);
+            api.updatePagination({ fromPage: update.fromPage });
           }
           if (update.perPage) {
-            setFromPage(1);
-            setPerPage(update.perPage);
+            api.updatePagination({ perPage: update.perPage, fromPage: 1 });
           }
         }}
         isLoading={isLoading}

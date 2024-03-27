@@ -8,11 +8,13 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { getReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EmbeddableRoot, useEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { MappedEmbeddableTypeOf } from './types';
 import type { MlStartDependencies } from '../plugin';
 import type { MlEmbeddableTypes } from './constants';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './constants';
 
 /**
  * Gets an instance of an embeddable component of requested type.
@@ -26,8 +28,16 @@ export function getEmbeddableComponent<EmbeddableType extends MlEmbeddableTypes>
   plugins: MlStartDependencies
 ) {
   const { embeddable: embeddableStart } = plugins;
-  const factory =
-    embeddableStart.getEmbeddableFactory<MappedEmbeddableTypeOf<EmbeddableType>>(embeddableType);
+
+  let factory: EmbeddableFactory<MappedEmbeddableTypeOf<EmbeddableType>>;
+  if (embeddableType === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE) {
+    // @ts-ignore TODO
+    factory = getReactEmbeddableFactory<MappedEmbeddableTypeOf<EmbeddableType>>(embeddableType);
+  } else {
+    // @ts-ignore TODO
+    factory =
+      embeddableStart.getEmbeddableFactory<MappedEmbeddableTypeOf<EmbeddableType>>(embeddableType);
+  }
 
   if (!factory) {
     throw new Error(`Embeddable type "${embeddableType}" has not been registered.`);

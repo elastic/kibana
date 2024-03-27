@@ -62,7 +62,8 @@ export function createEditSwimlanePanelAction(
     },
     async isCompatible(context: EmbeddableApiContext) {
       return (
-        isSwimLaneEmbeddableContext(context) && context.embeddable.viewMode?.getValue() === 'edit'
+        isSwimLaneEmbeddableContext(context) &&
+        context.embeddable.parentApi?.viewMode?.getValue() === 'edit'
       );
     },
   };

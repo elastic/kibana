@@ -6,24 +6,17 @@
  */
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane';
 import type { MlCoreSetup } from '../plugin';
 import { AnomalyChartsEmbeddableFactory } from './anomaly_charts';
+import { registerAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane';
 import { SingleMetricViewerEmbeddableFactory } from './single_metric_viewer';
 
 export * from './constants';
+export { getEmbeddableComponent } from './get_embeddable_component';
 export * from './types';
 
-export { getEmbeddableComponent } from './get_embeddable_component';
-
 export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {
-  const anomalySwimlaneEmbeddableFactory = new AnomalySwimlaneEmbeddableFactory(
-    core.getStartServices
-  );
-  embeddable.registerEmbeddableFactory(
-    anomalySwimlaneEmbeddableFactory.type,
-    anomalySwimlaneEmbeddableFactory
-  );
+  registerAnomalySwimLaneEmbeddableFactory(core.getStartServices);
 
   const anomalyChartsFactory = new AnomalyChartsEmbeddableFactory(core.getStartServices);
   embeddable.registerEmbeddableFactory(anomalyChartsFactory.type, anomalyChartsFactory);

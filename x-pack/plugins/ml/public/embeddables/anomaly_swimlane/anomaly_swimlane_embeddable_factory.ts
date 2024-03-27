@@ -9,14 +9,75 @@ import { i18n } from '@kbn/i18n';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 
-import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import type { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
-import { PLUGIN_ID, PLUGIN_ICON, ML_APP_NAME } from '../../../common/constants/app';
-import { HttpService } from '../../application/services/http_service';
-import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import type { MlDependencies } from '../../application/app';
+import type {
+  EmbeddableFactoryDefinition,
+  IContainer,
+  ReactEmbeddableFactory,
+} from '@kbn/embeddable-plugin/public';
+import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../../common/constants/app';
+import type { MlDependencies } from '../../application/app';
+import { HttpService } from '../../application/services/http_service';
+import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import type { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
+import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
+
+/**
+ * Provides the services required by the Anomaly Swimlane Embeddable.
+ */
+export const getServices = async (
+  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+): Promise<AnomalySwimlaneEmbeddableServices> => {
+  const [coreStart, pluginsStart] = await getStartServices();
+
+  const { AnomalyDetectorService } = await import(
+    '../../application/services/anomaly_detector_service'
+  );
+  const { AnomalyTimelineService } = await import(
+    '../../application/services/anomaly_timeline_service'
+  );
+  const { mlApiServicesProvider } = await import('../../application/services/ml_api_service');
+  const { mlResultsServiceProvider } = await import('../../application/services/results_service');
+
+  const httpService = new HttpService(coreStart.http);
+  const anomalyDetectorService = new AnomalyDetectorService(httpService);
+  const anomalyTimelineService = new AnomalyTimelineService(
+    pluginsStart.data.query.timefilter.timefilter,
+    coreStart.uiSettings,
+    mlResultsServiceProvider(mlApiServicesProvider(httpService))
+  );
+
+  return [
+    coreStart,
+    pluginsStart as MlDependencies,
+    { anomalyDetectorService, anomalyTimelineService },
+  ];
+};
+
+export const registerAnomalySwimLaneEmbeddableFactory = (
+  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+) => {
+  const factory: ReactEmbeddableFactory<
+    AnomalySwimLaneEmbeddableState,
+    AnomalySwimLaneEmbeddableApi
+  > = {
+    type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+    deserializeState: (state) => {
+      return state.rawState as AnomalySwimLaneEmbeddableState;
+    },
+    buildEmbeddable: async (state, buildApi) => {
+      const { buildAnomalySwimLaneEmbeddable } = await import(
+        './build_anomaly_swim_lane_embeddable'
+      );
+      const services = await getServices(getStartServices);
+      return await buildAnomalySwimLaneEmbeddable(state, buildApi, services);
+    },
+  };
+
+  registerReactEmbeddableFactory(factory);
+};
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput>

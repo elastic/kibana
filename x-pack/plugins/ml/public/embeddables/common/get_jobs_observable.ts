@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { catchError, distinctUntilChanged, map, pluck, switchMap } from 'rxjs/operators';
-import { isEqual } from 'lodash';
-import type { AnomalyChartsEmbeddableInput, AnomalySwimlaneEmbeddableInput } from '../types';
-import type { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import type { ExplorerJob } from '../../application/explorer/explorer_utils';
+import { catchError, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 import { parseInterval } from '../../../common/util/parse_interval';
+import type { ExplorerJob } from '../../application/explorer/explorer_utils';
+import type { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
+import type { JobId } from '../../shared';
 
 export function getJobsObservable(
-  embeddableInput: Observable<AnomalyChartsEmbeddableInput | AnomalySwimlaneEmbeddableInput>,
+  embeddableInput: Observable<{ jobIds: JobId[] }>,
   anomalyDetectorService: AnomalyDetectorService,
   setErrorHandler: (e: Error) => void
 ) {
   return embeddableInput.pipe(
-    pluck('jobIds'),
+    map((v) => v.jobIds),
     distinctUntilChanged(isEqual),
     switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds)),
     map((jobs) => {
