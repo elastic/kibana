@@ -85,6 +85,7 @@ import {
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
+import { canTrackContentfulRender } from '@kbn/presentation-containers';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -1042,6 +1043,26 @@ export class Embeddable
     });
 
     trackUiCounterEvents(events, executionContext);
+
+    if (
+      this.activeData &&
+      Object.entries(this.activeData).length > 0 &&
+      canTrackContentfulRender(this.parent)
+    ) {
+      const hasData = Object.values(this.activeData).some((table) => {
+        if (
+          table.meta &&
+          table.meta.statistics &&
+          typeof table.meta.statistics.totalCount === 'number'
+        ) {
+          return table.meta.statistics.totalCount > 0;
+        }
+        return table.rows.length > 0;
+      });
+      if (hasData) {
+        this.parent?.trackContentfulRender();
+      }
+    }
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({

@@ -21,6 +21,10 @@ export {
 } from './interfaces/presentation_container';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
 export {
+  canTrackContentfulRender,
+  type TrackContentfulRender,
+} from './interfaces/track_contentful_render';
+export {
   type SerializedPanelState,
   type HasSerializableState,
   apiHasSerializableState,

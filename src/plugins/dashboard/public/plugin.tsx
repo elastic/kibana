@@ -165,6 +165,11 @@ export class DashboardPlugin
     // adding items to the add panel menu
     uiActions.registerTrigger(addPanelMenuTrigger);
 
+    core.analytics.registerEventType({
+      eventType: 'dashboard_loaded_with_data',
+      schema: {},
+    });
+
     if (share) {
       this.locator = share.url.locators.create(
         new DashboardAppLocatorDefinition({

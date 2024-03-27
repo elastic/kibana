@@ -30,7 +30,7 @@ import {
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { PanelPackage } from '@kbn/presentation-containers';
+import { PanelPackage, TrackContentfulRender } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
@@ -116,7 +116,7 @@ export const useDashboardContainer = (): DashboardContainer => {
 
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
-  implements DashboardExternallyAccessibleApi
+  implements DashboardExternallyAccessibleApi, TrackContentfulRender
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
@@ -146,6 +146,7 @@ export class DashboardContainer
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
   private allDataViews: DataView[] = [];
+  private hadContentfulRender = false;
 
   // Services that are used in the Dashboard container code
   private creationOptions?: DashboardCreationOptions;
@@ -154,6 +155,13 @@ export class DashboardContainer
   private theme$;
   private chrome;
   private customBranding;
+
+  public trackContentfulRender() {
+    if (!this.hadContentfulRender && this.analyticsService) {
+      this.analyticsService.reportEvent('dashboard_loaded_with_data', {});
+    }
+    this.hadContentfulRender = true;
+  }
 
   private trackPanelAddMetric:
     | ((type: string, eventNames: string | string[], count?: number | undefined) => void)
@@ -236,6 +244,11 @@ export class DashboardContainer
       this.onStateChange(() => {
         if (this.expandedPanelId.value === this.getExpandedPanelId()) return;
         this.expandedPanelId.next(this.getExpandedPanelId());
+      })
+    );
+    this.publishingSubscription.add(
+      this.savedObjectId.subscribe(() => {
+        this.hadContentfulRender = false;
       })
     );
     this.startAuditingReactEmbeddableChildren();
