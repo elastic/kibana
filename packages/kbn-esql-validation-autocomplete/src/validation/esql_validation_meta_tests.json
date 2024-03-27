@@ -101,70 +101,70 @@
     {
       "query": "eval",
       "error": [
-        "SyntaxError: mismatched input 'eval' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'eval' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "stats",
       "error": [
-        "SyntaxError: mismatched input 'stats' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'stats' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "rename",
       "error": [
-        "SyntaxError: mismatched input 'rename' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'rename' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "limit",
       "error": [
-        "SyntaxError: mismatched input 'limit' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'limit' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "keep",
       "error": [
-        "SyntaxError: mismatched input 'keep' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'keep' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "drop",
       "error": [
-        "SyntaxError: mismatched input 'drop' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'drop' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "mv_expand",
       "error": [
-        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "dissect",
       "error": [
-        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "grok",
       "error": [
-        "SyntaxError: mismatched input 'grok' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'grok' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "f",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
@@ -3355,24 +3355,19 @@
       "warning": []
     },
     {
-      "query": "show",
+      "query": "meta",
       "error": [
-        "SyntaxError: no viable alternative at input 'show'"
+        "SyntaxError: missing 'functions' at '<EOF>'"
       ],
       "warning": []
     },
     {
-      "query": "show functions",
+      "query": "meta functions",
       "error": [],
       "warning": []
     },
     {
-      "query": "show info",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "show functions()",
+      "query": "meta functions()",
       "error": [
         "SyntaxError: token recognition error at: '('",
         "SyntaxError: token recognition error at: ')'"
@@ -3380,13 +3375,50 @@
       "warning": []
     },
     {
-      "query": "show functions blah",
+      "query": "meta functions blah",
       "error": [
         "SyntaxError: token recognition error at: 'b'",
         "SyntaxError: token recognition error at: 'l'",
         "SyntaxError: token recognition error at: 'a'",
         "SyntaxError: token recognition error at: 'h'"
       ],
+      "warning": []
+    },
+    {
+      "query": "meta info",
+      "error": [
+        "SyntaxError: token recognition error at: 'i'",
+        "SyntaxError: token recognition error at: 'n'",
+        "SyntaxError: token recognition error at: 'fo'",
+        "SyntaxError: missing 'functions' at '<EOF>'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "show",
+      "error": [
+        "SyntaxError: missing 'info' at '<EOF>'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "show functions",
+      "error": [
+        "SyntaxError: token recognition error at: 'f'",
+        "SyntaxError: token recognition error at: 'u'",
+        "SyntaxError: token recognition error at: 'n'",
+        "SyntaxError: token recognition error at: 'c'",
+        "SyntaxError: token recognition error at: 't'",
+        "SyntaxError: token recognition error at: 'io'",
+        "SyntaxError: token recognition error at: 'n'",
+        "SyntaxError: token recognition error at: 's'",
+        "SyntaxError: missing 'info' at '<EOF>'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "show info",
+      "error": [],
       "warning": []
     },
     {
@@ -3398,11 +3430,11 @@
         "SyntaxError: token recognition error at: 'b'",
         "SyntaxError: token recognition error at: 'e'",
         "SyntaxError: token recognition error at: 'r'",
-        "SyntaxError: token recognition error at: 'Fi'",
-        "SyntaxError: token recognition error at: 'e'",
+        "SyntaxError: token recognition error at: 'F'",
+        "SyntaxError: token recognition error at: 'ie'",
         "SyntaxError: token recognition error at: 'l'",
         "SyntaxError: token recognition error at: 'd'",
-        "SyntaxError: no viable alternative at input 'show '"
+        "SyntaxError: missing 'info' at '<EOF>'"
       ],
       "warning": []
     },
