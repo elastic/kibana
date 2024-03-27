@@ -109,7 +109,8 @@ export const ConnectorConfiguration: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.generateApiKey.title',
                     {
-                      defaultMessage: 'Generate an API key',
+                      defaultMessage:
+                        'Before you can generate an API key, attach an index by scrolling to the bottom of this page.',
                     }
                   ),
                   titleSize: 'xs',
@@ -121,17 +122,17 @@ export const ConnectorConfiguration: React.FC = () => {
                       <EuiText size="s">
                         <FormattedMessage
                           id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.description.thirdParagraph"
-                          defaultMessage="In this step, you will need to clone or fork the repository, and copy the generated API key and connector ID to the associated {link}. The connector ID will identify this connector to Search. The service type will determine which type of data source the connector is configured for."
+                          defaultMessage="In this step, you will need to clone or fork the elastic/connectors repository, and copy the API key and connector ID values to the config.yml file. Here's an {exampleLink}."
                           values={{
-                            link: (
+                            exampleLink: (
                               <EuiLink
-                                href="https://github.com/elastic/connectors-python/blob/main/config.yml"
+                                href="https://github.com/elastic/connectors-python/blob/main/config.yml.example"
                                 target="_blank"
                                 external
                               >
                                 {i18n.translate(
                                   'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.configurationFileLink',
-                                  { defaultMessage: 'configuration file' }
+                                  { defaultMessage: 'example config file' }
                                 )}
                               </EuiLink>
                             ),
@@ -151,13 +152,24 @@ export const ConnectorConfiguration: React.FC = () => {
                       </EuiCodeBlock>
                       <EuiSpacer />
                       <EuiText size="s">
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.connectorDeployedText',
-                          {
-                            defaultMessage:
-                              'Once configured, deploy the connector on your infrastructure.',
-                          }
-                        )}
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.description.fourthParagraph"
+                          defaultMessage="Because this connector is self-managed, you need to deploy the connector service on your own infrastructure. You can build from source or use Docker. Refer to the {link} for your deployment options."
+                          values={{
+                            link: (
+                              <EuiLink
+                                href="https://www.elastic.co/guide/en/enterprise-search/current/deploy-connector-client.html"
+                                target="_blank"
+                                external
+                              >
+                                {i18n.translate(
+                                  'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.deploymentModeLink',
+                                  { defaultMessage: 'documentation' }
+                                )}
+                              </EuiLink>
+                            ),
+                          }}
+                        />
                       </EuiText>
                     </>
                   ),
@@ -168,7 +180,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.deployConnector.title',
                     {
-                      defaultMessage: 'Deploy connector',
+                      defaultMessage: 'Set up and deploy connector',
                     }
                   ),
                   titleSize: 'xs',
@@ -244,7 +256,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.enhance.title',
                     {
-                      defaultMessage: 'Enhance your connector client',
+                      defaultMessage: 'Configure your connector',
                     }
                   ),
                   titleSize: 'xs',
