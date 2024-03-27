@@ -24,9 +24,10 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
-import { breadcrumbService } from './services/breadcrumbs';
+import { IndexManagementBreadcrumb } from './services/breadcrumbs';
 
 export const AppContext = createContext<AppDependencies | undefined>(undefined);
 
@@ -59,7 +60,7 @@ export interface AppDependencies {
     enableDataStreamsStorageColumn: boolean;
   };
   history: ScopedHistory;
-  setBreadcrumbs: typeof breadcrumbService.setBreadcrumbs;
+  setBreadcrumbs: (type: IndexManagementBreadcrumb, additionalBreadcrumb?: EuiBreadcrumb) => void;
   uiSettings: IUiSettingsClient;
   settings: SettingsStart;
   url: SharePluginStart['url'];

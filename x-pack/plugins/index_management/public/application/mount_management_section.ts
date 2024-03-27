@@ -142,7 +142,7 @@ export async function mountManagementSection({
     usageCollection,
     core,
   });
-  const appDependencies = await getIndexManagementDependencies({
+  const appDependencies = getIndexManagementDependencies({
     cloud,
     config,
     core,

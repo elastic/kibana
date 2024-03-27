@@ -108,10 +108,7 @@ export const renderApp = (
   } catch {
     user = null;
   }
-  const indexMappingComponent = indexManagementPlugin.getIndexMappingComponent({
-    history,
-    theme$: params.theme$,
-  });
+  const indexMappingComponent = indexManagementPlugin.getIndexMappingComponent({ history });
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,

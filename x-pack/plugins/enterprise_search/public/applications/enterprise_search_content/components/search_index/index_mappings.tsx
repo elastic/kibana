@@ -109,7 +109,14 @@ export const SearchIndexIndexMappings: React.FC = () => {
                       showAboutMappings={false}
                     />
                   ) : (
-                    'NO PLUGIN'
+                    <EuiCallOut
+                      color="danger"
+                      iconType="warn"
+                      title={i18n.translate(
+                        'xpack.enterpriseSearch.content.searchIndex.mappings.noMappingsComponent',
+                        { defaultMessage: 'Mappings component not found' }
+                      )}
+                    />
                   )}
                 </>
               )}

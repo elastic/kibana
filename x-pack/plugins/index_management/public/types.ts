@@ -11,8 +11,6 @@ import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { ScopedHistory } from '@kbn/core-application-browser';
-import { CoreTheme } from '@kbn/core-theme-browser';
-import { Observable } from 'rxjs';
 import { IndexMappingProps } from './application/sections/home/index_list/details_page/index_mapping_with_context_types';
 import { ExtensionsSetup, PublicApiServiceSetup } from './services';
 
@@ -25,7 +23,6 @@ export interface IndexManagementPluginStart {
   extensionsService: ExtensionsSetup;
   getIndexMappingComponent: (deps: {
     history: ScopedHistory<unknown>;
-    theme$: Observable<CoreTheme>;
   }) => React.FC<IndexMappingProps>;
 }
 

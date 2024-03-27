@@ -20,8 +20,8 @@ export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = (
   index,
   showAboutMappings,
 }) => {
-  // this normally happens on plugin setup
-  // but if embedded elsewhere that setup is skipped, so we have to do it here
+  // this normally happens when the index management app is rendered
+  // but if components are embedded elsewhere that setup is skipped, so we have to do it here
   // would do it in plugin.ts but that blows up the bundle size
   // can't do it in an effect because then the first http call fails as the instantiation happens after first render
   if (!httpService.httpClient) {
