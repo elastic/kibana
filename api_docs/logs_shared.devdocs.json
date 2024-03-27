@@ -1882,7 +1882,7 @@
             "section": "def-common.ResolvedLogView",
             "text": "ResolvedLogView"
           },
-          " | undefined; logViewStatus: { index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
+          " | undefined; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -2463,7 +2463,7 @@
             "section": "def-common.ResolvedLogView",
             "text": "ResolvedLogView"
           },
-          " | undefined; logViewStatus: { index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
+          " | undefined; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -3412,7 +3412,7 @@
             "section": "def-common.ResolvedLogView",
             "text": "ResolvedLogView"
           },
-          "; status: { index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; }; } | { type: \"LOADING_LOG_VIEW_FAILED\"; error: Error; }"
+          "; status: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; }; } | { type: \"LOADING_LOG_VIEW_FAILED\"; error: Error; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/notifications.ts",
         "deprecated": false,
@@ -6341,7 +6341,7 @@
         "label": "LogViewStatus",
         "description": [],
         "signature": [
-          "{ index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; }"
+          "{ index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
         "deprecated": false,

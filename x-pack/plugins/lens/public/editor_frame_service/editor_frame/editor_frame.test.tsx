@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { ReactWrapper } from 'enzyme';
-import { screen, fireEvent, within, waitFor } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { EditorFrame, EditorFrameProps } from './editor_frame';
@@ -29,7 +29,7 @@ import {
   renderWithReduxStore,
 } from '../../mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import { DragDrop, useDragDropContext } from '@kbn/dom-drag-drop';
+import { Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -168,24 +168,6 @@ describe('editor_frame', () => {
       }
     );
 
-    const openChartSwitch = () => {
-      userEvent.click(screen.getByTestId('lnsChartSwitchPopover'));
-    };
-
-    const waitForChartSwitchClosed = () => {
-      waitFor(() => {
-        expect(screen.queryByTestId('lnsChartSwitchList')).not.toBeInTheDocument();
-      });
-    };
-
-    const getMenuItem = (subType: string) => {
-      const list = screen.getByTestId('lnsChartSwitchList');
-      return within(list).getByTestId(`lnsChartSwitchPopover_${subType}`);
-    };
-
-    const switchToVis = (subType: string) => {
-      fireEvent.click(getMenuItem(subType));
-    };
     const queryLayerPanel = () => screen.queryByTestId('lns-layerPanel-0');
     const queryWorkspacePanel = () => screen.queryByTestId('lnsWorkspace');
     const queryDataPanel = () => screen.queryByTestId('lnsDataPanelWrapper');
@@ -193,13 +175,9 @@ describe('editor_frame', () => {
     return {
       ...rtlRender,
       store,
-      switchToVis,
-      getMenuItem,
-      openChartSwitch,
       queryLayerPanel,
       queryWorkspacePanel,
       queryDataPanel,
-      waitForChartSwitchClosed,
       simulateLoadingDatasource: () =>
         store.dispatch(
           setState({
@@ -342,57 +320,6 @@ describe('editor_frame', () => {
         layerId: 'first',
         indexPatterns: {},
       });
-    });
-  });
-
-  describe('switching', () => {
-    it('should initialize other visualization on switch', async () => {
-      const { openChartSwitch, switchToVis } = renderEditorFrame();
-      openChartSwitch();
-      switchToVis('testVis2');
-      expect(mockVisualization2.initialize).toHaveBeenCalled();
-    });
-
-    it('should use suggestions to switch to new visualization', async () => {
-      const { openChartSwitch, switchToVis } = renderEditorFrame();
-      const initialState = { suggested: true };
-      mockVisualization2.initialize.mockReturnValueOnce({ initial: true });
-      mockVisualization2.getVisualizationTypeId.mockReturnValueOnce('testVis2');
-      mockVisualization2.getSuggestions.mockReturnValueOnce([
-        {
-          title: 'Suggested vis',
-          score: 1,
-          state: initialState,
-          previewIcon: 'empty',
-        },
-      ]);
-      openChartSwitch();
-      switchToVis('testVis2');
-      expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
-      expect(mockVisualization2.initialize).toHaveBeenCalledWith(expect.anything(), initialState);
-      expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
-        expect.objectContaining({ state: { initial: true } })
-      );
-    });
-
-    it('should fall back when switching visualizations if the visualization has no suggested use', async () => {
-      mockVisualization2.initialize.mockReturnValueOnce({ initial: true });
-
-      const { openChartSwitch, switchToVis, waitForChartSwitchClosed } = renderEditorFrame();
-      openChartSwitch();
-      switchToVis('testVis2');
-
-      expect(mockDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
-      expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
-      expect(mockVisualization2.initialize).toHaveBeenCalledWith(
-        expect.any(Function), // generated layerId
-        undefined,
-        undefined
-      );
-      expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
-        expect.objectContaining({ state: { initial: true } })
-      );
-      waitForChartSwitchClosed();
     });
   });
 
@@ -626,7 +553,7 @@ describe('editor_frame', () => {
         instance.update();
 
         act(() => {
-          instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
+          instance.find('[data-test-subj="mockVisA"]').find(Droppable).prop('onDrop')!(
             {
               indexPatternId: '1',
               field: {},
@@ -711,7 +638,7 @@ describe('editor_frame', () => {
         instance.update();
 
         act(() => {
-          instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(
+          instance.find(Droppable).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(
             {
               indexPatternId: '1',
               field: {},

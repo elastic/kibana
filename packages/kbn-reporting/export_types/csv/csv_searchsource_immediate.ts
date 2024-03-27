@@ -50,6 +50,10 @@ export type ImmediateExecuteFn = (
   req: KibanaRequest
 ) => Promise<TaskRunResult>;
 
+/**
+ * @deprecated
+ * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+ */
 export class CsvSearchSourceImmediateExportType extends ExportType<
   JobParamsDownloadCSV,
   ImmediateExecuteFn,
