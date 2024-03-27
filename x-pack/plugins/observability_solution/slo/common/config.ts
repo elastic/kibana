@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-const uptimeConfig = schema.object({
-  index: schema.maybe(schema.string()),
+export const configSchema = schema.object({
+  sloOrphanSummaryCleanUpTaskEnabled: schema.boolean({ defaultValue: true }),
   enabled: schema.boolean({ defaultValue: true }),
   experimental: schema.maybe(
     schema.object({
-      ruleFormV2Enabled: schema.maybe(schema.boolean({ defaultValue: false })),
+      ruleFormV2: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
     })
   ),
 });
 
-export const config: PluginConfigDescriptor = {
-  schema: uptimeConfig,
+export const config = {
+  schema: configSchema,
   exposeToBrowser: {
     experimental: true,
   },
 };
-
-export type UptimeConfig = TypeOf<typeof uptimeConfig>;
-export type ExperimentalFeatures = UptimeConfig['experimental'];
+export type SloConfig = TypeOf<typeof configSchema>;
+export type ExperimentalFeatures = SloConfig['experimental'];
