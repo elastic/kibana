@@ -52,7 +52,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     this.urls = {
       getToken: `${API_PATH}/oauth2/token`,
       hostAction: `${API_PATH}/devices/entities/devices-actions/v2`,
-      agents: `${API_PATH}/devices/entities/devices/v2 `,
+      agents: `${API_PATH}/devices/entities/devices/v2`,
     };
 
     this.registerSubActions();
