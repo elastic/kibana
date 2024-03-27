@@ -30,11 +30,11 @@ export function createTelemetryTimelineTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('timelines')).l;
+      const log = newTelemetryLogger(logger.get('timelines'));
       const fetcher = new TelemetryTimelineFetcher(receiver);
       const trace = taskMetricsService.start(taskType);
 
-      log(
+      log.l(
         `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
       );
 
@@ -49,7 +49,7 @@ export function createTelemetryTimelineTaskConfig() {
         }
         const alerts = await receiver.fetchTimelineAlerts(alertsIndex, rangeFrom, rangeTo);
 
-        log(`found ${alerts.length} alerts to process`);
+        log.l(`found ${alerts.length} alerts to process`);
 
         for (const alert of alerts) {
           const result = await fetcher.fetchTimeline(alert);
@@ -70,11 +70,11 @@ export function createTelemetryTimelineTaskConfig() {
             sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
             counter += 1;
           } else {
-            log('no events in timeline');
+            log.l('no events in timeline');
           }
         }
 
-        log(`sent ${counter} timelines. Concluding timeline task.`);
+        log.l(`sent ${counter} timelines. Concluding timeline task.`);
 
         taskMetricsService.end(trace);
 
