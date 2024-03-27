@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { merge } from 'rxjs';
-import { debounceTime, filter, tap } from 'rxjs/operators';
+import { debounceTime, filter, tap } from 'rxjs';
 
 import type {
   AutoRefreshDoneFn,

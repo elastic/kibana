@@ -6,7 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { map, take } from 'rxjs';
 
 import type {
   AnalyticsServiceStart,

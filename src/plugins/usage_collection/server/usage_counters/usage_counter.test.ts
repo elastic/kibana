@@ -8,7 +8,7 @@
 import { UsageCounter } from './usage_counter';
 import type { UsageCounters } from '../../common/types';
 import * as Rx from 'rxjs';
-import * as rxOp from 'rxjs/operators';
+import * as rxOp from 'rxjs';
 
 describe('UsageCounter', () => {
   const domainId = 'test-domain-id';

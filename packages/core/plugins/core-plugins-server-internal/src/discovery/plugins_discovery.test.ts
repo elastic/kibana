@@ -15,7 +15,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Package } from '@kbn/repo-packages';
 
 import { firstValueFrom, from } from 'rxjs';
-import { map, toArray } from 'rxjs/operators';
+import { map, toArray } from 'rxjs';
 import { resolve } from 'path';
 import { ConfigService, Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';

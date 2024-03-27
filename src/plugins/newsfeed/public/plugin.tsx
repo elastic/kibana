@@ -7,7 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { catchError, takeUntil } from 'rxjs/operators';
+import { catchError, takeUntil } from 'rxjs';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import moment from 'moment';

@@ -11,7 +11,7 @@ import { EuiBasicTable, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
-import { switchMap, takeWhile, tap } from 'rxjs/operators';
+import { switchMap, takeWhile, tap } from 'rxjs';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { CategorizationJobCreator } from '../../../../../common/job_creator';

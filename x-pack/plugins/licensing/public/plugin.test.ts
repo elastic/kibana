@@ -6,7 +6,7 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
+import { take, toArray } from 'rxjs';
 import { mountExpiredBannerMock } from './plugin.test.mocks';
 
 import { LicenseType } from '../common/types';

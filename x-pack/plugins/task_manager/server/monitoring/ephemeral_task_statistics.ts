@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { map, filter, startWith, buffer, share } from 'rxjs/operators';
+import { map, filter, startWith, buffer, share } from 'rxjs';
 import { JsonObject } from '@kbn/utility-types';
 import { combineLatest, Observable, zip } from 'rxjs';
 import { isOk, Ok } from '../lib/result_type';

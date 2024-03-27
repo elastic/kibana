@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { map, shareReplay } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs';
 import { combineLatest, Observable } from 'rxjs';
 import { PathConfigType, config as pathConfig } from '@kbn/utils';
 import { pick, deepFreeze } from '@kbn/std';

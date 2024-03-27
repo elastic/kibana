@@ -7,17 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import {
-  map,
-  tap,
-  take,
-  share,
-  mergeMap,
-  switchMap,
-  scan,
-  takeUntil,
-  ignoreElements,
-} from 'rxjs/operators';
+import { map, tap, take, share, mergeMap, switchMap, scan, takeUntil, ignoreElements } from 'rxjs';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
 import { usingServerProcess } from './using_server_process';

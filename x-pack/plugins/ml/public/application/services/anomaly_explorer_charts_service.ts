@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { map as mapObservable } from 'rxjs/operators';
+import { map as mapObservable } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';

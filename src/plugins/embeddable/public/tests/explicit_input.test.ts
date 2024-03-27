@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { skip } from 'rxjs/operators';
+import { skip } from 'rxjs';
 import { testPlugin } from './test_plugin';
 import {
   MockFilter,

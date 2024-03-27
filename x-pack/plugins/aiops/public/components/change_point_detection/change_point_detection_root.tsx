@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { pick } from 'lodash';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { EuiSpacer } from '@elastic/eui';

@@ -18,7 +18,7 @@ import {
   StateComparators,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { combineLatestWith, debounceTime, map } from 'rxjs/operators';
+import { combineLatestWith, debounceTime, map } from 'rxjs';
 
 const getDefaultDiffingApi = () => {
   return {

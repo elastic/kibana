@@ -7,7 +7,7 @@
  */
 
 import { Observable, Subject } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 
 /**
  * Receives observable that emits strings, and returns a new observable

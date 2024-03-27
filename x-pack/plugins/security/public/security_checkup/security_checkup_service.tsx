@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, from } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, from, map } from 'rxjs';
 
 import type {
   DocLinksStart,

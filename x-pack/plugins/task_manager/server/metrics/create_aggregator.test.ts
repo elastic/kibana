@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
-import { take, bufferCount, skip } from 'rxjs/operators';
+import { take, bufferCount, skip } from 'rxjs';
 import {
   isTaskManagerMetricEvent,
   isTaskManagerStatEvent,

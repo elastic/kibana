@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { firstValueFrom, from, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { delay } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';

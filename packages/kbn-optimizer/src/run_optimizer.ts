@@ -7,7 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap, share, observeOn } from 'rxjs/operators';
+import { mergeMap, share, observeOn } from 'rxjs';
 
 import { summarizeEventStream, Update } from './common';
 

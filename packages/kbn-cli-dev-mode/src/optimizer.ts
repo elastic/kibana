@@ -9,7 +9,7 @@
 import Chalk from 'chalk';
 import moment from 'moment';
 import { Writable } from 'stream';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import {
   ToolingLog,
   pickLevelFromFlags,
@@ -17,7 +17,7 @@ import {
   parseLogLevel,
 } from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
-import { ignoreElements } from 'rxjs/operators';
+import { ignoreElements } from 'rxjs';
 import {
   runOptimizer,
   OptimizerConfig,

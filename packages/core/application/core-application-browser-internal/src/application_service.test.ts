@@ -16,7 +16,7 @@ import {
 
 import { createElement } from 'react';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
-import { bufferCount, takeUntil } from 'rxjs/operators';
+import { bufferCount, takeUntil } from 'rxjs';
 import { mount, shallow } from 'enzyme';
 import { createBrowserHistory } from 'history';
 

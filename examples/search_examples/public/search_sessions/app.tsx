@@ -26,7 +26,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs';
 import { lastValueFrom, of } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';

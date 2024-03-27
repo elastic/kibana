@@ -15,7 +15,7 @@ import {
   debounceTime,
   skipUntil,
   withLatestFrom,
-} from 'rxjs/operators';
+} from 'rxjs';
 import createContainer from 'constate';
 import { BehaviorSubject, iif, merge, Observable } from 'rxjs';
 import { useCallback, useEffect, useMemo, useState } from 'react';

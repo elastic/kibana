@@ -8,7 +8,7 @@
 
 import type { Observable } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';

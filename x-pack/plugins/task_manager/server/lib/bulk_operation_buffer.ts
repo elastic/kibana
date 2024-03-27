@@ -8,7 +8,7 @@
 import { Logger } from '@kbn/core/server';
 import { map } from 'lodash';
 import { Subject, race, from } from 'rxjs';
-import { bufferWhen, filter, bufferCount, flatMap, mapTo, first } from 'rxjs/operators';
+import { bufferWhen, filter, bufferCount, flatMap, mapTo, first } from 'rxjs';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { either, Result, asOk, asErr, Ok, Err } from './result_type';
 

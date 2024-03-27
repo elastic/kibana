@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { IKibanaSearchRequest } from '@kbn/data-plugin/public';
 import { ParsedDataSearchRequestDescriptor } from './types';
 

@@ -9,7 +9,7 @@
 import { of, Observable } from 'rxjs';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import { calculateStatus$ } from './status';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 
 describe('calculateStatus$', () => {
   const expectUnavailableDueToEs = (status$: Observable<ServiceStatus>) =>

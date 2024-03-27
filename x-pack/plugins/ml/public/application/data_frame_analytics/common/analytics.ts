@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, filter } from 'rxjs/operators';
+import { distinctUntilChanged, filter } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {

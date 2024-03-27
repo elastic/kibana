@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { combineLatest } from 'rxjs';
-import { startWith } from 'rxjs/operators';
+import { startWith } from 'rxjs';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { SingleMetricViewerEmbeddableInput } from '..';

@@ -7,7 +7,7 @@
  */
 
 import { fromEvent, Observable } from 'rxjs';
-import { map, shareReplay, startWith } from 'rxjs/operators';
+import { map, shareReplay, startWith } from 'rxjs';
 
 export function createPageVisibility$(): Observable<DocumentVisibilityState> {
   return fromEvent(document, 'visibilitychange').pipe(

@@ -26,7 +26,7 @@ import {
   ReplaySubject,
   Subscription,
 } from 'rxjs';
-import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
 import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { Executor } from '../executor';

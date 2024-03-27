@@ -9,7 +9,7 @@ import { parsePath } from 'history';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import * as Rx from 'rxjs';
-import { takeWhile } from 'rxjs/operators';
+import { takeWhile } from 'rxjs';
 
 import {
   EuiButton,

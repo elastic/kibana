@@ -8,7 +8,7 @@
 import type { ChildProcess } from 'child_process';
 
 import * as Rx from 'rxjs';
-import { filter, take, map, tap } from 'rxjs/operators';
+import { filter, take, map, tap } from 'rxjs';
 import execa from 'execa';
 
 import { observeLines } from '@kbn/stdio-dev-helpers';

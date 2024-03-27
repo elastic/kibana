@@ -20,7 +20,7 @@ import {
   switchMap,
   concatMap,
   takeUntil,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { CliArgs } from '@kbn/config';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';

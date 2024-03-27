@@ -9,7 +9,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Subject } from 'rxjs';
-import { share } from 'rxjs/operators';
+import { share } from 'rxjs';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';

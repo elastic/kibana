@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { FilterStateStore } from '@kbn/es-query';
 import { connectToQueryState } from '@kbn/data-plugin/public';
 import {

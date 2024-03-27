@@ -6,7 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
+import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
 import { from } from 'rxjs';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

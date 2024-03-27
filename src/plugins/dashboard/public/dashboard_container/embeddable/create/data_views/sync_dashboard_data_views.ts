@@ -8,7 +8,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { Observable, pipe, combineLatest } from 'rxjs';
-import { distinctUntilChanged, switchMap, filter, map } from 'rxjs/operators';
+import { distinctUntilChanged, switchMap, filter, map } from 'rxjs';
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';

@@ -22,7 +22,7 @@ jest.mock('../../tabify', () => ({
 
 import { tabifyAggResponse } from '../../tabify';
 import { of } from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs';
 
 describe('esaggs expression function - public', () => {
   let mockParams: MockedKeys<Parameters<typeof handleRequest>[0]>;

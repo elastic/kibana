@@ -7,7 +7,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { type IKibanaSearchResponse, isRunningResponse } from '@kbn/data-plugin/common';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export function useCancellableSearch() {

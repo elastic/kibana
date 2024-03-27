@@ -9,7 +9,7 @@
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeAll } from 'rxjs/operators';
+import { mergeAll } from 'rxjs';
 import { dllManifestPath } from '@kbn/ui-shared-deps-npm';
 
 import { Bundle, BundleRemotes, Hashes, parseDllManifest } from '../common';

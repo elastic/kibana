@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { concat, defer, of } from 'rxjs';
-import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
+import { concatMap, filter, map, shareReplay, take } from 'rxjs';
 import type {
   IEsSearchRequest,
   IKibanaSearchRequest,

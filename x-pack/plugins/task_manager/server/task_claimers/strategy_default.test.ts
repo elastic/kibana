@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { v1 as uuidv1, v4 as uuidv4 } from 'uuid';
-import { filter, take, toArray } from 'rxjs/operators';
+import { filter, take, toArray } from 'rxjs';
 
 import { TaskStatus, ConcreteTaskInstance, TaskPriority } from '../task';
 import { SearchOpts, StoreOpts, UpdateByQueryOpts, UpdateByQuerySearchOpts } from '../task_store';

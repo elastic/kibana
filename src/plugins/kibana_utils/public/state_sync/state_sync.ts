@@ -7,7 +7,7 @@
  */
 
 import { EMPTY, Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import defaultComparator from 'fast-deep-equal';
 import { IStateSyncConfig } from './types';
 import { IStateStorage } from './state_sync_state_storage';

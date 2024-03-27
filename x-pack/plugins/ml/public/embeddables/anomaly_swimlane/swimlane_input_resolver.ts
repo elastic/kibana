@@ -19,7 +19,7 @@ import {
   startWith,
   switchMap,
   tap,
-} from 'rxjs/operators';
+} from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';

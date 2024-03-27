@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { map, mergeMap, filter } from 'rxjs/operators';
+import { map, mergeMap, filter } from 'rxjs';
 import { catchError, of, from, BehaviorSubject, withLatestFrom } from 'rxjs';
 import { useLoadingStateContext } from './use_loading_state';
 import { useDatePickerContext } from './use_date_picker';

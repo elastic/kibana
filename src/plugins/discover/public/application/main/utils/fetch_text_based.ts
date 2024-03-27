@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';

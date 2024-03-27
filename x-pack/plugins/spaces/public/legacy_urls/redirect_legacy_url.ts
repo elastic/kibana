@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';

@@ -8,7 +8,7 @@
 
 import { promisify } from 'util';
 import { Observable } from 'rxjs';
-import { catchError, concatMap, finalize } from 'rxjs/operators';
+import { catchError, concatMap, finalize } from 'rxjs';
 import { Logger } from '@kbn/core/server';
 import { Stream, PassThrough } from 'stream';
 import { constants, deflate } from 'zlib';

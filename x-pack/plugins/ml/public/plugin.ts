@@ -14,7 +14,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { BehaviorSubject, mergeMap } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';

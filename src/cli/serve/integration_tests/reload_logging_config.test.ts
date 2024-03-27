@@ -13,7 +13,7 @@ import Os from 'os';
 import Del from 'del';
 
 import * as Rx from 'rxjs';
-import { map, filter, take } from 'rxjs/operators';
+import { map, filter, take } from 'rxjs';
 import { safeDump } from 'js-yaml';
 import { getConfigFromFiles } from '@kbn/config';
 

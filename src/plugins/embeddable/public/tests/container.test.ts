@@ -8,7 +8,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import * as Rx from 'rxjs';
-import { skip } from 'rxjs/operators';
+import { skip } from 'rxjs';
 import { EmbeddableOutput, isErrorEmbeddable, SavedObjectEmbeddableInput, ViewMode } from '../lib';
 import { ERROR_EMBEDDABLE_TYPE } from '../lib/embeddables/error_embeddable';
 import {

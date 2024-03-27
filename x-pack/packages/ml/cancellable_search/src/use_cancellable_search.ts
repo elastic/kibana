@@ -7,7 +7,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { type IKibanaSearchResponse, isRunningResponse } from '@kbn/data-plugin/common';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export interface UseCancellableSearch {

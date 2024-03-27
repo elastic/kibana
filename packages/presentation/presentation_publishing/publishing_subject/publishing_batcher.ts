@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime } from 'rxjs';
 import { AnyPublishingSubject, PublishingSubject, UnwrapPublishingSubjectTuple } from './types';
 
 const hasSubjectsArrayChanged = (

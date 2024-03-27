@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart, Capabilities } from '@kbn/core/public';
-import { first, map, skip } from 'rxjs/operators';
+import { first, map, skip } from 'rxjs';
 import { Subject, combineLatest } from 'rxjs';
 
 import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';

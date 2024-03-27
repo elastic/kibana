@@ -10,15 +10,18 @@ import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
-import { firstValueFrom, from, of, timer } from 'rxjs';
 import {
   catchError,
   distinctUntilChanged,
   exhaustMap,
+  firstValueFrom,
+  from,
   map,
+  of,
   shareReplay,
   takeWhile,
-} from 'rxjs/operators';
+  timer,
+} from 'rxjs';
 import tls from 'tls';
 
 import type {

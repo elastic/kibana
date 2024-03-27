@@ -6,7 +6,7 @@
  */
 
 import { Observable, combineLatest, defer } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 

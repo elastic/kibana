@@ -20,7 +20,7 @@ import {
 
 import type { Duration } from 'moment';
 import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { take, pairwise } from 'rxjs/operators';
+import { take, pairwise } from 'rxjs';
 import apm from 'elastic-apm-node';
 // @ts-expect-error no type definition
 import Brok from 'brok';

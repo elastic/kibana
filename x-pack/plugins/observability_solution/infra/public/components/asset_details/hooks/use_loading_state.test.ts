@@ -13,7 +13,7 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { skip } from 'rxjs/operators';
+import { skip } from 'rxjs';
 
 jest.mock('./use_date_picker');
 jest.mock('../../../hooks/use_kibana');

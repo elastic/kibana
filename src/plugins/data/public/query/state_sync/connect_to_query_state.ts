@@ -7,7 +7,7 @@
  */
 
 import { Subscription } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 import _ from 'lodash';
 import { COMPARE_ALL_OPTIONS, compareFilters, FilterStateStore } from '@kbn/es-query';
 import { BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
