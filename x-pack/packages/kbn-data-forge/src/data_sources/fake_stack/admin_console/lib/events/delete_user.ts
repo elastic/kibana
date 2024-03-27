@@ -65,7 +65,7 @@ export const deleteUser: EventFunction = (_schedule, timestamp) => {
       path,
       `https://${ADMIN_CONSOLE}.${domain}`,
       userAgent,
-      `${ADMIN_CONSOLE}.${domain}`,
+      domain,
       `${host}:${port}`,
       user.id
     ),
