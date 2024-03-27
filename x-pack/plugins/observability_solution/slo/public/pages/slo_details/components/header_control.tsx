@@ -13,6 +13,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
+import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_rate_rule_flyout';
+import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
 import { useSloActions } from '../hooks/use_slo_actions';
 import { useKibana } from '../../../utils/kibana_react';
 import { paths } from '../../../../common/locators/paths';
@@ -42,9 +44,17 @@ export function HeaderControl({ isLoading, slo }: Props) {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
+  const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
+
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
   const { mutate: deleteSlo } = useDeleteSlo();
+
+  const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
+    sloIds: slo ? [slo.id] : undefined,
+  });
+
+  const rules = slo ? rulesBySlo?.[slo?.id] ?? [] : [];
 
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
@@ -64,7 +74,12 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setRuleFlyoutVisibility(true);
   };
 
-  const { handleNavigateToRules, editSloHref } = useSloActions(slo);
+  const { handleNavigateToRules, editSloHref } = useSloActions({
+    slo,
+    rules,
+    setIsEditRuleFlyoutOpen,
+    setIsActionsPopoverOpen: setIsPopoverOpen,
+  });
 
   const handleNavigateToApm = () => {
     if (!slo) {
@@ -169,7 +184,8 @@ export function HeaderControl({ isLoading, slo }: Props) {
               data-test-subj="sloDetailsHeaderControlPopoverManageRules"
             >
               {i18n.translate('xpack.slo.sloDetails.headerControl.manageRules', {
-                defaultMessage: 'Manage rules',
+                defaultMessage: 'Manage burn rate {count, plural, one {rule} other {rules}}',
+                values: { count: rules.length },
               })}
             </EuiContextMenuItem>,
           ]
@@ -221,6 +237,12 @@ export function HeaderControl({ isLoading, slo }: Props) {
             )}
         />
       </EuiPopover>
+      <EditBurnRateRuleFlyout
+        rule={rules?.[0]}
+        isEditRuleFlyoutOpen={isEditRuleFlyoutOpen}
+        setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
+        refetchRules={refetchRules}
+      />
 
       {slo && isRuleFlyoutVisible ? (
         <AddRuleFlyout

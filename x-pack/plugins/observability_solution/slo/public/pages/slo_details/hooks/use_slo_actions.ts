@@ -7,11 +7,23 @@
 
 import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { BurnRateRuleParams } from '../../../typings';
 import { paths } from '../../../../common/locators/paths';
 import { formatRemoteKibanaUrl, openRemoteKibana } from '../../../utils/slo/utils';
 import { useKibana } from '../../../utils/kibana_react';
 
-export const useSloActions = (slo?: SLOWithSummaryResponse) => {
+export const useSloActions = ({
+  slo,
+  rules,
+  setIsEditRuleFlyoutOpen,
+  setIsActionsPopoverOpen,
+}: {
+  slo?: SLOWithSummaryResponse;
+  rules?: Array<Rule<BurnRateRuleParams>>;
+  setIsEditRuleFlyoutOpen: (val: boolean) => void;
+  setIsActionsPopoverOpen: (val: boolean) => void;
+}) => {
   const {
     share: {
       url: { locators },
@@ -20,17 +32,23 @@ export const useSloActions = (slo?: SLOWithSummaryResponse) => {
   } = useKibana().services;
 
   const handleNavigateToRules = async () => {
-    const locator = locators.get<RulesParams>(rulesLocatorID);
-
-    if (slo?.kibanaUrl) {
-      const basePath = http.basePath.get();
-      const url = await locator?.getUrl({ params: { sloId: slo.id } });
-      // since basePath is already included in the kibanaUrl, we need to remove it from the start of url
-      const urlWithoutBasePath = url?.replace(basePath, '');
-      openRemoteKibana(slo.kibanaUrl, urlWithoutBasePath);
+    if (rules?.length === 1) {
+      // if there is only one rule we can edit inline in flyout
+      setIsEditRuleFlyoutOpen(true);
+      setIsActionsPopoverOpen(false);
     } else {
-      if (slo?.id && locator) {
-        locator.navigate({ params: { sloId: slo.id } }, { replace: false });
+      const locator = locators.get<RulesParams>(rulesLocatorID);
+
+      if (slo?.kibanaUrl) {
+        const basePath = http.basePath.get();
+        const url = await locator?.getUrl({ params: { sloId: slo.id } });
+        // since basePath is already included in the kibanaUrl, we need to remove it from the start of url
+        const urlWithoutBasePath = url?.replace(basePath, '');
+        openRemoteKibana(slo.kibanaUrl, urlWithoutBasePath);
+      } else {
+        if (slo?.id && locator) {
+          locator.navigate({ params: { sloId: slo.id } }, { replace: false });
+        }
       }
     }
   };
