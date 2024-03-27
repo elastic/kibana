@@ -6,7 +6,7 @@
  */
 
 import './chart_switch.scss';
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { EuiFlexItem, EuiIconTip, EuiBetaBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -31,15 +31,13 @@ export const getDataLossWarning = (dataLoss: 'nothing' | 'layers' | 'everything'
     });
 };
 
-const DataLossWarning = ({ content, id }: { content: ReactNode; id: string }) => {
+const DataLossWarning = ({ content, id }: { content?: string; id: string }) => {
   if (!content) return null;
   return (
     <EuiFlexItem grow={false}>
       <EuiIconTip
         size="s"
-        aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-          defaultMessage: 'Warning',
-        })}
+        aria-label={content}
         type="dot"
         color="warning"
         content={content}
