@@ -51,6 +51,7 @@ export interface ReportingModalProps {
   // needed for canvas
   getJobParams?: JobAppParamsPDFV2;
   objectType: string;
+  downloadCsvFromLens: () => void;
 }
 
 type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
@@ -346,6 +347,18 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         />
       </EuiButton>
     );
+
+  const radioOptions =
+    objectType === 'lens'
+      ? [
+          { id: 'printablePdfV2', label: 'PDF' },
+          { id: 'pngV2', label: 'PNG', 'data-test-subj': 'pngReportOption' },
+          { id: 'csv', label: 'CSV', 'data-test-subj': 'lensCSVReport' },
+        ]
+      : [
+          { id: 'printablePdfV2', label: 'PDF' },
+          { id: 'pngV2', label: 'PNG', 'data-test-subj': 'pngReportOption' },
+        ];
   return (
     <>
       <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
@@ -356,10 +369,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
           <EuiRadioGroup
-            options={[
-              { id: 'printablePdfV2', label: 'PDF' },
-              { id: 'pngV2', label: 'PNG', 'data-test-subj': 'pngReportOption' },
-            ]}
+            options={radioOptions}
             onChange={(id) => {
               setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
             }}

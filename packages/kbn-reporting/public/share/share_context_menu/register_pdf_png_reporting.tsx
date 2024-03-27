@@ -9,6 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { TableInspectorAdapter } from '@kbn/lens-plugin/public/editor_frame_service/types';
+import { downloadCSVs } from '@kbn/lens-plugin/public';
 import { checkLicense } from '../../license_check';
 import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { ReportingModalContent } from './reporting_panel_content_lazy';
@@ -56,7 +58,7 @@ export const reportingScreenshotShareProvider = ({
       return [];
     }
     // for lens png pdf and csv are combined into one modal
-    const isSupportedType = ['dashboard', 'visualization'].includes(objectType);
+    const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
 
     if (!isSupportedType) {
       return [];
@@ -85,6 +87,11 @@ export const reportingScreenshotShareProvider = ({
 
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
+    const { title, activeData, columnsSorting } = sharingData as unknown as {
+      title: string;
+      activeData: TableInspectorAdapter;
+      columnsSorting?: string[];
+    };
 
     shareActions.push({
       shareMenuItem: {
@@ -115,6 +122,15 @@ export const reportingScreenshotShareProvider = ({
             }}
             theme={theme}
             objectType={objectType}
+            downloadCsvFromLens={async () => {
+              return await downloadCSVs({
+                title,
+                formatFactory: formatFactoryFn(),
+                activeData,
+                uiSettings,
+                columnsSorting,
+              });
+            }}
           />
         ),
       },
