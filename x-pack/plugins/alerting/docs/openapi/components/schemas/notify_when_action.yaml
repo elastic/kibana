@@ -8,6 +8,5 @@ enum:
   - onActionGroupChange
   - onActiveAlert
   - onThrottleInterval
-deprecated: true
 examples:
   - onActiveAlert
