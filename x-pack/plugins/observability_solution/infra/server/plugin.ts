@@ -122,6 +122,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
        * enabling this feature flag.
        */
       profilingEnabled: schema.boolean({ defaultValue: false }),
+      ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
   exposeToBrowser: publicConfigKeys,

@@ -9,16 +9,22 @@ import { Observable, Subscriber } from 'rxjs';
 import { v4 } from 'uuid';
 import { Parser } from 'xml2js';
 import type { Logger } from '@kbn/logging';
-import { JSONSchema } from 'json-schema-to-ts';
+import type { JSONSchema } from 'json-schema-to-ts';
 import {
   ChatCompletionChunkEvent,
   createInternalServerError,
   StreamingChatResponseEventType,
   TokenCountEvent,
-} from '../../../../common/conversation_complete';
-import type { BedrockChunkMember } from '../../util/eventstream_serde_into_observable';
-import { convertDeserializedXmlWithJsonSchema } from '../../util/convert_deserialized_xml_with_json_schema';
+} from '../../../../../common/conversation_complete';
+import type { BedrockChunkMember } from '../../../util/eventstream_serde_into_observable';
+import { convertDeserializedXmlWithJsonSchema } from '../../../util/convert_deserialized_xml_with_json_schema';
 import { parseSerdeChunkBody } from './parse_serde_chunk_body';
+import type {
+  CompletionChunk,
+  ContentBlockDeltaChunk,
+  ContentBlockStartChunk,
+  MessageStopChunk,
+} from './types';
 
 async function parseFunctionCallXml({
   xml,
@@ -83,21 +89,35 @@ export function processBedrockStream({
           return emitTokenCountEvent(subscriber, chunkBody);
         }
 
-        let completion = chunkBody.completion;
+        if (
+          chunkBody.type !== 'content_block_start' &&
+          chunkBody.type !== 'content_block_delta' &&
+          chunkBody.type !== 'message_delta'
+        ) {
+          return;
+        }
+
+        // completion: what we eventually want to emit
+        let completion = chunkBody.type !== 'message_delta' ? getCompletion(chunkBody) : '';
 
         const isStartOfFunctionCall = !functionCallsBuffer && completion.includes('<function');
 
-        const isEndOfFunctionCall = functionCallsBuffer && chunkBody.stop === '</function_calls>';
+        const isEndOfFunctionCall =
+          functionCallsBuffer &&
+          chunkBody.type === 'message_delta' &&
+          chunkBody.delta.stop_sequence === '</function_calls>';
 
         const isInFunctionCall = !!functionCallsBuffer;
 
         if (isStartOfFunctionCall) {
+          // when we see the start of the function call, split on <function,
+          // set completion to the part before, and buffer the part after
           const [before, after] = completion.split('<function');
           functionCallsBuffer += `<function${after}`;
           completion = before.trimEnd();
         } else if (isEndOfFunctionCall) {
-          completion = '';
-          functionCallsBuffer += chunkBody.completion + chunkBody.stop;
+          // parse the buffer as a function call
+          functionCallsBuffer += chunkBody.delta.stop_sequence ?? '';
 
           logger.debug(`Parsing xml:\n${functionCallsBuffer}`);
 
@@ -112,11 +132,12 @@ export function processBedrockStream({
               }),
             },
           });
-
+          // reset the buffer
           functionCallsBuffer = '';
         } else if (isInFunctionCall) {
+          // write everything to the buffer
+          functionCallsBuffer += completion;
           completion = '';
-          functionCallsBuffer += chunkBody.completion;
         }
 
         if (completion.trim()) {
@@ -152,28 +173,13 @@ export function processBedrockStream({
     });
 }
 
-interface TokenCountChunk extends CompletionChunk {
-  'amazon-bedrock-invocationMetrics': {
-    inputTokenCount: number;
-    outputTokenCount: number;
-    invocationLatency: number;
-    firstByteLatency: number;
-  };
-}
-
-interface CompletionChunk {
-  completion: string;
-  stop_reason: string | null;
-  stop: null | string;
-}
-
-function isTokenCountCompletionChunk(value: any): value is TokenCountChunk {
-  return 'amazon-bedrock-invocationMetrics' in value;
+function isTokenCountCompletionChunk(value: any): value is MessageStopChunk {
+  return value.type === 'message_stop' && 'amazon-bedrock-invocationMetrics' in value;
 }
 
 function emitTokenCountEvent(
   subscriber: Subscriber<ChatCompletionChunkEvent | TokenCountEvent>,
-  chunk: TokenCountChunk
+  chunk: MessageStopChunk
 ) {
   const { inputTokenCount, outputTokenCount } = chunk['amazon-bedrock-invocationMetrics'];
 
@@ -185,4 +191,8 @@ function emitTokenCountEvent(
       total: inputTokenCount + outputTokenCount,
     },
   });
+}
+
+function getCompletion(chunk: ContentBlockStartChunk | ContentBlockDeltaChunk) {
+  return chunk.type === 'content_block_start' ? chunk.content_block.text : chunk.delta.text;
 }
