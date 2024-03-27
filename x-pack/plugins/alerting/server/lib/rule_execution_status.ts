@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/core/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { RuleResultService } from '../monitoring/rule_result_service';
 import {
   RuleExecutionStatus,
   RuleExecutionStatusValues,
@@ -27,10 +28,15 @@ export interface IExecutionStatusAndMetrics {
   metrics: RuleRunMetrics | null;
 }
 
-export function executionStatusFromState(
-  stateWithMetrics: RuleTaskStateAndMetrics,
-  lastExecutionDate?: Date
-): IExecutionStatusAndMetrics {
+export function executionStatusFromState({
+  stateWithMetrics,
+  ruleResultService,
+  lastExecutionDate,
+}: {
+  stateWithMetrics: RuleTaskStateAndMetrics;
+  ruleResultService: RuleResultService;
+  lastExecutionDate?: Date;
+}): IExecutionStatusAndMetrics {
   const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
 
   let status: RuleExecutionStatuses =
@@ -58,6 +64,12 @@ export function executionStatusFromState(
         message: translations.taskRunner.warning.maxExecutableActions,
       };
     }
+  }
+
+  // Overwrite status to be error if last run reported any errors
+  const { errors: errorsFromLastRun } = ruleResultService.getLastRunResults();
+  if (errorsFromLastRun.length > 0) {
+    status = RuleExecutionStatusValues[2];
   }
 
   return {
