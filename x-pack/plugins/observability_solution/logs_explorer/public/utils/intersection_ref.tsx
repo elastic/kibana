@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 
 interface IntersectionOptions<THandler extends Function> {
@@ -31,3 +31,8 @@ export function useIntersectionRef<
 
   return [setRef, intersection] as [typeof setRef, IntersectionObserverEntry | null];
 }
+
+export const SpyRef = <THandler extends Function>(props: IntersectionOptions<THandler>) => {
+  const [spyRef] = useIntersectionRef(props);
+  return <span ref={spyRef} />;
+};

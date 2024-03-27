@@ -85,7 +85,7 @@ export interface SearchParams {
   sortOrder: SortOrder;
 }
 
-export type DataSourceSelectorSearchParams = Pick<SearchParams, 'name' | 'sortOrder'>;
+export type DataSourceSelectorSearchParams = SearchParams;
 
 export type DataSourceSelectorSearchHandler = (params: DataSourceSelectorSearchParams) => void;
 

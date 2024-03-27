@@ -22,8 +22,8 @@ import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
+import { SpyRef } from '../../../utils/intersection_ref';
 import { Dataset, Integration } from '../../../../common/datasets';
-import { useIntersectionRef } from '../../../hooks/use_intersection_ref';
 import { nameColumnLabel } from '../constants';
 import { tabContentHeight } from '../shared_styles';
 import {
@@ -65,8 +65,6 @@ export function IntegrationsList({
   search,
   ...props
 }: IntegrationsListProps) {
-  const [spyRef] = useIntersectionRef({ onIntersecting: onScrollEnd });
-
   const shouldDisplayPrompt = Boolean(!items || items.length <= 1);
 
   return (
@@ -90,7 +88,8 @@ export function IntegrationsList({
             </Fragment>
           );
         })}
-        <span ref={spyRef} /> {/* Used to trigger integrations infinite scroll loading */}
+        <SpyRef onIntersecting={onScrollEnd} />
+        {/* Used to trigger integrations infinite scroll loading */}
         {shouldDisplayPrompt && statusPrompt}
       </EuiPanel>
     </EuiPanel>
@@ -280,6 +279,7 @@ function Sortable({ children, sortOrder = 'asc', onSort, ...props }: SortablePro
     onSort(isAscending ? 'desc' : 'asc');
   };
 
+  // TODO: refactor to <EuiFlexGroup component="button" /> as soon as is supported by EUI
   return (
     <button {...props} onClick={handleSort}>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
