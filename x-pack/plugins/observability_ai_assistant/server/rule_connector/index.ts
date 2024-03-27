@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
 import { filter, lastValueFrom } from 'rxjs';
 import { v4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
@@ -135,11 +134,10 @@ async function executor(
                 (kibanaPublicUrl
                   ? ` A link to this
                   conversation should be added at the bottom of the report, the conversation
-                  url is ${path.join(
-                    kibanaPublicUrl!,
-                    'app/observabilityAIAssistant/conversations',
-                    conversationId
-                  )}.`
+                  url is ${
+                    kibanaPublicUrl! +
+                    `/app/observabilityAIAssistant/conversations/${conversationId}`
+                  }.`
                   : ''),
             },
           },
