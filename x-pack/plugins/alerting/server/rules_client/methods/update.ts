@@ -236,6 +236,12 @@ async function updateAlert<Params extends RuleTypeParams>(
   const actionsClient = await context.getActionsClient();
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
+  try {
+    validateActionsSchema(data.actions, data.systemActions);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating actions - ${error.message}`);
+  }
+
   // Validate
   const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
@@ -368,3 +374,28 @@ async function updateAlert<Params extends RuleTypeParams>(
     }),
   };
 }
+
+/**
+ * This is a temporary validation to ensure that actions
+ * contain the expected properties. When the method is migrated to
+ * use a schema for validation, like the create_rule method, the
+ * function should be deleted in favor of the schema validation.
+ */
+const validateActionsSchema = (
+  actions: NormalizedAlertAction[],
+  systemActions: NormalizedSystemAction[]
+) => {
+  for (const action of actions) {
+    if (!action.group) {
+      // Simulating kbn-schema error message
+      throw new Error('[actions.0.group]: expected value of type [string] but got [undefined]');
+    }
+  }
+
+  for (const systemAction of systemActions) {
+    if ('group' in systemAction || 'frequency' in systemAction || 'alertsFilter' in systemAction) {
+      // Simulating kbn-schema error message
+      throw new Error('definition for this key is missing');
+    }
+  }
+};

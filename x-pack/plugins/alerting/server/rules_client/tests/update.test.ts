@@ -31,6 +31,7 @@ import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_key
 import { migrateLegacyActions } from '../lib';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RuleDomain } from '../../application/rule/types';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -768,7 +769,7 @@ describe('update()', () => {
     expect(actionsClient.isPreconfigured).toHaveBeenCalled();
   });
 
-  test('should update a rule with some system actions', async () => {
+  test('should update a rule with system actions', async () => {
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
       {
@@ -3333,5 +3334,479 @@ describe('update()', () => {
       expect.any(Object),
       expect.any(Object)
     );
+  });
+
+  describe('actions', () => {
+    beforeEach(() => {
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'test',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              actionRef: 'system_action:system_action-id',
+              actionTypeId: 'test',
+              params: {},
+            },
+          ],
+          notifyWhen: 'onActiveAlert',
+          revision: 1,
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+          {
+            name: 'param:soRef_0',
+            type: 'someSavedObjectType',
+            id: '9',
+          },
+        ],
+      });
+
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: '1',
+          actionTypeId: 'test',
+          config: {
+            from: 'me@me.com',
+            hasAuth: false,
+            host: 'hello',
+            port: 22,
+            secure: null,
+            service: null,
+          },
+          isMissingSecrets: false,
+          name: 'email connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+        {
+          id: '2',
+          actionTypeId: 'test2',
+          config: {
+            from: 'me@me.com',
+            hasAuth: false,
+            host: 'hello',
+            port: 22,
+            secure: null,
+            service: null,
+          },
+          isMissingSecrets: false,
+          name: 'another email connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+    });
+
+    test('update a rule with system actions and default actions', async () => {
+      const result = await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+          systemActions: [
+            {
+              id: 'system_action-id',
+              params: {},
+            },
+          ],
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
+        1,
+        RULE_SAVED_OBJECT_TYPE,
+        {
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'test',
+              params: {
+                foo: true,
+              },
+              uuid: '156',
+            },
+            {
+              actionRef: 'system_action:system_action-id',
+              actionTypeId: 'test',
+              params: {},
+              uuid: '157',
+            },
+          ],
+          alertTypeId: 'myType',
+          apiKey: null,
+          apiKeyOwner: null,
+          apiKeyCreatedByUser: null,
+          consumer: 'myApp',
+          enabled: true,
+          meta: { versionApiKeyLastmodified: 'v7.10.0' },
+          name: 'abc',
+          notifyWhen: 'onActiveAlert',
+          params: { bar: true },
+          revision: 1,
+          schedule: { interval: '1m' },
+          scheduledTaskId: 'task-123',
+          tags: ['foo'],
+          throttle: null,
+          updatedAt: '2019-02-12T21:01:22.479Z',
+          updatedBy: 'elastic',
+        },
+        {
+          id: '1',
+          overwrite: true,
+          references: [{ id: '1', name: 'action_0', type: 'action' }],
+          version: '123',
+        }
+      );
+
+      expect(result).toMatchInlineSnapshot(`
+              Object {
+                "actions": Array [
+                  Object {
+                    "actionTypeId": "test",
+                    "group": "default",
+                    "id": "1",
+                    "params": Object {
+                      "foo": true,
+                    },
+                    "uuid": undefined,
+                  },
+                ],
+                "createdAt": 2019-02-12T21:01:22.479Z,
+                "enabled": true,
+                "id": "1",
+                "notifyWhen": "onActiveAlert",
+                "params": Object {
+                  "bar": true,
+                },
+                "revision": 1,
+                "schedule": Object {
+                  "interval": "1m",
+                },
+                "scheduledTaskId": "task-123",
+                "systemActions": Array [
+                  Object {
+                    "actionTypeId": "test",
+                    "id": "system_action-id",
+                    "params": Object {},
+                    "uuid": undefined,
+                  },
+                ],
+                "updatedAt": 2019-02-12T21:01:22.479Z,
+              }
+          `);
+
+      expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        '1',
+        {
+          namespace: 'default',
+        }
+      );
+
+      expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+      expect(actionsClient.isSystemAction).toHaveBeenCalled();
+    });
+
+    test('should construct the refs correctly and persist the actions to ES correctly', async () => {
+      await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+          systemActions: [
+            {
+              id: 'system_action-id',
+              params: {},
+            },
+          ],
+        },
+      });
+
+      const rule = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
+
+      expect(rule.actions).toEqual([
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+          uuid: '158',
+        },
+        {
+          actionRef: 'system_action:system_action-id',
+          actionTypeId: 'test',
+          params: {},
+          uuid: '159',
+        },
+      ]);
+    });
+
+    test('should transforms the actions from ES correctly', async () => {
+      const result = await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+          systemActions: [
+            {
+              id: 'system_action-id',
+              params: {},
+            },
+          ],
+        },
+      });
+
+      expect(result.actions).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+            "uuid": undefined,
+          },
+        ]
+      `);
+
+      expect(result.systemActions).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "id": "system_action-id",
+            "params": Object {},
+            "uuid": undefined,
+          },
+        ]
+      `);
+    });
+
+    test('should throw an error if the system action does not exist', async () => {
+      await expect(() =>
+        rulesClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+            actions: [],
+            systemActions: [
+              {
+                id: 'fake-system-action',
+                params: {},
+              },
+            ],
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Action fake-system-action is not a system action]`);
+    });
+
+    test('should throw an error if the system action contains the group', async () => {
+      await expect(() =>
+        rulesClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+            actions: [],
+            systemActions: [
+              {
+                id: 'system_action-id',
+                params: {},
+                // @ts-expect-error: testing validation
+                group: 'default',
+              },
+            ],
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Error validating actions - definition for this key is missing]`
+      );
+    });
+
+    test('should throw an error if the system action contains the frequency', async () => {
+      await expect(() =>
+        rulesClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+            actions: [],
+            systemActions: [
+              {
+                id: 'system_action-id',
+                params: {},
+                // @ts-expect-error: testing validation
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Error validating actions - definition for this key is missing]`
+      );
+    });
+
+    test('should throw an error if the system action contains the alertsFilter', async () => {
+      await expect(() =>
+        rulesClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+            actions: [],
+            systemActions: [
+              {
+                id: 'system_action-id',
+                params: {},
+                // @ts-expect-error: testing validation
+                alertsFilter: {
+                  query: { kql: 'test:1', filters: [] },
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Error validating actions - definition for this key is missing]`
+      );
+    });
+
+    test('should throw an error if the default action does not contain the group', async () => {
+      await expect(() =>
+        rulesClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              // @ts-expect-error: testing validation
+              {
+                id: 'action-id-1',
+                params: {},
+              },
+            ],
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Error validating actions - [actions.0.group]: expected value of type [string] but got [undefined]]`
+      );
+    });
   });
 });

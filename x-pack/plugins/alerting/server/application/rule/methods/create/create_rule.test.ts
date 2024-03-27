@@ -4167,7 +4167,7 @@ describe('create()', () => {
       );
     });
 
-    test('should construct the refs correctly and not persist the type of the action', async () => {
+    test('should construct the refs correctly and persist the actions to ES correctly', async () => {
       const data = getMockData({
         actions: [
           {
@@ -4211,7 +4211,7 @@ describe('create()', () => {
       ]);
     });
 
-    test('should add the actions type to the response correctly', async () => {
+    test('should transforms the actions from ES correctly', async () => {
       const data = getMockData({
         actions: [
           {
@@ -4247,6 +4247,20 @@ describe('create()', () => {
           },
         ]
       `);
+
+      expect(result.systemActions).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+            "uuid": "test-uuid",
+          },
+        ]
+      `);
     });
 
     test('should throw an error if the system action does not exist', async () => {
@@ -4260,6 +4274,21 @@ describe('create()', () => {
       const data = getMockData({ actions: [], systemAction: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
         `[Error: Error validating create data - [systemAction]: definition for this key is missing]`
+      );
+    });
+
+    test('should throw an error if the system action contains the group', async () => {
+      const systemAction = {
+        id: 'system_action-id',
+        uuid: '123',
+        params: {},
+        actionTypeId: '.test',
+        group: 'default',
+      };
+
+      const data = getMockData({ actions: [], systemActions: [systemAction] });
+      await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
+        `[Error: Error validating create data - [systemActions.0.group]: definition for this key is missing]`
       );
     });
 

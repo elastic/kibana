@@ -971,14 +971,12 @@ describe('bulkEdit()', () => {
                     throttle: null,
                   },
                   group: 'default',
-                  id: '1',
                   params: {},
                   actionRef: 'action_0',
                   actionTypeId: 'test-1',
                   uuid: '222',
                 },
                 {
-                  id: 'system_action-id',
                   params: {},
                   actionRef: 'system_action:system_action-id',
                   actionTypeId: 'test-2',
@@ -1085,7 +1083,7 @@ describe('bulkEdit()', () => {
       });
     });
 
-    test('should construct the refs correctly and not persist the type of the action', async () => {
+    test('should construct the refs correctly and persist the actions correctly', async () => {
       const defaultAction = {
         frequency: {
           notifyWhen: 'onActiveAlert' as const,
@@ -1116,14 +1114,12 @@ describe('bulkEdit()', () => {
                     throttle: null,
                   },
                   group: 'default',
-                  id: '1',
                   params: {},
                   actionRef: 'action_0',
                   actionTypeId: 'test-1',
                   uuid: '222',
                 },
                 {
-                  id: 'system_action-id',
                   params: {},
                   actionRef: 'system_action:system_action-id',
                   actionTypeId: 'test-2',
@@ -1198,7 +1194,7 @@ describe('bulkEdit()', () => {
       ]);
     });
 
-    test('should add the actions type to the response correctly', async () => {
+    test('should transforms the actions correctly', async () => {
       const defaultAction = {
         frequency: {
           notifyWhen: 'onActiveAlert' as const,
@@ -1229,14 +1225,12 @@ describe('bulkEdit()', () => {
                     throttle: null,
                   },
                   group: 'default',
-                  id: '1',
                   params: {},
                   actionRef: 'action_0',
                   actionTypeId: 'test-1',
                   uuid: '222',
                 },
                 {
-                  id: 'system_action-id',
                   params: {},
                   actionRef: 'system_action:system_action-id',
                   actionTypeId: 'test-2',
@@ -1345,6 +1339,56 @@ describe('bulkEdit()', () => {
           "total": 1,
         }
       `);
+    });
+
+    it('should throw an error if the system action contains the group', async () => {
+      const action = {
+        id: 'system_action-id',
+        uuid: '123',
+        params: {},
+        group: 'default',
+      };
+
+      actionsClient.isSystemAction.mockReturnValue(true);
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      const res = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [action],
+          },
+        ],
+      });
+
+      expect(res).toEqual({
+        errors: [
+          {
+            message:
+              'Error validating bulk edit rules operations - [0.group]: definition for this key is missing',
+            rule: {
+              id: '1',
+              name: 'my rule name',
+            },
+          },
+        ],
+        rules: [],
+        skipped: [],
+        total: 1,
+      });
     });
 
     it('should throw an error if the system action contains the frequency', async () => {
