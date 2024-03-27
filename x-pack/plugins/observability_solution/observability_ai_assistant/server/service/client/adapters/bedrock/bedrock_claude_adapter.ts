@@ -9,14 +9,14 @@ import dedent from 'dedent';
 import { castArray } from 'lodash';
 import { filter, tap } from 'rxjs';
 import { Builder } from 'xml2js';
-import { createInternalServerError } from '../../../../common/conversation_complete';
+import { createInternalServerError } from '../../../../../common/conversation_complete';
 import {
   BedrockChunkMember,
   eventstreamSerdeIntoObservable,
-} from '../../util/eventstream_serde_into_observable';
-import { jsonSchemaToFlatParameters } from '../../util/json_schema_to_flat_parameters';
+} from '../../../util/eventstream_serde_into_observable';
+import { jsonSchemaToFlatParameters } from '../../../util/json_schema_to_flat_parameters';
 import { processBedrockStream } from './process_bedrock_stream';
-import type { LlmApiAdapterFactory } from './types';
+import type { LlmApiAdapterFactory } from '../types';
 
 function replaceFunctionsWithTools(content: string) {
   return content.replaceAll(/(function)(s|[\s*\.])?(?!\scall)/g, (match, p1, p2) => {
@@ -142,7 +142,7 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
 
       `;
     } else {
-      functionsPrompt = `No tools are available anymore. Do not call any tool.`;
+      functionsPrompt = `No tools are available anymore. DO NOT UNDER ANY CIRCUMSTANCES call any tool, regardless of whether it was previously called.`;
     }
 
     const formattedMessages = [

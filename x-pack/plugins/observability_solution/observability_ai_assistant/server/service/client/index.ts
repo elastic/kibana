@@ -244,7 +244,7 @@ export class ObservabilityAIAssistantClient {
             return await next(nextMessages.concat(addedMessage));
           } else if (isUserMessage) {
             const functions =
-              numFunctionsCalled >= MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
+              numFunctionsCalled === MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
 
             const response$ = (
               await chatWithTokenCountIncrement(
