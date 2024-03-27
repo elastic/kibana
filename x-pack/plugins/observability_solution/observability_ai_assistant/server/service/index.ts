@@ -81,8 +81,6 @@ export class ObservabilityAIAssistantService {
 
   private readonly registrations: RegistrationCallback[] = [];
 
-  private initSuccessful: boolean = false;
-
   constructor({
     logger,
     core,
@@ -97,6 +95,8 @@ export class ObservabilityAIAssistantService {
     this.core = core;
     this.logger = logger;
     this.getModelId = getModelId;
+
+    this.allowInit();
 
     taskManager.registerTaskDefinitions({
       [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
@@ -124,13 +124,17 @@ export class ObservabilityAIAssistantService {
     });
   }
 
-  init = async () => {
-    if (this.initSuccessful) {
-      // If something breaks AFTER a successful init, then this state becomes stale
-      // which will require a restart to try the setup again
-      return;
-    }
+  init = async () => {};
 
+  private allowInit = () => {
+    this.init = once(async () => {
+      return this.doInit().catch(() => {
+        this.allowInit();
+      });
+    });
+  };
+
+  private doInit = async () => {
     try {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
@@ -245,7 +249,6 @@ export class ObservabilityAIAssistantService {
       });
 
       this.logger.info('Successfully set up index assets');
-      this.initSuccessful = true;
     } catch (error) {
       this.logger.error(`Failed to initialize service: ${error.message}`);
       this.logger.debug(error);
