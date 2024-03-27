@@ -7,15 +7,11 @@
  */
 
 import { euiThemeVars, darkMode } from '@kbn/ui-theme';
+import { themeRuleGroupBuilderFactory } from '../../../common/theme';
 import { ESQL_TOKEN_POSTFIX } from '../constants';
 import { monaco } from '../../../monaco_imports';
 
-const buildRuleGroup = (tokens: string[], color: string, isBold: boolean = false) =>
-  tokens.map((i) => ({
-    token: i + ESQL_TOKEN_POSTFIX,
-    foreground: color,
-    fontStyle: isBold ? 'bold' : '',
-  }));
+const buildRuleGroup = themeRuleGroupBuilderFactory(ESQL_TOKEN_POSTFIX);
 
 export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
   base: darkMode ? 'vs-dark' : 'vs',
