@@ -143,7 +143,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    describe('Create detection rule', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168991
+    describe.skip('Create detection rule', () => {
       it('Creates a detection rule from the Take Action button and navigates to rule page', async () => {
         await latestFindingsTable.openFlyoutAt(0);
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
