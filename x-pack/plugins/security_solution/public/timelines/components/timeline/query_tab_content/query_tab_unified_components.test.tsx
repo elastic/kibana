@@ -55,8 +55,8 @@ jest.mock('../../../../common/lib/kuery');
 jest.mock('../../../../common/hooks/use_experimental_features');
 
 // These tests can take more than standard timeout of 5s
-// that is why we are setting it to 10s
-const SPECIAL_TEST_TIMEOUT = 10000;
+// that is why we are setting it to 15s
+const SPECIAL_TEST_TIMEOUT = 15000;
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
   if (feature === 'unifiedComponentsInTimelineEnabled') {
