@@ -15,33 +15,36 @@ import {
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { LibraryNotificationPopover } from './library_notification_popover';
+import {
+  legacyUnlinkActionIsCompatible,
+  LegacyUnlinkFromLibraryAction,
+} from './legacy_unlink_from_library_action';
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
-import { isApiCompatible, UnlinkFromLibraryAction } from './unlink_from_library_action';
 
-export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
+export const LEGACY_ACTION_LIBRARY_NOTIFICATION = 'LEGACY_ACTION_LIBRARY_NOTIFICATION';
 
-export class LibraryNotificationAction implements Action<EmbeddableApiContext> {
-  public readonly id = ACTION_LIBRARY_NOTIFICATION;
-  public readonly type = ACTION_LIBRARY_NOTIFICATION;
+export class LegacyLibraryNotificationAction implements Action<EmbeddableApiContext> {
+  public readonly id = LEGACY_ACTION_LIBRARY_NOTIFICATION;
+  public readonly type = LEGACY_ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
 
-  constructor(private unlinkAction: UnlinkFromLibraryAction) {}
+  constructor(private unlinkAction: LegacyUnlinkFromLibraryAction) {}
 
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     const { embeddable } = context;
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    if (!legacyUnlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
     return <LibraryNotificationPopover unlinkAction={this.unlinkAction} api={embeddable} />;
   };
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return isApiCompatible(embeddable);
+    return legacyUnlinkActionIsCompatible(embeddable);
   }
 
   public subscribeToCompatibilityChanges(
     { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: LibraryNotificationAction) => void
+    onChange: (isCompatible: boolean, action: LegacyLibraryNotificationAction) => void
   ) {
-    if (!isApiCompatible(embeddable)) return;
+    if (!legacyUnlinkActionIsCompatible(embeddable)) return;
 
     /**
      * TODO: Upgrade this action by subscribing to changes in the existance of a saved object id. Currently,
@@ -55,17 +58,17 @@ export class LibraryNotificationAction implements Action<EmbeddableApiContext> {
   }
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    if (!legacyUnlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
     return dashboardLibraryNotificationStrings.getDisplayName();
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    if (!legacyUnlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
     return 'folderCheck';
   }
 
   public isCompatible = async ({ embeddable }: EmbeddableApiContext) => {
-    if (!isApiCompatible(embeddable)) return false;
+    if (!legacyUnlinkActionIsCompatible(embeddable)) return false;
     return getInheritedViewMode(embeddable) === 'edit' && embeddable.canUnlinkFromLibrary();
   };
 
