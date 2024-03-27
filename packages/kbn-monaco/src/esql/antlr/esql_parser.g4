@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.
+
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -24,6 +33,7 @@ sourceCommand
     | fromCommand
     | rowCommand
     | showCommand
+    | metaCommand
     ;
 
 processingCommand
@@ -114,7 +124,6 @@ deprecated_metadata
     : OPENING_BRACKET metadataOption CLOSING_BRACKET
     ;
 
-
 evalCommand
     : EVAL fields
     ;
@@ -147,11 +156,6 @@ identifier
 
 identifierPattern
     : ID_PATTERN
-    ;
-
-idPattern
-    : UNQUOTED_ID_PATTERN
-    | QUOTED_IDENTIFIER
     ;
 
 constant
@@ -250,7 +254,10 @@ subqueryExpression
 
 showCommand
     : SHOW INFO                                                           #showInfo
-    | SHOW FUNCTIONS                                                      #showFunctions
+    ;
+
+metaCommand
+    : META FUNCTIONS                                                      #metaFunctions
     ;
 
 enrichCommand
