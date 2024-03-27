@@ -23,9 +23,15 @@ interface Props {
   isRootLevelField: boolean;
   isMultiField?: boolean | null;
   showDocLink?: boolean;
+  isSemanticTextEnabled?: boolean;
 }
 
-export const TypeParameter = ({ isMultiField, isRootLevelField, showDocLink = false }: Props) => (
+export const TypeParameter = ({
+  isMultiField,
+  isRootLevelField,
+  showDocLink = false,
+  isSemanticTextEnabled = false,
+}: Props) => (
   <UseField<ComboBoxOption[]> path="type" config={getFieldConfig<ComboBoxOption[]>('type')}>
     {(typeField) => {
       const error = typeField.getErrorsMessages();
@@ -35,6 +41,16 @@ export const TypeParameter = ({ isMultiField, isRootLevelField, showDocLink = fa
       if (showDocLink && typeField.value.length > 0) {
         const selectedType = typeField.value[0].value as DataType;
         docLink = documentationService.getTypeDocLink(selectedType);
+      }
+
+      let fieldTypeOptions = isMultiField
+        ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
+        : isRootLevelField
+        ? FIELD_TYPES_OPTIONS
+        : filterTypesForNonRootFields(FIELD_TYPES_OPTIONS);
+
+      if (!isSemanticTextEnabled) {
+        fieldTypeOptions = fieldTypeOptions.filter((option) => option.value !== 'semantic_text');
       }
 
       return (
@@ -63,13 +79,7 @@ export const TypeParameter = ({ isMultiField, isRootLevelField, showDocLink = fa
               defaultMessage: 'Select a type',
             })}
             singleSelection={{ asPlainText: true }}
-            options={
-              isMultiField
-                ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
-                : isRootLevelField
-                ? FIELD_TYPES_OPTIONS
-                : filterTypesForNonRootFields(FIELD_TYPES_OPTIONS)
-            }
+            options={fieldTypeOptions}
             selectedOptions={typeField.value}
             onChange={typeField.setValue}
             isClearable={false}

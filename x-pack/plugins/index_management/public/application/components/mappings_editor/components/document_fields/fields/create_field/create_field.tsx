@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useForm, Form, FormDataProvider } from '../../../../shared_imports';
+import { useForm, Form, FormDataProvider, UseField } from '../../../../shared_imports';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { useDispatch } from '../../../../mappings_state_context';
 import { fieldSerializer } from '../../../../lib';
@@ -27,6 +27,8 @@ import { Field, NormalizedFields, MainType } from '../../../../types';
 import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
+import { InferenceIdSelects } from '../../field_parameters/inference_id_selects';
+import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 
 const formWrapper = (props: any) => <form {...props} />;
 
@@ -39,6 +41,7 @@ interface Props {
   maxNestedDepth?: number;
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
+  isSemanticTextEnabled?: boolean;
 }
 
 export const CreateField = React.memo(function CreateFieldComponent({
@@ -50,6 +53,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   maxNestedDepth,
   onCancelAddingNewFields,
   isAddingFields,
+  isSemanticTextEnabled,
 }: Props) {
   const dispatch = useDispatch();
 
@@ -85,7 +89,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     if (isValid) {
       form.reset();
-      dispatch({ type: 'field.add', value: data });
+      if (data.type === 'semantic_text') {
+        dispatch({ type: 'field.addSemanticText', value: data });
+      } else {
+        dispatch({ type: 'field.add', value: data });
+      }
 
       if (exitAfter) {
         cancel();
@@ -107,17 +115,13 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const renderFormFields = () => (
     <EuiFlexGroup gutterSize="s">
-      {/* Field name */}
-      <EuiFlexItem>
-        <NameParameter />
-      </EuiFlexItem>
-
       {/* Field type */}
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <TypeParameter
           isRootLevelField={isRootLevelField}
           isMultiField={isMultiField}
           showDocLink
+          isSemanticTextEnabled={isSemanticTextEnabled}
         />
       </EuiFlexItem>
 
@@ -139,6 +143,32 @@ export const CreateField = React.memo(function CreateFieldComponent({
           );
         }}
       </FormDataProvider>
+
+      {/* Field reference_field for semantic_text field type */}
+      <FormDataProvider pathsToWatch="type">
+        {({ type }) => {
+          if (type === undefined || type[0]?.value !== 'semantic_text') {
+            return null;
+          }
+
+          return (
+            <EuiFlexItem grow={false}>
+              <UseField path="reference_field">
+                {(field) => (
+                  <div className="mappingsEditor__selectSemanticTextReferenceField">
+                    <ReferenceFieldSelects onChange={field.setValue} />
+                  </div>
+                )}
+              </UseField>
+            </EuiFlexItem>
+          );
+        }}
+      </FormDataProvider>
+
+      {/* Field name */}
+      <EuiFlexItem>
+        <NameParameter />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -200,7 +230,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
               <EuiFlexItem className="mappingsEditor__createFieldContent__formFields">
                 {renderFormFields()}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{renderFormActions()}</EuiFlexItem>
             </EuiFlexGroup>
 
             <FormDataProvider pathsToWatch={['type', 'subType']}>
@@ -230,6 +259,36 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 );
               }}
             </FormDataProvider>
+            {/* Field inference_id for semantic_text field type */}
+            <FormDataProvider pathsToWatch="type">
+              {({ type }) => {
+                if (type === undefined || type[0]?.value !== 'semantic_text') {
+                  return null;
+                }
+
+                return (
+                  <>
+                    <EuiSpacer />
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <UseField path="inference_id">
+                          {(field) => (
+                            <div className="mappingsEditor__selectSemanticTextInferenceId">
+                              <InferenceIdSelects onChange={field.setValue} />
+                            </div>
+                          )}
+                        </UseField>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                );
+              }}
+            </FormDataProvider>
+
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={true} />
+              <EuiFlexItem grow={false}>{renderFormActions()}</EuiFlexItem>
+            </EuiFlexGroup>
           </div>
         </div>
       </Form>

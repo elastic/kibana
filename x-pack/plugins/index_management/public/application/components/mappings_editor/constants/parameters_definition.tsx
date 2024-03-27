@@ -155,7 +155,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
   },
   type: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.typeFieldLabel', {
+      label: i18n.translate('xpack.idxMgmt..typeFieldLabel', {
         defaultMessage: 'Field type',
       }),
       defaultValue: 'text',
@@ -1041,6 +1041,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.number,
   },
+
   dims: {
     fieldConfig: {
       defaultValue: '',
@@ -1067,6 +1068,26 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.string,
   },
+  reference_field: {
+    fieldConfig: {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.referenceFieldLabel', {
+        defaultMessage: 'Reference field',
+      }),
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.referenceFieldHelpText', {
+        defaultMessage: 'Reference field for model inference.',
+      }),
+    },
+    schema: t.string,
+  },
+  inference_id: {
+    fieldConfig: {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.inferenceIdLabel', {
+        defaultMessage: 'Select an inference endpoint:',
+      }),
+    },
+    schema: t.string,
+  },
+
   relations: {
     fieldConfig: {
       defaultValue: [] as any, // Needed for FieldParams typing

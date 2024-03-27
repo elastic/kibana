@@ -900,6 +900,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  semantic_text: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.semanticTextDescription', {
+      defaultMessage: 'Semantic text',
+    }),
+    value: 'semantic_text',
+    documentation: {
+      main: 'semantic-text.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.semanticTextLongDescription"
+          defaultMessage="Semantic text field references inference id used for text embeddings."
+        />
+      </p>
+    ),
+  },
   point: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.pointDescription', {
       defaultMessage: 'Point',
@@ -1007,6 +1024,7 @@ export const MAIN_TYPES: MainType[] = [
   'rank_features',
   'search_as_you_type',
   'shape',
+  'semantic_text',
   'sparse_vector',
   'text',
   'token_count',
