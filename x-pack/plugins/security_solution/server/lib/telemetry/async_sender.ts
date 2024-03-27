@@ -21,7 +21,8 @@ import { TelemetryChannel, TelemetryCounter } from './types';
 import * as collections from './collections_helpers';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import { SenderUtils } from './sender_helpers';
-import { newTelemetryLogger, type TelemetryLogger } from './helpers';
+import { newTelemetryLogger } from './helpers';
+import { type TelemetryLogger } from './telemetry_logger';
 
 export const DEFAULT_QUEUE_CONFIG: QueueConfig = {
   bufferTimeSpanMillis: 30 * 1_000,
