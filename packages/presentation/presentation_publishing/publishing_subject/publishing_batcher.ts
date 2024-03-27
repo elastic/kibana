@@ -29,8 +29,6 @@ const hasSubjectsArrayChanged = (
  * You should avoid using this hook with subjects that your component pushes values to on user interaction, as it can cause a slight delay.
  * @param subjects Publishing subjects array.
  *   When 'subjects' is expected to change, 'subjects' must be part of component react state.
- *   State change required for component to re-render.
- *   Re-render required to call method with updated value.
  */
 export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublishingSubject[]]>(
   ...subjects: [...SubjectsType]
@@ -51,16 +49,16 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
   /**
    * Set up latest published values state, initialized with the current values of the subjects.
    */
-  const subjectValues = useMemo(() => unwrapPublishingSubjectArray(subjectsToUse), [subjectsToUse]);
-  const [latestPublishedValues, setLatestPublishedValues] =
-    useState<UnwrapPublishingSubjectTuple<SubjectsType>>(subjectValues);
+  const [latestPublishedValues, setLatestPublishedValues] = useState<
+    UnwrapPublishingSubjectTuple<SubjectsType>
+  >(() => unwrapPublishingSubjectArray(subjectsToUse));
 
   /**
    * Subscribe to all subjects and update the latest values when any of them change.
    */
   useEffect(() => {
     if (!isFirstRender.current) {
-      setLatestPublishedValues(subjectValues);
+      setLatestPublishedValues(unwrapPublishingSubjectArray(subjectsToUse));
     } else {
       isFirstRender.current = false;
     }
@@ -92,7 +90,7 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
         });
       });
     return () => subscription.unsubscribe();
-  }, [subjectsToUse, subjectValues]);
+  }, [subjectsToUse]);
 
   return latestPublishedValues;
 };

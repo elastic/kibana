@@ -161,8 +161,6 @@ describe('useBatchedPublishingSubjects', () => {
       let renderCount = 0;
       function Component() {
         // When subjects is expected to change, subjects must be part of react state.
-        // State change required for component to re-render.
-        // Re-render required to call method with updated subjects.
         const [subjectFoo, setSubjectFoo] = useState<PublishingSubject<string> | undefined>(
           undefined
         );
@@ -199,8 +197,6 @@ describe('useBatchedPublishingSubjects', () => {
       let renderCount = 0;
       function Component() {
         // When subject is expected to change, subject must be part of react state.
-        // State change required for component to re-render.
-        // Re-render required to call method with updated subject.
         const [subjectFoo, setSubjectFoo] = useState<PublishingSubject<string> | undefined>(
           undefined
         );

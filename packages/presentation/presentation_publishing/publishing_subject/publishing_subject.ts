@@ -31,8 +31,6 @@ export const usePublishingSubject = <T extends unknown = unknown>(
  * Declares a state variable that is synced with a publishing subject value.
  * @param subject Publishing subject.
  *   When 'subject' is expected to change, 'subject' must be part of component react state.
- *   State change required for component to re-render.
- *   Re-render required to call method with updated value.
  */
 export const useStateFromPublishingSubject = <
   SubjectType extends PublishingSubject<any> | undefined = PublishingSubject<any> | undefined
