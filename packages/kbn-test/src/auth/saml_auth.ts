@@ -73,8 +73,6 @@ const getCloudUrl = (hostname: string, pathname: string) => {
 
 const createCloudSession = async (params: CreateSamlSessionParams) => {
   const { hostname, email, password, log } = params;
-  // remove after ms-104 is released
-  const deprecatedLoginUrl = getCloudUrl(hostname, '/api/v1/users/_login');
   const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/saas/auth/_login');
   let sessionResponse: AxiosResponse | undefined;
   const requestConfig = (cloudUrl: string) => {
@@ -93,22 +91,13 @@ const createCloudSession = async (params: CreateSamlSessionParams) => {
       maxRedirects: 0,
     };
   };
-  try {
-    sessionResponse = await axios.request(requestConfig(deprecatedLoginUrl));
-  } catch (ex) {
-    log.error(`Failed to create the new cloud session with 'POST ${deprecatedLoginUrl}'`);
-    // no error on purpose
-  }
 
-  if (!sessionResponse || sessionResponse?.status === 404) {
-    // Retrying with new cloud login endpoint
-    try {
-      sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
-    } catch (ex) {
-      log.error(`Failed to create the new cloud session with 'POST ${cloudLoginUrl}'`);
-      cleanException(cloudLoginUrl, ex);
-      throw ex;
-    }
+  try {
+    sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
+  } catch (ex) {
+    log.error(`Failed to create the new cloud session with 'POST ${cloudLoginUrl}'`);
+    cleanException(cloudLoginUrl, ex);
+    throw ex;
   }
 
   const token = sessionResponse?.data?.token as string;
