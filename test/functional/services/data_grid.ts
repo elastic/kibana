@@ -27,6 +27,7 @@ export class DataGridService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly docTable = this.ctx.getService('docTable');
   private readonly retry = this.ctx.getService('retry');
 
   async getDataGridTableData(): Promise<TabbedGridData> {
@@ -428,16 +429,7 @@ export class DataGridService extends FtrService {
   }
 
   public async addInclusiveFilter(detailsRow: WebElementWrapper, fieldName: string): Promise<void> {
-    const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
-    const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
-    await addInclusiveFilterButton.click();
-    await this.header.awaitGlobalLoadingIndicatorHidden();
-  }
-
-  public async getAddInclusiveFilterButton(
-    tableDocViewRow: WebElementWrapper
-  ): Promise<WebElementWrapper> {
-    return await tableDocViewRow.findByTestSubject(`~addInclusiveFilterButton`);
+    await this.docTable.addInclusiveFilter(detailsRow, fieldName);
   }
 
   public async getTableDocViewRow(
@@ -468,10 +460,7 @@ export class DataGridService extends FtrService {
     detailsRow: WebElementWrapper,
     fieldName: string
   ): Promise<void> {
-    const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
-    const addInclusiveFilterButton = await this.getRemoveInclusiveFilterButton(tableDocViewRow);
-    await addInclusiveFilterButton.click();
-    await this.header.awaitGlobalLoadingIndicatorHidden();
+    await this.docTable.removeInclusiveFilter(detailsRow, fieldName);
   }
 
   public async hasNoResults() {

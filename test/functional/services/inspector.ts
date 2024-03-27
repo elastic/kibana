@@ -9,6 +9,12 @@
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
+interface FilterForTableCell {
+  column: number;
+  row: number;
+  filter: 'in' | 'out';
+}
+
 export class InspectorService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
@@ -155,36 +161,23 @@ export class InspectorService extends FtrService {
   }
 
   /**
-   * Filters table for value by clicking specified cell
+   * Filter / filter out table for value by clicking specified cell
    * @param column column index
    * @param row row index
+   * @param filter 'in' to filter and 'out' to filter out
    */
-  public async filterForTableCell(column: string | number, row: string | number): Promise<void> {
+  public async filterForTableCell(options: FilterForTableCell): Promise<void> {
+    const filterLocator = {
+      in: 'filterForInspectorCellValue',
+      out: 'filterOutInspectorCellValue',
+    };
     await this.retry.try(async () => {
       const table = await this.testSubjects.find('inspectorTable');
       const cell = await table.findByCssSelector(
-        `tbody tr:nth-child(${row}) td:nth-child(${column})`
+        `tbody tr:nth-child(${options.row}) td:nth-child(${options.column})`
       );
       await cell.moveMouseTo();
-      const filterBtn = await this.testSubjects.findDescendant('filterForInspectorCellValue', cell);
-      await filterBtn.click();
-    });
-    await this.renderable.waitForRender();
-  }
-
-  /**
-   * Filters out table by clicking specified cell
-   * @param column column index
-   * @param row row index
-   */
-  public async filterOutTableCell(column: string | number, row: string | number): Promise<void> {
-    await this.retry.try(async () => {
-      const table = await this.testSubjects.find('inspectorTable');
-      const cell = await table.findByCssSelector(
-        `tbody tr:nth-child(${row}) td:nth-child(${column})`
-      );
-      await cell.moveMouseTo();
-      const filterBtn = await this.testSubjects.findDescendant('filterOutInspectorCellValue', cell);
+      const filterBtn = await this.testSubjects.findDescendant(filterLocator[options.filter], cell);
       await filterBtn.click();
     });
     await this.renderable.waitForRender();

@@ -26,6 +26,11 @@ interface SaveDashboardOptions {
   tags?: string[];
 }
 
+interface AddNewDashboardOptions {
+  continueEditing?: boolean;
+  expectWarning?: boolean;
+}
+
 export class DashboardPageObject extends FtrService {
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly config = this.ctx.getService('config');
@@ -361,7 +366,10 @@ export class DashboardPageObject extends FtrService {
     });
   }
 
-  public async clickNewDashboard(continueEditing = false) {
+  public async clickNewDashboard(
+    options: AddNewDashboardOptions = { continueEditing: false, expectWarning: false }
+  ) {
+    const { continueEditing, expectWarning } = options;
     const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
@@ -372,33 +380,15 @@ export class DashboardPageObject extends FtrService {
       }
     }
     await this.listingTable.clickNewButton();
+    if (expectWarning) {
+      await this.testSubjects.existOrFail('dashboardCreateConfirm');
+    }
     if (await this.testSubjects.exists('dashboardCreateConfirm')) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
       } else {
         await this.testSubjects.click('dashboardCreateConfirmStartOver');
       }
-    }
-    // make sure the dashboard page is shown
-    await this.waitForRenderComplete();
-  }
-
-  public async clickNewDashboardExpectWarning(continueEditing = false) {
-    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
-    if (!continueEditing && discardButtonExists) {
-      this.log.debug('found discard button');
-      await this.testSubjects.click('discardDashboardPromptButton');
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
-      if (confirmation) {
-        await this.common.clickConfirmOnModal();
-      }
-    }
-    await this.listingTable.clickNewButton();
-    await this.testSubjects.existOrFail('dashboardCreateConfirm');
-    if (continueEditing) {
-      await this.testSubjects.click('dashboardCreateConfirmContinue');
-    } else {
-      await this.testSubjects.click('dashboardCreateConfirmStartOver');
     }
     // make sure the dashboard page is shown
     await this.waitForRenderComplete();

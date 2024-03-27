@@ -96,6 +96,18 @@ export class ListingTableService extends FtrService {
     });
   }
 
+  public async loadNextPageIfAvailable() {
+    const morePages = !(
+      (await this.testSubjects.getAttribute('pagination-button-next', 'disabled')) === 'true'
+    );
+    if (morePages) {
+      await this.testSubjects.click('pagerNextButton');
+      await this.waitUntilTableIsLoaded();
+    }
+
+    return morePages;
+  }
+
   /**
    * Navigates through all pages on Landing page and returns array of items names that are selectable
    * Added for visualize_integration saved object tagging tests
@@ -108,13 +120,7 @@ export class ListingTableService extends FtrService {
       visualizationNames = visualizationNames.concat(
         await this.getAllSelectableItemsNamesOnCurrentPage()
       );
-      morePages = !(
-        (await this.testSubjects.getAttribute('pagination-button-next', 'disabled')) === 'true'
-      );
-      if (morePages) {
-        await this.testSubjects.click('pagerNextButton');
-        await this.waitUntilTableIsLoaded();
-      }
+      morePages = await this.loadNextPageIfAvailable();
     }
     return visualizationNames;
   }
@@ -151,13 +157,7 @@ export class ListingTableService extends FtrService {
     let visualizationNames: string[] = [];
     while (morePages) {
       visualizationNames = visualizationNames.concat(await this.getAllItemsNamesOnCurrentPage());
-      morePages = !(
-        (await this.testSubjects.getAttribute('pagination-button-next', 'disabled')) === 'true'
-      );
-      if (morePages) {
-        await this.testSubjects.click('pagerNextButton');
-        await this.waitUntilTableIsLoaded();
-      }
+      morePages = await this.loadNextPageIfAvailable();
     }
     return visualizationNames;
   }
