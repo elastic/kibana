@@ -265,6 +265,7 @@ export const postActionsConnectorExecuteRoute = (
             connectorId,
             elserId,
             esClient,
+            llmType: connectors[0]?.actionTypeId,
             kbResource: ESQL_RESOURCE,
             langChainMessages,
             logger,
