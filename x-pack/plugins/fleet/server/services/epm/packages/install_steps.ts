@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
 import { ConcurrentInstallOperationError } from '../../../errors';
 import {
   MAX_TIME_COMPLETE_INSTALL,
@@ -112,7 +114,6 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
       verificationResult,
     });
   }
-
   // Use a shared array that is updated by each operation. This allows each operation to accurately update the
   // installation object with it's references without requiring a refresh of the SO index on each update (faster).
   const esReferences = installedPkg?.attributes.installed_es ?? [];
@@ -130,7 +131,7 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
     packageInstallContext,
     spaceId,
   } = context;
-  const { packageInfo, paths } = packageInstallContext;
+  const { packageInfo } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
 
   const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
@@ -142,7 +143,6 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
       pkgName,
       pkgTitle,
       packageInstallContext,
-      paths,
       installedPkg,
       logger,
       spaceId,
@@ -427,3 +427,25 @@ export async function stepSaveSystemObject(context: InstallContext) {
     `Install status ${updatedPackage?.attributes?.install_status} - Installation complete!`
   );
 }
+
+// Function invoked after each transition
+export const updateLatestExecutedState = async (context: InstallContext) => {
+  const { logger, savedObjectsClient, packageInstallContext, latestExecutedState } = context;
+  const { packageInfo } = packageInstallContext;
+  const { name: pkgName } = packageInfo;
+
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+  try {
+    return await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+      latest_executed_state: latestExecutedState,
+    });
+  } catch (err) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      logger.error(`failed to update package install state to: latest_executed_state  ${err}`);
+    }
+  }
+};

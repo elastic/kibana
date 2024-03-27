@@ -521,6 +521,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           },
         },
         latest_install_failed_attempts: { type: 'object', enabled: false },
+        latest_executed_state: { type: 'object', enabled: false },
         installed_kibana: {
           dynamic: false,
           properties: {},
@@ -558,6 +559,16 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             type: 'mappings_addition',
             addedMappings: {
               latest_install_failed_attempts: { type: 'object', enabled: false },
+            },
+          },
+        ],
+      },
+      '2': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              latest_executed_state: { type: 'object', enabled: false },
             },
           },
         ],

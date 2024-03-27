@@ -15,7 +15,7 @@ import type {
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
-import type { PackageInstallContext } from '../../../../common/types';
+import type { PackageInstallContext, StateNames, StateContext } from '../../../../common/types';
 import type { PackageAssetReference } from '../../../types';
 
 import type {
@@ -41,28 +41,12 @@ import {
   stepDeletePreviousPipelines,
   stepSaveArchiveEntries,
   stepSaveSystemObject,
+  updateLatestExecutedState,
 } from './install_steps';
 import type { StateMachineDefinition } from './integrations_state_machine';
 import { handleState } from './integrations_state_machine';
 
-export const installStateNames = [
-  'create_restart_installation',
-  'install_kibana_assets',
-  'install_ilm_policies',
-  'install_ml_model',
-  'install_index_template_pipelines',
-  'remove_legacy_templates',
-  'update_current_write_indices',
-  'install_transforms',
-  'delete_previous_pipelines',
-  'save_archive_entries_from_assets_map',
-  'update_so',
-] as const;
-
-type StateNamesTuple = typeof installStateNames;
-type StateNames = StateNamesTuple[number];
-
-export interface InstallContext {
+export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   savedObjectTagAssignmentService: IAssignmentService;
@@ -96,46 +80,57 @@ export async function _stateMachineInstallPackage(
       create_restart_installation: {
         nextState: 'install_kibana_assets',
         onTransition: stepCreateRestartInstallation,
+        onPostTransition: updateLatestExecutedState,
       },
       install_kibana_assets: {
         onTransition: stepInstallKibanaAssets,
         nextState: 'install_ilm_policies',
+        onPostTransition: updateLatestExecutedState,
       },
       install_ilm_policies: {
         onTransition: stepInstallILMPolicies,
         nextState: 'install_ml_model',
+        onPostTransition: updateLatestExecutedState,
       },
       install_ml_model: {
         onTransition: stepInstallMlModel,
         nextState: 'install_index_template_pipelines',
+        onPostTransition: updateLatestExecutedState,
       },
       install_index_template_pipelines: {
         onTransition: stepInstallIndexTemplatePipelines,
         nextState: 'remove_legacy_templates',
+        onPostTransition: updateLatestExecutedState,
       },
       remove_legacy_templates: {
         onTransition: stepRemoveLegacyTemplates,
         nextState: 'update_current_write_indices',
+        onPostTransition: updateLatestExecutedState,
       },
       update_current_write_indices: {
         onTransition: stepUpdateCurrentWriteIndices,
         nextState: 'install_transforms',
+        onPostTransition: updateLatestExecutedState,
       },
       install_transforms: {
         onTransition: stepInstallTransforms,
         nextState: 'delete_previous_pipelines',
+        onPostTransition: updateLatestExecutedState,
       },
       delete_previous_pipelines: {
         onTransition: stepDeletePreviousPipelines,
         nextState: 'save_archive_entries_from_assets_map',
+        onPostTransition: updateLatestExecutedState,
       },
       save_archive_entries_from_assets_map: {
         onTransition: stepSaveArchiveEntries,
         nextState: 'update_so',
+        onPostTransition: updateLatestExecutedState,
       },
       update_so: {
         onTransition: stepSaveSystemObject,
         nextState: 'end',
+        onPostTransition: updateLatestExecutedState,
       },
     },
   };

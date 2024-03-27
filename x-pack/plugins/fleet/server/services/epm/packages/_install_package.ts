@@ -161,7 +161,6 @@ export async function _installPackage({
         pkgName,
         pkgTitle,
         packageInstallContext,
-        paths,
         installedPkg,
         logger,
         spaceId,

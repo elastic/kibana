@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { appContextService } from '../../app_context';
+import type { StateContext } from '../../../../common/types';
 export interface State {
   onTransition: any;
   nextState?: string;
@@ -22,8 +23,8 @@ export interface StateMachineDefinition<T extends string> {
 export async function handleState(
   currentStateName: string,
   definition: StateMachineDefinition<string>,
-  context: { [key: string]: any }
-): Promise<{ [key: string]: any }> {
+  context: StateContext<string>
+): Promise<StateContext<string>> {
   const logger = appContextService.getLogger();
   const { states } = definition;
   const currentState = states[currentStateName];
@@ -35,13 +36,24 @@ export async function handleState(
       `Current state ${currentStateName}: running transition ${currentState.onTransition.name}`
     );
     try {
+      // inject information about the state into context
+      const startedAt = new Date(Date.now()).toISOString();
+      const latestExecutedState = {
+        name: currentStateName,
+        started_at: startedAt,
+      };
       stateResult = await currentState.onTransition.call(undefined, updatedContext);
       // check if is a function/promise
       if (typeof stateResult === 'function') {
         const promiseName = `${currentStateName}Result`;
         updatedContext[promiseName] = stateResult;
+        updatedContext = { ...updatedContext, currentStateName, latestExecutedState };
       } else {
-        updatedContext = { ...updatedContext, ...stateResult };
+        updatedContext = {
+          ...updatedContext,
+          ...stateResult,
+          latestExecutedState,
+        };
       }
       currentStatus = 'success';
       logger.debug(
@@ -55,6 +67,9 @@ export async function handleState(
     }
   } else {
     currentStatus = 'failed';
+    logger.warn(
+      `Execution of state "${currentStateName}" with status "${currentStatus}": provided onTransition is not a valid function `
+    );
   }
 
   if (typeof currentState.onPostTransition === 'function') {

@@ -549,6 +549,35 @@ export interface InstallFailedAttempt {
   };
 }
 
+const installStateNames = [
+  'create_restart_installation',
+  'install_kibana_assets',
+  'install_ilm_policies',
+  'install_ml_model',
+  'install_index_template_pipelines',
+  'remove_legacy_templates',
+  'update_current_write_indices',
+  'install_transforms',
+  'delete_previous_pipelines',
+  'save_archive_entries_from_assets_map',
+  'update_so',
+] as const;
+
+type StateNamesTuple = typeof installStateNames;
+export type StateNames = StateNamesTuple[number];
+export interface LatestExecutedState<T> {
+  name: T;
+  started_at: string;
+  error?: string;
+}
+
+export type InstallLatestExecutedState = LatestExecutedState<StateNames>;
+
+export interface StateContext<T> {
+  [key: string]: any;
+  latestExecutedState: LatestExecutedState<T>;
+}
+
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
@@ -569,6 +598,7 @@ export interface Installation {
   internal?: boolean;
   removable?: boolean;
   latest_install_failed_attempts?: InstallFailedAttempt[];
+  latest_executed_state?: InstallLatestExecutedState;
 }
 
 export interface PackageUsageStats {
