@@ -150,8 +150,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(aggregationResponse.aggregations).to.have.property('usernames');
         expect(aggregationResponse.aggregations.usernames.buckets.length).to.be(1);
 
-        expect(aggregationResponse.aggregations).to.have.property('managedMetadata');
-        expect(aggregationResponse.aggregations.managedMetadata.doc_count).to.eql(5);
+        expect(aggregationResponse.aggregations).to.have.property('managed');
+        expect(aggregationResponse.aggregations.managed.buckets.metadataBased.doc_count).to.eql(5);
       } else {
         expect(aggregationResponse.total).to.be(15);
       }

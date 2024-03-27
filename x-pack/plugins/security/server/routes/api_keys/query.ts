@@ -73,7 +73,9 @@ export function defineQueryApiKeysAndAggregationsRoute({
           });
         }
         const { query, size, from, sort } = request.body;
+
         const transformedSort = sort && [{ [sort.field]: { order: sort.direction } }];
+
         const queryResponse = await esClient.asCurrentUser.security.queryApiKeys({
           query,
           size,
@@ -124,7 +126,7 @@ export function defineQueryApiKeysAndAggregationsRoute({
                   filters: {
                     filters: {
                       metadataBased: { term: { 'metadata.managed': true } },
-                      namePrefixBased: { prefix: { name: { value: 'Alerting' } } },
+                      namePrefixBased: { prefix: { name: { value: 'Alerting: ' } } },
                     },
                   },
                 },
