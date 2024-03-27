@@ -611,20 +611,14 @@ export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations)
   let expiredCount = 0;
 
   if (aggregationResponse) {
-    const {
-      usernames,
-      types,
-      expired,
-      managed: {
-        buckets: { namePrefixBased, metadataBased },
-      },
-    } = aggregationResponse;
+    const { usernames, types, expired, managed } = aggregationResponse;
     types?.buckets.forEach((type) => {
       typeFilters.add(type.key);
     });
     usernames?.buckets.forEach((username) => {
       usernameFilters.add(username.key);
     });
+    const { namePrefixBased, metadataBased } = managed?.buckets || {};
     if (
       (namePrefixBased?.doc_count && namePrefixBased?.doc_count > 0) ||
       (metadataBased?.doc_count && metadataBased?.doc_count > 0)

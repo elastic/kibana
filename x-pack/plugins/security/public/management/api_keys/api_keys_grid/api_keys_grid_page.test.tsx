@@ -74,6 +74,7 @@ describe('APIKeysGridPage', () => {
       canManageApiKeys: true,
       canManageOwnApiKeys: true,
       total: 2,
+      aggregationTotal: 2,
       aggregations: {
         usernames: {
           doc_count_error_upper_bound: 0,
@@ -249,6 +250,8 @@ describe('APIKeysGridPage', () => {
         canManageApiKeys: false,
         canManageOwnApiKeys: false,
         total: 0,
+        aggregations: {},
+        aggregationTotal: 0,
       });
     });
 

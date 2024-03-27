@@ -38,6 +38,7 @@ describe('apiKeysManagementApp', () => {
       canManageApiKeys: true,
       canManageOwnApiKeys: true,
       aggregations: {},
+      aggregationsTotal: 0,
     });
 
     authc.getCurrentUser.mockResolvedValue(
