@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { searchConnectorsMock } from '@kbn/search-connectors-plugin/public/plugin.mock';
+
 import React from 'react';
 
 import { act } from '@testing-library/react';
@@ -41,6 +43,7 @@ describe('renderApp', () => {
       guidedOnboarding: guidedOnboardingMock.createStart(),
       lens: lensPluginMock.createStartContract(),
       licensing: licensingMock.createStart(),
+      searchConnectors: searchConnectorsMock.createStart(),
       security: securityMock.createStart(),
       share: sharePluginMock.createStartContract(),
       ml: mlPluginMock.createStartContract(),
