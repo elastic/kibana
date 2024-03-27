@@ -72,7 +72,7 @@ For information about the {kib} 8.13.0 release, review the following information
 
 [discrete]
 [[known-179457]]
-.Canvas workpad image rendering displays a fail toast notification
+.In Canvas, an empty text element incorrectly triggers a toast notification
 [%collapsible]
 ====
 *Details* +
