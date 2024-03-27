@@ -9,7 +9,8 @@ import React from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { css } from '@emotion/react';
-import { PackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
+// import { PackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
+import { PackagePolicyInputVarField } from '../package_policy_input_var_field';
 import { AwsOptions } from './get_aws_credentials_form_options';
 import { findVariableDef } from '../utils';
 

@@ -62,6 +62,11 @@ export { PackagePolicyEditorDatastreamPipelines } from './applications/fleet/sec
 export type { PackagePolicyEditorDatastreamPipelinesProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines';
 export { PackagePolicyEditorDatastreamMappings } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings';
 export type { PackagePolicyEditorDatastreamMappingsProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings';
-
+// export { PackagePolicyInputVarField } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field';
 export type { DynamicPagePathValues } from './constants';
-export { PackagePolicyInputVarField } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field';
+export { MultiTextInput } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/multi_text_input';
+export { DatasetComboBox } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/dataset_combo';
+export type { DataStream, RegistryVarsEntry } from './types';
+export { DATASET_VAR_NAME } from '../common/constants';
+export { ExperimentalFeaturesService } from './services';
+export { useStartServices } from './hooks';
