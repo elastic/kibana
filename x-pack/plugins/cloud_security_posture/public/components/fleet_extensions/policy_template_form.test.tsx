@@ -61,7 +61,6 @@ import {
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
 } from '../test_subjects';
 import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
-import { ThemeProvider } from '@emotion/react';
 import { getMockTheme } from '@kbn/fleet-plugin/public/mocks';
 
 // mock useParams
@@ -127,31 +126,29 @@ describe('<CspPolicyTemplateForm />', () => {
     onChange?: jest.Mock<void, [NewPackagePolicy]>;
     agentlessPolicy?: AgentPolicy;
   }) => (
-    <ThemeProvider theme={mockTheme}>
-      <TestProvider>
-        {edit && (
-          <CspPolicyTemplateForm
-            policy={newPolicy as PackagePolicy}
-            newPolicy={newPolicy}
-            onChange={onChange}
-            packageInfo={packageInfo}
-            isEditPage={true}
-            agentPolicy={agentPolicy}
-            agentlessPolicy={agentlessPolicy}
-          />
-        )}
-        {!edit && (
-          <CspPolicyTemplateForm
-            newPolicy={newPolicy}
-            onChange={onChange}
-            packageInfo={packageInfo}
-            isEditPage={false}
-            agentPolicy={agentPolicy}
-            agentlessPolicy={agentlessPolicy}
-          />
-        )}
-      </TestProvider>
-    </ThemeProvider>
+    <TestProvider>
+      {edit && (
+        <CspPolicyTemplateForm
+          policy={newPolicy as PackagePolicy}
+          newPolicy={newPolicy}
+          onChange={onChange}
+          packageInfo={packageInfo}
+          isEditPage={true}
+          agentPolicy={agentPolicy}
+          agentlessPolicy={agentlessPolicy}
+        />
+      )}
+      {!edit && (
+        <CspPolicyTemplateForm
+          newPolicy={newPolicy}
+          onChange={onChange}
+          packageInfo={packageInfo}
+          isEditPage={false}
+          agentPolicy={agentPolicy}
+          agentlessPolicy={agentlessPolicy}
+        />
+      )}
+    </TestProvider>
   );
 
   it('updates package policy namespace to default when it changes', () => {
