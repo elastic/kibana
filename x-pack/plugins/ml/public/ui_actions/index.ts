@@ -14,6 +14,7 @@ import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_acti
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
 import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
 import { createClearSelectionAction } from './clear_selection_action';
+import { createAddSwimlanePanelAction } from './create_swim_lane';
 import { createEditAnomalyChartsPanelAction } from './edit_anomaly_charts_panel_action';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
 import {
@@ -42,6 +43,7 @@ export function registerMlUiActions(
   core: CoreSetup<MlStartDependencies, MlPluginStart>
 ) {
   // Initialize actions
+  const addSwimlanePanelAction = createAddSwimlanePanelAction(core.getStartServices);
   const editSwimlanePanelAction = createEditSwimlanePanelAction(core.getStartServices);
   const openInExplorerAction = createOpenInExplorerAction(core.getStartServices);
   const applyInfluencerFiltersAction = createApplyInfluencerFiltersAction(core.getStartServices);
@@ -58,6 +60,8 @@ export function registerMlUiActions(
   uiActions.registerAction(categorizationADJobAction);
 
   // Assign triggers
+  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addSwimlanePanelAction);
+
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSwimlanePanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editExplorerPanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openInExplorerAction);
