@@ -51,10 +51,7 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
   /**
    * Set up latest published values state, initialized with the current values of the subjects.
    */
-  const subjectValues = useMemo(
-    () => unwrapPublishingSubjectArray(subjectsToUse),
-    [subjectsToUse]
-  );
+  const subjectValues = useMemo(() => unwrapPublishingSubjectArray(subjectsToUse), [subjectsToUse]);
   const [latestPublishedValues, setLatestPublishedValues] =
     useState<UnwrapPublishingSubjectTuple<SubjectsType>>(subjectValues);
 
@@ -95,7 +92,7 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
         });
       });
     return () => subscription.unsubscribe();
-  }, [subjectsToUse]);
+  }, [subjectsToUse, subjectValues]);
 
   return latestPublishedValues;
 };

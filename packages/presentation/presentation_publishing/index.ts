@@ -50,10 +50,7 @@ export {
   apiPublishesDataLoading,
   type PublishesDataLoading,
 } from './interfaces/publishes_data_loading';
-export {
-  apiPublishesDataViews,
-  type PublishesDataViews,
-} from './interfaces/publishes_data_views';
+export { apiPublishesDataViews, type PublishesDataViews } from './interfaces/publishes_data_views';
 export {
   apiPublishesDisabledActionIds,
   type PublishesDisabledActionIds,

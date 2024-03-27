@@ -163,11 +163,11 @@ describe('useBatchedPublishingSubjects', () => {
         // When subjects is expected to change, subjects must be part of react state.
         // State change required for component to re-render.
         // Re-render required to call method with updated subjects.
-        const [subjectFooState, setSubjectFooState] = useState<PublishingSubject<string> | undefined>(undefined);
-        const [valueFoo] = useBatchedPublishingSubjects(
-          subjectFooState
-        );
-  
+        const [subjectFooState, setSubjectFooState] = useState<
+          PublishingSubject<string> | undefined
+        >(undefined);
+        const [valueFoo] = useBatchedPublishingSubjects(subjectFooState);
+
         renderCount++;
         return (
           <>
@@ -186,15 +186,11 @@ describe('useBatchedPublishingSubjects', () => {
       }
       render(<Component />);
       await waitFor(() => {
-        expect(
-          screen.getByText('valueFoo: undefined')
-        ).toBeInTheDocument();
+        expect(screen.getByText('valueFoo: undefined')).toBeInTheDocument();
       });
       userEvent.click(screen.getByRole('button'));
       await waitFor(() => {
-        expect(
-          screen.getByText('valueFoo: foo')
-        ).toBeInTheDocument();
+        expect(screen.getByText('valueFoo: foo')).toBeInTheDocument();
       });
       expect(screen.getByTestId('renderCount')).toHaveTextContent('3');
     });
@@ -205,9 +201,11 @@ describe('useBatchedPublishingSubjects', () => {
         // When subject is expected to change, subject must be part of react state.
         // State change required for component to re-render.
         // Re-render required to call method with updated subject.
-        const [subjectFooState, setSubjectFooState] = useState<PublishingSubject<string> | undefined>(undefined);
+        const [subjectFooState, setSubjectFooState] = useState<
+          PublishingSubject<string> | undefined
+        >(undefined);
         const valueFoo = useStateFromPublishingSubject(subjectFooState);
-  
+
         renderCount++;
         return (
           <>
@@ -226,15 +224,11 @@ describe('useBatchedPublishingSubjects', () => {
       }
       render(<Component />);
       await waitFor(() => {
-        expect(
-          screen.getByText('valueFoo: undefined')
-        ).toBeInTheDocument();
+        expect(screen.getByText('valueFoo: undefined')).toBeInTheDocument();
       });
       userEvent.click(screen.getByRole('button'));
       await waitFor(() => {
-        expect(
-          screen.getByText('valueFoo: foo')
-        ).toBeInTheDocument();
+        expect(screen.getByText('valueFoo: foo')).toBeInTheDocument();
       });
       expect(screen.getByTestId('renderCount')).toHaveTextContent('3');
     });
