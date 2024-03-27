@@ -49,9 +49,12 @@ const gatherRoutes = (wrapper: ShallowWrapper) => {
   });
 };
 
+const mockExperimentalFeatures = {};
+
 const props: DiscoverRoutesProps = {
   customizationCallbacks: [],
   customizationContext: mockCustomizationContext,
+  experimentalFeatures: mockExperimentalFeatures,
 };
 
 describe('DiscoverRoutes', () => {
@@ -156,6 +159,7 @@ describe('CustomDiscoverRoutes', () => {
       <CustomDiscoverRoutes
         profileRegistry={profileRegistry}
         customizationContext={mockCustomizationContext}
+        experimentalFeatures={mockExperimentalFeatures}
       />
     );
     expect(component.find(DiscoverRoutes).getElement()).toMatchObject(
@@ -163,6 +167,7 @@ describe('CustomDiscoverRoutes', () => {
         prefix={addProfile('', mockProfile)}
         customizationCallbacks={callbacks}
         customizationContext={mockCustomizationContext}
+        experimentalFeatures={mockExperimentalFeatures}
       />
     );
   });
@@ -173,6 +178,7 @@ describe('CustomDiscoverRoutes', () => {
       <CustomDiscoverRoutes
         profileRegistry={profileRegistry}
         customizationContext={mockCustomizationContext}
+        experimentalFeatures={mockExperimentalFeatures}
       />
     );
     expect(component.find(NotFoundRoute).getElement()).toMatchObject(<NotFoundRoute />);
@@ -191,6 +197,7 @@ describe('DiscoverRouter', () => {
         history={history}
         profileRegistry={profileRegistry}
         customizationContext={mockCustomizationContext}
+        experimentalFeatures={mockExperimentalFeatures}
       />
     );
     gatherRoutes(component);
@@ -201,6 +208,7 @@ describe('DiscoverRouter', () => {
       <DiscoverRoutes
         customizationCallbacks={callbacks}
         customizationContext={mockCustomizationContext}
+        experimentalFeatures={mockExperimentalFeatures}
       />
     );
   });
@@ -210,6 +218,7 @@ describe('DiscoverRouter', () => {
       <CustomDiscoverRoutes
         profileRegistry={profileRegistry}
         customizationContext={mockCustomizationContext}
+        experimentalFeatures={mockExperimentalFeatures}
       />
     );
   });
