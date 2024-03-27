@@ -116,6 +116,13 @@ export class UnifiedFieldListPageObject extends FtrService {
     });
   }
 
+  public async closeFieldPopover() {
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.retry.waitFor('popover is closed', async () => {
+      return !(await this.testSubjects.exists('fieldPopoverHeader_fieldDisplayName'));
+    });
+  }
+
   public async clickFieldListItem(field: string) {
     await this.testSubjects.moveMouseTo(`field-${field}`);
     await this.testSubjects.click(`field-${field}`);
