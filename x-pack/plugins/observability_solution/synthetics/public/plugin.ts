@@ -50,6 +50,7 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public/plugin';
 import {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
@@ -100,6 +101,7 @@ export interface ClientPluginsStart {
   uiSettings: CoreStart['uiSettings'];
   usageCollection: UsageCollectionStart;
   serverless: ServerlessPluginStart;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {

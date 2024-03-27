@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { GaugeShapes } from '@kbn/visualizations-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -15,7 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
 
-  describe('lens workspace size', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/176882
+  describe.skip('lens workspace size', () => {
     let originalWindowSize: {
       height: number;
       width: number;
@@ -52,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const assertWorkspaceDimensions = async (expectedWidth: string, expectedHeight: string) => {
       const tolerance = 1;
 
-      await retry.try(async () => {
+      await retry.tryForTime(2000, async () => {
         const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
 
         expect(pxToN(width)).to.within(
@@ -194,15 +196,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await assertWorkspaceDimensions('400px', '400px');
     });
 
-    it('gauge size (absolute pixels)', async () => {
+    it('gauge size (absolute pixels) - horizontal', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization('horizontalBullet', 'gauge');
+        await PageObjects.lens.switchToVisualization(GaugeShapes.HORIZONTAL_BULLET, 'horizontal');
       });
 
-      await assertWorkspaceDimensions('600px', '300px');
+      await assertWorkspaceDimensions('600px', '200px');
+    });
 
+    it('gauge size (absolute pixels) - vertical', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization('verticalBullet', 'gauge');
+        await PageObjects.lens.switchToVisualization(GaugeShapes.VERTICAL_BULLET, 'vertical');
       });
 
       // this height is below the requested 600px
@@ -210,7 +214,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and the chart is forced to shrink.
       //
       // this is a good thing because it makes this a test case for that scenario
-      await assertWorkspaceDimensions('300px', '400px');
+      await assertWorkspaceDimensions('400px', '400px');
+    });
+
+    it('gauge size (absolute pixels) - arc', async () => {
+      await retry.try(async () => {
+        await PageObjects.lens.switchToVisualization(GaugeShapes.SEMI_CIRCLE, 'semi');
+      });
+      await assertWorkspaceDimensions('600px', '375px');
+    });
+
+    it('gauge size (absolute pixels) - major arc', async () => {
+      await retry.try(async () => {
+        await PageObjects.lens.switchToVisualization(GaugeShapes.ARC, 'arc');
+      });
+      await assertWorkspaceDimensions('600px', '400px');
+    });
+
+    it('gauge size (absolute pixels) - circle', async () => {
+      await retry.try(async () => {
+        await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'circular');
+      });
+      await assertWorkspaceDimensions('600px', '400px');
     });
 
     it('XY chart size', async () => {

@@ -45,6 +45,7 @@ import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
 import type { SerializedEnrichPolicy, FieldFromIndicesRequest } from '../../../common';
+import { Fields } from '../components/mappings_editor/types';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
@@ -429,5 +430,12 @@ export function createIndex(indexName: string) {
     body: JSON.stringify({
       indexName,
     }),
+  });
+}
+export function updateIndexMappings(indexName: string, newFields: Fields) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
+    method: 'put',
+    body: JSON.stringify({ ...newFields }),
   });
 }

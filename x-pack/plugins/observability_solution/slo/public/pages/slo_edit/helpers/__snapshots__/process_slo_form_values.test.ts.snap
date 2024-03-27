@@ -1,0 +1,312 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform partial URL state into form state handles partial Custom Histogram state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": Object {
+        "aggregation": "value_count",
+        "field": "",
+      },
+      "index": "override-index",
+      "timestampField": "",
+      "total": Object {
+        "aggregation": "value_count",
+        "field": "",
+      },
+    },
+    "type": "sli.histogram.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state handles partial Custom Metric state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": Object {
+        "equation": "A",
+        "metrics": Array [
+          Object {
+            "aggregation": "sum",
+            "field": "",
+            "name": "A",
+          },
+        ],
+      },
+      "index": "override-index",
+      "timestampField": "",
+      "total": Object {
+        "equation": "A",
+        "metrics": Array [
+          Object {
+            "aggregation": "sum",
+            "field": "",
+            "name": "A",
+          },
+        ],
+      },
+    },
+    "type": "sli.metric.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state handles the 'budgetingMethod' URL state 1`] = `
+Object {
+  "budgetingMethod": "timeslices",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": "",
+      "index": "",
+      "timestampField": "",
+      "total": "",
+    },
+    "type": "sli.kql.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state handles the 'filters' URL state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": Object {
+        "filters": Array [
+          Object {
+            "meta": Object {
+              "alias": "override-alias",
+              "disabled": true,
+              "key": "override",
+              "negate": true,
+            },
+          },
+        ],
+        "kqlQuery": "some.override.filter:'foo'",
+      },
+      "index": "override-index",
+      "timestampField": "",
+      "total": "",
+    },
+    "type": "sli.kql.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state handles the 'objective' URL state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": "",
+      "index": "",
+      "timestampField": "",
+      "total": "",
+    },
+    "type": "sli.kql.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 94.5,
+    "timesliceTarget": 95,
+    "timesliceWindow": "2",
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state handles the 'timeWindow' URL state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": "",
+      "index": "",
+      "timestampField": "",
+      "total": "",
+    },
+    "type": "sli.kql.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "1M",
+    "type": "calendarAligned",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state with 'indicator' in URL state handles partial APM Availability state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "environment": "",
+      "filter": "",
+      "index": "",
+      "service": "override-service",
+      "transactionName": "",
+      "transactionType": "",
+    },
+    "type": "sli.apm.transactionErrorRate",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state with 'indicator' in URL state handles partial APM Latency state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "environment": "",
+      "filter": "",
+      "index": "",
+      "service": "override-service",
+      "threshold": 250,
+      "transactionName": "",
+      "transactionType": "",
+    },
+    "type": "sli.apm.transactionDuration",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state with 'indicator' in URL state handles partial Custom Query state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": "some.override.filter:'foo'",
+      "index": "override-index",
+      "timestampField": "",
+      "total": "",
+    },
+    "type": "sli.kql.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state with 'indicator' in URL state returns default form values when no indicator type is specified 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": "",
+      "index": "",
+      "timestampField": "",
+      "total": "",
+    },
+    "type": "sli.kql.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
