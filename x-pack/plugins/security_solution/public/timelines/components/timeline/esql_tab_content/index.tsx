@@ -87,14 +87,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const timeline = useShallowEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
   );
-  const {
-    status,
-    savedSearchId,
-    activeTab,
-    savedObjectId,
-    title,
-    description,
-  } = timeline;
+  const { status, savedSearchId, activeTab, savedObjectId, title, description } = timeline;
 
   const { data: savedSearchById, isFetching } = useQuery({
     queryKey: ['savedSearchById', savedSearchId ?? ''],
