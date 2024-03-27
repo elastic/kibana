@@ -198,14 +198,8 @@ export class LensVisService {
       return;
     }
 
-    const {
-      queryParams,
-      timeInterval,
-      breakdownField,
-      table,
-      onSuggestionContextChange,
-      onVisContextChanged,
-    } = this.prevUpdateContext;
+    const { queryParams, timeInterval, breakdownField, table, onVisContextChanged } =
+      this.prevUpdateContext;
 
     const lensAttributesState = this.getLensAttributesState({
       currentSuggestionContext: editedSuggestionContext,
@@ -216,13 +210,6 @@ export class LensVisService {
       table,
     });
 
-    this.state$.next({
-      ...this.state$.getValue(),
-      currentSuggestionContext: editedSuggestionContext,
-      visContext: lensAttributesState.visContext,
-    });
-
-    onSuggestionContextChange(editedSuggestionContext);
     onVisContextChanged?.(
       lensAttributesState.visContext,
       UnifiedHistogramExternalVisContextStatus.manuallyCustomized
