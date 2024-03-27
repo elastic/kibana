@@ -230,6 +230,7 @@ describe('The custom threshold alert type', () => {
   setup();
 
   describe('querying the entire infrastructure', () => {
+    beforeEach(() => jest.clearAllMocks());
     afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
@@ -334,6 +335,7 @@ describe('The custom threshold alert type', () => {
   });
 
   describe('querying with a groupBy parameter', () => {
+    beforeEach(() => jest.clearAllMocks());
     afterAll(() => clearInstances());
     const execute = (
       comparator: Comparator,
