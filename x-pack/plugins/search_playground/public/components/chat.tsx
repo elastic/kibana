@@ -56,7 +56,7 @@ export const Chat = () => {
     handleSubmit,
     getValues,
   } = useFormContext<ChatForm>();
-  const { messages, append, stop: stopRequest, setMessages, reload } = useChat();
+  const { messages, append, stop: stopRequest, setMessages, reload, error } = useChat();
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
   const messagesRef = useAutoBottomScroll([showStartPage]);
 
@@ -87,9 +87,18 @@ export const Chat = () => {
         role: MessageRole.system,
         content: 'You can start chat now',
       },
+      ...(error
+        ? [
+            {
+              id: uuidv4(),
+              role: MessageRole.system,
+              content: 'Please verify if you have correct OPENAI API key and retry again.',
+            },
+          ]
+        : []),
       ...transformFromChatMessages(messages),
     ],
-    [messages]
+    [messages, error]
   );
 
   const regenerateMessages = () => {
