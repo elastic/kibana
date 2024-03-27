@@ -6,7 +6,7 @@
       {
         "params": [
           {
-            "name": "field",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -234,7 +234,7 @@
       {
         "params": [
           {
-            "name": "field",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -250,7 +250,7 @@
       {
         "params": [
           {
-            "name": "field",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -266,7 +266,7 @@
       {
         "params": [
           {
-            "name": "field",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -282,7 +282,7 @@
       {
         "params": [
           {
-            "name": "field",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -298,7 +298,7 @@
       {
         "params": [
           {
-            "name": "field",
+            "name": "number",
             "type": "number",
             "optional": false
           },
@@ -345,12 +345,78 @@
       {
         "params": [
           {
-            "name": "field",
+            "name": "number",
             "type": "number",
             "optional": false
           }
         ],
         "returnType": "number"
+      }
+    ]
+  },
+  {
+    "name": "values",
+    "description": "Collect values for a field.",
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "boolean",
+            "optional": false
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "date",
+            "optional": false
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "number",
+            "optional": false
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "ip",
+            "optional": false
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "version",
+            "optional": false
+          }
+        ],
+        "returnType": "any"
       }
     ]
   }

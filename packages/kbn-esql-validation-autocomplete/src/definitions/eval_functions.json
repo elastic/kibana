@@ -6,7 +6,7 @@
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -17,12 +17,12 @@
   },
   {
     "name": "acos",
-    "description": "The arccosine of an angle, expressed in radians.",
+    "description": "Returns the {wikipedia}/Inverse_trigonometric_functions[arccosine] of `n` as an angle, expressed in radians.",
     "signatures": [
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -33,12 +33,12 @@
   },
   {
     "name": "asin",
-    "description": "Inverse sine trigonometric function.",
+    "description": "Returns the {wikipedia}/Inverse_trigonometric_functions[arcsine] of the input numeric expression as an angle, expressed in radians.",
     "signatures": [
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -49,12 +49,12 @@
   },
   {
     "name": "atan",
-    "description": "Inverse tangent trigonometric function.",
+    "description": "Returns the {wikipedia}/Inverse_trigonometric_functions[arctangent] of the input numeric expression as an angle, expressed in radians.",
     "signatures": [
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -65,17 +65,17 @@
   },
   {
     "name": "atan2",
-    "description": "The angle between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane.",
+    "description": "The {wikipedia}/Atan2[angle] between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane, expressed in radians.",
     "signatures": [
       {
         "params": [
           {
-            "name": "y",
+            "name": "y_coordinate",
             "type": "number",
             "optional": false
           },
           {
-            "name": "x",
+            "name": "x_coordinate",
             "type": "number",
             "optional": false
           }
@@ -552,7 +552,7 @@
             "optional": false
           },
           {
-            "name": "rest",
+            "name": "trueValue",
             "type": "boolean",
             "optional": false
           }
@@ -568,7 +568,7 @@
             "optional": false
           },
           {
-            "name": "rest",
+            "name": "trueValue",
             "type": "cartesian_point",
             "optional": false
           }
@@ -584,7 +584,7 @@
             "optional": false
           },
           {
-            "name": "rest",
+            "name": "trueValue",
             "type": "date",
             "optional": false
           }
@@ -600,7 +600,7 @@
             "optional": false
           },
           {
-            "name": "rest",
+            "name": "trueValue",
             "type": "number",
             "optional": false
           }
@@ -616,7 +616,7 @@
             "optional": false
           },
           {
-            "name": "rest",
+            "name": "trueValue",
             "type": "geo_point",
             "optional": false
           }
@@ -632,7 +632,7 @@
             "optional": false
           },
           {
-            "name": "rest",
+            "name": "trueValue",
             "type": "ip",
             "optional": false
           }
@@ -648,7 +648,7 @@
             "optional": false
           },
           {
-            "name": "rest",
+            "name": "trueValue",
             "type": "string",
             "optional": false
           }
@@ -664,7 +664,7 @@
             "optional": false
           },
           {
-            "name": "rest",
+            "name": "trueValue",
             "type": "version",
             "optional": false
           }
@@ -681,7 +681,7 @@
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -714,151 +714,40 @@
   },
   {
     "name": "coalesce",
-    "description": "Returns the first of its arguments that is not null.",
+    "description": "Returns the first of its arguments that is not null. If all arguments are null, it returns `null`.",
     "signatures": [
       {
         "params": [
           {
-            "name": "expression",
-            "type": "boolean",
-            "optional": false
-          },
-          {
-            "name": "expressionX",
+            "name": "first",
             "type": "boolean",
             "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       },
       {
         "params": [
           {
-            "name": "expression",
-            "type": "boolean",
-            "optional": false
-          },
-          {
-            "name": "expressionX",
+            "name": "first",
             "type": "string",
             "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       },
       {
         "params": [
           {
-            "name": "expression",
-            "type": "boolean",
-            "optional": false
-          },
-          {
-            "name": "expressionX",
+            "name": "first",
             "type": "number",
             "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "expression",
-            "type": "string",
-            "optional": false
-          },
-          {
-            "name": "expressionX",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "expression",
-            "type": "string",
-            "optional": false
-          },
-          {
-            "name": "expressionX",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "expression",
-            "type": "string",
-            "optional": false
-          },
-          {
-            "name": "expressionX",
-            "type": "number",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "expression",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "expressionX",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "expression",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "expressionX",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "expression",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "expressionX",
-            "type": "number",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       }
     ]
   },
@@ -869,12 +758,12 @@
       {
         "params": [
           {
-            "name": "first",
+            "name": "string1",
             "type": "string",
             "optional": false
           },
           {
-            "name": "rest",
+            "name": "string2",
             "type": "string",
             "optional": false
           }
@@ -891,7 +780,7 @@
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -907,7 +796,7 @@
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -949,12 +838,12 @@
       {
         "params": [
           {
-            "name": "date_part",
+            "name": "datePart",
             "type": "string",
             "optional": false
           },
           {
-            "name": "field",
+            "name": "date",
             "type": "date",
             "optional": false
           }
@@ -970,7 +859,7 @@
       {
         "params": [
           {
-            "name": "format",
+            "name": "dateFormat",
             "type": "string",
             "optional": true
           },
@@ -1064,7 +953,7 @@
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -1083,79 +972,10 @@
             "name": "first",
             "type": "number",
             "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "number",
-            "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "ip",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       },
       {
         "params": [
@@ -1163,79 +983,10 @@
             "name": "first",
             "type": "boolean",
             "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "number",
-            "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "boolean",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "boolean",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "boolean",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "ip",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "boolean",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       },
       {
         "params": [
@@ -1243,79 +994,10 @@
             "name": "first",
             "type": "string",
             "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "number",
-            "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "string",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "string",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "string",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "ip",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "string",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       },
       {
         "params": [
@@ -1323,79 +1005,10 @@
             "name": "first",
             "type": "ip",
             "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "number",
-            "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "ip",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "ip",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "ip",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "ip",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "ip",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       },
       {
         "params": [
@@ -1403,79 +1016,10 @@
             "name": "first",
             "type": "version",
             "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "number",
-            "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "version",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "version",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "version",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "ip",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "version",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       }
     ]
   },
@@ -1489,79 +1033,10 @@
             "name": "first",
             "type": "number",
             "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "number",
-            "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "ip",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       },
       {
         "params": [
@@ -1569,79 +1044,10 @@
             "name": "first",
             "type": "boolean",
             "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "number",
-            "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "boolean",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "boolean",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "boolean",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "ip",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "boolean",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       },
       {
         "params": [
@@ -1649,79 +1055,10 @@
             "name": "first",
             "type": "string",
             "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "number",
-            "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "string",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "string",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "string",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "ip",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "string",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       },
       {
         "params": [
@@ -1729,79 +1066,10 @@
             "name": "first",
             "type": "ip",
             "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "number",
-            "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "ip",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "ip",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "ip",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "ip",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "ip",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       },
       {
         "params": [
@@ -1809,90 +1077,21 @@
             "name": "first",
             "type": "version",
             "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "number",
-            "optional": false
           }
         ],
         "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "version",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "version",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "version",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "ip",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
-      },
-      {
-        "params": [
-          {
-            "name": "first",
-            "type": "version",
-            "optional": false
-          },
-          {
-            "name": "rest",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "any",
-        "minParams": 2
+        "minParams": 1
       }
     ]
   },
   {
     "name": "left",
-    "description": "Return the substring that extracts length chars from the string starting from the left.",
+    "description": "Returns the substring that extracts 'length' chars from 'string' starting from the left.",
     "signatures": [
       {
         "params": [
           {
-            "name": "str",
+            "name": "string",
             "type": "string",
             "optional": false
           },
@@ -1913,7 +1112,7 @@
       {
         "params": [
           {
-            "name": "str",
+            "name": "string",
             "type": "string",
             "optional": false
           }
@@ -1924,7 +1123,7 @@
   },
   {
     "name": "log",
-    "description": "Returns the logarithm of a value to a base.",
+    "description": "Returns the logarithm of a number to a base.",
     "signatures": [
       {
         "params": [
@@ -1934,7 +1133,7 @@
             "optional": true
           },
           {
-            "name": "value",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -1950,7 +1149,7 @@
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -1966,7 +1165,7 @@
       {
         "params": [
           {
-            "name": "str",
+            "name": "string",
             "type": "string",
             "optional": false
           }
@@ -1982,7 +1181,7 @@
       {
         "params": [
           {
-            "name": "field",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -1998,7 +1197,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "string",
             "type": "string",
             "optional": false
           },
@@ -2019,7 +1218,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -2029,7 +1228,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "cartesian_point",
             "optional": false
           }
@@ -2039,7 +1238,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "cartesian_shape",
             "optional": false
           }
@@ -2049,7 +1248,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -2059,7 +1258,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -2069,7 +1268,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "geo_point",
             "optional": false
           }
@@ -2079,7 +1278,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "geo_shape",
             "optional": false
           }
@@ -2089,7 +1288,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "ip",
             "optional": false
           }
@@ -2099,7 +1298,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -2109,7 +1308,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "version",
             "optional": false
           }
@@ -2125,7 +1324,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -2135,7 +1334,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -2145,7 +1344,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -2155,7 +1354,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "ip",
             "optional": false
           }
@@ -2165,7 +1364,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -2175,7 +1374,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "version",
             "optional": false
           }
@@ -2191,7 +1390,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -2201,7 +1400,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "cartesian_point",
             "optional": false
           }
@@ -2211,7 +1410,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "cartesian_shape",
             "optional": false
           }
@@ -2221,7 +1420,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -2231,7 +1430,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -2241,7 +1440,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "geo_point",
             "optional": false
           }
@@ -2251,7 +1450,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "geo_shape",
             "optional": false
           }
@@ -2261,7 +1460,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "ip",
             "optional": false
           }
@@ -2271,7 +1470,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -2281,7 +1480,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "version",
             "optional": false
           }
@@ -2297,7 +1496,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -2307,7 +1506,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "cartesian_point",
             "optional": false
           }
@@ -2317,7 +1516,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "cartesian_shape",
             "optional": false
           }
@@ -2327,7 +1526,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -2337,7 +1536,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -2347,7 +1546,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "geo_point",
             "optional": false
           }
@@ -2357,7 +1556,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "geo_shape",
             "optional": false
           }
@@ -2367,7 +1566,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "ip",
             "optional": false
           }
@@ -2377,7 +1576,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -2387,7 +1586,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "version",
             "optional": false
           }
@@ -2403,7 +1602,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -2413,7 +1612,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -2423,7 +1622,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -2433,7 +1632,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "ip",
             "optional": false
           }
@@ -2443,7 +1642,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -2453,7 +1652,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "version",
             "optional": false
           }
@@ -2469,7 +1668,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -2485,7 +1684,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -2495,7 +1694,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -2505,7 +1704,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -2515,7 +1714,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "ip",
             "optional": false
           }
@@ -2525,7 +1724,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -2535,9 +1734,311 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "version",
             "optional": false
+          }
+        ],
+        "returnType": "any"
+      }
+    ]
+  },
+  {
+    "name": "mv_slice",
+    "description": "Returns a subset of the multivalued field using the start and end index values.",
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "boolean",
+            "optional": false
+          },
+          {
+            "name": "start",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "end",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "cartesian_point",
+            "optional": false
+          },
+          {
+            "name": "start",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "end",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "cartesian_shape",
+            "optional": false
+          },
+          {
+            "name": "start",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "end",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "date",
+            "optional": false
+          },
+          {
+            "name": "start",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "end",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "start",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "end",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "geo_point",
+            "optional": false
+          },
+          {
+            "name": "start",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "end",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "geo_shape",
+            "optional": false
+          },
+          {
+            "name": "start",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "end",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "ip",
+            "optional": false
+          },
+          {
+            "name": "start",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "end",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "start",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "end",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "version",
+            "optional": false
+          },
+          {
+            "name": "start",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "end",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      }
+    ]
+  },
+  {
+    "name": "mv_sort",
+    "description": "Sorts a multivalued field in lexicographical order.",
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "boolean",
+            "optional": false
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "date",
+            "optional": false
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "ip",
+            "optional": false
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "optional": true
+          }
+        ],
+        "returnType": "any"
+      },
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": "version",
+            "optional": false
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "optional": true
           }
         ],
         "returnType": "any"
@@ -2551,12 +2052,38 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "number",
             "type": "number",
             "optional": false
           }
         ],
         "returnType": "number"
+      }
+    ]
+  },
+  {
+    "name": "mv_zip",
+    "description": "Combines the values from two multivalued fields with a delimiter that joins them together.",
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "string1",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "string2",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "delim",
+            "type": "string",
+            "optional": true
+          }
+        ],
+        "returnType": "string"
       }
     ]
   },
@@ -2608,7 +2135,7 @@
       {
         "params": [
           {
-            "name": "str",
+            "name": "string",
             "type": "string",
             "optional": false
           },
@@ -2618,7 +2145,7 @@
             "optional": false
           },
           {
-            "name": "newStr",
+            "name": "newString",
             "type": "string",
             "optional": false
           }
@@ -2634,7 +2161,7 @@
       {
         "params": [
           {
-            "name": "str",
+            "name": "string",
             "type": "string",
             "optional": false
           },
@@ -2655,7 +2182,7 @@
       {
         "params": [
           {
-            "name": "value",
+            "name": "number",
             "type": "number",
             "optional": false
           },
@@ -2676,7 +2203,7 @@
       {
         "params": [
           {
-            "name": "str",
+            "name": "string",
             "type": "string",
             "optional": false
           }
@@ -2692,7 +2219,7 @@
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -2708,7 +2235,7 @@
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -2724,7 +2251,7 @@
       {
         "params": [
           {
-            "name": "str",
+            "name": "string",
             "type": "string",
             "optional": false
           },
@@ -2745,8 +2272,306 @@
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
+            "optional": false
+          }
+        ],
+        "returnType": "number"
+      }
+    ]
+  },
+  {
+    "name": "st_intersects",
+    "description": "Returns whether the two geometries or geometry columns intersect.",
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "geo_point",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "geo_point",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "geo_point",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "cartesian_point",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "geo_point",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "geo_shape",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "geo_point",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "cartesian_shape",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "cartesian_point",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "geo_point",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "cartesian_point",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "cartesian_point",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "cartesian_point",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "geo_shape",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "cartesian_point",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "cartesian_shape",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "geo_shape",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "geo_point",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "geo_shape",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "cartesian_point",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "geo_shape",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "geo_shape",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "geo_shape",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "cartesian_shape",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "cartesian_shape",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "geo_point",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "cartesian_shape",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "cartesian_point",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "cartesian_shape",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "geo_shape",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      },
+      {
+        "params": [
+          {
+            "name": "geomA",
+            "type": "cartesian_shape",
+            "optional": false
+          },
+          {
+            "name": "geomB",
+            "type": "cartesian_shape",
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      }
+    ]
+  },
+  {
+    "name": "st_x",
+    "description": "Extracts the x-coordinate from a point geometry.",
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "point",
+            "type": "geo_point",
+            "optional": false
+          }
+        ],
+        "returnType": "number"
+      },
+      {
+        "params": [
+          {
+            "name": "point",
+            "type": "cartesian_point",
+            "optional": false
+          }
+        ],
+        "returnType": "number"
+      }
+    ]
+  },
+  {
+    "name": "st_y",
+    "description": "Extracts the y-coordinate from a point geometry.",
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "point",
+            "type": "geo_point",
+            "optional": false
+          }
+        ],
+        "returnType": "number"
+      },
+      {
+        "params": [
+          {
+            "name": "point",
+            "type": "cartesian_point",
             "optional": false
           }
         ],
@@ -2782,7 +2607,7 @@
       {
         "params": [
           {
-            "name": "str",
+            "name": "string",
             "type": "string",
             "optional": false
           },
@@ -2808,7 +2633,7 @@
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -2824,7 +2649,7 @@
       {
         "params": [
           {
-            "name": "n",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -2846,12 +2671,14 @@
   {
     "name": "to_boolean",
     "description": "Converts an input value to a boolean value.",
-    "alias": ["to_bool"],
+    "alias": [
+      "to_bool"
+    ],
     "signatures": [
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -2861,7 +2688,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -2871,7 +2698,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -2887,7 +2714,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "cartesian_point",
             "optional": false
           }
@@ -2897,7 +2724,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -2913,7 +2740,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "cartesian_point",
             "optional": false
           }
@@ -2923,7 +2750,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "cartesian_shape",
             "optional": false
           }
@@ -2933,7 +2760,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -2945,12 +2772,14 @@
   {
     "name": "to_datetime",
     "description": "Converts an input value to a date value.",
-    "alias": ["to_dt"],
+    "alias": [
+      "to_dt"
+    ],
     "signatures": [
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -2960,7 +2789,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -2970,7 +2799,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -2986,7 +2815,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -2998,12 +2827,14 @@
   {
     "name": "to_double",
     "description": "Converts an input value to a double value.",
-    "alias": ["to_dbl"],
+    "alias": [
+      "to_dbl"
+    ],
     "signatures": [
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -3013,7 +2844,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -3023,7 +2854,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -3033,7 +2864,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -3049,7 +2880,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "geo_point",
             "optional": false
           }
@@ -3059,7 +2890,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -3075,7 +2906,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "geo_point",
             "optional": false
           }
@@ -3085,7 +2916,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "geo_shape",
             "optional": false
           }
@@ -3095,7 +2926,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -3107,12 +2938,14 @@
   {
     "name": "to_integer",
     "description": "Converts an input value to an integer value.",
-    "alias": ["to_int"],
+    "alias": [
+      "to_int"
+    ],
     "signatures": [
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -3122,7 +2955,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -3132,7 +2965,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -3142,7 +2975,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -3158,7 +2991,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "ip",
             "optional": false
           }
@@ -3168,7 +3001,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -3184,7 +3017,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -3194,7 +3027,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -3204,7 +3037,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -3214,7 +3047,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -3246,7 +3079,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "number",
             "type": "number",
             "optional": false
           }
@@ -3258,12 +3091,14 @@
   {
     "name": "to_string",
     "description": "Converts a field into a string.",
-    "alias": ["to_str"],
+    "alias": [
+      "to_str"
+    ],
     "signatures": [
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -3273,7 +3108,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "cartesian_point",
             "optional": false
           }
@@ -3283,7 +3118,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "cartesian_shape",
             "optional": false
           }
@@ -3293,7 +3128,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -3303,7 +3138,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -3313,7 +3148,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "geo_point",
             "optional": false
           }
@@ -3323,7 +3158,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "geo_shape",
             "optional": false
           }
@@ -3333,7 +3168,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "ip",
             "optional": false
           }
@@ -3343,7 +3178,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -3353,7 +3188,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "version",
             "optional": false
           }
@@ -3365,12 +3200,15 @@
   {
     "name": "to_unsigned_long",
     "description": "Converts an input value to an unsigned long value.",
-    "alias": ["to_ul", "to_ulong"],
+    "alias": [
+      "to_ul",
+      "to_ulong"
+    ],
     "signatures": [
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "boolean",
             "optional": false
           }
@@ -3380,7 +3218,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "date",
             "optional": false
           }
@@ -3390,7 +3228,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -3400,7 +3238,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "number",
             "optional": false
           }
@@ -3428,12 +3266,14 @@
   {
     "name": "to_version",
     "description": "Converts an input string to a version value.",
-    "alias": ["to_ver"],
+    "alias": [
+      "to_ver"
+    ],
     "signatures": [
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "string",
             "optional": false
           }
@@ -3443,7 +3283,7 @@
       {
         "params": [
           {
-            "name": "v",
+            "name": "field",
             "type": "version",
             "optional": false
           }
@@ -3459,7 +3299,7 @@
       {
         "params": [
           {
-            "name": "str",
+            "name": "string",
             "type": "string",
             "optional": false
           }
