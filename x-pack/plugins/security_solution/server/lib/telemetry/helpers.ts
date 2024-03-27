@@ -400,13 +400,13 @@ export class TelemetryTimelineFetcher {
 
     let record;
     if (telemetryTimeline.length >= 1) {
-      const { _clusterInfo, licenseInfo } = await this.extraInfo;
+      const extraInfo = await this.extraInfo;
       record = {
         '@timestamp': moment().toISOString(),
-        version: _clusterInfo.version?.number,
-        cluster_name: _clusterInfo.cluster_name,
-        cluster_uuid: _clusterInfo.cluster_uuid,
-        license_uuid: licenseInfo?.uid,
+        version: extraInfo.clusterInfo.version?.number,
+        cluster_name: extraInfo.clusterInfo.cluster_name,
+        cluster_uuid: extraInfo.clusterInfo.cluster_uuid,
+        license_uuid: extraInfo.licenseInfo?.uid,
         alert_id: alertUUID,
         event_id: eventId,
         timeline: telemetryTimeline,
