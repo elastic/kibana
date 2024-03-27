@@ -1840,9 +1840,7 @@ describe('Timeline', () => {
   describe('#updateTimelineColumnWidth', () => {
     let mockTimelineById: TimelineById;
     beforeEach(() => {
-      mockTimelineById = {
-        ...structuredClone(timelineByIdMock),
-      };
+      mockTimelineById = structuredClone(timelineByIdMock);
       mockTimelineById.foo.columns = structuredClone(defaultUdtHeaders);
     });
 

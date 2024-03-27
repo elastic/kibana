@@ -21,33 +21,30 @@ export const getFormattedFields = ({
   headers: ColumnHeaderOptions[];
   scopeId: string;
 }) => {
-  return headers
-    .map((h) => h.id)
-    .reduce(
-      (
-        obj: Record<string, (props: EuiDataGridCellValueElementProps) => React.ReactNode>,
-        field: string,
-        currentIdx
-      ) => {
-        obj[field] = function UnifiedFieldRender(props: EuiDataGridCellValueElementProps) {
-          return (
-            <DefaultCellRenderer
-              {...props}
-              isDraggable={false}
-              isTimeline={true}
-              isDetails={false}
-              isExpanded={false}
-              isExpandable={true}
-              data={dataTableRows[props.rowIndex].data}
-              eventId={dataTableRows[props.rowIndex]._id}
-              scopeId={scopeId}
-              linkValues={undefined}
-              header={headers[currentIdx]}
-            />
-          );
-        };
-        return obj;
-      },
-      {}
-    );
+  return headers.reduce(
+    (
+      obj: Record<string, (props: EuiDataGridCellValueElementProps) => React.ReactNode>,
+      header: ColumnHeaderOptions
+    ) => {
+      obj[header.id] = function UnifiedFieldRender(props: EuiDataGridCellValueElementProps) {
+        return (
+          <DefaultCellRenderer
+            {...props}
+            isDraggable={false}
+            isTimeline={true}
+            isDetails={false}
+            isExpanded={false}
+            isExpandable={true}
+            data={dataTableRows[props.rowIndex].data}
+            eventId={dataTableRows[props.rowIndex]._id}
+            scopeId={scopeId}
+            linkValues={undefined}
+            header={header}
+          />
+        );
+      };
+      return obj;
+    },
+    {}
+  );
 };

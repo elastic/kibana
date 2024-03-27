@@ -29,7 +29,6 @@ import { timelineActions } from '../../../store';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { cloneDeep } from 'lodash';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
@@ -80,6 +79,8 @@ const columnsToDisplay = [
   },
 ];
 
+const localMockedTimelineData = structuredClone(mockTimelineData);
+
 const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) => {
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
     columns: getColumnHeaders(columnsToDisplay, mockSourcererScope.browserFields),
@@ -96,9 +97,9 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
         sortDirection: 'desc',
       },
     ],
-    events: structuredClone(mockTimelineData),
+    events: localMockedTimelineData,
     refetch: jest.fn(),
-    totalCount: mockTimelineData.length,
+    totalCount: localMockedTimelineData.length,
     onEventClosed: jest.fn(),
     expandedDetail: {},
     showExpandedDetails: false,
@@ -141,12 +142,19 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
   });
 };
 
+const getTimelineFromStore = (
+  store: ReturnType<typeof createMockStore>,
+  timelineId: string = TimelineId.test
+) => {
+  return store.getState().timeline.timelineById[timelineId];
+};
+
 const loadPageMock = jest.fn();
 
 const useTimelineEventsMock = jest.fn(() => [
   false,
   {
-    events: cloneDeep(mockTimelineData),
+    events: localMockedTimelineData,
     pageInfo: {
       activePage: 0,
       totalPages: 10,
@@ -239,7 +247,7 @@ describe('unified timeline', () => {
       fireEvent.click(screen.getByTitle('Move left'));
 
       await waitFor(() => {
-        const newColumns = customStore.getState().timeline.timelineById[TimelineId.test].columns;
+        const newColumns = getTimelineFromStore(customStore).columns;
         expect(newColumns[0].id).toBe('message');
       });
     });
@@ -275,7 +283,7 @@ describe('unified timeline', () => {
       fireEvent.click(screen.getByTitle('Move right'));
 
       await waitFor(() => {
-        const newColumns = customStore.getState().timeline.timelineById[TimelineId.test].columns;
+        const newColumns = getTimelineFromStore(customStore).columns;
         expect(newColumns[2].id).toBe('message');
       });
     });
@@ -301,7 +309,7 @@ describe('unified timeline', () => {
       );
 
       // column is currently present in the state
-      const currentColumns = customStore.getState().timeline.timelineById[TimelineId.test].columns;
+      const currentColumns = getTimelineFromStore(customStore).columns;
       expect(currentColumns).toMatchObject(
         expect.arrayContaining([
           expect.objectContaining({
@@ -318,7 +326,7 @@ describe('unified timeline', () => {
 
       // column should now be removed
       await waitFor(() => {
-        const newColumns = customStore.getState().timeline.timelineById[TimelineId.test].columns;
+        const newColumns = getTimelineFromStore(customStore).columns;
         expect(newColumns).not.toMatchObject(
           expect.arrayContaining([
             expect.objectContaining({
@@ -353,7 +361,7 @@ describe('unified timeline', () => {
       fireEvent.click(screen.getByTitle('Sort Old-New'));
 
       await waitFor(() => {
-        const newSort = customStore.getState().timeline.timelineById[TimelineId.test].sort;
+        const newSort = getTimelineFromStore(customStore).sort;
         expect(newSort).toMatchObject([
           {
             columnId: '@timestamp',
@@ -390,7 +398,7 @@ describe('unified timeline', () => {
       fireEvent.click(screen.getByTitle('Sort A-Z'));
 
       await waitFor(() => {
-        const newSort = customStore.getState().timeline.timelineById[TimelineId.test].sort;
+        const newSort = getTimelineFromStore(customStore).sort;
         expect(newSort).toMatchObject([
           {
             columnId: '@timestamp',
@@ -439,7 +447,7 @@ describe('unified timeline', () => {
       fireEvent.click(screen.getByTitle('Sort Low-High'));
 
       await waitFor(() => {
-        const newSort = customStore.getState().timeline.timelineById[TimelineId.test].sort;
+        const newSort = getTimelineFromStore(customStore).sort;
         expect(newSort).toMatchObject([
           {
             columnId: '@timestamp',
@@ -542,8 +550,8 @@ describe('unified timeline', () => {
         );
       });
     });
-    it('should remove the column when clicked on ⊕ sign', async () => {
-      const field = {
+    it('should add the column when clicked on + sign', async () => {
+      const fieldToBeAdded = {
         name: 'agent.id',
       };
 
@@ -556,29 +564,29 @@ describe('unified timeline', () => {
 
       expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('9');
 
-      expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
+      expect(screen.queryAllByTestId(`dataGridHeaderCell-${fieldToBeAdded.name}`)).toHaveLength(0);
 
       const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
 
       // / new columns does not exists yet
-      const currentColumns = customStore.getState().timeline.timelineById[TimelineId.test].columns;
+      const currentColumns = getTimelineFromStore(customStore).columns;
       expect(currentColumns).not.toMatchObject(
         expect.arrayContaining([
           expect.objectContaining({
-            id: field.name,
+            id: fieldToBeAdded.name,
           }),
         ])
       );
 
-      fireEvent.click(within(availableFields).getByTestId(`fieldToggle-${field.name}`));
+      fireEvent.click(within(availableFields).getByTestId(`fieldToggle-${fieldToBeAdded.name}`));
 
       // new columns should exist now
       await waitFor(() => {
-        const newColumns = customStore.getState().timeline.timelineById[TimelineId.test].columns;
+        const newColumns = getTimelineFromStore(customStore).columns;
         expect(newColumns).toMatchObject(
           expect.arrayContaining([
             expect.objectContaining({
-              id: field.name,
+              id: fieldToBeAdded.name,
             }),
           ])
         );
@@ -586,7 +594,7 @@ describe('unified timeline', () => {
     });
 
     it('should remove the column when clicked on X sign', async () => {
-      const field = {
+      const fieldToBeRemoved = {
         name: 'event.severity',
       };
 
@@ -597,29 +605,31 @@ describe('unified timeline', () => {
         expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toBeVisible();
       });
 
-      expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
+      expect(screen.queryAllByTestId(`dataGridHeaderCell-${fieldToBeRemoved.name}`)).toHaveLength(
+        1
+      );
 
       const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
 
-      // / new columns does exists
-      const currentColumns = customStore.getState().timeline.timelineById[TimelineId.test].columns;
+      // new columns does exists
+      const currentColumns = getTimelineFromStore(customStore).columns;
       expect(currentColumns).toMatchObject(
         expect.arrayContaining([
           expect.objectContaining({
-            id: field.name,
+            id: fieldToBeRemoved.name,
           }),
         ])
       );
 
-      fireEvent.click(within(availableFields).getByTestId(`fieldToggle-${field.name}`));
+      fireEvent.click(within(availableFields).getByTestId(`fieldToggle-${fieldToBeRemoved.name}`));
 
-      // new columns should exist now
+      // new columns should not exist now
       await waitFor(() => {
-        const newColumns = customStore.getState().timeline.timelineById[TimelineId.test].columns;
+        const newColumns = getTimelineFromStore(customStore).columns;
         expect(newColumns).not.toMatchObject(
           expect.arrayContaining([
             expect.objectContaining({
-              id: field.name,
+              id: fieldToBeRemoved.name,
             }),
           ])
         );

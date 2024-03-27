@@ -66,6 +66,13 @@ const TestComponent = (props: TestComponentProps) => {
   );
 };
 
+const getTimelineFromStore = (
+  store: ReturnType<typeof createMockStore>,
+  timelineId: string = TimelineId.test
+) => {
+  return store.getState().timeline.timelineById[timelineId];
+};
+
 describe('unified data table', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
@@ -210,9 +217,7 @@ describe('unified data table', () => {
     );
 
     await waitFor(() => {
-      expect(customMockStore.getState().timeline.timelineById[TimelineId.test]?.rowHeight).toEqual(
-        rowHeight.new
-      );
+      expect(getTimelineFromStore(customMockStore)?.rowHeight).toEqual(rowHeight.new);
     });
   });
 
@@ -303,12 +308,14 @@ describe('unified data table', () => {
       const customMockStore = createMockStore();
       render(<TestComponent store={customMockStore} />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+      // make sure that items per page is as per the props passed above
+      expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
+        `Rows per page: 50`
+      );
       fireEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
       fireEvent.click(screen.getByTestId(`tablePagination-25-rows`));
       await waitFor(() => {
-        expect(
-          customMockStore.getState().timeline.timelineById[TimelineId.test]?.itemsPerPage
-        ).toEqual(25);
+        expect(getTimelineFromStore(customMockStore)?.itemsPerPage).toEqual(25);
       });
     });
 

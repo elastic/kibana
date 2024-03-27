@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const DATA_VIEW_MANDATORY = i18n.translate(
   'xpack.securitySolution.components.dataViewMandatory',
   {
-    defaultMessage: 'DataView is mandatory but was not provided',
+    defaultMessage: 'The DataView is required, but was not provided',
   }
 );
 
@@ -18,6 +18,6 @@ export const DATA_VIEW_MANDATORY_MSG = i18n.translate(
   'xpack.securitySolution.components.dataViewMandatoryDetailMessage',
   {
     defaultMessage:
-      'It looks like DataView is not selected properly. Please select the appropriate DataView and index patterns',
+      'The DataView is not selected properly. Please select the appropriate DataView and index patterns',
   }
 );

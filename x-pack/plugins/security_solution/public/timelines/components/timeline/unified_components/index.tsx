@@ -322,10 +322,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     onFieldEdited();
   }, [onFieldEdited]);
 
-  if (!dataView) {
-    return null;
-  }
-
   return (
     <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
       <TimelineResizableLayout
@@ -410,6 +406,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 };
 
-export const UnifiedTimeline = withDataView<Props>(React.memo(UnifiedTimelineComponent));
+export const UnifiedTimeline = React.memo(withDataView<Props>(UnifiedTimelineComponent));
 // eslint-disable-next-line import/no-default-export
 export { UnifiedTimeline as default };

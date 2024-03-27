@@ -144,6 +144,7 @@ describe('query tab with unified timeline', () => {
   });
 
   beforeEach(() => {
+    // increase timeout for these tests as they are rendering a complete table with ~30 rows which can take time.
     const ONE_SECOND = 1000;
     jest.setTimeout(10 * ONE_SECOND);
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
