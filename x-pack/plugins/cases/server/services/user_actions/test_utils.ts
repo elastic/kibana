@@ -52,7 +52,7 @@ export const createUserActionFindSO = (
 });
 
 export const createConnectorUserAction = (
-  overrides?: Partial<CaseUserActionWithoutReferenceIds>
+  overrides?: Partial<SavedObject<CaseUserActionWithoutReferenceIds>>
 ): SavedObject<CaseUserActionWithoutReferenceIds> => {
   const { id, ...restConnector } = createConnectorObject().connector;
   return {
@@ -61,8 +61,8 @@ export const createConnectorUserAction = (
       payload: { connector: restConnector },
       type: 'connector',
       connectorId: id,
-      ...(overrides && { ...overrides }),
     }),
+    ...(overrides && { ...overrides }),
   };
 };
 
@@ -146,7 +146,7 @@ export const createUserActionSO = ({
 export const updateConnectorUserAction = ({
   overrides,
 }: {
-  overrides?: Partial<CaseUserActionWithoutReferenceIds>;
+  overrides?: Partial<SavedObject<CaseUserActionWithoutReferenceIds>>;
 } = {}): SavedObject<CaseUserActionWithoutReferenceIds> => {
   const { id, ...restConnector } = createJiraConnector();
   return {
@@ -155,15 +155,15 @@ export const updateConnectorUserAction = ({
       payload: { connector: restConnector },
       type: 'connector',
       connectorId: id,
-      ...(overrides && { ...overrides }),
     }),
+    ...(overrides && { ...overrides }),
   };
 };
 
 export const pushConnectorUserAction = ({
   overrides,
 }: {
-  overrides?: Partial<CaseUserActionWithoutReferenceIds>;
+  overrides?: Partial<SavedObject<CaseUserActionWithoutReferenceIds>>;
 } = {}): SavedObject<CaseUserActionWithoutReferenceIds> => {
   const { connector_id: connectorId, ...restExternalService } = createExternalService();
   return {
@@ -172,8 +172,8 @@ export const pushConnectorUserAction = ({
       payload: { externalService: restExternalService },
       pushedConnectorId: connectorId,
       type: 'pushed',
-      ...(overrides && { ...overrides }),
     }),
+    ...(overrides && { ...overrides }),
   };
 };
 
