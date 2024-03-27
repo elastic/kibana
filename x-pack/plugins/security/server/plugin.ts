@@ -295,6 +295,7 @@ export class SecurityPlugin
       spaces,
       audit: this.auditSetup,
       authz: this.authorizationSetup,
+      getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
     });
 
     setupSavedObjects({
