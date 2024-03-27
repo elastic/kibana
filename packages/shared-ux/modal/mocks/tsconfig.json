@@ -17,6 +17,5 @@
   ],
   "kbn_references": [
     "@kbn/shared-ux-storybook-mock",
-    "@kbn/share-modal",
   ]
 }
