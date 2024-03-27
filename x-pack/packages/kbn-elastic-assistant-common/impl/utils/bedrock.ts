@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 
@@ -19,10 +20,12 @@ export const handleBedrockChunk = ({
   chunk,
   bedrockBuffer,
   chunkHandler,
+  logger,
 }: {
   chunk: Uint8Array;
   bedrockBuffer: Uint8Array;
   chunkHandler?: (chunk: string) => void;
+  logger?: Logger;
 }): { decodedChunk: string; bedrockBuffer: Uint8Array } => {
   // Concatenate the current chunk to the existing buffer.
   let newBuffer = concatChunks(bedrockBuffer, chunk);
@@ -51,7 +54,7 @@ export const handleBedrockChunk = ({
       const body = JSON.parse(
         Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
       );
-      const decodedContent = prepareBedrockOutput(body);
+      const decodedContent = prepareBedrockOutput(body, logger);
       if (chunkHandler) chunkHandler(decodedContent);
       return decodedContent;
     })
@@ -90,16 +93,24 @@ function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
   return newBuffer;
 }
 
+interface CompletionChunk {
+  type?: string;
+  delta?: {
+    type?: string;
+    text?: string;
+    stop_reason?: null | string;
+    stop_sequence?: null | string;
+  };
+  message?: { content: Array<{ text?: string; type: string }> };
+  content_block?: { type: string; text: string };
+}
+
 /**
  * Prepare the streaming output from the bedrock API
  * @param responseBody
  * @returns string
  */
-const prepareBedrockOutput = (responseBody: {
-  type?: string;
-  delta?: { type: string; text: string };
-  message?: { content: Array<{ text?: string; type: string }> };
-}): string => {
+const prepareBedrockOutput = (responseBody: CompletionChunk, logger?: Logger): string => {
   if (responseBody.type && responseBody.type.length) {
     if (responseBody.type === 'message_start' && responseBody.message) {
       return parseContent(responseBody.message.content);
@@ -111,6 +122,7 @@ const prepareBedrockOutput = (responseBody: {
       return responseBody.delta.text;
     }
   }
+  logger?.warn(`Failed to parse bedrock chunk ${JSON.stringify(responseBody)}`);
   return '';
 };
 

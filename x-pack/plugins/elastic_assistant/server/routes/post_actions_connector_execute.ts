@@ -219,6 +219,7 @@ export const postActionsConnectorExecuteRoute = (
                     : { temperature: 0, stopSequences: [] }),
                 },
               },
+              logger,
             });
 
             telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {

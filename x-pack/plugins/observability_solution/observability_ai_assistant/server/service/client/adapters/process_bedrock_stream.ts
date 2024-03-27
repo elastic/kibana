@@ -202,7 +202,7 @@ function emitTokenCountEvent(
  * @param responseBody
  * @returns string
  */
-const prepareBedrockOutput = (responseBody: CompletionChunk): string => {
+const prepareBedrockOutput = (responseBody: CompletionChunk, logger: Logger): string => {
   if (responseBody.type && responseBody.type.length) {
     if (responseBody.type === 'message_start' && responseBody.message) {
       return parseContent(responseBody.message.content);
@@ -214,6 +214,7 @@ const prepareBedrockOutput = (responseBody: CompletionChunk): string => {
       return responseBody.delta.text;
     }
   }
+  logger.warn(`Failed to parse bedrock chunk ${JSON.stringify(responseBody)}`);
   return '';
 };
 

@@ -8,18 +8,25 @@
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { handleBedrockChunk } from '@kbn/elastic-assistant-common';
+import { Logger } from '@kbn/core/server';
 
-type StreamParser = (responseStream: Readable) => Promise<string>;
+type StreamParser = (responseStream: Readable, logger: Logger) => Promise<string>;
 
-export const handleStreamStorage: (
-  responseStream: Readable,
-  llmType: string,
-  onMessageSent?: (content: string) => void
-) => Promise<void> = async (responseStream, llmType, onMessageSent) => {
+export const handleStreamStorage = async ({
+  responseStream,
+  llmType,
+  onMessageSent,
+  logger,
+}: {
+  responseStream: Readable;
+  llmType: string;
+  onMessageSent?: (content: string) => void;
+  logger: Logger;
+}): Promise<void> => {
   try {
     const parser = llmType === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
     // TODO @steph add abort signal
-    const parsedResponse = await parser(responseStream);
+    const parsedResponse = await parser(responseStream, logger);
     if (onMessageSent) {
       onMessageSent(parsedResponse);
     }
@@ -70,7 +77,7 @@ const parseOpenAIResponse = (responseBody: string) =>
       return prev + (msg.content || '');
     }, '');
 
-const parseBedrockStream: StreamParser = async (responseStream) => {
+const parseBedrockStream: StreamParser = async (responseStream, logger: Logger) => {
   const responseBuffer: Uint8Array[] = [];
   responseStream.on('data', (chunk) => {
     // special encoding for bedrock, do not attempt to convert to string
@@ -78,7 +85,7 @@ const parseBedrockStream: StreamParser = async (responseStream) => {
   });
   await finished(responseStream);
 
-  return parseBedrockBuffer(responseBuffer);
+  return parseBedrockBuffer(responseBuffer, logger);
 };
 
 /**
@@ -87,14 +94,14 @@ const parseBedrockStream: StreamParser = async (responseStream) => {
  * @param {Uint8Array[]} chunks - Array of Uint8Array chunks to be parsed.
  * @returns {string} - Parsed string from the Bedrock buffer.
  */
-const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
+const parseBedrockBuffer = (chunks: Uint8Array[], logger: Logger): string => {
   // Initialize an empty Uint8Array to store the concatenated buffer.
   let bedrockBuffer: Uint8Array = new Uint8Array(0);
 
   // Map through each chunk to process the Bedrock buffer.
   return chunks
     .map((chunk) => {
-      const processedChunk = handleBedrockChunk({ chunk, bedrockBuffer });
+      const processedChunk = handleBedrockChunk({ chunk, bedrockBuffer, logger });
       bedrockBuffer = processedChunk.bedrockBuffer;
       return processedChunk.decodedChunk;
     })
