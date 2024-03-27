@@ -140,9 +140,13 @@ async function createSecurityProject(
     };
   } catch (error) {
     if (error instanceof AxiosError) {
+<<<<<<< Updated upstream
       log.error(
         `${error.response?.status}:${Object.values(error.response?.data.errors).flat().join()}`
       );
+=======
+      console.log(`${error.response?.status}:${JSON.stringify(error.response?.data)}`);
+>>>>>>> Stashed changes
     } else {
       log.error(`${error.message}`);
     }
