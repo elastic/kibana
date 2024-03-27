@@ -14,6 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo, useState } from 'react';
+import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { isPending } from '../../../../hooks/use_fetcher';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asBigNumber } from '../../../../../common/utils/formatters';
@@ -30,6 +31,7 @@ import {
   ITableColumn,
   ManagedTable,
   TableOptions,
+  TableSearchBar,
 } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
@@ -37,6 +39,7 @@ import {
   ErrorGroupItem,
   useErrorGroupListData,
 } from './use_error_group_list_data';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
@@ -85,6 +88,14 @@ export function ErrorGroupList({
     '/services/{serviceName}/overview',
     '/services/{serviceName}/errors'
   );
+
+  const { core } = useApmPluginContext();
+
+  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
+    apmEnableTableSearchBar,
+    true
+  );
+
   const { offset } = query;
 
   const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
@@ -293,11 +304,10 @@ export function ErrorGroupList({
     offset,
   ]);
 
-  const tableSearchBar = useMemo(() => {
+  const tableSearchBar: TableSearchBar<ErrorGroupItem> = useMemo(() => {
     return {
-      fieldsToSearch: ['name', 'groupId', 'culprit', 'type'] as Array<
-        keyof ErrorGroupItem
-      >,
+      isEnabled: isTableSearchBarEnabled,
+      fieldsToSearch: ['name', 'groupId', 'culprit', 'type'],
       maxCountExceeded: mainStatistics.maxCountExceeded,
       onChangeSearchQuery: setDebouncedSearchQuery,
       placeholder: i18n.translate(
@@ -305,7 +315,11 @@ export function ErrorGroupList({
         { defaultMessage: 'Search errors by message, type or culprit' }
       ),
     };
-  }, [mainStatistics.maxCountExceeded, setDebouncedSearchQuery]);
+  }, [
+    isTableSearchBarEnabled,
+    mainStatistics.maxCountExceeded,
+    setDebouncedSearchQuery,
+  ]);
 
   return (
     <ManagedTable

@@ -19,8 +19,8 @@ spec:
       description: Initiate kibana serverless releases
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-mission-control'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       default_branch: main
       allow_rebuilds: false
       skip_intermediate_builds: false
