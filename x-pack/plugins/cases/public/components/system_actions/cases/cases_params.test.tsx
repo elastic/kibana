@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { useAlertDataViews } from '../hooks/use_alert_data_view';
 import { CasesParamsFields } from './cases_params';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('../../../common/lib/kibana/use_application');
@@ -64,6 +64,7 @@ describe('CasesParamsFields renders', () => {
             {
               name: 'host.ip',
               type: 'ip',
+              esTypes: ['keyword'],
             },
             {
               name: 'host.geo.location',
@@ -78,7 +79,7 @@ describe('CasesParamsFields renders', () => {
   it('all params fields are rendered', async () => {
     render(<CasesParamsFields {...defaultProps} />);
 
-    expect(await screen.findByTestId('group-by-alert-field')).toBeInTheDocument();
+    expect(await screen.findByTestId('group-by-alert-field-combobox')).toBeInTheDocument();
     expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
     expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
@@ -96,7 +97,7 @@ describe('CasesParamsFields renders', () => {
     render(<CasesParamsFields {...defaultProps} />);
 
     expect(await screen.findByRole('progressbar')).toBeInTheDocument();
-    expect(await screen.findByTestId('group-by-alert-field')).toHaveProperty('disabled');
+    expect(await screen.findByTestId('comboBoxSearchInput')).toBeDisabled();
   });
 
   it('when subAction undefined, sets to default', () => {
@@ -151,26 +152,64 @@ describe('CasesParamsFields renders', () => {
     it('renders grouping by field options', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
-      userEvent.click(await screen.findByTestId('group-by-alert-field'));
+      userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
 
-      expect(await screen.findByTestId('group-by-alert-field-host.ip')).toBeInTheDocument();
+      await showEuiComboBoxOptions();
 
-      expect(
-        await screen.findByTestId('group-by-alert-field-host.geo.location')
-      ).toBeInTheDocument();
+      expect(await screen.findByText('host.ip')).toBeInTheDocument();
+
+      expect(screen.queryByText('host.geo.location')).not.toBeInTheDocument();
     });
 
     it('updates grouping by field', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
-      userEvent.click(await screen.findByTestId('group-by-alert-field'));
-      await waitForEuiPopoverOpen();
+      userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
 
-      expect(await screen.findByTestId('group-by-alert-field-host.ip')).toBeInTheDocument();
+      await showEuiComboBoxOptions();
 
-      userEvent.click(await screen.findByTestId('group-by-alert-field-host.ip'));
+      expect(await screen.findByText('host.ip')).toBeInTheDocument();
+
+      userEvent.click(await screen.findByText('host.ip'));
 
       expect(editAction.mock.calls[0][1].groupingBy).toEqual(['host.ip']);
+    });
+
+    it('updates grouping by field by search', async () => {
+      useAlertDataViewsMock.mockReturnValue({
+        loading: false,
+        dataViews: [
+          {
+            title: '.alerts-test',
+            fields: [
+              {
+                name: 'host.ip',
+                type: 'ip',
+                esTypes: ['keyword'],
+              },
+              {
+                name: 'host.geo.location',
+                type: 'geo_point',
+              },
+              {
+                name: 'alert.name',
+                type: 'string',
+                esTypes: ['keyword'],
+              },
+            ],
+          },
+        ],
+      });
+
+      render(<CasesParamsFields {...defaultProps} />);
+
+      userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
+
+      await showEuiComboBoxOptions();
+
+      userEvent.type(await screen.findByTestId('comboBoxSearchInput'), 'alert.name{enter}');
+
+      expect(editAction.mock.calls[0][1].groupingBy).toEqual(['alert.name']);
     });
 
     it('updates time window size', async () => {

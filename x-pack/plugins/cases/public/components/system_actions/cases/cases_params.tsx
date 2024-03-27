@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCheckbox,
   EuiFieldNumber,
@@ -17,7 +17,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiSuperSelect,
+  EuiComboBox,
 } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { useApplication } from '../../../common/lib/kibana/use_application';
@@ -83,53 +83,64 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [editAction, index, actionParams.subActionParams]
   );
 
-  const handleTimeWindowChange = (key: 'timeWindowSize' | 'timeWindowUnit', value: string) => {
-    if (!value) {
-      return;
-    }
+  const handleTimeWindowChange = useCallback(
+    (key: 'timeWindowSize' | 'timeWindowUnit', value: string) => {
+      if (!value) {
+        return;
+      }
 
-    const newTimeWindow =
-      key === 'timeWindowSize'
-        ? `${parseInt(value, 10)}${timeWindowUnit}`
-        : `${timeWindowSize}${value}`;
+      const newTimeWindow =
+        key === 'timeWindowSize'
+          ? `${parseInt(value, 10)}${timeWindowUnit}`
+          : `${timeWindowSize}${value}`;
 
-    editSubActionProperty('timeWindow', newTimeWindow);
-  };
+      editSubActionProperty('timeWindow', newTimeWindow);
+    },
+    [editSubActionProperty, timeWindowUnit, timeWindowSize]
+  );
 
-  const options: Array<EuiSuperSelectOption<string>> = useMemo(() => {
+  const onChangeComboBox = useCallback(
+    (optionsValue: Array<EuiComboBoxOptionOption<string>>) => {
+      editSubActionProperty('groupingBy', optionsValue?.length ? [optionsValue[0].value] : []);
+    },
+    [editSubActionProperty]
+  );
+
+  const options: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     if (!dataViews?.length) {
       return [];
     }
+
     return dataViews
       .map((dataView) => {
-        const fields = dataView.fields;
-        return fields.map((field) => ({
-          value: field.name,
-          inputDisplay: (
-            <span data-test-subj={`group-by-alert-field-${field.name}`}>{field.name}</span>
-          ),
-        }));
+        return dataView.fields
+          .filter((field) => field.esTypes?.includes('keyword'))
+          .map((field) => ({
+            value: field.name,
+            label: field.name,
+          }));
       })
       .flat();
   }, [dataViews]);
+
+  const selectedOptions = groupingBy.map((x) => ({ value: x, label: x }));
 
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
           <EuiFormRow fullWidth>
-            <EuiSuperSelect
+            <EuiComboBox
               fullWidth
-              name="groupByAlertField"
-              data-test-subj="group-by-alert-field"
+              isClearable={true}
+              singleSelection
+              data-test-subj="group-by-alert-field-combobox"
               prepend={i18n.GROUP_BY_ALERT}
               isLoading={loadingAlertDataViews}
-              disabled={loadingAlertDataViews}
+              isDisabled={loadingAlertDataViews}
               options={options}
-              valueOfSelected={groupingBy?.[0] ?? ''}
-              onChange={(value: string) => {
-                editSubActionProperty('groupingBy', [value]);
-              }}
+              onChange={onChangeComboBox}
+              selectedOptions={selectedOptions}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -149,7 +160,6 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           <EuiFlexItem grow={2}>
             <EuiFieldNumber
               prepend={i18n.TIME_WINDOW}
-              name="timeWindowSize"
               data-test-subj="time-window-size-input"
               value={timeWindowSize}
               onChange={(e) => {
@@ -160,7 +170,6 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           <EuiFlexItem grow={3}>
             <EuiSelect
               fullWidth
-              name="timeWindowUnit"
               data-test-subj="time-window-unit-select"
               value={timeWindowUnit}
               onChange={(e) => {
@@ -176,7 +185,6 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         <EuiFlexItem>
           <EuiCheckbox
             id={`reopen-case-${index}`}
-            name={`reopen-case-${index}`}
             data-test-subj="reopen-case"
             checked={reopenClosedCases}
             label={i18n.REOPEN_WHEN_CASE_IS_CLOSED}
