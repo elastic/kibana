@@ -22,6 +22,8 @@ import {
   EuiSelectable,
   EuiFilterButton,
   EuiSelectableOption,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -253,12 +255,13 @@ export const PipelineTable: FunctionComponent<Props> = ({
     },
     columns: [
       {
+        width: '25%',
         field: 'name',
         name: i18n.translate('xpack.ingestPipelines.list.table.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string, pipeline) => (
+        render: (name: string) => (
           <EuiLink
             data-test-subj="pipelineDetailsLink"
             {...reactRouterNavigate(history, {
@@ -267,30 +270,60 @@ export const PipelineTable: FunctionComponent<Props> = ({
             })}
           >
             {name}
-            {pipeline.deprecated && (
-              <>
-                &nbsp;
-                <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
-                  <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
-                    {deprecatedPipelineBadge.badge}
-                  </EuiBadge>
-                </EuiToolTip>
-              </>
-            )}
-            {pipeline.isManaged && (
-              <>
-                &nbsp;
-                <EuiBadge color="hollow" data-test-subj="isManagedBadge">
-                  {i18n.translate('xpack.ingestPipelines.list.table.managedBadgeLabel', {
-                    defaultMessage: 'Managed',
-                  })}
-                </EuiBadge>
-              </>
-            )}
           </EuiLink>
         ),
       },
       {
+        width: '100px',
+        render: (pipeline: Pipeline) => {
+          return (
+            <EuiFlexGroup direction='column' gutterSize="xs" alignItems="center">
+              {pipeline.isManaged && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow" data-test-subj="isManagedBadge">
+                    {i18n.translate('xpack.ingestPipelines.list.table.managedBadgeLabel', {
+                      defaultMessage: 'Managed',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+              {pipeline.deprecated && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
+                    <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
+                      {deprecatedPipelineBadge.badge}
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
+        }
+      },
+      {
+        field: 'description',
+        name: (
+          <FormattedMessage
+            id="xpack.ingestPipelines.list.table.descriptionColumnTitle"
+            defaultMessage="Description"
+          />
+        ),
+      },
+      {
+        width: '120px',
+        name: (
+          <FormattedMessage
+            id="xpack.ingestPipelines.list.table.preprocessorsColumnTitle"
+            defaultMessage="Preprocessors"
+          />
+        ),
+        align: 'right',
+        dataType: 'number',
+        sortable: ({ processors }: Pipeline) => processors.length,
+        render: ({ processors }: Pipeline) => processors.length,
+      },
+      {
+        width: '120px',
         name: (
           <FormattedMessage
             id="xpack.ingestPipelines.list.table.actionColumnTitle"
