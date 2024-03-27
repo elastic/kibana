@@ -21,7 +21,7 @@ export interface HasLibraryTransforms<StateT extends object = object> {
    *
    * @returns {Promise<{ state: StateT; savedObjectId: string }>}
    *   state: by-reference embeddable state replacing by-value embeddable state
-   *   savedObjectId: Saved object id for new library saved object
+   *   savedObjectId: Saved object id for new saved object added to library
    */
   saveStateToSavedObject: (title: string) => Promise<{ state: StateT; savedObjectId: string }>;
   checkForDuplicateTitle: (
