@@ -21,7 +21,7 @@ type RouterElementChildren = Array<
       children: RouterElementChildren;
       component: Function;
     },
-    any
+    string | React.JSXElementConstructor<unknown>
   >
 >;
 
