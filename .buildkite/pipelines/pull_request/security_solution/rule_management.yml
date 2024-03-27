@@ -1,4 +1,4 @@
-steps: 
+steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
@@ -10,7 +10,7 @@ steps:
     parallelism: 8
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
@@ -24,7 +24,7 @@ steps:
     parallelism: 4
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
@@ -38,7 +38,7 @@ steps:
     parallelism: 8
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
@@ -52,5 +52,5 @@ steps:
     parallelism: 6
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1

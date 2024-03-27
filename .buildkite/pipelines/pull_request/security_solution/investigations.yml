@@ -10,9 +10,9 @@ steps:
     parallelism: 8
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
-  
+
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
@@ -24,5 +24,5 @@ steps:
     parallelism: 8
     retry:
       automatic:
-        - exit_status: '*'
-          limit: 1           
+        - exit_status: '-1'
+          limit: 1
