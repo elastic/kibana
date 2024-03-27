@@ -32,14 +32,17 @@ export const ShareMenuTabs = () => {
 
   const tabs = [linkTab, allowEmbed ? embedTab : null].filter(Boolean);
   if (shareMenuItems) {
-    shareMenuItems.forEach(({ shareMenuItem, panel }) => {
-      tabs.push({
-        id: panel.id.toString(),
-        name: shareMenuItem.name,
-        // @ts-ignore
-        content: () => panel.content,
+    shareMenuItems
+      // need to filter out the null shareMenuItem from Lens and just use the reporting image modal that includes CSV for Lens
+      .filter((item) => item !== null)
+      .forEach(({ shareMenuItem, panel }) => {
+        tabs.push({
+          id: panel.id.toString(),
+          name: shareMenuItem.name,
+          // @ts-ignore
+          content: () => panel.content,
+        });
       });
-    });
   }
 
   return (
