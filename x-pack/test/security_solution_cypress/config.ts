@@ -47,7 +47,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'chartEmbeddablesEnabled',
           'alertSuppressionForIndicatorMatchRuleEnabled',
-          'alertSuppressionForEqlRuleEnabledNonSequence',
+          'alertSuppressionForNonSequenceEqlRuleEnabled',
         ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',

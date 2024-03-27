@@ -38,7 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'alertSuppressionForIndicatorMatchRuleEnabled',
         ])}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForEqlRuleEnabledNonSequence',
+          'alertSuppressionForNonSequenceEqlRuleEnabled',
         ])}`,
       ],
     },
