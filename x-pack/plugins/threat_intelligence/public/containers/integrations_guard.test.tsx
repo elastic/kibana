@@ -76,17 +76,18 @@ describe('IntegrationsGuard', () => {
 
   it('should render loading when integrations only are loading', async () => {
     (
-      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
-    ).mockReturnValue({
-      count: 0,
-      isLoading: true,
-    });
-    (
       useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
     ).mockReturnValue('');
     (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
       ''
     );
+
+    (
+      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+    ).mockReturnValue({
+      count: 0,
+      isLoading: true,
+    });
     (useIntegrations as jest.MockedFunction<typeof useIntegrations>).mockReturnValue({
       isLoading: true,
       data: [],
