@@ -135,9 +135,11 @@ export default function ({ getService }: FtrProviderContext) {
       await createMultipleKeys();
 
       const { body: aggregationResponse } = await supertest
-        .post('/internal/security/api_key/_query_aggs')
+        .post('/internal/security/api_key/_query')
         .set('kbn-xsrf', 'xxx')
-        .send()
+        .send({
+          query: { match: { invalidated: false } },
+        })
         .expect(200);
 
       if (!isBasicLicense) {
