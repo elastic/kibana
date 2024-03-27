@@ -15,10 +15,8 @@ const AssetTypeRT = rt.type({
 const CustomDashboardRT = rt.intersection([
   AssetTypeRT,
   rt.type({
-    dashboardIdList: rt.array(rt.string),
-  }),
-  rt.partial({
-    kuery: rt.string,
+    dashboardSavedObjectId: rt.string,
+    dashboardFilterAssetIdEnabled: rt.boolean,
   }),
 ]);
 
@@ -26,7 +24,7 @@ const CustomDashboardRT = rt.intersection([
  GET endpoint
 */
 export const InfraGetCustomDashboardsRequestParamsRT = AssetTypeRT;
-export const InfraGetCustomDashboardsResponseBodyRT = CustomDashboardRT;
+export const InfraGetCustomDashboardsResponseBodyRT = rt.array(CustomDashboardRT);
 export type InfraGetCustomDashboardsRequestParams = rt.TypeOf<
   typeof InfraGetCustomDashboardsRequestParamsRT
 >;

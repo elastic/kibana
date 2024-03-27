@@ -51,9 +51,27 @@ export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
         });
       }
 
+      const customDashboardExist = customDashboards.saved_objects.find(
+        ({ attributes }) => attributes.dashboardSavedObjectId === payload.dashboardSavedObjectId
+      );
+
+      if (!customDashboardExist) {
+        const savedCustomDashboard = await savedObjectsClient.create<InfraCustomDashboard>(
+          INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+          payload
+        );
+
+        return response.ok({
+          body: InfraSaveCustomDashboardsResponseBodyRT.encode({
+            ...payload,
+            ...savedCustomDashboard.attributes,
+          }),
+        });
+      }
+
       const savedCustomDashboard = await savedObjectsClient.update<InfraCustomDashboard>(
         INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-        customDashboards.saved_objects[0].id,
+        payload.dashboardSavedObjectId,
         payload
       );
 

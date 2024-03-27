@@ -21,7 +21,7 @@ export function initGetCustomDashboardRoute(framework: KibanaFramework) {
   framework.registerRoute(
     {
       method: 'get',
-      path: '/api/infra/custom-dashboards/{assetType}',
+      path: '/api/infra/{assetType}/custom-dashboards',
       validate: {
         params: validateParams,
       },
@@ -39,22 +39,25 @@ export function initGetCustomDashboardRoute(framework: KibanaFramework) {
 
       if (customDashboards.total === 0) {
         return response.ok({
-          body: InfraGetCustomDashboardsResponseBodyRT.encode({
-            assetType: params.assetType,
-            dashboardIdList: [],
-            kuery: undefined,
-          }),
+          body: InfraGetCustomDashboardsResponseBodyRT.encode([
+            {
+              dashboardSavedObjectId: '',
+              dashboardFilterAssetIdEnabled: false,
+              assetType: params.assetType,
+            },
+          ]),
         });
       }
 
-      const attributes = customDashboards.saved_objects[0].attributes;
+      // const attributes = customDashboards.saved_objects[0].attributes;
+      const responseBody = customDashboards.saved_objects.map(({ attributes }) => ({
+        assetType: attributes.assetType,
+        dashboardSavedObjectId: attributes.dashboardSavedObjectId,
+        dashboardFilterAssetIdEnabled: attributes.dashboardFilterAssetIdEnabled,
+      }));
 
       return response.ok({
-        body: InfraGetCustomDashboardsResponseBodyRT.encode({
-          assetType: attributes.assetType,
-          dashboardIdList: attributes.dashboardIdList,
-          kuery: attributes.kuery,
-        }),
+        body: InfraGetCustomDashboardsResponseBodyRT.encode(responseBody),
       });
     })
   );
