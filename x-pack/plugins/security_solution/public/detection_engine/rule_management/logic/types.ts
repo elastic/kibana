@@ -26,11 +26,6 @@ import type {
 } from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 
-export interface CreateRulesProps {
-  rule: RuleCreateProps;
-  signal?: AbortSignal;
-}
-
 export interface PreviewRulesProps {
   rule: RuleCreateProps & { invocationCount: number; timeframeEnd: string };
   signal?: AbortSignal;

@@ -51,7 +51,7 @@ paths:
         200:
           description: Indicates a successful call.
           content:
-            application/ndjson:
+            application/json:
               schema:
                 type: string
                 format: binary

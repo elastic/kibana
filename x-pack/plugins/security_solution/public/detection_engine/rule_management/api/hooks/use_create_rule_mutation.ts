@@ -12,7 +12,7 @@ import type {
   RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
-import { createRule } from '../api';
+import { createRule } from '../../../../common/api_client/client';
 import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
 import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';
@@ -27,7 +27,7 @@ export const useCreateRuleMutation = (
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
 
   return useMutation<RuleResponse, Error, RuleCreateProps>(
-    (rule: RuleCreateProps) => createRule({ rule: transformOutput(rule) }),
+    (rule: RuleCreateProps) => createRule(transformOutput(rule)),
     {
       ...options,
       mutationKey: CREATE_RULE_MUTATION_KEY,

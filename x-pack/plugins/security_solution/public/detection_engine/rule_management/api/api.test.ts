@@ -23,8 +23,6 @@ import { rulesMock } from '../logic/mock';
 import type { FindRulesReferencedByExceptionsListProp } from '../logic/types';
 
 import {
-  createRule,
-  updateRule,
   patchRule,
   fetchRules,
   fetchRuleById,
@@ -44,44 +42,6 @@ const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
 describe('Detections Rules API', () => {
-  describe('createRule', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(getRulesSchemaMock());
-    });
-
-    test('POSTs rule', async () => {
-      const payload = getCreateRulesSchemaMock();
-      await createRule({ rule: payload });
-      expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/rules',
-        expect.objectContaining({
-          body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1"}',
-          method: 'POST',
-        })
-      );
-    });
-  });
-
-  describe('updateRule', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(getRulesSchemaMock());
-    });
-
-    test('PUTs rule', async () => {
-      const payload = getUpdateRulesSchemaMock();
-      await updateRule({ rule: payload });
-      expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/rules',
-        expect.objectContaining({
-          body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","id":"04128c15-0d1b-4716-a4c5-46997ac7f3bd"}',
-          method: 'PUT',
-        })
-      );
-    });
-  });
-
   describe('patchRule', () => {
     beforeEach(() => {
       fetchMock.mockClear();

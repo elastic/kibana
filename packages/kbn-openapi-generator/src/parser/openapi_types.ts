@@ -43,6 +43,13 @@ export type NormalizedSchemaObject =
 
 export type NormalizedSchemaItem = OpenAPIV3.SchemaObject | NormalizedReferenceObject;
 
+export type ResponseExample =
+  | string
+  | number
+  | boolean
+  | object
+  | Array<string | number | boolean | object>;
+
 /**
  * OpenAPI types do not have a dedicated type for objects, so we need to create
  * to use for path and query parameters
@@ -70,4 +77,5 @@ export interface NormalizedOperation {
   requestQuery?: NormalizedSchemaItem;
   requestBody?: NormalizedSchemaItem;
   response?: NormalizedSchemaItem;
+  responseExample?: ResponseExample;
 }

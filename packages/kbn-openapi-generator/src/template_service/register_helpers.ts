@@ -7,7 +7,7 @@
  */
 
 import type Handlebars from '@kbn/handlebars';
-import { snakeCase, camelCase } from 'lodash';
+import { snakeCase, camelCase, upperCase } from 'lodash';
 
 export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('concat', (...args) => {
@@ -16,6 +16,7 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   });
   handlebarsInstance.registerHelper('snakeCase', snakeCase);
   handlebarsInstance.registerHelper('camelCase', camelCase);
+  handlebarsInstance.registerHelper('upperCase', upperCase);
   handlebarsInstance.registerHelper('toJSON', (value: unknown) => {
     return JSON.stringify(value);
   });
@@ -50,4 +51,10 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('startsWithSpecialChar', (val: string) => {
     return /^[^a-zA-Z0-9]/.test(val);
   });
+  handlebarsInstance.registerHelper(
+    'replace',
+    (val: string, searchValue: string, replaceValue: string) => {
+      return val.replace(searchValue, replaceValue);
+    }
+  );
 }

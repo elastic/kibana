@@ -11,20 +11,12 @@ import { savedRuleMock, rulesMock } from '../../logic/mock';
 
 import type {
   PatchRuleProps,
-  CreateRulesProps,
-  UpdateRulesProps,
   PrePackagedRulesStatusResponse,
   BasicFetchProps,
   FetchRuleProps,
   FetchRulesResponse,
   FetchRulesProps,
 } from '../../logic/types';
-
-export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RuleResponse> =>
-  Promise.resolve(getRulesSchemaMock());
-
-export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RuleResponse> =>
-  Promise.resolve(getRulesSchemaMock());
 
 export const patchRule = async ({
   ruleProperties,

@@ -24,3 +24,6 @@ export const SuggestUserProfilesRequestQuery = z.object({
   searchTerm: z.string().optional(),
 });
 export type SuggestUserProfilesRequestQueryInput = z.input<typeof SuggestUserProfilesRequestQuery>;
+
+export type SuggestUserProfilesResponse = z.infer<typeof SuggestUserProfilesResponse>;
+export const SuggestUserProfilesResponse = z.string();

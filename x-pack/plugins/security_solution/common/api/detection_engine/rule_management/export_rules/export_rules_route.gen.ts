@@ -46,3 +46,9 @@ export const ExportRulesRequestBody = z
   })
   .nullable();
 export type ExportRulesRequestBodyInput = z.input<typeof ExportRulesRequestBody>;
+
+/**
+ * An `.ndjson` file containing the returned rules.
+ */
+export type ExportRulesResponse = z.infer<typeof ExportRulesResponse>;
+export const ExportRulesResponse = z.string();
