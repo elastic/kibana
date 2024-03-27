@@ -58,6 +58,10 @@ export function routeHandlerFactory<T extends ApiVersion>(
     // const client = (await context.core).elasticsearch.client.asCurrentUser;
     // const executionContext = createExecutionContext(coreStart, AIOPS_PLUGIN_ID, request.route.path);
 
-    return response.ok();
+    return response.ok({
+      body: {
+        time: new Date().toISOString(),
+      },
+    });
   };
 }
