@@ -1297,7 +1297,13 @@ function expandParams(params) {
   return result;
 }
 
-const ensureArray = (value) => (Array.isArray(value) ? value : value === null ? [] : [value]);
+const ensureArray = (value) => {
+  if (Array.isArray(value)) {
+    return value;
+  } else {
+    return value === null ? [] : [value];
+  }
+};
 
 const dedupe = (arr) => Array.from(new Set(arr));
 
@@ -1316,6 +1322,53 @@ const elasticsearchToKibanaType = (elasticsearchType) => {
   return elasticsearchType;
 };
 
+/**
+ * Builds a function definition object from a row of the "meta functions" table
+ * @param {Array<any>} value — the row of the "meta functions" table, corresponding to a single function definition
+ * @param {*} columnIndices — the indices of the columns in the "meta functions" table
+ * @returns
+ */
+function getFunctionDefinition(value, columnIndices) {
+  const kbnArgTypes = ensureArray(value[columnIndices.argTypes]).map((argType) =>
+    dedupe(argType.split('|').map(elasticsearchToKibanaType))
+  );
+
+  const getMinParams = () =>
+    value[columnIndices.variadic]
+      ? ensureArray(value[columnIndices.optionalArgs]).length
+      : undefined;
+
+  const getReturnType = () => {
+    const allReturnTypes = dedupe(
+      value[columnIndices.returnType].split('|').map(elasticsearchToKibanaType)
+    );
+
+    // our client-side parser doesn't currently support multiple return types
+    return allReturnTypes.length === 1 ? allReturnTypes[0] : 'any';
+  };
+
+  const unexpandedParams = ensureArray(value[columnIndices.argNames]).map((argName, i) => ({
+    name: argName,
+    type: kbnArgTypes[i],
+    optional: ensureArray(value[columnIndices.optionalArgs])[i],
+  }));
+
+  const expandedParams = expandParams(unexpandedParams);
+
+  const signatures = expandedParams.map((params) => ({
+    params,
+    returnType: getReturnType(),
+    minParams: getMinParams(),
+  }));
+
+  return {
+    name: value[columnIndices.name],
+    description: value[columnIndices.description],
+    alias: aliasTable[value[columnIndices.name]],
+    signatures,
+  };
+}
+
 (async function main() {
   const columnIndices = showFunctionsOutput.columns.reduce((acc, curr, index) => {
     acc[curr.name] = index;
@@ -1328,53 +1381,8 @@ const elasticsearchToKibanaType = (elasticsearchType) => {
     if (aliases.has(value[columnIndices.name])) {
       continue;
     }
-    // console.log(value[columnIndices.name]);
-    // console.log(value[columnIndices.argNames]);
-    console.log(value[columnIndices.name]);
-    console.log('----------------');
-    console.log(value[columnIndices.argTypes]);
-    // console.log(value[columnIndices.optionalArgs]);
-    // console.log(value[columnIndices.variadic]);
-    // console.log(value[columnIndices.returnType]);
 
-    const kbnArgTypes = ensureArray(value[columnIndices.argTypes]).map((argType) =>
-      dedupe(argType.split('|').map(elasticsearchToKibanaType))
-    );
-
-    const getMinParams = () =>
-      value[columnIndices.variadic]
-        ? ensureArray(value[columnIndices.optionalArgs]).length
-        : undefined;
-
-    const getReturnType = () => {
-      const allReturnTypes = dedupe(
-        value[columnIndices.returnType].split('|').map(elasticsearchToKibanaType)
-      );
-
-      // our client-side parser doesn't currently support multiple return types
-      return allReturnTypes.length === 1 ? allReturnTypes[0] : 'any';
-    };
-
-    const unexpandedParams = ensureArray(value[columnIndices.argNames]).map((argName, i) => ({
-      name: argName,
-      type: kbnArgTypes[i],
-      optional: ensureArray(value[columnIndices.optionalArgs])[i],
-    }));
-
-    const expandedParams = expandParams(unexpandedParams);
-
-    const signatures = expandedParams.map((params) => ({
-      params,
-      returnType: getReturnType(),
-      minParams: getMinParams(),
-    }));
-
-    const functionDefinition = {
-      name: value[columnIndices.name],
-      description: value[columnIndices.description],
-      alias: aliasTable[value[columnIndices.name]],
-      signatures,
-    };
+    const functionDefinition = getFunctionDefinition(value, columnIndices);
 
     value[columnIndices.isAggregation]
       ? aggFunctionDefinitions.push(functionDefinition)
