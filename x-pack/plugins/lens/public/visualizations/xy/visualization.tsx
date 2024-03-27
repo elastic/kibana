@@ -42,7 +42,11 @@ import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
 } from './xy_config_panel/dimension_editor';
-import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
+import {
+  ReferenceLayerHeader,
+  AnnotationsLayerHeader,
+  LayerHeaderContent,
+} from './xy_config_panel/layer_header';
 import type {
   Visualization,
   FramePublicAPI,
@@ -65,6 +69,8 @@ import {
   injectReferences,
   isHorizontalChart,
   isPersistedState,
+  annotationLayerHasUnsavedChanges,
+  isHorizontalSeries,
 } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
@@ -81,7 +87,6 @@ import {
   setAnnotationsDimension,
   getUniqueLabels,
   onAnnotationDrop,
-  isDateHistogram,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -104,6 +109,7 @@ import {
   newLayerState,
   supportedDataLayer,
   validateLayersForDimension,
+  isTimeChart,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
 import type { XYByValueAnnotationLayerConfig, XYState } from './types';
@@ -244,11 +250,15 @@ export const getXyVisualization = ({
 
   getDescription,
 
-  switchVisualizationType(seriesType: string, state: State) {
+  switchVisualizationType(seriesType: string, state: State, layerId?: string) {
     return {
       ...state,
       preferredSeriesType: seriesType as SeriesType,
-      layers: state.layers.map((layer) => ({ ...layer, seriesType: seriesType as SeriesType })),
+      layers: layerId
+        ? state.layers.map((layer) =>
+            layer.layerId === layerId ? { ...layer, seriesType: seriesType as SeriesType } : layer
+          )
+        : state.layers.map((layer) => ({ ...layer, seriesType: seriesType as SeriesType })),
     };
   },
 
@@ -645,15 +655,36 @@ export const getXyVisualization = ({
       <LayerHeaderContent
         {...otherProps}
         onChangeIndexPattern={(indexPatternId) => {
-          // TODO: should it trigger an action as in the datasource?
           onChangeIndexPattern(indexPatternId);
         }}
       />
     );
   },
 
-  LayerHeaderComponent(props) {
-    return <LayerHeader {...props} />;
+  isSubtypeCompatible(subtype1, subtype2) {
+    return (
+      (isHorizontalSeries(subtype1 as SeriesType) && isHorizontalSeries(subtype2 as SeriesType)) ||
+      (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
+    );
+  },
+
+  getCustomLayerHeader(props) {
+    const layer = props.state.layers.find((l) => l.layerId === props.layerId);
+    if (!layer) {
+      return undefined;
+    }
+    if (isReferenceLayer(layer)) {
+      return <ReferenceLayerHeader />;
+    }
+    if (isAnnotationsLayer(layer)) {
+      return (
+        <AnnotationsLayerHeader
+          title={getAnnotationLayerTitle(layer)}
+          hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
+        />
+      );
+    }
+    return undefined;
   },
 
   ToolbarComponent(props) {
@@ -743,7 +774,7 @@ export const getXyVisualization = ({
     const annotationLayers = getAnnotationsLayers(state.layers);
     const errors: UserMessage[] = [];
 
-    const hasDateHistogram = isDateHistogram(getDataLayers(state.layers), frame);
+    const hasDateHistogram = isTimeChart(getDataLayers(state.layers), frame);
 
     annotationLayers.forEach((layer) => {
       layer.annotations.forEach((annotation) => {
