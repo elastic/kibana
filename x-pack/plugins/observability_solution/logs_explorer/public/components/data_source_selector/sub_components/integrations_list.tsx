@@ -139,6 +139,7 @@ function Header({ onSortByName, search, ...props }: HeaderProps) {
           // @ts-expect-error This is an issue with EuiFlexItem not correctly inferring the props of the passed component. https://github.com/elastic/eui/issues/7612
           sortOrder={search.sortOrder}
           onSort={handleNameSort}
+          data-test-subj="dataSourceSelectorNameHeader"
         >
           <EuiText size="xs">
             <strong>{nameColumnLabel}</strong>
@@ -184,7 +185,7 @@ interface DatasetItemProps extends ListRowProps {
 
 function DatasetItem({ dataset, icon, ...props }: DatasetItemProps) {
   return (
-    <ListRow {...props} withIndentation css={datasetItemStyle}>
+    <ListRow {...props} withIndentation css={datasetItemStyle} data-test-subj={dataset.id}>
       <NameColumn
         component={ButtonWithIcon}
         // @ts-expect-error This is an issue with EuiFlexItem not correctly inferring the props of the passed component. https://github.com/elastic/eui/issues/7612
