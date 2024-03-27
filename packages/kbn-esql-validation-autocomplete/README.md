@@ -2,7 +2,7 @@
 
 ## Folder structure
 
-This library enables all the advanced features for ES|QL within Monaco, as validation, autocomplete, hover, etc...
+This library enables all the advanced features for ES|QL, as validation, autocomplete, hover, etc...
 The package is structure as follow:
 
 ```
