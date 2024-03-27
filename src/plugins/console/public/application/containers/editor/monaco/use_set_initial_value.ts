@@ -6,27 +6,40 @@
  * Side Public License, v 1.
  */
 
+import { debounce } from 'lodash';
+import { parse } from 'query-string';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
-import { NotificationsSetup } from '@kbn/core-notifications-browser';
+import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
 
-export interface LoadBufferFromRemoteParams {
+interface QueryParams {
+  load_from: string;
+}
+
+interface SetInitialValueParams {
   /** The text value that is initially in the console editor. */
   initialTextValue?: string;
   /** The function that sets the state of the value in the console editor. */
   setValue: (value: string) => void;
-  /** The notifications service. */
-  notifications: NotificationsSetup;
+  /** The toasts service. */
+  toasts: IToasts;
 }
 
 /**
- * Returns a hook to extract the data from the provided url and set the Console editor input to this data.
- *
- * @param params The {@link LoadBufferFromRemoteParams} to use.
+ * Util function for reading the load_from parameter from the current url.
  */
-export const useLoadBufferFromRemote = (params: LoadBufferFromRemoteParams) => {
-  const { initialTextValue, setValue, notifications } = params;
-  return (url: string) => {
+const readLoadFromParam = () => {
+  const [, queryString] = (window.location.hash || window.location.search || '').split('?');
+
+  const queryParams = parse(queryString || '', { sort: false }) as Required<QueryParams>;
+  return queryParams.load_from;
+};
+
+export const useSetInitialValue = (params: SetInitialValueParams) => {
+  const { initialTextValue, setValue, toasts } = params;
+
+  const loadBufferFromRemote = (url: string) => {
     // Normalize and encode the URL to avoid issues with spaces and other special characters.
     const encodedUrl = new URL(url).toString();
     if (/^https?:\/\//.test(encodedUrl)) {
@@ -52,7 +65,7 @@ export const useLoadBufferFromRemote = (params: LoadBufferFromRemoteParams) => {
 
       // Show a toast if we have a failure
       if (data === null || data === '') {
-        notifications.toasts.addWarning(
+        toasts.addWarning(
           i18n.translate('console.loadFromDataUriErrorMessage', {
             defaultMessage: 'Unable to load data from the load_from query parameter in the URL',
           })
@@ -62,5 +75,30 @@ export const useLoadBufferFromRemote = (params: LoadBufferFromRemoteParams) => {
 
       setValue(data);
     }
+  };
+
+  // Support for loading a console snippet from a remote source, like support docs.
+  const onHashChange = debounce(() => {
+    const url = readLoadFromParam();
+    if (!url) {
+      return;
+    }
+    loadBufferFromRemote(url);
+  }, 200);
+
+  return () => {
+    window.addEventListener('hashchange', onHashChange);
+
+    const loadFromParam = readLoadFromParam();
+
+    if (loadFromParam) {
+      loadBufferFromRemote(loadFromParam);
+    } else {
+      setValue(initialTextValue || DEFAULT_INPUT_VALUE);
+    }
+
+    return () => {
+      window.removeEventListener('hashchange', onHashChange);
+    };
   };
 };
