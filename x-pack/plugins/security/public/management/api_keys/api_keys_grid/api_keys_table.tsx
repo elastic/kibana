@@ -611,7 +611,14 @@ export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations)
   let expiredCount = 0;
 
   if (aggregationResponse) {
-    const { usernames, types, expired, managedMetadata, alertingKeys } = aggregationResponse;
+    const {
+      usernames,
+      types,
+      expired,
+      managed: {
+        buckets: { namePrefixBased, metadataBased },
+      },
+    } = aggregationResponse;
     types?.buckets.forEach((type) => {
       typeFilters.add(type.key);
     });
@@ -619,8 +626,8 @@ export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations)
       usernameFilters.add(username.key);
     });
     if (
-      (alertingKeys?.doc_count && alertingKeys?.doc_count > 0) ||
-      (managedMetadata?.doc_count && managedMetadata?.doc_count > 0)
+      (namePrefixBased?.doc_count && namePrefixBased?.doc_count > 0) ||
+      (metadataBased?.doc_count && metadataBased?.doc_count > 0)
     ) {
       typeFilters.add('managed');
     }

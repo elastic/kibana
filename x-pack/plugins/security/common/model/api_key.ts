@@ -87,8 +87,9 @@ export interface ApiKeyAggregations {
   usernames?: AggregationResponse<string>;
   types?: AggregationResponse<'rest' | 'cross_cluster' | 'managed'>;
   expired?: { doc_count: number };
-  alertingKeys?: { doc_count: number };
-  managedMetadata?: { doc_count: number };
+  managed: {
+    buckets: { metadataBased: { doc_count: number }; namePrefixBased: { doc_count: number } };
+  };
 }
 
 export interface ApiKeyAggregationsResponse {

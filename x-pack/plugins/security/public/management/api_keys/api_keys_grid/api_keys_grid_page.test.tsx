@@ -109,11 +109,15 @@ describe('APIKeysGridPage', () => {
         expired: {
           doc_count: 0,
         },
-        alertingKeys: {
-          doc_count: 0,
-        },
-        managedMetadata: {
-          doc_count: 0,
+        managed: {
+          buckets: {
+            metadataBased: {
+              doc_count: 0,
+            },
+            namePrefixBased: {
+              doc_count: 0,
+            },
+          },
         },
       },
     });

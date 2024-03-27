@@ -49,8 +49,8 @@ export function defineQueryApiKeysAggregationsRoute({
                 'aggregations.types.buckets.key',
                 'aggregations.invalidated.doc_count',
                 'aggregations.expired.doc_count',
-                'aggregations.alertingKeys.doc_count',
-                'aggregations.managedMetadata.doc_count',
+                'aggregations.managed.buckets.metadataBased.doc_count',
+                'aggregations.managed.buckets.namePrefixBased.doc_count',
               ],
             },
             body: {
@@ -77,19 +77,11 @@ export function defineQueryApiKeysAggregationsRoute({
                     range: { expiration: { lte: 'now/m' } },
                   },
                 },
-                alertingKeys: {
-                  filter: {
-                    prefix: {
-                      name: {
-                        value: 'Alerting',
-                      },
-                    },
-                  },
-                },
-                managedMetadata: {
-                  filter: {
-                    term: {
-                      'metadata.managed': true,
+                managed: {
+                  filters: {
+                    filters: {
+                      metadataBased: { term: { 'metadata.managed': true } },
+                      namePrefixBased: { prefix: { name: { value: 'Alerting' } } },
                     },
                   },
                 },
