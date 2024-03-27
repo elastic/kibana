@@ -360,6 +360,8 @@ describe('handleState', () => {
         latestExecutedState: {
           name: 'state1',
           started_at: expect.anything(),
+          errors:
+            'Error during execution of state "state2" with status "failed": Installation failed',
         },
       })
     );

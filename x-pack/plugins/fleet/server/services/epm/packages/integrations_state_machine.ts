@@ -47,7 +47,7 @@ export async function handleState(
       if (typeof stateResult === 'function') {
         const promiseName = `${currentStateName}Result`;
         updatedContext[promiseName] = stateResult;
-        updatedContext = { ...updatedContext, currentStateName, latestExecutedState };
+        updatedContext = { ...updatedContext, latestExecutedState };
       } else {
         updatedContext = {
           ...updatedContext,
@@ -61,14 +61,15 @@ export async function handleState(
       );
     } catch (error) {
       currentStatus = 'failed';
-      logger.warn(
-        `Error during execution of state "${currentStateName}" with status "${currentStatus}": ${error.message}`
-      );
+      const errorMessage = `Error during execution of state "${currentStateName}" with status "${currentStatus}": ${error.message}`;
+      logger.warn(errorMessage);
+      const latestStateWithError = { ...updatedContext.latestExecutedState, errors: errorMessage };
+      updatedContext = { ...updatedContext, latestExecutedState: latestStateWithError };
     }
   } else {
     currentStatus = 'failed';
     logger.warn(
-      `Execution of state "${currentStateName}" with status "${currentStatus}": provided onTransition is not a valid function `
+      `Execution of state "${currentStateName}" with status "${currentStatus}": provided onTransition is not a valid function`
     );
   }
 
