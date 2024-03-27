@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ItemSet } from '../types';
+import type { ItemSet } from '@kbn/ml-agg-utils';
 
 import { getValueCounts } from './get_value_counts';
 

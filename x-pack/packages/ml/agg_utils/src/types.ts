@@ -51,6 +51,15 @@ export interface FieldValuePair {
   fieldValue: string | number;
 }
 
+export interface ItemSet {
+  set: FieldValuePair[];
+  size: number;
+  maxPValue: number;
+  doc_count: number;
+  support: number;
+  total_doc_count: number;
+}
+
 /**
  * Interface describing attributes used for numeric histograms.
  * @interface

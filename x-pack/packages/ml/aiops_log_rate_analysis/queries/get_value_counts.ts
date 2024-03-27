@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ItemSet } from '../types';
+import type { ItemSet } from '@kbn/ml-agg-utils';
 
 export function getValueCounts(df: ItemSet[], field: string) {
   return df.reduce<Record<string, number>>((p, c) => {

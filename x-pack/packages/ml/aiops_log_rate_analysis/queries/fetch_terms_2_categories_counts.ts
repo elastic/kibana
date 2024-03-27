@@ -11,14 +11,14 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { FieldValuePair, SignificantItem } from '@kbn/ml-agg-utils';
+import type { FieldValuePair, ItemSet, SignificantItem } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
-import type { FetchFrequentItemSetsResponse, ItemSet } from '../types';
+import type { FetchFrequentItemSetsResponse } from '../types';
 import { LOG_RATE_ANALYSIS_SETTINGS } from '../constants';
 
 import { getQueryWithParams } from './get_query_with_params';

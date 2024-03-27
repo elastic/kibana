@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { SignificantItem, SignificantItemType, FieldValuePair } from '@kbn/ml-agg-utils';
+import type {
+  SignificantItem,
+  SignificantItemType,
+  FieldValuePair,
+  ItemSet,
+} from '@kbn/ml-agg-utils';
 
 export interface SignificantItemDuplicateGroup {
   keys: Pick<SignificantItem, keyof SignificantItem>;
@@ -13,15 +18,6 @@ export interface SignificantItemDuplicateGroup {
 }
 
 export type FieldValuePairCounts = Record<string, Record<string, number>>;
-
-export interface ItemSet {
-  set: FieldValuePair[];
-  size: number;
-  maxPValue: number;
-  doc_count: number;
-  support: number;
-  total_doc_count: number;
-}
 
 export interface FetchFrequentItemSetsResponse {
   fields: string[];

@@ -12,15 +12,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { type SignificantItem } from '@kbn/ml-agg-utils';
+import type { ItemSet, SignificantItem } from '@kbn/ml-agg-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { RANDOM_SAMPLER_SEED, LOG_RATE_ANALYSIS_SETTINGS } from '../constants';
-import type {
-  SignificantItemDuplicateGroup,
-  ItemSet,
-  FetchFrequentItemSetsResponse,
-} from '../types';
+import type { SignificantItemDuplicateGroup, FetchFrequentItemSetsResponse } from '../types';
 
 interface FrequentItemSetsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {

@@ -7,9 +7,7 @@
 
 import { uniqBy } from 'lodash';
 
-import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
-
-import type { ItemSet } from '../types';
+import type { ItemSet, SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { groupDuplicates } from './fetch_frequent_item_sets';
