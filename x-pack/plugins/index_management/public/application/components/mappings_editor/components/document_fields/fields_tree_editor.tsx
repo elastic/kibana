@@ -12,7 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import { FieldsList, CreateField } from './fields';
 
-export const DocumentFieldsTreeEditor = () => {
+interface Props {
+  onCancelAddingNewFields?: () => void;
+  isAddingFields?: boolean;
+}
+
+export const DocumentFieldsTreeEditor = ({ onCancelAddingNewFields, isAddingFields }: Props) => {
   const dispatch = useDispatch();
   const {
     fields: { byId, rootLevelFields },
@@ -34,7 +39,15 @@ export const DocumentFieldsTreeEditor = () => {
       return null;
     }
 
-    return <CreateField isCancelable={fields.length > 0} allFields={byId} isRootLevelField />;
+    return (
+      <CreateField
+        isCancelable={fields.length > 0}
+        allFields={byId}
+        isRootLevelField
+        onCancelAddingNewFields={onCancelAddingNewFields}
+        isAddingFields={isAddingFields}
+      />
+    );
   };
 
   const renderAddFieldButton = () => {
@@ -58,7 +71,7 @@ export const DocumentFieldsTreeEditor = () => {
 
   return (
     <>
-      <FieldsList fields={fields} />
+      <FieldsList fields={fields} state={useMappingsState()} isAddingFields={isAddingFields} />
       {renderCreateField()}
       {renderAddFieldButton()}
     </>
