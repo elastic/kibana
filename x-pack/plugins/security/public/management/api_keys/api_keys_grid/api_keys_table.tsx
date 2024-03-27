@@ -32,6 +32,23 @@ import type { AuthenticatedUser } from '../../../../common';
 import type { ApiKey, ApiKeyAggregations, RestApiKey } from '../../../../common/model';
 import type { CreateAPIKeyResult } from '../api_keys_api_client';
 
+export interface TableSortingOptions {
+  field:
+    | 'id'
+    | 'type'
+    | 'name'
+    | 'username'
+    | 'realm'
+    | 'creation'
+    | 'metadata'
+    | 'role_descriptors'
+    | 'expiration'
+    | 'invalidated'
+    | 'limited_by'
+    | '_sort'
+    | 'expired';
+  direction: 'asc' | 'desc';
+}
 export interface ApiKeysTableProps {
   apiKeys: CategorizedApiKey[];
   currentUser: AuthenticatedUser;
@@ -48,6 +65,7 @@ export interface ApiKeysTableProps {
   pagination: any;
   onSearchChange: any;
   aggregations?: ApiKeyAggregations;
+  sortingOptions: TableSortingOptions;
 }
 
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
@@ -65,6 +83,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   pagination,
   onSearchChange,
   aggregations,
+  sortingOptions,
 }) => {
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
@@ -298,6 +317,12 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
               }
         }
         isSelectable={canManageOwnApiKeys}
+        sorting={{
+          sort: {
+            field: sortingOptions.field,
+            direction: sortingOptions.direction,
+          },
+        }}
       />
     </>
   );

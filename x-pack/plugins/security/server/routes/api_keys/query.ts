@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SecurityQueryApiKeysRequest } from '@elastic/elasticsearch/lib/api/types';
-
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
@@ -39,8 +37,13 @@ export function defineQueryApiKeysAndAggregationsRoute({
         body: schema.object({
           query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           size: schema.maybe(schema.number()),
-          sort: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           from: schema.maybe(schema.number()),
+          sort: schema.maybe(
+            schema.object({
+              field: schema.string(),
+              direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+            })
+          ),
         }),
       },
       options: {
@@ -69,13 +72,13 @@ export function defineQueryApiKeysAndAggregationsRoute({
             },
           });
         }
-        const { query, size, from, sort } = request.body as SecurityQueryApiKeysRequest;
-
+        const { query, size, from, sort } = request.body;
+        const transformedSort = sort && [{ [sort.field]: { order: sort.direction } }];
         const queryResponse = await esClient.asCurrentUser.security.queryApiKeys({
           query,
           size,
           from,
-          sort,
+          sort: transformedSort,
         });
 
         const transportResponse =

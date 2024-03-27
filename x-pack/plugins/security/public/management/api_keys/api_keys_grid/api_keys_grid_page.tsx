@@ -26,7 +26,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { ApiKeysTable } from './api_keys_table';
-import type { CategorizedApiKey } from './api_keys_table';
+import type { CategorizedApiKey, TableSortingOptions } from './api_keys_table';
 import { InvalidateProvider } from './invalidate_provider';
 import type { ApiKey } from '../../../../common/model';
 import { Breadcrumb } from '../../../components/breadcrumb';
@@ -74,32 +74,42 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const [query, setQuery] = useState<Query>(EuiSearchBar.Query.parse(''));
   const [from, setFrom] = useState<number>(0);
   const [pageSize, setPageSize] = useState(25);
+  const [tableSort, setTableSort] = useState<TableSortingOptions>({
+    field: 'creation',
+    direction: 'desc',
+  });
 
   const [state, queryApiKeysAndAggregations] = useAsyncFn(() => {
     const queryContainer = parseSearchBarQuery(query);
+
     const requestBody = {
       query: queryContainer,
       from,
       size: pageSize,
+      sort: tableSort,
     };
     return Promise.all([
       new APIKeysAPIClient(services.http).queryApiKeys(requestBody),
       authc.getCurrentUser(),
     ]);
-  }, [services.http, query, from, pageSize]);
+  }, [services.http, query, from, pageSize, tableSort]);
 
   const resetQueryOnError = () => {
     setQuery(EuiSearchBar.Query.parse(''));
     setFrom(0);
+    setTableSort({ field: 'creation', direction: 'desc' });
   };
 
   const [createdApiKey, setCreatedApiKey] = useState<CreateAPIKeyResult>();
   const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
   const readOnly = !useCapabilities('api_keys').save;
 
-  const onTableChange = ({ page }: Criteria<ApiKey>) => {
+  const onTableChange = ({ page, sort }: Criteria<ApiKey>) => {
     setFrom(page?.index! * pageSize);
     setPageSize(page?.size!);
+    if (sort) {
+      setTableSort(sort);
+    }
   };
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
@@ -113,7 +123,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   useEffect(() => {
     queryApiKeysAndAggregations();
-  }, [query, from, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [query, from, pageSize, tableSort]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!state.value) {
     if (state.loading) {
@@ -299,6 +309,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   onTableChange={onTableChange}
                   onSearchChange={debouncedOnSearchChange}
                   aggregations={aggregations}
+                  sortingOptions={tableSort}
                 />
               )}
             </InvalidateProvider>
