@@ -115,7 +115,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           searchQuery
         );
 
-        // const nonEmptyFields = null;
         // Getting non-empty fields for the index pattern
         // because then we can absolutely exclude these from subsequent requests
         const nonEmptyFields = await fetchDataWithTimeout<Promise<FieldSpec[]>>(
@@ -314,7 +313,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
           const nonAggregatableOverallStatsResp: NonAggregatableFieldOverallStats[] = [];
 
-          // @TODO: remove
           let sampledNonAggregatableFieldsExamples: Array<{ [key: string]: string }> | undefined;
           value.forEach((resp, idx) => {
             if (idx === 0 && isNonAggregatableSampledDocs(resp)) {
