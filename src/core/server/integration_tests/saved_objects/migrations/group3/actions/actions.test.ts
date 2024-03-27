@@ -401,21 +401,19 @@ describe('migration actions', () => {
     });
     it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
       // Create a red index
-      await client.indices.create(
-        {
-          index: 'red_then_yellow_index',
-          timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
-              // Disable all shard allocation so that the index status is red
-              routing: { allocation: { enable: 'none' } },
-            },
+      await client.indices.create({
+        index: 'red_then_yellow_index',
+        timeout: '5s',
+        body: {
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index stays yellow
+            number_of_replicas: '1',
+            // Disable all shard allocation so that the index status is red
+            routing: { allocation: { enable: 'none' } },
           },
         },
-      );
+      });
 
       // Start tracking the index status
       const indexStatusPromise = waitForIndexStatus({
@@ -1817,21 +1815,19 @@ describe('migration actions', () => {
       expect.assertions(2);
       // Create a red index
       await client.indices
-        .create(
-          {
-            index: 'red_then_yellow_index',
-            timeout: '5s',
-            body: {
-              mappings: { properties: {} },
-              settings: {
-                // Allocate 1 replica so that this index stays yellow
-                number_of_replicas: '1',
-                // Disable all shard allocation so that the index status starts as red
-                index: { routing: { allocation: { enable: 'none' } } },
-              },
+        .create({
+          index: 'red_then_yellow_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status starts as red
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
-        )
+        })
         .catch((e) => {
           /** ignore */
         });
