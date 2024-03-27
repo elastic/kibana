@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { useShareTabsContext } from '../../context';
 import { ExportContent } from './export_content';
@@ -17,7 +16,7 @@ type IExportTab = IModalTabDeclaration<{
   exportType: string;
 }>;
 
-const exportTabReducer: IExportTab['reducer'] = (state = {}, action) => {
+const exportTabReducer: IExportTab['reducer'] = (state = { exportType: '' }, action) => {
   switch (action.type) {
     default:
       return state;
@@ -31,21 +30,20 @@ const ExportTabContent: IExportTab['content'] = ({ state, dispatch }) => {
 
 export const exportTab: IExportTab = {
   id: 'export',
-  name: i18n.translate('share.contextMenu.permalinksTab', {
+  name: i18n.translate('share.contextMenu.exportsTab', {
     defaultMessage: 'Export',
   }),
-  description: (
-    <FormattedMessage
-      id="share.dashboard.link.description"
-      defaultMessage="Share a direct link to this search."
-    />
-  ),
+  description: i18n.translate('share.dashboard.link.description', {
+    defaultMessage: 'Share a direct link to this search.',
+  }),
+  reducer: exportTabReducer,
   content: ExportTabContent,
   modalActionBtn: {
     id: 'export',
     dataTestSubj: 'generateExportButton',
-    formattedMessageId: 'share.link.generateExportButton',
-    defaultMessage: 'Generate export',
+    label: i18n.translate('share.dashboard.link.description', {
+      defaultMessage: 'Share a direct link to this search.',
+    }),
     handler: ({ state }) => {
       // add method to handle export
     },

@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { TabbedModal, type IModalTabDeclaration } from './src/tabbed_modal';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/modal/tabbed'],
+};

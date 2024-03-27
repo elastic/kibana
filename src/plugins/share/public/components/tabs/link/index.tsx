@@ -8,7 +8,6 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { copyToClipboard } from '@elastic/eui';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { useShareTabsContext } from '../../context';
@@ -81,19 +80,15 @@ export const linkTab: ILinkTab = {
   name: i18n.translate('share.contextMenu.permalinksTab', {
     defaultMessage: 'Links',
   }),
-  description: (
-    <FormattedMessage
-      id="share.dashboard.link.description"
-      defaultMessage="Share a direct link to this search."
-    />
-  ),
+  description: i18n.translate('share.dashboard.link.description', {
+    defaultMessage: 'Share a direct link to this search.',
+  }),
   content: LinkTabContent,
   reducer: linkTabReducer,
   modalActionBtn: {
     id: 'link',
     dataTestSubj: 'copyShareUrlButton',
-    formattedMessageId: 'share.link.copyLinkButton',
-    defaultMessage: 'Copy link',
+    label: i18n.translate('share.link.copyLinkButton', { defaultMessage: 'Copy link' }),
     handler: ({ state }) => {
       copyToClipboard(state.dashboardUrl);
     },

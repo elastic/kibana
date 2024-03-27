@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { copyToClipboard } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { EmbedContent } from './embed_content';
 import { useShareTabsContext } from '../../context';
@@ -64,19 +63,18 @@ export const embedTab: IEmbedTab = {
   name: i18n.translate('share.contextMenu.embedCodeTab', {
     defaultMessage: 'Embed',
   }),
-  description: (
-    <FormattedMessage
-      id="share.dashboard.embed.description"
-      defaultMessage="Embed this dashboard into another webpage. Select which menu items to include in the embeddable view."
-    />
-  ),
+  description: i18n.translate('share.dashboard.embed.description', {
+    defaultMessage:
+      'Embed this dashboard into another webpage. Select which menu items to include in the embeddable view.',
+  }),
   reducer: embedTabReducer,
   content: EmbedTabContent,
   modalActionBtn: {
     id: 'embed',
     dataTestSubj: 'copyEmbedUrlButton',
-    formattedMessageId: 'share.link.copyEmbedCodeButton',
-    defaultMessage: 'Copy Embed',
+    label: i18n.translate('share.link.copyEmbedCodeButton', {
+      defaultMessage: 'Copy Embed',
+    }),
     handler: ({ state }) => {
       copyToClipboard(state.url);
     },
