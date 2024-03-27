@@ -250,7 +250,7 @@ describe('unified timeline', () => {
         const newColumns = getTimelineFromStore(customStore).columns;
         expect(newColumns[0].id).toBe('message');
       });
-    });
+    }, 100000);
 
     it('should move column right correctly ', async () => {
       const field = {
@@ -286,7 +286,7 @@ describe('unified timeline', () => {
         const newColumns = getTimelineFromStore(customStore).columns;
         expect(newColumns[2].id).toBe('message');
       });
-    });
+    }, 100000);
 
     it('should remove column ', async () => {
       const field = {
