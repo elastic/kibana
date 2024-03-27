@@ -82,10 +82,10 @@ export const generateEsHits = (dataView: DataView, count: number): EsHitRecord[]
     _index: 'i',
     _id: i.toString(),
     _score: 1,
-    _source: dataView.fields.reduce<Record<string, any>>(
+    fields: dataView.fields.reduce<Record<string, any>>(
       (source, field) => ({
         ...source,
-        [field.name]: generateFieldValue(field, i),
+        [field.name]: [generateFieldValue(field, i)],
       }),
       {}
     ),

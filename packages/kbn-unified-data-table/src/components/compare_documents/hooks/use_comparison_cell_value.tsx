@@ -131,7 +131,7 @@ const InnerCellValue = ({
   }
 
   if (!doc) {
-    return <>{EMPTY_VALUE}</>;
+    return <span className={CELL_CLASS}>{EMPTY_VALUE}</span>;
   }
 
   if (!diff) {

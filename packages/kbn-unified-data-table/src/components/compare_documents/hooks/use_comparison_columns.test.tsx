@@ -174,11 +174,11 @@ describe('useComparisonColumns', () => {
     render(<button onClick={pinAction} data-test-subj="pin" />);
     userEvent.click(screen.getByTestId('pin'));
     expect(setSelectedDocs).toHaveBeenCalledTimes(1);
-    expect(setSelectedDocs).toHaveBeenCalledWith(['1', '0', '2', '3']);
+    expect(setSelectedDocs).toHaveBeenLastCalledWith(['1', '0', '2', '3']);
     render(<button onClick={removeAction} data-test-subj="remove" />);
     userEvent.click(screen.getByTestId('remove'));
     expect(setSelectedDocs).toHaveBeenCalledTimes(2);
-    expect(setSelectedDocs).toHaveBeenCalledWith(['0', '2', '3']);
+    expect(setSelectedDocs).toHaveBeenLastCalledWith(['0', '2', '3']);
   });
 
   it('should not set column widths if there is sufficient space', () => {

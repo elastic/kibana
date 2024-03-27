@@ -19,14 +19,14 @@ import { fieldList, FieldSpec } from '@kbn/data-views-plugin/common';
 import { EsHitRecord } from '@kbn/discover-utils/types';
 
 const matchValues = (hit: EsHitRecord) => {
-  hit._source!.bytes = 50;
-  hit._source!.extension = 'gif';
+  hit.fields!.bytes = [50];
+  hit.fields!.extension = ['gif'];
   return hit;
 };
 
 const clearValues = (hit: EsHitRecord) => {
-  hit._source!.bytes = null;
-  hit._source!.extension = undefined;
+  hit.fields!.bytes = null;
+  hit.fields!.extension = undefined;
   return hit;
 };
 
