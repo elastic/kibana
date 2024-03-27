@@ -25,6 +25,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
+import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -74,6 +75,7 @@ export interface PluginsStart {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   ml: MlPluginStart;
+  searchConnectors: SearchConnectorsPluginStart;
   searchPlayground: SearchPlaygroundPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
