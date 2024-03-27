@@ -59,12 +59,12 @@ export TEST_BROWSER_HEADLESS=1
 export TEST_KIBANA_URL="http://elastic:changeme@$KIBANA_IP_ADDRESS:5601"
 export TEST_ES_URL="http://elastic:changeme@192.168.56.1:9200"
 
-cd x-pack
-
 echo "--- FTR - Reporting"
 
+cd x-pack
+
 if [[ "$TEST_PACKAGE" == "fips" ]]; then
-  node scripts/functional_test_runner.js --config x-pack/test/reporting_functional/reporting_and_security.config.ts --quiet
+  node scripts/functional_test_runner.js --config test/reporting_functional/reporting_and_security.config.ts --quiet
 else
   node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
 fi
