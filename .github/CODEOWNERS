@@ -393,7 +393,10 @@ packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
 examples/eso_model_version_example @elastic/kibana-security
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
-packages/kbn-esql-utils @elastic/kibana-visualizations
+packages/kbn-esql-ast @elastic/kibana-esql
+packages/kbn-esql-utils @elastic/kibana-esql
+packages/kbn-esql-validation-autocomplete @elastic/kibana-esql
+examples/esql_validation_example @elastic/kibana-esql
 packages/kbn-event-annotation-common @elastic/kibana-visualizations
 packages/kbn-event-annotation-components @elastic/kibana-visualizations
 src/plugins/event_annotation_listing @elastic/kibana-visualizations
@@ -497,7 +500,7 @@ src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
-packages/kbn-language-documentation-popover @elastic/kibana-visualizations
+packages/kbn-language-documentation-popover @elastic/kibana-esql
 x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
 packages/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 packages/kbn-lens-formula-docs @elastic/kibana-visualizations
@@ -682,6 +685,7 @@ x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
 packages/kbn-search-api-panels @elastic/enterprise-search-frontend
 packages/kbn-search-connectors @elastic/enterprise-search-frontend
+x-pack/plugins/search_connectors @elastic/enterprise-search-frontend
 packages/kbn-search-errors @elastic/kibana-data-discovery
 examples/search_examples @elastic/kibana-data-discovery
 packages/kbn-search-index-documents @elastic/enterprise-search-frontend
@@ -824,8 +828,8 @@ x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
-packages/kbn-text-based-editor @elastic/kibana-visualizations
-src/plugins/text_based_languages @elastic/kibana-visualizations
+packages/kbn-text-based-editor @elastic/kibana-esql
+src/plugins/text_based_languages @elastic/kibana-esql
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
@@ -965,7 +969,7 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 /test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
-packages/kbn-monaco/src/esql @elastic/kibana-visualizations
+packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Global Experience
 
@@ -1175,8 +1179,8 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /.bazelversion @elastic/kibana-operations
 /WORKSPACE.bazel @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
-/.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-visualizations
-/.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-visualizations
+/.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-esql
+/.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
