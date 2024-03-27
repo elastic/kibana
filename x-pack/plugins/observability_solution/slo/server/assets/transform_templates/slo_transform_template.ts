@@ -32,12 +32,11 @@ export const getSLOTransformTemplate = (
   settings: TransformSettings,
   slo: SLO
 ): TransformPutTransformRequest => {
-  const groupingFilters = buildGroupingFilters(slo);
-  source.query.bool.filter.push(...groupingFilters);
+  const formattedSource = buildSourceWithFilters(source, slo);
   return {
     transform_id: transformId,
     description,
-    source,
+    source: formattedSource,
     frequency: settings.frequency,
     dest: destination,
     settings: {
@@ -67,4 +66,18 @@ const buildGroupingFilters = (slo: SLO) => {
   // build exists filters for each groupBy field to make sure the field exists
   const groups = [slo.groupBy].flat().filter((group) => !!group && group !== ALL_VALUE);
   return groups.map((group) => ({ exists: { field: group } }));
+};
+
+const buildSourceWithFilters = (source: TransformSource, slo: SLO) => {
+  const groupingFilters = buildGroupingFilters(slo);
+  return {
+    ...source,
+    query: {
+      ...source.query,
+      bool: {
+        ...source.query.bool,
+        filter: [...source.query.bool.filter, ...groupingFilters],
+      },
+    },
+  };
 };
