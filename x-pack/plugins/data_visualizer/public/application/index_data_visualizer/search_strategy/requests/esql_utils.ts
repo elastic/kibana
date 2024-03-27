@@ -35,8 +35,3 @@ export const getESQLPercentileQueryArray = (fieldName: string, percents = PERCEN
     (p) =>
       `${getSafeESQLName(`${fieldName}_p${p}`)} = PERCENTILE(${getSafeESQLName(fieldName)}, ${p})`
   );
-
-export const getSafeESQLLimitSize = (str?: string) => {
-  if (str === 'none' || !str) return '';
-  return ` | LIMIT ${str}`;
-};
