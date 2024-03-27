@@ -43,7 +43,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
   Actions,
   AuditLogger,

@@ -36,7 +36,6 @@ export const performCreate = async <T>(
     serializer,
     migrator,
     extensions = {},
-    logger,
   }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
   const {
