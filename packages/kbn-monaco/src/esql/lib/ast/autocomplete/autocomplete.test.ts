@@ -348,9 +348,16 @@ describe('autocomplete', () => {
   });
 
   describe('show', () => {
-    testSuggestions('show ', ['functions', 'info']);
-    for (const fn of ['functions', 'info']) {
+    testSuggestions('show ', ['info']);
+    for (const fn of ['info']) {
       testSuggestions(`show ${fn} `, ['|']);
+    }
+  });
+
+  describe('meta', () => {
+    testSuggestions('meta ', ['functions']);
+    for (const fn of ['functions']) {
+      testSuggestions(`meta ${fn} `, ['|']);
     }
   });
 

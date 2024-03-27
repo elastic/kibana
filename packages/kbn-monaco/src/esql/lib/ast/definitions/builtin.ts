@@ -385,7 +385,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     description: i18n.translate('monaco.esql.definition.functionsDoc', {
       defaultMessage: 'Show ES|QL avaialble functions with signatures',
     }),
-    supportedCommands: ['show'],
+    supportedCommands: ['meta'],
     signatures: [
       {
         params: [],
