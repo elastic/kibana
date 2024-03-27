@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type DocumentDiffMode = 'basic' | 'chars' | 'words' | 'lines';
+export type DocumentDiffMode = 'basic' | 'chars' | 'words' | 'lines' | null;

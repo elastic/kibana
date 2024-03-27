@@ -23,7 +23,6 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  useEuiBackgroundColor,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -34,14 +33,12 @@ import type { DocumentDiffMode } from './types';
 export interface ComparisonControlsProps {
   isPlainRecord?: boolean;
   selectedDocs: string[];
-  showDiff: boolean | undefined;
   diffMode: DocumentDiffMode | undefined;
   showDiffDecorations: boolean | undefined;
   showMatchingValues: boolean | undefined;
   showAllFields: boolean | undefined;
   forceShowAllFields: boolean;
   setIsCompareActive: (isCompareActive: boolean) => void;
-  setShowDiff: (showDiff: boolean) => void;
   setDiffMode: (diffMode: DocumentDiffMode) => void;
   setShowDiffDecorations: (showDiffDecorations: boolean) => void;
   setShowMatchingValues: (showMatchingValues: boolean) => void;
@@ -51,21 +48,18 @@ export interface ComparisonControlsProps {
 export const ComparisonControls = ({
   isPlainRecord,
   selectedDocs,
-  showDiff,
   diffMode,
   showDiffDecorations,
   showMatchingValues,
   showAllFields,
   forceShowAllFields,
   setIsCompareActive,
-  setShowDiff,
   setDiffMode,
   setShowDiffDecorations,
   setShowMatchingValues,
   setShowAllFields,
 }: ComparisonControlsProps) => {
   const { euiTheme } = useEuiTheme();
-  const backgroundSuccess = useEuiBackgroundColor('success');
 
   return (
     <EuiFlexGroup responsive={false} wrap={true} gutterSize="s" alignItems="center">
@@ -87,23 +81,6 @@ export const ComparisonControls = ({
             )}
           </strong>
         </EuiText>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiDataGridToolbarControl
-          iconType="diff"
-          color={showDiff ? 'success' : 'text'}
-          isSelected={showDiff}
-          onClick={() => {
-            setShowDiff(!showDiff);
-          }}
-          css={{
-            backgroundColor: showDiff ? `${backgroundSuccess} !important` : undefined,
-            borderColor: showDiff ? `${backgroundSuccess} !important` : undefined,
-          }}
-        >
-          <FormattedMessage id="unifiedDataTable.showDiff" defaultMessage="Show diff" />
-        </EuiDataGridToolbarControl>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -210,6 +187,10 @@ const ComparisonSettings = ({
 
         <DiffModeEntry entryDiffMode="lines" diffMode={diffMode} setDiffMode={setDiffMode} advanced>
           <FormattedMessage id="unifiedDataTable.diffModeLines" defaultMessage="By line" />
+        </DiffModeEntry>
+
+        <DiffModeEntry entryDiffMode={null} diffMode={diffMode} setDiffMode={setDiffMode}>
+          <FormattedMessage id="unifiedDataTable.diffModeNone" defaultMessage="None" />
         </DiffModeEntry>
 
         <EuiHorizontalRule margin="none" />
@@ -353,9 +334,11 @@ const DiffOptionSwitch = ({
         <EuiFlexItem grow={false}>
           <EuiSwitch label={label} checked={checked} compressed onChange={onChange} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip type="questionInCircle" position="right" content={description} />
-        </EuiFlexItem>
+        {description && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip type="questionInCircle" position="right" content={description} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiContextMenuItem>
   );

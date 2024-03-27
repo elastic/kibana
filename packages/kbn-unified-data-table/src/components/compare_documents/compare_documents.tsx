@@ -73,7 +73,6 @@ const CompareDocuments = ({
   setIsCompareActive,
   renderCustomToolbar,
 }: CompareDocumentsProps) => {
-  const [showDiff, setShowDiff] = useLocalStorage(getStorageKey(consumer, 'ShowDiff'), true);
   const [diffMode, setDiffMode] = useLocalStorage<DocumentDiffMode>(
     getStorageKey(consumer, 'DiffMode'),
     'basic'
@@ -129,14 +128,12 @@ const CompareDocuments = ({
       <ComparisonControls
         isPlainRecord={isPlainRecord}
         selectedDocs={selectedDocs}
-        showDiff={showDiff}
         diffMode={diffMode}
         showDiffDecorations={showDiffDecorations}
         showMatchingValues={showMatchingValues}
         showAllFields={showAllFields}
         forceShowAllFields={forceShowAllFields}
         setIsCompareActive={setIsCompareActive}
-        setShowDiff={setShowDiff}
         setDiffMode={setDiffMode}
         setShowDiffDecorations={setShowDiffDecorations}
         setShowMatchingValues={setShowMatchingValues}
@@ -151,11 +148,9 @@ const CompareDocuments = ({
       setDiffMode,
       setIsCompareActive,
       setShowAllFields,
-      setShowDiff,
       setShowDiffDecorations,
       setShowMatchingValues,
       showAllFields,
-      showDiff,
       showDiffDecorations,
       showMatchingValues,
     ]
@@ -178,12 +173,11 @@ const CompareDocuments = ({
       }),
     [renderCustomToolbar, additionalControls, comparisonFields, totalFields]
   );
-  const ComparisonCellValue = useComparisonCellValue({
+  const renderCellValue = useComparisonCellValue({
     dataView,
     comparisonFields,
     fieldColumnId,
     selectedDocs,
-    showDiff,
     diffMode,
     fieldFormats,
     getDocById,
@@ -203,7 +197,7 @@ const CompareDocuments = ({
       rowHeightsOptions={comparisonRowHeight}
       inMemory={comparisonInMemory}
       schemaDetectors={schemaDetectors}
-      renderCellValue={ComparisonCellValue}
+      renderCellValue={renderCellValue}
       renderCustomToolbar={renderCustomToolbarFn}
       data-test-subj="comparisonTable"
       css={comparisonCss}

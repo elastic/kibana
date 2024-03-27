@@ -34,7 +34,6 @@ export interface UseComparisonCellValueProps {
   comparisonFields: string[];
   fieldColumnId: string;
   selectedDocs: string[];
-  showDiff: boolean | undefined;
   diffMode: DocumentDiffMode | undefined;
   fieldFormats: FieldFormatsStart;
   getDocById: (id: string) => DataTableRecord | undefined;
@@ -45,7 +44,6 @@ export const useComparisonCellValue = ({
   comparisonFields,
   fieldColumnId,
   selectedDocs,
-  showDiff,
   diffMode,
   fieldFormats,
   getDocById,
@@ -56,7 +54,7 @@ export const useComparisonCellValue = ({
     [comparisonBaseDocId, getDocById]
   );
 
-  const ComparisonCellValue = useCallback(
+  return useCallback(
     (innerProps: EuiDataGridCellValueElementProps) => {
       return (
         <InnerCellValue
@@ -65,7 +63,6 @@ export const useComparisonCellValue = ({
           fieldColumnId={fieldColumnId}
           comparisonBaseDocId={comparisonBaseDocId}
           comparisonBaseDoc={comparisonBaseDoc}
-          showDiff={showDiff}
           diffMode={diffMode}
           fieldFormats={fieldFormats}
           getDocById={getDocById}
@@ -82,11 +79,8 @@ export const useComparisonCellValue = ({
       fieldColumnId,
       fieldFormats,
       getDocById,
-      showDiff,
     ]
   );
-
-  return ComparisonCellValue;
 };
 
 interface InnerCellValueProps
@@ -103,7 +97,6 @@ const InnerCellValue = ({
   comparisonBaseDocId,
   comparisonBaseDoc,
   comparisonFields,
-  showDiff,
   diffMode,
   fieldColumnId,
   getDocById,
@@ -117,12 +110,12 @@ const InnerCellValue = ({
   const doc = useMemo(() => getDocById(columnId), [columnId, getDocById]);
   const base = comparisonBaseDoc?.[fieldName];
   const comparison = doc?.flattened[fieldName];
-  const diff = useDiff({ base, comparison, showDiff, diffMode });
+  const diff = useDiff({ base, comparison, diffMode });
 
   useEffect(() => {
     if (columnId === comparisonBaseDocId) {
       setCellProps({ className: BASE_CELL_CLASS });
-    } else if (!showDiff || diffMode !== 'basic') {
+    } else if (diffMode !== 'basic') {
       setCellProps({ className: undefined });
     } else if (columnId !== fieldColumnId) {
       if (isEqual(base, comparison)) {
@@ -131,16 +124,7 @@ const InnerCellValue = ({
         setCellProps({ className: DIFF_CELL_CLASS });
       }
     }
-  }, [
-    base,
-    columnId,
-    comparison,
-    comparisonBaseDocId,
-    diffMode,
-    fieldColumnId,
-    setCellProps,
-    showDiff,
-  ]);
+  }, [base, columnId, comparison, comparisonBaseDocId, diffMode, fieldColumnId, setCellProps]);
 
   if (columnId === fieldColumnId) {
     return <FieldCellContent field={field} fieldName={fieldName} />;
@@ -216,16 +200,14 @@ const FieldCellContent = ({
 const useDiff = ({
   base,
   comparison,
-  showDiff,
   diffMode,
 }: {
   base: unknown;
   comparison: unknown;
-  showDiff: boolean | undefined;
   diffMode: DocumentDiffMode | undefined;
 }) => {
   const diff = useMemo(() => {
-    if (!showDiff || diffMode === 'basic' || !base || !comparison) {
+    if (!diffMode || diffMode === 'basic' || !base || !comparison) {
       return undefined;
     }
 
@@ -244,7 +226,7 @@ const useDiff = ({
     }
 
     return diffLines(baseValueString, currentValueString, { ignoreWhitespace: false });
-  }, [base, comparison, diffMode, showDiff]);
+  }, [base, comparison, diffMode]);
 
   return diff;
 };
