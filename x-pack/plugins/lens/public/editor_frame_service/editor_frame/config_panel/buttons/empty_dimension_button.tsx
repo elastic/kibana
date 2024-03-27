@@ -9,11 +9,11 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
-  DragDrop,
   DragDropIdentifier,
   useDragDropContext,
   DropType,
   DropTargetSwapDuplicateCombine,
+  Droppable,
 } from '@kbn/dom-drag-drop';
 import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
@@ -180,7 +180,7 @@ export function EmptyDimensionButton({
 
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
-      <DragDrop
+      <Droppable
         getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
         getAdditionalClassesOnDroppable={
           DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
@@ -201,7 +201,7 @@ export function EmptyDimensionButton({
             <DefaultEmptyButton {...buttonProps} />
           )}
         </div>
-      </DragDrop>
+      </Droppable>
     </div>
   );
 }

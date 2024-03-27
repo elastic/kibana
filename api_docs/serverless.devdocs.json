@@ -329,6 +329,77 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "serverless",
+          "id": "def-public.ServerlessPluginStart.getNavigationCards",
+          "type": "Function",
+          "tags": [],
+          "label": "getNavigationCards",
+          "description": [],
+          "signature": [
+            "(roleManagementEnabled?: boolean | undefined, extendCardNavDefinitions?: Record<string, ",
+            {
+              "pluginId": "@kbn/management-cards-navigation",
+              "scope": "common",
+              "docId": "kibKbnManagementCardsNavigationPluginApi",
+              "section": "def-common.CardNavExtensionDefinition",
+              "text": "CardNavExtensionDefinition"
+            },
+            "> | undefined) => Record<string, ",
+            {
+              "pluginId": "@kbn/management-cards-navigation",
+              "scope": "common",
+              "docId": "kibKbnManagementCardsNavigationPluginApi",
+              "section": "def-common.CardNavExtensionDefinition",
+              "text": "CardNavExtensionDefinition"
+            },
+            "> | undefined"
+          ],
+          "path": "x-pack/plugins/serverless/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "serverless",
+              "id": "def-public.ServerlessPluginStart.getNavigationCards.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "roleManagementEnabled",
+              "description": [],
+              "signature": [
+                "boolean | undefined"
+              ],
+              "path": "x-pack/plugins/serverless/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            },
+            {
+              "parentPluginId": "serverless",
+              "id": "def-public.ServerlessPluginStart.getNavigationCards.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "extendCardNavDefinitions",
+              "description": [],
+              "signature": [
+                "Record<string, ",
+                {
+                  "pluginId": "@kbn/management-cards-navigation",
+                  "scope": "common",
+                  "docId": "kibKbnManagementCardsNavigationPluginApi",
+                  "section": "def-common.CardNavExtensionDefinition",
+                  "text": "CardNavExtensionDefinition"
+                },
+                "> | undefined"
+              ],
+              "path": "x-pack/plugins/serverless/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

@@ -16,7 +16,7 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { apiPublishesUnifiedSearch, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiPublishesTimeRange, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';
 import { customizePanelAction } from '../panel_actions';
 
@@ -30,7 +30,7 @@ export class CustomTimeRangeBadge
   public order = 7;
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    if (!apiPublishesUnifiedSearch(embeddable)) throw new IncompatibleActionError();
+    if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
     const timeRange = embeddable.timeRange$.value;
     if (!timeRange) return '';
     return renderToString(
@@ -43,14 +43,14 @@ export class CustomTimeRangeBadge
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiPublishesUnifiedSearch(embeddable);
+    return apiPublishesTimeRange(embeddable);
   }
 
   public subscribeToCompatibilityChanges(
     { embeddable }: EmbeddableApiContext,
     onChange: (isCompatible: boolean, action: CustomTimeRangeBadge) => void
   ) {
-    if (!apiPublishesUnifiedSearch(embeddable)) return;
+    if (!apiPublishesTimeRange(embeddable)) return;
     return embeddable.timeRange$.subscribe((timeRange) => {
       onChange(Boolean(timeRange), this);
     });
@@ -65,7 +65,7 @@ export class CustomTimeRangeBadge
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (apiPublishesUnifiedSearch(embeddable)) {
+    if (apiPublishesTimeRange(embeddable)) {
       const timeRange = embeddable.timeRange$.value;
       return Boolean(timeRange);
     }

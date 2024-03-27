@@ -20,7 +20,7 @@ export {
 export { XJsonLang } from './src/xjson';
 export { SQLLang } from './src/sql';
 export { ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang } from './src/esql';
-export type { ESQLCallbacks } from './src/esql';
+export type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 
 export * from './src/painless';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
@@ -32,4 +32,4 @@ import { registerLanguage } from './src/helpers';
 export { BarePluginApi, registerLanguage };
 export * from './src/types';
 
-export { CONSOLE_LANG_ID } from './src/console';
+export { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from './src/console';

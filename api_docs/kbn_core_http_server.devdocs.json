@@ -3778,10 +3778,6 @@
               },
               {
                 "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_mapping_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/settings/register_load_route.ts"
               },
               {
@@ -3815,6 +3811,10 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_privileges_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_mapping_route.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -4387,10 +4387,6 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -6831,6 +6827,18 @@
                 "path": "x-pack/plugins/rollup/server/routes/api/search/register_search_route.ts"
               },
               {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
                 "plugin": "searchprofiler",
                 "path": "x-pack/plugins/searchprofiler/server/routes/profile.ts"
               },
@@ -8083,6 +8091,10 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_execute_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_update_mapping_route.ts"
               },
               {
                 "plugin": "remoteClusters",
