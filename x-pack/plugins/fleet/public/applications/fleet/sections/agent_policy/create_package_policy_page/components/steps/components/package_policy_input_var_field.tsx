@@ -52,7 +52,7 @@ const FormRow = styled(EuiFormRow)`
   }
 
   .euiFormRow__fieldWrapper > .euiPanel {
-    padding: ${(props) => props.theme.eui.euiSizeXS};
+    padding: ${(props) => props.theme.eui?.euiSizeXS};
   }
 `;
 
