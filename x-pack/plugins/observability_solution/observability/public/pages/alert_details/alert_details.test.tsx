@@ -135,7 +135,7 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('alertDetails')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
     expect(alertDetails.queryByTestId('alertDetailsPageTitle')).toBeTruthy();
-    expect(alertDetails.queryByTestId('alert-summary-container')).toBeTruthy();
+    expect(alertDetails.queryByTestId('alertDetailsTabbedContent')).toBeTruthy();
   });
 
   it('should show error loading the alert details', async () => {
