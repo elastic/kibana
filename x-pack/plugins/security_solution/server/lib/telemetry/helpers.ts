@@ -39,6 +39,11 @@ import {
 } from './constants';
 import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
 import { resolverEntity } from '../../endpoint/routes/resolver/entity/utils/build_resolver_entity';
+import {
+  type TelemetryLogger,
+  TelemetryLoggerImpl,
+  tlog as telemetryLogger,
+} from './telemetry_logger';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -282,80 +287,23 @@ export const formatValueListMetaData = (
 });
 
 export let isElasticCloudDeployment = false;
-let _clusterInfo: Nullable<ESClusterInfo>;
+export let clusterInfo: Nullable<ESClusterInfo>;
 export const setIsElasticCloudDeployment = (value: boolean) => {
   isElasticCloudDeployment = value;
 };
 export const setClusterInfo = (info: Nullable<ESClusterInfo>) => {
-  _clusterInfo = info;
+  clusterInfo = info;
 };
 
 /**
- * @deprecated use `newTelemetryLogger` instead
+ * @deprecated use `new TelemetryLoggerImpl(...)` instead
  */
 export const tlog = (logger: Logger, message: string, meta?: LogMeta) => {
-  if (isElasticCloudDeployment) {
-    logger.info(message, logMeta(meta));
-  } else {
-    logger.debug(message, logMeta(meta));
-  }
+  telemetryLogger(logger, message, meta);
 };
 
-export interface TelemetryLogger extends Logger {
-  l: (message: string, meta?: LogMeta | object | undefined) => void;
-}
-
-/**
- * Returns a new `TelemetryLogger` instance.
- *
- * This custom logger extends the base kibana Logger with the following functionality:
- *  - Exposes a helper `TelemetryLogger::l` method that logs at the
- *    info or debug level depending on whether the instance is a cloud deployment or not.
- *  - For the above method as well as the regular debug, info, warn and error,
- *    includes the cluster uuid and name as part of the metadata structured fields.
- *
- * Please try to use a meaningful logger name, e.g.:
- *
- * ```js
- * const log = newTelemetryLogger(logger.get('tasks.endpoint'));
- * ````
- * instead of
- *
- * ```js
- * const log = newTelemetryLogger(logger);
- * ````
- *
- * It makes easier to browse the logs by filtering by the structured argument `logger`.
- */
 export const newTelemetryLogger = (logger: Logger): TelemetryLogger => {
-  const delegated = Object.create(logger);
-
-  delegated.l = (message: string, meta?: LogMeta | object | undefined) =>
-    tlog(logger, message, logMeta(meta));
-  delegated.info = (message: string, meta?: LogMeta | undefined) =>
-    logger.info(message, logMeta(meta));
-  delegated.error = (message: string, meta?: LogMeta | undefined) =>
-    logger.error(message, logMeta(meta));
-  delegated.warn = (message: string, meta?: LogMeta | undefined) =>
-    logger.warn(message, logMeta(meta));
-  delegated.debug = (message: string, meta?: LogMeta | undefined) =>
-    logger.debug(message, logMeta(meta));
-
-  return delegated;
-};
-
-// helper method to merge a given LogMeta with the cluster info (if exists)
-const logMeta = (meta?: LogMeta | undefined): LogMeta => {
-  const clusterInfoMeta = _clusterInfo
-    ? {
-        cluster_uuid: _clusterInfo?.cluster_uuid,
-        cluster_name: _clusterInfo?.cluster_name,
-      }
-    : {};
-  return {
-    ...clusterInfoMeta,
-    ...(meta ?? {}),
-  };
+  return new TelemetryLoggerImpl(logger);
 };
 
 function obfuscateString(clusterId: string, toHash: string): string {
@@ -452,12 +400,12 @@ export class TelemetryTimelineFetcher {
 
     let record;
     if (telemetryTimeline.length >= 1) {
-      const { clusterInfo, licenseInfo } = await this.extraInfo;
+      const { _clusterInfo, licenseInfo } = await this.extraInfo;
       record = {
         '@timestamp': moment().toISOString(),
-        version: clusterInfo.version?.number,
-        cluster_name: clusterInfo.cluster_name,
-        cluster_uuid: clusterInfo.cluster_uuid,
+        version: _clusterInfo.version?.number,
+        cluster_name: _clusterInfo.cluster_name,
+        cluster_uuid: _clusterInfo.cluster_uuid,
         license_uuid: licenseInfo?.uid,
         alert_id: alertUUID,
         event_id: eventId,
@@ -494,13 +442,13 @@ export class TelemetryTimelineFetcher {
       this.receiver.fetchLicenseInfo(),
     ]);
 
-    const clusterInfo: ESClusterInfo =
+    const _clusterInfo: ESClusterInfo =
       clusterInfoPromise.status === 'fulfilled' ? clusterInfoPromise.value : ({} as ESClusterInfo);
 
     const licenseInfo: ESLicense | undefined =
       licenseInfoPromise.status === 'fulfilled' ? licenseInfoPromise.value : ({} as ESLicense);
 
-    return { clusterInfo, licenseInfo };
+    return { clusterInfo: _clusterInfo, licenseInfo };
   }
 
   private calculateTimeFrame(): TimeFrame {
