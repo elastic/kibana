@@ -168,9 +168,7 @@ export class AnalyticsClient implements IAnalyticsClient {
     this.optInConfig$.next(optInConfigInstance);
   };
 
-  public registerContextProvider = <Context extends Partial<EventContext>>(
-    contextProviderOpts: ContextProviderOpts<Context>
-  ) => {
+  public registerContextProvider = <Context>(contextProviderOpts: ContextProviderOpts<Context>) => {
     this.contextService.registerContextProvider(contextProviderOpts);
   };
 
