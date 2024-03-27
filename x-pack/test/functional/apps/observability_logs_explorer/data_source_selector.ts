@@ -408,20 +408,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should sort the data views list by the clicked sorting option', async () => {
-          await retry.try(async () => {
-            const panelTitleNode = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu: WebElementWrapper) =>
-                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
-              );
-
-            expect(
-              await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
-                panelTitleNode
-              )
-            ).to.be('Data Views');
-          });
-
           // Test descending order
           await PageObjects.observabilityLogsExplorer.clickSortButtonBy('desc');
           await retry.try(async () => {

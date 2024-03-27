@@ -187,21 +187,25 @@ export function DataSourceSelector({
         search={search}
         statusPrompt={integrationsStatusPrompt}
       >
-        <SearchControls
-          key={INTEGRATIONS_TAB_ID}
-          isLoading={isSearchingIntegrations || isLoadingUncategorized}
-          onSearch={searchByName}
-          search={search}
-        />
+        {tabId === INTEGRATIONS_TAB_ID && (
+          <SearchControls
+            key={INTEGRATIONS_TAB_ID}
+            isLoading={isSearchingIntegrations || isLoadingUncategorized}
+            onSearch={searchByName}
+            search={search}
+          />
+        )}
       </IntegrationsList>
       {/* Data views tab content */}
       <DataViewList hidden={tabId !== DATA_VIEWS_TAB_ID} items={dataViewsItems}>
-        <SearchControls
-          key={DATA_VIEWS_TAB_ID}
-          onSearch={searchByName}
-          onSort={sortByOrder}
-          search={search}
-        />
+        {tabId === DATA_VIEWS_TAB_ID && (
+          <SearchControls
+            key={DATA_VIEWS_TAB_ID}
+            onSearch={searchByName}
+            onSort={sortByOrder}
+            search={search}
+          />
+        )}
         <EuiHorizontalRule margin="none" />
       </DataViewList>
       <EuiHorizontalRule margin="none" />
