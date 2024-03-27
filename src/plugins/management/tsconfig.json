@@ -26,6 +26,7 @@
     "@kbn/config-schema",
     "@kbn/serverless",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/deeplinks-management",
   ],
   "exclude": [
     "target/**/*"
