@@ -49,6 +49,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/reporting-public",
     "@kbn/analytics-client",
+    "@kbn/reporting-csv-share-panel",
   ],
   "exclude": [
     "target/**/*",

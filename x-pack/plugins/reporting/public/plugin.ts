@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
+import { from, ReplaySubject } from 'rxjs';
 
 import {
   CoreSetup,
@@ -30,11 +30,11 @@ import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 
 import {
-  ReportingCsvPanelAction,
   getSharedComponents,
   reportingCsvShareProvider,
   reportingScreenshotShareProvider,
 } from '@kbn/reporting-public/share';
+import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
@@ -73,7 +73,7 @@ export class ReportingPublicPlugin
 {
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
-  private readonly stop$ = new Rx.ReplaySubject<void>(1);
+  private readonly stop$ = new ReplaySubject<void>(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
   });
@@ -126,7 +126,7 @@ export class ReportingPublicPlugin
       uiActions: uiActionsSetup,
     } = setupDeps;
 
-    const startServices$ = Rx.from(getStartServices());
+    const startServices$ = from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
 
     const apiClient = this.getApiClient(core.http, core.uiSettings);

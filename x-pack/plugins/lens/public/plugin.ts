@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
+import { from } from 'rxjs';
 
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -182,7 +182,7 @@ export interface LensPluginStartDependencies {
   eventAnnotationService: EventAnnotationServiceType;
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
-  licensing: LicensingPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export interface LensPublicSetup {
@@ -394,9 +394,9 @@ export class LensPlugin {
       this.locator = share.url.locators.create(new LensAppLocatorDefinition());
 
       const { getStartServices } = core;
-      const startServices$ = Rx.from(getStartServices());
+      const startServices$ = from(getStartServices());
       startServices$.subscribe(([, { licensing }]) => {
-        licensing.license$.subscribe((license) => {
+        licensing?.license$.subscribe((license) => {
           return share.register(
             downloadCsvShareProvider({
               uiSettings: core.uiSettings,
