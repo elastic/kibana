@@ -14,71 +14,59 @@ import React, {
   useRef,
   useCallback,
   type PropsWithChildren,
-  type ReactElement,
   type Dispatch,
 } from 'react';
-import { type EuiTabProps, type CommonProps } from '@elastic/eui';
+import { once } from 'lodash';
 
 interface IDispatchAction {
   type: string;
   payload: any;
 }
 
-export type IModalTabState = Record<string, unknown>;
+export type IDispatchFunction = Dispatch<IDispatchAction>;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type IModalMetaState = {
+export interface IMetaState {
   selectedTabId: string | null;
-};
-
-type IReducer<S extends IModalTabState> = (state: S, action: IDispatchAction) => S;
-
-export type IModalTabContent<S extends IModalTabState> = (props: {
-  state: S;
-  dispatch: Dispatch<IDispatchAction>;
-}) => ReactElement;
-
-interface IModalTabActionBtn<S> extends CommonProps {
-  id: string;
-  dataTestSubj: string;
-  defaultMessage: string;
-  formattedMessageId: string;
-  handler: (args: { state: S }) => void;
-  isCopy?: boolean;
 }
 
-export interface IModalTabDeclaration<S extends IModalTabState> extends EuiTabProps {
+type IReducer<S> = (state: S, action: IDispatchAction) => S;
+
+export interface ITabDeclaration<S = {}> {
   id: string;
   name: string;
   initialState?: Partial<S>;
   reducer?: IReducer<S>;
-  description?: ReactElement;
-  'data-test-subj'?: string;
-  content?: IModalTabContent<S>;
-  modalActionBtn: IModalTabActionBtn<S>;
 }
 
-interface IModalContext<S extends IModalTabState = IModalTabState> {
-  tabs: Array<Exclude<IModalTabDeclaration<S>, 'reducer' | 'initialState'>>;
-  state: { meta: IModalMetaState } & Record<string, S>;
+interface IModalContext<T extends Array<ITabDeclaration<Record<string, any>>>> {
+  tabs: Array<Omit<T[number], 'reducer' | 'initialState'>>;
+  state: {
+    meta: IMetaState;
+    [index: string]: any;
+  };
   dispatch: Dispatch<IDispatchAction>;
 }
 
-const ModalContext = createContext<IModalContext>({
-  tabs: [],
-  state: {
-    meta: {
-      selectedTabId: null,
+const createStateContext = once(<T extends Array<ITabDeclaration<Record<string, any>>>>() =>
+  createContext({
+    tabs: [],
+    state: {
+      meta: {
+        selectedTabId: null,
+      },
     },
-  },
-  dispatch: () => {},
-});
+    dispatch: () => {},
+  } as IModalContext<T>)
+);
+
+export const useModalContext = <T extends Array<ITabDeclaration<Record<string, any>>>>() =>
+  useContext(createStateContext<T>());
 
 /**
  * @description defines state transition for meta information to manage the modal, meta action types
  * must be prefixed with the string 'META_'
  */
-const modalMetaReducer: IReducer<IModalMetaState> = (state, action) => {
+const modalMetaReducer: IReducer<IMetaState> = (state, action) => {
   switch (action.type) {
     case 'META_selectedTabId':
       return {
@@ -90,20 +78,30 @@ const modalMetaReducer: IReducer<IModalMetaState> = (state, action) => {
   }
 };
 
-export type IModalContextProviderProps<Tabs extends Array<IModalTabDeclaration<IModalTabState>>> =
+export type IModalContextProviderProps<Tabs extends Array<ITabDeclaration<Record<string, any>>>> =
   PropsWithChildren<{
+    /**
+     * Array of tab declaration to be rendered into the modal that will be rendered
+     */
     tabs: Tabs;
+    /**
+     * ID of the tab we'd like the modal to have selected on render
+     */
     defaultSelectedTabId: Tabs[number]['id'];
   }>;
 
-export function ModalContextProvider<T extends Array<IModalTabDeclaration<IModalTabState>>>({
+export function ModalContextProvider<T extends Array<ITabDeclaration<Record<string, any>>>>({
   tabs,
   defaultSelectedTabId,
   children,
 }: IModalContextProviderProps<T>) {
-  const modalTabDefinitions = useRef<IModalContext['tabs']>([]);
+  const ModalContext = createStateContext<T>();
 
-  const initialModalState = useRef<IModalContext['state']>({
+  type IModalInstanceContext = IModalContext<T>;
+
+  const modalTabDefinitions = useRef<IModalInstanceContext['tabs']>([]);
+
+  const initialModalState = useRef<IModalInstanceContext['state']>({
     // instantiate state with default meta information
     meta: {
       selectedTabId: defaultSelectedTabId,
@@ -112,35 +110,36 @@ export function ModalContextProvider<T extends Array<IModalTabDeclaration<IModal
 
   const reducersMap = useMemo(
     () =>
-      tabs.reduce((result, { id, reducer, initialState, ...rest }) => {
-        initialModalState.current[id] = initialState ?? {};
-        modalTabDefinitions.current.push({ id, reducer, ...rest });
-        result[id] = reducer;
+      tabs.reduce((result, { reducer, initialState, ...rest }) => {
+        initialModalState.current[rest.id] = initialState ?? {};
+        // @ts-ignore
+        modalTabDefinitions.current.push({ ...rest });
+        result[rest.id] = reducer;
         return result;
-      }, {}),
+      }, {} as Record<string, T[number]['reducer']>),
     [tabs]
   );
 
-  const combineReducers = useCallback(function (
-    reducers: Record<string, IReducer<IModalTabState>>
-  ) {
-    return (state: IModalContext['state'], action: IDispatchAction) => {
+  const combineReducers = useCallback(function (reducers: Record<string, T[number]['reducer']>) {
+    return (state: IModalInstanceContext['state'], action: IDispatchAction) => {
       const newState = { ...state };
 
       if (/^meta_/i.test(action.type)) {
         newState.meta = modalMetaReducer(newState.meta, action);
       } else {
         const selectedTabId = state.meta.selectedTabId!;
+        const selectedTabReducer = reducers[selectedTabId];
 
-        newState[selectedTabId] = reducers[selectedTabId](newState[selectedTabId], action);
+        if (selectedTabReducer) {
+          newState[selectedTabId] = selectedTabReducer(newState[selectedTabId], action);
+        }
       }
 
       return newState;
     };
-  },
-  []);
+  }, []);
 
-  const createInitialState = useCallback((state: IModalContext['state']) => {
+  const createInitialState = useCallback((state: IModalInstanceContext['state']) => {
     return state;
   }, []);
 
@@ -156,5 +155,3 @@ export function ModalContextProvider<T extends Array<IModalTabDeclaration<IModal
     </ModalContext.Provider>
   );
 }
-
-export const useModalContext = () => useContext(ModalContext);

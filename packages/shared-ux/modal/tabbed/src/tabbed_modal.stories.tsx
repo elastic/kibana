@@ -5,17 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { EuiText, EuiCheckboxGroup, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import React, { Fragment } from 'react';
+import { EuiText, EuiCheckboxGroup, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 
 import {
   StorybookMock as TabbedModalStorybookMock,
   type Params as TabbedModalStorybookParams,
 } from '../storybook/setup';
 
-import { TabbedModal } from './tabbed_modal';
-import { IModalTabDeclaration, IModalTabState } from './context';
+import { TabbedModal, type IModalTabDeclaration } from './tabbed_modal';
 
 export default {
   title: 'Modal/Tabbed Modal',
@@ -49,9 +47,8 @@ export const TrivialExample = (params: TabbedModalStorybookParams) => {
           },
           modalActionBtn: {
             id: 'wave',
+            label: 'Say Hi 👋🏾',
             dataTestSubj: 'wave',
-            formattedMessageId: 'non.existent.id.for.helloWorld.example',
-            defaultMessage: 'Say Hi 👋🏾',
             handler: ({ state }) => {
               alert(state.message);
             },
@@ -102,7 +99,7 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
     SelectOption,
   }
 
-  interface IPizzaSelectorTabState extends IModalTabState {
+  interface IPizzaSelectorTabState {
     checkboxIdToSelectedMap: Record<string, boolean>;
   }
 
@@ -160,15 +157,13 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
     modalActionBtn: {
       id: 'pizza',
       dataTestSubj: 'order-pizza',
-      formattedMessageId: 'non.existent.id.for.orderPizza.example',
-      defaultMessage: 'Order 🍕',
+      label: 'Order 🍕',
       handler: ({ state }) => {
         alert(JSON.stringify(state));
       },
     },
   };
 
-  // TODO: fix type mismatch
   return (
     <TabbedModal
       {...params}
