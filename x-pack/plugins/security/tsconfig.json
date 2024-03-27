@@ -75,7 +75,6 @@
     "@kbn/code-editor-mock",
     "@kbn/core-security-browser",
     "@kbn/core-security-server",
-    "@kbn/core-security-common",
   ],
   "exclude": [
     "target/**/*",
