@@ -120,14 +120,14 @@ export const downloadCsvShareProvider = ({
     const panelTitle = i18n.translate(
       'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
       {
-        defaultMessage: 'CSV Download',
+        defaultMessage: 'Export',
       }
     );
 
     const atLeastGold = license.hasAtLeast('gold');
 
     return [
-      atLeastGold
+      !atLeastGold
         ? {
             shareMenuItem: {
               name: panelTitle,
