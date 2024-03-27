@@ -19,8 +19,7 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '@kbn/actions-plugin/server/constants/saved_objects';
-import type { FakeRawRequest } from '@kbn/core-http-server';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { firstValueFrom } from 'rxjs';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
@@ -36,6 +35,7 @@ import {
 import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
 import { getConnectorType as getObsAIAssistantConnectorType } from './rule_connector';
+import { RespondFunctionResources } from './service/types';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -145,19 +145,26 @@ export class ObservabilityAIAssistantPlugin
 
     plugins.actions.registerType(
       getObsAIAssistantConnectorType({
-        getObsAIClient: () => {
-          const fakeRawRequest: FakeRawRequest = {
-            headers: {
-              authorization: 'ApiKey --',
+        getObsAIClient: async (request: KibanaRequest) => {
+          const client = await service.getClient({ request });
+          const resources = {
+            logger: this.logger.get('connector'),
+            context: {
+              rac: {
+                async getAlertsClient() {
+                  const [_, pluginsStart] = await core.getStartServices();
+                  return pluginsStart.ruleRegistry.getRacClientWithRequest(request);
+                },
+              },
             },
-            path: '/',
-          };
-
-          const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
-
-          return service.getClient({
-            request: fakeRequest,
+            plugins: { core },
+          } as unknown as RespondFunctionResources;
+          const functionClient = await service.getFunctionClient({
+            client,
+            resources,
+            signal: new AbortController().signal,
           });
+          return { client, functionClient, kibanaPublicUrl: core.http.basePath.publicBaseUrl };
         },
       })
     );

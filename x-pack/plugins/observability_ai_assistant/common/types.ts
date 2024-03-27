@@ -75,7 +75,7 @@ export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation'
   conversation: { title: string };
 };
 
-export type ConversationCreateRequest = ConversationRequestBase;
+export type ConversationCreateRequest = ConversationRequestBase & { conversation: { id?: string } };
 export type ConversationUpdateRequest = ConversationRequestBase & { conversation: { id: string } };
 
 export interface KnowledgeBaseEntry {

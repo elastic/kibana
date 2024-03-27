@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
+import path from 'path';
+import { filter, lastValueFrom } from 'rxjs';
+import { v4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
+import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
 import { MessageRole } from '../../common/types';
-import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
+import { ChatFunctionClient } from '../service/chat_function_client';
+import {
+  ChatCompletionChunkEvent,
+  StreamingChatResponseEventType,
+} from '../../common/conversation_complete';
 
 const ConfigSchemaProps = {
   connector: schema.maybe(schema.string()),
@@ -43,11 +51,17 @@ export type ObsAIAssistantConnectorTypeExecutorOptions = ConnectorTypeExecutorOp
 export function getConnectorType({
   getObsAIClient,
 }: {
-  getObsAIClient: () => Promise<ObservabilityAIAssistantClient | undefined>;
+  getObsAIClient: (request: KibanaRequest) => Promise<{
+    client: ObservabilityAIAssistantClient | undefined;
+    functionClient: ChatFunctionClient | undefined;
+    kibanaPublicUrl?: string;
+  }>;
 }): ObsAIAssistantConnectorType {
   return {
     id: '.observability-ai-assistant',
-    minimumLicenseRequired: 'enterprise',
+    isSystemActionType: true,
+    getKibanaPrivileges: (params) => [],
+    minimumLicenseRequired: 'platinum',
     name: i18n.translate('xpack.observabilityAiAssistant.alertConnector.title', {
       defaultMessage: 'Observability AI Assistant',
     }),
@@ -83,16 +97,24 @@ function renderParameterTemplates(
 
 async function executor(
   execOptions: ObsAIAssistantConnectorTypeExecutorOptions,
-  getObsAIClient: () => Promise<ObservabilityAIAssistantClient | undefined>
+  getObsAIClient: (request: KibanaRequest) => Promise<{
+    client: ObservabilityAIAssistantClient | undefined;
+    functionClient: ChatFunctionClient | undefined;
+    kibanaPublicUrl?: string;
+  }>
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const obsAIClient = await getObsAIClient();
-  if (!obsAIClient) {
+  const { client, functionClient, kibanaPublicUrl } = await getObsAIClient(execOptions.request!);
+  if (!client || !functionClient) {
     return { actionId: execOptions.actionId, status: 'error' };
   }
-
-  const response = await lastValueFrom(
-    (
-      await obsAIClient.chat('alert_action', {
+  const conversationId = v4();
+  const assistantResponse = await lastValueFrom(
+    await client
+      .complete({
+        functionClient,
+        conversationId,
+        persist: true,
+        isPrecomputedConversationId: true,
         connectorId: 'azure-open-ai',
         signal: new AbortController().signal,
         messages: [
@@ -100,13 +122,25 @@ async function executor(
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.System,
-              content: `You are a helpful assistant for Elastic Observability.
+              content:
+                `You are a helpful assistant for Elastic Observability.
                   Your task is to create a report for an alert that just fired.
                   This report should be sent to the appropriate connector (ie
-                  slack, email..) if there is one configured. The report is aimed
+                  slack, email..) if the user ask for it. The report is aimed
                   at SRE. You should attempt to include resolved or ongoing issues
                   of the same alert to help troubleshoot the root cause. Also include
-                  a list of ongoing alerts that could be related.`,
+                  a list of ongoing alerts that could be related. Your next answer
+                  should be the complete alert report. ONLY reply with the report and DO NOT
+                  provide any details on the steps you've followed to get the information.` +
+                (kibanaPublicUrl
+                  ? ` A link to this
+                  conversation should be added at the bottom of the report, the conversation
+                  url is ${path.join(
+                    kibanaPublicUrl!,
+                    'app/observabilityAIAssistant/conversations',
+                    conversationId
+                  )}.`
+                  : ''),
             },
           },
           {
@@ -121,13 +155,10 @@ async function executor(
             message: {
               role: MessageRole.Assistant,
               function_call: {
-                name: 'alerts',
+                name: 'recall',
                 arguments: JSON.stringify({
-                  name: 'alerts',
-                  args: {
-                    start: 'now-1h',
-                    end: 'now',
-                  },
+                  queries: [],
+                  categories: [],
                 }),
                 trigger: MessageRole.Assistant as const,
               },
@@ -135,11 +166,17 @@ async function executor(
           },
         ],
       })
-    ).pipe(concatenateChatCompletionChunks())
+      .pipe(
+        filter(
+          (event): event is ChatCompletionChunkEvent =>
+            event.type === StreamingChatResponseEventType.ChatCompletionChunk
+        )
+      )
+      .pipe(concatenateChatCompletionChunks())
   );
 
   // eslint-disable-next-line no-console
-  console.log(JSON.stringify(response));
+  console.log(assistantResponse);
 
   //  await axios.post(
   //    'https://hooks.slack.com/services/...',

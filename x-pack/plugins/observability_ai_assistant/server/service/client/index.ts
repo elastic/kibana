@@ -132,7 +132,7 @@ export class ObservabilityAIAssistantClient {
       signal: AbortSignal;
       functionClient: ChatFunctionClient;
       persist: boolean;
-    } & ({ conversationId: string } | { title?: string })
+    } & ({ conversationId: string; isPrecomputedConversationId: boolean } | { title?: string })
   ): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
@@ -140,8 +140,10 @@ export class ObservabilityAIAssistantClient {
 
         let conversationId: string = '';
         let title: string = '';
+        let isPrecomputedConversationId: boolean = false;
         if ('conversationId' in params) {
           conversationId = params.conversationId;
+          isPrecomputedConversationId = params.isPrecomputedConversationId;
         }
 
         if ('title' in params) {
@@ -369,7 +371,7 @@ export class ObservabilityAIAssistantClient {
           }
 
           // store the updated conversation and close the stream
-          if (conversationId) {
+          if (conversationId && !isPrecomputedConversationId) {
             const conversation = await this.getConversationWithMetaFields(conversationId);
             if (!conversation) {
               throw createConversationNotFoundError();
@@ -396,6 +398,7 @@ export class ObservabilityAIAssistantClient {
               '@timestamp': new Date().toISOString(),
               conversation: {
                 title: generatedTitle || title || 'New conversation',
+                id: conversationId,
               },
               messages: nextMessages,
               labels: {},
@@ -667,7 +670,7 @@ export class ObservabilityAIAssistantClient {
       conversation,
       {
         '@timestamp': now,
-        conversation: { id: v4() },
+        conversation: { id: conversation.conversation.id || v4() },
       },
       this.getConversationUpdateValues(now)
     );

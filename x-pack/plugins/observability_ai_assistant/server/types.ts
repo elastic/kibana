@@ -12,6 +12,7 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -56,4 +57,5 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   dataViews: DataViewsServerPluginStart;
   ml: MlPluginStart;
   licensing: LicensingPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
 }
