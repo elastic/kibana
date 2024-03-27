@@ -22,10 +22,13 @@ export interface HostsLocatorParams extends SerializableRecord {
     from: string;
     to: string;
   };
+  filters?: SerializableRecord[];
+  panelFilters?: SerializableRecord[];
   limit?: number;
 }
 
 export const HOSTS_LOCATOR_ID = 'HOSTS_LOCATOR';
+const DEFAULT_HOST_LIMIT = 100;
 
 export class HostsLocatorDefinition implements LocatorDefinition<HostsLocatorParams> {
   public readonly id = HOSTS_LOCATOR_ID;
@@ -33,7 +36,14 @@ export class HostsLocatorDefinition implements LocatorDefinition<HostsLocatorPar
   constructor(protected readonly deps: HostsLocatorDependencies) {}
 
   public readonly getLocation = async (params: HostsLocatorParams) => {
-    const searchString = rison.encodeUnknown(params);
+    const paramsWithDefaults = {
+      query: params.query ?? { language: 'kuery', query: '' },
+      dateRange: params.dateRange ?? { from: 'now-15m', to: 'now' },
+      filters: params.filters ?? [],
+      panelFilters: params.panelFilters ?? [],
+      limit: params.limit ?? DEFAULT_HOST_LIMIT,
+    };
+    const searchString = rison.encodeUnknown(paramsWithDefaults);
     return {
       app: 'metrics',
       path: `/hosts?_a=${searchString}`,

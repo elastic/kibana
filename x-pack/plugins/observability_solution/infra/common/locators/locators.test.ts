@@ -192,6 +192,8 @@ describe('Infra Locators', () => {
           from: '2021-01-01T00:00:00.000Z',
           to: '2021-01-02T00:00:00.000Z',
         },
+        filters: [],
+        panelFilters: [],
         limit: 10,
       };
       const { hostsLocator } = await setupHostsLocator();
@@ -214,6 +216,8 @@ describe('Infra Locators', () => {
           from: '2021-01-01T00:00:00.000Z',
           to: '2021-01-02T00:00:00.000Z',
         },
+        filters: [],
+        panelFilters: [],
         limit: 10,
       };
       const { hostsLocator } = await setupHostsLocator();
