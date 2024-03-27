@@ -12,7 +12,7 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana-serverless-security-solution-quality-gate-gen-ai
+      name: "Kibana / Serverless / Security Solution Quality Gate / Gen Ai"
       description: "[MKI] Executes Cypress tests for the Gen AI team"
     spec:
       repository: elastic/kibana
