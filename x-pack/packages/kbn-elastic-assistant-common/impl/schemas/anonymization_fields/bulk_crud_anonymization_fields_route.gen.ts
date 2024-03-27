@@ -47,8 +47,8 @@ export const AnonymizationFieldResponse = z.object({
   id: UUID,
   timestamp: NonEmptyString.optional(),
   field: z.string(),
-  defaultAllow: z.boolean().optional(),
-  defaultAllowReplacement: z.boolean().optional(),
+  allowed: z.boolean().optional(),
+  anonymized: z.boolean().optional(),
   updatedAt: z.string().optional(),
   updatedBy: z.string().optional(),
   createdAt: z.string().optional(),
@@ -104,15 +104,15 @@ export const BulkActionBase = z.object({
 export type AnonymizationFieldCreateProps = z.infer<typeof AnonymizationFieldCreateProps>;
 export const AnonymizationFieldCreateProps = z.object({
   field: z.string(),
-  defaultAllow: z.boolean().optional(),
-  defaultAllowReplacement: z.boolean().optional(),
+  allowed: z.boolean().optional(),
+  anonymized: z.boolean().optional(),
 });
 
 export type AnonymizationFieldUpdateProps = z.infer<typeof AnonymizationFieldUpdateProps>;
 export const AnonymizationFieldUpdateProps = z.object({
   id: z.string(),
-  defaultAllow: z.boolean().optional(),
-  defaultAllowReplacement: z.boolean().optional(),
+  allowed: z.boolean().optional(),
+  anonymized: z.boolean().optional(),
 });
 
 export type PerformBulkActionRequestBody = z.infer<typeof PerformBulkActionRequestBody>;

@@ -23,12 +23,12 @@ export const assistantAnonymizationFieldsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  default_allow: {
+  allowed: {
     type: 'boolean',
     array: false,
     required: false,
   },
-  default_allow_replacement: {
+  anonymized: {
     type: 'boolean',
     array: false,
     required: false,

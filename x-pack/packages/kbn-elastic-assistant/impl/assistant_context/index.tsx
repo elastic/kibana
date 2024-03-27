@@ -82,8 +82,6 @@ export interface AssistantProviderProps {
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
-  setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
-  setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   title?: string;
   toasts?: IToasts;
 }
@@ -128,8 +126,6 @@ export interface UseAssistantContext {
   selectedSettingsTab: SettingsTabs;
   setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
   setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
-  setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
-  setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
@@ -158,8 +154,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   http,
   baseConversations,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
-  setDefaultAllow,
-  setDefaultAllowReplacement,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
 }) => {
@@ -274,8 +268,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       selectedSettingsTab,
       setAllQuickPrompts: setLocalStorageQuickPrompts,
       setAllSystemPrompts: setLocalStorageSystemPrompts,
-      setDefaultAllow,
-      setDefaultAllowReplacement,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
@@ -311,8 +303,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       selectedSettingsTab,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
-      setDefaultAllow,
-      setDefaultAllowReplacement,
       setLocalStorageKnowledgeBase,
       showAssistantOverlay,
       title,

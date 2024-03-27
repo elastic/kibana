@@ -20,8 +20,8 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { SearchEsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
-import { transformESToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 
 export const findAnonymizationFieldsRoute = (
   router: ElasticAssistantPluginRouter,
@@ -57,7 +57,7 @@ export const findAnonymizationFieldsRoute = (
           const dataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
-          const result = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
+          const result = await dataClient?.findDocuments<EsAnonymizationFieldsSchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
@@ -72,7 +72,7 @@ export const findAnonymizationFieldsRoute = (
                 perPage: result.perPage,
                 page: result.page,
                 total: result.total,
-                data: transformESToAnonymizationFields(result.data),
+                data: transformESSearchToAnonymizationFields(result.data),
               },
             });
           }

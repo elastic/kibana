@@ -14,12 +14,36 @@ import {
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import {
   CreateAnonymizationFieldSchema,
-  SearchEsAnonymizationFieldsSchema,
+  EsAnonymizationFieldsSchema,
   UpdateAnonymizationFieldSchema,
 } from './types';
 
 export const transformESToAnonymizationFields = (
-  response: estypes.SearchResponse<SearchEsAnonymizationFieldsSchema>
+  response: EsAnonymizationFieldsSchema[]
+): AnonymizationFieldResponse[] => {
+  return response.map((anonymizationFieldSchema) => {
+    const anonymizationField: AnonymizationFieldResponse = {
+      timestamp: anonymizationFieldSchema['@timestamp'],
+      createdAt: anonymizationFieldSchema.created_at,
+      users:
+        anonymizationFieldSchema.users?.map((user) => ({
+          id: user.id,
+          name: user.name,
+        })) ?? [],
+      field: anonymizationFieldSchema.field,
+      allowed: anonymizationFieldSchema.allowed,
+      anonymized: anonymizationFieldSchema.anonymized,
+      updatedAt: anonymizationFieldSchema.updated_at,
+      namespace: anonymizationFieldSchema.namespace,
+      id: anonymizationFieldSchema.id,
+    };
+
+    return anonymizationField;
+  });
+};
+
+export const transformESSearchToAnonymizationFields = (
+  response: estypes.SearchResponse<EsAnonymizationFieldsSchema>
 ): AnonymizationFieldResponse[] => {
   return response.hits.hits
     .filter((hit) => hit._source !== undefined)
@@ -35,8 +59,8 @@ export const transformESToAnonymizationFields = (
             name: user.name,
           })) ?? [],
         field: anonymizationFieldSchema.field,
-        defaultAllow: anonymizationFieldSchema.default_allow,
-        defaultAllowReplacement: anonymizationFieldSchema.default_allow_replacement,
+        allowed: anonymizationFieldSchema.allowed,
+        anonymized: anonymizationFieldSchema.anonymized,
         updatedAt: anonymizationFieldSchema.updated_at,
         namespace: anonymizationFieldSchema.namespace,
         id: hit._id,
@@ -49,7 +73,7 @@ export const transformESToAnonymizationFields = (
 export const transformToUpdateScheme = (
   user: AuthenticatedUser,
   updatedAt: string,
-  { defaultAllow, defaultAllowReplacement, id }: AnonymizationFieldUpdateProps
+  { allowed, anonymized, id }: AnonymizationFieldUpdateProps
 ): UpdateAnonymizationFieldSchema => {
   return {
     id,
@@ -60,15 +84,15 @@ export const transformToUpdateScheme = (
       },
     ],
     updated_at: updatedAt,
-    default_allow: defaultAllow,
-    default_allow_replacement: defaultAllowReplacement,
+    allowed,
+    anonymized,
   };
 };
 
 export const transformToCreateScheme = (
   user: AuthenticatedUser,
   createdAt: string,
-  { defaultAllow, defaultAllowReplacement, field }: AnonymizationFieldCreateProps
+  { allowed, anonymized, field }: AnonymizationFieldCreateProps
 ): CreateAnonymizationFieldSchema => {
   return {
     updated_at: createdAt,
@@ -80,8 +104,8 @@ export const transformToCreateScheme = (
       },
     ],
     created_at: createdAt,
-    default_allow: defaultAllow,
-    default_allow_replacement: defaultAllowReplacement,
+    allowed,
+    anonymized,
   };
 };
 

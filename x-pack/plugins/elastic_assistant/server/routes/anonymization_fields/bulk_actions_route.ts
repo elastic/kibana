@@ -34,7 +34,7 @@ import {
   transformToUpdateScheme,
 } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import {
-  SearchEsAnonymizationFieldsSchema,
+  EsAnonymizationFieldsSchema,
   UpdateAnonymizationFieldSchema,
 } from '../../ai_assistant_data_clients/anonymization_fields/types';
 
@@ -168,18 +168,16 @@ export const bulkActionAnonymizationFieldsRoute = (
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
           if (body.create && body.create.length > 0) {
-            const result = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
+            const result = await dataClient?.findDocuments<EsAnonymizationFieldsSchema>({
               perPage: 100,
               page: 1,
-              filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
-                .map((c) => `field:${c.field}`)
-                .join(' OR ')})`,
+              filter: `(${body.create.map((c) => `field:${c.field}`).join(' OR ')})`,
               fields: ['field'],
             });
             if (result?.data != null && result.total > 0) {
               return assistantResponse.error({
                 statusCode: 409,
-                body: `anonymization for field: "${result.data.hits.hits
+                body: `anonymization field: "${result.data.hits.hits
                   .map((c) => c._id)
                   .join(',')}" already exists`,
               });
@@ -207,22 +205,13 @@ export const bulkActionAnonymizationFieldsRoute = (
             authenticatedUser,
           });
 
-          const created = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
-          const updated = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
-
           return buildBulkResponse(response, {
-            updated: updated?.data ? transformESToAnonymizationFields(updated.data) : [],
-            created: created?.data ? transformESToAnonymizationFields(created.data) : [],
+            updated: docsUpdated
+              ? transformESToAnonymizationFields(docsUpdated as EsAnonymizationFieldsSchema[])
+              : [],
+            created: docsCreated
+              ? transformESToAnonymizationFields(docsCreated as EsAnonymizationFieldsSchema[])
+              : [],
             deleted: docsDeleted ?? [],
             errors,
           });

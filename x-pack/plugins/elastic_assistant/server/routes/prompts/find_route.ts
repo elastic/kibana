@@ -19,8 +19,8 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { SearchEsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
-import { transformESToPrompts } from '../../ai_assistant_data_clients/prompts/helpers';
+import { EsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
+import { transformESSearchToPrompts } from '../../ai_assistant_data_clients/prompts/helpers';
 
 export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
@@ -48,7 +48,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
           const ctx = await context.resolve(['core', 'elasticAssistant']);
           const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
 
-          const result = await dataClient?.findDocuments<SearchEsPromptsSchema>({
+          const result = await dataClient?.findDocuments<EsPromptsSchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
@@ -63,7 +63,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
                 perPage: result.perPage,
                 page: result.page,
                 total: result.total,
-                data: transformESToPrompts(result.data),
+                data: transformESSearchToPrompts(result.data),
               },
             });
           }

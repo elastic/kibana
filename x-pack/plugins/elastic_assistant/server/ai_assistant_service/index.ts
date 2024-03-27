@@ -11,6 +11,8 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { Subject } from 'rxjs';
+import { Script } from '@elastic/elasticsearch/lib/api/types';
+import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from '../../common/anonymization';
 import { AssistantResourceNames } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import {
@@ -314,9 +316,39 @@ export class AIAssistantService {
 
       let anonymizationFieldsIndexName =
         await this.anonymizationFieldsDataStream.getInstalledSpaceName(spaceId);
+
       if (!anonymizationFieldsIndexName) {
+      console.log('hkhkjhjkhjkhkjh             ' + anonymizationFieldsIndexName)
+
         anonymizationFieldsIndexName = await this.anonymizationFieldsDataStream.installSpace(
           spaceId
+        );
+
+        const dataClient = await this.createAIAssistantAnonymizationFieldsDataClient({
+          spaceId,
+          logger: this.options.logger,
+          currentUser: null,
+        });
+        const writer = await dataClient?.getWriter();
+        console.log('hhhhh             ' + anonymizationFieldsIndexName)
+
+        const changedAt = new Date().toISOString();
+        const res = await writer?.bulk({
+          documentsToCreate: DEFAULT_ALLOW.map((field) => ({
+            '@timestamp': changedAt,
+            created_at: changedAt,
+            created_by: '',
+            field,
+            anonymized: DEFAULT_ALLOW_REPLACEMENT.includes(field),
+            allowed: true,
+            namespace: spaceId,
+          })),
+          getUpdateScript(document: { id: string }, updatedAt: string): Script {
+            throw new Error('Function not implemented.');
+          },
+        });
+        this.options.logger.info(
+          `Created default anonymization fields: ${res?.docs_created.length}`
         );
       }
     } catch (error) {

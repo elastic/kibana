@@ -33,10 +33,7 @@ import {
   transformToUpdateScheme,
   transformESToPrompts,
 } from '../../ai_assistant_data_clients/prompts/helpers';
-import {
-  SearchEsPromptsSchema,
-  UpdatePromptSchema,
-} from '../../ai_assistant_data_clients/prompts/types';
+import { EsPromptsSchema, UpdatePromptSchema } from '../../ai_assistant_data_clients/prompts/types';
 
 export interface BulkOperationError {
   message: string;
@@ -164,7 +161,7 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
           const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
 
           if (body.create && body.create.length > 0) {
-            const result = await dataClient?.findDocuments<SearchEsPromptsSchema>({
+            const result = await dataClient?.findDocuments<EsPromptsSchema>({
               perPage: 100,
               page: 1,
               filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
@@ -203,22 +200,9 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             authenticatedUser,
           });
 
-          const created = await dataClient?.findDocuments<SearchEsPromptsSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
-          const updated = await dataClient?.findDocuments<SearchEsPromptsSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
-
           return buildBulkResponse(response, {
-            updated: updated?.data ? transformESToPrompts(updated.data) : [],
-            created: created?.data ? transformESToPrompts(created.data) : [],
+            updated: docsUpdated ? transformESToPrompts(docsUpdated as EsPromptsSchema[]) : [],
+            created: docsCreated ? transformESToPrompts(docsCreated as EsPromptsSchema[]) : [],
             deleted: docsDeleted ?? [],
             errors,
           });
