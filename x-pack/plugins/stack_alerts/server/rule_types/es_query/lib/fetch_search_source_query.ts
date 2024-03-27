@@ -18,6 +18,7 @@ import {
   buildAggregation,
   isCountAggregation,
   parseAggregationResults,
+  SerializedSearchSourceFields,
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
@@ -57,7 +58,15 @@ export async function fetchSearchSourceQuery({
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
 
-  const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+  const initialSearchSource = await searchSourceClient.create({
+    ...params.searchConfiguration,
+    fields: [
+      ...((params.searchConfiguration as SerializedSearchSourceFields)?.fields || []),
+      'index',
+      'filter',
+      'query',
+    ],
+  });
 
   const index = initialSearchSource.getField('index') as DataView;
   const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
