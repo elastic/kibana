@@ -11,8 +11,3 @@ export interface FlyoutProps {
   dataset: FlyoutDataset;
   closeFlyout: () => void;
 }
-
-export interface RouterLinkProps {
-  href: string | undefined;
-  onClick: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
-}

@@ -20,9 +20,8 @@ export const NONE = 'none';
 export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
 export const DEFAULT_DEGRADED_DOCS = { percentage: 0, count: 0 };
 
-export const SO_SEARCH_LIMIT = 10000;
+export const SO_SEARCH_LIMIT = 300;
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
-export const MANAGEMENT_APP_LOCATOR = 'MANAGEMENT_APP_LOCATOR';
 export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';

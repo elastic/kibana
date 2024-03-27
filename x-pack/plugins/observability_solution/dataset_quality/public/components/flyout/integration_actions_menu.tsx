@@ -16,10 +16,10 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { useFlyoutIntegrationActions } from '../../hooks/use_flyout_integration_actions';
-import { RouterLinkProps } from './types';
 const seeIntegrationText = i18n.translate('xpack.datasetQuality.flyoutSeeIntegrationActionText', {
   defaultMessage: 'See integration',
 });

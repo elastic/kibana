@@ -8,8 +8,9 @@
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { useMemo, useCallback } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { DashboardType } from '../../common/data_streams_stats';
-import { DASHBOARD_APP_LOCATOR, MANAGEMENT_APP_LOCATOR } from '../../common/constants';
+import { DASHBOARD_APP_LOCATOR } from '../../common/constants';
 import { useKibanaContextForPlugin } from '../utils';
 
 export const useFlyoutIntegrationActions = () => {

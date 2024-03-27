@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
+export interface RouterLinkProps {
+  href: string | undefined;
+  onClick: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
+}
+
 interface GetRouterLinkPropsDeps {
   href?: string;
   onClick(): void;
@@ -28,7 +33,7 @@ const isLeftClickEvent = (event: React.MouseEvent<HTMLAnchorElement>) => event.b
  * @returns An object that contains an href and a guardedClick handler that will
  * manage behaviours such as leftClickEvent and event with modifiers (Ctrl, Shift, etc)
  */
-export const getRouterLinkProps = ({ href, onClick }: GetRouterLinkPropsDeps) => {
+export const getRouterLinkProps = ({ href, onClick }: GetRouterLinkPropsDeps): RouterLinkProps => {
   const guardedClickHandler = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (event.defaultPrevented) {
       return;
