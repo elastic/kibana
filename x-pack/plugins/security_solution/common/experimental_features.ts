@@ -223,6 +223,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables date pickers and sourcerer in analyzer if needed.
    */
   analyzerDatePickersAndSourcererDisabled: false,
+
+  /**
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
+   */
+  malwareOnWriteScanOptionAvailable: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
