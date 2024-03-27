@@ -163,10 +163,10 @@ describe('useBatchedPublishingSubjects', () => {
         // When subjects is expected to change, subjects must be part of react state.
         // State change required for component to re-render.
         // Re-render required to call method with updated subjects.
-        const [subjectFooState, setSubjectFooState] = useState<
+        const [subjectFoo, setSubjectFoo] = useState<
           PublishingSubject<string> | undefined
         >(undefined);
-        const [valueFoo] = useBatchedPublishingSubjects(subjectFooState);
+        const [valueFoo] = useBatchedPublishingSubjects(subjectFoo);
 
         renderCount++;
         return (
@@ -175,7 +175,7 @@ describe('useBatchedPublishingSubjects', () => {
               onClick={() => {
                 // using setTimeout to move next calls outside of callstack from onClick
                 setTimeout(() => {
-                  setSubjectFooState(new BehaviorSubject<string>('foo'));
+                  setSubjectFoo(new BehaviorSubject<string>('foo'));
                 }, 0);
               }}
             />
@@ -201,10 +201,10 @@ describe('useBatchedPublishingSubjects', () => {
         // When subject is expected to change, subject must be part of react state.
         // State change required for component to re-render.
         // Re-render required to call method with updated subject.
-        const [subjectFooState, setSubjectFooState] = useState<
+        const [subjectFoo, setSubjectFoo] = useState<
           PublishingSubject<string> | undefined
         >(undefined);
-        const valueFoo = useStateFromPublishingSubject(subjectFooState);
+        const valueFoo = useStateFromPublishingSubject(subjectFoo);
 
         renderCount++;
         return (
@@ -213,7 +213,7 @@ describe('useBatchedPublishingSubjects', () => {
               onClick={() => {
                 // using setTimeout to move next calls outside of callstack from onClick
                 setTimeout(() => {
-                  setSubjectFooState(new BehaviorSubject<string>('foo'));
+                  setSubjectFoo(new BehaviorSubject<string>('foo'));
                 }, 0);
               }}
             />
