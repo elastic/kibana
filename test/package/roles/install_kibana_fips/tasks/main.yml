@@ -6,9 +6,7 @@
 
 - name: set image tag
   set_fact:
-    kibana_commit: "{{ lookup('env','BUILDKITE_COMMIT') }}"  
-    kibana_ver: "{{ kibana_fips.files[0].path | basename| regex_search('kibana-ubi-fips-(.*)-docker-image.tar.gz', '\\1') | first }}" 
-    kibana_image_tag: "{{ kibana_ver }}-{{ kibana_commit }}"
+    kibana_image_tag: "{{ kibana_fips.files[0].path | basename| regex_search('kibana-ubi-fips-(.*)-docker-image.tar.gz', '\\1') | first }}-{{ lookup('env','BUILDKITE_COMMIT') }}"
 
 - name: load image
   become: yes
