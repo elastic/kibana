@@ -51,6 +51,7 @@ export const DomainsTable: React.FC = () => {
             to={generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
               domainId: domain.id,
               indexName,
+              tabId: 'domain_management',
             })}
           >
             {domain.url}
@@ -95,6 +96,7 @@ export const DomainsTable: React.FC = () => {
               generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
                 domainId: domain.id,
                 indexName,
+                tabId: 'domain_management',
               })
             );
           },

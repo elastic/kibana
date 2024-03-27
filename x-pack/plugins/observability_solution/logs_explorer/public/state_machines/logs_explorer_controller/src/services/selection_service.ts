@@ -7,6 +7,8 @@
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { InvokeCreator } from 'xstate';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
 import { LogsExplorerCustomizations } from '../../../../controller';
 import { Dataset } from '../../../../../common/datasets';
 import {
@@ -23,6 +25,7 @@ interface LogsExplorerControllerSelectionServiceDeps {
   datasetsClient: IDatasetsClient;
   dataViews: DataViewsPublicPluginStart;
   events?: LogsExplorerCustomizations['events'];
+  uiSettings: IUiSettingsClient;
 }
 
 export const initializeSelection =
@@ -30,6 +33,7 @@ export const initializeSelection =
     datasetsClient,
     dataViews,
     events,
+    uiSettings,
   }: LogsExplorerControllerSelectionServiceDeps): InvokeCreator<
     LogsExplorerControllerContext,
     LogsExplorerControllerEvent
@@ -63,7 +67,9 @@ export const initializeSelection =
        * If the selection is a data view which is not of logs type, invoke the customization event for unknown data views.
        */
       if (
-        dataViewSelection.selection.dataView.isUnknownDataType() &&
+        !dataViewSelection.selection.dataView.testAgainstAllowedList(
+          uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+        ) &&
         events?.onUknownDataViewSelection
       ) {
         return events.onUknownDataViewSelection(context);
