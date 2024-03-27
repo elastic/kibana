@@ -6,7 +6,7 @@
  */
 
 import React, { NamedExoticComponent } from 'react';
-import { BlockListFlyoutProps, BlockListFormProps } from '../types';
+import { BlockListFlyoutProps, BlockListFormProps, SelectedDataView } from '../types';
 import { SecuritySolutionPluginContext } from '..';
 
 export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext => ({
@@ -31,7 +31,7 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     selectedPatterns: [],
     indexPattern: { fields: [], title: '' },
     loading: false,
-  },
+  } as unknown as SelectedDataView,
   securitySolutionStore: {
     // @ts-ignore
     dispatch: () => jest.fn(),
