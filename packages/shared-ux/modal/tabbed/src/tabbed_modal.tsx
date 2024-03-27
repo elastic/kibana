@@ -64,15 +64,11 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
   };
 
   const btnClickHandler = useCallback(() => {
-    modalActionBtn ? modalActionBtn.handler({ state: selectedTabState }) : null;
+    modalActionBtn && modalActionBtn.handler({ state: selectedTabState });
   }, [selectedTabState, modalActionBtn]);
 
   return (
-    <EuiModal
-      onClose={onClose}
-      style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
-      maxWidth={true}
-    >
+    <EuiModal onClose={onClose} style={{ ...(modalWidth ? { width: modalWidth } : {}) }} maxWidth>
       <EuiModalHeader>
         <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>

@@ -12,14 +12,13 @@ import {
   EuiButtonEmpty,
   EuiCopy,
   EuiFlexGroup,
-  EuiForm,
-  EuiFormRow,
   EuiModalFooter,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
@@ -244,11 +243,14 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         <>
           <EuiSwitch
             label={
-              <FormattedMessage
-                id="reporting.screenCapturePanelContent.optimizeForPrintingLabel"
-                defaultMessage="Optimize for printing"
-              />
+              <EuiText size="s" css={{ textWrap: 'nowrap' }}>
+                <FormattedMessage
+                  id="reporting.screenCapturePanelContent.optimizeForPrintingLabel"
+                  defaultMessage="For printing"
+                />
+              </EuiText>
             }
+            css={{ display: 'block' }}
             checked={usePrintLayout}
             onChange={handlePrintLayoutChange}
             data-test-subj="usePrintLayout"
@@ -268,38 +270,39 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     }
     return null;
   };
-  const renderCopyURLButton = ({
-    isUnsaved,
-  }: {
-    isUnsaved: boolean;
-    exceedsMaxLength: boolean;
-  }) => {
-    if (isUnsaved && exceedsMaxLength) {
-      return <ErrorUrlTooLongPanel isUnsaved />;
-    } else if (exceedsMaxLength) {
-      return <ErrorUrlTooLongPanel isUnsaved={false} />;
+  const renderCopyURLButton = useCallback(() => {
+    if (exceedsMaxLength) {
+      return <ErrorUrlTooLongPanel isUnsaved={isDirty} />;
     }
+
     return (
       <>
         <EuiToolTip
           content={
-            <FormattedMessage
-              id="reporting.share.modalContent.unsavedStateErrorText"
-              defaultMessage="Save your work before copying this URL."
-            />
+            isDirty ? (
+              <FormattedMessage
+                id="reporting.share.modalContent.unsavedStateErrorText"
+                defaultMessage="Save your work before copying this URL."
+              />
+            ) : (
+              <FormattedMessage
+                id="reporting.share.modalContent.savedStateErrorText"
+                defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
+              />
+            )
           }
         >
           <EuiCopy textToCopy={absoluteUrl}>
             {(copy) => (
               <EuiButtonEmpty
                 iconType="copy"
-                disabled={!isSaved}
+                disabled={isDirty}
                 flush="both"
                 onClick={copy}
                 data-test-subj="shareReportingCopyURL"
               >
                 <FormattedMessage
-                  id="reporting.share.modalContent.copyPostUrlButtonLabel"
+                  id="reporting.share.modalContent.copyUrlButtonLabel"
                   defaultMessage="Post URL"
                 />
               </EuiButtonEmpty>
@@ -318,11 +321,11 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         </EuiToolTip>
       </>
     );
-  };
+  }, [absoluteUrl, exceedsMaxLength, isDirty]);
 
   const saveWarningMessageWithButton =
-    objectId === undefined || objectId === '' || !isSaved || props.isDirty || isStale ? (
-      <EuiFormRow>
+    objectId === undefined || objectId === '' || !isSaved || isDirty || isStale ? (
+      <>
         <EuiToolTip content="Please save your work before generating a report.">
           <EuiButton
             disabled={Boolean(createReportingJob)}
@@ -337,7 +340,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             />
           </EuiButton>
         </EuiToolTip>
-      </EuiFormRow>
+      </>
     ) : (
       <EuiButton
         disabled={Boolean(createReportingJob)}
@@ -366,33 +369,51 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         ];
   return (
     <>
-      <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-        <FormattedMessage
-          id="reporting.share.imageExport"
-          defaultMessage="Exports can take a few minutes to generate."
+      <EuiSpacer size="m" />
+      <FormattedMessage
+        id="reporting.share.imageExport"
+        defaultMessage="Exports can take a few minutes to generate."
+      />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
+        <EuiRadioGroup
+          options={radioOptions}
+          onChange={(id) => {
+            setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
+          }}
+          name="image reporting radio group"
+          idSelected={selectedRadio}
+          legend={{
+            children: <FormattedMessage id="reporting.share.fileType" defaultMessage="File type" />,
+          }}
         />
-        <EuiSpacer size="m" />
-        <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
-          <EuiRadioGroup
-            options={radioOptions}
-            onChange={(id) => {
-              setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
-            }}
-            name="image reporting radio group"
-            idSelected={selectedRadio}
-            legend={{
-              children: (
-                <FormattedMessage id="reporting.share.fileType" defaultMessage="File type" />
-              ),
-            }}
-          />
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <EuiModalFooter
+        css={
+          selectedRadio === 'printablePdfV2'
+            ? { justifyContent: 'center', alignItems: 'center' }
+            : {}
+        }
+      >
         {renderOptions()}
-      </EuiForm>
-      <EuiModalFooter>
-        {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
-        {saveWarningMessageWithButton}
+        {renderCopyURLButton()}
+        {objectType === 'dashboard' ? (
+          <EuiButton
+            disabled={Boolean(createReportingJob)}
+            fill
+            onClick={() => generateReportingJob()}
+            data-test-subj="generateReportButton"
+            isLoading={Boolean(createReportingJob)}
+          >
+            <FormattedMessage
+              id="reporting.share.generateReportButtonLabel"
+              defaultMessage="Generate export"
+            />
+          </EuiButton>
+        ) : (
+          saveWarningMessageWithButton
+        )}
       </EuiModalFooter>
     </>
   );
