@@ -92,7 +92,7 @@ export function registerAnomalyRuleType({
 }: RegisterRuleDependencies) {
   if (!alerting) {
     throw new Error(
-      'Cannot register anomaly rule type. Both the actions and alerting plugins need to be enabled.'
+      'Cannot register anomaly rule type. The alerting plugin needs to be enabled.'
     );
   }
 
