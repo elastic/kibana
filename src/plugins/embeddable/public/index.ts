@@ -101,10 +101,6 @@ export {
   type DefaultEmbeddableApi,
   type ReactEmbeddableFactory,
   type ReactEmbeddableRegistration,
-  type ReactEmbeddableTitlesApi,
-  type SerializedReactEmbeddableTitles,
-  initializeReactEmbeddableTitles,
-  serializeReactEmbeddableTitles,
   startTrackingEmbeddableUnsavedChanges,
 } from './react_embeddable_system';
 
