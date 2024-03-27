@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export const CONSOLE_LANG_ID = 'console';
-export const CONSOLE_THEME_ID = 'consoleTheme';
-export const CONSOLE_POSTFIX = '.console';
+export const themeRuleGroupBuilderFactory =
+  (postfix: string = '') =>
+  (tokens: string[], color: string, isBold: boolean = false) =>
+    tokens.map((i) => ({
+      token: i + postfix,
+      foreground: color,
+      fontStyle: isBold ? 'bold' : '',
+    }));
