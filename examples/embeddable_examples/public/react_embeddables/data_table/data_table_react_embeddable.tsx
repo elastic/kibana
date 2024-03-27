@@ -16,6 +16,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   apiPublishesDataViews,
+  initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -40,15 +41,20 @@ export const getDataTableFactory = (
   deserializeState: (state) => {
     return state.rawState as DataTableSerializedState;
   },
-  buildEmbeddable: async (initialState, buildApi) => {
+  buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
     // initialize embeddable state
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
 
     // initialize services
     const storage = new Storage(localStorage);
-    const { forceRefresh, queryLoading$, startQueryService } = await initializeDataTableQueries(
-      services
-    );
+
+    // start the time range service (allows the data table to have a local time range)
+    const { appliedTimeRange$, serializeTimeRange, timeRangeApi, timeRangeComparators } =
+      initializeTimeRange(initialState, parentApi);
+
+    const { forceRefresh, queryLoading$, rows$, fields$, dataView$, stopQueryService } =
+      await initializeDataTableQueries(services, parentApi, appliedTimeRange$);
+
     const allServices = {
       ...services,
       storage,
@@ -59,20 +65,18 @@ export const getDataTableFactory = (
 
     const api = buildApi(
       {
+        ...timeRangeApi,
         ...titlesApi,
         forceRefresh,
         dataLoading: queryLoading$,
         serializeState: () => {
           return {
-            rawState: serializeTitles(),
+            rawState: { ...serializeTitles(), ...serializeTimeRange() },
           };
         },
       },
-      titleComparators
+      { ...titleComparators, ...timeRangeComparators }
     );
-
-    // Start the data table query service
-    const { rows$, fields$, dataView$, stopQueryService } = startQueryService(api);
 
     // Create the React Embeddable component
     return {

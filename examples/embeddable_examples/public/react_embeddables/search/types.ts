@@ -11,6 +11,7 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import {
+  HasForceRefresh,
   HasParentApi,
   PublishesDataLoading,
   PublishesDataViews,
@@ -18,11 +19,12 @@ import {
   PublishesWritableUnifiedSearch,
 } from '@kbn/presentation-publishing';
 
-export interface State {
+export interface SearchExampleSerializedState {
   timeRange: TimeRange | undefined;
 }
 
-export type Api = DefaultEmbeddableApi<State> &
+export type SearchExampleApi = DefaultEmbeddableApi<SearchExampleSerializedState> &
+  HasForceRefresh &
   PublishesDataViews &
   PublishesDataLoading &
   Pick<PublishesWritableUnifiedSearch, 'timeRange$' | 'setTimeRange'> &

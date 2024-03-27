@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import {
-  DefaultEmbeddableApi,
-  SerializedReactEmbeddableTitles,
-} from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   HasForceRefresh,
   PublishesDataLoading,
   PublishesDataViews,
+  SerializedTimeRange,
+  SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { PublishesSelectedFields } from '../field_list/publishes_selected_fields';
 
@@ -26,8 +25,10 @@ export interface DataTableQueryState {
   query?: Query | AggregateQuery;
 }
 
-export type DataTableSerializedState = SerializedReactEmbeddableTitles;
+export type DataTableSerializedState = SerializedTitles & SerializedTimeRange;
 
-export type DataTableApi = DefaultEmbeddableApi & PublishesDataLoading & HasForceRefresh;
+export type DataTableApi = DefaultEmbeddableApi<DataTableSerializedState> &
+  PublishesDataLoading &
+  HasForceRefresh;
 
 export type DataTableProvider = PublishesDataViews & PublishesSelectedFields;

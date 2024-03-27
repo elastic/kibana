@@ -252,10 +252,10 @@ export class ControlGroupContainer extends Container<
     this.subscriptions.add(
       this.getInput$()
         .pipe(
-          skip(1),
           distinctUntilChanged(
             (a, b) => Boolean(a.showApplySelections) === Boolean(b.showApplySelections)
-          )
+          ),
+          skip(1)
         )
         .subscribe(() => {
           const { filters, timeslice } = this.recalculateFilters();

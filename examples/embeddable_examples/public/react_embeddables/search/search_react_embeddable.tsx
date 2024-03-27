@@ -7,20 +7,22 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTimeRange, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
-import { Api, Services, State } from './types';
+import { SearchExampleApi, SearchExampleSerializedState, Services } from './types';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
-  const factory: ReactEmbeddableFactory<State, Api> = {
+  const factory: ReactEmbeddableFactory<SearchExampleSerializedState, SearchExampleApi> = {
     type: SEARCH_EMBEDDABLE_ID,
     deserializeState: (state) => {
-      return state.rawState as State;
+      return state.rawState as SearchExampleSerializedState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const {
@@ -35,10 +37,12 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         defaultDataView ? [defaultDataView] : undefined
       );
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+      const lastForceRefreshTime$ = new BehaviorSubject<number>(0);
 
       const api = buildApi(
         {
           ...timeRangeApi,
+          forceRefresh: () => lastForceRefreshTime$.next(Date.now()),
           dataViews: dataViews$,
           dataLoading: dataLoading$,
           serializeState: () => {
@@ -60,10 +64,11 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         Component: () => {
           const [count, setCount] = useState<number>(0);
           const [error, setError] = useState<Error | undefined>();
-          const [filters, query, appliedTimeRange] = useBatchedPublishingSubjects(
+          const [filters, query, appliedTimeRange, forceRefreshTime] = useBatchedPublishingSubjects(
             api.parentApi?.filters$,
             api.parentApi?.query$,
-            appliedTimeRange$
+            appliedTimeRange$,
+            lastForceRefreshTime$
           );
 
           useEffect(() => {
@@ -97,7 +102,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
             return () => {
               ignore = true;
             };
-          }, [filters, query, appliedTimeRange]);
+          }, [filters, query, appliedTimeRange, forceRefreshTime]);
 
           if (!defaultDataView) {
             return (
@@ -116,9 +121,15 @@ export const getSearchEmbeddableFactory = (services: Services) => {
           }
 
           return (
-            <p>
-              Found <strong>{count}</strong> from {defaultDataView.name}
-            </p>
+            <div
+              css={css`
+                padding: ${euiThemeVars.euiSizeM};
+              `}
+            >
+              <p>
+                Found <strong>{count}</strong> from {defaultDataView.name}
+              </p>
+            </div>
           );
         },
       };

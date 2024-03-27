@@ -48,12 +48,11 @@ export const getContainerParentFromAPI = (
 };
 
 export const listenForCompatibleApi = <ApiType extends unknown>(
-  api: unknown,
+  parent: unknown,
   isCompatible: (api: unknown) => api is ApiType,
   apiFound: (api: ApiType | undefined) => (() => void) | void
 ) => {
-  const parent = getContainerParentFromAPI(api);
-  if (!parent) return () => {};
+  if (!parent || !apiIsPresentationContainer(parent)) return () => {};
 
   let lastCleanupFunction: (() => void) | undefined;
   let lastCompatibleUuid: string | null;
