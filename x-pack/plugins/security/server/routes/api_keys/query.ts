@@ -83,14 +83,12 @@ export function defineQueryApiKeysRoute({
           sort,
         });
 
-        const validKeys = queryResponse.api_keys.filter(({ invalidated }) => !invalidated);
-
         return response.ok<QueryApiKeyResult>({
           body: {
             // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
-            apiKeys: validKeys,
+            apiKeys: queryResponse.api_keys,
             total: queryResponse.total,
-            count: validKeys.length,
+            count: queryResponse.api_keys.length,
             canManageCrossClusterApiKeys:
               clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled,
             canManageApiKeys: clusterPrivileges.manage_api_key,
