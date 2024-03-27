@@ -10,21 +10,22 @@ import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { pluginServices } from '../services/plugin_services';
 import {
-  UnlinkFromLibraryAction,
-  UnlinkPanelFromLibraryActionApi,
-} from './unlink_from_library_action';
+  LegacyUnlinkFromLibraryAction,
+  LegacyUnlinkPanelFromLibraryActionApi,
+} from './legacy_unlink_from_library_action';
 
 describe('Unlink from library action', () => {
-  let action: UnlinkFromLibraryAction;
-  let context: { embeddable: UnlinkPanelFromLibraryActionApi };
+  let action: LegacyUnlinkFromLibraryAction;
+  let context: { embeddable: LegacyUnlinkPanelFromLibraryActionApi };
 
   beforeEach(() => {
-    action = new UnlinkFromLibraryAction();
+    action = new LegacyUnlinkFromLibraryAction();
     context = {
       embeddable: {
         unlinkFromLibrary: jest.fn(),
         canUnlinkFromLibrary: jest.fn().mockResolvedValue(true),
-
+        linkToLibrary: jest.fn(),
+        canLinkToLibrary: jest.fn().mockResolvedValue(true),
         viewMode: new BehaviorSubject<ViewMode>('edit'),
         panelTitle: new BehaviorSubject<string | undefined>('A very compatible API'),
       },
