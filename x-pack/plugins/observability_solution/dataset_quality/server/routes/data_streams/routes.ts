@@ -21,7 +21,7 @@ import { getDataStreamDetails } from './get_data_stream_details';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
-import { getIntegrationDashboards, getIntegrations } from './get_integrations';
+import { getIntegrationDashboards, getIntegrations } from './get_integration_dashboards';
 import { getEstimatedDataInBytes } from './get_estimated_data_in_bytes';
 
 const statsRoute = createDatasetQualityServerRoute({
