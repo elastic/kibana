@@ -101,7 +101,8 @@ export const ConnectorConfiguration: React.FC = () => {
                     i18n.translate(
                       'xpack.enterpriseSearch.content.connectorDetail.configuration.apiKey.noApiKeyLabel',
                       {
-                        defaultMessage: 'Please set an index name before generating an API key',
+                        defaultMessage:
+                          'Before you can generate an API key, you need to attach an index. Scroll to the bottom of this page for instructions.',
                       }
                     )
                   ),
@@ -109,8 +110,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.generateApiKey.title',
                     {
-                      defaultMessage:
-                        'Before you can generate an API key, attach an index by scrolling to the bottom of this page.',
+                      defaultMessage: 'Generate an API key',
                     }
                   ),
                   titleSize: 'xs',
