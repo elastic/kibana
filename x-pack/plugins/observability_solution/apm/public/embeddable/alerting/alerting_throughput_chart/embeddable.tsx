@@ -17,7 +17,7 @@ import {
 import { type CoreStart } from '@kbn/core/public';
 import { APMEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingThroughputChart } from './chart';
-import type { APMAlertingThroughputChartEmbeddableInput } from './types';
+import type { APMAlertingVizEmbeddableInput } from '../types';
 import type { ApmPluginStartDeps } from '../../../plugin';
 
 export const APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE =
@@ -29,7 +29,7 @@ interface APMThroughputChartEmbeddableDeps {
 }
 
 export class APMThroughputChartEmbeddable extends AbstractEmbeddable<
-  APMAlertingThroughputChartEmbeddableInput,
+  APMAlertingVizEmbeddableInput,
   EmbeddableOutput
 > {
   public readonly type = APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE;
@@ -38,7 +38,7 @@ export class APMThroughputChartEmbeddable extends AbstractEmbeddable<
 
   constructor(
     private readonly deps: APMThroughputChartEmbeddableDeps,
-    initialInput: APMAlertingThroughputChartEmbeddableInput,
+    initialInput: APMAlertingVizEmbeddableInput,
     parent?: IContainer
   ) {
     super(initialInput, {}, parent);

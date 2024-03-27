@@ -17,7 +17,7 @@ import {
 import { type CoreStart } from '@kbn/core/public';
 import { APMEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingLatencyChart } from './chart';
-import type { APMAlertingLatencyChartEmbeddableInput } from './types';
+import type { APMAlertingVizEmbeddableInput } from '../types';
 import type { ApmPluginStartDeps } from '../../../plugin';
 
 export const APM_ALERTING_LATENCY_CHART_EMBEDDABLE =
@@ -29,7 +29,7 @@ interface APMLatencyChartEmbeddableDeps {
 }
 
 export class APMLatencyChartEmbeddable extends AbstractEmbeddable<
-  APMAlertingLatencyChartEmbeddableInput,
+  APMAlertingVizEmbeddableInput,
   EmbeddableOutput
 > {
   public readonly type = APM_ALERTING_LATENCY_CHART_EMBEDDABLE;
@@ -38,7 +38,7 @@ export class APMLatencyChartEmbeddable extends AbstractEmbeddable<
 
   constructor(
     private readonly deps: APMLatencyChartEmbeddableDeps,
-    initialInput: APMAlertingLatencyChartEmbeddableInput,
+    initialInput: APMAlertingVizEmbeddableInput,
     parent?: IContainer
   ) {
     super(initialInput, {}, parent);

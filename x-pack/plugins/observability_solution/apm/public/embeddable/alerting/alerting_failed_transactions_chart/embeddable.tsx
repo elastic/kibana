@@ -17,7 +17,7 @@ import {
 import { type CoreStart } from '@kbn/core/public';
 import { APMEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingFailedTransactionsChart } from './chart';
-import type { APMAlertingFailedTransactionsChartEmbeddableInput } from './types';
+import type { APMAlertingVizEmbeddableInput } from '../types';
 import type { ApmPluginStartDeps } from '../../../plugin';
 
 export const APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE =
@@ -29,7 +29,7 @@ interface APMFailedTransactionsChartEmbeddableDeps {
 }
 
 export class APMFailedTransactionsChartEmbeddable extends AbstractEmbeddable<
-  APMAlertingFailedTransactionsChartEmbeddableInput,
+  APMAlertingVizEmbeddableInput,
   EmbeddableOutput
 > {
   public readonly type = APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE;
@@ -38,7 +38,7 @@ export class APMFailedTransactionsChartEmbeddable extends AbstractEmbeddable<
 
   constructor(
     private readonly deps: APMFailedTransactionsChartEmbeddableDeps,
-    initialInput: APMAlertingFailedTransactionsChartEmbeddableInput,
+    initialInput: APMAlertingVizEmbeddableInput,
     parent?: IContainer
   ) {
     super(initialInput, {}, parent);
