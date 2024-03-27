@@ -14,9 +14,9 @@ import {
 } from '@kbn/actions-plugin/common';
 import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { API_INFO_ERROR } from './translations';
-import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
+import { AppInfo, AssignmentGroup, RESTApiError, ServiceNowActionConnector } from './types';
 import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
-import { Choice } from './types';
+import { Choice, ConfigurationItem } from './types';
 
 export async function getChoices({
   http,
@@ -34,6 +34,48 @@ export async function getChoices({
     {
       body: JSON.stringify({
         params: { subAction: 'getChoices', subActionParams: { fields } },
+      }),
+      signal,
+    }
+  );
+  return rewriteResponseToCamelCase(res);
+}
+
+export async function getConfigurationItems({
+  http,
+  signal,
+  connectorId,
+}: {
+  http: HttpSetup;
+  signal: AbortSignal;
+  connectorId: string;
+}): Promise<ActionTypeExecutorResult<ConfigurationItem[]>> {
+  const res = await http.post<ConnectorExecutorResult<ConfigurationItem[]>>(
+    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
+    {
+      body: JSON.stringify({
+        params: { subAction: 'getConfigurationItems', subActionParams: {} },
+      }),
+      signal,
+    }
+  );
+  return rewriteResponseToCamelCase(res);
+}
+
+export async function getAssignmentGroups({
+  http,
+  signal,
+  connectorId,
+}: {
+  http: HttpSetup;
+  signal: AbortSignal;
+  connectorId: string;
+}): Promise<ActionTypeExecutorResult<AssignmentGroup[]>> {
+  const res = await http.post<ConnectorExecutorResult<AssignmentGroup[]>>(
+    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
+    {
+      body: JSON.stringify({
+        params: { subAction: 'getAssignmentGroups', subActionParams: {} },
       }),
       signal,
     }

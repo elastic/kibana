@@ -88,6 +88,12 @@ export const createExternalService: ServiceFactory = ({
     return `${choicesUrl}?sysparm_query=name=task^ORname=${table}^${elements}^language=en&sysparm_fields=label,value,dependent_value,element`;
   };
 
+  const getConfigurationItemURL = () =>
+    `${urlWithoutTrailingSlash}/api/now/cmdb/instance/cmdb_ci?sysparm_query=ORDERBYname`;
+
+  const getAssignmentGroupsURL = () =>
+    `${urlWithoutTrailingSlash}/api/now/table/sys_user_group?sysparm_fields=sys_id,name`;
+
   const checkInstance = (res: AxiosResponse) => {
     if (res.status >= 200 && res.status < 400 && res.data.result == null) {
       throw new Error(
@@ -368,6 +374,38 @@ export const createExternalService: ServiceFactory = ({
     }
   };
 
+  const getConfigurationItems = async () => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: getConfigurationItemURL(),
+        logger,
+        configurationUtilities,
+      });
+
+      checkInstance(res);
+      return res.data.result;
+    } catch (error) {
+      throw createServiceError(error, 'Unable to get configuration items');
+    }
+  };
+
+  const getAssignmentGroups = async () => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: getAssignmentGroupsURL(),
+        logger,
+        configurationUtilities,
+      });
+
+      checkInstance(res);
+      return res.data.result;
+    } catch (error) {
+      throw createServiceError(error, 'Unable to get assignment groups');
+    }
+  };
+
   return {
     createIncident,
     findIncidents,
@@ -381,5 +419,7 @@ export const createExternalService: ServiceFactory = ({
     checkIfApplicationIsInstalled,
     closeIncident,
     getIncidentByCorrelationId,
+    getConfigurationItems,
+    getAssignmentGroups,
   };
 };

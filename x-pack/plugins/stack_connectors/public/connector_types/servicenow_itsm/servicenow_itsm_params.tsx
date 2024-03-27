@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTitle,
   EuiLink,
+  EuiComboBox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -34,6 +35,8 @@ import {
 } from '../lib/servicenow/helpers';
 
 import * as i18n from '../lib/servicenow/translations';
+import { useGetConfigurationItems } from '../lib/servicenow/use_get_configuration_items';
+import { useGetAssignmentGroup } from '../lib/servicenow/use_get_assignment_groups';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -210,6 +213,18 @@ const ServiceNowParamsFields: React.FunctionComponent<
     onSuccess: onChoicesSuccess,
   });
 
+  const { configurationItems, isLoading: isLoadingConfigurationItems } = useGetConfigurationItems({
+    http,
+    toastNotifications: toasts,
+    actionConnector,
+  });
+
+  const { assignmentGroups, isLoading: isLoadingAssignmentGroup } = useGetAssignmentGroup({
+    http,
+    toastNotifications: toasts,
+    actionConnector,
+  });
+
   const handleEventActionChange = useCallback(
     (value: EventAction) => {
       if (!value) {
@@ -367,6 +382,53 @@ const ServiceNowParamsFields: React.FunctionComponent<
                   />
                 </EuiFormRow>
               ) : null}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.CI_LABEL}>
+                <EuiComboBox
+                  options={configurationItems.map((item) => ({
+                    label: item.name,
+                    value: item.sys_id,
+                  }))}
+                  isLoading={isLoadingConfigurationItems}
+                  fullWidth
+                  onChange={(configurationItem) =>
+                    editSubActionProperty('cmdb_ci', configurationItem[0].value)
+                  }
+                  singleSelection={{ asPlainText: true }}
+                  selectedOptions={configurationItems
+                    .filter((item) => item.sys_id === incident.cmdb_ci)
+                    .map((item) => ({
+                      label: item.name,
+                      value: item.sys_id,
+                    }))}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.ASSIGNMENT_GROUP_LABEL}>
+                <EuiComboBox
+                  options={assignmentGroups.map((group) => ({
+                    label: group.name,
+                    value: group.sys_id,
+                  }))}
+                  isLoading={isLoadingAssignmentGroup}
+                  fullWidth
+                  singleSelection={{ asPlainText: true }}
+                  onChange={(assignmentGroup) =>
+                    editSubActionProperty('assignment_group', assignmentGroup[0].value)
+                  }
+                  selectedOptions={assignmentGroups
+                    .filter((group) => group.sys_id === incident.assignment_group)
+                    .map((group) => ({
+                      label: group.name,
+                      value: group.sys_id,
+                    }))}
+                />
+              </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />

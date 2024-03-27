@@ -102,6 +102,20 @@ export const CHOICES_API_ERROR = i18n.translate(
   }
 );
 
+export const CI_API_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.unableToGetCIMessage',
+  {
+    defaultMessage: 'Unable to get configuration items',
+  }
+);
+
+export const ASSIGNMENT_GROUP_API_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.unableToGetAssignmentGroupMessage',
+  {
+    defaultMessage: 'Unable to get assignment groups',
+  }
+);
+
 export const CATEGORY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.categoryTitle',
   {
@@ -141,6 +155,20 @@ export const PRIORITY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.prioritySelectFieldLabel',
   {
     defaultMessage: 'Priority',
+  }
+);
+
+export const CI_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.configurationItemTitle',
+  {
+    defaultMessage: 'Configuration item',
+  }
+);
+
+export const ASSIGNMENT_GROUP_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.assignmentGroupTitle',
+  {
+    defaultMessage: 'Assignment group',
   }
 );
 

@@ -55,7 +55,9 @@ export type ExecutorSubActionGetChoicesParams = TypeOf<
 export type ServiceNowExecutorResultData =
   | PushToServiceResponse
   | GetCommonFieldsResponse
-  | GetChoicesResponse;
+  | GetChoicesResponse
+  | GetConfigurationItemsResponse
+  | GetAssignmentGroupsResponse;
 
 export interface CreateCommentRequest {
   [key: string]: string;
@@ -110,6 +112,19 @@ export interface ExternalServiceParamsClose {
   correlationId: string | null;
 }
 
+interface ConfigurationItem {
+  sys_id: string;
+  name: string;
+}
+
+interface AssignmentGroup {
+  sys_id: string;
+  name: string;
+}
+
+export type GetConfigurationItemsResponse = ConfigurationItem[];
+export type GetAssignmentGroupsResponse = AssignmentGroup[];
+
 export interface ExternalService {
   getChoices: (fields: string[]) => Promise<GetChoicesResponse>;
   getIncident: (id: string) => Promise<ServiceNowIncident>;
@@ -125,6 +140,8 @@ export interface ExternalService {
   getApplicationInformation: () => Promise<GetApplicationInfoResponse>;
   checkIfApplicationIsInstalled: () => Promise<void>;
   getIncidentByCorrelationId: (correlationId: string) => Promise<ServiceNowIncident | null>;
+  getConfigurationItems: () => Promise<GetConfigurationItemsResponse>;
+  getAssignmentGroups: () => Promise<GetAssignmentGroupsResponse>;
 }
 
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
@@ -220,6 +237,10 @@ export interface ExternalServiceAPI {
   closeIncident: (
     args: CloseIncidentApiHandlerArgs
   ) => Promise<ExternalServiceIncidentResponse | null>;
+  getConfigurationItems: (
+    args: GetCommonFieldsHandlerArgs
+  ) => Promise<GetConfigurationItemsResponse>;
+  getAssignmentGroups: (args: GetCommonFieldsHandlerArgs) => Promise<GetAssignmentGroupsResponse>;
 }
 
 export interface ExternalServiceCommentResponse {

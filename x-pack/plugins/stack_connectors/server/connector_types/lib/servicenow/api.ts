@@ -18,6 +18,8 @@ import {
   PushToServiceResponse,
   CloseIncidentApiHandlerArgs,
   ExternalServiceIncidentResponse,
+  GetConfigurationItemsResponse,
+  GetAssignmentGroupsResponse,
 } from './types';
 
 const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};
@@ -105,6 +107,20 @@ const getChoicesHandler = async ({
   return res;
 };
 
+const getConfigurationItemsHandler = async ({
+  externalService,
+}: GetCommonFieldsHandlerArgs): Promise<GetConfigurationItemsResponse> => {
+  const res = await externalService.getConfigurationItems();
+  return res;
+};
+
+const getAssignmentGroupsHandler = async ({
+  externalService,
+}: GetCommonFieldsHandlerArgs): Promise<GetAssignmentGroupsResponse> => {
+  const res = await externalService.getAssignmentGroups();
+  return res;
+};
+
 export const api: ExternalServiceAPI = {
   getChoices: getChoicesHandler,
   getFields: getFieldsHandler,
@@ -112,4 +128,6 @@ export const api: ExternalServiceAPI = {
   handshake: handshakeHandler,
   pushToService: pushToServiceHandler,
   closeIncident: closeIncidentHandler,
+  getConfigurationItems: getConfigurationItemsHandler,
+  getAssignmentGroups: getAssignmentGroupsHandler,
 };

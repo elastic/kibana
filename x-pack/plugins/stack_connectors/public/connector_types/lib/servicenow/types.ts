@@ -65,3 +65,13 @@ export interface RESTApiError {
   };
   status: string;
 }
+
+export interface ConfigurationItem {
+  sys_id: string;
+  name: string;
+}
+
+export interface AssignmentGroup {
+  sys_id: string;
+  name: string;
+}

@@ -109,6 +109,8 @@ const supportedSubActions: string[] = [
   'getChoices',
   'getIncident',
   'closeIncident',
+  'getConfigurationItems',
+  'getAssignmentGroups',
 ];
 async function executor(
   {
@@ -186,6 +188,22 @@ async function executor(
       externalService,
       params: closeIncidentParams,
       logger,
+    });
+  }
+
+  if (subAction === 'getConfigurationItems') {
+    data = await api.getConfigurationItems({
+      externalService,
+      logger,
+      params: {},
+    });
+  }
+
+  if (subAction === 'getAssignmentGroups') {
+    data = await api.getAssignmentGroups({
+      externalService,
+      logger,
+      params: {},
     });
   }
 

@@ -67,6 +67,8 @@ export const ExecutorSubActionPushParamsSchemaITSM = schema.object({
     severity: schema.nullable(schema.string()),
     urgency: schema.nullable(schema.string()),
     impact: schema.nullable(schema.string()),
+    cmdb_ci: schema.nullable(schema.string()),
+    assignment_group: schema.nullable(schema.string()),
   }),
   comments: CommentsSchema,
 });
@@ -154,6 +156,14 @@ export const ExecutorParamsSchemaITSM = schema.oneOf([
   schema.object({
     subAction: schema.literal('closeIncident'),
     subActionParams: ExecutorSubActionCloseIncidentParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('getConfigurationItems'),
+    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('getAssignmentGroups'),
+    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
   }),
 ]);
 
