@@ -76,7 +76,7 @@ For information about the {kib} 8.13.0 release, review the following information
 [%collapsible]
 ====
 *Details* +
-When opening an ecommerce sample data in a Canvas workpad, a toast notification stating that rending the image has failed is incorrectly displayed. For more information, refer to ({kibana-pull}179457[#179457]).
+In Canvas, and empty text element incorrectly triggers a "Markdown content is required in [readOnly] mode" toast notification. For more information, refer to ({kibana-pull}179457[#179457]).
 ====
 
 [float]
