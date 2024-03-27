@@ -12,13 +12,13 @@ import {
   ISearchSource,
   ISearchStartSearchSource,
   SortDirection,
+  SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
   isCountAggregation,
   parseAggregationResults,
-  SerializedSearchSourceFields,
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
