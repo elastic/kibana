@@ -47,6 +47,7 @@
     "@kbn/lens-plugin",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/slo-plugin",
+    "@kbn/es-query",
   ],
   "exclude": [
     "target/**/*"
