@@ -12,7 +12,6 @@ import { ReactEmbeddableDynamicActionsApi } from '@kbn/embeddable-enhanced-plugi
 import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { imageClickTrigger } from '../actions';
-import { ImageEmbeddableStrings } from '../image_embeddable/image_embeddable_strings';
 import { ImageEmbeddableApi } from '../image_embeddable/types';
 import { FileImageMetadata, FilesClient, imageEmbeddableFileKind } from '../imports';
 import { coreServices, screenshotModeService, uiActionsService } from '../services/kibana_services';
@@ -25,7 +24,6 @@ import './image_embeddable.scss';
 
 interface ImageEmbeddableProps {
   api: ImageEmbeddableApi & {
-    setBlockingError: (error: Error | undefined) => void;
     setDataLoading: (loading: boolean | undefined) => void;
     imageConfig$: PublishingSubject<ImageConfig>;
   };
@@ -80,7 +78,6 @@ export const ImageEmbeddable = ({
         }}
         onError={() => {
           api.setDataLoading(false);
-          api.setBlockingError(new Error(ImageEmbeddableStrings.getErrorMessage()));
         }}
         onClick={
           // note: passing onClick enables the cursor pointer style, so we only pass it if there are compatible actions

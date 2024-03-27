@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { initializeTitles } from '@kbn/presentation-publishing';
 
@@ -20,7 +21,6 @@ import { openImageEditor } from '../components/image_editor/open_image_editor';
 import { FileImageMetadata } from '../imports';
 import { filesService } from '../services/kibana_services';
 import { IMAGE_EMBEDDABLE_TYPE } from './constants';
-import { ImageEmbeddableStrings } from './image_embeddable_strings';
 import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
 export const getImageEmbeddableFactory = ({
@@ -52,14 +52,12 @@ export const getImageEmbeddableFactory = ({
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const embeddable = buildApi(
         {
           ...titlesApi,
           ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
           dataLoading: dataLoading$,
-          blockingError: blockingError$,
           supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
           onEdit: async () => {
             try {
@@ -73,7 +71,10 @@ export const getImageEmbeddableFactory = ({
             }
           },
           isEditingEnabled: () => true,
-          getTypeDisplayName: ImageEmbeddableStrings.getEditDisplayName,
+          getTypeDisplayName: () =>
+            i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName.edit', {
+              defaultMessage: 'image',
+            }),
           serializeState: () => {
             return {
               rawState: {
@@ -103,7 +104,6 @@ export const getImageEmbeddableFactory = ({
               ...embeddable,
               imageConfig$,
               setDataLoading: (loading) => dataLoading$.next(loading),
-              setBlockingError: (error) => blockingError$.next(error),
             }}
             filesClient={filesClient}
             startDynamicActions={dynamicActionsApi?.startDynamicActions}
