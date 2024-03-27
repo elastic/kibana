@@ -10143,6 +10143,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:apmEnableServiceInventoryTableSearchBar": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "observability:apmAWSLambdaPriceFactor": {
           "type": "text",
           "_meta": {
@@ -10213,12 +10219,6 @@
           }
         },
         "labs:dashboard:deferBelowFold": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "labs:dashboard:linksPanel": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."

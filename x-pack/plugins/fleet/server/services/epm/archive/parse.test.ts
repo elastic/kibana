@@ -344,6 +344,11 @@ describe('parseAndVerifyArchive', () => {
       owner: {
         github: 'elastic/integrations',
       },
+      agent: {
+        privileges: {
+          root: true,
+        },
+      },
       policy_templates: [
         {
           description: 'Collect your custom log files.',
