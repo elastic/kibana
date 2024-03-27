@@ -1784,12 +1784,12 @@ The current behaviour of the app allows to modify a rule's fields in the followi
 
 The **Rule Edit Page** is currently split into four tabs:
 
-| Tab            | Contains fields                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tab            | Contains fields|
+| -------------- | -------------- |
 | **Definition** | - Rule type (cannot be changed)<br>- Data Source<br>- Query<br>- Machine Learning job (ML rules only)<br>- Anomaly score threshold (ML rules only)<br>- Group by (threshold rules only)<br>- Count (cardinality) (threshold rules only)<br>- Indicator index patterns (indicator match rules only)<br>- Indicator index query (indicator match rules only)<br>- Indicator mapping (indicator match rules only)<br>- New terms fields (new term rules only)<br>- History window size (new terms rules only)<br>- Alert Suppression (for custom query and threshold rules only)<br>- Timeline Template |
-| **About**      | - Name<br>- Description<br>- Severity<br>- Severity override<br>- Risk score<br>- Risk score override<br>- Tags<br>- Reference URLs<br>- False positive examples<br>- MITRE ATT&CK™ threats<br>- Custom highlighted fields<br>- Investigation guide<br>- Author<br>- License<br>- Elastic Endpoint exceptions<br>- Building block<br>- Rule name override<br>- Timestamp override                                                                                                                                                                                                                    |
-| **Schedule**   | - Interval<br>- Lookback time                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| **Actions**    | - Actions<br>- Response actions (custom query rules only)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **About**      | - Name<br>- Description<br>- Severity<br>- Severity override<br>- Risk score<br>- Risk score override<br>- Tags<br>- Reference URLs<br>- False positive examples<br>- MITRE ATT&CK™ threats<br>- Custom highlighted fields<br>- Investigation guide<br>- Author<br>- License<br>- Elastic Endpoint exceptions<br>- Building block<br>- Rule name override<br>- Timestamp override|
+| **Schedule**   | - Interval<br>- Lookback time|
+| **Actions**    | - Actions<br>- Response actions (custom query rules only)|
 
 Out of these four tabs, only **Actions** is enabled and accessible when editing a prebuilt rule - since actions (and shared exceptions lists and snoozing) are the only fields that can currently be modified for prebuilt rules from the UI.
 
@@ -1894,9 +1894,9 @@ We propose developing more adaptable diff algorithms tailored to specific rule f
 
 In general, for all types of fields, we will follow the heuristic:
 
-- if `base` === `target` && `base` !== `current`, we set merge proposal to be the current version, without a conflict
-- if `base` === `current` && `base` !== `target`, we set merge proposal to be the target version, without a conflict
-- if `base` !== `current` !== target: mark the diff as a conflict AND:
+- if `target` === `base` && `current` !== `base`, we set merge proposal to be the current version, without a conflict
+- if `current` === `base` && `target` !== `base`, we set merge proposal to be the target version, without a conflict
+- if `base` !== `current` !== `target`: mark the diff as a conflict AND:
   - **if conflict is non-solvable**: use the `current` version as the merge proposal 
   - **if conflict is solvable** use the generated merged version as the merge proposal (possible only in a few types, detailed below - see tables)
 
