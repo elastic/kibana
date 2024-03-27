@@ -17,10 +17,6 @@ import type {
 } from './types';
 import { loadDataViews, searchDataViews } from './services/data_views_service';
 
-export function getSearchCacheKey(context: DataViewsContext) {
-  return { search: context.search, filter: context.filter };
-}
-
 export const createPureDataViewsStateMachine = (
   initialContext: DefaultDataViewsContext = createDefaultContext()
 ) =>
@@ -92,12 +88,16 @@ export const createPureDataViewsStateMachine = (
     },
     {
       actions: {
-        storeSearch: assign((_context, event) => ({
+        storeSearch: assign((context, event) => ({
           // Store search from search event
-          ...('search' in event && { search: event.search }),
+          ...('search' in event && {
+            searchCriteria: { ...context.searchCriteria, search: event.search },
+          }),
         })),
-        storeFilter: assign((_context, event) => ({
-          ...('filter' in event && { filter: event.filter }),
+        storeFilter: assign((context, event) => ({
+          ...('filter' in event && {
+            searchCriteria: { ...context.searchCriteria, filter: event.filter },
+          }),
         })),
         storeDataViews: assign((_context, event) =>
           'data' in event && !isError(event.data)
@@ -107,14 +107,14 @@ export const createPureDataViewsStateMachine = (
         searchDataViews: assign((context) => {
           if (context.dataViewsSource !== null) {
             return {
-              dataViews: searchDataViews(context.dataViewsSource, context.search, context.filter),
+              dataViews: searchDataViews(context.dataViewsSource, context.searchCriteria),
             };
           }
           return {};
         }),
         storeInCache: (context, event) => {
           if ('data' in event && !isError(event.data)) {
-            context.cache.set(getSearchCacheKey(context), event.data);
+            context.cache.set(context.searchCriteria, event.data);
           }
         },
         storeError: assign((_context, event) =>
