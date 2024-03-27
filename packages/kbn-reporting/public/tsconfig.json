@@ -37,5 +37,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/lens-plugin",
+    "@kbn/field-formats-plugin",
   ]
 }
