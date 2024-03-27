@@ -7,3 +7,5 @@
  */
 
 export const CONSOLE_LANG_ID = 'console';
+export const CONSOLE_THEME_ID = 'consoleTheme';
+export const CONSOLE_POSTFIX = '.console';

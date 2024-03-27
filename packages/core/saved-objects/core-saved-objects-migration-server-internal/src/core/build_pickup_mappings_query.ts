@@ -6,22 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { getBaseMappings } from './build_active_mappings';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-export const buildPickupMappingsQuery = (
-  updatedFields: string[]
-): QueryDslQueryContainer | undefined => {
-  const rootFields = Object.keys(getBaseMappings().properties);
-
-  if (updatedFields.some((field) => rootFields.includes(field))) {
-    // we are updating some root fields, update ALL documents (no filter query)
-    return undefined;
-  }
-
-  // at this point, all updated fields correspond to SO types
-  const updatedTypes = updatedFields;
-
+export const buildPickupMappingsQuery = (updatedTypes: string[]): QueryDslQueryContainer => {
   return {
     bool: {
       should: updatedTypes.map((type) => ({ term: { type } })),
