@@ -12,13 +12,13 @@ export interface HasLibraryTransforms<StateT extends object = object> {
   //
   /**
    *
-   * @returns {Promise<boolean>} 
+   * @returns {Promise<boolean>}
    *   True when embeddable is by-value and can be converted to by-reference embeddable
    */
   canLinkToLibrary: () => Promise<boolean>;
   /**
    * Saves embeddable to library
-   * 
+   *
    * @returns {Promise<{ state: StateT; savedObjectId: string }>}
    *   state: by-reference embeddable state replacing by-value embeddable state
    *   savedObjectId: Saved object id for newly stored library saved object
