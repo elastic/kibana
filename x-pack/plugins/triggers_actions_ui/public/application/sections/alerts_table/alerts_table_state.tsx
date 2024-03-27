@@ -93,7 +93,8 @@ export type AlertsTableStateProps = {
    */
   dynamicRowHeight?: boolean;
   lastReloadRequestTime?: number;
-} & Partial<EuiDataGridProps>;
+  renderCellPopover?: AlertsTableProps['renderCellPopover'];
+} & Omit<Partial<EuiDataGridProps>, 'renderCellPopover'>;
 
 export interface AlertsTableStorage {
   columns: EuiDataGridColumn[];

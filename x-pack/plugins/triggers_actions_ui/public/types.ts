@@ -577,7 +577,7 @@ export type AlertsTableProps = {
    */
   dynamicRowHeight?: boolean;
   featureIds?: ValidFeatureId[];
-  renderCellPopover?: EuiDataGridProps['renderCellPopover'];
+  renderCellPopover?: ReturnType<GetRenderCellPopover>;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 export type SetFlyoutAlert = (alertId: string) => void;

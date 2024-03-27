@@ -29,15 +29,15 @@ import {
   EuiText,
   EuiIcon,
   EuiSpacer,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
-import { AlertsTableProps, FetchAlertData, GetRenderCellPopover } from '../../../types';
+import { AlertsTableProps, FetchAlertData } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 
 import './alerts_table.scss';
@@ -136,29 +136,40 @@ const CustomGridBody = memo(
   }
 );
 
+/**
+ * An error callout that displays the error stack in a code block
+ */
 const ViewError = ({ error }: { error: Error }) => (
   <>
     <EuiFlexGroup
       gutterSize="s"
       alignItems="center"
+      // Here we force the error callout to be the same height as the cell content
+      // so that the error detail gets hidden in the overflow area and only shown in
+      // the cell popover
       css={css`
         height: 1lh;
       `}
     >
-      <EuiIcon type="error" color="danger" />
-      <EuiText
-        color="subdued"
-        size="xs"
-        css={css`
-          line-height: unset;
-          font-weight: ${euiThemeVars.euiFontWeightSemiBold};
-        `}
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.alertTable.viewError"
-          defaultMessage="An error occurred"
-        />
-      </EuiText>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="error" color="danger" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText
+          color="subdued"
+          size="xs"
+          css={css`
+            line-height: unset;
+          `}
+        >
+          <strong>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertTable.viewError"
+              defaultMessage="An error occurred"
+            />
+          </strong>
+        </EuiText>
+      </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer />
     <EuiCodeBlock isCopyable>{error.stack}</EuiCodeBlock>
@@ -483,7 +494,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         ? props.alertsTableConfiguration?.getRenderCellPopover({
             context: renderCellContext,
           })
-        : (props.renderCellPopover as ReturnType<GetRenderCellPopover>),
+        : props.renderCellPopover,
     [props.alertsTableConfiguration, props.renderCellPopover, renderCellContext]
   );
 
