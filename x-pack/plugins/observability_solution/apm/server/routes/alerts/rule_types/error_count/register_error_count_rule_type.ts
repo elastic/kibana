@@ -102,7 +102,7 @@ export function registerErrorCountRuleType({
 }: RegisterRuleDependencies) {
   if (!alerting) {
     throw new Error(
-      'Cannot register error count rule type. Both the actions and alerting plugins need to be enabled.'
+      'Cannot register error count rule type. The alerting plugin needs to be enabled.'
     );
   }
   alerting.registerType({
