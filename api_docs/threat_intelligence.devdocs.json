@@ -119,7 +119,7 @@
               "\nGets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView."
             ],
             "signature": [
-              "SourcererDataView"
+              "SelectedDataView"
             ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,

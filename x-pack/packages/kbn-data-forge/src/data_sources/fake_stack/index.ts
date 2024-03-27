@@ -19,18 +19,25 @@ import {
   generateEvent as generateNginxProxy,
   kibanaAssets as kibanaAssetsNginxProxy,
 } from './nginx_proxy';
+import {
+  generateEvent as generateHeartbeat,
+  kibanaAssets as kibanaAssetsHeartbeat,
+} from './heartbeat';
+
 import { GeneratorFunction } from '../../types';
 
 import { indexTemplate as adminConsoleIndexTemplate } from './admin_console/ecs';
 import { indexTemplate as messageProcessorIndexTemplate } from './message_processor/ecs';
 import { indexTemplate as mongodbIndexTemplate } from './mongodb/ecs';
 import { indexTemplate as nginxProxyIndexTemplate } from './nginx_proxy/ecs';
+import { indexTemplate as heartbeatIndexTemplate } from './heartbeat/ecs';
 
 export const indexTemplate = [
   adminConsoleIndexTemplate,
   messageProcessorIndexTemplate,
   mongodbIndexTemplate,
   nginxProxyIndexTemplate,
+  heartbeatIndexTemplate,
 ];
 
 export const kibanaAssets = [
@@ -38,6 +45,7 @@ export const kibanaAssets = [
   kibanaAssetsMongoDB,
   kibanaAssetsMessageProcessor,
   kibanaAssetsNginxProxy,
+  kibanaAssetsHeartbeat,
   `${__dirname}/assets/transaction_rates.ndjson`,
 ];
 
@@ -47,11 +55,13 @@ export const generteEvent: GeneratorFunction = (config, schedule, index, timesta
   const mongodbEvents = generateMongoDB(config, schedule, index, timestamp);
   const messageProcessorEvents = generateMessageProcessor(config, schedule, index, timestamp);
   const nginxProxyEvents = generateNginxProxy(config, schedule, index, timestamp);
+  const heartbeatEvents = generateHeartbeat(config, schedule, index, timestamp);
   return [
     ...(isArray(adminConsoleEvents) ? adminConsoleEvents : [adminConsoleEvents]),
     ...(isArray(mongodbEvents) ? mongodbEvents : [mongodbEvents]),
     ...(isArray(messageProcessorEvents) ? messageProcessorEvents : [messageProcessorEvents]),
     ...(isArray(nginxProxyEvents) ? nginxProxyEvents : [nginxProxyEvents]),
+    ...(isArray(heartbeatEvents) ? heartbeatEvents : [heartbeatEvents]),
   ].map((event) => {
     const labels = event.labels ?? {};
     return { ...event, labels: { ...labels, scenario } };
