@@ -15,8 +15,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 export function HeaderMenu(): React.ReactElement | null {
   const { http, theme } = useKibana().services;
 
-  const { appMountParameters, experimentalFeatures } = usePluginContext();
-  console.log('EXPERIMENTAL', experimentalFeatures);
+  const { appMountParameters } = usePluginContext();
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters?.setHeaderActionMenu!}
