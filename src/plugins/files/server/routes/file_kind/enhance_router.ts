@@ -26,8 +26,7 @@ export function enhanceRouter({ router, fileKind }: Args): FileKindRouter {
   const handlerWrapper: (handler: FileKindHandler) => FileKindHandler =
     (handler) => async (ctx, req, res) => {
       return handler(
-        // @ts-expect-error upgrade typescript v4.9.5
-        Object.create(ctx, { fileKind: { value: fileKind, enumerable: true, writeable: false } }),
+        Object.create(ctx, { fileKind: { value: fileKind, enumerable: true, writable: false } }),
         req,
         res
       );
