@@ -4606,7 +4606,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-ast@link:packages/kbn-esql-ast":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-utils@link:packages/kbn-esql-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-validation-autocomplete@link:packages/kbn-esql-validation-autocomplete":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-validation-example-plugin@link:examples/esql_validation_example":
   version "0.0.0"
   uid ""
 
