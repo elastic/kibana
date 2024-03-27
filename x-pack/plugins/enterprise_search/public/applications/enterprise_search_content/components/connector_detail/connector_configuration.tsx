@@ -117,26 +117,6 @@ export const ConnectorConfiguration: React.FC = () => {
                 {
                   children: (
                     <>
-                      <EuiText size="s">
-                        <FormattedMessage
-                          id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.description.secondParagraph"
-                          defaultMessage="The connectors repository contains several {link}. Use our framework to accelerate developing connectors for custom data sources."
-                          values={{
-                            link: (
-                              <EuiLink
-                                href="https://github.com/elastic/connectors-python/tree/main/connectors"
-                                target="_blank"
-                                external
-                              >
-                                {i18n.translate(
-                                  'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.clientExamplesLink',
-                                  { defaultMessage: 'connector client examples' }
-                                )}
-                              </EuiLink>
-                            ),
-                          }}
-                        />
-                      </EuiText>
                       <EuiSpacer />
                       <EuiText size="s">
                         <FormattedMessage
