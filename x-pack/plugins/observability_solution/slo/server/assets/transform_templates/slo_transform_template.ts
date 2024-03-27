@@ -12,6 +12,7 @@ import {
   TransformSource,
   TransformTimeSync,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_RESOURCES_VERSION } from '../../../common/constants';
 import { SLO } from '../../domain/models';
 
@@ -64,6 +65,6 @@ export const getSLOTransformTemplate = (
 
 const buildGroupingFilters = (slo: SLO) => {
   // build exists filters for each groupBy field to make sure the field exists
-  const groups = [slo.groupBy].flat().filter((group) => !!group);
+  const groups = [slo.groupBy].flat().filter((group) => !!group && group !== ALL_VALUE);
   return groups.map((group) => ({ exists: { field: group } }));
 };
