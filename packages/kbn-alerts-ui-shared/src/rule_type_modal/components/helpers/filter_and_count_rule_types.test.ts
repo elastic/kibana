@@ -7,7 +7,7 @@
  */
 
 import { RuleTypeWithDescription } from '../../types';
-import { filterAndCountRuleTypes } from './filterAndCountRuleTypes';
+import { filterAndCountRuleTypes } from './filter_and_count_rule_types';
 
 const mockRuleType: (
   name: string,
