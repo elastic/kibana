@@ -61,7 +61,6 @@ import {
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
 } from '../test_subjects';
 import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
-import { getMockTheme } from '@kbn/fleet-plugin/public/mocks';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -76,7 +75,6 @@ jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
 
 const onChange = jest.fn();
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
-const mockTheme = getMockTheme({ eui: { euiSizeXS: '4px' } });
 
 const createReactQueryResponseWithRefetch = (
   data: Parameters<typeof createReactQueryResponse>[0]
