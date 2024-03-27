@@ -7,7 +7,7 @@
 
 import { from, takeUntil } from 'rxjs';
 
-import { IBasePath } from '@kbn/core-http-server';
+import { IStaticAssets } from '@kbn/core-http-browser';
 import {
   GlobalSearchProviderResult,
   GlobalSearchResultProvider,
@@ -18,7 +18,9 @@ import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
 
 import { getIndexData } from '../lib/indices/utils/get_index_data';
 
-export function getIndicesSearchResultProvider(basePath: IBasePath): GlobalSearchResultProvider {
+export function getIndicesSearchResultProvider(
+  staticAssets: IStaticAssets
+): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, client, maxResults }) => {
       if (!client || !term || tags || (types && !types.includes('indices'))) {
@@ -45,7 +47,7 @@ export function getIndicesSearchResultProvider(basePath: IBasePath): GlobalSearc
             return {
               id: indexName,
               title: indexName,
-              icon: basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/index.svg'),
+              icon: staticAssets.getPluginAssetHref('images/index.svg'),
               type: i18n.translate('xpack.enterpriseSearch.searchIndexProvider.type.name', {
                 defaultMessage: 'Index',
               }),

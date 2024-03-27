@@ -138,6 +138,12 @@ export class ManagementPlugin
       },
     });
 
+    core.getStartServices().then(([coreStart]) => {
+      coreStart.chrome
+        .getChromeStyle$()
+        .subscribe((style) => this.isSidebarEnabled$.next(style === 'classic'));
+    });
+
     return {
       sections: this.managementSections.setup(),
       locator,
@@ -160,8 +166,6 @@ export class ManagementPlugin
     }
 
     return {
-      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
-        this.isSidebarEnabled$.next(isSidebarEnabled),
       setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo, extendCardNavDefinitions }),
     };

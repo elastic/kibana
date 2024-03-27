@@ -23,7 +23,7 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { TimeBuckets } from '../../application/util/time_buckets';
+import { TimeBuckets } from '@kbn/ml-time-buckets';
 import type { MlStartDependencies } from '../../plugin';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import {

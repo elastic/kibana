@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent, FC } from 'react';
 import ReactMonacoEditor, {
   type MonacoEditorProps as ReactMonacoEditorProps,
 } from 'react-monaco-editor';
@@ -148,6 +148,11 @@ export interface CodeEditorProps {
     minLines?: number;
     maxLines?: number;
   };
+
+  /**
+   * Enables the editor to get disabled when pressing ESC to resolve focus trapping for accessibility.
+   */
+  accessibilityOverlayEnabled?: boolean;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -177,6 +182,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     defaultMessage: 'Cannot edit in read-only editor',
   }),
   fitToContent,
+  accessibilityOverlayEnabled = true,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
@@ -486,7 +492,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       data-test-subj="kibanaCodeEditor"
       className="kibanaCodeEditor"
     >
-      {renderPrompt()}
+      {accessibilityOverlayEnabled && renderPrompt()}
 
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
@@ -507,42 +513,44 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </EuiFlexGroup>
           </div>
         ) : null}
-        <MonacoEditor
-          theme={theme}
-          language={languageId}
-          value={value}
-          onChange={onChange}
-          width={isFullScreen ? '100vw' : width}
-          height={isFullScreen ? '100vh' : fitToContent ? undefined : height}
-          editorWillMount={_editorWillMount}
-          editorDidMount={_editorDidMount}
-          editorWillUnmount={_editorWillUnmount}
-          options={{
-            padding: allowFullScreen || isCopyable ? { top: 24 } : {},
-            renderLineHighlight: 'none',
-            scrollBeyondLastLine: false,
-            minimap: {
-              enabled: false,
-            },
-            scrollbar: {
-              useShadows: false,
-              // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
-              // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
-              // outer scrollbars.
-              alwaysConsumeMouseWheel: false,
-            },
-            wordBasedSuggestions: false,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-            matchBrackets: 'never',
-            fontFamily: 'Roboto Mono',
-            fontSize: isFullScreen ? 16 : 12,
-            lineHeight: isFullScreen ? 24 : 21,
-            // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
-            'bracketPairColorization.enabled': false,
-            ...options,
-          }}
-        />
+        <UseBug177756ReBroadcastMouseDown>
+          <MonacoEditor
+            theme={theme}
+            language={languageId}
+            value={value}
+            onChange={onChange}
+            width={isFullScreen ? '100vw' : width}
+            height={isFullScreen ? '100vh' : fitToContent ? undefined : height}
+            editorWillMount={_editorWillMount}
+            editorDidMount={_editorDidMount}
+            editorWillUnmount={_editorWillUnmount}
+            options={{
+              padding: allowFullScreen || isCopyable ? { top: 24 } : {},
+              renderLineHighlight: 'none',
+              scrollBeyondLastLine: false,
+              minimap: {
+                enabled: false,
+              },
+              scrollbar: {
+                useShadows: false,
+                // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
+                // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
+                // outer scrollbars.
+                alwaysConsumeMouseWheel: false,
+              },
+              wordBasedSuggestions: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+              matchBrackets: 'never',
+              fontFamily: 'Roboto Mono',
+              fontSize: isFullScreen ? 16 : 12,
+              lineHeight: isFullScreen ? 24 : 21,
+              // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
+              'bracketPairColorization.enabled': false,
+              ...options,
+            }}
+          />
+        </UseBug177756ReBroadcastMouseDown>
       </FullScreenDisplay>
     </div>
   );
@@ -694,4 +702,30 @@ const useBug175684OnChange = (onChange: CodeEditorProps['onChange']) => {
   }, []);
 
   return onChangeWrapper;
+};
+
+const UseBug177756ReBroadcastMouseDown: FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [$codeWrapper, setCodeWrapper] = React.useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const rebroadcastEvent = (event: MouseEvent) => {
+      // rebroadcast mouse event to accommodate integration with other parts of the codebase
+      // especially that the monaco it self does prevent default for mouse events
+      if ($codeWrapper?.contains(event.target as Node) && event.defaultPrevented) {
+        $codeWrapper.dispatchEvent(new MouseEvent(event.type, event));
+      }
+    };
+
+    if ($codeWrapper) {
+      $codeWrapper.addEventListener('mousedown', rebroadcastEvent);
+
+      return () => $codeWrapper.removeEventListener('mousedown', rebroadcastEvent);
+    }
+  }, [$codeWrapper]);
+
+  return (
+    <div ref={setCodeWrapper} style={{ display: 'contents' }}>
+      {children}
+    </div>
+  );
 };
