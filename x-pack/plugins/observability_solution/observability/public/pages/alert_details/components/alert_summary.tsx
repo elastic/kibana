@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiText, EuiSpacer } from '@elastic/eui';
 
 export interface AlertSummaryField {
   label: ReactNode | string;
@@ -18,15 +18,18 @@ interface AlertSummaryProps {
 
 export function AlertSummary({ alertSummaryFields }: AlertSummaryProps) {
   return (
-    <EuiFlexGroup data-test-subj="alert-summary-container" gutterSize="xl">
-      {alertSummaryFields?.map((field, idx) => {
-        return (
-          <EuiFlexItem key={idx} grow={false}>
-            <EuiText color="subdued">{field.label}</EuiText>
-            <EuiText>{field.value}</EuiText>
-          </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup data-test-subj="alert-summary-container" gutterSize="xl">
+        {alertSummaryFields?.map((field, idx) => {
+          return (
+            <EuiFlexItem key={idx} grow={false}>
+              <EuiText color="subdued">{field.label}</EuiText>
+              <EuiText>{field.value}</EuiText>
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+      {alertSummaryFields && alertSummaryFields.length > 0 && <EuiSpacer size="l" />}
+    </>
   );
 }
