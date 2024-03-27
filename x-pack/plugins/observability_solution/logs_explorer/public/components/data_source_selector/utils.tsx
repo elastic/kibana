@@ -28,13 +28,27 @@ interface IntegrationsTreeParams {
   onDatasetSelected: DatasetSelectionHandler;
 }
 
+export interface DatasetTreeItem extends Pick<Dataset, 'id' | 'iconType' | 'name' | 'title'> {
+  onClick: () => void;
+}
+
+export interface IntegrationTreeItem
+  extends Pick<
+    Integration,
+    'id' | 'name' | 'title' | 'description' | 'icons' | 'status' | 'version'
+  > {
+  content?: React.ReactNode;
+  isLoading?: boolean;
+  datasets?: DatasetTreeItem[];
+}
+
 export const buildIntegrationsTree = ({
   integrations,
   datasets,
   datasetsFallback,
   isLoadingUncategorized,
   onDatasetSelected,
-}: IntegrationsTreeParams) => {
+}: IntegrationsTreeParams): IntegrationTreeItem[] => {
   const uncategorizedIntegration = {
     id: 'integration-uncategorized-1.0.0',
     title: uncategorizedLabel,

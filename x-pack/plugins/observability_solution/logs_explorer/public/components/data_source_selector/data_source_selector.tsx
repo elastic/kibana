@@ -17,16 +17,16 @@ import {
   noIntegrationsLabel,
 } from './constants';
 import { useDataSourceSelector } from './state_machine/use_data_source_selector';
-import { SelectorPopover } from './sub_components/selector_popover';
+import { DataViewList } from './sub_components/data_views_list';
 import { DataViewMenuItem } from './sub_components/data_view_menu_item';
+import { IntegrationsList } from './sub_components/integrations_list';
+import ListStatus from './sub_components/list_status';
 import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
+import { SelectorPopover } from './sub_components/selector_popover';
+import { DataSourceSelectorTabs } from './sub_components/selector_tabs';
 import { DataSourceSelectorProps } from './types';
 import { buildIntegrationsTree, createDataViewsStatusItem } from './utils';
-import { IntegrationsList } from './sub_components/integrations_list';
-import { DataViewList } from './sub_components/data_views_list';
-import ListStatus from './sub_components/list_status';
-import { DataSourceSelectorTabs } from './sub_components/selector_tabs';
 
 export function DataSourceSelector({
   datasets,
@@ -165,10 +165,10 @@ export function DataSourceSelector({
 
   return (
     <SelectorPopover
-      selection={dataSourceSelection}
-      isOpen={isOpen}
       closePopover={closePopover}
+      isOpen={isOpen}
       onClick={togglePopover}
+      selection={dataSourceSelection}
     >
       <DataSourceSelectorTabs tabId={tabId}>
         <DataSourceSelectorTabs.Integrations onClick={switchToIntegrationsTab} />
@@ -180,8 +180,8 @@ export function DataSourceSelector({
       while the tradeoff of keeping the contents in memory provide a better UX. */}
       {/* Integrations tab content */}
       <IntegrationsList
-        items={integrationItems}
         hidden={tabId !== INTEGRATIONS_TAB_ID}
+        items={integrationItems}
         onScrollEnd={scrollToIntegrationsBottom}
         onSortByName={sortByOrder}
         search={search}
@@ -189,18 +189,18 @@ export function DataSourceSelector({
       >
         <SearchControls
           key={INTEGRATIONS_TAB_ID}
-          search={search}
-          onSearch={searchByName}
           isLoading={isSearchingIntegrations || isLoadingUncategorized}
+          onSearch={searchByName}
+          search={search}
         />
       </IntegrationsList>
       {/* Data views tab content */}
       <DataViewList hidden={tabId !== DATA_VIEWS_TAB_ID} items={dataViewsItems}>
         <SearchControls
           key={DATA_VIEWS_TAB_ID}
-          search={search}
           onSearch={searchByName}
           onSort={sortByOrder}
+          search={search}
         />
         <EuiHorizontalRule margin="none" />
       </DataViewList>

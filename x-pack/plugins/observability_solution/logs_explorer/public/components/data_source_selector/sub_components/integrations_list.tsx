@@ -23,7 +23,6 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { SpyRef } from '../../../utils/intersection_ref';
-import { Dataset, Integration } from '../../../../common/datasets';
 import { nameColumnLabel } from '../constants';
 import { tabContentHeight } from '../shared_styles';
 import {
@@ -31,23 +30,10 @@ import {
   DataSourceSelectorSearchHandler,
   DataSourceSelectorSearchParams,
 } from '../types';
-
-interface TDatasetItem extends Pick<Dataset, 'id' | 'iconType' | 'name' | 'title'> {
-  onClick: () => void;
-}
-
-interface TIntegrationItem
-  extends Pick<
-    Integration,
-    'id' | 'name' | 'title' | 'description' | 'icons' | 'status' | 'version'
-  > {
-  content?: React.ReactNode;
-  isLoading?: boolean;
-  datasets?: TDatasetItem[];
-}
+import { DatasetTreeItem, IntegrationTreeItem } from '../utils';
 
 type IntegrationsListProps = {
-  items: TIntegrationItem[];
+  items: IntegrationTreeItem[];
   statusPrompt: React.ReactNode;
   onScrollEnd: DataSourceSelectorScrollHandler;
   onSortByName: DataSourceSelectorSearchHandler;
@@ -88,8 +74,8 @@ export function IntegrationsList({
             </Fragment>
           );
         })}
-        <SpyRef onIntersecting={onScrollEnd} />
         {/* Used to trigger integrations infinite scroll loading */}
+        <SpyRef onIntersecting={onScrollEnd} />
         {shouldDisplayPrompt && statusPrompt}
       </EuiPanel>
     </EuiPanel>
@@ -97,7 +83,7 @@ export function IntegrationsList({
 }
 
 interface IntegrationItemProps {
-  integration: TIntegrationItem;
+  integration: IntegrationTreeItem;
 }
 
 function IntegrationItem({ integration }: IntegrationItemProps) {
@@ -170,7 +156,7 @@ function Header({ onSortByName, search, ...props }: HeaderProps) {
 }
 
 interface IntegrationItemButtonProps extends ListRowProps {
-  integration: TIntegrationItem;
+  integration: IntegrationTreeItem;
   icon: React.ReactNode;
 }
 
@@ -192,7 +178,7 @@ function IntegrationItemButton({ integration, icon, ...props }: IntegrationItemB
 }
 
 interface DatasetItemProps extends ListRowProps {
-  dataset: TDatasetItem;
+  dataset: DatasetTreeItem;
   icon: React.ReactNode;
 }
 
