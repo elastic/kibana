@@ -140,9 +140,7 @@ async function createSecurityProject(
     };
   } catch (error) {
     if (error instanceof AxiosError) {
-      log.error(
-        `${error.response?.status}:${Object.values(error.response?.data.errors).flat().join()}`
-      );
+      log.error(`${error.response?.status}:${JSON.stringify(error.response?.data)}`);
     } else {
       log.error(`${error.message}`);
     }
