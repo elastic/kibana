@@ -48,7 +48,8 @@ describe('AgentDetailsActionMenu', () => {
     } as any);
     mockedUseAuthz.mockReturnValue({
       fleet: {
-        all: true,
+        readAgents: true,
+        allAgents: true,
       },
     } as any);
     mockedUseAgentVersion.mockReturnValue('8.10.2');
@@ -125,6 +126,24 @@ describe('AgentDetailsActionMenu', () => {
 
       expect(res).not.toBe(null);
       expect(res).not.toBeEnabled();
+    });
+
+    it('should not render an active action button if agent version >= 8.7 and user do not have Agent:Read authz', async () => {
+      mockedUseAuthz.mockReturnValue({
+        fleet: {
+          readAgents: false,
+        },
+      } as any);
+      const res = renderAndGetDiagnosticsButton({
+        agent: {
+          active: true,
+          status: 'online',
+          local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+        } as any,
+        agentPolicy: {} as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
     });
   });
 

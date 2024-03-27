@@ -50,6 +50,7 @@ import { createIndex, deleteRiskScoreIndicies } from './indices';
 import { createIngestPipeline, deleteRiskScoreIngestPipelines } from './ingest_pipelines';
 import { deleteSavedObjects } from './saved_objects';
 import { createStoredScript, deleteStoredScripts } from './stored_scripts';
+import { rootRequest } from '../common';
 
 export const deleteRiskScore = ({
   riskScoreEntity,
@@ -293,18 +294,14 @@ export const waitForInstallRiskScoreModule = () => {
 };
 
 export const installRiskScoreModule = () => {
-  cy.request({
+  rootRequest({
     url: RISK_SCORE_URL,
     method: 'POST',
     body: {
       riskScoreEntity: 'host',
     },
     headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
       [ELASTIC_HTTP_VERSION_HEADER]: '1',
     },
-  })
-    .its('status')
-    .should('eql', 200);
+  });
 };

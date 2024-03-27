@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
-import { CONSOLE_LANG_ID } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from '@kbn/monaco';
 import { useSetInitialValue } from './use_set_initial_value';
 import { useServicesContext, useEditorReadContext } from '../../../contexts';
 
@@ -48,6 +48,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
+          theme: CONSOLE_THEME_ID,
         }}
       />
     </div>
