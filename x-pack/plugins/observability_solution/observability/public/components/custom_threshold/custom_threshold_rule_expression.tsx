@@ -23,9 +23,9 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { ISearchSource, Query } from '@kbn/data-plugin/common';
+import { ISearchSource, Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewBase } from '@kbn/es-query';
+import { DataViewBase, isOfQueryType } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,7 +37,11 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
-import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
+import {
+  Aggregators,
+  Comparator,
+  CustomThresholdSearchSourceFields,
+} from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
@@ -50,6 +54,18 @@ type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
+
+const getSearchConfig = (
+  fields: SerializedSearchSourceFields
+): CustomThresholdSearchSourceFields => {
+  if (!fields.query || !isOfQueryType(fields.query)) {
+    throw new Error('Custom threshold does not support queries other than Query type.');
+  }
+  return {
+    ...fields,
+    query: fields.query,
+  };
+};
 
 export const defaultExpression: MetricExpression = {
   comparator: Comparator.GT,
@@ -112,7 +128,7 @@ export default function Expressions(props: Props) {
             newSearchSource.setField('index', defaultDataView);
             setDataView(defaultDataView);
           }
-          initialSearchConfiguration = newSearchSource.getSerializedFields();
+          initialSearchConfiguration = getSearchConfig(newSearchSource.getSerializedFields());
         }
       }
 
@@ -188,7 +204,10 @@ export default function Expressions(props: Props) {
       );
       setRuleParams('criteria', ruleCriteria);
       searchSource?.setParent(undefined).setField('index', newDataView);
-      setRuleParams('searchConfiguration', searchSource?.getSerializedFields());
+      setRuleParams(
+        'searchConfiguration',
+        searchSource && getSearchConfig(searchSource.getSerializedFields())
+      );
       setDataView(newDataView);
     },
     [ruleParams.criteria, searchSource, setRuleParams]
@@ -412,7 +431,7 @@ export default function Expressions(props: Props) {
         onQueryChange={debouncedOnFilterChange}
         onQuerySubmit={onFilterChange}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
-        query={ruleParams.searchConfiguration?.query as Query}
+        query={ruleParams.searchConfiguration?.query}
         filters={ruleParams.searchConfiguration?.filter}
         onFiltersUpdated={(filter) => {
           // Since rule params will be sent to the API as is, and we only need meta and query parameters to be
