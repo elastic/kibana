@@ -7,10 +7,10 @@
 
 import type { FunctionComponent, MutableRefObject } from 'react';
 import React, { useCallback } from 'react';
+import { css } from '@emotion/react';
 import type { EuiTableSelectionType, EuiBasicTableProps, Pagination } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable, useEuiTheme } from '@elastic/eui';
 import classnames from 'classnames';
-import styled from 'styled-components';
 
 import { LinkButton } from '../links';
 
@@ -37,10 +37,6 @@ interface CasesTableProps {
   isLoadingColumns: boolean;
 }
 
-const Div = styled.div`
-  margin-top: ${({ theme }) => theme.eui.euiSizeM};
-`;
-
 export const CasesTable: FunctionComponent<CasesTableProps> = ({
   columns,
   data,
@@ -59,6 +55,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
 }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
+  const { euiTheme } = useEuiTheme();
   const navigateToCreateCaseClick = useCallback(
     (ev) => {
       ev.preventDefault();
@@ -72,9 +69,13 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   );
 
   return (isCasesLoading && isDataEmpty) || isLoadingColumns ? (
-    <Div>
+    <div
+      css={css`
+        margin-top: ${euiTheme.size.m};
+      `}
+    >
       <EuiSkeletonText data-test-subj="initialLoadingPanelAllCases" lines={10} />
-    </Div>
+    </div>
   ) : (
     <>
       <EuiBasicTable

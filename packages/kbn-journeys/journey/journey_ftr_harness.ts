@@ -29,9 +29,11 @@ import type { Step, AnyStep } from './journey';
 import type { JourneyConfig } from './journey_config';
 import { JourneyScreenshots } from './journey_screenshots';
 import { getNewPageObject } from '../services/page';
+import { getSynthtraceClient } from '../services/synthtrace';
 
 export class JourneyFtrHarness {
   private readonly screenshots: JourneyScreenshots;
+  private readonly kbnUrl: KibanaUrl;
 
   constructor(
     private readonly log: ToolingLog,
@@ -44,6 +46,15 @@ export class JourneyFtrHarness {
     private readonly journeyConfig: JourneyConfig<any>
   ) {
     this.screenshots = new JourneyScreenshots(this.journeyConfig.getName());
+    this.kbnUrl = new KibanaUrl(
+      new URL(
+        Url.format({
+          protocol: this.config.get('servers.kibana.protocol'),
+          hostname: this.config.get('servers.kibana.hostname'),
+          port: this.config.get('servers.kibana.port'),
+        })
+      )
+    );
   }
 
   private browser: ChromiumBrowser | undefined;
@@ -59,8 +70,9 @@ export class JourneyFtrHarness {
   private apm: apmNode.Agent | null = null;
 
   // journey can be run to collect EBT/APM metrics or just as a functional test
-  // TEST_PERFORMANCE_PHASE is defined via scripts/run_perfomance.js run only
-  private readonly isPerformanceRun = process.env.TEST_PERFORMANCE_PHASE || false;
+  // TEST_INGEST_ES_DATA is defined via scripts/run_perfomance.js run only
+  private readonly isPerformanceRun = !!process.env.TEST_PERFORMANCE_PHASE;
+  private readonly shouldIngestEsData = process.env.TEST_INGEST_ES_DATA === 'true' || false;
 
   // Update the Telemetry and APM global labels to link traces with journey
   private async updateTelemetryAndAPMLabels(labels: { [k: string]: string }) {
@@ -158,16 +170,54 @@ export class JourneyFtrHarness {
     await this.interceptBrowserRequests(this.page);
   }
 
+  private async runSynthtrace() {
+    const config = this.journeyConfig.getSynthtraceConfig();
+    if (config) {
+      const client = await getSynthtraceClient(config.type, {
+        log: this.log,
+        es: this.es,
+        auth: this.auth,
+        kbnUrl: this.kbnUrl,
+      });
+      const generator = config.generator(config.options);
+      await client.index(generator);
+    }
+  }
+
+  /**
+   * onSetup is part of high level 'before' hook and does the following sequentially:
+   * 1. Start browser
+   * 2. Load test data (opt-in)
+   * 3. Run BeforeSteps (opt-in)
+   * 4. Setup APM
+   */
   private async onSetup() {
     // We start browser and init page in the first place
     await this.setupBrowserAndPage();
-    // We allow opt-in beforeSteps hook to manage Kibana/ES state
+
+    // We allow opt-in beforeSteps hook to manage Kibana/ES after start, install integrations, etc.
     await this.journeyConfig.getBeforeStepsFn(this.getCtx());
-    // Loading test data
+
+    /**
+     * Loading test data, optionally but following the order:
+     * 1. Synthtrace client
+     * 2. ES archives
+     * 3. Kbn archives (Saved objects)
+     */
+
+    // To insure we ingest data with synthtrace only once during performance run
+    if (!this.isPerformanceRun || this.shouldIngestEsData) {
+      await this.runSynthtrace();
+    }
+
     await Promise.all([
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         if (this.isPerformanceRun) {
-          // we start Elasticsearch only once and keep ES data persisitent.
+          //
+          /**
+           * During performance run we ingest data to ES before WARMUP phase, and avoid re-indexing
+           * before TEST phase by insuring index already exists
+           */
           await this.esArchiver.loadIfNeeded(esArchive);
         } else {
           await this.esArchiver.load(esArchive);
@@ -242,7 +292,9 @@ export class JourneyFtrHarness {
     await this.teardownApm();
     await Promise.all([
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
-        // Keep ES data when journey is run twice (avoid unload after "Warmup" phase)
+        /**
+         * Keep ES data after WARMUP phase to avoid re-indexing
+         */
         if (!this.isPerformanceRun) {
           await this.esArchiver.unload(esArchive);
         }

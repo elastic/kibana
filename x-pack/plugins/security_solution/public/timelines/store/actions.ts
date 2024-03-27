@@ -41,6 +41,10 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
+export const deleteNoteFromEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
+  'DELETE_NOTE_FROM_EVENT'
+);
+
 export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
 
 export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
@@ -290,3 +294,8 @@ export const setDataProviderVisibility = actionCreator<{
 }>('SET_DATA_PROVIDER_VISIBLITY');
 
 export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');
+
+export const setConfirmingNoteId = actionCreator<{
+  id: string;
+  confirmingNoteId: string | null | undefined;
+}>('SET_CONFIRMING_NOTE_ID');

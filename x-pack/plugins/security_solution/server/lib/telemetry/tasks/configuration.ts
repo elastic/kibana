@@ -32,10 +32,10 @@ export function createTelemetryConfigurationTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('configuration')).l;
+      const log = newTelemetryLogger(logger.get('configuration'));
       const trace = taskMetricsService.start(taskType);
 
-      log(
+      log.l(
         `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
       );
 
@@ -44,14 +44,14 @@ export function createTelemetryConfigurationTaskConfig() {
         const manifest = await artifactService.getArtifact(artifactName);
 
         if (manifest.notModified) {
-          log('No new configuration artifact found, skipping...');
+          log.l('No new configuration artifact found, skipping...');
           taskMetricsService.end(trace);
           return 0;
         }
 
         const configArtifact = manifest.data as unknown as TelemetryConfiguration;
 
-        log(`Got telemetry configuration artifact: ${JSON.stringify(configArtifact)}`);
+        log.l(`Got telemetry configuration artifact: ${JSON.stringify(configArtifact)}`);
 
         telemetryConfiguration.max_detection_alerts_batch =
           configArtifact.max_detection_alerts_batch;
@@ -68,7 +68,7 @@ export function createTelemetryConfigurationTaskConfig() {
         }
 
         if (configArtifact.sender_channels) {
-          log('Updating sender channels configuration');
+          log.l('Updating sender channels configuration');
           telemetryConfiguration.sender_channels = configArtifact.sender_channels;
           const channelsDict = Object.values(TelemetryChannel).reduce(
             (acc, channel) => acc.set(channel as string, channel),
@@ -77,7 +77,7 @@ export function createTelemetryConfigurationTaskConfig() {
 
           Object.entries(configArtifact.sender_channels).forEach(([channelName, config]) => {
             if (channelName === 'default') {
-              log('Updating default configuration');
+              log.l('Updating default configuration');
               sender.updateDefaultQueueConfig({
                 bufferTimeSpanMillis: config.buffer_time_span_millis,
                 inflightEventsThreshold: config.inflight_events_threshold,
@@ -86,9 +86,9 @@ export function createTelemetryConfigurationTaskConfig() {
             } else {
               const channel = channelsDict.get(channelName);
               if (!channel) {
-                log(`Ignoring unknown channel "${channelName}"`);
+                log.l(`Ignoring unknown channel "${channelName}"`);
               } else {
-                log(`Updating configuration for channel "${channelName}`);
+                log.l(`Updating configuration for channel "${channelName}`);
                 sender.updateQueueConfig(channel, {
                   bufferTimeSpanMillis: config.buffer_time_span_millis,
                   inflightEventsThreshold: config.inflight_events_threshold,
@@ -101,10 +101,10 @@ export function createTelemetryConfigurationTaskConfig() {
 
         taskMetricsService.end(trace);
 
-        log(`Updated TelemetryConfiguration: ${JSON.stringify(telemetryConfiguration)}`);
+        log.l(`Updated TelemetryConfiguration: ${JSON.stringify(telemetryConfiguration)}`);
         return 0;
       } catch (err) {
-        log(`Failed to set telemetry configuration due to ${err.message}`);
+        log.l(`Failed to set telemetry configuration due to ${err.message}`);
         telemetryConfiguration.resetAllToDefault();
         taskMetricsService.end(trace, err);
         return 0;
