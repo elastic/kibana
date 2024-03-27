@@ -248,7 +248,8 @@ export const useESQLOverallStatsData = (
         const columnsResp = await runRequest(
           {
             params: {
-              query: esqlBaseQuery + '| LIMIT 1000',
+              // Doing this to match with the default limit
+              query: getESQLWithSafeLimit(esqlBaseQuery, 1000),
               ...(filter ? { filter } : {}),
               dropNullColumns: true,
             },
