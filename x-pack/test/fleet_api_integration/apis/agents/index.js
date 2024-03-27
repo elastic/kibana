@@ -26,5 +26,6 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./request_diagnostics'));
     loadTestFile(require.resolve('./uploads'));
     loadTestFile(require.resolve('./get_agents_by_actions'));
+    loadTestFile(require.resolve('./privileges'));
   });
 }
