@@ -14,6 +14,16 @@ import {
 import { render } from '@testing-library/react';
 import { mockedAlertSummaryResponse, mockedChartProps } from '../../../mock/alert_summary_widget';
 import { ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ, TOTAL_ALERT_COUNT_DATA_TEST_SUBJ } from './constants';
+import { LIGHT_THEME } from '@elastic/charts';
+import { useChartThemes } from '../../../hooks/use_chart_themes';
+
+jest.mock('../../../hooks/use_chart_themes', () => ({
+  useChartThemes: jest.fn(),
+}));
+(useChartThemes as jest.Mock).mockReturnValue({
+  baseTheme: LIGHT_THEME,
+  sparklineTheme: {},
+});
 
 describe('AlertSummaryWidgetCompact', () => {
   const renderComponent = (props: Partial<AlertSummaryWidgetCompactProps> = {}) =>

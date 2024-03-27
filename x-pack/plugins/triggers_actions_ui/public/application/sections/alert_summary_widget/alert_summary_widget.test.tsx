@@ -16,6 +16,8 @@ import {
   ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ,
   TOTAL_ALERT_COUNT_DATA_TEST_SUBJ,
 } from './components/constants';
+import { useChartThemes } from '../../hooks/use_chart_themes';
+import { LIGHT_THEME } from '@elastic/charts';
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation(() => true),
@@ -35,6 +37,15 @@ jest.mock('../../hooks/use_load_alert_summary', () => ({
     },
   }),
 }));
+
+jest.mock('../../hooks/use_chart_themes', () => ({
+  useChartThemes: jest.fn(),
+}));
+(useChartThemes as jest.Mock).mockReturnValue({
+  baseTheme: LIGHT_THEME,
+  sparklineTheme: {},
+});
+
 const useLoadAlertSummaryMock = useLoadAlertSummary as jest.Mock;
 
 describe('AlertSummaryWidget', () => {

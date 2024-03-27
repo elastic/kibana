@@ -19,4 +19,20 @@ export const themeServiceMock: ThemeService = {
   })),
   useDarkMode: jest.fn().mockReturnValue(false),
   useChartsBaseTheme: jest.fn().mockReturnValue(LIGHT_THEME),
+  useSparklineOverrides: jest.fn().mockReturnValue({
+    lineSeriesStyle: {
+      point: {
+        visible: false,
+        strokeWidth: 1,
+        radius: 1,
+      },
+    },
+    areaSeriesStyle: {
+      point: {
+        visible: false,
+        strokeWidth: 1,
+        radius: 1,
+      },
+    },
+  }),
 } as any;

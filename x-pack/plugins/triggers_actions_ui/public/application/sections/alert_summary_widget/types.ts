@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { BrushEndListener } from '@elastic/charts';
+import type { BrushEndListener, SettingsProps } from '@elastic/charts';
 import { estypes } from '@elastic/elasticsearch';
 import { AlertStatus, ValidFeatureId } from '@kbn/rule-data-utils';
-import type { PartialTheme, Theme } from '@elastic/charts';
 
 export interface Alert {
   key: number;
@@ -25,8 +24,7 @@ export interface AlertSummaryTimeRange {
 }
 
 export interface ChartProps {
-  theme?: PartialTheme;
-  baseTheme: Theme;
+  themeOverrides?: SettingsProps['theme'];
   onBrushEnd?: BrushEndListener;
 }
 
@@ -41,7 +39,7 @@ export interface AlertSummaryWidgetProps {
   fullSize?: boolean;
   onClick?: (status?: AlertStatus) => void;
   timeRange: AlertSummaryTimeRange;
-  chartProps: ChartProps;
+  chartProps?: ChartProps;
   hideChart?: boolean;
   onLoaded?: (alertsCount?: AlertsCount) => void;
 }

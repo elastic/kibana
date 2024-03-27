@@ -22,11 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
 import { Alert, ChartProps } from '../types';
+import { useChartThemes } from '../../../hooks/use_chart_themes';
 
 export interface AlertSummaryWidgetFullSizeProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
-  chartProps: ChartProps;
+  chartProps?: ChartProps;
   recoveredAlertCount: number;
   dateFormat?: string;
   hideChart?: boolean;
@@ -35,19 +36,12 @@ export interface AlertSummaryWidgetFullSizeProps {
 export const AlertSummaryWidgetFullSize = ({
   activeAlertCount,
   activeAlerts,
-  chartProps: { theme, baseTheme, onBrushEnd },
+  chartProps: { themeOverrides, onBrushEnd } = {},
   dateFormat,
   recoveredAlertCount,
   hideChart,
 }: AlertSummaryWidgetFullSizeProps) => {
-  const chartTheme = [
-    ...(theme ? [theme] : []),
-    {
-      chartPaddings: {
-        top: 7,
-      },
-    },
-  ];
+  const { baseTheme } = useChartThemes();
   const chartData = activeAlerts.map((alert) => alert.doc_count);
   const domain = {
     max: Math.max(...chartData) * 1.1, // add 10% headroom
@@ -78,7 +72,18 @@ export const AlertSummaryWidgetFullSize = ({
             />
             <Settings
               legendPosition={Position.Right}
-              theme={chartTheme}
+              theme={[
+                ...(themeOverrides
+                  ? Array.isArray(themeOverrides)
+                    ? themeOverrides
+                    : [themeOverrides]
+                  : []),
+                {
+                  chartPaddings: {
+                    top: 7,
+                  },
+                },
+              ]}
               baseTheme={baseTheme}
               onBrushEnd={onBrushEnd}
               locale={i18n.getLocale()}

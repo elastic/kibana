@@ -18,17 +18,17 @@ import {
   TooltipType,
   Tooltip,
 } from '@elastic/charts';
-import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 import { AlertStatus } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, WIDGET_TITLE } from './constants';
 import { Alert, ChartProps } from '../types';
+import { useChartThemes } from '../../../hooks/use_chart_themes';
 
 export interface AlertSummaryWidgetCompactProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
-  chartProps: ChartProps;
+  chartProps?: ChartProps;
   recoveredAlertCount: number;
   timeRangeTitle?: JSX.Element | string;
   onClick: (status?: AlertStatus) => void;
@@ -37,23 +37,12 @@ export interface AlertSummaryWidgetCompactProps {
 export const AlertSummaryWidgetCompact = ({
   activeAlertCount,
   activeAlerts,
-  chartProps: { theme, baseTheme },
+  chartProps: { themeOverrides } = {},
   recoveredAlertCount,
   timeRangeTitle,
   onClick,
 }: AlertSummaryWidgetCompactProps) => {
-  const chartTheme = [
-    ...(theme ? [theme] : []),
-    EUI_SPARKLINE_THEME_PARTIAL,
-    {
-      chartMargins: {
-        left: 10,
-        right: 10,
-        top: 10,
-        bottom: 10,
-      },
-    },
-  ];
+  const { baseTheme, sparklineTheme } = useChartThemes();
 
   const handleClick = (
     event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
@@ -99,7 +88,26 @@ export const AlertSummaryWidgetCompact = ({
             <EuiFlexItem style={{ minWidth: '200px' }}>
               <Chart size={{ height: 50 }}>
                 <Tooltip type={TooltipType.None} />
-                <Settings theme={chartTheme} baseTheme={baseTheme} locale={i18n.getLocale()} />
+                <Settings
+                  theme={[
+                    ...(themeOverrides
+                      ? Array.isArray(themeOverrides)
+                        ? themeOverrides
+                        : [themeOverrides]
+                      : []),
+                    sparklineTheme,
+                    {
+                      chartMargins: {
+                        left: 10,
+                        right: 10,
+                        top: 10,
+                        bottom: 10,
+                      },
+                    },
+                  ]}
+                  baseTheme={baseTheme}
+                  locale={i18n.getLocale()}
+                />
                 <Axis
                   hide
                   id="activeAlertsAxis"

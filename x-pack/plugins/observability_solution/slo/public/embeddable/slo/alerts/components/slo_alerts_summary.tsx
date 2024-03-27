@@ -64,16 +64,11 @@ export function SloAlertsSummary({
     [timeRange.from, timeRange.to, bucketSize]
   );
 
-  const chartProps = {
-    theme: charts.theme.useChartsTheme(),
-    baseTheme: charts.theme.useChartsBaseTheme(),
-  };
   return (
     <AlertSummaryWidget
       featureIds={observabilityAlertFeatureIds}
       filter={esQuery}
       timeRange={alertSummaryTimeRange}
-      chartProps={chartProps}
       fullSize
       onLoaded={() => {
         if (onLoaded) {

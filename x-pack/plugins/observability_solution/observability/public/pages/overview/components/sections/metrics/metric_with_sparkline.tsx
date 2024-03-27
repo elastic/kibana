@@ -5,23 +5,14 @@
  * 2.0.
  */
 
-import {
-  Chart,
-  Settings,
-  AreaSeries,
-  TooltipType,
-  Tooltip,
-  LIGHT_THEME,
-  DARK_THEME,
-} from '@elastic/charts';
+import { Chart, Settings, AreaSeries, TooltipType, Tooltip } from '@elastic/charts';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiTextColor } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
-import { ThemeContext } from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 import { NumberOrNull } from '../../../../..';
+import { useChartThemes } from '../../../../../hooks/use_chart_themes';
 
 interface Props {
   id: string;
@@ -31,11 +22,7 @@ interface Props {
   color: number;
 }
 export function MetricWithSparkline({ id, formatter, value, timeseries, color }: Props) {
-  const themeCTX = useContext(ThemeContext);
-  const isDarkTheme = (themeCTX && themeCTX.darkMode) || false;
-  const theme = [EUI_SPARKLINE_THEME_PARTIAL];
-  const baseTheme = isDarkTheme ? DARK_THEME : LIGHT_THEME;
-
+  const { baseTheme, sparklineTheme } = useChartThemes();
   const colors = baseTheme.colors?.vizColors ?? [];
 
   if (!value) {
@@ -57,7 +44,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
           <Tooltip type={TooltipType.None} />
           <Settings
             baseTheme={baseTheme}
-            theme={theme}
+            theme={sparklineTheme}
             showLegend={false}
             locale={i18n.getLocale()}
           />
