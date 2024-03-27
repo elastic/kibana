@@ -7,6 +7,7 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { InfraLocatorDependencies } from '.';
 
 export type HostsLocator = LocatorPublic<HostsLocatorParams>;
@@ -22,8 +23,8 @@ export interface HostsLocatorParams extends SerializableRecord {
     from: string;
     to: string;
   };
-  filters?: SerializableRecord[];
-  panelFilters?: SerializableRecord[];
+  filters?: Filter[];
+  panelFilters?: Filter[];
   limit?: number;
 }
 
