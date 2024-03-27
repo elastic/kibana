@@ -13,7 +13,6 @@ import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../synthetics_common/field_selector';
-import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 
@@ -133,7 +132,13 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
 
       <EuiCallOut
         size="s"
-        title="Synthetics availability SLIs are automatically grouped by monitor and location"
+        title={i18n.translate(
+          'xpack.slo.syntheticsAvailabilityIndicatorTypeForm.euiCallOut.syntheticsAvailabilitySLIsAreLabel',
+          {
+            defaultMessage:
+              'Synthetics availability SLIs are automatically grouped by monitor and location',
+          }
+        )}
         iconType="iInCircle"
       />
       <DataPreviewChart range={range} label={LABEL} useGoodBadEventsChart />
