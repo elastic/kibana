@@ -165,7 +165,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
         return this.crowdstrikeApiRequest(req, true);
       }
 
-      throw error;
+      throw new Error(error.message);
     }
   }
 

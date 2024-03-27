@@ -26,6 +26,8 @@ describe('CrowdstrikeConnector', () => {
   let mockedRequest: jest.Mock;
 
   beforeEach(() => {
+    // @ts-expect-error private static - but I still want to reset it
+    CrowdstrikeConnector.token = null;
     // @ts-expect-error
     mockedRequest = connector.request = jest.fn() as jest.Mock;
   });
@@ -78,8 +80,6 @@ describe('CrowdstrikeConnector', () => {
   describe('getAgentDetails', () => {
     it('should make a GET request to the correct URL with correct params', async () => {
       const mockResponse = { data: { resources: [{}] } };
-      // @ts-expect-error private static - but I still want to reset it
-      CrowdstrikeConnector.token = null;
 
       mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
       mockedRequest.mockResolvedValueOnce(mockResponse);
@@ -139,8 +139,6 @@ describe('CrowdstrikeConnector', () => {
     });
     it('should not call getTokenRequest if the token already exists', async () => {
       const mockResponse = { data: { resources: [{}] } };
-      // @ts-expect-error private static - but I still want to reset it
-      CrowdstrikeConnector.token = null;
 
       mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
       mockedRequest.mockResolvedValue(mockResponse);
@@ -188,6 +186,28 @@ describe('CrowdstrikeConnector', () => {
           url: hostPath,
         })
       );
+      expect(mockedRequest).toHaveBeenCalledTimes(3);
+    });
+    it('should throw error when something goes wrong', async () => {
+      const mockResponse = { code: 400, message: 'something goes wrong' };
+
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockRejectedValueOnce(mockResponse);
+
+      //   expect(mockedRequest).toThrowError('access denied, invalid bearer token');
+      await expect(() => connector.getAgentDetails({ ids: ['id1', 'id2'] })).rejects.toThrowError(
+        'something goes wrong'
+      );
+      expect(mockedRequest).toHaveBeenCalledTimes(2);
+    });
+    it('should repeat the call one time if theres 401 error ', async () => {
+      const mockResponse = { code: 401, message: 'access denied, invalid bearer token' };
+
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockRejectedValueOnce(mockResponse);
+
+      //   expect(mockedRequest).toThrowError('access denied, invalid bearer token');
+      await expect(() => connector.getAgentDetails({ ids: ['id1', 'id2'] })).rejects.toThrowError();
       expect(mockedRequest).toHaveBeenCalledTimes(3);
     });
   });
