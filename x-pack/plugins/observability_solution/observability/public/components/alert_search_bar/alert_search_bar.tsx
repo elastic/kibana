@@ -126,6 +126,14 @@ export function ObservabilityAlertSearchBar({
     [onKueryChange, timeFilterService, clearSavedQuery, onRangeFromChange, onRangeToChange]
   );
 
+  const onFilterUpdated = useCallback<(filters: Filter[]) => void>(
+    (updatedFilters) => {
+      clearSavedQuery();
+      onFiltersChange?.(updatedFilters);
+    },
+    [clearSavedQuery, onFiltersChange]
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -136,7 +144,7 @@ export function ObservabilityAlertSearchBar({
           rangeTo={rangeTo}
           showFilterBar={showFilterBar}
           filters={filters}
-          onFiltersUpdated={onFiltersChange}
+          onFiltersUpdated={onFilterUpdated}
           savedQuery={savedQuery}
           onSavedQueryUpdated={setSavedQuery}
           onClearSavedQuery={clearSavedQuery}
