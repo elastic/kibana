@@ -72,6 +72,7 @@ interface EditorFooterProps {
   isSpaceReduced?: boolean;
   isLoading?: boolean;
   allowQueryCancellation?: boolean;
+  hideTimeFilterInfo?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -88,6 +89,7 @@ export const EditorFooter = memo(function EditorFooter({
   isSpaceReduced,
   isLoading,
   allowQueryCancellation,
+  hideTimeFilterInfo,
 }: EditorFooterProps) {
   const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
@@ -113,7 +115,7 @@ export const EditorFooter = memo(function EditorFooter({
             </EuiText>
           </EuiFlexItem>
           {/* If there is no space and no @timestamp detected hide the information */}
-          {(detectTimestamp || !isSpaceReduced) && (
+          {(detectTimestamp || !isSpaceReduced) && !hideTimeFilterInfo && (
             <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
               <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                 <EuiFlexItem grow={false}>

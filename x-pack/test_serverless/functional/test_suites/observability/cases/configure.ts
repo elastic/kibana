@@ -52,9 +52,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('change closure option successfully', async () => {
         await cases.common.selectRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
-        const toast = await toasts.getToastElement(1);
+        const toast = await toasts.getElementByIndex(1);
         expect(await toast.getVisibleText()).to.be('Settings successfully updated');
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
       });
     });
 

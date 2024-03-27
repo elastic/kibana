@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock, createAgentPolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import {
   CLOUDBEAT_GCP,
@@ -17,11 +17,15 @@ import {
 } from '../../../common/constants';
 import type { PostureInput } from '../../../common/types_old';
 
-export const getMockPolicyAWS = () => getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws');
-export const getMockPolicyGCP = () => getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp');
-export const getMockPolicyAzure = () => getPolicyMock(CLOUDBEAT_AZURE, 'cspm', 'azure');
+export const getMockPolicyAWS = (vars?: PackagePolicyConfigRecord) =>
+  getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws', vars);
+export const getMockPolicyGCP = (vars?: PackagePolicyConfigRecord) =>
+  getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp', vars);
+export const getMockPolicyAzure = (vars?: PackagePolicyConfigRecord) =>
+  getPolicyMock(CLOUDBEAT_AZURE, 'cspm', 'azure', vars);
 export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', 'self_managed');
-export const getMockPolicyEKS = () => getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks');
+export const getMockPolicyEKS = (vars?: PackagePolicyConfigRecord) =>
+  getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks', vars);
 export const getMockPolicyVulnMgmtAWS = () =>
   getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
 export const getMockAgentlessAgentPolicy = () => {
@@ -131,7 +135,8 @@ export const getMockPackageInfoCspmAzure = (packageVersion = '1.6.0') => {
 const getPolicyMock = (
   type: PostureInput,
   posture: string,
-  deployment: string
+  deployment: string,
+  vars: object = {}
 ): NewPackagePolicy => {
   const mockPackagePolicy = createNewPackagePolicyMock();
 
@@ -204,26 +209,48 @@ const getPolicyMock = (
         type: CLOUDBEAT_EKS,
         policy_template: 'kspm',
         enabled: type === CLOUDBEAT_EKS,
-        streams: [{ enabled: type === CLOUDBEAT_EKS, data_stream: dataStream, vars: eksVarsMock }],
+        streams: [
+          {
+            enabled: type === CLOUDBEAT_EKS,
+            data_stream: dataStream,
+            vars: { ...eksVarsMock, ...vars },
+          },
+        ],
       },
       {
         type: CLOUDBEAT_AWS,
         policy_template: 'cspm',
         enabled: type === CLOUDBEAT_AWS,
-        streams: [{ enabled: type === CLOUDBEAT_AWS, data_stream: dataStream, vars: awsVarsMock }],
+        streams: [
+          {
+            enabled: type === CLOUDBEAT_AWS,
+            data_stream: dataStream,
+            vars: { ...awsVarsMock, ...vars },
+          },
+        ],
       },
       {
         type: CLOUDBEAT_GCP,
         policy_template: 'cspm',
         enabled: type === CLOUDBEAT_GCP,
-        streams: [{ enabled: type === CLOUDBEAT_GCP, data_stream: dataStream, vars: gcpVarsMock }],
+        streams: [
+          {
+            enabled: type === CLOUDBEAT_GCP,
+            data_stream: dataStream,
+            vars: { ...gcpVarsMock, ...vars },
+          },
+        ],
       },
       {
         type: CLOUDBEAT_AZURE,
         policy_template: 'cspm',
-        enabled: false,
+        enabled: type === CLOUDBEAT_AZURE,
         streams: [
-          { enabled: type === CLOUDBEAT_AZURE, data_stream: dataStream, vars: azureVarsMock },
+          {
+            enabled: type === CLOUDBEAT_AZURE,
+            data_stream: dataStream,
+            vars: { ...azureVarsMock, ...vars },
+          },
         ],
       },
       {

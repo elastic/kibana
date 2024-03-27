@@ -11,4 +11,7 @@ export interface ClientConfigType {
     enabled: boolean;
     embeddedEnabled: boolean;
   };
+  dev: {
+    enableMonaco: boolean;
+  };
 }

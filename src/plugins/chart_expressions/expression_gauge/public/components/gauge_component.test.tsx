@@ -21,7 +21,14 @@ import {
   GaugeColorModes,
 } from '../../common';
 import GaugeComponent from './gauge_component';
-import { Chart, Goal, Settings } from '@elastic/charts';
+import {
+  Chart,
+  Bullet,
+  Settings,
+  BulletProps,
+  ColorBandSimpleConfig,
+  Color,
+} from '@elastic/charts';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -103,7 +110,6 @@ describe('GaugeComponent', function () {
       uiState,
       renderComplete: jest.fn(),
       setChartSize: jest.fn(),
-      shouldUseVeil: false,
     };
   });
 
@@ -167,8 +173,9 @@ describe('GaugeComponent', function () {
       },
       data: createData({ 'metric-accessor': 12, 'min-accessor': 0, 'max-accessor': 10 }),
     } as GaugeRenderProps;
-    const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-    expect(goal.prop('actual')).toEqual(10);
+    const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+    const datum = bullet.prop<BulletProps['data']>('data')[0]?.[0];
+    expect(datum?.value).toEqual(12);
   });
 
   describe('labelMajor and labelMinor settings', () => {
@@ -181,9 +188,10 @@ describe('GaugeComponent', function () {
           labelMinor: '',
         },
       };
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('labelMajor')).toEqual('');
-      expect(goal.prop('labelMinor')).toEqual('');
+      const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+      const datum = bullet.prop<BulletProps['data']>('data')[0]?.[0];
+      expect(datum?.title).toEqual('');
+      expect(datum?.subtitle).toEqual('');
     });
     it('displays custom labelMajor and labelMinor when passed', () => {
       const customProps = {
@@ -195,9 +203,10 @@ describe('GaugeComponent', function () {
           labelMinor: 'custom labelMinor',
         },
       };
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('labelMajor')).toEqual('custom labelMajor   ');
-      expect(goal.prop('labelMinor')).toEqual('custom labelMinor  ');
+      const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+      const datum = bullet.prop<BulletProps['data']>('data')[0]?.[0];
+      expect(datum?.title).toEqual('custom labelMajor');
+      expect(datum?.subtitle).toEqual('custom labelMinor');
     });
     it('displays auto labelMajor', () => {
       const customProps = {
@@ -208,8 +217,9 @@ describe('GaugeComponent', function () {
           labelMajor: '',
         },
       };
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('labelMajor')).toEqual('Count of records   ');
+      const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+      const datum = bullet.prop<BulletProps['data']>('data')[0]?.[0];
+      expect(datum?.title).toEqual('Count of records');
     });
   });
 
@@ -238,9 +248,11 @@ describe('GaugeComponent', function () {
           ticksPosition: GaugeTicksPositions.BANDS,
         },
       } as GaugeRenderProps;
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 1, 2, 3, 4, 10]);
-      expect(goal.prop('bands')).toEqual([0, 1, 2, 3, 4, 10]);
+      const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+      const datum = bullet.prop<BulletProps['data']>('data')[0]?.[0];
+      expect((datum?.ticks as () => number[])?.()).toEqual([0, 1, 2, 3, 4, 10]);
+      const colorBands = bullet.prop<Color[]>('colorBands');
+      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
     });
     it('sets proper color bands if palette steps are smaller than minimum', () => {
       const palette = {
@@ -266,8 +278,9 @@ describe('GaugeComponent', function () {
           ticksPosition: GaugeTicksPositions.BANDS,
         },
       } as GaugeRenderProps;
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('bands')).toEqual([0, 4, 10]);
+      const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+      const colorBands = bullet.prop<Color[]>('colorBands');
+      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
     });
     it('sets proper color bands if percent palette steps are smaller than 0', () => {
       const palette = {
@@ -293,8 +306,9 @@ describe('GaugeComponent', function () {
           ticksPosition: GaugeTicksPositions.BANDS,
         },
       } as GaugeRenderProps;
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('bands')).toEqual([0, 8, 10]);
+      const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+      const colorBands = bullet.prop<Color[]>('colorBands');
+      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
     });
     it('doesnt set bands for values differing <10%', () => {
       const palette = {
@@ -320,8 +334,9 @@ describe('GaugeComponent', function () {
           ticksPosition: GaugeTicksPositions.BANDS,
         },
       } as GaugeRenderProps;
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('bands')).toEqual([0, 1, 1.5, 3, 10]);
+      const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+      const colorBands = bullet.prop<Color[]>('colorBands');
+      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
     });
     it('sets proper color bands for values greater than maximum', () => {
       const palette = {
@@ -347,8 +362,9 @@ describe('GaugeComponent', function () {
           ticksPosition: GaugeTicksPositions.BANDS,
         },
       } as GaugeRenderProps;
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('bands')).toEqual([0, 10]);
+      const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+      const colorBands = bullet.prop<Color[]>('colorBands');
+      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
     });
     it('passes number bands from color palette with no stops defined', () => {
       const palette = {
@@ -375,8 +391,10 @@ describe('GaugeComponent', function () {
           max: 'max-accessor',
         },
       } as GaugeRenderProps;
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('bands')).toEqual([0, 5, 10]);
+      const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+      const colorBands = bullet.prop<ColorBandSimpleConfig>('colorBands');
+      expect(colorBands?.steps).toEqual([0, 5, 10]);
+      expect(colorBands?.colors).toEqual(['rgba(255,255,255,0)', 'rgba(255,255,255,0)']);
     });
     it('passes percent bands from color palette', () => {
       const palette = {
@@ -403,8 +421,10 @@ describe('GaugeComponent', function () {
           max: 'max-accessor',
         },
       } as GaugeRenderProps;
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('bands')).toEqual([0, 2, 6, 8, 10]);
+      const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+      const colorBands = bullet.prop<ColorBandSimpleConfig>('colorBands');
+      expect(colorBands?.steps).toEqual([0, 2, 6, 8, 10]);
+      expect(colorBands?.colors).toEqual(['blue', 'blue', 'blue', 'blue']);
     });
   });
 

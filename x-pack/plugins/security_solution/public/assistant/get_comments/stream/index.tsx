@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useFetchConnectorsQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
@@ -16,53 +17,56 @@ import { MessageText } from './message_text';
 
 interface Props {
   abortStream: () => void;
-  amendMessage: (message: string) => void;
   content?: string;
   isEnabledLangChain: boolean;
   isError?: boolean;
   isFetching?: boolean;
-  isLastComment: boolean;
+  isControlsEnabled?: boolean;
   index: number;
-  connectorTypeTitle: string;
+  connectorId: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
+  refetchCurrentConversation: () => void;
   regenerateMessage: () => void;
   transformMessage: (message: string) => ContentMessage;
 }
 
 export const StreamComment = ({
   abortStream,
-  amendMessage,
   content,
-  connectorTypeTitle,
+  connectorId,
   index,
+  isControlsEnabled = false,
   isEnabledLangChain,
   isError = false,
   isFetching = false,
-  isLastComment,
   reader,
+  refetchCurrentConversation,
   regenerateMessage,
   transformMessage,
 }: Props) => {
+  const { data: connectors } = useFetchConnectorsQuery();
+  const llmType = connectors?.find((c) => c.id === connectorId)?.connector_type_id ?? '.gen-ai';
+
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
-    amendMessage,
+    refetchCurrentConversation,
     content,
-    connectorTypeTitle,
+    llmType,
     reader,
     isEnabledLangChain,
     isError,
   });
 
-  const currentState = useRef({ isStreaming, pendingMessage, amendMessage });
+  const currentState = useRef({ isStreaming, pendingMessage, refetchCurrentConversation });
 
   useEffect(() => {
-    currentState.current = { isStreaming, pendingMessage, amendMessage };
-  }, [amendMessage, isStreaming, pendingMessage]);
+    currentState.current = { isStreaming, pendingMessage, refetchCurrentConversation };
+  }, [refetchCurrentConversation, isStreaming, pendingMessage]);
 
   useEffect(
     () => () => {
-      // if the component is unmounted while streaming, amend the message with the pending message
-      if (currentState.current.isStreaming && currentState.current.pendingMessage.length > 0) {
-        currentState.current.amendMessage(currentState.current.pendingMessage ?? '');
+      // if the component is unmounted while streaming, fetch the convo to get the completed stream
+      if (currentState.current.isStreaming) {
+        currentState.current.refetchCurrentConversation();
       }
     },
     // store values in currentState to detect true unmount
@@ -79,10 +83,10 @@ export const StreamComment = ({
     [isFetching, isLoading, isStreaming]
   );
   const controls = useMemo(() => {
-    if (reader == null || !isLastComment) {
+    if (!isControlsEnabled) {
       return;
     }
-    if (isAnythingLoading) {
+    if (isAnythingLoading && reader) {
       return (
         <StopGeneratingButton
           onClick={() => {
@@ -99,7 +103,7 @@ export const StreamComment = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [abortStream, isAnythingLoading, isLastComment, reader, regenerateMessage, setComplete]);
+  }, [abortStream, isAnythingLoading, isControlsEnabled, reader, regenerateMessage, setComplete]);
 
   return (
     <MessagePanel

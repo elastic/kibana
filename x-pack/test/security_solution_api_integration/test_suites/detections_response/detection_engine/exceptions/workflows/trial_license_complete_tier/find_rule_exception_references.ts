@@ -22,14 +22,13 @@ import {
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
+import { getSimpleRule, createExceptionList } from '../../../../utils';
 import {
   createRule,
-  getSimpleRule,
   deleteAllRules,
-  createExceptionList,
   deleteAllAlerts,
   createAlertsIndex,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 
 export default ({ getService }: FtrProviderContext) => {

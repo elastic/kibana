@@ -12,7 +12,7 @@ import {
   createSearchSessionRestorationDataProvider,
 } from './discover_state';
 import { createBrowserHistory, createMemoryHistory, History } from 'history';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   savedSearchAdHoc,
@@ -25,20 +25,16 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
-import { DiscoverCustomizationContext, FetchStatus } from '../../types';
+import { FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { copySavedSearch } from './discover_saved_search_container';
 import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
   start();
   return stop;
-};
-
-const customizationContext: DiscoverCustomizationContext = {
-  displayMode: 'standalone',
-  showLogsExplorerTabs: false,
 };
 
 async function getState(
@@ -58,7 +54,7 @@ async function getState(
   const nextState = getDiscoverStateContainer({
     services: discoverServiceMock,
     history: nextHistory,
-    customizationContext,
+    customizationContext: mockCustomizationContext,
   });
   nextState.appState.isEmptyURL = jest.fn(() => isEmptyUrl ?? true);
   jest.spyOn(nextState.dataState, 'fetch');
@@ -95,7 +91,7 @@ describe('Test discover state', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
-      customizationContext,
+      customizationContext: mockCustomizationContext,
     });
     state.savedSearchState.set(savedSearchMock);
     state.appState.update({}, true);
@@ -178,7 +174,7 @@ describe('Test discover state with overridden state storage', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
-      customizationContext,
+      customizationContext: mockCustomizationContext,
       stateStorageContainer: stateStorage,
     });
     state.savedSearchState.set(savedSearchMock);
@@ -264,7 +260,7 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
   const discoverStateContainer = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
-    customizationContext,
+    customizationContext: mockCustomizationContext,
   });
   discoverStateContainer.appState.update({
     index: savedSearchMock.searchSource.getField('index')!.id,
@@ -360,6 +356,9 @@ describe('Test discover state actions', () => {
     discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
       return { from: 'now-15d', to: 'now' };
     });
+    discoverServiceMock.data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+      return { pause: true, value: 1000 };
+    });
     discoverServiceMock.data.search.searchSource.create = jest
       .fn()
       .mockReturnValue(savedSearchMock.searchSource);
@@ -439,6 +438,7 @@ describe('Test discover state actions', () => {
         "columns": Array [
           "default_column",
         ],
+        "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "refreshInterval": undefined,
@@ -447,7 +447,6 @@ describe('Test discover state actions', () => {
         "sampleSize": undefined,
         "sort": Array [],
         "timeRange": undefined,
-        "usesAdHocDataView": false,
       }
     `);
     expect(searchSource.getField('index')?.id).toEqual('the-data-view-id');
@@ -524,6 +523,71 @@ describe('Test discover state actions', () => {
       `"/#?_a=(columns:!(message),index:the-data-view-id,interval:month,sort:!())&_g=()"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    unsubscribe();
+  });
+
+  test('loadSavedSearch given a URL with different time range than the stored one showing as changed', async () => {
+    const url = '/#_g=(time:(from:now-24h%2Fh,to:now))';
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: createSearchSourceMock({ index: dataViewMock, filter: [] }),
+      timeRestore: true,
+      timeRange: { from: 'now-15d', to: 'now' },
+    };
+    const { state } = await getState(url, {
+      savedSearch,
+      isEmptyUrl: false,
+    });
+    await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
+    const unsubscribe = state.actions.initializeAndSync();
+    await new Promise(process.nextTick);
+    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    unsubscribe();
+  });
+
+  test('loadSavedSearch given a URL with different refresh interval than the stored one showing as changed', async () => {
+    const url = '/#_g=(time:(from:now-15d,to:now),refreshInterval:(pause:!f,value:1234))';
+    discoverServiceMock.data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+      return { pause: false, value: 1234 };
+    });
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: createSearchSourceMock({ index: dataViewMock, filter: [] }),
+      timeRestore: true,
+      timeRange: { from: 'now-15d', to: 'now' },
+      refreshInterval: { pause: false, value: 60000 },
+    };
+    const { state } = await getState(url, {
+      savedSearch,
+      isEmptyUrl: false,
+    });
+    await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
+    const unsubscribe = state.actions.initializeAndSync();
+    await new Promise(process.nextTick);
+    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    unsubscribe();
+  });
+
+  test('loadSavedSearch given a URL with matching time range and refresh interval not showing as changed', async () => {
+    const url = '/#?_g=(time:(from:now-15d,to:now),refreshInterval:(pause:!f,value:60000))';
+    discoverServiceMock.data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+      return { pause: false, value: 60000 };
+    });
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: createSearchSourceMock({ index: dataViewMock, filter: [] }),
+      timeRestore: true,
+      timeRange: { from: 'now-15d', to: 'now' },
+      refreshInterval: { pause: false, value: 60000 },
+    };
+    const { state } = await getState(url, {
+      savedSearch,
+      isEmptyUrl: false,
+    });
+    await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
+    const unsubscribe = state.actions.initializeAndSync();
+    await new Promise(process.nextTick);
+    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
     unsubscribe();
   });
 
@@ -846,7 +910,7 @@ describe('Test discover state with embedded mode', () => {
       services: discoverServiceMock,
       history,
       customizationContext: {
-        ...customizationContext,
+        ...mockCustomizationContext,
         displayMode: 'embedded',
       },
     });

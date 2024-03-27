@@ -19,13 +19,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('GET /infra/services', () => {
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const to = new Date().toISOString();
+
     describe('with transactions', () => {
-      before(async () => {
-        await synthtrace.index(
-          generateServicesData({ from, to, instanceCount: 3, servicesPerHost: 3 })
-        );
-      });
-      after(() => synthtrace.clean());
+      before(async () =>
+        synthtrace.index(generateServicesData({ from, to, instanceCount: 3, servicesPerHost: 3 }))
+      );
+      after(async () => synthtrace.clean());
       it('returns no services with no data', async () => {
         const filters = JSON.stringify({
           'host.name': 'some-host',
@@ -87,7 +86,9 @@ export default function ({ getService }: FtrProviderContext) {
           generateServicesLogsOnlyData({ from, to, instanceCount: 1, servicesPerHost: 2 })
         );
       });
-      after(() => synthtrace.clean());
+      after(async () => {
+        await synthtrace.clean();
+      });
       it('should return services with logs only data', async () => {
         const filters = JSON.stringify({
           'host.name': 'host-0',

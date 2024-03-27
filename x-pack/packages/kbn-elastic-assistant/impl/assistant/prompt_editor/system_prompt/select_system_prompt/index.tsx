@@ -30,7 +30,7 @@ import { TEST_IDS } from '../../../constants';
 export interface Props {
   allSystemPrompts: Prompt[];
   compressed?: boolean;
-  conversation: Conversation | undefined;
+  conversation?: Conversation;
   selectedPrompt: Prompt | undefined;
   clearSelectedSystemPrompt?: () => void;
   isClearable?: boolean;
@@ -71,9 +71,9 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   // Write the selected system prompt to the conversation config
   const setSelectedSystemPrompt = useCallback(
     (prompt: Prompt | undefined) => {
-      if (conversation) {
+      if (conversation && conversation.apiConfig) {
         setApiConfig({
-          conversationId: conversation.id,
+          conversation,
           apiConfig: {
             ...conversation.apiConfig,
             defaultSystemPromptId: prompt?.id,
@@ -174,7 +174,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
               onBlur={handleOnBlur}
               options={[...options, addNewSystemPrompt]}
               placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
-              valueOfSelected={selectedPrompt?.id ?? allSystemPrompts[0].id}
+              valueOfSelected={selectedPrompt?.id ?? allSystemPrompts[0]?.id}
             />
           </EuiFormRow>
         )}

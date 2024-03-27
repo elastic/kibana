@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -25,7 +25,7 @@ export class DataViewFieldEditorPlugin implements Plugin<void, void, SetupDeps, 
     core.application.register({
       id: 'dataViewFieldEditorExample',
       title: 'Data view field editor example',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const [, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');

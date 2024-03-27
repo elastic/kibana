@@ -11,14 +11,14 @@ import { Observable } from 'rxjs';
 import {
   HttpSetup,
   NotificationsStart,
-  I18nStart,
   CoreTheme,
   DocLinksStart,
   CoreStart,
 } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { EuiWindowEvent } from '@elastic/eui';
 import { ObjectStorageClient } from '../../../../common/types';
 
 import * as localStorageObjectClient from '../../../lib/local_storage_object_client';
@@ -49,7 +49,6 @@ import { Main } from '../main';
 import { EditorContentSpinner } from '../../components';
 
 interface ConsoleDependencies {
-  I18nContext: I18nStart['Context'];
   autocompleteInfo: AutocompleteInfo;
   docLinks: DocLinksStart['links'];
   docLinkVersion: string;
@@ -71,12 +70,11 @@ const loadDependencies = async (
   const {
     docLinks: { DOC_LINK_VERSION, links },
     http,
-    i18n: { Context: I18nContext },
     notifications,
     theme: { theme$ },
   } = core;
   const trackUiMetric = createUsageTracker(usageCollection);
-  trackUiMetric.load('opened_remote_app');
+  trackUiMetric.load('opened_embedded_app');
 
   await loadActiveApi(core.http);
   const autocompleteInfo = getAutocompleteInfo();
@@ -93,7 +91,6 @@ const loadDependencies = async (
 
   autocompleteInfo.mapping.setup(http, settings);
   return {
-    I18nContext,
     autocompleteInfo,
     docLinks: links,
     docLinkVersion: DOC_LINK_VERSION,
@@ -109,13 +106,20 @@ const loadDependencies = async (
   };
 };
 
-type ConsoleWrapperProps = Omit<EmbeddableConsoleDependencies, 'setDispatch'>;
+interface ConsoleWrapperProps extends Omit<EmbeddableConsoleDependencies, 'setDispatch'> {
+  onKeyDown: (this: Window, ev: WindowEventMap['keydown']) => any;
+}
 
-export const ConsoleWrapper: React.FunctionComponent<ConsoleWrapperProps> = (props) => {
+export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
+  const { core, usageCollection, onKeyDown } = props;
+
   useEffect(() => {
-    loadDependencies(props.core, props.usageCollection).then(setDependencies);
-  }, [setDependencies, props]);
+    if (dependencies === null) {
+      loadDependencies(core, usageCollection).then(setDependencies);
+    }
+  }, [dependencies, setDependencies, core, usageCollection]);
+
   useEffect(() => {
     return () => {
       if (dependencies) {
@@ -127,8 +131,8 @@ export const ConsoleWrapper: React.FunctionComponent<ConsoleWrapperProps> = (pro
   if (!dependencies) {
     return <EditorContentSpinner />;
   }
+
   const {
-    I18nContext,
     autocompleteInfo,
     docLinkVersion,
     docLinks,
@@ -143,33 +147,34 @@ export const ConsoleWrapper: React.FunctionComponent<ConsoleWrapperProps> = (pro
     trackUiMetric,
   } = dependencies;
   return (
-    <I18nContext>
-      <KibanaThemeProvider theme={{ theme$ }}>
-        <ServicesContextProvider
-          value={{
-            docLinkVersion,
-            docLinks,
-            services: {
-              esHostService,
-              storage,
-              history,
-              settings,
-              notifications,
-              trackUiMetric,
-              objectStorageClient,
-              http,
-              autocompleteInfo,
-            },
-            theme$,
-          }}
-        >
-          <RequestContextProvider>
-            <EditorContextProvider settings={settings.toJSON()}>
+    <KibanaRenderContextProvider {...core}>
+      <ServicesContextProvider
+        value={{
+          docLinkVersion,
+          docLinks,
+          services: {
+            esHostService,
+            storage,
+            history,
+            settings,
+            notifications,
+            trackUiMetric,
+            objectStorageClient,
+            http,
+            autocompleteInfo,
+          },
+          theme$,
+        }}
+      >
+        <RequestContextProvider>
+          <EditorContextProvider settings={settings.toJSON()}>
+            <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
+              <EuiWindowEvent event="keydown" handler={onKeyDown} />
               <Main hideWelcome />
-            </EditorContextProvider>
-          </RequestContextProvider>
-        </ServicesContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>
+            </div>
+          </EditorContextProvider>
+        </RequestContextProvider>
+      </ServicesContextProvider>
+    </KibanaRenderContextProvider>
   );
 };

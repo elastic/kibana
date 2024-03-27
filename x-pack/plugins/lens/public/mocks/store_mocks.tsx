@@ -69,7 +69,7 @@ export const renderWithReduxStore = (
   {
     preloadedState,
     storeDeps,
-  }: { preloadedState: Partial<LensAppState>; storeDeps?: LensStoreDeps } = {
+  }: { preloadedState?: Partial<LensAppState>; storeDeps?: LensStoreDeps } = {
     preloadedState: {},
     storeDeps: mockStoreDeps(),
   }

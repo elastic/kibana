@@ -21,6 +21,7 @@ import {
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
 import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   RulesSettingsFlappingProperties,
@@ -136,11 +137,16 @@ export class LegacyAlertsClient<
     return this.alertFactory?.get(id);
   }
 
+  public isTrackedAlert(id: string) {
+    return !!this.trackedAlerts.active[id];
+  }
+
   public processAlerts({
     notifyOnActionGroupChange,
     flappingSettings,
     maintenanceWindowIds,
     alertDelay,
+    ruleRunMetricsStore,
   }: ProcessAlertsOpts) {
     const {
       newAlerts: processedAlertsNew,
@@ -176,6 +182,7 @@ export class LegacyAlertsClient<
       processedAlertsRecoveredCurrent,
       this.startedAtString
     );
+    ruleRunMetricsStore.setNumberOfDelayedAlerts(alerts.delayedAlertsCount);
     alerts.currentRecoveredAlerts = merge(alerts.currentRecoveredAlerts, earlyRecoveredAlerts);
 
     this.processedAlerts.new = alerts.newAlerts;
@@ -213,6 +220,7 @@ export class LegacyAlertsClient<
       flappingSettings,
       maintenanceWindowIds,
       alertDelay,
+      ruleRunMetricsStore,
     });
 
     this.logAlerts({
@@ -262,7 +270,9 @@ export class LegacyAlertsClient<
     return null;
   }
 
-  public async persistAlerts() {}
+  public async persistAlerts(maintenanceWindows?: MaintenanceWindow[]) {
+    return null;
+  }
 
   public async setAlertStatusToUntracked() {
     return;

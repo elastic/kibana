@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 
-import { NavigateToPath } from '../contexts/kibana';
+import type { NavigateToPath } from '../contexts/kibana';
 
 export const ML_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.machineLearningBreadcrumbLabel', {

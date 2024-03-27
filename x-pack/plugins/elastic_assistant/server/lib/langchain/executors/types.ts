@@ -12,8 +12,9 @@ import { Logger } from '@kbn/logging';
 import { KibanaRequest, ResponseHeaders } from '@kbn/core-http-server';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { ExecuteConnectorRequestBody, Replacement } from '@kbn/elastic-assistant-common';
+import { ResponseBody } from '../types';
 import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
-import { RequestBody, ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 
 export interface AgentExecutorParams<T extends boolean> {
@@ -31,9 +32,9 @@ export interface AgentExecutorParams<T extends boolean> {
   llmType?: string;
   logger: Logger;
   isStream?: T;
-  onNewReplacements?: (newReplacements: Record<string, string>) => void;
-  replacements?: Record<string, string>;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
+  onNewReplacements?: (newReplacements: Replacement[]) => void;
+  replacements: Replacement[];
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   size?: number;
   elserId?: string;
   traceOptions?: TraceOptions;

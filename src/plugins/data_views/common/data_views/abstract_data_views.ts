@@ -72,7 +72,7 @@ export abstract class AbstractDataView {
    */
   public timeFieldName: string | undefined;
   /**
-   * Type is used to identify rollup index patterns.
+   * Type is used to identify rollup index patterns or ES|QL data views.
    */
   public type: string | undefined;
   /**
@@ -300,6 +300,23 @@ export abstract class AbstractDataView {
 
   protected setFieldCustomLabelInternal(fieldName: string, customLabel: string | undefined | null) {
     this.setFieldAttrs(fieldName, 'customLabel', customLabel === null ? undefined : customLabel);
+  }
+
+  /**
+   * Set field custom description
+   * @param fieldName name of field to set custom description on
+   * @param customDescription custom description value. If undefined, custom description is removed
+   */
+
+  protected setFieldCustomDescriptionInternal(
+    fieldName: string,
+    customDescription: string | undefined | null
+  ) {
+    this.setFieldAttrs(
+      fieldName,
+      'customDescription',
+      customDescription === null ? undefined : customDescription
+    );
   }
 
   /**

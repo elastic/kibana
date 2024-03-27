@@ -23,12 +23,15 @@
       "lens",
       "embeddable",
       "share",
-      "console"
+      "console",
+      "searchConnectors",
+      "searchPlayground"
     ],
     "optionalPlugins": [
       "customIntegrations",
       "globalSearch",
       "home",
+      "indexManagement",
       "ml",
       "spaces",
       "usageCollection",

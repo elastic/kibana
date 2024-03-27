@@ -420,6 +420,7 @@ export interface IErrorObject {
 export enum EditConnectorTabs {
   Configuration = 'configuration',
   Test = 'test',
+  Rules = 'rules',
 }
 
 export interface RuleEditProps<
@@ -810,14 +811,14 @@ export interface ConnectorServices {
 }
 
 export interface RulesListFilters {
-  actionTypes: string[];
-  ruleExecutionStatuses: string[];
-  ruleLastRunOutcomes: string[];
-  ruleParams: Record<string, string | number | object>;
-  ruleStatuses: RuleStatus[];
-  searchText: string;
-  tags: string[];
-  types: string[];
+  actionTypes?: string[];
+  ruleExecutionStatuses?: string[];
+  ruleLastRunOutcomes?: string[];
+  ruleParams?: Record<string, string | number | object>;
+  ruleStatuses?: RuleStatus[];
+  searchText?: string;
+  tags?: string[];
+  types?: string[];
   kueryNode?: KueryNode;
 }
 

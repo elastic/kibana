@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { RectAnnotation } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { RectAnnotationSpec } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import type { RectAnnotationSpec } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 interface BrushAnnotationProps {
   id: string;

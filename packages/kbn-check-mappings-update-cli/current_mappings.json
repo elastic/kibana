@@ -837,6 +837,11 @@
           "panelsJSON": {
             "index": false,
             "type": "text"
+          },
+          "showApplySelections": {
+            "doc_values": false,
+            "index": false,
+            "type": "boolean"
           }
         }
       },
@@ -1553,6 +1558,19 @@
       }
     }
   },
+  "infra-custom-dashboards": {
+    "properties": {
+      "assetType": {
+        "type": "keyword"
+      },
+      "dashboardIdList": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      }
+    }
+  },
   "infrastructure-monitoring-log-view": {
     "dynamic": false,
     "properties": {
@@ -1850,6 +1868,10 @@
       },
       "timeout": {
         "type": "integer"
+      },
+      "topic": {
+        "index": false,
+        "type": "text"
       },
       "topics": {
         "dynamic": false,
@@ -2403,12 +2425,18 @@
       },
       "title": {
         "type": "text"
+      },
+      "titleKeyword": {
+        "type": "keyword"
       }
     }
   },
   "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
+      "alertSampleSizePerShard": {
+        "type": "integer"
+      },
       "dataViewId": {
         "type": "keyword"
       },

@@ -161,7 +161,7 @@ describe('Sourcerer Hooks', () => {
       });
       await waitForNextUpdate();
       rerender();
-      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch).toBeCalledTimes(3);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
         payload: { id: 'security-solution', loading: true },
@@ -207,30 +207,30 @@ describe('Sourcerer Hooks', () => {
       await waitForNextUpdate();
       rerender();
       await waitFor(() => {
-        expect(mockDispatch.mock.calls[2][0]).toEqual({
+        expect(mockDispatch.mock.calls[3][0]).toEqual({
           type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
           payload: { loading: true },
         });
-        expect(mockDispatch.mock.calls[3][0]).toEqual({
+        expect(mockDispatch.mock.calls[4][0]).toEqual({
           type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
           payload: { signalIndexName: mockSourcererState.signalIndexName },
         });
-        expect(mockDispatch.mock.calls[4][0]).toEqual({
+        expect(mockDispatch.mock.calls[5][0]).toEqual({
           type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
           payload: {
             id: mockSourcererState.defaultDataView.id,
             loading: true,
           },
         });
-        expect(mockDispatch.mock.calls[5][0]).toEqual({
+        expect(mockDispatch.mock.calls[6][0]).toEqual({
           type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_DATA_VIEWS',
           payload: mockNewDataViews,
         });
-        expect(mockDispatch.mock.calls[6][0]).toEqual({
+        expect(mockDispatch.mock.calls[7][0]).toEqual({
           type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
           payload: { loading: false },
         });
-        expect(mockDispatch).toHaveBeenCalledTimes(7);
+        expect(mockDispatch).toHaveBeenCalledTimes(8);
         expect(mockSearch).toHaveBeenCalledTimes(2);
       });
     });
@@ -396,7 +396,7 @@ describe('Sourcerer Hooks', () => {
       );
       await waitForNextUpdate();
       rerender();
-      expect(mockDispatch.mock.calls[2][0]).toEqual({
+      expect(mockDispatch.mock.calls[3][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'detections',

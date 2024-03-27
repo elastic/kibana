@@ -35,9 +35,8 @@ jest.mock('langchain/chains', () => ({
 const mockCall = jest.fn();
 const mockInvoke = jest.fn().mockImplementation(() => Promise.resolve());
 jest.mock('langchain/agents', () => ({
-  initializeAgentExecutorWithOptions: jest.fn().mockImplementation((_a, _b, { agentType }) => ({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    call: (props: any) => mockCall({ ...props, agentType }),
+  initializeAgentExecutorWithOptions: jest.fn().mockImplementation(() => ({
+    call: mockCall.mockReturnValueOnce({ output: mockActionResponse.message }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     invoke: (props: any) => mockInvoke({ ...props, agentType }),
   })),
@@ -64,20 +63,26 @@ const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
 const mockLogger = loggerMock.create();
 const mockTelemetry = coreMock.createSetup().analytics;
 const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-
 const defaultProps = {
   actions: mockActions,
   isEnabledKnowledgeBase: true,
   connectorId: mockConnectorId,
   esClient: esClientMock,
   langChainMessages,
-  llmType: 'openai',
   logger: mockLogger,
   onNewReplacements: jest.fn(),
   request: mockRequest,
   kbResource: ESQL_RESOURCE,
   telemetry: mockTelemetry,
+  replacements: [],
 };
+describe('callAgentExecutor', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
+    await callAgentExecutor(defaultProps);
 
 describe('callAgentExecutor', () => {
   beforeEach(() => {

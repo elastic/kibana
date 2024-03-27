@@ -203,3 +203,39 @@ test('calling older done() is ignored', () => {
   jest.advanceTimersByTime(501);
   expect(fn1).toHaveBeenCalledTimes(2);
 });
+
+test('pauses if page is not visible', () => {
+  let mockPageVisibility: DocumentVisibilityState = 'visible';
+  jest.spyOn(document, 'visibilityState', 'get').mockImplementation(() => mockPageVisibility);
+
+  const { loop$, start, stop } = createAutoRefreshLoop();
+
+  const fn = jest.fn((done) => done());
+  loop$.subscribe(fn);
+
+  jest.advanceTimersByTime(5000);
+  expect(fn).not.toBeCalled();
+
+  start(1000);
+
+  jest.advanceTimersByTime(1001);
+  expect(fn).toHaveBeenCalledTimes(1);
+
+  mockPageVisibility = 'hidden';
+  document.dispatchEvent(new Event('visibilitychange'));
+
+  jest.advanceTimersByTime(1001);
+  expect(fn).toHaveBeenCalledTimes(1);
+
+  mockPageVisibility = 'visible';
+  document.dispatchEvent(new Event('visibilitychange'));
+  expect(fn).toHaveBeenCalledTimes(2);
+
+  jest.advanceTimersByTime(1001);
+  expect(fn).toHaveBeenCalledTimes(3);
+
+  stop();
+
+  jest.advanceTimersByTime(5000);
+  expect(fn).toHaveBeenCalledTimes(3);
+});

@@ -63,6 +63,7 @@ export async function sendUpgradeAgentsActions(
     version: string;
     sourceUri?: string | undefined;
     force?: boolean;
+    skipRateLimitCheck?: boolean;
     upgradeDurationSeconds?: number;
     startTime?: string;
     batchSize?: number;

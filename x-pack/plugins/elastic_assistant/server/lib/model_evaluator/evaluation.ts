@@ -17,8 +17,8 @@ import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collect
 import { Dataset } from '@kbn/elastic-assistant-common';
 import { AgentExecutorEvaluatorWithMetadata } from '../langchain/executors/types';
 import { callAgentWithRetry, getMessageFromLangChainResponse } from './utils';
-import { ResponseBody } from '../langchain/types';
 import { isLangSmithEnabled, writeLangSmithFeedback } from '../../routes/evaluate/utils';
+import { ResponseBody } from '../langchain/types';
 
 export interface PerformEvaluationParams {
   agentExecutorEvaluators: AgentExecutorEvaluatorWithMetadata[];

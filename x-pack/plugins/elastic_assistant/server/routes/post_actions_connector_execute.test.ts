@@ -20,7 +20,10 @@ import {
   INVOKE_ASSISTANT_SUCCESS_EVENT,
 } from '../lib/telemetry/event_based_telemetry';
 import { PassThrough } from 'stream';
+import { getConversationResponseMock } from '../ai_assistant_data_clients/conversations/update_conversation.test';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
+const actionsClient = actionsClientMock.create();
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
 }));
@@ -79,14 +82,34 @@ jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
     }
   ),
 }));
-
+const existingConversation = getConversationResponseMock();
 const reportEvent = jest.fn();
 const mockContext = {
   elasticAssistant: {
-    actions: jest.fn(),
+    actions: {
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
+    },
     getRegisteredTools: jest.fn(() => []),
     logger: loggingSystemMock.createLogger(),
     telemetry: { ...coreMock.createSetup().analytics, reportEvent },
+    getCurrentUser: () => ({
+      username: 'user',
+      email: 'email',
+      fullName: 'full name',
+      roles: ['user-role'],
+      enabled: true,
+      authentication_realm: { name: 'native1', type: 'native' },
+      lookup_realm: { name: 'native1', type: 'native' },
+      authentication_provider: { type: 'basic', name: 'basic1' },
+      authentication_type: 'realm',
+      elastic_cloud_user: false,
+      metadata: { _reserved: false },
+    }),
+    getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
+      getConversation: jest.fn().mockResolvedValue(existingConversation),
+      updateConversation: jest.fn().mockResolvedValue(existingConversation),
+      appendConversationMessages: jest.fn().mockResolvedValue(existingConversation),
+    }),
   },
   core: {
     elasticsearch: {
@@ -134,31 +157,53 @@ describe('postActionsConnectorExecuteRoute', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        isPreconfigured: false,
+        isSystemAction: false,
+        isDeprecated: false,
+        name: 'my name',
+        actionTypeId: '.gen-ai',
+        isMissingSecrets: false,
+        config: {
+          a: true,
+          b: true,
+          c: true,
+        },
+      },
+    ]);
   });
 
   it('returns the expected response when isEnabledKnowledgeBase=false', async () => {
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        const result = await handler(
-          mockContext,
-          {
-            ...mockRequest,
-            body: {
-              ...mockRequest.body,
-              isEnabledKnowledgeBase: false,
-            },
-          },
-          mockResponse
-        );
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    isEnabledKnowledgeBase: false,
+                  },
+                },
+                mockResponse
+              );
 
-        expect(result).toEqual({
-          body: {
-            connector_id: 'mock-connector-id',
-            data: mockActionResponse,
-            status: 'ok',
-          },
-        });
-      }),
+              expect(result).toEqual({
+                body: {
+                  connector_id: 'mock-connector-id',
+                  data: mockActionResponse,
+                  status: 'ok',
+                },
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(
@@ -169,14 +214,16 @@ describe('postActionsConnectorExecuteRoute', () => {
 
   it('returns the expected response when isEnabledKnowledgeBase=true', async () => {
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        const result = await handler(mockContext, mockRequest, mockResponse);
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(mockContext, mockRequest, mockResponse);
 
         expect(result).toEqual({
           body: {
             connector_id: 'mock-connector-id',
             data: mockActionResponse,
-            replacements: {},
             status: 'ok',
           },
           headers: { 'content-type': 'application/json' },
@@ -197,14 +244,20 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        const result = await handler(mockContext, requestWithBadConnectorId, mockResponse);
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(mockContext, requestWithBadConnectorId, mockResponse);
 
-        expect(result).toEqual({
-          body: 'simulated error',
-          statusCode: 500,
-        });
-      }),
+              expect(result).toEqual({
+                body: 'simulated error',
+                statusCode: 500,
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(
@@ -215,14 +268,20 @@ describe('postActionsConnectorExecuteRoute', () => {
 
   it('reports success events to telemetry - kb on, RAG alerts off', async () => {
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        await handler(mockContext, mockRequest, mockResponse);
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, mockRequest, mockResponse);
 
-        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-          isEnabledKnowledgeBase: true,
-          isEnabledRAGAlerts: false,
-        });
-      }),
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                isEnabledKnowledgeBase: true,
+                isEnabledRAGAlerts: false,
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(
@@ -238,20 +297,26 @@ describe('postActionsConnectorExecuteRoute', () => {
         ...mockRequest.body,
         allow: ['@timestamp'],
         allowReplacement: ['host.name'],
-        replacements: {},
+        replacements: [],
         isEnabledRAGAlerts: true,
       },
     };
 
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        await handler(mockContext, ragRequest, mockResponse);
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, ragRequest, mockResponse);
 
-        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-          isEnabledKnowledgeBase: true,
-          isEnabledRAGAlerts: true,
-        });
-      }),
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                isEnabledKnowledgeBase: true,
+                isEnabledRAGAlerts: true,
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(
@@ -268,20 +333,26 @@ describe('postActionsConnectorExecuteRoute', () => {
         isEnabledKnowledgeBase: false,
         allow: ['@timestamp'],
         allowReplacement: ['host.name'],
-        replacements: {},
+        replacements: [],
         isEnabledRAGAlerts: true,
       },
     };
 
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        await handler(mockContext, req, mockResponse);
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, req, mockResponse);
 
-        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-          isEnabledKnowledgeBase: false,
-          isEnabledRAGAlerts: true,
-        });
-      }),
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                isEnabledKnowledgeBase: false,
+                isEnabledRAGAlerts: true,
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(
@@ -300,14 +371,20 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        await handler(mockContext, req, mockResponse);
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, req, mockResponse);
 
-        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-          isEnabledKnowledgeBase: false,
-          isEnabledRAGAlerts: false,
-        });
-      }),
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                isEnabledKnowledgeBase: false,
+                isEnabledRAGAlerts: false,
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(
@@ -323,15 +400,21 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        await handler(mockContext, requestWithBadConnectorId, mockResponse);
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, requestWithBadConnectorId, mockResponse);
 
-        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
-          errorMessage: 'simulated error',
-          isEnabledKnowledgeBase: true,
-          isEnabledRAGAlerts: false,
-        });
-      }),
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+                errorMessage: 'simulated error',
+                isEnabledKnowledgeBase: true,
+                isEnabledRAGAlerts: false,
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(
@@ -351,15 +434,21 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        await handler(mockContext, badRequest, mockResponse);
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, badRequest, mockResponse);
 
-        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
-          errorMessage: 'simulated error',
-          isEnabledKnowledgeBase: true,
-          isEnabledRAGAlerts: true,
-        });
-      }),
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+                errorMessage: 'simulated error',
+                isEnabledKnowledgeBase: true,
+                isEnabledRAGAlerts: true,
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(
@@ -377,21 +466,27 @@ describe('postActionsConnectorExecuteRoute', () => {
         isEnabledKnowledgeBase: false,
         allow: ['@timestamp'],
         allowReplacement: ['host.name'],
-        replacements: {},
+        replacements: [],
         isEnabledRAGAlerts: true,
       },
     };
 
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        await handler(mockContext, badRequest, mockResponse);
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, badRequest, mockResponse);
 
-        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
-          errorMessage: 'simulated error',
-          isEnabledKnowledgeBase: false,
-          isEnabledRAGAlerts: true,
-        });
-      }),
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+                errorMessage: 'simulated error',
+                isEnabledKnowledgeBase: false,
+                isEnabledRAGAlerts: true,
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(
@@ -411,15 +506,21 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        await handler(mockContext, badRequest, mockResponse);
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, badRequest, mockResponse);
 
-        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
-          errorMessage: 'simulated error',
-          isEnabledKnowledgeBase: false,
-          isEnabledRAGAlerts: false,
-        });
-      }),
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+                errorMessage: 'simulated error',
+                isEnabledKnowledgeBase: false,
+                isEnabledRAGAlerts: false,
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(

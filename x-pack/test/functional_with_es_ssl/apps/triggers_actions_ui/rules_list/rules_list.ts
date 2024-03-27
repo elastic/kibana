@@ -27,6 +27,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   const retry = getService('retry');
   const header = getPageObject('header');
   const objectRemover = new ObjectRemover(supertest);
+  const toasts = getService('toasts');
 
   async function refreshAlertsList() {
     const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
@@ -48,7 +49,8 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     return summary;
   };
 
-  describe('rules list', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/157623
+  describe.skip('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
@@ -346,7 +348,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Deleted 1 rule');
       });
 
@@ -369,7 +371,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await header.waitUntilLoadingHasFinished();
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Disabled 1 rule');
       });
 
@@ -468,7 +470,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Deleted 1 rule');
       });
 

@@ -8,10 +8,6 @@
 import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -20,6 +16,12 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 

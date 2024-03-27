@@ -146,6 +146,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     vars: packageLevelVars,
   } = data;
   const packagePolicy = packageToPackagePolicy(packageInfo, policyId, namespace, name, description);
+
   if (packagePolicy.package && options?.experimental_data_stream_features) {
     packagePolicy.package.experimental_data_stream_features =
       options.experimental_data_stream_features;

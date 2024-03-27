@@ -12,11 +12,12 @@ import {
 import { PostActionsConnectorExecuteBodyInputs } from '../../schemas/post_actions_connector_execute';
 
 export type RequestBody = PostActionsConnectorExecuteBodyInputs;
+import { Replacement } from '@kbn/elastic-assistant-common';
 
 export interface ResponseBody {
   data: string;
   connector_id: string;
-  replacements?: Record<string, string>;
+  replacements?: Replacement[];
   status: string;
   trace_data?: {
     transaction_id: string;

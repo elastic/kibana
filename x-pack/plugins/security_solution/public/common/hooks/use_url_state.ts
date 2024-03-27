@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EXPANDABLE_FLYOUT_URL_KEY } from '@kbn/expandable-flyout';
 import { useSyncGlobalQueryString } from '../utils/global_query_string';
 import { useInitSearchBarFromUrlParams } from './search_bar/use_init_search_bar_url_params';
 import { useInitTimerangeFromUrlParam } from './search_bar/use_init_timerange_url_params';
@@ -30,7 +29,8 @@ export const useUrlState = () => {
 
 export const URL_PARAM_KEY = {
   appQuery: 'query',
-  eventFlyout: EXPANDABLE_FLYOUT_URL_KEY,
+  eventFlyout: 'eventFlyout',
+  timelineFlyout: 'timelineFlyout',
   filters: 'filters',
   savedQuery: 'savedQuery',
   sourcerer: 'sourcerer',

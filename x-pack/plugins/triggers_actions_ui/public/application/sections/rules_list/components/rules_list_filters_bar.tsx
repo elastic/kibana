@@ -81,7 +81,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
           isGrouped
           refresh={refresh}
           canLoadRules={canLoadRules}
-          selectedTags={filters.tags}
+          selectedTags={filters.tags || []}
           onChange={(value) => updateFilters({ filter: 'tags', value })}
         />,
       ];
@@ -93,7 +93,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     if (isRuleStatusFilterEnabled) {
       return (
         <RuleStatusFilter
-          selectedStatuses={filters.ruleStatuses}
+          selectedStatuses={filters.ruleStatuses || []}
           onChange={(value) => updateFilters({ filter: 'ruleStatuses', value })}
         />
       );
@@ -106,7 +106,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
       return [
         <RuleExecutionStatusFilter
           key="rule-status-filter"
-          selectedStatuses={filters.ruleExecutionStatuses}
+          selectedStatuses={filters.ruleExecutionStatuses || []}
           onChange={(value) => updateFilters({ filter: 'ruleExecutionStatuses', value })}
         />,
       ];
@@ -114,7 +114,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     return [
       <RuleLastRunOutcomeFilter
         key="rule-last-run-outcome-filter"
-        selectedOutcomes={filters.ruleLastRunOutcomes}
+        selectedOutcomes={filters.ruleLastRunOutcomes || []}
         onChange={(value) => updateFilters({ filter: 'ruleLastRunOutcomes', value })}
       />,
     ];
@@ -124,14 +124,14 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     <TypeFilter
       key="type-filter"
       options={filterOptions}
-      filters={filters.types}
+      filters={filters.types || []}
       onChange={(value) => updateFilters({ filter: 'types', value })}
     />,
     showActionFilter && (
       <ActionTypeFilter
         key="action-type-filter"
         actionTypes={actionTypes}
-        filters={filters.actionTypes}
+        filters={filters.actionTypes || []}
         onChange={(value) => updateFilters({ filter: 'actionTypes', value })}
       />
     ),

@@ -20,6 +20,7 @@ import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/cus
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { ActionDocument } from './typings';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -38,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
+    let alertId: string;
 
     before(async () => {
       dataForgeConfig = {
@@ -139,6 +141,9 @@ export default function ({ getService }: FtrProviderContext) {
                 documents: [
                   {
                     ruleType: '{{rule.type}}',
+                    alertDetailsUrl: '{{context.alertDetailsUrl}}',
+                    reason: '{{context.reason}}',
+                    value: '{{context.value}}',
                   },
                 ],
               },
@@ -173,10 +178,11 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
         });
+        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Beta)'
+          'Custom threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -221,6 +227,22 @@ export default function ({ getService }: FtrProviderContext) {
             alertOnGroupDisappear: true,
             searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
           });
+      });
+
+      it('should set correct action variables', async () => {
+        const resp = await alertingApi.waitForDocumentInIndex<ActionDocument>({
+          indexName: ALERT_ACTION_INDEX,
+          docCountTarget: 1,
+        });
+
+        expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
+        expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
+          `http://localhost:5620/app/observability/alerts/${alertId}`
+        );
+        expect(resp.hits.hits[0]._source?.reason).eql(
+          `Custom equation is 1 B, above the threshold of 0.9 B. (duration: 1 min, data view: ${DATA_VIEW})`
+        );
+        expect(resp.hits.hits[0]._source?.value).eql('1 B');
       });
     });
   });

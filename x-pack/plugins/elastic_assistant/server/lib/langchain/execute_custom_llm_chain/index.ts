@@ -195,7 +195,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   }
 
   // Wrap executor call with an APM span for instrumentation
-  await withAssistantSpan(DEFAULT_AGENT_EXECUTOR_ID, async (span) => {
+  const langChainResponse = await withAssistantSpan(DEFAULT_AGENT_EXECUTOR_ID, async (span) => {
     if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
       traceData = {
         // Transactions ID since this span is the parent
@@ -218,7 +218,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   return {
     body: {
       connector_id: connectorId,
-      data: llm.getActionResultData(), // the response from the actions framework
+      data: langChainResponse.output, // the response from the actions framework
       trace_data: traceData,
       replacements,
       status: 'ok',

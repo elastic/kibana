@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
-import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
+import type { CasesClient, CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   FleetFromHostFileClientInterface,
@@ -23,6 +23,9 @@ import type {
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
+import { EndpointError } from '../../common/endpoint/errors';
+import type { ResponseActionsClient } from './services';
+import { EndpointActionsClient } from './services';
 import {
   getAgentPolicyCreateCallback,
   getAgentPolicyUpdateCallback,
@@ -49,8 +52,8 @@ import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
-import type { ActionCreateService } from './services/actions/create/types';
-import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
+import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
+import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -73,13 +76,12 @@ export interface EndpointAppContextServiceStartContract {
   registerListsServerExtension?: ListsServerExtensionRegistrar;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
-  cases: CasesStart | undefined;
+  cases: CasesServerStart | undefined;
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
-  actionCreateService: ActionCreateService | undefined;
   esClient: ElasticsearchClient;
-  appFeaturesService: AppFeaturesService;
+  productFeaturesService: ProductFeaturesService;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
@@ -117,17 +119,17 @@ export class EndpointAppContextService {
         featureUsageService,
         endpointMetadataService,
         esClient,
-        appFeaturesService,
+        productFeaturesService,
         savedObjectsClient,
       } = dependencies;
 
       registerIngestCallback(
         'agentPolicyCreate',
-        getAgentPolicyCreateCallback(logger, appFeaturesService)
+        getAgentPolicyCreateCallback(logger, productFeaturesService)
       );
       registerIngestCallback(
         'agentPolicyUpdate',
-        getAgentPolicyUpdateCallback(logger, appFeaturesService)
+        getAgentPolicyUpdateCallback(logger, productFeaturesService)
       );
 
       registerIngestCallback(
@@ -140,7 +142,7 @@ export class EndpointAppContextService {
           licenseService,
           exceptionListsClient,
           this.setupDependencies.cloud,
-          appFeaturesService
+          productFeaturesService
         )
       );
 
@@ -158,7 +160,7 @@ export class EndpointAppContextService {
           endpointMetadataService,
           this.setupDependencies.cloud,
           esClient,
-          appFeaturesService
+          productFeaturesService
         )
       );
 
@@ -194,9 +196,17 @@ export class EndpointAppContextService {
   }
 
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
+    if (!this.startDependencies?.productFeaturesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
     const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
-    return calculateEndpointAuthz(this.getLicenseService(), fleetAuthz, userRoles);
+    return calculateEndpointAuthz(
+      this.getLicenseService(),
+      fleetAuthz,
+      userRoles,
+      this.startDependencies.productFeaturesService
+    );
   }
 
   public getEndpointMetadataService(): EndpointMetadataService {
@@ -263,12 +273,38 @@ export class EndpointAppContextService {
     return this.startDependencies.messageSigningService;
   }
 
-  public getActionCreateService(): ActionCreateService {
-    if (!this.startDependencies?.actionCreateService) {
+  public getInternalResponseActionsClient({
+    agentType = 'endpoint',
+    username = 'elastic',
+  }: {
+    agentType?: ResponseActionAgentType;
+    username?: string;
+  }): ResponseActionsClient {
+    if (!this.startDependencies?.esClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.startDependencies.actionCreateService;
+    if (agentType !== `endpoint`) {
+      throw new EndpointError(
+        `Agent type [${agentType}] does not support usage of response actions via non-HTTP requests!`
+      );
+    }
+
+    // TODO:PT switch to using `getResponseActionsClient()` instead once we support getting internal versions of connectorsActions
+    // return getResponseActionsClient(agentType, {
+    //   endpointService: this,
+    //   esClient: this.startDependencies.esClient,
+    //   username: 'elastic',
+    //   isAutomated: true,
+    //   connectorActions: undefined, // FIXME:PT get internal client here
+    // });
+
+    return new EndpointActionsClient({
+      username,
+      esClient: this.startDependencies.esClient,
+      endpointService: this,
+      isAutomated: true,
+    });
   }
 
   public async getFleetToHostFilesClient() {

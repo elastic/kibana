@@ -97,35 +97,42 @@ export const callOpenAIFunctionsExecutor: AgentExecutor<false> = async ({
   let traceData;
 
   // Wrap executor call with an APM span for instrumentation
-  await withAssistantSpan(OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID, async (span) => {
-    if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
-      traceData = {
-        // Transactions ID since this span is the parent
-        transaction_id: span.transaction.ids['transaction.id'],
-        trace_id: span.ids['trace.id'],
-      };
-      span.addLabels({ evaluationId: traceOptions?.evaluationId });
-    }
-
-    return executor.call(
-      { input: latestMessage[0].content },
-      {
-        callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
-        runName: OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID,
-        tags: traceOptions?.tags ?? [],
+  const langChainResponse = await withAssistantSpan(
+    OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID,
+    async (span) => {
+      if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
+        traceData = {
+          // Transactions ID since this span is the parent
+          transaction_id: span.transaction.ids['transaction.id'],
+          trace_id: span.ids['trace.id'],
+        };
+        span.addLabels({ evaluationId: traceOptions?.evaluationId });
       }
-    );
-  });
+
+      return executor.call(
+        { input: latestMessage[0].content },
+        {
+          callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+          runName: OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID,
+          tags: traceOptions?.tags ?? [],
+        }
+      );
+    }
+  );
 
   return {
     body: {
       connector_id: connectorId,
-      data: llm.getActionResultData(), // the response from the actions framework
+      data: langChainResponse.output, // the response from the actions framework
       trace_data: traceData,
       status: 'ok',
     },
     headers: {
       'content-type': 'application/json',
     },
+    connector_id: connectorId,
+    data: langChainResponse.output, // the response from the actions framework
+    trace_data: traceData,
+    status: 'ok',
   };
 };

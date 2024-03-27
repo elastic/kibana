@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { pick } from 'lodash';
 import type OpenAI from 'openai';
 import {
   createLlmProxy,
@@ -21,12 +22,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const browser = getService('browser');
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const log = getService('log');
 
   const driver = getService('__webdriver__');
 
   const toasts = getService('toasts');
 
-  const { header, common } = getPageObjects(['header', 'common']);
+  const { header } = getPageObjects(['header', 'common']);
 
   const flyoutService = getService('flyout');
 
@@ -66,7 +68,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await deleteConnectors();
       await deleteConversations();
 
-      proxy = await createLlmProxy();
+      proxy = await createLlmProxy(log);
 
       await ui.auth.login();
 
@@ -114,11 +116,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             );
 
             await retry.waitFor('Connector created toast', async () => {
-              const count = await toasts.getToastCount();
+              const count = await toasts.getCount();
               return count > 0;
             });
 
-            await toasts.dismissAllToasts();
+            await toasts.dismissAll();
           });
 
           it('creates a connector', async () => {
@@ -188,13 +190,47 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                 expect(response.body.conversations.length).to.eql(1);
 
-                expect(response.body.conversations[0].messages.length).to.eql(3);
-
                 expect(response.body.conversations[0].conversation.title).to.be('My title');
 
-                await common.waitUntilUrlIncludes(
-                  `/conversations/${response.body.conversations[0].conversation.id}`
-                );
+                const { messages } = response.body.conversations[0];
+
+                expect(messages.length).to.eql(5);
+
+                const [
+                  systemMessage,
+                  firstUserMessage,
+                  contextRequest,
+                  contextResponse,
+                  assistantResponse,
+                ] = messages.map((msg) => msg.message);
+
+                expect(systemMessage.role).to.eql('system');
+
+                expect(firstUserMessage.content).to.eql('hello');
+
+                expect(pick(contextRequest.function_call, 'name', 'arguments')).to.eql({
+                  name: 'context',
+                  arguments: JSON.stringify({ queries: [], categories: [] }),
+                });
+
+                expect(contextResponse.name).to.eql('context');
+
+                const parsedContext = JSON.parse(contextResponse.content || '');
+
+                expect(parsedContext.screen_description).to.contain('The user is looking at');
+
+                expect(pick(assistantResponse, 'role', 'content')).to.eql({
+                  role: 'assistant',
+                  content: 'My response',
+                });
+              });
+
+              it('updates the list of conversations', async () => {
+                const links = await testSubjects.findAll(ui.pages.conversations.conversationLink);
+                expect(links.length).to.eql(1);
+
+                const title = await links[0].getVisibleText();
+                expect(title).to.eql('My title');
               });
 
               describe('and adding another prompt', () => {
@@ -227,7 +263,28 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     endpoint: 'POST /internal/observability_ai_assistant/conversations',
                   });
 
-                  expect(response.body.conversations[0].messages.length).to.eql(5);
+                  const messages = response.body.conversations[0].messages.slice(5);
+
+                  expect(messages.length).to.eql(4);
+
+                  const [userReply, contextRequest, contextResponse, assistantResponse] =
+                    messages.map((msg) => msg.message);
+
+                  expect(userReply.content).to.eql('hello');
+
+                  expect(pick(contextRequest.function_call, 'name', 'arguments')).to.eql({
+                    name: 'context',
+                    arguments: JSON.stringify({ queries: [], categories: [] }),
+                  });
+
+                  expect(contextResponse.name).to.eql('context');
+
+                  expect(pick(assistantResponse, 'role', 'content')).to.eql({
+                    role: 'assistant',
+                    content: 'My second response',
+                  });
+
+                  expect(response.body.conversations[0].messages.length).to.eql(9);
                 });
               });
             });
@@ -245,7 +302,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await deleteConversations();
 
       await ui.auth.logout();
-      await proxy.close();
+      proxy.close();
     });
   });
 }

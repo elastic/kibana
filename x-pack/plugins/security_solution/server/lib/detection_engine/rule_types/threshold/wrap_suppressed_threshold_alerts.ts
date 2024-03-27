@@ -105,8 +105,7 @@ export const wrapSuppressedThresholdALerts = ({
       id,
       publicBaseUrl
     );
-    // suppression start/end equals to alert timestamp, since we suppress alerts for threshold rule type, not documents as for query rule type
-    const suppressionTime = new Date(baseAlert[TIMESTAMP]);
+
     return {
       _id: id,
       _index: '',
@@ -116,8 +115,12 @@ export const wrapSuppressedThresholdALerts = ({
           field,
           value,
         })),
-        [ALERT_SUPPRESSION_START]: suppressionTime,
-        [ALERT_SUPPRESSION_END]: suppressionTime,
+        [ALERT_SUPPRESSION_START]: bucket.min_timestamp.value
+          ? new Date(bucket.min_timestamp.value)
+          : new Date(baseAlert[TIMESTAMP]),
+        [ALERT_SUPPRESSION_END]: bucket.max_timestamp.value
+          ? new Date(bucket.max_timestamp.value)
+          : new Date(baseAlert[TIMESTAMP]),
         [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         [ALERT_INSTANCE_ID]: instanceId,
       },

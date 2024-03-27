@@ -51,7 +51,7 @@ export function createMockDatasource(
     removeLayer: jest.fn((state, layerId) => ({ newState: state, removedLayerIds: [layerId] })),
     cloneLayer: jest.fn((_state, _layerId, _newLayerId, getNewId) => {}),
     removeColumn: jest.fn((props) => {}),
-    getLayers: jest.fn((_state) => []),
+    getLayers: jest.fn((_state) => ['a']),
     uniqueLabels: jest.fn((_state, dataViews) => ({})),
     getDropProps: jest.fn(),
     onDrop: jest.fn(),

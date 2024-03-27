@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Check that session is restored
         await searchSessions.expectState('restored');
-        expect(await toasts.getToastCount()).to.be(0); // no session restoration related warnings
+        expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
       });
     });
     describe('Disabled storing search sessions in space', () => {

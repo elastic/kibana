@@ -116,6 +116,9 @@ const runCli: RunFn = async ({ log, flags }) => {
     s1Client,
   });
 
+  log.info(`SentinelOne Agent Status:
+${s1Info.status}`);
+
   const {
     id: agentPolicyId,
     agents = 0,
@@ -177,7 +180,5 @@ const runCli: RunFn = async ({ log, flags }) => {
 ${hostVm.info()}
 ${agentPolicyVm ? `${agentPolicyVm.info()}\n` : ''}
 ${await getMultipassVmCountNotice(2)}
-SentinelOne Agent Status:
-${s1Info.status}
 `);
 };

@@ -151,7 +151,6 @@
     "@kbn/coloring",
     "@kbn/profiling-utils",
     "@kbn/profiling-data-access-plugin",
-    "@kbn/ecs",
     "@kbn/coloring",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
@@ -168,5 +167,8 @@
     "@kbn/typed-react-router-config",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/infra-forge",
+    "@kbn/slo-plugin",
+    "@kbn/aiops-test-utils",
+    "@kbn/observability-ai-assistant-app-plugin",
   ]
 }

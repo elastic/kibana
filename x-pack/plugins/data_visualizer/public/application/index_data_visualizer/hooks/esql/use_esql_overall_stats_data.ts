@@ -9,12 +9,13 @@ import { ESQL_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import { getESQLWithSafeLimit } from '@kbn/esql-utils';
 import { OMIT_FIELDS } from '../../../../../common/constants';
-import type { TimeBucketsInterval } from '../../../../../common/services/time_buckets';
 import type {
   DataStatsFetchProgress,
   DocumentCountStats,
@@ -22,14 +23,9 @@ import type {
 import { getSupportedFieldType } from '../../../common/components/fields_stats_grid/get_field_names';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { getInitialProgress, getReducer } from '../../progress_utils';
-import {
-  getSafeESQLLimitSize,
-  getSafeESQLName,
-  isESQLQuery,
-} from '../../search_strategy/requests/esql_utils';
+import { getSafeESQLName, isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import type { NonAggregatableField } from '../../types/overall_stats';
 import { getESQLSupportedAggs } from '../../utils/get_supported_aggs';
-import type { ESQLDefaultLimitSizeOption } from '../../components/search_panel/esql/limit_size';
 import { getESQLOverallStats } from '../../search_strategy/esql_requests/get_count_and_cardinality';
 import type { AggregatableField } from '../../types/esql_data_visualizer';
 import {
@@ -66,7 +62,7 @@ const getESQLDocumentCountStats = async (
   intervalMs?: number,
   searchOptions?: ISearchOptions,
   onError?: HandleErrorCallback
-): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number }> => {
+): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number; request?: object }> => {
   if (!isESQLQuery(query)) {
     throw Error(
       i18n.translate('xpack.dataVisualizer.esql.noQueryProvided', {
@@ -82,8 +78,7 @@ const getESQLDocumentCountStats = async (
     const aggQuery = ` | EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${getSafeESQLName(
       timeFieldName
     )}))
-    | stats rows = count(*) by _timestamp_
-    | LIMIT 10000`;
+    | stats rows = count(*) by _timestamp_`;
 
     const request = {
       params: {
@@ -116,7 +111,7 @@ const getESQLDocumentCountStats = async (
         buckets: _buckets,
         totalCount,
       };
-      return { documentCountStats: result, totalCount };
+      return { documentCountStats: result, totalCount, request };
     } catch (error) {
       handleError({
         request,
@@ -139,6 +134,7 @@ const getESQLDocumentCountStats = async (
     try {
       const esqlResults = await runRequest(request, { ...(searchOptions ?? {}), strategy: 'esql' });
       return {
+        request,
         documentCountStats: undefined,
         totalCount: esqlResults?.rawResponse.values[0][0],
       };
@@ -186,8 +182,9 @@ export const useESQLOverallStatsData = (
         indexPattern: string | undefined;
         timeFieldName: string | undefined;
         lastRefresh: number;
+        limit: number;
         filter?: QueryDslQueryContainer;
-        limitSize?: ESQLDefaultLimitSizeOption;
+        totalCount?: number;
       }
     | undefined
 ) => {
@@ -198,6 +195,7 @@ export const useESQLOverallStatsData = (
     },
   } = useDataVisualizerKibana();
 
+  const previousDocCountRequest = useRef('');
   const { runRequest, cancelRequest } = useCancellableSearch(data);
 
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
@@ -226,9 +224,14 @@ export const useESQLOverallStatsData = (
           isRunning: true,
           error: undefined,
         });
-        setTableData({ totalCount: undefined, documentCountStats: undefined });
 
-        const { searchQuery, intervalMs, filter, limitSize } = fieldStatsRequest;
+        const {
+          searchQuery,
+          intervalMs,
+          filter: filter,
+          limit,
+          totalCount: knownTotalCount,
+        } = fieldStatsRequest;
 
         if (!isESQLQuery(searchQuery)) {
           return;
@@ -276,17 +279,45 @@ export const useESQLOverallStatsData = (
 
         setTableData({ columns, timeFieldName });
 
-        const { totalCount, documentCountStats } = await getESQLDocumentCountStats(
-          runRequest,
+        // We don't need to fetch the doc count stats again if only the limit size is changed
+        // so return the previous totalCount, documentCountStats if available
+        const hashedDocCountParams = JSON.stringify({
           searchQuery,
           filter,
           timeFieldName,
           intervalInMs,
-          undefined,
-          onError
-        );
+        });
+        let { totalCount, documentCountStats } = tableData;
+        if (knownTotalCount !== undefined) {
+          totalCount = knownTotalCount;
+        }
+        if (
+          knownTotalCount === undefined &&
+          (totalCount === undefined ||
+            documentCountStats === undefined ||
+            hashedDocCountParams !== previousDocCountRequest.current)
+        ) {
+          setTableData({ totalCount: undefined, documentCountStats: undefined });
 
-        setTableData({ totalCount, documentCountStats });
+          previousDocCountRequest.current = hashedDocCountParams;
+          const results = await getESQLDocumentCountStats(
+            runRequest,
+            searchQuery,
+            filter,
+            timeFieldName,
+            intervalInMs,
+            undefined,
+            onError
+          );
+
+          totalCount = results.totalCount;
+          documentCountStats = results.documentCountStats;
+          setTableData({ totalCount, documentCountStats });
+        }
+
+        if (totalCount === undefined) {
+          totalCount = 0;
+        }
         setOverallStatsProgress({
           loaded: 50,
         });
@@ -339,9 +370,17 @@ export const useESQLOverallStatsData = (
         // COUNT + CARDINALITY
         // For % count & cardinality, we want the full base query WITH specified limit
         // to safeguard against huge datasets
-        const esqlBaseQueryWithLimit = searchQuery.esql + getSafeESQLLimitSize(limitSize);
+        const esqlBaseQueryWithLimit = getESQLWithSafeLimit(searchQuery.esql, limit);
 
         if (totalCount === 0) {
+          setTableData({
+            aggregatableFields: undefined,
+            nonAggregatableFields: undefined,
+            overallStats: undefined,
+            columns: undefined,
+            timeFieldName: undefined,
+          });
+
           setOverallStatsProgress({
             loaded: 100,
             isRunning: false,
@@ -355,7 +394,7 @@ export const useESQLOverallStatsData = (
             fields,
             esqlBaseQueryWithLimit,
             filter,
-            limitSize,
+            limitSize: limit,
             totalCount,
             onError,
           });

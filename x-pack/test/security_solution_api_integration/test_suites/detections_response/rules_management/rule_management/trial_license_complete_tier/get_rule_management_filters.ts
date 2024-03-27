@@ -11,11 +11,11 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 
 import {
-  deleteAllRules,
   getSimpleRule,
   installMockPrebuiltRules,
   deleteAllPrebuiltRuleAssets,
 } from '../../../utils';
+import { deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

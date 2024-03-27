@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -30,7 +30,7 @@ export class LensInlineEditingPlugin
     core.application.register({
       id: 'lens_embeddable_inline_editing_example',
       title: 'Lens inline editing embeddable',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: mount(core),
     });
 

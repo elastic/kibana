@@ -35,7 +35,6 @@ import {
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
-import type { ExperimentalFeatures } from '../../../../../common';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -45,6 +44,7 @@ import {
   AssetCriticalityDataClient,
   assetCriticalityServiceFactory,
 } from '../../asset_criticality';
+import type { EntityAnalyticsConfig } from '../../types';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -58,19 +58,19 @@ const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION
 type GetRiskScoreService = (namespace: string) => Promise<RiskScoreService>;
 
 export const registerRiskScoringTask = ({
-  experimentalFeatures,
   getStartServices,
   kibanaVersion,
   logger,
   taskManager,
   telemetry,
+  entityAnalyticsConfig,
 }: {
-  experimentalFeatures: ExperimentalFeatures;
   getStartServices: StartServicesAccessor<StartPlugins>;
   kibanaVersion: string;
   logger: Logger;
   taskManager: TaskManagerSetupContract | undefined;
   telemetry: AnalyticsServiceSetup;
+  entityAnalyticsConfig: EntityAnalyticsConfig;
 }): void => {
   if (!taskManager) {
     logger.info('Task Manager is unavailable; skipping risk engine task registration.');
@@ -87,9 +87,10 @@ export const registerRiskScoringTask = ({
         logger,
         namespace,
       });
+
       const assetCriticalityService = assetCriticalityServiceFactory({
         assetCriticalityDataClient,
-        experimentalFeatures,
+        uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
       });
 
       const riskEngineDataClient = new RiskEngineDataClient({
@@ -122,7 +123,12 @@ export const registerRiskScoringTask = ({
       title: 'Entity Analytics Risk Engine - Risk Scoring Task',
       timeout: TIMEOUT,
       stateSchemaByVersion,
-      createTaskRunner: createTaskRunnerFactory({ logger, getRiskScoreService, telemetry }),
+      createTaskRunner: createTaskRunnerFactory({
+        logger,
+        getRiskScoreService,
+        telemetry,
+        entityAnalyticsConfig,
+      }),
     },
   });
 };
@@ -186,12 +192,14 @@ export const runTask = async ({
   logger,
   taskInstance,
   telemetry,
+  entityAnalyticsConfig,
 }: {
   logger: Logger;
   isCancelled: () => boolean;
   getRiskScoreService: GetRiskScoreService;
   taskInstance: ConcreteTaskInstance;
   telemetry: AnalyticsServiceSetup;
+  entityAnalyticsConfig: EntityAnalyticsConfig;
 }): Promise<{
   state: RiskScoringTaskState;
 }> => {
@@ -221,7 +229,9 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    const configuration = await riskScoreService.getConfiguration();
+    const configuration = await riskScoreService.getConfigurationWithDefaults(
+      entityAnalyticsConfig
+    );
     if (configuration == null) {
       log(
         'Risk engine configuration not found; exiting task. Please reinitialize the risk engine and try again'
@@ -236,6 +246,7 @@ export const runTask = async ({
       identifierType: configuredIdentifierType,
       range: configuredRange,
       pageSize,
+      alertSampleSizePerShard,
     } = configuration;
     if (!enabled) {
       log('risk engine is not enabled, exiting task');
@@ -250,10 +261,17 @@ export const runTask = async ({
       ? [configuredIdentifierType]
       : [RiskScoreEntity.host, RiskScoreEntity.user];
 
+    const runs: Array<{
+      identifierType: IdentifierType;
+      scoresWritten: number;
+      tookMs: number;
+    }> = [];
+
     await asyncForEach(identifierTypes, async (identifierType) => {
       let isWorkComplete = isCancelled();
       let afterKeys: AfterKeys = {};
       while (!isWorkComplete) {
+        const now = Date.now();
         const result = await riskScoreService.calculateAndPersistScores({
           afterKeys,
           index,
@@ -263,6 +281,14 @@ export const runTask = async ({
           range,
           runtimeMappings,
           weights: [],
+          alertSampleSizePerShard,
+        });
+        const tookMs = Date.now() - now;
+
+        runs.push({
+          identifierType,
+          scoresWritten: result.scores_written,
+          tookMs,
         });
 
         isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();
@@ -279,6 +305,7 @@ export const runTask = async ({
       scoresWritten,
       taskDurationInSeconds,
       interval: taskInstance?.schedule?.interval,
+      alertSampleSizePerShard,
     };
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
 
@@ -290,7 +317,7 @@ export const runTask = async ({
     }
 
     log('task run completed');
-    log(JSON.stringify(telemetryEvent));
+    log(JSON.stringify({ ...telemetryEvent, runs }));
     return {
       state: updatedState,
     };
@@ -305,17 +332,26 @@ const createTaskRunnerFactory =
     logger,
     getRiskScoreService,
     telemetry,
+    entityAnalyticsConfig,
   }: {
     logger: Logger;
     getRiskScoreService: GetRiskScoreService;
     telemetry: AnalyticsServiceSetup;
+    entityAnalyticsConfig: EntityAnalyticsConfig;
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     let cancelled = false;
     const isCancelled = () => cancelled;
     return {
       run: async () =>
-        runTask({ getRiskScoreService, isCancelled, logger, taskInstance, telemetry }),
+        runTask({
+          getRiskScoreService,
+          isCancelled,
+          logger,
+          taskInstance,
+          telemetry,
+          entityAnalyticsConfig,
+        }),
       cancel: async () => {
         cancelled = true;
       },

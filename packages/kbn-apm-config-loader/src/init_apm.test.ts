@@ -15,14 +15,17 @@ describe('initApm', () => {
   let apmAddFilterMock: jest.Mock;
   let apmStartMock: jest.Mock;
   let getConfig: jest.Mock;
+  let isUsersRedactionEnabled: jest.Mock;
 
   beforeEach(() => {
     apmAddFilterMock = apm.addFilter as jest.Mock;
     apmStartMock = apm.start as jest.Mock;
     getConfig = jest.fn();
+    isUsersRedactionEnabled = jest.fn();
 
     mockLoadConfiguration.mockImplementation(() => ({
       getConfig,
+      isUsersRedactionEnabled,
     }));
   });
 
@@ -46,11 +49,27 @@ describe('initApm', () => {
     expect(getConfig).toHaveBeenCalledWith('service-name');
   });
 
-  it('registers a filter using `addFilter`', () => {
+  it('calls `apmConfigLoader.isUsersRedactionEnabled`', () => {
+    initApm(['foo', 'bar'], 'rootDir', true, 'service-name');
+
+    expect(isUsersRedactionEnabled).toHaveBeenCalledTimes(1);
+  });
+
+  it('registers a filter using `addFilter` when user redaction is enabled', () => {
+    isUsersRedactionEnabled.mockReturnValue(true);
+
     initApm(['foo', 'bar'], 'rootDir', true, 'service-name');
 
     expect(apmAddFilterMock).toHaveBeenCalledTimes(1);
     expect(apmAddFilterMock).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it('does not register a filter using `addFilter` when user redaction is disabled', () => {
+    isUsersRedactionEnabled.mockReturnValue(false);
+
+    initApm(['foo', 'bar'], 'rootDir', true, 'service-name');
+
+    expect(apmAddFilterMock).not.toHaveBeenCalled();
   });
 
   it('starts apm with the config returned from `getConfig`', () => {

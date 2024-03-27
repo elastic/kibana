@@ -81,8 +81,7 @@ import type {
   RuleDefinitionProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
-import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
-import { PLUGIN_ID, CONNECTORS_PLUGIN_ID } from './common/constants';
+import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
@@ -229,6 +228,18 @@ export class Plugin
         defaultMessage: 'Detect conditions using rules.',
       }
     );
+    const alertsFeatureTitle = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.alerts.displayName',
+      {
+        defaultMessage: 'Alerts',
+      }
+    );
+    const alertsFeatureDescription = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.alerts.displayDescription',
+      {
+        defaultMessage: 'Monitor all of your alerts in one place',
+      }
+    );
     const connectorsFeatureTitle = i18n.translate(
       'xpack.triggersActionsUI.managementSection.connectors.displayName',
       {
@@ -266,7 +277,7 @@ export class Plugin
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: PLUGIN_ID,
       title: featureTitle,
-      order: 0,
+      order: 1,
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
@@ -364,10 +375,66 @@ export class Plugin
       },
     });
 
-    if (this.experimentalFeatures.internalAlertsTable) {
-      registerAlertsTableConfiguration({
-        alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
+    if (this.experimentalFeatures.globalAlertsPage) {
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
+        id: ALERTS_PLUGIN_ID,
+        title: alertsFeatureTitle,
+        capabilitiesId: PLUGIN_ID,
+        order: 0,
+        async mount(params: ManagementAppMountParams) {
+          const { renderApp } = await import('./application/alerts_app');
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            PluginsStart,
+            unknown
+          ];
+          let kibanaFeatures: KibanaFeature[];
+          try {
+            kibanaFeatures = await pluginsStart.features.getFeatures();
+          } catch (err) {
+            kibanaFeatures = [];
+          }
+
+          return renderApp({
+            ...coreStart,
+            actions: plugins.actions,
+            dashboard: pluginsStart.dashboard,
+            data: pluginsStart.data,
+            dataViews: pluginsStart.dataViews,
+            dataViewEditor: pluginsStart.dataViewEditor,
+            charts: pluginsStart.charts,
+            alerting: pluginsStart.alerting,
+            spaces: pluginsStart.spaces,
+            unifiedSearch: pluginsStart.unifiedSearch,
+            isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+            element: params.element,
+            theme$: params.theme$,
+            storage: new Storage(window.localStorage),
+            setBreadcrumbs: params.setBreadcrumbs,
+            history: params.history,
+            actionTypeRegistry,
+            ruleTypeRegistry,
+            alertsTableConfigurationRegistry,
+            kibanaFeatures,
+            licensing: pluginsStart.licensing,
+            expressions: pluginsStart.expressions,
+            isServerless: !!pluginsStart.serverless,
+            fieldFormats: pluginsStart.fieldFormats,
+            lens: pluginsStart.lens,
+          });
+        },
       });
+      if (plugins.home) {
+        plugins.home.featureCatalogue.register({
+          id: ALERTS_PLUGIN_ID,
+          title: alertsFeatureTitle,
+          description: alertsFeatureDescription,
+          icon: 'watchesApp',
+          path: triggersActionsRoute,
+          showOnHomePage: false,
+          category: 'admin',
+        });
+      }
     }
 
     return {
@@ -379,9 +446,9 @@ export class Plugin
 
   public start(_: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
     import('./application/sections/alerts_table/configuration').then(
-      ({ getAlertsTableConfiguration }) => {
-        this.alertsTableConfigurationRegistry.register(
-          getAlertsTableConfiguration(plugins.fieldFormats)
+      ({ createGenericAlertsTableConfigurations }) => {
+        createGenericAlertsTableConfigurations(plugins.fieldFormats).forEach((c) =>
+          this.alertsTableConfigurationRegistry.register(c)
         );
       }
     );

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
-import { TooltipValue, TooltipValueFormatter } from '@elastic/charts';
+import type { TooltipValue, TooltipValueFormatter } from '@elastic/charts';
 import { distinctUntilChanged } from 'rxjs/operators';
 
 export interface ChartTooltipValue extends TooltipValue {

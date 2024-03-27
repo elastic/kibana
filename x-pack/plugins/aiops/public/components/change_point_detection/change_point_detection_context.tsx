@@ -5,32 +5,25 @@
  * 2.0.
  */
 
-import React, {
-  createContext,
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import type { FC } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
 import type { Filter, Query } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
-import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
+import type { TimeBuckets, TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
 } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
-import { useTimeBuckets } from '../../hooks/use_time_buckets';
 
 export interface ChangePointDetectionPageUrlState {
   pageKey: 'changePoint';
@@ -153,15 +146,15 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   }, [dataView, savedSearch, uiSettings, filterManager]);
 
   const timefilter = useTimefilter();
-  const timeBuckets = useTimeBuckets();
+  const timeBuckets = useTimeBuckets(uiSettings);
+
+  const { searchBounds } = useFilterQueryUpdates();
 
   const [resultFilters, setResultFilter] = useState<Filter[]>([]);
   const [selectedChangePoints, setSelectedChangePoints] = useState<
     Record<number, SelectedChangePoint[]>
   >({});
   const [bucketInterval, setBucketInterval] = useState<TimeBucketsInterval>();
-
-  const timeRange = useTimeRangeUpdates(true);
 
   useEffect(function updateIntervalOnTimeBoundsChange() {
     const timeUpdateSubscription = timefilter
@@ -267,14 +260,14 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     mergedQuery.bool!.filter.push({
       range: {
         [dataView.timeFieldName!]: {
-          from: timeRange.from,
-          to: timeRange.to,
+          from: searchBounds.min?.valueOf(),
+          to: searchBounds.max?.valueOf(),
         },
       },
     });
 
     return mergedQuery;
-  }, [resultFilters, resultQuery, uiSettings, dataView, timeRange]);
+  }, [resultFilters, resultQuery, uiSettings, dataView, searchBounds]);
 
   if (!bucketInterval) return null;
 
@@ -295,7 +288,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   return (
     <ChangePointDetectionContext.Provider value={value}>
-      <FilterQueryContextProvider>{children}</FilterQueryContextProvider>
+      {children}
     </ChangePointDetectionContext.Provider>
   );
 };

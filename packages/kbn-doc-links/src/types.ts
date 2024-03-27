@@ -138,10 +138,12 @@ export interface DocLinks {
     readonly connectorsMySQL: string;
     readonly connectorsNative: string;
     readonly connectorsNetworkDrive: string;
+    readonly connectorsNotion: string;
     readonly connectorsOneDrive: string;
     readonly connectorsOracle: string;
     readonly connectorsOutlook: string;
     readonly connectorsPostgreSQL: string;
+    readonly connectorsRedis: string;
     readonly connectorsS3: string;
     readonly connectorsSalesforce: string;
     readonly connectorsServiceNow: string;
@@ -434,7 +436,10 @@ export interface DocLinks {
   readonly alerting: Readonly<{
     guide: string;
     actionTypes: string;
-    apmRules: string;
+    apmRulesErrorCount: string;
+    apmRulesTransactionDuration: string;
+    apmRulesTransactionError: string;
+    apmRulesAnomaly: string;
     emailAction: string;
     emailActionConfig: string;
     emailExchangeClientSecretConfig: string;
@@ -538,6 +543,7 @@ export interface DocLinks {
     policySecrets: string;
     remoteESOoutput: string;
     performancePresets: string;
+    scalingKubernetesResourcesAndLimits: string;
   }>;
   readonly ecs: {
     readonly guide: string;

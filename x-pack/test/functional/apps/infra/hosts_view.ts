@@ -7,7 +7,14 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { parse } from 'url';
+import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
+  createLogger,
+  LogLevel,
+} from '@kbn/apm-synthtrace';
+import url from 'url';
+import { kbnTestConfig } from '@kbn/test';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
@@ -18,6 +25,7 @@ import {
   HOSTS_VIEW_PATH,
   DATE_PICKER_FORMAT,
 } from './constants';
+import { generateAddServicesToExistingHost } from './helpers';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -26,6 +34,7 @@ const END_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesD
 
 const tableEntries = [
   {
+    alertsCount: 2,
     title: 'demo-stack-apache-01',
     cpuUsage: '1.2%',
     normalizedLoad: '0.5%',
@@ -36,26 +45,7 @@ const tableEntries = [
     tx: '0 bit/s',
   },
   {
-    title: 'demo-stack-client-01',
-    cpuUsage: '0.5%',
-    normalizedLoad: '0.1%',
-    memoryUsage: '13.8%',
-    memoryFree: '3.3 GB',
-    diskSpaceUsage: '16.9%',
-    rx: '0 bit/s',
-    tx: '0 bit/s',
-  },
-  {
-    title: 'demo-stack-haproxy-01',
-    cpuUsage: '0.8%',
-    normalizedLoad: '0%',
-    memoryUsage: '16.5%',
-    memoryFree: '3.2 GB',
-    diskSpaceUsage: '16.3%',
-    rx: '0 bit/s',
-    tx: '0 bit/s',
-  },
-  {
+    alertsCount: 2,
     title: 'demo-stack-mysql-01',
     cpuUsage: '0.9%',
     normalizedLoad: '0%',
@@ -66,6 +56,18 @@ const tableEntries = [
     tx: '0 bit/s',
   },
   {
+    alertsCount: 2,
+    title: 'demo-stack-redis-01',
+    cpuUsage: '0.8%',
+    normalizedLoad: '0%',
+    memoryUsage: '15.9%',
+    memoryFree: '3.3 GB',
+    diskSpaceUsage: '16.3%',
+    rx: '0 bit/s',
+    tx: '0 bit/s',
+  },
+  {
+    alertsCount: 0,
     title: 'demo-stack-nginx-01',
     cpuUsage: '0.8%',
     normalizedLoad: '1.4%',
@@ -76,12 +78,24 @@ const tableEntries = [
     tx: '0 bit/s',
   },
   {
-    title: 'demo-stack-redis-01',
+    alertsCount: 0,
+    title: 'demo-stack-haproxy-01',
     cpuUsage: '0.8%',
     normalizedLoad: '0%',
-    memoryUsage: '15.9%',
-    memoryFree: '3.3 GB',
+    memoryUsage: '16.5%',
+    memoryFree: '3.2 GB',
     diskSpaceUsage: '16.3%',
+    rx: '0 bit/s',
+    tx: '0 bit/s',
+  },
+  {
+    alertsCount: 0,
+    title: 'demo-stack-client-01',
+    cpuUsage: '0.5%',
+    normalizedLoad: '0.1%',
+    memoryUsage: '13.8%',
+    memoryFree: '3.3 GB',
+    diskSpaceUsage: '16.9%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -90,6 +104,7 @@ const tableEntries = [
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
+  const esClient = getService('es');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const observability = getService('observability');
@@ -107,6 +122,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   // Helpers
+
+  const getKibanaServerUrl = () => {
+    const kibanaServerUrl = url.format(kbnTestConfig.getUrlParts() as url.UrlObject);
+    const kibanaServerUrlWithAuth = url
+      .format({
+        ...url.parse(kibanaServerUrl),
+        auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
+      })
+      .slice(0, -1);
+    return kibanaServerUrlWithAuth;
+  };
+
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
 
@@ -127,18 +154,42 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
 
   describe('Hosts View', function () {
+    let synthtraceApmClient: ApmSynthtraceEsClient;
     before(async () => {
-      await Promise.all([
+      const kibanaClient = new ApmSynthtraceKibanaClient({
+        target: getKibanaServerUrl(),
+        logger: createLogger(LogLevel.debug),
+      });
+      const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
+      await kibanaClient.installApmPackage(kibanaVersion);
+      synthtraceApmClient = new ApmSynthtraceEsClient({
+        client: esClient,
+        logger: createLogger(LogLevel.info),
+        version: kibanaVersion,
+        refreshAfterIndex: true,
+      });
+
+      const services = generateAddServicesToExistingHost({
+        from: DATES.metricsAndLogs.hosts.processesDataStartDate,
+        to: DATES.metricsAndLogs.hosts.processesDataEndDate,
+        hostName: 'Jennys-MBP.fritz.box',
+        servicesPerHost: 3,
+      });
+
+      await browser.setWindowSize(1600, 1200);
+
+      return Promise.all([
+        synthtraceApmClient.index(services),
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
         kibanaServer.savedObjects.cleanStandardList(),
       ]);
-      await browser.setWindowSize(1600, 1200);
     });
 
     after(async () => {
-      await Promise.all([
+      return Promise.all([
+        synthtraceApmClient.clean(),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
@@ -209,15 +260,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(hosts.length).to.equal(9);
           });
 
-          it('should show all section as collapsable', async () => {
+          it('should show all section as collapsible', async () => {
             await pageObjects.assetDetails.metadataSectionCollapsibleExist();
             await pageObjects.assetDetails.alertsSectionCollapsibleExist();
             await pageObjects.assetDetails.metricsSectionCollapsibleExist();
+            await pageObjects.assetDetails.servicesSectionCollapsibleExist();
           });
 
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
+          });
+
+          it('should show 3 services each with an icon, service name, and url', async () => {
+            await pageObjects.assetDetails.servicesSectionCollapsibleExist();
+
+            const services =
+              await pageObjects.assetDetails.getAssetDetailsServicesWithIconsAndNames();
+
+            expect(services.length).to.equal(3);
+
+            const currentUrl = await browser.getCurrentUrl();
+            const parsedUrl = new URL(currentUrl);
+            const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+
+            services.forEach((service, index) => {
+              expect(service.serviceName).to.equal(`service-${index}`);
+              expect(service.iconSrc).to.not.be.empty();
+              const expectedUrlPattern = `${baseUrl}/app/apm/services/service-${index}/overview?rangeFrom=${DATES.metricsAndLogs.hosts.processesDataStartDate}&rangeTo=${DATES.metricsAndLogs.hosts.processesDataEndDate}`;
+              expect(service.serviceUrl).to.equal(expectedUrlPattern);
+            });
           });
         });
 
@@ -270,18 +342,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         describe('Flyout links', () => {
-          it('should navigate to APM services after click', async () => {
-            await pageObjects.assetDetails.clickApmServicesLink();
-            const url = parse(await browser.getCurrentUrl());
-            const query = decodeURIComponent(url.query ?? '');
-            const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
-
-            expect(url.pathname).to.eql('/app/apm/services');
-            expect(query).to.contain(kuery);
-
-            await returnTo(HOSTS_VIEW_PATH);
-          });
-
           it('should navigate to Host Details page after click', async () => {
             await pageObjects.assetDetails.clickOpenAsPageLink();
             const dateRange = await pageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
@@ -407,7 +467,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
             await retry.try(async () => {
-              const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
+              const tileValue =
+                metric === 'hostsCount'
+                  ? await pageObjects.infraHostsView.getKPITileValue(metric)
+                  : await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
+
               expect(tileValue).to.eql(value);
             });
           });
@@ -557,13 +621,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await Promise.all(
             [
               { metric: 'hostsCount', value: '3' },
-              { metric: 'cpuUsage', value: '0.8%' },
+              { metric: 'cpuUsage', value: '0.9%' },
               { metric: 'normalizedLoad1m', value: '0.2%' },
-              { metric: 'memoryUsage', value: '16.3%' },
-              { metric: 'diskUsage', value: '16.9%' },
+              { metric: 'memoryUsage', value: '17.5%' },
+              { metric: 'diskUsage', value: '17.2%' },
             ].map(async ({ metric, value }) => {
               await retry.try(async () => {
-                const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
+                const tileValue =
+                  metric === 'hostsCount'
+                    ? await pageObjects.infraHostsView.getKPITileValue(metric)
+                    : await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
                 expect(tileValue).to.eql(value);
               });
             })
@@ -573,12 +640,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should update the alerts count on a search submit', async () => {
           const alertsCount = await pageObjects.infraHostsView.getAlertsCount();
 
-          expect(alertsCount).to.be('2');
+          expect(alertsCount).to.be('6');
         });
 
         it('should update the alerts table content on a search submit', async () => {
-          const ACTIVE_ALERTS = 2;
-          const RECOVERED_ALERTS = 2;
+          const ACTIVE_ALERTS = 6;
+          const RECOVERED_ALERTS = 4;
           const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
           const COLUMNS = 11;
 
@@ -655,7 +722,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHostsView.sortByCpuUsage();
           let hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-          expect(hostDataFirtPage).to.eql(tableEntries[1]);
+          expect(hostDataFirtPage).to.eql(tableEntries[5]);
 
           await pageObjects.infraHostsView.paginateTo(2);
           hostRows = await pageObjects.infraHostsView.getHostsTableData();
@@ -672,7 +739,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHostsView.paginateTo(2);
           hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-          expect(hostDataLastPage).to.eql(tableEntries[1]);
+          expect(hostDataLastPage).to.eql(tableEntries[5]);
         });
 
         it('should sort by text field asc', async () => {
@@ -684,14 +751,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHostsView.paginateTo(2);
           hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-          expect(hostDataLastPage).to.eql(tableEntries[5]);
+          expect(hostDataLastPage).to.eql(tableEntries[2]);
         });
 
         it('should sort by text field desc', async () => {
           await pageObjects.infraHostsView.sortByTitle();
           let hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-          expect(hostDataFirtPage).to.eql(tableEntries[5]);
+          expect(hostDataFirtPage).to.eql(tableEntries[2]);
 
           await pageObjects.infraHostsView.paginateTo(2);
           hostRows = await pageObjects.infraHostsView.getHostsTableData();

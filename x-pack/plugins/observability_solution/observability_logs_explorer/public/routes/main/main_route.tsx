@@ -35,8 +35,12 @@ export const ObservabilityLogsExplorerMainRoute = () => {
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const createLogsExplorerController = useMemo(
-    () => createLogsExplorerControllerWithCustomizations(logsExplorer.createLogsExplorerController),
-    [logsExplorer.createLogsExplorerController]
+    () =>
+      createLogsExplorerControllerWithCustomizations(
+        logsExplorer.createLogsExplorerController,
+        services
+      ),
+    [logsExplorer.createLogsExplorerController, services]
   );
 
   return (

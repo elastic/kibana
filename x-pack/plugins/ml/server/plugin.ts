@@ -24,7 +24,7 @@ import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import type { CasesSetup } from '@kbn/cases-plugin/server';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import type { MlCapabilities } from '../common/types/capabilities';
 import { jsonSchemaRoutes } from './routes/json_schema';
@@ -55,7 +55,8 @@ import { resultsServiceRoutes } from './routes/results_service';
 import { modelManagementRoutes } from './routes/model_management';
 import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
-import { createSharedServices, SharedServices } from './shared_services';
+import type { SharedServices } from './shared_services';
+import { createSharedServices } from './shared_services';
 import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
@@ -91,7 +92,7 @@ export class MlServerPlugin
   private spacesPlugin: SpacesPluginSetup | undefined;
   private security: SecurityPluginSetup | undefined;
   private home: HomeServerPluginSetup | null = null;
-  private cases: CasesSetup | null | undefined = null;
+  private cases: CasesServerSetup | null | undefined = null;
   private dataViews: DataViewsPluginStart | null = null;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};

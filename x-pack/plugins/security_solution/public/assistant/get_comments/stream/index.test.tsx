@@ -6,10 +6,15 @@
  */
 
 import React from 'react';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { useFetchConnectorsQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query';
 import { StreamComment } from '.';
 import { useStream } from './use_stream';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { AsApiContract } from '@kbn/actions-plugin/common';
 const mockSetComplete = jest.fn();
+jest.mock('../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query');
 
 jest.mock('./use_stream');
 
@@ -17,14 +22,15 @@ const content = 'Test Content';
 const mockAbortStream = jest.fn();
 const testProps = {
   abortStream: mockAbortStream,
-  amendMessage: jest.fn(),
+  refetchCurrentConversation: jest.fn(),
   content,
   index: 1,
   isEnabledLangChain: true,
-  isLastComment: true,
   connectorTypeTitle: 'OpenAI',
+  isControlsEnabled: true,
   regenerateMessage: jest.fn(),
   transformMessage: jest.fn(),
+  connectorId: 'test',
 };
 
 const mockReader = jest.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;
@@ -39,6 +45,16 @@ describe('StreamComment', () => {
       pendingMessage: 'Test Message',
       setComplete: mockSetComplete,
     });
+    const connectors: unknown[] = [
+      {
+        id: 'hi',
+        name: 'OpenAI connector',
+        actionTypeId: '.gen-ai',
+      },
+    ];
+    jest.mocked(useFetchConnectorsQuery).mockReturnValue({
+      data: connectors,
+    } as unknown as UseQueryResult<Array<AsApiContract<Connector>>, unknown>);
   });
   it('renders content correctly', () => {
     render(<StreamComment {...testProps} />);

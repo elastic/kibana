@@ -367,20 +367,37 @@ export class DataGridService extends FtrService {
   }
 
   public async getCurrentRowHeightValue() {
-    const buttonGroup = await this.testSubjects.find('rowHeightButtonGroup');
+    const buttonGroup = await this.testSubjects.find(
+      'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
+    );
     return (
       await buttonGroup.findByCssSelector('.euiButtonGroupButton-isSelected')
     ).getVisibleText();
   }
 
   public async changeRowHeightValue(newValue: string) {
-    const buttonGroup = await this.testSubjects.find('rowHeightButtonGroup');
+    const buttonGroup = await this.testSubjects.find(
+      'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
+    );
     const option = await buttonGroup.findByCssSelector(`[data-text="${newValue}"]`);
     await option.click();
   }
 
-  public async resetRowHeightValue() {
-    await this.testSubjects.click('resetDisplaySelector');
+  public async getCurrentHeaderRowHeightValue() {
+    const buttonGroup = await this.testSubjects.find(
+      'unifiedDataTableHeaderRowHeightSettings_rowHeightButtonGroup'
+    );
+    return (
+      await buttonGroup.findByCssSelector('.euiButtonGroupButton-isSelected')
+    ).getVisibleText();
+  }
+
+  public async changeHeaderRowHeightValue(newValue: string) {
+    const buttonGroup = await this.testSubjects.find(
+      'unifiedDataTableHeaderRowHeightSettings_rowHeightButtonGroup'
+    );
+    const option = await buttonGroup.findByCssSelector(`[data-text="${newValue}"]`);
+    await option.click();
   }
 
   private async findSampleSizeInput() {

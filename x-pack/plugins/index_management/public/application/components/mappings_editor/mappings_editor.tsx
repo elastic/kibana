@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
@@ -26,14 +26,16 @@ import {
   RuntimeFields,
 } from './types';
 import { extractMappingsDefinition } from './lib';
-import { useMappingsState } from './mappings_state_context';
+import { useDispatch, useMappingsState } from './mappings_state_context';
 import { useMappingsStateListener } from './use_state_listener';
 import { useConfig } from './config_context';
 import { DocLinksStart } from './shared_imports';
+import { DocumentFieldsHeader } from './components/document_fields/document_fields_header';
+import { SearchResult } from './components/document_fields/search_fields';
 
 type TabName = 'fields' | 'runtimeFields' | 'advanced' | 'templates';
 
-interface MappingsEditorParsedMetadata {
+export interface MappingsEditorParsedMetadata {
   parsedDefaultValue?: {
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
@@ -95,7 +97,6 @@ export const MappingsEditor = React.memo(
           },
           runtime,
         };
-
         return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };
       }, [value]);
 
@@ -151,8 +152,36 @@ export const MappingsEditor = React.memo(
       selectTab(tab);
     };
 
+    const dispatch = useDispatch();
+    const onSearchChange = useCallback(
+      (searchValue: string) => {
+        dispatch({ type: 'search:update', value: searchValue });
+      },
+      [dispatch]
+    );
+
     const tabToContentMap = {
-      fields: <DocumentFields />,
+      fields: (
+        <DocumentFields
+          searchComponent={
+            <>
+              <DocumentFieldsHeader
+                searchValue={state.search.term}
+                onSearchChange={onSearchChange}
+              />
+              <EuiSpacer size="m" />
+            </>
+          }
+          searchResultComponent={
+            state.search.term.trim() !== '' ? (
+              <SearchResult
+                result={state.search.result}
+                documentFieldsState={state.documentFields}
+              />
+            ) : undefined
+          }
+        />
+      ),
       runtimeFields: <RuntimeFieldsList />,
       templates: <TemplatesForm value={state.templates.defaultValue} />,
       advanced: (

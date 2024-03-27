@@ -235,9 +235,9 @@ describe('annotation list view', () => {
 
     it('opens editor when title is clicked', async () => {
       act(() => {
-        wrapper.find(TableListViewTable).prop('onClickTitle')!({
+        wrapper.find(TableListViewTable).prop('getOnClickTitle')!({
           id: '1234',
-        } as UserContentCommonSchema);
+        } as UserContentCommonSchema)!();
       });
 
       await new Promise((resolve) => setTimeout(resolve, 0));

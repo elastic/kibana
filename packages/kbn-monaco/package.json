@@ -4,8 +4,8 @@
   "private": true,
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "scripts": {
-    "build:antlr4ts:painless": "../../node_modules/antlr4ts-cli/antlr4ts ./src/painless/antlr/painless_lexer.g4 ./src/painless/antlr/painless_parser.g4 && node ./scripts/fix_generated_antlr.js painless",
-    "build:antlr4ts:esql": "../../node_modules/antlr4ts-cli/antlr4ts src/esql/antlr/esql_lexer.g4 src/esql/antlr/esql_parser.g4 && node ./scripts/fix_generated_antlr.js esql && node ./scripts/esql_update_ast_script.js",
-    "build:antlr4ts": "npm run build:antlr4ts:painless && npm run build:antlr4ts:esql"
+    "build:antlr4:painless": "antlr -Dlanguage=TypeScript ./src/painless/antlr/painless_lexer.g4 ./src/painless/antlr/painless_parser.g4 && node ./scripts/fix_generated_antlr.js painless",
+    "prebuild:antlr4": "brew bundle --file=./scripts/antlr4_tools/brewfile",
+    "build:antlr4": "yarn run build:antlr4:painless && npm run build:antlr4:esql"
   }
 }

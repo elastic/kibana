@@ -138,7 +138,6 @@ export const useResponderActionData = ({
         capabilities: ['isolation'],
         hostName: agentInfoFromAlert.host.name,
         platform: agentInfoFromAlert.host.os.family,
-        lastCheckin: agentInfoFromAlert.lastCheckin,
       });
     }
     if (hostInfo) {

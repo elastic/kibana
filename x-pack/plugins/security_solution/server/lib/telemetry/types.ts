@@ -43,6 +43,7 @@ export interface ESLicense {
   start_date_in_millis?: number;
 }
 
+// Telemetry
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
   '@timestamp'?: string;
@@ -77,6 +78,30 @@ export interface TelemetryEvent {
       pod?: SearchTypes;
     };
   };
+}
+
+/**
+ * List of supported telemetry channels.
+ */
+export enum TelemetryChannel {
+  LISTS = 'security-lists-v2',
+  ENDPOINT_META = 'endpoint-metadata',
+  ENDPOINT_ALERTS = 'alerts-endpoint',
+  DETECTION_ALERTS = 'alerts-detections',
+  TIMELINE = 'alerts-timeline',
+  INSIGHTS = 'security-insights-v1',
+  TASK_METRICS = 'task-metrics',
+}
+
+export enum TelemetryCounter {
+  DOCS_SENT = 'docs_sent',
+  DOCS_LOST = 'docs_lost',
+  DOCS_DROPPED = 'docs_dropped',
+  HTTP_STATUS = 'http_status',
+  RUNTIME_ERROR = 'runtime_error',
+  FATAL_ERROR = 'fatal_error',
+  TELEMETRY_OPTED_OUT = 'telemetry_opted_out',
+  TELEMETRY_NOT_REACHABLE = 'telemetry_not_reachable',
 }
 
 // EP Policy Response
@@ -428,21 +453,22 @@ export interface ValueListIndicatorMatchResponseAggregation {
   };
 }
 
-export interface TaskMetric {
-  name: string;
-  passed: boolean;
-  time_executed_in_ms: number;
-  start_time: number;
-  end_time: number;
-  error_message?: string;
-}
-
 export interface TelemetryConfiguration {
   telemetry_max_buffer_size: number;
   max_security_list_telemetry_batch: number;
   max_endpoint_telemetry_batch: number;
   max_detection_rule_telemetry_batch: number;
   max_detection_alerts_batch: number;
+  use_async_sender: boolean;
+  sender_channels?: {
+    [key: string]: TelemetrySenderChannelConfiguration;
+  };
+}
+
+export interface TelemetrySenderChannelConfiguration {
+  buffer_time_span_millis: number;
+  inflight_events_threshold: number;
+  max_payload_size_bytes: number;
 }
 
 export interface TelemetryFilterListArtifact {

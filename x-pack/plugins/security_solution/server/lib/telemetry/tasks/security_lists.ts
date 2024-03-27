@@ -12,25 +12,26 @@ import {
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
   TELEMETRY_CHANNEL_LISTS,
-  TASK_METRICS_CHANNEL,
 } from '../constants';
 import type { ESClusterInfo, ESLicense } from '../types';
 import {
   batchTelemetryRecords,
   templateExceptionList,
-  createTaskMetric,
   formatValueListMetaData,
   createUsageCounterLabel,
-  tlog,
+  newTelemetryLogger,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
+import type { ITaskMetricsService } from '../task_metrics.types';
 
 export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number) {
+  const taskName = 'Security Solution Lists Telemetry';
+  const taskType = 'security:telemetry-lists';
   return {
-    type: 'security:telemetry-lists',
-    title: 'Security Solution Lists Telemetry',
+    type: taskType,
+    title: taskName,
     interval: '24h',
     timeout: '3m',
     version: '1.0.0',
@@ -39,14 +40,18 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
+      taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      const log = newTelemetryLogger(logger.get('security_lists'));
+      const trace = taskMetricsService.start(taskType);
+
+      log.l(
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
+
       const usageCollector = sender.getTelemetryUsageCluster();
-
       const usageLabelPrefix: string[] = ['security_telemetry', 'lists'];
-
-      const startTime = Date.now();
-      const taskName = 'Security Solution Lists Telemetry';
       try {
         let trustedApplicationsCount = 0;
         let endpointExceptionsCount = 0;
@@ -77,7 +82,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_TRUSTED_APPLICATION
           );
           trustedApplicationsCount = trustedAppsJson.length;
-          tlog(logger, `Trusted Apps: ${trustedApplicationsCount}`);
+          log.l(`Trusted Apps: ${trustedApplicationsCount}`);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -102,7 +107,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_ENDPOINT_EXCEPTION
           );
           endpointExceptionsCount = epExceptionsJson.length;
-          tlog(logger, `EP Exceptions: ${endpointExceptionsCount}`);
+          log.l(`EP Exceptions: ${endpointExceptionsCount}`);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -127,7 +132,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_ENDPOINT_EVENT_FILTER
           );
           endpointEventFiltersCount = epFiltersJson.length;
-          tlog(logger, `EP Event Filters: ${endpointEventFiltersCount}`);
+          log.l(`EP Event Filters: ${endpointEventFiltersCount}`);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -153,14 +158,10 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         if (valueListMetaData?.total_list_count) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
         }
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, true, startTime),
-        ]);
+        taskMetricsService.end(trace);
         return trustedApplicationsCount + endpointExceptionsCount + endpointEventFiltersCount;
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, false, startTime, err.message),
-        ]);
+        taskMetricsService.end(trace, err);
         return 0;
       }
     },

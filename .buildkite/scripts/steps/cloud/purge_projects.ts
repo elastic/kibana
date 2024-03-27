@@ -23,7 +23,7 @@ async function getPrProjects() {
       .flat()
       .filter((project) => project.name.match(match))
       .map((project) => {
-        const [, prNumber, projectType] = project.name.match(match);
+        const [, , prNumber, projectType] = project.name.match(match);
         return {
           id: project.id,
           name: project.name,

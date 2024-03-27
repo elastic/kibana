@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiBadge, SearchFilterConfig } from '@elastic/eui';
+import type { SearchFilterConfig } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import type { Clause, Value } from '@elastic/eui/src/components/search_bar/query/ast';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,7 +17,7 @@ import {
   TRANSFORM_HEALTH,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 import { TransformTaskStateBadge } from './transform_task_state_badge';
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 

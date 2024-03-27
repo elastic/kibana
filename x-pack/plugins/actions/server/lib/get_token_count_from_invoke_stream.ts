@@ -45,30 +45,40 @@ export async function getTokenCountFromInvokeStream({
 }> {
   const { signal, ...chatCompletionRequest } = body;
 
-  // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
-  const promptTokens = encode(
-    chatCompletionRequest.messages
-      .map((msg) => `<|start|>${msg.role}\n${msg.content}<|end|>`)
-      .join('\n')
-  ).length;
-
   const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
-
   const parsedResponse = await parser(responseStream, logger, signal);
+  if (typeof parsedResponse === 'string') {
+    // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+    const promptTokens = encode(
+      chatCompletionRequest.messages
+        .map((msg) => `<|start|>${msg.role}\n${msg.content}<|end|>`)
+        .join('\n')
+    ).length;
 
-  const completionTokens = encode(parsedResponse).length;
-  return {
-    prompt: promptTokens,
-    completion: completionTokens,
-    total: promptTokens + completionTokens,
-  };
+    const completionTokens = encode(parsedResponse).length;
+    return {
+      prompt: promptTokens,
+      completion: completionTokens,
+      total: promptTokens + completionTokens,
+    };
+  }
+  // if parsed response is not a string, it is the usage object
+  return parsedResponse;
 }
 
 type StreamParser = (
   responseStream: Readable,
   logger: Logger,
   signal?: AbortSignal
-) => Promise<string>;
+) => Promise<
+  | {
+  total: number;
+  prompt: number;
+  completion: number;
+}
+  | string
+>;
+
 
 const parseBedrockStream: StreamParser = async (responseStream, logger) => {
   const responseBuffer: Uint8Array[] = [];
@@ -82,6 +92,10 @@ const parseBedrockStream: StreamParser = async (responseStream, logger) => {
     await finished(responseStream);
   } catch (e) {
     logger.error('An error occurred while calculating streaming response tokens');
+  }
+  const usage = getUsageFromFinalChunk(responseBuffer[responseBuffer.length - 1], logger);
+  if (usage) {
+    return usage;
   }
   return parseBedrockBuffer(responseBuffer);
 };
@@ -126,7 +140,6 @@ const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) =
 const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
   // Initialize an empty Uint8Array to store the concatenated buffer.
   let bedrockBuffer: Uint8Array = new Uint8Array(0);
-
   // Map through each chunk to process the Bedrock buffer.
   return chunks
     .map((chunk) => {
@@ -220,3 +233,46 @@ const parseOpenAIResponse = (responseBody: string) =>
       prev += msg.content || '';
       return prev;
     }, '');
+
+/**
+ * Parses the final chunk of a Bedrock buffer to extract the usage object.
+ * @param finalChunk
+ */
+const getUsageFromFinalChunk = (
+  finalChunk: Uint8Array,
+  logger: Logger
+): {
+  total: number;
+  prompt: number;
+  completion: number;
+} | null => {
+  const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+  const event = awsDecoder.decode(finalChunk);
+  const body = JSON.parse(
+    Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
+  );
+  if (body.type === 'message_stop') {
+    if (
+      body['amazon-bedrock-invocationMetrics'] &&
+      body['amazon-bedrock-invocationMetrics'].inputTokenCount != null &&
+      body['amazon-bedrock-invocationMetrics'].outputTokenCount != null
+    ) {
+      return {
+        total:
+          body['amazon-bedrock-invocationMetrics'].inputTokenCount +
+          body['amazon-bedrock-invocationMetrics'].outputTokenCount,
+        prompt: body['amazon-bedrock-invocationMetrics'].inputTokenCount,
+        completion: body['amazon-bedrock-invocationMetrics'].outputTokenCount,
+      };
+    }
+    logger.error(
+      'Response from Bedrock invoke stream message_stop chunk did not contain amazon-bedrock-invocationMetrics'
+    );
+    return {
+      total: 0,
+      prompt: 0,
+      completion: 0,
+    };
+  }
+  return null;
+};
