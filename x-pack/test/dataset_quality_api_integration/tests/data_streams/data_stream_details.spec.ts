@@ -90,15 +90,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns "sizeBytes" correctly', async () => {
         const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
-        expect(isNaN(resp.body.sizeBytes)).to.be(false);
+        expect(isNaN(resp.body.sizeBytes as number)).to.be(false);
         expect(resp.body.sizeBytes).to.be.greaterThan(0);
       });
 
       it('returns service.name and host.name correctly', async () => {
         const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
-        expect(isNaN(resp.body.sizeBytes)).to.be(false);
         expect(resp.body.services).to.eql({ ['service.name']: [serviceName] });
-        expect(resp.body.hosts['host.name']).to.eql([hostName]);
+        expect(resp.body.hosts?.['host.name']).to.eql([hostName]);
       });
 
       after(async () => {
