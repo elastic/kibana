@@ -581,7 +581,7 @@
           },
           ">"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -595,7 +595,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -703,7 +703,7 @@
             "text": "PublishesTimeRange"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -717,7 +717,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -743,7 +743,7 @@
             "text": "PublishesUnifiedSearch"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -757,7 +757,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -945,7 +945,7 @@
             "text": "PublishesWritableUnifiedSearch"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -959,7 +959,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1276,6 +1276,86 @@
               "unknown"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.initializeTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "initializeTimeRange",
+        "description": [],
+        "signature": [
+          "(rawState: ",
+          "SerializedTimeRange",
+          ", parentApi?: unknown) => { appliedTimeRange$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined>; cleanupTimeRange: () => void; serializeTimeRange: () => ",
+          "SerializedTimeRange",
+          "; timeRangeApi: ",
+          "PublishesWritableTimeRange",
+          "; timeRangeComparators: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.StateComparators",
+            "text": "StateComparators"
+          },
+          "<",
+          "SerializedTimeRange",
+          ">; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.initializeTimeRange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rawState",
+            "description": [],
+            "signature": [
+              "SerializedTimeRange"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.initializeTimeRange.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "parentApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4562,7 +4642,7 @@
         "tags": [],
         "label": "PublishesTimeRange",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4926,7 +5006,7 @@
               },
               " | undefined>; }; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5786,7 +5866,7 @@
           },
           " | undefined>; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5898,7 +5978,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => void; setFilters: (filters: ",
+          " | undefined) => void; } & { setFilters: (filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -5916,7 +5996,7 @@
           },
           " | undefined) => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

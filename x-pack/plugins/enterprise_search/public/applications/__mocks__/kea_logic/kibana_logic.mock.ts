@@ -34,6 +34,7 @@ export const mockKibanaValues = {
     isCloudEnabled: false,
   },
   config: { host: 'http://localhost:3002' },
+  connectorTypes: [],
   consolePlugin: {},
   data: dataPluginMock.createStartContract(),
   esConfig: { elasticsearch_host: 'https://your_deployment_url' },
