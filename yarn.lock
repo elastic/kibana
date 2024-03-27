@@ -5598,6 +5598,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-csv-share-panel@link:packages/kbn-reporting/get_csv_panel_actions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-example-plugin@link:x-pack/examples/reporting_example":
   version "0.0.0"
   uid ""
