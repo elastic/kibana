@@ -297,7 +297,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
         const resultingTags = [...prePopulatedTags, ...tagsToBeAdded];
 
         // check if only pre-populated tags exist in the tags filter
-        checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+        checkTagsInTagsFilter(prePopulatedTags);
 
         selectAllRules();
 
@@ -313,7 +313,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
         // check that new tags were added to tags filter
         // tags in tags filter sorted alphabetically
         const resultingTagsInFilter = [...resultingTags].sort();
-        checkTagsInTagsFilter(resultingTagsInFilter, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+        checkTagsInTagsFilter(resultingTagsInFilter);
       });
     });
 
@@ -322,7 +322,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
         const tagsToBeAdded = ['tag-to-add-1', 'tag-to-add-2'];
 
         // check if only pre-populated tags exist in the tags filter
-        checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+        checkTagsInTagsFilter(prePopulatedTags);
 
         selectAllRules();
 
@@ -339,7 +339,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
         const tagsToOverwrite = ['overwrite-tag-1'];
 
         // check if only pre-populated tags exist in the tags filter
-        checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+        checkTagsInTagsFilter(prePopulatedTags);
 
         selectAllRules();
 
@@ -360,7 +360,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
         testAllTagsBadges(tagsToOverwrite);
 
         // check that only new tags are in the tag filter
-        checkTagsInTagsFilter(tagsToOverwrite, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+        checkTagsInTagsFilter(tagsToOverwrite);
       });
     });
 
@@ -370,7 +370,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
         const resultingTags = prePopulatedTags.slice(1);
 
         // check if only pre-populated tags exist in the tags filter
-        checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+        checkTagsInTagsFilter(prePopulatedTags);
 
         selectAllRules();
 
@@ -384,7 +384,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
         testAllTagsBadges(resultingTags);
 
         // check that tags were removed from the tag filter
-        checkTagsInTagsFilter(resultingTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+        checkTagsInTagsFilter(resultingTags);
       });
     });
   });
@@ -702,7 +702,7 @@ describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () =
         const resultingTags = [...prePopulatedTags, ...tagsToBeAdded];
 
         // check if only pre-populated tags exist in the tags filter
-        checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+        checkTagsInTagsFilter(prePopulatedTags);
 
         selectAllRules();
 
@@ -718,7 +718,7 @@ describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () =
         // check that new tags were added to tags filter
         // tags in tags filter sorted alphabetically
         const resultingTagsInFilter = [...resultingTags].sort();
-        checkTagsInTagsFilter(resultingTagsInFilter, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+        checkTagsInTagsFilter(resultingTagsInFilter);
       });
     });
   });

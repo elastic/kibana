@@ -39,7 +39,14 @@ const TagsFilterPopoverComponent = ({
 }: TagsFilterPopoverProps) => {
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
 
-  const options = useMemo(() => caseInsensitiveSort(tags).map((tag) => ({ label: tag })), [tags]);
+  const options = useMemo(
+    () =>
+      caseInsensitiveSort(tags).map((tag) => ({
+        label: tag,
+        'data-test-subj': 'tagsFilter-selectableOption',
+      })),
+    [tags]
+  );
 
   const selectedOptions = useMemo(
     () => selectedTags.map((tag) => ({ label: tag })),

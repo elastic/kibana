@@ -16,9 +16,10 @@ import {
   MODAL_CONFIRMATION_BODY,
   MODAL_CONFIRMATION_TITLE,
   RULES_TAGS_FILTER_BTN,
+  RULES_TAGS_FILTER_SELECTABLE_OPTION,
   TOASTER_BODY,
 } from '../screens/alerts_detection_rules';
-import { EUI_SELECTABLE_LIST_ITEM, TIMELINE_SEARCHBOX } from '../screens/common/controls';
+import { TIMELINE_SEARCHBOX } from '../screens/common/controls';
 import {
   ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
   ADD_RULE_ACTIONS_MENU_ITEM,
@@ -220,15 +221,14 @@ export const checkOverwriteTagsCheckbox = () => {
 /**
  * check if rule tags filter populated with a list of tags
  * @param tags
- * @param srOnlyText SR-only text appended by EUI
  */
-export const checkTagsInTagsFilter = (tags: string[], srOnlyText: string = '') => {
+export const checkTagsInTagsFilter = (tags: string[]) => {
   cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
 
-  cy.get(EUI_SELECTABLE_LIST_ITEM)
+  cy.get(RULES_TAGS_FILTER_SELECTABLE_OPTION)
     .should('have.length', tags.length)
     .each(($el, index) => {
-      cy.wrap($el).should('have.text', `${tags[index]}${srOnlyText}`);
+      cy.wrap($el).should('have.text', `${tags[index]}`);
     });
 };
 

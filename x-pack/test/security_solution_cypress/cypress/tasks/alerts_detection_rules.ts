@@ -43,6 +43,7 @@ import {
   RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX,
   RULES_TAGS_FILTER_BTN,
   RULES_TAGS_FILTER_POPOVER,
+  RULES_TAGS_FILTER_SELECTABLE_OPTION,
   RULES_TABLE_REFRESH_INDICATOR,
   RULES_MANAGEMENT_TAB,
   RULES_MONITORING_TAB,
@@ -57,7 +58,11 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
-import { EUI_CHECKBOX } from '../screens/common/controls';
+import {
+  COMBO_BOX_CLEAR_BUTTON,
+  COMBO_BOX_SEARCH_INPUT,
+  EUI_CHECKBOX,
+} from '../screens/common/controls';
 import { POPOVER_ACTIONS_TRIGGER_BUTTON, RULE_NAME_HEADER } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
@@ -145,8 +150,10 @@ export const filterBySearchTerm = (term: string) => {
 export const filterByTags = (tags: string[]) => {
   cy.get(RULES_TAGS_FILTER_BTN).click();
 
+  cy.get(COMBO_BOX_SEARCH_INPUT).click();
+
   for (const tag of tags) {
-    cy.get(RULES_TAGS_FILTER_POPOVER).contains(tag).click();
+    cy.get(RULES_TAGS_FILTER_SELECTABLE_OPTION).contains(tag).click();
   }
 
   // close the popover
@@ -156,9 +163,7 @@ export const filterByTags = (tags: string[]) => {
 export const unselectTags = () => {
   cy.get(RULES_TAGS_FILTER_BTN).click();
 
-  cy.get(RULES_TAGS_FILTER_POPOVER)
-    .find('[aria-checked="true"]')
-    .each((el) => cy.wrap(el).click());
+  cy.get(COMBO_BOX_CLEAR_BUTTON).click();
 
   // close the popover
   cy.get(RULES_TAGS_FILTER_BTN).click();

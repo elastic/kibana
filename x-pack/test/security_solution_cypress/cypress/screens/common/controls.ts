@@ -19,6 +19,10 @@ export const EUI_BASIC_TABLE_LOADING = '.euiBasicTable-loading';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
+export const COMBO_BOX_SEARCH_INPUT = '[data-test-subj="comboBoxSearchInput"]';
+
+export const COMBO_BOX_CLEAR_BUTTON = '[data-test-subj="comboBoxClearButton"]';
+
 export const COMBO_BOX_SELECTION = '.euiMark';
 
 export const SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE =
