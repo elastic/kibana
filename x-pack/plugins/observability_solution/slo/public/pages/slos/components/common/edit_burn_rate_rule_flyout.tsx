@@ -11,6 +11,7 @@ import { useKibana } from '../../../../utils/kibana_react';
 import { BurnRateRuleParams } from '../../../../typings';
 
 export function EditBurnRateRuleFlyout({
+  refetchRules,
   rule,
   isEditRuleFlyoutOpen,
   setIsEditRuleFlyoutOpen,
@@ -18,12 +19,14 @@ export function EditBurnRateRuleFlyout({
   rule?: Rule<BurnRateRuleParams>;
   isEditRuleFlyoutOpen: boolean;
   setIsEditRuleFlyoutOpen: (value: boolean) => void;
+  refetchRules: () => void;
 }) {
   const {
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout },
   } = useKibana().services;
 
   const handleSavedRule = async () => {
+    refetchRules();
     setIsEditRuleFlyoutOpen(false);
   };
 

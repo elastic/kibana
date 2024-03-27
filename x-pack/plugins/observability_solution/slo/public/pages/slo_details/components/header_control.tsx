@@ -50,7 +50,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
 
   const { mutate: deleteSlo } = useDeleteSlo();
 
-  const { data: rulesBySlo } = useFetchRulesForSlo({
+  const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: slo ? [slo.id] : undefined,
   });
 
@@ -235,6 +235,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
         rule={rules?.[0]}
         isEditRuleFlyoutOpen={isEditRuleFlyoutOpen}
         setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
+        refetchRules={refetchRules}
       />
 
       {slo && isRuleFlyoutVisible ? (

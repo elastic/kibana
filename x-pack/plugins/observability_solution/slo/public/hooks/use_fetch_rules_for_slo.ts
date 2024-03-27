@@ -12,10 +12,8 @@ import { BurnRateRuleParams } from '../typings';
 import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
-type SloId = string;
-
 interface Params {
-  sloIds?: SloId[];
+  sloIds?: string[];
 }
 
 interface RuleApiResponse {
@@ -25,17 +23,10 @@ interface RuleApiResponse {
   data: Array<AsApiContract<Rule<BurnRateRuleParams>>>;
 }
 
-export interface UseFetchRulesForSloResponse {
-  isLoading: boolean;
-  isSuccess: boolean;
-  isError: boolean;
-  data: Record<string, Array<Rule<BurnRateRuleParams>>> | undefined;
-}
-
-export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSloResponse {
+export function useFetchRulesForSlo({ sloIds = [] }: Params) {
   const { http } = useKibana().services;
 
-  const { isLoading, isError, isSuccess, data } = useQuery({
+  const { isLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: sloKeys.rule(sloIds),
     queryFn: async () => {
       try {
@@ -70,10 +61,13 @@ export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSl
     keepPreviousData: true,
   });
 
+  const refetchRules = refetch as () => void;
+
   return {
     data,
     isLoading,
     isSuccess,
     isError,
+    refetchRules,
   };
 }

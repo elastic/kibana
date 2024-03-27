@@ -26,11 +26,13 @@ export interface SloListItemProps {
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
   activeAlerts?: number;
+  refetchRules: () => void;
 }
 
 export function SloListItem({
   slo,
   rules,
+  refetchRules,
   historicalSummary = [],
   historicalSummaryLoading,
   activeAlerts,
@@ -116,6 +118,7 @@ export function SloListItem({
         rule={rules?.[0]}
         isEditRuleFlyoutOpen={isEditRuleFlyoutOpen}
         setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
+        refetchRules={refetchRules}
       />
 
       {isDeleteConfirmationModalOpen ? (

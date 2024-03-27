@@ -44,7 +44,7 @@ export interface Props {
   activeAlerts?: number;
   loading: boolean;
   error: boolean;
-  cardsPerRow: number;
+  refetchRules: () => void;
 }
 
 export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
@@ -68,7 +68,7 @@ const getFirstGroupBy = (slo: SLOWithSummaryResponse) => {
   return slo.groupBy && ![slo.groupBy].flat().includes(ALL_VALUE) ? firstGroupBy : '';
 };
 
-export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cardsPerRow }: Props) {
+export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refetchRules }: Props) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const [isMouseOver, setIsMouseOver] = useState(false);
@@ -147,6 +147,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
         rule={rules?.[0]}
         isEditRuleFlyoutOpen={isEditRuleFlyoutOpen}
         setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
+        refetchRules={refetchRules}
       />
 
       {isDeleteConfirmationModalOpen ? (
