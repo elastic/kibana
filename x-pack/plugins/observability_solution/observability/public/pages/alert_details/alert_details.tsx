@@ -204,7 +204,7 @@ export function AlertDetails() {
   const tabs: EuiTabbedContentTab[] = [
     {
       id: OVERVIEW_TAB_ID,
-      name: i18n.translate('xpack.observability.customThreshold.alertDetails.tab.overviewLabel', {
+      name: i18n.translate('xpack.observability.alertDetails.tab.overviewLabel', {
         defaultMessage: 'Overview',
       }),
       'data-test-subj': 'overviewTab',
@@ -212,7 +212,7 @@ export function AlertDetails() {
     },
     {
       id: METADATA_TAB_ID,
-      name: i18n.translate('xpack.observability.customThreshold.alertDetails.tab.metadataLabel', {
+      name: i18n.translate('xpack.observability.alertDetails.tab.metadataLabel', {
         defaultMessage: 'Metadata',
       }),
       'data-test-subj': 'metadataTab',
