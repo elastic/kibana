@@ -21,6 +21,8 @@ export interface UserProfileAPIClient {
    * request has not finished or because there is no user profile data for the current user.
    */
   readonly userProfileLoaded$: Observable<boolean>;
+  /** Flag to indicate if the current user has a user profile. Anonymous users don't have user profiles. */
+  readonly enabled$: Observable<boolean>;
   /**
    * Retrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or
    * users authenticated via authenticating proxies, the `null` value is returned.

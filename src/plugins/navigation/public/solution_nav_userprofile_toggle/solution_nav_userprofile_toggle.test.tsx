@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { of } from 'rxjs';
 import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -34,6 +35,7 @@ describe('SolutionNavUserProfileToggle', () => {
       userProfileData: { userSettings: { solutionNavOptOut: undefined } },
       isLoading: false,
       update: mockUpdate,
+      userProfileEnabled: true,
     });
 
     const { getByTestId, rerender } = render(
@@ -49,6 +51,7 @@ describe('SolutionNavUserProfileToggle', () => {
       userProfileData: { userSettings: { solutionNavOptOut: true } },
       isLoading: false,
       update: mockUpdate,
+      userProfileEnabled: true,
     });
 
     // Rerender the component to apply the new props
@@ -58,5 +61,26 @@ describe('SolutionNavUserProfileToggle', () => {
 
     fireEvent.click(toggleSwitch);
     expect(mockUpdate).toHaveBeenLastCalledWith({ userSettings: { solutionNavOptOut: false } });
+  });
+
+  it('does not render if user profile is disabled', async () => {
+    const security = securityMock.createStart();
+    security.userProfiles.enabled$ = of(false);
+    const core = coreMock.createStart();
+
+    const mockUpdate = jest.fn();
+    mockUseUpdateUserProfile.mockReturnValue({
+      userProfileData: { userSettings: { solutionNavOptOut: undefined } },
+      isLoading: false,
+      update: mockUpdate,
+      userProfileEnabled: false,
+    });
+
+    const { queryByTestId } = render(
+      <SolutionNavUserProfileToggle core={core} security={security} defaultOptOutValue={false} />
+    );
+    const toggleSwitch = await queryByTestId('solutionNavToggleSwitch');
+
+    expect(toggleSwitch).toBeNull();
   });
 });

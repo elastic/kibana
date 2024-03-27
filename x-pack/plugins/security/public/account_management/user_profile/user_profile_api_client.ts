@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, skipWhile, Subject, switchMap } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
 import type {
@@ -32,16 +32,27 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
     this.internalDataUpdates$.asObservable();
 
   private readonly _userProfile$ = new BehaviorSubject<UserProfileData | null>(null);
+  private readonly _enabled$ = new BehaviorSubject(false);
   private readonly _userProfileLoaded$ = new BehaviorSubject(false);
 
   /** Observable of the current user profile data */
   public readonly userProfile$ = this._userProfile$.asObservable();
-  public readonly userProfileLoaded$ = this._userProfileLoaded$.asObservable();
+  public readonly userProfileLoaded$ = this._userProfileLoaded$
+    .asObservable()
+    .pipe(distinctUntilChanged());
+  public enabled$: Observable<boolean>;
 
-  constructor(private readonly http: HttpStart) {}
+  constructor(private readonly http: HttpStart) {
+    this.enabled$ = this.userProfileLoaded$.pipe(
+      skipWhile((loaded) => !loaded),
+      switchMap(() => this._enabled$.asObservable()),
+      distinctUntilChanged()
+    );
+  }
 
   public start() {
     // Fetch the user profile with default path to initialize the user profile observable.
+    // This will also enable or not the user profile for the user by checking if we receive a 404 on this request.
     this.getCurrent({ dataPath: DEFAULT_DATAPATHS }).catch(() => {
       // silently ignore the error
     });
@@ -62,18 +73,19 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
       .then((response) => {
         const data = response?.data ?? {};
         const updated = merge(this._userProfile$.getValue(), data);
-        this._userProfile$.next(updated);
 
-        if (this._userProfileLoaded$.getValue() === false) {
-          this._userProfileLoaded$.next(true);
-        }
+        this._userProfile$.next(updated);
+        this._enabled$.next(true);
+        this._userProfileLoaded$.next(true);
 
         return response;
       })
       .catch((err) => {
-        if (this._userProfileLoaded$.getValue() === false) {
-          this._userProfileLoaded$.next(true);
-        }
+        // If we receive a 404 on the request, it means there are no user profile for the user.
+        const notFound = err?.response?.status === 404;
+        this._enabled$.next(notFound ? false : true);
+        this._userProfileLoaded$.next(true);
+
         return Promise.reject(err);
       });
   }

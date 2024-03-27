@@ -34,6 +34,7 @@ function createStartMock() {
       partialUpdate: jest.fn(),
       userProfile$: of({}),
       userProfileLoaded$: of(true),
+      enabled$: of(true),
     },
     uiApi: getUiApiMock.createStart(),
   };

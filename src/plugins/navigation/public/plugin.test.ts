@@ -20,6 +20,7 @@ import {
 } from '../common';
 import { NavigationPublicPlugin } from './plugin';
 import { ConfigSchema } from './types';
+import { SolutionNavUserProfileToggle } from './solution_nav_userprofile_toggle';
 
 jest.mock('rxjs', () => {
   const original = jest.requireActual('rxjs');
@@ -163,6 +164,29 @@ describe('Navigation Plugin', () => {
       expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith(null, {
         onlyIfNotSet: true,
       });
+    });
+
+    it('should add the opt in/out toggle in the user menu', () => {
+      const { plugin, coreStart, unifiedSearch, cloud, security, getGlobalSetting$ } = setup({
+        featureOn,
+      });
+
+      const uiSettingsValues: Record<string, any> = {
+        [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true,
+        [OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID]: 'visible',
+        [DEFAULT_SOLUTION_NAV_UI_SETTING_ID]: 'es',
+      };
+
+      getGlobalSetting$.mockImplementation((settingId: string) => {
+        const value = uiSettingsValues[settingId] ?? 'unknown';
+        return of(value);
+      });
+
+      plugin.start(coreStart, { unifiedSearch, cloud, security });
+
+      expect(security.navControlService.addUserMenuLinks).toHaveBeenCalled();
+      const [menuLink] = security.navControlService.addUserMenuLinks.mock.calls[0][0];
+      expect((menuLink.content as any)?.type).toBe(SolutionNavUserProfileToggle);
     });
 
     describe('isSolutionNavEnabled$', () => {

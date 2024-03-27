@@ -44,5 +44,6 @@ export interface UserProfileData {
 
 export interface UserProfileAPIClient {
   userProfile$: Observable<UserProfileData | null>;
+  enabled$: Observable<boolean>;
   partialUpdate: <D extends Partial<UserProfileData>>(data: D) => Promise<void>;
 }

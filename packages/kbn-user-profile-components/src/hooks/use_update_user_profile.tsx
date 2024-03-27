@@ -53,7 +53,7 @@ export const useUpdateUserProfile = ({
   pageReloadChecker,
 }: Props = {}) => {
   const { userProfileApiClient, notifySuccess } = useUserProfiles();
-  const { userProfile$ } = userProfileApiClient;
+  const { userProfile$, enabled$ } = userProfileApiClient;
   const {
     enabled: notificationSuccessEnabled = true,
     title: notificationTitle = i18nTexts.notificationSuccess.title,
@@ -61,6 +61,7 @@ export const useUpdateUserProfile = ({
   } = notificationSuccess;
   const [isLoading, setIsLoading] = useState(false);
   const userProfileData = useObservable(userProfile$);
+  const userProfileEnabled = useObservable(enabled$);
   // Keep a snapshot before updating the user profile so we can compare previous and updated values
   const userProfileSnapshot = useRef<UserProfileData | null>();
   const isMounted = useRef(false);
@@ -143,6 +144,8 @@ export const useUpdateUserProfile = ({
     userProfileData,
     /** Flag to indicate if currently updating */
     isLoading,
+    /** Flag to indicate if user profile is enabled */
+    userProfileEnabled,
   };
 };
 

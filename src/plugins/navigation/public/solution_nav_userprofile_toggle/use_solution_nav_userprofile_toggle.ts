@@ -15,7 +15,7 @@ interface Deps {
 
 export const useSolutionNavUserProfileToggle = ({ defaultOptOutValue }: Deps) => {
   const [hasOptOut, setHasOptOut] = useState(defaultOptOutValue);
-  const { userProfileData, isLoading, update } = useUpdateUserProfile();
+  const { userProfileData, isLoading, update, userProfileEnabled } = useUpdateUserProfile();
 
   const { userSettings: { solutionNavOptOut = defaultOptOutValue } = {} } = userProfileData ?? {};
 
@@ -42,8 +42,8 @@ export const useSolutionNavUserProfileToggle = ({ defaultOptOutValue }: Deps) =>
   }, [solutionNavOptOut]);
 
   return {
-    isVisible: true,
     toggle,
     hasOptOut,
+    userProfileEnabled,
   };
 };

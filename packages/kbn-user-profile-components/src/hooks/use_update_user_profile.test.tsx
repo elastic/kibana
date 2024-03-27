@@ -27,6 +27,7 @@ const security = {
     partialUpdate: jest.fn(),
     userProfile$: of({}),
     userProfileLoaded$: of(true),
+    enabled$: of(true),
   },
   uiApi: {},
 };

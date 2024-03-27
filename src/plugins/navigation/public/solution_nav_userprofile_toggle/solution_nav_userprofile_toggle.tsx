@@ -32,20 +32,20 @@ interface Props {
 export const SolutionNavUserProfileToggle = ({ security, core, defaultOptOutValue }: Props) => {
   return (
     <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-      <ThemeDarkModeToggleUi defaultOptOutValue={defaultOptOutValue} />
+      <SolutionNavUserProfileToggleUi defaultOptOutValue={defaultOptOutValue} />
     </UserProfilesKibanaProvider>
   );
 };
 
-function ThemeDarkModeToggleUi({ defaultOptOutValue }: { defaultOptOutValue: boolean }) {
+function SolutionNavUserProfileToggleUi({ defaultOptOutValue }: { defaultOptOutValue: boolean }) {
   const toggleTextSwitchId = useGeneratedHtmlId({ prefix: 'toggleSolutionNavSwitch' });
   const { euiTheme } = useEuiTheme();
 
-  const { isVisible, toggle, hasOptOut } = useSolutionNavUserProfileToggle({
+  const { userProfileEnabled, toggle, hasOptOut } = useSolutionNavUserProfileToggle({
     defaultOptOutValue,
   });
 
-  if (!isVisible) {
+  if (!userProfileEnabled) {
     return null;
   }
 
