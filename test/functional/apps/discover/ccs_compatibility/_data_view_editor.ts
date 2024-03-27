@@ -14,13 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
-  const PageObjects = getPageObjects([
-    'common',
-    'discover',
-    'header',
-    'timePicker',
-    'unifiedSearch',
-  ]);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultIndexPatternString = config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
@@ -58,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('allows creating a new data view', async function () {
       const dataViewToCreate = config.get('esTestCluster.ccs') ? 'ftr-remote:logstash' : 'logstash';
-      await PageObjects.unifiedSearch.createNewDataView(dataViewToCreate, true, false);
+      await PageObjects.discover.createAdHocDataView(dataViewToCreate, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
         'data view selector to include a newly created dataview',
