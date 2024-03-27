@@ -7,15 +7,43 @@
  */
 
 export interface HasLibraryTransforms<StateT extends object = object> {
+  //
+  // Add to library methods
+  //
+  /**
+   *
+   * @returns {Promise<boolean>} 
+   *   True when embeddable is by-value and can be converted to by-reference embeddable
+   */
   canLinkToLibrary: () => Promise<boolean>;
-  canUnlinkFromLibrary: () => Promise<boolean>;
+  /**
+   *
+   * @returns {Promise<{ state: StateT; savedObjectId: string }>}
+   *   state: by-reference embeddable state replacing by-value embeddable state
+   *   savedObjectId: Saved object id for newly stored library saved object
+   */
   saveStateToSavedObject: (title: string) => Promise<{ state: StateT; savedObjectId: string }>;
-  savedObjectAttributesToState: () => StateT;
   checkForDuplicateTitle: (
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
     onTitleDuplicate: () => void
   ) => Promise<void>;
+
+  //
+  // Unlink from library methods
+  //
+  /**
+   *
+   * @returns {Promise<boolean>}
+   *   True when embeddable is by-reference and can be converted to by-value
+   */
+  canUnlinkFromLibrary: () => Promise<boolean>;
+  /**
+   *
+   * @returns {StateT}
+   *   by-value embeddable state replacing by-reference embeddable state
+   */
+  savedObjectAttributesToState: () => StateT;
 }
 
 export const apiHasLibraryTransforms = <StateT extends object = object>(
