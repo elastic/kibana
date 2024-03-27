@@ -17,16 +17,10 @@ export interface CreateRuleData<Params extends RuleParams = never> {
   enabled: CreateRuleDataType['enabled'];
   consumer: CreateRuleDataType['consumer'];
   tags: CreateRuleDataType['tags'];
+  throttle?: CreateRuleDataType['throttle'];
   params: Params;
   schedule: CreateRuleDataType['schedule'];
   actions: CreateRuleDataType['actions'];
-  alertDelay?: CreateRuleDataType['alertDelay'];
-  /**
-   * @deprecated Use action-level `notifyWhen` instead *
-   */
   notifyWhen?: CreateRuleDataType['notifyWhen'];
-  /**
-   * @deprecated Use action-level `throttle` instead *
-   */
-  throttle?: CreateRuleDataType['throttle'];
+  alertDelay?: CreateRuleDataType['alertDelay'];
 }

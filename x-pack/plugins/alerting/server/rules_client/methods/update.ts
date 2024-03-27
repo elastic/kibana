@@ -49,15 +49,9 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
     params: Params;
-    alertDelay?: AlertDelay;
-    /**
-     * @deprecated Use action-level `throttle` instead
-     */
     throttle?: string | null;
-    /**
-     * @deprecated Use action-level `notifyWhen` instead
-     */
     notifyWhen?: RuleNotifyWhenType | null;
+    alertDelay?: AlertDelay;
   };
   allowMissingConnectorSecrets?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision;

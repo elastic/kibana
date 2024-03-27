@@ -165,15 +165,9 @@ export interface Rule<Params extends RuleTypeParams = never> {
   apiKey: string | null;
   apiKeyOwner: string | null;
   apiKeyCreatedByUser?: boolean | null;
-  muteAll: boolean;
-  /**
-   * @deprecated Use action-level `notifyWhen` instead
-   */
-  notifyWhen?: RuleNotifyWhenType | null;
-  /**
-   * @deprecated Use action-level `throttle` instead
-   */
   throttle?: string | null;
+  muteAll: boolean;
+  notifyWhen?: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
