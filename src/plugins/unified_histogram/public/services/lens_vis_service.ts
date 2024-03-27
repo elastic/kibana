@@ -582,8 +582,13 @@ export class LensVisService {
     if (externalVisContext?.attributes) {
       if (
         isEqual(currentQuery, externalVisContext.attributes?.state?.query) &&
-        suggestionType === externalVisContext?.suggestionType &&
-        isSuggestionAndVisContextCompatible(suggestion, externalVisContext) &&
+        dataView.timeFieldName === externalVisContext?.requestData?.timeField &&
+        areSuggestionAndVisContextAndQueryParamsStillCompatible({
+          suggestionType,
+          suggestion,
+          externalVisContext,
+          queryParams,
+        }) &&
         (isTextBased || // the rest is only for data view mode
           (timeInterval === externalVisContext?.requestData?.timeInterval &&
             breakdownField?.name === externalVisContext?.requestData?.breakdownField))
@@ -707,4 +712,29 @@ function getLensSuggestionFromLensAttributes({
   }
 
   return undefined;
+}
+
+function areSuggestionAndVisContextAndQueryParamsStillCompatible({
+  suggestionType,
+  suggestion,
+  externalVisContext,
+  queryParams,
+}: {
+  suggestionType: UnifiedHistogramSuggestionType;
+  suggestion: Suggestion;
+  externalVisContext: UnifiedHistogramVisContext;
+  queryParams: QueryParams;
+}): boolean {
+  if (
+    suggestionType === UnifiedHistogramSuggestionType.lensSuggestion &&
+    !Boolean(getLensSuggestionFromLensAttributes({ externalVisContext, queryParams }))
+  ) {
+    // can't retrieve back a suggestion with matching query and columns
+    return false;
+  }
+  return (
+    suggestionType === externalVisContext.suggestionType &&
+    // check vis shape
+    isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
+  );
 }
