@@ -136,6 +136,7 @@ steps:
         SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
         SERVICE: kibana
         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
+        DRY_RUN: "${DRY_RUN:-false}"
 EOF
 
 else
