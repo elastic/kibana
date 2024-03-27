@@ -220,7 +220,7 @@ export async function createRule<Params extends RuleParams = never>(
       id: createdRuleSavedObject.id,
       logger: context.logger,
       ruleType: context.ruleTypeRegistry.get(createdRuleSavedObject.attributes.alertTypeId),
-      references,
+      references: createdRuleSavedObject.references,
     }
   );
 

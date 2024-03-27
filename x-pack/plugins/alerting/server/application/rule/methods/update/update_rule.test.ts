@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -16,22 +16,22 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { IntervalSchedule, RuleNotifyWhen } from '../../types';
-import { RecoveredActionGroup } from '../../../common';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { IntervalSchedule, RuleNotifyWhen } from '../../../../types';
+import { RecoveredActionGroup } from '../../../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from './lib';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { migrateLegacyActions } from '../lib';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
-jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
     migrateLegacyActions: jest.fn(),
   };
@@ -47,7 +47,7 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
-jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
@@ -56,7 +56,7 @@ jest.mock('uuid', () => {
   return { v4: () => `${uuid++}` };
 });
 
-jest.mock('../../application/rule/methods/get_schedule_frequency', () => ({
+jest.mock('../get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
 }));
 
@@ -119,6 +119,18 @@ describe('update()', () => {
       revision: 0,
       scheduledTaskId: 'task-123',
       params: {},
+      executionStatus: {
+        lastExecutionDate: '2019-02-12T21:01:22.479Z',
+        status: 'pending',
+      },
+      muteAll: false,
+      legacyId: null,
+      snoozeSchedule: [],
+      mutedInstanceIds: [],
+      createdBy: 'elastic',
+      createdAt: '2019-02-12T21:01:22.479Z',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
       actions: [
         {
           group: 'default',
@@ -136,7 +148,13 @@ describe('update()', () => {
         },
       ],
     },
-    references: [],
+    references: [
+      {
+        name: '1',
+        type: 'action',
+        id: '1',
+      },
+    ],
     version: '123',
   };
   const existingDecryptedAlert = {
@@ -282,6 +300,10 @@ describe('update()', () => {
         alertDelay: {
           active: 5,
         },
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
       },
       references: [
         {
@@ -375,6 +397,10 @@ describe('update()', () => {
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": "onActiveAlert",
         "params": Object {
@@ -439,7 +465,14 @@ describe('update()', () => {
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "myApp",
+        "createdAt": "2019-02-12T21:01:22.479Z",
+        "createdBy": "elastic",
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": "2019-02-12T21:01:22.479Z",
+          "status": "pending",
+        },
+        "legacyId": null,
         "mapped_params": Object {
           "risk_score": 40,
           "severity": "20-low",
@@ -447,6 +480,8 @@ describe('update()', () => {
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
         },
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
         "name": "abc",
         "notifyWhen": "onActiveAlert",
         "params": Object {
@@ -459,6 +494,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -592,6 +628,10 @@ describe('update()', () => {
         notifyWhen: 'onActiveAlert',
         revision: 1,
         scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -649,6 +689,16 @@ describe('update()', () => {
       1,
       RULE_SAVED_OBJECT_TYPE,
       {
+        muteAll: false,
+        legacyId: null,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         actions: [
           {
             group: 'default',
@@ -734,6 +784,10 @@ describe('update()', () => {
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": "onActiveAlert",
         "params": Object {
@@ -844,6 +898,10 @@ describe('update()', () => {
         notifyWhen: 'onActiveAlert',
         revision: 1,
         scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -922,6 +980,16 @@ describe('update()', () => {
             uuid: '108',
           },
         ],
+        muteAll: false,
+        legacyId: null,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
@@ -974,6 +1042,10 @@ describe('update()', () => {
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": "onActiveAlert",
         "params": Object {
@@ -1065,6 +1137,10 @@ describe('update()', () => {
         notifyWhen: 'onActiveAlert',
         revision: 1,
         scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -1106,6 +1182,16 @@ describe('update()', () => {
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       {
+        muteAll: false,
+        legacyId: null,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         actions: [
           {
             actionRef: 'action_0',
@@ -1165,6 +1251,10 @@ describe('update()', () => {
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": "onActiveAlert",
         "params": Object {
@@ -1194,6 +1284,10 @@ describe('update()', () => {
         schedule: { interval: '1m' },
         params: {
           bar: true,
+        },
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -1255,9 +1349,12 @@ describe('update()', () => {
             },
           },
         ],
-        "apiKey": "MTIzOmFiYw==",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": "onThrottleInterval",
         "params": Object {
@@ -1297,13 +1394,21 @@ describe('update()', () => {
         ],
         "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
-        "apiKeyCreatedByUser": undefined,
         "apiKeyOwner": "elastic",
         "consumer": "myApp",
+        "createdAt": "2019-02-12T21:01:22.479Z",
+        "createdBy": "elastic",
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": "2019-02-12T21:01:22.479Z",
+          "status": "pending",
+        },
+        "legacyId": null,
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
         },
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
         "name": "abc",
         "notifyWhen": "onThrottleInterval",
         "params": Object {
@@ -1314,6 +1419,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1356,6 +1462,10 @@ describe('update()', () => {
           bar: true,
         },
         notifyWhen: 'onThrottleInterval',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         actions: [
@@ -1416,9 +1526,12 @@ describe('update()', () => {
             },
           },
         ],
-        "apiKey": null,
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": "onThrottleInterval",
         "params": Object {
@@ -1453,10 +1566,19 @@ describe('update()', () => {
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "myApp",
+        "createdAt": "2019-02-12T21:01:22.479Z",
+        "createdBy": "elastic",
         "enabled": false,
+        "executionStatus": Object {
+          "lastExecutionDate": "2019-02-12T21:01:22.479Z",
+          "status": "pending",
+        },
+        "legacyId": null,
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
         },
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
         "name": "abc",
         "notifyWhen": "onThrottleInterval",
         "params": Object {
@@ -1467,6 +1589,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1598,6 +1721,10 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         createdAt: new Date().toISOString(),
         actions: [
           {
@@ -1626,10 +1753,14 @@ describe('update()', () => {
         },
       ],
     });
+
     await rulesClient.update({
       id: '1',
       data: {
-        ...existingAlert.attributes,
+        tags: existingAlert.attributes.tags,
+        params: existingAlert.attributes.params,
+        schedule: existingAlert.attributes.schedule,
+        actions: [],
         name: ' my alert name ',
       },
     });
@@ -1646,6 +1777,10 @@ describe('update()', () => {
         schedule: { interval: '1m' },
         params: {
           bar: true,
+        },
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
         },
         actions: [
           {
@@ -1797,9 +1932,13 @@ describe('update()', () => {
           },
         ],
         scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         createdAt: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       },
-      updated_at: new Date().toISOString(),
       references: [
         {
           name: 'action_0',
@@ -1867,7 +2006,11 @@ describe('update()', () => {
         ],
       },
     });
-    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      undefined
+    );
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'update(): Failed to load API key to invalidate on alert 1: Fail'
     );
@@ -1952,6 +2095,10 @@ describe('update()', () => {
           actions: [],
           enabled: true,
           alertTypeId: '123',
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
           schedule: currentSchedule,
           scheduledTaskId: 'task-123',
         },
@@ -1993,6 +2140,10 @@ describe('update()', () => {
               },
             },
           ],
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
           scheduledTaskId: taskId,
         },
         references: [
@@ -2421,6 +2572,10 @@ describe('update()', () => {
         notifyWhen: 'onActiveAlert',
         revision: 1,
         scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -2465,6 +2620,16 @@ describe('update()', () => {
       1,
       RULE_SAVED_OBJECT_TYPE,
       {
+        muteAll: false,
+        legacyId: null,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         actions: [
           {
             group: 'default',
@@ -2473,7 +2638,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '147',
+            uuid: '146',
           },
         ],
         alertTypeId: 'myType',
@@ -2516,6 +2681,10 @@ describe('update()', () => {
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": "onActiveAlert",
         "params": Object {
@@ -2615,6 +2784,10 @@ describe('update()', () => {
         ],
         notifyWhen: 'onActiveAlert',
         scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -2742,6 +2915,10 @@ describe('update()', () => {
           },
           actions: [],
           scheduledTaskId: 'task-123',
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
           createdAt: new Date().toISOString(),
         },
         updated_at: new Date().toISOString(),
@@ -2819,6 +2996,10 @@ describe('update()', () => {
           },
           actions: [],
           scheduledTaskId: 'task-123',
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
           createdAt: new Date().toISOString(),
         },
         updated_at: new Date().toISOString(),
@@ -2954,6 +3135,10 @@ describe('update()', () => {
           },
         ],
         scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -3013,6 +3198,16 @@ describe('update()', () => {
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       {
+        muteAll: false,
+        legacyId: null,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         actions: [
           {
             actionRef: 'action_0',
@@ -3028,7 +3223,7 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '154',
+            uuid: '153',
           },
         ],
         alertTypeId: 'myType',
@@ -3072,6 +3267,10 @@ describe('update()', () => {
           actions: [],
           notifyWhen: 'onActiveAlert',
           scheduledTaskId: 'task-123',
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
@@ -3082,7 +3281,7 @@ describe('update()', () => {
     test('should call migrateLegacyActions', async () => {
       const existingDecryptedSiemAlert = {
         ...existingDecryptedAlert,
-        attributes: { ...existingDecryptedAlert, consumer: AlertConsumers.SIEM },
+        attributes: { ...existingDecryptedAlert.attributes, consumer: AlertConsumers.SIEM },
       };
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(
@@ -3144,6 +3343,10 @@ describe('update()', () => {
             },
           },
         ],
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyCreatedByUser: true,
         revision: 1,
@@ -3200,10 +3403,13 @@ describe('update()', () => {
             },
           },
         ],
-        "apiKey": "MTIzOmFiYw==",
         "apiKeyCreatedByUser": true,
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": "onThrottleInterval",
         "params": Object {
@@ -3232,7 +3438,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "155",
+            "uuid": "154",
           },
         ],
         "alertTypeId": "myType",
@@ -3240,10 +3446,19 @@ describe('update()', () => {
         "apiKeyCreatedByUser": true,
         "apiKeyOwner": "elastic",
         "consumer": "myApp",
+        "createdAt": "2019-02-12T21:01:22.479Z",
+        "createdBy": "elastic",
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": "2019-02-12T21:01:22.479Z",
+          "status": "pending",
+        },
+        "legacyId": null,
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
         },
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
         "name": "abc",
         "notifyWhen": "onThrottleInterval",
         "params": Object {
@@ -3254,6 +3469,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
