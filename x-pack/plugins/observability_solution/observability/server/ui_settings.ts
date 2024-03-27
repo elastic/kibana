@@ -334,9 +334,9 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.apmEnableServiceInventoryTableSearchBarDescription',
       {
         defaultMessage:
-          '{betaLabel} Enables faster searching in the APM Service inventory table by adding a handy search bar with live filtering.',
+          '{technicalPreviewLabel} Enables faster searching in the APM Service inventory table by adding a handy search bar with live filtering.',
         values: {
-          betaLabel: `<em>[${betaLabel}]</em>`,
+          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
         },
       }
     ),
