@@ -109,7 +109,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => {}}
-            title={title ?? ""}
+            title={title ?? ''}
             showCopyOnSave={false}
             objectType={
               typeof embeddable.getTypeDisplayName === 'function'
