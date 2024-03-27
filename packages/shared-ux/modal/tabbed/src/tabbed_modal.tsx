@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback, Fragment, type ComponentProps, type FC } from 'react';
+import React, { useMemo, Fragment, type ComponentProps, type FC } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -63,10 +63,6 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
     ));
   };
 
-  const btnClickHandler = useCallback(() => {
-    modalActionBtn && modalActionBtn.handler({ state: selectedTabState });
-  }, [selectedTabState, modalActionBtn]);
-
   return (
     <EuiModal onClose={onClose} style={{ ...(modalWidth ? { width: modalWidth } : {}) }} maxWidth>
       <EuiModalHeader>
@@ -87,7 +83,9 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
             fill
             data-test-subj={modalActionBtn.dataTestSubj}
             data-share-url={state.url}
-            onClick={btnClickHandler}
+            onClick={() => {
+              modalActionBtn.handler({ state: selectedTabState });
+            }}
           >
             <FormattedMessage
               id={modalActionBtn.formattedMessageId}
