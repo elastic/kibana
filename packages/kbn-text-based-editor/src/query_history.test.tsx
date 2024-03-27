@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { EuiInMemoryTable } from '@elastic/eui';
 import { QueryHistoryAction, getTableColumns, QueryHistory, QueryColumn } from './query_history';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
 
 jest.mock('./history_local_storage', () => {
   const module = jest.requireActual('./history_local_storage');
@@ -29,29 +28,22 @@ jest.mock('./history_local_storage', () => {
 
 describe('QueryHistory', () => {
   describe('QueryHistoryAction', () => {
-    it('should render the history action component as a button if is spaceReduced is undefined', async () => {
-      const component = mount(<QueryHistoryAction toggleHistory={jest.fn()} isHistoryOpen />);
+    it('should render the history action component as a button if is spaceReduced is undefined', () => {
+      render(<QueryHistoryAction toggleHistory={jest.fn()} isHistoryOpen />);
       expect(
-        component.find(
-          '[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]'
-        ).length
-      ).not.toBe(0);
+        screen.getByTestId('TextBasedLangEditor-toggle-query-history-button-container')
+      ).toBeInTheDocument();
 
       expect(
-        component
-          .find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
-          .at(0)
-          .text()
-      ).toBe('Hide recent queries');
+        screen.getByTestId('TextBasedLangEditor-toggle-query-history-button-container')
+      ).toHaveTextContent('Hide recent queries');
     });
 
-    it('should render the history action component as an icon if is spaceReduced is true', async () => {
-      const component = mount(
-        <QueryHistoryAction toggleHistory={jest.fn()} isHistoryOpen isSpaceReduced />
-      );
+    it('should render the history action component as an icon if is spaceReduced is true', () => {
+      render(<QueryHistoryAction toggleHistory={jest.fn()} isHistoryOpen isSpaceReduced />);
       expect(
-        component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-icon"]').length
-      ).not.toBe(0);
+        screen.getByTestId('TextBasedLangEditor-toggle-query-history-icon')
+      ).toBeInTheDocument();
     });
   });
 
@@ -147,14 +139,12 @@ describe('QueryHistory', () => {
 
   describe('QueryHistory component', () => {
     it('should not fetch the query items if refetchHistoryItems is not given', async () => {
-      const component = mount(
-        <QueryHistory onUpdateAndSubmit={jest.fn()} containerWidth={400} containerCSS={''} />
-      );
-      expect(component.find(EuiInMemoryTable).prop('items')).toEqual([]);
+      render(<QueryHistory onUpdateAndSubmit={jest.fn()} containerWidth={400} containerCSS={''} />);
+      expect(screen.getByRole('table')).toHaveTextContent('No items found');
     });
 
     it('should fetch the query items if refetchHistoryItems is given ', async () => {
-      const component = mount(
+      render(
         <QueryHistory
           onUpdateAndSubmit={jest.fn()}
           containerWidth={400}
@@ -162,46 +152,15 @@ describe('QueryHistory', () => {
           refetchHistoryItems
         />
       );
-      expect(component.find(EuiInMemoryTable).prop('items')).toEqual([
-        {
-          queryString: 'from kibana_sample_data_flights | limit 10',
-          timeZone: 'Browser',
-          timeRan: 'Mar. 25, 24 08:45:27',
-          queryRunning: false,
-          duration: '2ms',
-          status: 'success',
-        },
-      ]);
-    });
-
-    it('should have an auto layout for small viewports', async () => {
-      const component = mount(
-        <QueryHistory
-          onUpdateAndSubmit={jest.fn()}
-          containerWidth={400}
-          containerCSS={''}
-          refetchHistoryItems
-        />
+      expect(screen.getByRole('table')).toHaveTextContent(
+        'Time ranRecent queriesLast durationTime ranMar. 25, 24 08:45:27Recent queriesfrom kibana_sample_data_flights | limit 10Last duration2ms'
       );
-      expect(component.find(EuiInMemoryTable).prop('tableLayout')).toEqual('auto');
-    });
-
-    it('should have a fixed layout for large viewports', async () => {
-      const component = mount(
-        <QueryHistory
-          onUpdateAndSubmit={jest.fn()}
-          containerWidth={900}
-          containerCSS={''}
-          refetchHistoryItems
-        />
-      );
-      expect(component.find(EuiInMemoryTable).prop('tableLayout')).toEqual('fixed');
     });
   });
 
   describe('Querystring column', () => {
     it('should not render the expanded button for large viewports', async () => {
-      const component = mount(
+      render(
         <QueryColumn
           containerWidth={900}
           queryString={' from index | stats woof = avg(meow) by meow'}
@@ -209,9 +168,8 @@ describe('QueryHistory', () => {
         />
       );
       expect(
-        component.find('[data-test-subj="TextBasedLangEditor-queryHistory-queryString-expanded"]')
-          .length
-      ).toBe(0);
+        screen.queryByTestId('TextBasedLangEditor-queryHistory-queryString-expanded')
+      ).not.toBeInTheDocument();
     });
 
     it('should render the expanded button for small viewports', async () => {
@@ -223,7 +181,7 @@ describe('QueryHistory', () => {
         configurable: true,
         value: 200,
       });
-      const component = mount(
+      render(
         <QueryColumn
           containerWidth={40}
           queryString={' from index | stats woof = avg(meow) by meow'}
@@ -231,9 +189,8 @@ describe('QueryHistory', () => {
         />
       );
       expect(
-        component.find('[data-test-subj="TextBasedLangEditor-queryHistory-queryString-expanded"]')
-          .length
-      ).not.toBe(0);
+        screen.getByTestId('TextBasedLangEditor-queryHistory-queryString-expanded')
+      ).toBeInTheDocument();
     });
   });
 });

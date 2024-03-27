@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 export class ESQLService extends FtrService {
