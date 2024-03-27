@@ -301,6 +301,7 @@ export class SecurityPlugin
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
+      getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
     });
 
     this.registerDeprecations(core, license);

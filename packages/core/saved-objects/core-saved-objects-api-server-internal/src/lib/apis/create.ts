@@ -36,6 +36,7 @@ export const performCreate = async <T>(
     serializer,
     migrator,
     extensions = {},
+    logger,
   }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
   const {
@@ -45,6 +46,7 @@ export const performCreate = async <T>(
     preflight: preflightHelper,
     serializer: serializerHelper,
     migration: migrationHelper,
+    user: userHelper,
   } = helpers;
   const { securityExtension } = extensions;
 
@@ -69,6 +71,7 @@ export const performCreate = async <T>(
   validationHelper.validateOriginId(type, options);
 
   const time = getCurrentTime();
+  const createdBy = userHelper.getCurrentUserId();
   let savedObjectNamespace: string | undefined;
   let savedObjectNamespaces: string[] | undefined;
   let existingOriginId: string | undefined;
@@ -133,6 +136,7 @@ export const performCreate = async <T>(
     managed: setManaged({ optionsManaged: managed }),
     created_at: time,
     updated_at: time,
+    ...(createdBy && { created_by: createdBy }),
     ...(Array.isArray(references) && { references }),
   });
 
