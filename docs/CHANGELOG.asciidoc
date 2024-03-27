@@ -76,7 +76,7 @@ For information about the {kib} 8.13.0 release, review the following information
 [%collapsible]
 ====
 *Details* +
-In Canvas, and empty text element incorrectly triggers a "Markdown content is required in [readOnly] mode" toast notification. For more information, refer to ({kibana-pull}179457[#179457]).
+In Canvas, an empty text element incorrectly triggers a "Markdown content is required in [readOnly] mode" toast notification. For more information, refer to ({kibana-pull}179457[#179457]).
 ====
 
 [float]
