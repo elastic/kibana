@@ -15,7 +15,11 @@ import { UnifiedTimelineBody } from './unified_timeline_body';
 import { render, screen } from '@testing-library/react';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 
-jest.mock('../unified_components');
+jest.mock('../unified_components', () => {
+  return {
+    UnifiedTimeline: jest.fn(),
+  };
+});
 
 const mockEventsData = structuredClone(mockTimelineData);
 
@@ -54,7 +58,7 @@ const MockUnifiedTimelineComponent = jest.fn(() => <div />);
 
 describe('UnifiedTimelineBody', () => {
   beforeEach(() => {
-    (UnifiedTimeline as jest.Mock).mockImplementation(MockUnifiedTimelineComponent);
+    (UnifiedTimeline as unknown as jest.Mock).mockImplementation(MockUnifiedTimelineComponent);
   });
   it('should pass correct page rows', () => {
     const { rerender } = renderTestComponents();
