@@ -238,6 +238,22 @@ Object {
       ],
       "type": "array",
     },
+    "system": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -359,6 +375,22 @@ Object {
         },
       ],
       "type": "array",
+    },
+    "system": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
     },
     "temperature": Object {
       "flags": Object {
