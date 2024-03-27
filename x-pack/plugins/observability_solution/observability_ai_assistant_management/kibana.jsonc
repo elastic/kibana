@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-ai-assistant-management-plugin",
+  "owner": "@elastic/obs-knowledge-team",
+  "plugin": {
+    "id": "observabilityAiAssistantManagement",
+    "server": false,
+    "browser": true,
+    "configPath": ["xpack", "observabilityAiAssistantManagement"],
+    "requiredPlugins": ["management"],
+    "optionalPlugins": [
+      "actions",
+      "home",
+      "observabilityAIAssistant",
+      "serverless",
+      "enterpriseSearch"
+    ],
+    "requiredBundles": ["kibanaReact"]
+  }
+}

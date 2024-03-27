@@ -257,7 +257,7 @@ Object {
 }
 `;
 
-exports[`Transform partial URL state into form state with 'indicator' in URL state handles partial Custom KQL state 1`] = `
+exports[`Transform partial URL state into form state with 'indicator' in URL state handles partial Custom Query state 1`] = `
 Object {
   "budgetingMethod": "occurrences",
   "description": "",
