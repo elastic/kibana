@@ -10,7 +10,6 @@ import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugi
 
 import type { ApiKeyAggregationsResponse, ApiKeyToInvalidate } from '../../../common/model';
 import type {
-  GetAPIKeysResult,
   QueryApiKeyResult,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
@@ -27,10 +26,6 @@ const apiKeysUrl = '/internal/security/api_key';
 
 export class APIKeysAPIClient {
   constructor(private readonly http: HttpStart) {}
-
-  public async getApiKeys() {
-    return await this.http.get<GetAPIKeysResult>(apiKeysUrl);
-  }
 
   public async queryApiKeys(params?: any) {
     return await this.http.post<QueryApiKeyResult>(`${apiKeysUrl}/_query`, {
