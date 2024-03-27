@@ -225,11 +225,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             {!isDraftImageConfigValid ? (
               <EuiEmptyPrompt
                 css={css`
-                  max-width: none;
-                  ${CONTAINER_SIZING_CSS}
-                  .euiEmptyPrompt__main {
-                    height: 100%;
-                  }
+                  max-inline-size: none !important;
                 `}
                 iconType="image"
                 color="subdued"
