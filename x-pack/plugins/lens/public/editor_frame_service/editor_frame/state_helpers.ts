@@ -359,6 +359,7 @@ export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
   doc: Document,
+  canUseCache: boolean,
   services: {
     uiSettings: IUiSettingsClient;
     storage: IStorageWrapper;
@@ -452,7 +453,7 @@ export async function persistedStateToExpression(
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
       nowInstant: services.nowProvider.get(),
-      canUseCache: true,
+      canUseCache,
     }),
     activeVisualizationState,
     indexPatterns,

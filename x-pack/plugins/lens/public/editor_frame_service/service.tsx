@@ -93,7 +93,11 @@ export class EditorFrameService {
    * This is an asynchronous process.
    * @param doc parsed Lens saved object
    */
-  public documentToExpression = async (doc: Document, services: EditorFramePlugins) => {
+  public documentToExpression = async (
+    doc: Document,
+    services: EditorFramePlugins,
+    canUseCache: boolean
+  ) => {
     const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
       this.loadDatasources(),
       this.loadVisualizations(),
@@ -101,7 +105,13 @@ export class EditorFrameService {
 
     const { persistedStateToExpression } = await import('../async_services');
 
-    return persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc, services);
+    return persistedStateToExpression(
+      resolvedDatasources,
+      resolvedVisualizations,
+      doc,
+      canUseCache,
+      services
+    );
   };
 
   public setup(): EditorFrameSetup {
