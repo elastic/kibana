@@ -12,6 +12,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiButton,
+  EuiButtonIcon,
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
   EuiPopover,
@@ -168,17 +169,15 @@ export const PipelineTable: FunctionComponent<Props> = ({
           </EuiButton>
         ) : undefined,
       toolsRight: [
-        <EuiButton
+        <EuiButtonIcon
           key="reloadButton"
           iconType="refresh"
           color="success"
           data-test-subj="reloadButton"
+          size="m"
+          display="fill"
           onClick={onReloadClick}
-        >
-          {i18n.translate('xpack.ingestPipelines.list.table.reloadButtonLabel', {
-            defaultMessage: 'Reload',
-          })}
-        </EuiButton>,
+        />,
         <EuiPopover
           key="createPipelinePopover"
           isOpen={showPopover}
