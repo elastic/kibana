@@ -21,6 +21,7 @@ import {
   EuiFlexGrid,
   EuiAvatar,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 interface UseCaseOption {
@@ -159,6 +160,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     },
   ];
 
+  const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingUseCase' });
   const [selectedId, setSelectedId] = useState<string>();
   const [hoveredId, setHoveredId] = useState<string>();
 
@@ -194,7 +196,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               {/* Using EuiSpacer instead of EuiFlexGroup to ensure spacing is part of hit area for mouse hover effect */}
               {index > 0 && <EuiSpacer size="m" />}
               <EuiCheckableCard
-                id={option.id}
+                id={`${radioGroupId}_${option.id}`}
+                name={radioGroupId}
                 label={option.label}
                 checked={selectedId === option.id}
                 onChange={() => setSelectedId(option.id)}
