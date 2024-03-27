@@ -542,7 +542,6 @@ describe('JiraParamsFields renders', () => {
 
     it('renders additional info for the additional fields field', () => {
       const results = render(<JiraParamsFields {...defaultProps} />);
-      results.debug(document.body, Infinity);
       const additionalFields = results.getByText('Additional fields help');
 
       expect(additionalFields).toBeInTheDocument();
