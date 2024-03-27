@@ -67,6 +67,7 @@ export interface Props {
   selectedSubCategory?: string;
   setSelectedSubCategory?: (c: string | undefined) => void;
   showMissingIntegrationMessage?: boolean;
+  showControls?: boolean;
   showSearchTools?: boolean;
 }
 
@@ -88,6 +89,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   showMissingIntegrationMessage = false,
   callout,
   showCardLabels = true,
+  showControls = true,
   showSearchTools = true,
 }) => {
   const localSearchRef = useLocalSearch(list, !!isLoading);
@@ -176,7 +178,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
       gutterSize="xl"
       data-test-subj="epmList.integrationCards"
     >
-      {!!controls && (
+      {showControls && (
         <StickySidebar data-test-subj="epmList.controlsSideColumn" grow={1}>
           <ControlsColumn controls={controls} title={title} />
         </StickySidebar>

@@ -19,13 +19,14 @@ export default {
 
 type Args = Pick<
   Props,
-  'title' | 'isLoading' | 'showMissingIntegrationMessage' | 'showSearchTools'
+  'title' | 'isLoading' | 'showMissingIntegrationMessage' | 'showControls' | 'showSearchTools'
 >;
 
 const args: Args = {
   title: 'Installed integrations',
   isLoading: false,
   showMissingIntegrationMessage: false,
+  showControls: true,
   showSearchTools: true,
 };
 const categories = [
