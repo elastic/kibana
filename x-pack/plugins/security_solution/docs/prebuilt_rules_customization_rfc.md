@@ -1426,7 +1426,10 @@ Depending on the endpoint, we will have to modify it to address multiple changes
 3. **Removing checks that block modifying prebuilt rules:** some of our endpoints prevent users from modifying prebuilt rules. This check needs to be removed from all endpoints to allow the customization of prebuilt rules.
 4. **Blocking the update of non-customizable fields:** while the goal of this epic is to allow users to modify their prebuilt rule fields, there are certain rule fields that we will still want to prevent the user from modifying via endpoints, since we will not provide support for resolving conflicts for them via the UI or API if they arise during an update. See the **Customizable** column in [this ticket](https://github.com/elastic/kibana/issues/147239) for a detailed list of fields that should be blocked from modification via the endpoints.
 
-The table below shows which of these changes need to be applied to our endpoints: (✅ change needed - ❌ no change needed)
+The table below shows which of these changes need to be applied to our endpoints: (
+  
+- ✏️ Changes needed
+- ➖ No changes needed
 
   <table>
     <thead>
@@ -1441,52 +1444,52 @@ The table below shows which of these changes need to be applied to our endpoints
     <tbody align="center">
       <tr>
         <td><b>Update Rule</b> - PUT /rules</td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>❌</td>
-        <td>✅</td>
+        <td>✏️</td>
+        <td>✏️</td>
+        <td>➖</td>
+        <td>✏️</td>
       </tr>
       <tr>
         <td><b>Patch Rule</b> - PATCH /rules</td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>❌</td>
-        <td>✅</td>
+        <td>✏️</td>
+        <td>✏️</td>
+        <td>➖</td>
+        <td>✏️</td>
       </tr>
       <tr>
         <td><b>Bulk Patch Rules</b> - PATCH /rules/_bulk_update</td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>❌</td>
-        <td>✅</td>
+        <td>✏️</td>
+        <td>✏️</td>
+        <td>➖</td>
+        <td>✏️</td>
       </tr>
       <tr>
         <td><b>Bulk Update Rules</b> - PUT /rules/_bulk_update</td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>❌</td>
-        <td>✅</td>
+        <td>✏️</td>
+        <td>✏️</td>
+        <td>➖</td>
+        <td>✏️</td>
       </tr>
       <tr>
         <td><b>Bulk Actions</b> - POST /rules/_bulk_action</td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>❌</td>
+        <td>✏️</td>
+        <td>✏️</td>
+        <td>✏️</td>
+        <td>➖</td>
       </tr>
       <tr>
         <td><b>Perform Rule Upgrade</b> - POST /prebuilt_rules/upgrade/_perform</td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>❌</td>
-        <td>❌</td>
+        <td>✏️</td>
+        <td>✏️</td>
+        <td>➖</td>
+        <td>➖</td>
       </tr>
       <tr>
         <td><b>Import Rules</b> POST /rules/_import</td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>❌</td>
-        <td>✅</td>
+        <td>✏️</td>
+        <td>✏️</td>
+        <td>➖</td>
+        <td>✏️</td>
       </tr>
   </table>
 
