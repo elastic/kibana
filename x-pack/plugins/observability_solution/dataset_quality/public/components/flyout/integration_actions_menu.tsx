@@ -83,7 +83,7 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
         renderItem: () => (
           <MenuActionItem
             buttonText={seeIntegrationText}
-            dataTestSubject="datasetQualityFlyoutIntegrationOverviewAction"
+            dataTestSubject="datasetQualityFlyoutIntegrationActionOverview"
             routerLinkProps={getIntegrationOverviewLinkProps(integrationName, version)}
             iconType="package"
           />
@@ -93,7 +93,7 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
         renderItem: () => (
           <MenuActionItem
             buttonText={indexTemplateText}
-            dataTestSubject="datasetQualityFlyoutIntegrationTemplateAction"
+            dataTestSubject="datasetQualityFlyoutIntegrationActionTemplate"
             routerLinkProps={getIndexManagementLinkProps({
               sectionId: 'data',
               appId: `index_management/templates/${type}-${name}`,
@@ -113,6 +113,7 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
         icon: 'dashboardApp',
         panel: 1,
         name: viewDashboardsText,
+        'data-test-subj': 'datasetQualityFlyoutIntegrationActionViewDashboards',
       });
     }
 
@@ -129,7 +130,7 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
             renderItem: () => (
               <MenuActionItem
                 buttonText={dashboard.title}
-                dataTestSubject="datasetQualityFlyoutIntegrationDashboardAction"
+                dataTestSubject="datasetQualityFlyoutIntegrationActionDashboard"
                 routerLinkProps={getDashboardLinkProps(dashboard)}
                 iconType="dashboardApp"
               />

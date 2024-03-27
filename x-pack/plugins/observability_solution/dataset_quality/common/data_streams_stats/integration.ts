@@ -12,7 +12,7 @@ export class Integration {
   title: string;
   version: string;
   icons?: IntegrationType['icons'];
-  dashboards: DashboardType[];
+  dashboards?: DashboardType[];
 
   private constructor(integration: Integration) {
     this.name = integration.name;
