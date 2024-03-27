@@ -1,9 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -27,14 +26,17 @@ export interface ConnectorServerSideDefinition {
 export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.azureBlob.description', {
-      defaultMessage: 'Search over your content on Azure Blob Storage.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.azureBlob.description',
+      {
+        defaultMessage: 'Search over your content on Azure Blob Storage.',
+      }
+    ),
     iconPath: 'azure_blob_storage.svg',
     isBeta: false,
     isNative: true,
     keywords: ['cloud', 'azure', 'blob', 's3', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.azureBlob.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.azureBlob.name', {
       defaultMessage: 'Azure Blob Storage',
     }),
     serviceType: 'azure_blob_storage',
@@ -42,7 +44,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.confluence.description',
+      'searchConnectorsPlugin.content.nativeConnectors.confluence.description',
       {
         defaultMessage: 'Search over your content on Confluence Cloud.',
       }
@@ -51,7 +53,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['confluence', 'cloud', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.confluence.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.confluence.name', {
       defaultMessage: 'Confluence Cloud & Server',
     }),
     serviceType: 'confluence',
@@ -59,7 +61,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.confluenceDataCenter.description',
+      'searchConnectorsPlugin.content.nativeConnectors.confluenceDataCenter.description',
       {
         defaultMessage: 'Search over your content on Confluence Data Center.',
       }
@@ -69,9 +71,12 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: true,
     isTechPreview: true,
     keywords: ['confluence', 'data', 'center', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.confluence_data_center.name', {
-      defaultMessage: 'Confluence Data Center',
-    }),
+    name: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.confluence_data_center.name',
+      {
+        defaultMessage: 'Confluence Data Center',
+      }
+    ),
     serviceType: 'confluence',
   },
   {
@@ -82,15 +87,18 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'connector',
       'connector_client',
     ],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.dropbox.description', {
-      defaultMessage: 'Search over your files and folders stored on Dropbox.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.dropbox.description',
+      {
+        defaultMessage: 'Search over your files and folders stored on Dropbox.',
+      }
+    ),
     iconPath: 'dropbox.svg',
     isBeta: false,
     isNative: true,
     isTechPreview: false,
     keywords: ['dropbox', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.dropbox.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.dropbox.name', {
       defaultMessage: 'Dropbox',
     }),
     serviceType: 'dropbox',
@@ -104,14 +112,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'connector_client',
       'jira',
     ],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.jira.description', {
-      defaultMessage: 'Search over your content on Jira Cloud.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.jira.description',
+      {
+        defaultMessage: 'Search over your content on Jira Cloud.',
+      }
+    ),
     iconPath: 'jira_cloud.svg',
     isBeta: false,
     isNative: true,
     keywords: ['jira', 'cloud', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.jira.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.jira.name', {
       defaultMessage: 'Jira Cloud',
     }),
     serviceType: 'jira',
@@ -126,7 +137,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'jira',
     ],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.jiraServer.description',
+      'searchConnectorsPlugin.content.nativeConnectors.jiraServer.description',
       {
         defaultMessage: 'Search over your content on Jira Server.',
       }
@@ -135,7 +146,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: false,
     keywords: ['jira', 'server', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.jiraServer.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.jiraServer.name', {
       defaultMessage: 'Jira Server',
     }),
     serviceType: 'jira',
@@ -143,7 +154,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.jiraDataCenter.description',
+      'searchConnectorsPlugin.content.nativeConnectors.jiraDataCenter.description',
       {
         defaultMessage: 'Search over your content on Jira Data Center.',
       }
@@ -153,21 +164,24 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isTechPreview: true,
     isNative: true,
     keywords: ['jira', 'data', 'center', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.jira_data_center.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.jira_data_center.name', {
       defaultMessage: 'Jira Data Center',
     }),
     serviceType: 'jira',
   },
   {
     categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.github.description', {
-      defaultMessage: 'Search over your projects and repos on GitHub.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.github.description',
+      {
+        defaultMessage: 'Search over your projects and repos on GitHub.',
+      }
+    ),
     iconPath: 'github.svg',
     isBeta: false,
     isNative: true,
     keywords: ['github', 'cloud', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.github.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.github.name', {
       defaultMessage: 'GitHub & GitHub Enterprise Server',
     }),
     serviceType: 'github',
@@ -175,7 +189,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.googleCloud.description',
+      'searchConnectorsPlugin.content.nativeConnectors.googleCloud.description',
       {
         defaultMessage: 'Search over your content on Google Cloud Storage.',
       }
@@ -184,7 +198,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['google', 'cloud', 'blob', 's3', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.googleCloud.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.googleCloud.name', {
       defaultMessage: 'Google Cloud Storage',
     }),
     serviceType: 'google_cloud_storage',
@@ -192,7 +206,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.googleDrive.description',
+      'searchConnectorsPlugin.content.nativeConnectors.googleDrive.description',
       {
         defaultMessage: 'Search over your content on Google Drive.',
       }
@@ -201,7 +215,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['google', 'drive', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.googleDrive.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.googleDrive.name', {
       defaultMessage: 'Google Drive',
     }),
     serviceType: 'google_drive',
@@ -214,14 +228,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'connector',
       'connector_client',
     ],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.mongoDB.description', {
-      defaultMessage: 'Search over your MongoDB content.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.mongoDB.description',
+      {
+        defaultMessage: 'Search over your MongoDB content.',
+      }
+    ),
     iconPath: 'mongodb.svg',
     isBeta: false,
     isNative: true,
     keywords: ['mongo', 'mongodb', 'database', 'nosql', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.mongodb.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.mongodb.name', {
       defaultMessage: 'MongoDB',
     }),
     serviceType: 'mongodb',
@@ -234,14 +251,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'connector',
       'connector_client',
     ],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.mysql.description', {
-      defaultMessage: 'Search over your MySQL content.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.mysql.description',
+      {
+        defaultMessage: 'Search over your MySQL content.',
+      }
+    ),
     iconPath: 'mysql.svg',
     isBeta: false,
     isNative: true,
     keywords: ['mysql', 'sql', 'database', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.mysql.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.mysql.name', {
       defaultMessage: 'MySQL',
     }),
     serviceType: 'mysql',
@@ -255,21 +275,24 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'connector',
       'connector_client',
     ],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.msSql.description', {
-      defaultMessage: 'Search over your content on Microsoft SQL Server.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.msSql.description',
+      {
+        defaultMessage: 'Search over your content on Microsoft SQL Server.',
+      }
+    ),
     iconPath: 'mssql.svg',
     isBeta: false,
     isNative: true,
     keywords: ['mssql', 'microsoft', 'sql', 'database', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.microsoftSQL.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.microsoftSQL.name', {
       defaultMessage: 'Microsoft SQL',
     }),
     serviceType: 'mssql',
   },
   {
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.netowkrDrive.description',
+      'searchConnectorsPlugin.content.nativeConnectors.netowkrDrive.description',
       {
         defaultMessage: 'Search over your Network Drive content.',
       }
@@ -279,28 +302,31 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['network', 'drive', 'file', 'directory', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.networkDrive.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.networkDrive.name', {
       defaultMessage: 'Network drive',
     }),
     serviceType: 'network_drive',
   },
   {
     categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.notion.description', {
-      defaultMessage: 'Search over your content on Notion.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.notion.description',
+      {
+        defaultMessage: 'Search over your content on Notion.',
+      }
+    ),
     iconPath: 'notion.svg',
     isBeta: true,
     isNative: false,
     keywords: ['notion', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.notion.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.notion.name', {
       defaultMessage: 'Notion',
     }),
     serviceType: 'notion',
   },
   {
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.postgreSQL.description',
+      'searchConnectorsPlugin.content.nativeConnectors.postgreSQL.description',
       {
         defaultMessage: 'Search over your content on PostgreSQL.',
       }
@@ -317,22 +343,25 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['postgresql', 'sql', 'database', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.postgresql.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.postgresql.name', {
       defaultMessage: 'PostgreSQL',
     }),
     serviceType: 'postgresql',
   },
   {
     categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.redis.description', {
-      defaultMessage: 'Search over your content on Redis.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.redis.description',
+      {
+        defaultMessage: 'Search over your content on Redis.',
+      }
+    ),
     iconPath: 'redis.svg',
     isBeta: false,
     isNative: false,
     isTechPreview: true,
     keywords: ['redis', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.redis.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.redis.name', {
       defaultMessage: 'Redis',
     }),
     serviceType: 'redis',
@@ -340,7 +369,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.salesforce.description',
+      'searchConnectorsPlugin.content.nativeConnectors.salesforce.description',
       {
         defaultMessage: 'Search over your content on Salesforce.',
       }
@@ -349,7 +378,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['salesforce', 'cloud', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.salesforce.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.salesforce.name', {
       defaultMessage: 'Salesforce',
     }),
     serviceType: 'salesforce',
@@ -364,7 +393,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'connector_client',
     ],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.salesforceSandbox.description',
+      'searchConnectorsPlugin.content.nativeConnectors.salesforceSandbox.description',
       {
         defaultMessage: 'Search over your content on Salesforce Sandbox.',
       }
@@ -373,7 +402,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['salesforce', 'cloud', 'connector', 'sandbox'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.salesforceBox.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.salesforceBox.name', {
       defaultMessage: 'Salesforce Sandbox',
     }),
     serviceType: 'salesforce',
@@ -381,7 +410,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.serviceNow.description',
+      'searchConnectorsPlugin.content.nativeConnectors.serviceNow.description',
       {
         defaultMessage: 'Search over your content on ServiceNow.',
       }
@@ -391,7 +420,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: true,
     isTechPreview: false,
     keywords: ['servicenow', 'cloud', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.serviceNow.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.serviceNow.name', {
       defaultMessage: 'ServiceNow',
     }),
     serviceType: 'servicenow',
@@ -399,7 +428,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.sharepointOnline.description',
+      'searchConnectorsPlugin.content.nativeConnectors.sharepointOnline.description',
       {
         defaultMessage: 'Search over your content on SharePoint Online.',
       }
@@ -409,21 +438,24 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: true,
     isTechPreview: false,
     keywords: ['sharepoint', 'office365', 'cloud', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.sharepointOnline.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.sharepointOnline.name', {
       defaultMessage: 'Sharepoint Online',
     }),
     serviceType: 'sharepoint_online',
   },
   {
     categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.gmail.description', {
-      defaultMessage: 'Search over your content on Gmail.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.gmail.description',
+      {
+        defaultMessage: 'Search over your content on Gmail.',
+      }
+    ),
     iconPath: 'gmail.svg',
     isBeta: true,
     isNative: true,
     keywords: ['gmail', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.gmail.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.gmail.name', {
       defaultMessage: 'Gmail',
     }),
     serviceType: 'gmail',
@@ -437,14 +469,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'connector',
       'connector_client',
     ],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.oracle.description', {
-      defaultMessage: 'Search over your content on Oracle.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.oracle.description',
+      {
+        defaultMessage: 'Search over your content on Oracle.',
+      }
+    ),
     iconPath: 'oracle.svg',
     isBeta: true,
     isNative: true,
     keywords: ['oracle', 'sql', 'database', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.oracle.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.oracle.name', {
       defaultMessage: 'Oracle',
     }),
     serviceType: 'oracle',
@@ -458,20 +493,23 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'connector',
       'connector_client',
     ],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.oneDrive.description', {
-      defaultMessage: 'Search over your content on OneDrive.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.oneDrive.description',
+      {
+        defaultMessage: 'Search over your content on OneDrive.',
+      }
+    ),
     iconPath: 'onedrive.svg',
     isBeta: false,
     isNative: true,
     keywords: ['network', 'drive', 'file', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.oneDrive.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.oneDrive.name', {
       defaultMessage: 'OneDrive',
     }),
     serviceType: 'onedrive',
   },
   {
-    description: i18n.translate('searchConnectors.content.nativeConnectors.s3.description', {
+    description: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.s3.description', {
       defaultMessage: 'Search over your content on Amazon S3.',
     }),
     categories: [
@@ -485,22 +523,25 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['s3', 'cloud', 'amazon', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.s3.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.s3.name', {
       defaultMessage: 'S3',
     }),
     serviceType: 's3',
   },
   {
-    description: i18n.translate('searchConnectors.content.nativeConnectors.slack.description', {
-      defaultMessage: 'Search over your content on Slack.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.slack.description',
+      {
+        defaultMessage: 'Search over your content on Slack.',
+      }
+    ),
     categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
     iconPath: 'slack.svg',
     isBeta: false,
     isNative: false,
     isTechPreview: true,
     keywords: ['slack', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.slack.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.slack.name', {
       defaultMessage: 'Slack',
     }),
     serviceType: 'slack',
@@ -508,7 +549,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.sharepointServer.description',
+      'searchConnectorsPlugin.content.nativeConnectors.sharepointServer.description',
       {
         defaultMessage: 'Search over your content on SharePoint Server.',
       }
@@ -518,7 +559,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: false,
     isTechPreview: false,
     keywords: ['sharepoint', 'cloud', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.sharepointServer.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.sharepointServer.name', {
       defaultMessage: 'Sharepoint Server',
     }),
     serviceType: 'sharepoint_server',
@@ -532,7 +573,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'connector_client',
       'box',
     ],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.box.description', {
+    description: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.box.description', {
       defaultMessage: 'Search over your content on Box.',
     }),
     iconPath: 'box.svg',
@@ -540,15 +581,18 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: false,
     isTechPreview: true,
     keywords: ['cloud', 'box'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.box.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.box.name', {
       defaultMessage: 'Box',
     }),
     serviceType: 'box',
   },
   {
-    description: i18n.translate('searchConnectors.content.nativeConnectors.outlook.description', {
-      defaultMessage: 'Search over your content on Outlook.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.outlook.description',
+      {
+        defaultMessage: 'Search over your content on Outlook.',
+      }
+    ),
     categories: [
       'enterprise_search',
       'elastic_stack',
@@ -561,7 +605,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: true,
     keywords: ['outlook', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.outlook.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.outlook.name', {
       defaultMessage: 'Outlook',
     }),
     serviceType: 'outlook',
@@ -575,15 +619,18 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'connector_client',
       'teams',
     ],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.teams.description', {
-      defaultMessage: 'Search over your content on Teams.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.teams.description',
+      {
+        defaultMessage: 'Search over your content on Teams.',
+      }
+    ),
     iconPath: 'teams.svg',
     isBeta: false,
     isNative: false,
     isTechPreview: true,
     keywords: ['teams', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.teams.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.teams.name', {
       defaultMessage: 'Teams',
     }),
     serviceType: 'teams',
@@ -597,15 +644,18 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'connector_client',
       'zoom',
     ],
-    description: i18n.translate('searchConnectors.content.nativeConnectors.zoom.description', {
-      defaultMessage: 'Search over your content on Zoom.',
-    }),
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.zoom.description',
+      {
+        defaultMessage: 'Search over your content on Zoom.',
+      }
+    ),
     iconPath: 'zoom.svg',
     isBeta: false,
     isNative: false,
     isTechPreview: true,
     keywords: ['zoom', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.zoom.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.zoom.name', {
       defaultMessage: 'Zoom',
     }),
     serviceType: 'zoom',
@@ -613,7 +663,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     categories: ['enterprise_search', 'custom', 'elastic_stack', 'connector', 'connector_client'],
     description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.customConnector.description',
+      'searchConnectorsPlugin.content.nativeConnectors.customConnector.description',
       {
         defaultMessage: 'Search over data stored on custom data sources.',
       }
@@ -622,7 +672,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: false,
     keywords: ['custom', 'connector', 'code'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.customConnector.name', {
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.customConnector.name', {
       defaultMessage: 'Customized connector',
     }),
     serviceType: '',

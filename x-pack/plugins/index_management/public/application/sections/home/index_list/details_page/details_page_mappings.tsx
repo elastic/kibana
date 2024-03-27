@@ -94,6 +94,7 @@ export const DetailsPageMappings: FunctionComponent<{
       data={stringifiedData}
       jsonData={data}
       showAboutMappings={showAboutMappings}
+      refetchMapping={resendRequest}
     />
   );
 };

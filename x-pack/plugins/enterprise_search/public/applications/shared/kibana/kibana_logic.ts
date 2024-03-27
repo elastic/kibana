@@ -26,6 +26,7 @@ import { IndexMappingProps } from '@kbn/index-management-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
@@ -45,6 +46,7 @@ export interface KibanaLogicProps {
   charts: ChartsPluginStart;
   cloud?: CloudSetup;
   config: ClientConfigType;
+  connectorTypes: ConnectorDefinition[];
   console?: ConsolePluginStart;
   data: DataPublicPluginStart;
   esConfig: ESConfig;
@@ -85,6 +87,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
     config: [props.config || {}, {}],
+    connectorTypes: [props.connectorTypes || [], {}],
     consolePlugin: [props.console || {}, {}],
     data: [props.data, {}],
     esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],

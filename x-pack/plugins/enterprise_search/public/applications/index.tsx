@@ -110,12 +110,15 @@ export const renderApp = (
   }
   const indexMappingComponent = indexManagementPlugin.getIndexMappingComponent({ history });
 
+  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
+
   const unmountKibanaLogic = mountKibanaLogic({
     application,
     capabilities,
     charts,
     cloud,
     config,
+    connectorTypes,
     console: plugins.console,
     data: plugins.data,
     esConfig,
