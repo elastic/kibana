@@ -3308,12 +3308,12 @@ describe('Task Runner', () => {
     });
 
     ruleResultService.getLastRunResults.mockImplementation(() => ({
-      errors: ['an error occured'],
+      errors: ['an error occurred'],
       warnings: [],
       outcomeMessage: '',
     }));
 
-    await taskRunner.run();
+    const runnerResult = await taskRunner.run();
 
     expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(2);
     expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
@@ -3322,7 +3322,11 @@ describe('Task Runner', () => {
     testAlertingEventLogCalls({
       status: 'error',
       softErrorFromLastRun: true,
+      errorMessage: 'an error occurred',
+      errorReason: 'unknown',
     });
+
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
   });
 
   function testAlertingEventLogCalls({
@@ -3386,6 +3390,10 @@ describe('Task Runner', () => {
             status: {
               lastExecutionDate: new Date('1970-01-01T00:00:00.000Z'),
               status,
+              error: {
+                message: errorMessage,
+                reason: errorReason,
+              },
             },
           })
         );

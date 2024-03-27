@@ -185,7 +185,7 @@ describe('RuleExecutionStatus', () => {
         ruleResultService,
       });
       expect(status.status).toBe('error');
-      expect(status.error).toBe(undefined);
+      expect(status.error).toEqual({ message: 'an error', reason: 'unknown' });
       expect(status.warning).toBe(undefined);
     });
   });
