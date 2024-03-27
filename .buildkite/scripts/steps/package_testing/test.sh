@@ -62,4 +62,9 @@ export TEST_ES_URL="http://elastic:changeme@192.168.56.1:9200"
 cd x-pack
 
 echo "--- FTR - Reporting"
-node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
+
+if [[ "$TEST_PACKAGE" == "fips" ]]; then
+  node scripts/functional_test_runner.js --config x-pack/test/reporting_functional/reporting_and_security.config.ts --quiet
+else
+  node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
+fi
