@@ -23,6 +23,8 @@ export const API_HEADERS = Object.freeze({
   [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
 });
 
+export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
+
 export const rootRequest = <T = unknown>({
   headers: optionHeaders,
   ...restOptions
@@ -53,48 +55,6 @@ export const deleteAlertsAndRules = () => {
   deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
 };
 
-export const deleteExceptionLists = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'exception-list',
-              },
-            },
-          ],
-        },
-      },
-    },
-  });
-};
-
-export const deleteEndpointExceptionList = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'exception-list-agnostic',
-              },
-            },
-          ],
-        },
-      },
-    },
-  });
-};
-
 export const getConnectors = () =>
   rootRequest<AllConnectorsResponse[]>({
     method: 'GET',
@@ -108,10 +68,12 @@ export const deleteConnectors = () => {
         return connector.id;
       });
       ids.forEach((id) => {
-        rootRequest({
-          method: 'DELETE',
-          url: `api/actions/connector/${id}`,
-        });
+        if (!INTERNAL_CLOUD_CONNECTORS.includes(id)) {
+          rootRequest({
+            method: 'DELETE',
+            url: `api/actions/connector/${id}`,
+          });
+        }
       });
     }
   });
