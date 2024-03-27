@@ -12,18 +12,17 @@ import {
   EuiButtonIconProps,
   useEuiShadow,
   EuiPanel,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import styled from 'styled-components';
-import { RulesParams } from '@kbn/observability-plugin/public';
-import { rulesLocatorID } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
+import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useCapabilities } from '../../../hooks/use_capabilities';
-import { paths } from '../../../../common/locators/paths';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -66,20 +65,10 @@ export function SloItemActions({
 }: Props) {
   const {
     application: { navigateToUrl },
-    http: { basePath },
-    share: {
-      url: { locators },
-    },
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
 
-  const sloDetailsUrl = basePath.prepend(
-    paths.sloDetails(
-      slo.id,
-      ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
-      slo.remoteName
-    )
-  );
+  const { handleNavigateToRules, editSloHref, remoteDeleteUrl, sloDetailsUrl } = useSloActions(slo);
 
   const handleClickActions = () => {
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
@@ -89,28 +78,19 @@ export function SloItemActions({
     navigateToUrl(sloDetailsUrl);
   };
 
-  const editHref = () => {
-    if (slo.kibanaUrl) {
-      return (slo.kibanaUrl + paths.sloEdit(slo.id)).replace(/\/\//g, '/');
-    } else {
-      return basePath.prepend(paths.sloEdit(slo.id));
-    }
-  };
-
   const navigateToClone = useCloneSlo(slo.kibanaUrl);
 
   const handleClone = () => {
     navigateToClone(slo);
   };
 
-  const handleNavigateToRules = async () => {
-    const locator = locators.get<RulesParams>(rulesLocatorID);
-    locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
-  };
-
   const handleDelete = () => {
-    setDeleteConfirmationModalOpen(true);
-    setIsActionsPopoverOpen(false);
+    if (slo.kibanaUrl) {
+      window.open(remoteDeleteUrl, '_blank');
+    } else {
+      setDeleteConfirmationModalOpen(true);
+      setIsActionsPopoverOpen(false);
+    }
   };
 
   const handleCreateRule = () => {
@@ -142,6 +122,16 @@ export function SloItemActions({
   );
   const isRemote = !!slo.remoteName;
 
+  const showPopUpIcon = slo.kibanaUrl ? (
+    <EuiIcon
+      type="popout"
+      size="s"
+      css={{
+        marginLeft: '10px',
+      }}
+    />
+  ) : null;
+
   return (
     <EuiPopover
       anchorPosition="downLeft"
@@ -167,13 +157,14 @@ export function SloItemActions({
             key="edit"
             icon="pencil"
             disabled={!hasWriteCapabilities || (isRemote && !slo.kibanaUrl)}
-            href={editHref()}
+            href={editSloHref()}
             target={slo.kibanaUrl ? '_blank' : undefined}
             data-test-subj="sloActionsEdit"
           >
             {i18n.translate('xpack.slo.item.actions.edit', {
               defaultMessage: 'Edit',
             })}
+            {showPopUpIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="createRule"
@@ -190,14 +181,14 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="manageRules"
             icon="gear"
-            disabled={!hasWriteCapabilities || isRemote}
+            disabled={!hasWriteCapabilities}
             onClick={handleNavigateToRules}
             data-test-subj="sloActionsManageRules"
-            toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
           >
             {i18n.translate('xpack.slo.item.actions.manageRules', {
               defaultMessage: 'Manage rules',
             })}
+            {showPopUpIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="clone"
@@ -210,24 +201,24 @@ export function SloItemActions({
             }
           >
             {i18n.translate('xpack.slo.item.actions.clone', { defaultMessage: 'Clone' })}
+            {showPopUpIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="delete"
             icon="trash"
-            disabled={!hasWriteCapabilities || isRemote}
+            disabled={!hasWriteCapabilities}
             onClick={handleDelete}
             data-test-subj="sloActionsDelete"
-            toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
           >
             {i18n.translate('xpack.slo.item.actions.delete', { defaultMessage: 'Delete' })}
+            {showPopUpIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             icon="dashboardApp"
             key="addToDashboard"
             onClick={handleAddToDashboard}
-            // disabled={!hasWriteCapabilities || isRemote}
+            disabled={!hasWriteCapabilities}
             data-test-subj="sloActionsAddToDashboard"
-            // toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
           >
             {i18n.translate('xpack.slo.item.actions.addToDashboard', {
               defaultMessage: 'Add to Dashboard',

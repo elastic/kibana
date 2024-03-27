@@ -8,13 +8,12 @@
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import type { RulesParams } from '@kbn/observability-plugin/public';
-import { rulesLocatorID } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
+import { useSloActions } from '../hooks/use_slo_actions';
 import { useKibana } from '../../../utils/kibana_react';
 import { paths } from '../../../../common/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
@@ -23,9 +22,10 @@ import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useDeleteSlo } from '../../../hooks/use_delete_slo';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
+import { useGetQueryParams } from '../hooks/use_get_query_params';
 
 export interface Props {
-  slo: SLOWithSummaryResponse | undefined;
+  slo?: SLOWithSummaryResponse;
   isLoading: boolean;
 }
 
@@ -33,13 +33,12 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const {
     application: { navigateToUrl, capabilities },
     http: { basePath },
-    share: {
-      url: { locators },
-    },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
   const hasApmReadCapabilities = capabilities.apm.show;
   const { hasWriteCapabilities } = useCapabilities();
+
+  const { isDeletingSlo, removeDeleteQueryParam } = useGetQueryParams();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
@@ -50,15 +49,11 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const editHref = () => {
-    if (slo) {
-      if (slo.kibanaUrl) {
-        return (slo.kibanaUrl + paths.sloEdit(slo.id)).replace(/\/\//g, '/');
-      } else {
-        return basePath.prepend(paths.sloEdit(slo.id));
-      }
+  useEffect(() => {
+    if (isDeletingSlo) {
+      setDeleteConfirmationModalOpen(true);
     }
-  };
+  }, [isDeletingSlo]);
 
   const onCloseRuleFlyout = () => {
     setRuleFlyoutVisibility(false);
@@ -69,13 +64,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setRuleFlyoutVisibility(true);
   };
 
-  const handleNavigateToRules = async () => {
-    const locator = locators.get<RulesParams>(rulesLocatorID);
-
-    if (slo?.id && locator) {
-      locator.navigate({ params: { sloId: slo.id } }, { replace: false });
-    }
-  };
+  const { handleNavigateToRules, editSloHref } = useSloActions(slo);
 
   const handleNavigateToApm = () => {
     if (!slo) {
@@ -103,6 +92,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
   };
 
   const handleDeleteCancel = () => {
+    removeDeleteQueryParam();
     setDeleteConfirmationModalOpen(false);
   };
 
@@ -151,7 +141,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
               key="edit"
               disabled={!hasWriteCapabilities || !canEditRemote}
               icon="pencil"
-              href={editHref()}
+              href={editSloHref()}
               target={isRemote ? '_blank' : undefined}
               data-test-subj="sloDetailsHeaderControlPopoverEdit"
             >
@@ -173,11 +163,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="manageRules"
-              disabled={!hasWriteCapabilities || isRemote}
+              disabled={!hasWriteCapabilities}
               icon="gear"
               onClick={handleNavigateToRules}
               data-test-subj="sloDetailsHeaderControlPopoverManageRules"
-              toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
             >
               {i18n.translate('xpack.slo.sloDetails.headerControl.manageRules', {
                 defaultMessage: 'Manage rules',
