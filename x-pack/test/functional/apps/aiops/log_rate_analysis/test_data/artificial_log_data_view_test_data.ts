@@ -161,6 +161,7 @@ export const getArtificialLogDataViewTestData = ({
           wp: getWindowParameters(),
         },
       },
+      prompt: 'change-point',
     },
   };
 };

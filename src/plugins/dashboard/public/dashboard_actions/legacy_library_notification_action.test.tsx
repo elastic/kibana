@@ -9,16 +9,16 @@
 import { ViewMode } from '@kbn/presentation-publishing';
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { LibraryNotificationAction } from './library_notification_action';
+import { LegacyLibraryNotificationAction } from './legacy_library_notification_action';
 import {
-  UnlinkFromLibraryAction,
-  UnlinkPanelFromLibraryActionApi,
-} from './unlink_from_library_action';
+  LegacyUnlinkFromLibraryAction,
+  LegacyUnlinkPanelFromLibraryActionApi,
+} from './legacy_unlink_from_library_action';
 
 describe('library notification action', () => {
-  let action: LibraryNotificationAction;
-  let unlinkAction: UnlinkFromLibraryAction;
-  let context: { embeddable: UnlinkPanelFromLibraryActionApi };
+  let action: LegacyLibraryNotificationAction;
+  let unlinkAction: LegacyUnlinkFromLibraryAction;
+  let context: { embeddable: LegacyUnlinkPanelFromLibraryActionApi };
 
   let updateViewMode: (viewMode: ViewMode) => void;
 
@@ -26,13 +26,15 @@ describe('library notification action', () => {
     const viewModeSubject = new BehaviorSubject<ViewMode>('edit');
     updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
 
-    unlinkAction = new UnlinkFromLibraryAction();
-    action = new LibraryNotificationAction(unlinkAction);
+    unlinkAction = new LegacyUnlinkFromLibraryAction();
+    action = new LegacyLibraryNotificationAction(unlinkAction);
     context = {
       embeddable: {
         viewMode: viewModeSubject,
         canUnlinkFromLibrary: jest.fn().mockResolvedValue(true),
         unlinkFromLibrary: jest.fn(),
+        canLinkToLibrary: jest.fn().mockResolvedValue(true),
+        linkToLibrary: jest.fn(),
       },
     };
   });

@@ -6,7 +6,7 @@
  */
 
 import { toUtf8 } from '@smithy/util-utf8';
-import { BedrockChunkMember } from '../../util/eventstream_serde_into_observable';
+import { BedrockChunkMember } from '../../../util/eventstream_serde_into_observable';
 
 export function parseSerdeChunkBody(chunk: BedrockChunkMember['chunk']) {
   return JSON.parse(Buffer.from(JSON.parse(toUtf8(chunk.body)).bytes, 'base64').toString('utf-8'));

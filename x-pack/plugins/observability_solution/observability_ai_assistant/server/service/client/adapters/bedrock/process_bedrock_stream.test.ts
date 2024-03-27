@@ -8,13 +8,13 @@
 import { fromUtf8 } from '@smithy/util-utf8';
 import { lastValueFrom, of } from 'rxjs';
 import { Logger } from '@kbn/logging';
-import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
+import { concatenateChatCompletionChunks } from '../../../../../common/utils/concatenate_chat_completion_chunks';
 import { processBedrockStream } from './process_bedrock_stream';
-import { MessageRole } from '../../../../common';
-import { rejectTokenCountEvents } from '../../util/reject_token_count_events';
+import { MessageRole } from '../../../../../common';
+import { rejectTokenCountEvents } from '../../../util/reject_token_count_events';
 
 describe('processBedrockStream', () => {
-  const encode = (completion: string, stop?: string) => {
+  const encodeChunk = (body: unknown) => {
     return {
       chunk: {
         headers: {
@@ -22,11 +22,28 @@ describe('processBedrockStream', () => {
         },
         body: fromUtf8(
           JSON.stringify({
-            bytes: Buffer.from(JSON.stringify({ completion, stop }), 'utf-8').toString('base64'),
+            bytes: Buffer.from(JSON.stringify(body), 'utf-8').toString('base64'),
           })
         ),
       },
     };
+  };
+
+  const encode = (completion: string) => {
+    return encodeChunk({ type: 'content_block_delta', delta: { type: 'text', text: completion } });
+  };
+
+  const start = () => {
+    return encodeChunk({ type: 'message_start' });
+  };
+
+  const stop = (stopSequence?: string) => {
+    return encodeChunk({
+      type: 'message_delta',
+      delta: {
+        stop_sequence: stopSequence || null,
+      },
+    });
   };
 
   function getLoggerMock() {
@@ -38,7 +55,14 @@ describe('processBedrockStream', () => {
   it('parses normal text messages', async () => {
     expect(
       await lastValueFrom(
-        of(encode('This'), encode(' is'), encode(' some normal'), encode(' text')).pipe(
+        of(
+          start(),
+          encode('This'),
+          encode(' is'),
+          encode(' some normal'),
+          encode(' text'),
+          stop()
+        ).pipe(
           processBedrockStream({ logger: getLoggerMock() }),
           rejectTokenCountEvents(),
           concatenateChatCompletionChunks()
@@ -61,11 +85,12 @@ describe('processBedrockStream', () => {
     expect(
       await lastValueFrom(
         of(
+          start(),
           encode('<function_calls><invoke'),
           encode('><tool_name>my_tool</tool_name><parameters'),
           encode('><my_param>my_value</my_param'),
-          encode('></parameters></invoke'),
-          encode('>', '</function_calls>')
+          encode('></parameters></invoke>'),
+          stop('</function_calls>')
         ).pipe(
           processBedrockStream({
             logger: getLoggerMock(),
@@ -104,12 +129,14 @@ describe('processBedrockStream', () => {
     expect(
       await lastValueFrom(
         of(
+          start(),
           encode('This is'),
           encode(' my text\n<function_calls><invoke'),
           encode('><tool_name>my_tool</tool_name><parameters'),
           encode('><my_param>my_value</my_param'),
           encode('></parameters></invoke'),
-          encode('>', '</function_calls>')
+          encode('>'),
+          stop('</function_calls>')
         ).pipe(
           processBedrockStream({
             logger: getLoggerMock(),
@@ -148,11 +175,13 @@ describe('processBedrockStream', () => {
     async function fn() {
       return lastValueFrom(
         of(
+          start(),
           encode('<function_calls><invoke'),
           encode('><tool_name>my_tool</tool><parameters'),
           encode('><my_param>my_value</my_param'),
           encode('></parameters></invoke'),
-          encode('>', '</function_calls>')
+          encode('>'),
+          stop('</function_calls>')
         ).pipe(
           processBedrockStream({
             logger: getLoggerMock(),
@@ -189,11 +218,13 @@ describe('processBedrockStream', () => {
       async () =>
         await lastValueFrom(
           of(
+            start(),
             encode('<function_calls><invoke'),
             encode('><tool_name>my_other_tool</tool_name><parameters'),
             encode('><my_param>my_value</my_param'),
             encode('></parameters></invoke'),
-            encode('>', '</function_calls>')
+            encode('>'),
+            stop('</function_calls>')
           ).pipe(
             processBedrockStream({
               logger: getLoggerMock(),
@@ -227,7 +258,8 @@ describe('processBedrockStream', () => {
           encode('<function_calls><invoke'),
           encode('><tool_name>my_tool</tool_name><parameters'),
           encode('></parameters></invoke'),
-          encode('>', '</function_calls>')
+          encode('>'),
+          stop('</function_calls>')
         ).pipe(
           processBedrockStream({
             logger: getLoggerMock(),
