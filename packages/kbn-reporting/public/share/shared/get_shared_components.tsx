@@ -41,6 +41,7 @@ export interface ApplicationProps {
    */
   onClose: () => void;
   objectType: string;
+  downloadCsvFromLens: () => void;
 }
 
 export interface ReportingPublicComponents {

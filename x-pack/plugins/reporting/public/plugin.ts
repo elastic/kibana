@@ -35,6 +35,7 @@ import {
   reportingCsvShareProvider,
   reportingScreenshotShareProvider,
 } from '@kbn/reporting-public/share';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 
@@ -53,6 +54,8 @@ export interface ReportingPublicPluginStartDependencies {
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
   share: SharePluginStart;
+  // needed for lens csv
+  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -205,7 +208,7 @@ export class ReportingPublicPlugin
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;
 
-    startServices$.subscribe(([{ application }, { licensing }]) => {
+    startServices$.subscribe(([{ application }, { licensing, fieldFormats }]) => {
       licensing.license$.subscribe((license) => {
         shareSetup.register(
           reportingCsvShareProvider({
@@ -217,6 +220,7 @@ export class ReportingPublicPlugin
             usesUiCapabilities,
             theme: core.theme,
             version: this.kibanaVersion,
+            formatFactoryFn: () => fieldFormats.deserialize,
           })
         );
 
@@ -231,6 +235,7 @@ export class ReportingPublicPlugin
               usesUiCapabilities,
               theme: core.theme,
               version: this.kibanaVersion,
+              formatFactoryFn: () => fieldFormats.deserialize,
             })
           );
         }

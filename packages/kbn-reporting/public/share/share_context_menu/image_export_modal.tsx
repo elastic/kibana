@@ -58,7 +58,7 @@ type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
 
 export type Props = ReportingModalProps & { intl: InjectedIntl };
 
-type AllowedImageExportType = 'pngV2' | 'printablePdfV2' | 'printablePdf';
+type AllowedImageExportType = 'pngV2' | 'printablePdfV2' | 'printablePdf' | 'csv';
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const {
@@ -72,6 +72,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     jobProviderOptions,
     objectType,
     isDirty,
+    downloadCsvFromLens,
   } = props;
   const isSaved = Boolean(objectId) || !isDirty;
   const [isStale, setIsStale] = useState(false);
@@ -172,6 +173,9 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   }, [markAsStale, getAbsoluteReportGenerationUrl]);
 
   const generateReportingJob = () => {
+    if (selectedRadio === 'csv') {
+      return downloadCsvFromLens();
+    }
     const decoratedJobParams = apiClient.getDecoratedJobParams(
       getJobParams(false) as unknown as AppParams
     );
