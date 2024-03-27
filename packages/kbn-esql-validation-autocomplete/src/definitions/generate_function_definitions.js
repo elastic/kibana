@@ -1362,11 +1362,37 @@ function getFunctionDefinition(value, columnIndices) {
   }));
 
   return {
+    type: value[columnIndices.isAggregation] ? 'agg' : 'eval',
     name: value[columnIndices.name],
     description: value[columnIndices.description],
     alias: aliasTable[value[columnIndices.name]],
     signatures,
   };
+}
+
+function printGeneratedFunctionsFile(functionDefinitions) {
+  const printFunctionDefinition = (functionDefinition) => {
+    const { type, name, description, alias, signatures } = functionDefinition;
+
+    return `{
+    type: '${type}',
+    name: '${name}',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
+      description
+    )} }),
+    alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
+    signatures: ${JSON.stringify(signatures, null, 2)},
+}`;
+  };
+
+  const functionDefinitionsString = functionDefinitions.map(printFunctionDefinition).join(',\n');
+
+  const fileContents = `import { i18n } from '@kbn/i18n';
+import type { GeneratedFunctionDefinition } from './types';
+
+export const generatedFunctions: GeneratedFunctionDefinition[] = [\n${functionDefinitionsString}\n];`;
+
+  return fileContents;
 }
 
 (async function main() {
@@ -1384,18 +1410,18 @@ function getFunctionDefinition(value, columnIndices) {
 
     const functionDefinition = getFunctionDefinition(value, columnIndices);
 
-    value[columnIndices.isAggregation]
+    functionDefinition.type === 'agg'
       ? aggFunctionDefinitions.push(functionDefinition)
       : evalFunctionDefinitions.push(functionDefinition);
   }
 
   await writeFile(
-    join(__dirname, 'eval_functions.json'),
-    JSON.stringify(evalFunctionDefinitions, null, 2)
+    join(__dirname, 'eval_functions_generated.ts'),
+    printGeneratedFunctionsFile(evalFunctionDefinitions)
   );
 
   await writeFile(
-    join(__dirname, 'agg_functions.json'),
-    JSON.stringify(aggFunctionDefinitions, null, 2)
+    join(__dirname, 'agg_functions_generated.ts'),
+    printGeneratedFunctionsFile(aggFunctionDefinitions)
   );
 })();

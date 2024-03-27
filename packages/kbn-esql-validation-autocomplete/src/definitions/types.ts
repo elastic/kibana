@@ -32,6 +32,15 @@ export interface FunctionDefinition {
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
+/**
+ * This type includes only the properties that can be automatically generated
+ * from Elasticsearch metadata (e.g. from `meta functions` command).
+ */
+export type GeneratedFunctionDefinition = Pick<
+  FunctionDefinition,
+  'type' | 'name' | 'description' | 'alias' | 'signatures'
+>;
+
 export interface CommandBaseDefinition {
   name: string;
   alias?: string;

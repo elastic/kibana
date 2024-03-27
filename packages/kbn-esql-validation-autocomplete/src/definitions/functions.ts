@@ -12,6 +12,7 @@ import type { RecursivePartial } from '@kbn/utility-types';
 import type { ESQLFunction } from '@kbn/esql-ast';
 import { isLiteralItem } from '../shared/helpers';
 import type { FunctionDefinition } from './types';
+import { generatedFunctions } from './eval_functions_generated';
 
 const validateLogFunctions = (fnDef: ESQLFunction) => {
   const messages = [];
@@ -37,8 +38,6 @@ const validateLogFunctions = (fnDef: ESQLFunction) => {
   }
   return messages;
 };
-
-import * as rawFunctionDefinitions from './eval_functions.json';
 
 /**
  * Overrides for function definitions
@@ -78,7 +77,7 @@ const functionOverrides: Record<string, RecursivePartial<FunctionDefinition>> = 
 
 const usedOverrides = new Set<string>();
 
-rawFunctionDefinitions.forEach((def) => {
+generatedFunctions.forEach((def) => {
   if (functionOverrides[def.name]) {
     usedOverrides.add(def.name);
     _.merge(def, functionOverrides[def.name]);
@@ -91,16 +90,14 @@ if (usedOverrides.size !== Object.keys(functionOverrides).length) {
 }
 
 if (
-  rawFunctionDefinitions.some(
-    (def) => !def.signatures.some((sig) => sig.params.some((p) => !p.name))
-  )
+  generatedFunctions.some((def) => !def.signatures.some((sig) => sig.params.some((p) => !p.name)))
 ) {
   throw new Error(
     'Some function signatures have unnamed parameters... make sure the overrides match up with the JSON definitions.'
   );
 }
 
-const evalFunctionDefinitions: FunctionDefinition[] = rawFunctionDefinitions
+const evalFunctionDefinitions: FunctionDefinition[] = generatedFunctions
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
   .map((def) => ({
     ...def,
