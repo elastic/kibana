@@ -13,7 +13,7 @@ export const fetchDataWithTimeout = async <T extends Promise<unknown>>(
   asyncFunc: T,
   abortCtrl: AbortController,
   defaultResult = null,
-  timeoutDuration = 2000
+  timeoutDuration = 6000
 ) => {
   return await lastValueFrom(
     from(asyncFunc).pipe(
