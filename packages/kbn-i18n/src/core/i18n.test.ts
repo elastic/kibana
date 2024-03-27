@@ -241,57 +241,6 @@ describe('I18n engine', () => {
     });
   });
 
-  describe('setDefaultLocale', () => {
-    test('should throw error if locale is not a non-empty string', () => {
-      expect(() => i18n.setDefaultLocale(undefined as any)).toThrow();
-      expect(() => i18n.setDefaultLocale(null as any)).toThrow();
-      expect(() => i18n.setDefaultLocale(true as any)).toThrow();
-      expect(() => i18n.setDefaultLocale(5 as any)).toThrow();
-      expect(() => i18n.setDefaultLocale({} as any)).toThrow();
-      expect(() => i18n.setDefaultLocale('')).toThrow();
-    });
-
-    test('should update the default locale', () => {
-      expect(i18n.getDefaultLocale()).not.toBe('foo');
-      i18n.setDefaultLocale('foo');
-      expect(i18n.getDefaultLocale()).toBe('foo');
-    });
-
-    test('should normalize passed locale', () => {
-      i18n.setDefaultLocale('en-US');
-      expect(i18n.getDefaultLocale()).toBe('en-us');
-    });
-
-    test('should set "en" locale as default for IntlMessageFormat and IntlRelativeFormat', () => {
-      const IntlMessageFormat = require('intl-messageformat');
-      const IntlRelativeFormat = require('intl-relativeformat');
-
-      expect(IntlMessageFormat.defaultLocale).toBe('en');
-      expect(IntlRelativeFormat.defaultLocale).toBe('en');
-    });
-
-    test('should update defaultLocale for IntlMessageFormat and IntlRelativeFormat', () => {
-      const IntlMessageFormat = require('intl-messageformat');
-      const IntlRelativeFormat = require('intl-relativeformat');
-
-      i18n.setDefaultLocale('foo');
-
-      expect(IntlMessageFormat.defaultLocale).toBe('foo');
-      expect(IntlRelativeFormat.defaultLocale).toBe('foo');
-    });
-  });
-
-  describe('getDefaultLocale', () => {
-    test('should return "en" locale by default', () => {
-      expect(i18n.getDefaultLocale()).toBe('en');
-    });
-
-    test('should return updated locale', () => {
-      i18n.setDefaultLocale('foo');
-      expect(i18n.getDefaultLocale()).toBe('foo');
-    });
-  });
-
   describe('setFormats', () => {
     test('should throw error if formats parameter is not a non-empty object', () => {
       expect(() => i18n.setFormats(undefined as any)).toThrow();
@@ -497,8 +446,6 @@ describe('I18n engine', () => {
     });
 
     test('should format pluralized default messages', () => {
-      i18n.setDefaultLocale('en');
-
       expect(
         i18n.translate('a.b.c', {
           values: { numPhotos: 0 },
@@ -544,7 +491,6 @@ describe('I18n engine', () => {
                    }`,
         },
       });
-      i18n.setDefaultLocale('en');
 
       expect(() =>
         i18n.translate('a.b.c', { values: { foo: 0 } } as any)
@@ -569,7 +515,6 @@ describe('I18n engine', () => {
           ['a.b.c']: 'Result: {result, number, percent}',
         },
       });
-      i18n.setDefaultLocale('en');
 
       expect(i18n.translate('a.b.c', { values: { result: 0.15 } } as any)).toBe('Result: 15%');
 
@@ -618,8 +563,6 @@ describe('I18n engine', () => {
     });
 
     test('should format default messages with date formatter', () => {
-      i18n.setDefaultLocale('en');
-
       expect(
         i18n.translate('foo', {
           defaultMessage: 'Sale begins {start, date, short}',
@@ -672,8 +615,6 @@ describe('I18n engine', () => {
     });
 
     test('should format default messages with time formatter', () => {
-      i18n.setDefaultLocale('en');
-
       expect(
         i18n.translate('foo', {
           defaultMessage: 'Coupon expires at {expires, time, short}',
@@ -732,7 +673,6 @@ describe('I18n engine', () => {
         },
         messages: {},
       });
-      i18n.setDefaultLocale('en');
 
       expect(
         i18n.translate('a.b.c', {
@@ -769,7 +709,6 @@ describe('I18n engine', () => {
           ['a.b.c']: 'Your total is {total, number, usd}',
         },
       });
-      i18n.setDefaultLocale('en');
 
       expect(i18n.translate('a.b.c', { values: { total: 1000 } } as any)).toBe(
         'Your total is 1,000'
@@ -790,7 +729,6 @@ describe('I18n engine', () => {
           ['a.b.c']: 'Your total is {total, foo}',
         },
       });
-      i18n.setDefaultLocale('en');
 
       expect(() =>
         i18n.translate('a.b.c', { values: { total: 1 } } as any)

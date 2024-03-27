@@ -6,18 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { IntlShape, WrappedComponentProps } from '.';
+import { injectIntl } from '..';
 
-export {
-  FormattedDate,
-  FormattedTime,
-  FormattedNumber,
-  FormattedPlural,
-  FormattedMessage,
-  FormattedRelativeTime,
-} from '.';
-
-export { injecti18n } from './src/compatiblity_layer';
-
-export { I18nProvider } from './src/provider';
-export { injectI18n } from './src/inject';
+export const injecti18n = injectIntl;

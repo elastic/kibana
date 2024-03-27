@@ -302,7 +302,7 @@ See the [integration documentation]({docLink}) for more information.',
     textPre: i18n.translate('xpack.apm.tutorial.jsClient.scriptTags.textPre', {
       defaultMessage:
         "Alternatively, you can use Script tags to set up and configure the Agent. \
-Add a `<script>` tag to the HTML page and use the `elasticApm` global object to load and initialize the agent. \
+Add a `'<script>'` tag to the HTML page and use the `elasticApm` global object to load and initialize the agent. \
 Don't forget to download the latest version of the RUM Agent from [GitHub]({GitHubLink}) or [UNPKG]({UnpkgLink}), \
 and host the file on your Server/CDN before deploying to production.",
       values: {

@@ -8,13 +8,8 @@
 
 import {
   formats,
-  addTranslation,
   getTranslation,
-  setLocale,
   getLocale,
-  setDefaultLocale,
-  getDefaultLocale,
-  setFormats,
   getFormats,
   getRegisteredLocales,
   translate,
@@ -35,13 +30,8 @@ import {
 
 const i18n = {
   formats,
-  addTranslation,
   getTranslation,
-  setLocale,
   getLocale,
-  setDefaultLocale,
-  getDefaultLocale,
-  setFormats,
   getFormats,
   getRegisteredLocales,
   translate,
