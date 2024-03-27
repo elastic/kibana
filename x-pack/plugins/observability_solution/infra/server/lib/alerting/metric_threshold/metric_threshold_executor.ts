@@ -224,7 +224,12 @@ export const createMetricThresholdExecutor =
     const groupByIsSame = isEqual(state.groupBy, params.groupBy);
     const previousMissingGroups =
       alertOnGroupDisappear && filterQueryIsSame && groupByIsSame && state.missingGroups
-        ? state.missingGroups
+        ? state.missingGroups.filter((missingGroup) =>
+            // We use isTrackedAlert to remove missing groups that are untracked by the user
+            typeof missingGroup === 'string'
+              ? alertsClient.isTrackedAlert(missingGroup)
+              : alertsClient.isTrackedAlert(missingGroup.key)
+          )
         : [];
 
     const alertResults = await evaluateRule(
