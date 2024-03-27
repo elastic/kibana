@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, skip } from 'rxjs';
 import { PublishingSubject, ValueFromPublishingSubject } from './types';
 
@@ -36,8 +36,15 @@ export const useStateFromPublishingSubject = <
 >(
   subject: SubjectType
 ): ValueFromPublishingSubject<SubjectType> => {
+  const isFirstRender = useRef(true);
   const [value, setValue] = useState<ValueFromPublishingSubject<SubjectType>>(subject?.getValue());
   useEffect(() => {
+    if (!isFirstRender.current) {
+      setValue(subject?.getValue());
+    } else {
+      isFirstRender.current = false;
+    }
+
     if (!subject) return;
     // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
     const subscription = subject.pipe(skip(1)).subscribe((newValue) => setValue(newValue));

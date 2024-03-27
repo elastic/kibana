@@ -31,6 +31,7 @@ const hasSubjectsArrayChanged = (
 export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublishingSubject[]]>(
   ...subjects: [...SubjectsType]
 ): UnwrapPublishingSubjectTuple<SubjectsType> => {
+  const isFirstRender = useRef(true);
   /**
    * memoize and deep diff subjects to avoid rebuilding the subscription when the subjects are the same.
    */
@@ -46,17 +47,23 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
   /**
    * Set up latest published values state, initialized with the current values of the subjects.
    */
-  const initialSubjectValues = useMemo(
+  const subjectValues = useMemo(
     () => unwrapPublishingSubjectArray(subjectsToUse),
     [subjectsToUse]
   );
   const [latestPublishedValues, setLatestPublishedValues] =
-    useState<UnwrapPublishingSubjectTuple<SubjectsType>>(initialSubjectValues);
+    useState<UnwrapPublishingSubjectTuple<SubjectsType>>(subjectValues);
 
   /**
    * Subscribe to all subjects and update the latest values when any of them change.
    */
   useEffect(() => {
+    if (!isFirstRender.current) {
+      setLatestPublishedValues(subjectValues);
+    } else {
+      isFirstRender.current = false;
+    }
+
     const definedSubjects: Array<PublishingSubject<unknown>> = [];
     const definedSubjectIndices: number[] = [];
 
