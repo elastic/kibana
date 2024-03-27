@@ -54,6 +54,10 @@ jest.mock('../../../../common/lib/kuery');
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 
+// These tests can take more than standard timeout of 5s
+// that is why we are setting it to 10s
+const SPECIAL_TEST_TIMEOUT = 10000;
+
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
   if (feature === 'unifiedComponentsInTimelineEnabled') {
     return true;
@@ -174,330 +178,378 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('render', () => {
-    it('should render unifiedDataTable in timeline', async () => {
-      renderTestComponents();
-      await waitFor(() => {
-        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-      });
-    });
+    it(
+      'should render unifiedDataTable in timeline',
+      async () => {
+        renderTestComponents();
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
 
-    it('should render unified-field-list in timeline', async () => {
-      renderTestComponents();
-      await waitFor(() => {
-        expect(screen.getByTestId('timeline-sidebar')).toBeVisible();
-      });
-    });
+    it(
+      'should render unified-field-list in timeline',
+      async () => {
+        renderTestComponents();
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-sidebar')).toBeVisible();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
   });
 
   describe('pagination', () => {
-    it('should paginate correctly', async () => {
-      renderTestComponents();
+    it(
+      'should paginate correctly',
+      async () => {
+        renderTestComponents();
 
-      await waitFor(() => {
-        expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
-          'Rows per page: 5'
-        );
-      });
+        await waitFor(() => {
+          expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
+            'Rows per page: 5'
+          );
+        });
 
-      expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
-      expect(screen.getByTestId('pagination-button-6')).toBeVisible();
-
-      fireEvent.click(screen.getByTestId('pagination-button-6'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('pagination-button-6')).toHaveAttribute('aria-current', 'true');
-      });
-    });
-
-    it('should load more records according to sample size correctly', async () => {
-      renderTestComponents();
-      await waitFor(() => {
         expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
         expect(screen.getByTestId('pagination-button-6')).toBeVisible();
-      });
-      // Go to last page
-      fireEvent.click(screen.getByTestId('pagination-button-6'));
-      await waitFor(() => {
-        expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
-      });
-      fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
-      expect(loadPageMock).toHaveBeenNthCalledWith(1, 1);
-    });
+
+        fireEvent.click(screen.getByTestId('pagination-button-6'));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('pagination-button-6')).toHaveAttribute('aria-current', 'true');
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should load more records according to sample size correctly',
+      async () => {
+        renderTestComponents();
+        await waitFor(() => {
+          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-6')).toBeVisible();
+        });
+        // Go to last page
+        fireEvent.click(screen.getByTestId('pagination-button-6'));
+        await waitFor(() => {
+          expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
+        });
+        fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
+        expect(loadPageMock).toHaveBeenNthCalledWith(1, 1);
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
   });
 
   describe('columns', () => {
-    it('should move column left/right correctly ', async () => {
-      const { container } = renderTestComponents();
+    it(
+      'should move column left/right correctly ',
+      async () => {
+        const { container } = renderTestComponents();
 
-      await waitFor(() => {
-        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-      });
-      expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
-        'data-gridcell-column-index',
-        '12'
-      );
-
-      expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
-
-      fireEvent.click(
-        container.querySelector(
-          '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
-        ) as HTMLElement
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTitle('Move left')).toBeEnabled();
-      });
-
-      fireEvent.click(screen.getByTitle('Move left'));
-
-      await waitFor(() => {
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
         expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
           'data-gridcell-column-index',
-          '11'
+          '12'
         );
-      });
-    }, 10000);
 
-    it('should remove column left/right ', async () => {
-      const { container } = renderTestComponents();
+        expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
 
-      await waitFor(() => {
-        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-      });
+        fireEvent.click(
+          container.querySelector(
+            '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
+          ) as HTMLElement
+        );
 
-      expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
+        await waitFor(() => {
+          expect(screen.getByTitle('Move left')).toBeEnabled();
+        });
 
-      fireEvent.click(
-        container.querySelector(
-          '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
-        ) as HTMLElement
-      );
+        fireEvent.click(screen.getByTitle('Move left'));
 
-      await waitFor(() => {
-        expect(screen.getByTitle('Remove column')).toBeVisible();
-      });
+        await waitFor(() => {
+          expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
+            'data-gridcell-column-index',
+            '11'
+          );
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
 
-      fireEvent.click(screen.getByTitle('Remove column'));
+    it(
+      'should remove column left/right ',
+      async () => {
+        const { container } = renderTestComponents();
 
-      await waitFor(() => {
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
+
+        expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
+
+        fireEvent.click(
+          container.querySelector(
+            '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
+          ) as HTMLElement
+        );
+
+        await waitFor(() => {
+          expect(screen.getByTitle('Remove column')).toBeVisible();
+        });
+
+        fireEvent.click(screen.getByTitle('Remove column'));
+
+        await waitFor(() => {
+          expect(
+            container.querySelector('[data-gridcell-column-id="message"]')
+          ).not.toBeInTheDocument();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should sort date column',
+      async () => {
+        const { container } = renderTestComponents();
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
+
         expect(
-          container.querySelector('[data-gridcell-column-id="message"]')
-        ).not.toBeInTheDocument();
-      });
-    });
+          container.querySelector('[data-gridcell-column-id="@timestamp"]')
+        ).toBeInTheDocument();
 
-    it('should sort date column', async () => {
-      const { container } = renderTestComponents();
-      await waitFor(() => {
-        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-      });
-
-      expect(container.querySelector('[data-gridcell-column-id="@timestamp"]')).toBeInTheDocument();
-
-      fireEvent.click(
-        container.querySelector(
-          '[data-gridcell-column-id="@timestamp"] .euiDataGridHeaderCell__icon'
-        ) as HTMLElement
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTitle('Sort Old-New')).toBeVisible();
-      });
-      expect(screen.getByTitle('Sort New-Old')).toBeVisible();
-
-      useTimelineEventsMock.mockClear();
-
-      fireEvent.click(screen.getByTitle('Sort Old-New'));
-
-      await waitFor(() => {
-        expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
-          1,
-          expect.objectContaining({
-            sort: [
-              {
-                direction: 'asc',
-                esTypes: [],
-                field: '@timestamp',
-                type: 'date',
-              },
-            ],
-          })
+        fireEvent.click(
+          container.querySelector(
+            '[data-gridcell-column-id="@timestamp"] .euiDataGridHeaderCell__icon'
+          ) as HTMLElement
         );
-      });
-    });
 
-    it('should sort string column correctly', async () => {
-      const { container } = renderTestComponents();
-      await waitFor(() => {
-        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-      });
+        await waitFor(() => {
+          expect(screen.getByTitle('Sort Old-New')).toBeVisible();
+        });
+        expect(screen.getByTitle('Sort New-Old')).toBeVisible();
 
-      expect(container.querySelector('[data-gridcell-column-id="host.name"]')).toBeInTheDocument();
+        useTimelineEventsMock.mockClear();
 
-      fireEvent.click(
-        container.querySelector(
-          '[data-gridcell-column-id="host.name"] .euiDataGridHeaderCell__icon'
-        ) as HTMLElement
-      );
+        fireEvent.click(screen.getByTitle('Sort Old-New'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('dataGridHeaderCellActionGroup-host.name')).toBeVisible();
-      });
+        await waitFor(() => {
+          expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+              sort: [
+                {
+                  direction: 'asc',
+                  esTypes: [],
+                  field: '@timestamp',
+                  type: 'date',
+                },
+              ],
+            })
+          );
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
 
-      expect(screen.getByTitle('Sort A-Z')).toBeVisible();
-      expect(screen.getByTitle('Sort Z-A')).toBeVisible();
+    it(
+      'should sort string column correctly',
+      async () => {
+        const { container } = renderTestComponents();
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
 
-      useTimelineEventsMock.mockClear();
+        expect(
+          container.querySelector('[data-gridcell-column-id="host.name"]')
+        ).toBeInTheDocument();
 
-      fireEvent.click(screen.getByTitle('Sort A-Z'));
-
-      await waitFor(() => {
-        expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
-          1,
-          expect.objectContaining({
-            sort: [
-              {
-                direction: 'desc',
-                esTypes: [],
-                field: '@timestamp',
-                type: 'date',
-              },
-              {
-                direction: 'asc',
-                esTypes: [],
-                field: 'host.name',
-                type: 'string',
-              },
-            ],
-          })
+        fireEvent.click(
+          container.querySelector(
+            '[data-gridcell-column-id="host.name"] .euiDataGridHeaderCell__icon'
+          ) as HTMLElement
         );
-      });
-    });
 
-    it('should sort number column', async () => {
-      const field = {
-        name: 'event.severity',
-        type: 'number',
-      };
+        await waitFor(() => {
+          expect(screen.getByTestId('dataGridHeaderCellActionGroup-host.name')).toBeVisible();
+        });
 
-      const { container } = renderTestComponents();
-      await waitFor(() => {
-        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-      });
+        expect(screen.getByTitle('Sort A-Z')).toBeVisible();
+        expect(screen.getByTitle('Sort Z-A')).toBeVisible();
 
-      expect(
-        container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
-      ).toBeInTheDocument();
+        useTimelineEventsMock.mockClear();
 
-      fireEvent.click(
-        container.querySelector(
-          `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-        ) as HTMLElement
-      );
+        fireEvent.click(screen.getByTitle('Sort A-Z'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId(`dataGridHeaderCellActionGroup-${field.name}`)).toBeVisible();
-      });
+        await waitFor(() => {
+          expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+              sort: [
+                {
+                  direction: 'desc',
+                  esTypes: [],
+                  field: '@timestamp',
+                  type: 'date',
+                },
+                {
+                  direction: 'asc',
+                  esTypes: [],
+                  field: 'host.name',
+                  type: 'string',
+                },
+              ],
+            })
+          );
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
 
-      expect(screen.getByTitle('Sort Low-High')).toBeVisible();
-      expect(screen.getByTitle('Sort High-Low')).toBeVisible();
+    it(
+      'should sort number column',
+      async () => {
+        const field = {
+          name: 'event.severity',
+          type: 'number',
+        };
 
-      useTimelineEventsMock.mockClear();
+        const { container } = renderTestComponents();
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
 
-      fireEvent.click(screen.getByTitle('Sort Low-High'));
+        expect(
+          container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
+        ).toBeInTheDocument();
 
-      await waitFor(() => {
-        expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
-          1,
-          expect.objectContaining({
-            sort: [
-              {
-                direction: 'desc',
-                esTypes: [],
-                field: '@timestamp',
-                type: 'date',
-              },
-              {
-                direction: 'asc',
-                esTypes: [],
-                field: field.name,
-                type: field.type,
-              },
-            ],
-          })
+        fireEvent.click(
+          container.querySelector(
+            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
+          ) as HTMLElement
         );
-      });
-    });
+
+        await waitFor(() => {
+          expect(screen.getByTestId(`dataGridHeaderCellActionGroup-${field.name}`)).toBeVisible();
+        });
+
+        expect(screen.getByTitle('Sort Low-High')).toBeVisible();
+        expect(screen.getByTitle('Sort High-Low')).toBeVisible();
+
+        useTimelineEventsMock.mockClear();
+
+        fireEvent.click(screen.getByTitle('Sort Low-High'));
+
+        await waitFor(() => {
+          expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+              sort: [
+                {
+                  direction: 'desc',
+                  esTypes: [],
+                  field: '@timestamp',
+                  type: 'date',
+                },
+                {
+                  direction: 'asc',
+                  esTypes: [],
+                  field: field.name,
+                  type: field.type,
+                },
+              ],
+            })
+          );
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
   });
 
   describe('left controls', () => {
-    it('should clear all sorting', async () => {
-      renderTestComponents();
-      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+    it(
+      'should clear all sorting',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
-      expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
-      expect(
-        within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
-      ).toHaveTextContent('1');
-
-      fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
-
-      // // timestamp sorting indicators
-      expect(
-        await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
-      ).toBeVisible();
-
-      expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
-
-      fireEvent.click(screen.getByTestId('dataGridColumnSortingClearButton'));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeNull();
-      });
-    });
-
-    it('should be able to sort by multiple columns', async () => {
-      renderTestComponents();
-      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-      expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
-      expect(
-        within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
-      ).toHaveTextContent('1');
-
-      fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
-
-      // // timestamp sorting indicators
-      expect(
-        await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
-      ).toBeVisible();
-
-      expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
-
-      // add more columns to sorting
-      fireEvent.click(screen.getByText(/Pick fields to sort by/));
-
-      await waitFor(() => {
+        expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
         expect(
-          screen.getByTestId('dataGridColumnSortingPopoverColumnSelection-event.severity')
+          within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+        ).toHaveTextContent('1');
+
+        fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
+
+        // // timestamp sorting indicators
+        expect(
+          await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
         ).toBeVisible();
-      });
 
-      fireEvent.click(
-        screen.getByTestId('dataGridColumnSortingPopoverColumnSelection-event.severity')
-      );
+        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
 
-      // check new columns for sorting validity
-      await waitFor(() => {
-        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-event.severity')).toBeVisible();
-      });
-      expect(
-        screen.getByTestId('euiDataGridColumnSorting-sortColumn-event.severity')
-      ).toBeVisible();
+        fireEvent.click(screen.getByTestId('dataGridColumnSortingClearButton'));
 
-      expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
-    }, 10000);
+        await waitFor(() => {
+          expect(screen.queryByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeNull();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should be able to sort by multiple columns',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
+        expect(
+          within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+        ).toHaveTextContent('1');
+
+        fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
+
+        // // timestamp sorting indicators
+        expect(
+          await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
+        ).toBeVisible();
+
+        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
+
+        // add more columns to sorting
+        fireEvent.click(screen.getByText(/Pick fields to sort by/));
+
+        await waitFor(() => {
+          expect(
+            screen.getByTestId('dataGridColumnSortingPopoverColumnSelection-event.severity')
+          ).toBeVisible();
+        });
+
+        fireEvent.click(
+          screen.getByTestId('dataGridColumnSortingPopoverColumnSelection-event.severity')
+        );
+
+        // check new columns for sorting validity
+        await waitFor(() => {
+          expect(screen.getByTestId('dataGridHeaderCellSortingIcon-event.severity')).toBeVisible();
+        });
+        expect(
+          screen.getByTestId('euiDataGridColumnSorting-sortColumn-event.severity')
+        ).toBeVisible();
+
+        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
   });
 
   describe('unified fields list', () => {
