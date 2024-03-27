@@ -10,7 +10,10 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import type { FieldsEqlOptions } from '../../../../../../common/search_strategy';
+import type {
+  EqlOptionsSelected,
+  FieldsEqlOptions,
+} from '../../../../../../common/search_strategy';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
@@ -31,6 +34,7 @@ import { getEqlOptions } from './selectors';
 interface TimelineEqlQueryBar {
   index: string[];
   eqlQueryBar: FieldValueQueryBar;
+  eqlOptions: EqlOptionsSelected;
 }
 
 const defaultValues = {
@@ -40,12 +44,16 @@ const defaultValues = {
     filters: [],
     saved_id: null,
   },
+  eqlOptions: {},
 };
 
 const schema: FormSchema<TimelineEqlQueryBar> = {
   index: {
     fieldsToValidateOnChange: ['index', 'eqlQueryBar'],
     validations: [],
+  },
+  eqlOptions: {
+    fieldsToValidateOnChange: ['eqlOptions', 'eqlQueryBar'],
   },
   eqlQueryBar: {
     validations: [
@@ -89,18 +97,20 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields } = form;
+  const { getFields, setFieldValue } = form;
 
   const onOptionsChange = useCallback(
-    (field: FieldsEqlOptions, value: string | undefined) =>
+    (field: FieldsEqlOptions, value: string | undefined) => {
       dispatch(
         timelineActions.updateEqlOptions({
           id: timelineId,
           field,
           value,
         })
-      ),
-    [dispatch, timelineId]
+      );
+      setFieldValue('eqlOptions', { ...optionsSelected, [field]: value });
+    },
+    [dispatch, optionsSelected, setFieldValue, timelineId]
   );
 
   const [{ eqlQueryBar: formEqlQueryBar }] = useFormData<TimelineEqlQueryBar>({
@@ -179,6 +189,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   return (
     <Form form={form} data-test-subj="EqlQueryBarTimeline">
       <HiddenUseField key="Index" path="index" />
+      <HiddenUseField key="EqlOptions" path="eqlOptions" />
       <UseField
         key="EqlQueryBar"
         path="eqlQueryBar"

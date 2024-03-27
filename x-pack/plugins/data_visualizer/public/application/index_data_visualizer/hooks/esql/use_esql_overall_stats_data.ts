@@ -13,8 +13,9 @@ import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import { getESQLWithSafeLimit } from '@kbn/esql-utils';
 import { OMIT_FIELDS } from '../../../../../common/constants';
-import type { TimeBucketsInterval } from '../../../../../common/services/time_buckets';
 import type {
   DataStatsFetchProgress,
   DocumentCountStats,
@@ -22,11 +23,7 @@ import type {
 import { getSupportedFieldType } from '../../../common/components/fields_stats_grid/get_field_names';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { getInitialProgress, getReducer } from '../../progress_utils';
-import {
-  getSafeESQLLimitSize,
-  getSafeESQLName,
-  isESQLQuery,
-} from '../../search_strategy/requests/esql_utils';
+import { getSafeESQLName, isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import type { NonAggregatableField } from '../../types/overall_stats';
 import { getESQLOverallStats } from '../../search_strategy/esql_requests/get_count_and_cardinality';
 import type { AggregatableField } from '../../types/esql_data_visualizer';
@@ -34,7 +31,6 @@ import {
   handleError,
   type HandleErrorCallback,
 } from '../../search_strategy/esql_requests/handle_error';
-import type { ESQLDefaultLimitSizeOption } from '../../embeddables/grid_embeddable/types';
 
 export interface Column {
   type: string;
@@ -81,8 +77,7 @@ const getESQLDocumentCountStats = async (
     const aggQuery = ` | EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${getSafeESQLName(
       timeFieldName
     )}))
-    | stats rows = count(*) by _timestamp_
-    | LIMIT 10000`;
+    | stats rows = count(*) by _timestamp_`;
 
     const request = {
       params: {
@@ -186,8 +181,8 @@ export const useESQLOverallStatsData = (
         indexPattern: string | undefined;
         timeFieldName: string | undefined;
         lastRefresh: number;
+        limit: number;
         filter?: QueryDslQueryContainer;
-        limitSize?: ESQLDefaultLimitSizeOption;
         totalCount?: number;
       }
     | undefined
@@ -233,7 +228,7 @@ export const useESQLOverallStatsData = (
           searchQuery,
           intervalMs,
           filter: filter,
-          limitSize,
+          limit,
           totalCount: knownTotalCount,
         } = fieldStatsRequest;
 
@@ -385,7 +380,7 @@ export const useESQLOverallStatsData = (
         // COUNT + CARDINALITY
         // For % count & cardinality, we want the full base query WITH specified limit
         // to safeguard against huge datasets
-        const esqlBaseQueryWithLimit = searchQuery.esql + getSafeESQLLimitSize(limitSize);
+        const esqlBaseQueryWithLimit = getESQLWithSafeLimit(searchQuery.esql, limit);
 
         if (totalCount === 0) {
           setTableData({
@@ -410,7 +405,7 @@ export const useESQLOverallStatsData = (
             fields: populatedFields,
             esqlBaseQueryWithLimit,
             filter,
-            limitSize,
+            limitSize: limit,
             totalCount,
             onError,
           });
