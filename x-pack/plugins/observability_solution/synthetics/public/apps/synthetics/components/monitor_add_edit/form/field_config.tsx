@@ -827,7 +827,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         <EuiCode>http.response.body.headers</EuiCode>
       </>
     ),
-    props: (): Omit<EuiCheckboxProps, ControlledFieldProp> => ({
+    props: (): Omit<EuiCheckboxProps, ControlledFieldProp> & {
+      disabled?: boolean;
+    } => ({
       label: i18n.translate('xpack.synthetics.monitorConfig.indexResponseHeaders.label', {
         defaultMessage: 'Index response headers',
       }),
