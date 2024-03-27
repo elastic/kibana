@@ -11,7 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
 
-const MAX_COMPARISON_FIELDS = 100;
+export const MAX_COMPARISON_FIELDS = 100;
 
 export interface UseComparisonFieldsProps {
   dataView: DataView;

@@ -105,7 +105,6 @@ const CompareDocuments = ({
     isPlainRecord,
     fieldColumnId,
     selectedDocs,
-    getDocById,
     setSelectedDocs,
   });
   const comparisonColumnVisibility = useMemo<EuiDataGridColumnVisibility>(
