@@ -128,6 +128,29 @@ describe('Security Plugin', () => {
           },
           "userProfiles": Object {
             "bulkGet": [Function],
+            "enabled$": Observable {
+              "operator": [Function],
+              "source": Observable {
+                "operator": [Function],
+                "source": Observable {
+                  "operator": [Function],
+                  "source": Observable {
+                    "operator": [Function],
+                    "source": Observable {
+                      "source": BehaviorSubject {
+                        "_value": false,
+                        "closed": false,
+                        "currentObservers": null,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [],
+                        "thrownError": null,
+                      },
+                    },
+                  },
+                },
+              },
+            },
             "getCurrent": [Function],
             "partialUpdate": [Function],
             "suggest": [Function],
@@ -144,14 +167,17 @@ describe('Security Plugin', () => {
               },
             },
             "userProfileLoaded$": Observable {
-              "source": BehaviorSubject {
-                "_value": false,
-                "closed": false,
-                "currentObservers": null,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
+              "operator": [Function],
+              "source": Observable {
+                "source": BehaviorSubject {
+                  "_value": false,
+                  "closed": false,
+                  "currentObservers": null,
+                  "hasError": false,
+                  "isStopped": false,
+                  "observers": Array [],
+                  "thrownError": null,
+                },
               },
             },
           },
