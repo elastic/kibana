@@ -122,6 +122,12 @@ EOF
 
   SONAR_LOGIN=$(vault_get sonarqube token)
   export SONAR_LOGIN
+
+  ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
+  export ELASTIC_APM_SERVER_URL
+
+  ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
+  export ELASTIC_APM_API_KEY
 }
 
 # Set up GCS Service Account for CDN

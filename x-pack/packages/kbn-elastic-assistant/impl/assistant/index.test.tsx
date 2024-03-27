@@ -50,7 +50,7 @@ const mockData = {
     title: 'Welcome',
     category: 'assistant',
     messages: [],
-    apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+    apiConfig: { connectorId: '123' },
     replacements: [],
   },
   'electric sheep': {
@@ -58,7 +58,7 @@ const mockData = {
     category: 'assistant',
     title: 'electric sheep',
     messages: [],
-    apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+    apiConfig: { connectorId: '123' },
     replacements: [],
   },
 };
@@ -169,7 +169,7 @@ describe('Assistant', () => {
       expect(chatSendSpy).toHaveBeenLastCalledWith(
         expect.objectContaining({
           currentConversation: {
-            apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
+            apiConfig: { connectorId: '123' },
             replacements: [],
             category: 'assistant',
             id: 'Welcome Id',
