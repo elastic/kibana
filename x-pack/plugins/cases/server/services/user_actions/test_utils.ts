@@ -61,8 +61,8 @@ export const createConnectorUserAction = (
       payload: { connector: restConnector },
       type: 'connector',
       connectorId: id,
+      ...(overrides && { ...overrides }),
     }),
-    ...(overrides && { ...overrides }),
   };
 };
 
@@ -155,8 +155,8 @@ export const updateConnectorUserAction = ({
       payload: { connector: restConnector },
       type: 'connector',
       connectorId: id,
+      ...(overrides && { ...overrides }),
     }),
-    ...(overrides && { ...overrides }),
   };
 };
 
@@ -172,8 +172,8 @@ export const pushConnectorUserAction = ({
       payload: { externalService: restExternalService },
       pushedConnectorId: connectorId,
       type: 'pushed',
+      ...(overrides && { ...overrides }),
     }),
-    ...(overrides && { ...overrides }),
   };
 };
 
