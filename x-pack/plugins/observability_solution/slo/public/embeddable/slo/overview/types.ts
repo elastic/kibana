@@ -6,6 +6,13 @@
  */
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { Subject } from 'rxjs';
+export type SLOView = 'cardView' | 'listView';
+
+interface GroupFilters {
+  groupBy: string;
+  groups: string[];
+  sloView: string;
+}
 
 export interface EmbeddableSloProps {
   sloId: string | undefined;
@@ -14,10 +21,11 @@ export interface EmbeddableSloProps {
   onRenderComplete?: () => void;
   showAllGroupByInstances?: boolean;
   showGroupSLOs?: boolean; // delete this one
-  overviewMode?: 'single' | 'groups';
-  groupBy: string; // TODO add groupBy options
-  groups: [];
-  sloView: string; // TODO add sloView types
+  overviewMode?: string;
+  groupBy?: string; // TODO add groupBy options
+  groups?: [];
+  sloView?: SLOView; // TODO add sloView types;
+  groupFilters?: GroupFilters;
 }
 
 export type SloEmbeddableInput = EmbeddableInput & EmbeddableSloProps;

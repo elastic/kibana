@@ -16,6 +16,7 @@ import {
   EuiSelect,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
 
 import { i18n } from '@kbn/i18n';
 import { useFetchSloGroups } from '../../../hooks/use_fetch_slo_groups';
@@ -48,8 +49,12 @@ const groupByOptions: Option[] = [
 
 export type SLOView = 'cardView' | 'listView';
 
-export function SloGroupConfiguration({ onSelected }) {
-  const mapGroupsToOptions = (items) =>
+interface Props {
+  onSelected: (prop: string, value: string | string[] | undefined) => void;
+}
+
+export function SloGroupConfiguration({ onSelected }: Props) {
+  const mapGroupsToOptions = (items: SLOGroupWithSummaryResponse[] | undefined) =>
     items?.map((item) => ({
       label: item.group,
       value: item.group,
@@ -60,7 +65,7 @@ export function SloGroupConfiguration({ onSelected }) {
   const [selectedGroupOptions, setSelectedGroupOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
-  const [sloView, setSloView] = useState('cardView');
+  const [sloView, setSloView] = useState<SLOView>('cardView');
 
   // Fetch the groups for slo.tags, status and slo.indicator.type
   const { data: tags, isLoading: isTagsLoading } = useFetchSloGroups({
@@ -128,13 +133,11 @@ export function SloGroupConfiguration({ onSelected }) {
     setSelectedGroupOptions(opts);
     const selectedGroups =
       opts.length >= 1
-        ? groupOptions?.filter((group) => opts.find((opt) => opt.value === group.value))
+        ? groupOptions
+            ?.filter((group) => opts.find((opt) => opt.value === group.value))
+            .map((opt) => opt.label)
         : undefined;
-    onSelected({
-      groupBy: selectedGroupBy,
-      groups: selectedGroups,
-      sloView,
-    });
+    onSelected('groups', selectedGroups);
   };
 
   return (
@@ -152,12 +155,7 @@ export function SloGroupConfiguration({ onSelected }) {
           value={selectedGroupBy}
           onChange={(e) => {
             setSelectedGroupBy(e.target.value);
-            console.log(e.target.value, '!!e.target.value');
-            onSelected({
-              groups: selectedGroupOptions,
-              groupBy: e.target.value,
-              sloView,
-            });
+            onSelected('groupBy', e.target.value);
           }}
         />
       </EuiFormRow>
@@ -207,11 +205,7 @@ export function SloGroupConfiguration({ onSelected }) {
             idSelected={sloView}
             onChange={(id) => {
               setSloView(id as SLOView);
-              onSelected({
-                groups: selectedGroupOptions,
-                groupBy: selectedGroupBy,
-                sloView: id,
-              });
+              onSelected('sloView', id);
             }}
             isIconOnly
           />

@@ -32,25 +32,24 @@ interface SloConfigurationProps {
   onCreate: (props: EmbeddableSloProps) => void;
   onCancel: () => void;
 }
+export type SLOView = 'cardView' | 'listView';
 
 export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
+  const [overviewMode, setOverviewMode] = useState<string>(initialInput?.overviewMode ?? 'single');
+  const [selectedGroupFilters, setSelectedGroupFilters] = useState({
+    groupBy: 'tags',
+    groups: [],
+    sloView: 'cards',
+  });
   const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
   const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
-  const [overviewMode, setOverviewMode] = useState(initialInput?.overviewMode ?? 'single');
-  const [selectedGroups, setSelectedGroups] = useState();
-  const [selectedGroupBy, setSelectedGroupBy] = useState();
-  const [selectedSloView, setSelectedSloView] = useState();
-
-  // TODO  create a separate onCreate function for single vs group SLOs sending the appropriate params
   const onConfirmClick = () =>
     onCreate({
       showAllGroupByInstances,
       sloId: selectedSlo?.sloId,
       sloInstanceId: selectedSlo?.sloInstanceId,
       overviewMode,
-      groups: selectedGroups,
-      groupBy: selectedGroupBy,
-      sloView: selectedSloView,
+      groupFilters: selectedGroupFilters,
     });
   const [hasError, setHasError] = useState(false);
 
@@ -66,7 +65,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
       <EuiModalBody>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <OverviewModeSelector value={overviewMode} onChange={setOverviewMode} />
+            <OverviewModeSelector value={overviewMode} onChange={(mode) => setOverviewMode(mode)} />
             <EuiSpacer size="m" />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -74,12 +73,9 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
           <EuiFlexItem>
             {overviewMode === 'groups' ? (
               <SloGroupConfiguration
-                onSelected={({ sloView, groupBy, groups }) => {
-                  console.log(groupBy, '!!groupBy');
-                  setSelectedGroupBy(groupBy);
-                  setSelectedGroups(groups);
-                  setSelectedSloView(sloView);
-                }}
+                onSelected={(prop, value) =>
+                  setSelectedGroupFilters((prevState) => ({ ...prevState, [prop]: value }))
+                }
               />
             ) : (
               <SloSelector

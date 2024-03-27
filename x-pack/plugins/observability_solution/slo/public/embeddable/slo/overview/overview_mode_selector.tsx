@@ -14,7 +14,7 @@ const overviewModeOptions: EuiButtonGroupOptionProps[] = [
     id: `single`,
     label: (
       <FormattedMessage
-        id="xpack.aiops.embeddableChangePointChart.viewTypeSelector.chartsLabel"
+        id="xpack.slo.overviewEmbeddable.typeSelector.singleSLOLabel"
         defaultMessage="Single SLO"
       />
     ),
@@ -23,7 +23,7 @@ const overviewModeOptions: EuiButtonGroupOptionProps[] = [
     id: `groups`,
     label: (
       <FormattedMessage
-        id="xpack.aiops.embeddableChangePointChart.viewTypeSelector.tableLabel"
+        id="xpack.slo.overviewEmbeddable.typeSelector.groupSLOLabel"
         defaultMessage="Group of SLOs"
       />
     ),
