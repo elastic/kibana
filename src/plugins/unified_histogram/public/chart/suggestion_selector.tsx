@@ -30,7 +30,7 @@ export const SuggestionSelector = ({
   activeSuggestion,
   onSuggestionChange,
 }: SuggestionSelectorProps) => {
-  const suggestionOptions = suggestions.map((sug) => {
+  let suggestionOptions = suggestions.map((sug) => {
     return {
       label: sug.title,
       value: sug.title,
@@ -45,6 +45,16 @@ export const SuggestionSelector = ({
         },
       ]
     : [];
+
+  if (activeSuggestion && !suggestions.find((s) => s.title === activeSuggestion.title)) {
+    suggestionOptions = [
+      ...suggestionOptions,
+      {
+        label: activeSuggestion.title,
+        value: activeSuggestion.title,
+      },
+    ];
+  }
 
   const onSelectionChange = useCallback(
     (newOptions) => {

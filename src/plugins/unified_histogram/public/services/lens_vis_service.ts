@@ -264,6 +264,24 @@ export class LensVisService {
       }
     }
 
+    if (
+      externalVisContext &&
+      externalVisContext.suggestionType === UnifiedHistogramSuggestionType.lensSuggestion
+    ) {
+      // can be based on an unfamiliar suggestion but it was saved somehow, so try to restore it too
+      const derivedExternalSuggestion = getLensSuggestionFromLensAttributes({
+        externalVisContext,
+        queryParams,
+      });
+
+      if (derivedExternalSuggestion) {
+        availableSuggestionsWithType.push({
+          suggestion: derivedExternalSuggestion,
+          type: UnifiedHistogramSuggestionType.lensSuggestion,
+        });
+      }
+    }
+
     if (externalVisContext) {
       // try to find a suggestion that is compatible with the external vis context
       const matchingItem = availableSuggestionsWithType.find((item) =>
@@ -630,4 +648,63 @@ export class LensVisService {
       visContext,
     };
   };
+}
+
+function getLensSuggestionFromLensAttributes({
+  externalVisContext,
+  queryParams,
+}: {
+  externalVisContext: UnifiedHistogramVisContext | undefined;
+  queryParams: QueryParams;
+}): Suggestion | undefined {
+  if (!externalVisContext) {
+    return undefined;
+  }
+
+  const { attributes, suggestionType } = externalVisContext;
+
+  try {
+    if (suggestionType === UnifiedHistogramSuggestionType.lensSuggestion) {
+      const datasourceId: 'formBased' | 'textBased' | undefined = [
+        'formBased' as const,
+        'textBased' as const,
+      ].find((key) => Boolean(attributes.state.datasourceStates[key]));
+
+      if (!datasourceId) {
+        return undefined;
+      }
+      const datasourceState = attributes.state.datasourceStates[datasourceId];
+
+      // should be based on same columns and same query
+      if (
+        !datasourceState?.layers ||
+        !Object.values(datasourceState?.layers).some(
+          (layer) =>
+            isEqual(
+              layer.columns?.map((c: { columnId: string; meta: DatatableColumn['meta'] }) => ({
+                id: c.columnId,
+                meta: c.meta,
+              })),
+              queryParams.columns?.map((c) => ({ id: c.id, meta: c.meta }))
+            ) && isEqual(layer.query, queryParams.query)
+        )
+      ) {
+        return undefined;
+      }
+
+      return {
+        title: i18n.translate('unifiedHistogram.lensTitleUnfamiliar', {
+          defaultMessage: 'Customized',
+        }),
+        visualizationId: attributes.visualizationType,
+        visualizationState: attributes.state.visualization,
+        datasourceState,
+        datasourceId,
+      } as Suggestion;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
 }

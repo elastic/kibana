@@ -519,6 +519,66 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await getCurrentVisChartTitle()).to.be('Donut');
     });
 
+    it('should be able to change to an unfamiliar vis type via lens flyout', async () => {
+      await PageObjects.discover.loadSavedSearch('testCustomESQLVisDonut');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Donut');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      await changeVisSeriesType('Pie');
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Customized');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Pie');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
+
+      await PageObjects.discover.saveSearch('testCustomESQLVisPie', true);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Customized');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Pie');
+      expect(await getCurrentVisChartTitle()).to.be('Customized');
+
+      await browser.refresh();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Customized');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Pie');
+      expect(await getCurrentVisChartTitle()).to.be('Customized');
+
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageB = avg(bytes) by extension.raw'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Bar vertical stacked');
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+
+      await PageObjects.discover.revertUnsavedChanges();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Customized');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Pie');
+      expect(await getCurrentVisChartTitle()).to.be('Customized');
+    });
+
     it('should be able to load a saved search with custom vis, edit vis and revert changes', async () => {
       await PageObjects.discover.loadSavedSearch('testCustomESQLVis');
 
