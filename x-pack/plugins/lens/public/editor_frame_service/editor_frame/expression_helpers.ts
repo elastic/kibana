@@ -174,7 +174,7 @@ export function buildExpression({
   dateRange: DateRange;
   nowInstant: Date;
   // should be set to false when: 1. searchcontext changes (filters, query, timerange) or 2. refresh is clicked
-  canUseCache: boolean | undefined;
+  canUseCache?: boolean;
 }): Ast | null {
   // if an unregistered visualization is passed in the SO
   // then this will be set as "undefined". Relax the check to catch both
