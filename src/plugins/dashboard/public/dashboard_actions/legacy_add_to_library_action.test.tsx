@@ -9,18 +9,23 @@
 import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { pluginServices } from '../services/plugin_services';
-import { AddToLibraryAction, AddPanelToLibraryActionApi } from './add_to_library_action';
+import {
+  LegacyAddToLibraryAction,
+  LegacyAddPanelToLibraryActionApi,
+} from './legacy_add_to_library_action';
 
 describe('Add to library action', () => {
-  let action: AddToLibraryAction;
-  let context: { embeddable: AddPanelToLibraryActionApi };
+  let action: LegacyAddToLibraryAction;
+  let context: { embeddable: LegacyAddPanelToLibraryActionApi };
 
   beforeEach(() => {
-    action = new AddToLibraryAction();
+    action = new LegacyAddToLibraryAction();
     context = {
       embeddable: {
         linkToLibrary: jest.fn(),
         canLinkToLibrary: jest.fn().mockResolvedValue(true),
+        unlinkFromLibrary: jest.fn(),
+        canUnlinkFromLibrary: jest.fn().mockResolvedValue(true),
 
         viewMode: new BehaviorSubject<ViewMode>('edit'),
         panelTitle: new BehaviorSubject<string | undefined>('A very compatible API'),

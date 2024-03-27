@@ -101,6 +101,12 @@ export {
 } from './interfaces/titles/publishes_panel_title';
 export { initializeTitles, type SerializedTitles } from './interfaces/titles/titles_api';
 export {
+  type HasLibraryTransforms,
+  apiHasLibraryTransforms,
+  type HasLegacyLibraryTransforms,
+  apiHasLegacyLibraryTransforms,
+} from './interfaces/has_library_transforms';
+export {
   useBatchedPublishingSubjects,
   usePublishingSubject,
   useStateFromPublishingSubject,
