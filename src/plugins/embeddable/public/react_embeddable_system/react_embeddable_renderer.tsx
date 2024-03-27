@@ -11,17 +11,13 @@ import {
   PresentationContainer,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
-import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
+import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-import {
-  DefaultEmbeddableApi,
-  ReactEmbeddableApiRegistration,
-  ReactEmbeddableFactory,
-} from './types';
+import { DefaultEmbeddableApi, ReactEmbeddableApiRegistration } from './types';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -37,12 +33,22 @@ export const ReactEmbeddableRenderer = <
   state,
   parentApi,
   onApiAvailable,
+  panelProps,
 }: {
   maybeId?: string;
   type: string;
   state: SerializedPanelState<StateType>;
   parentApi?: PresentationContainer;
   onApiAvailable?: (api: ApiType) => void;
+  panelProps?: Pick<
+    PresentationPanelProps<ApiType>,
+    | 'showShadow'
+    | 'showBorder'
+    | 'showBadges'
+    | 'showNotifications'
+    | 'hideHeader'
+    | 'hideInspector'
+  >;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
 
@@ -50,10 +56,7 @@ export const ReactEmbeddableRenderer = <
     () =>
       (async () => {
         const uuid = maybeId ?? generateId();
-        const factory = getReactEmbeddableFactory(type) as ReactEmbeddableFactory<
-          StateType,
-          ApiType
-        >;
+        const factory = await getReactEmbeddableFactory<StateType, ApiType>(type);
         const registerApi = (
           apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
           comparators: StateComparators<StateType>
@@ -109,5 +112,5 @@ export const ReactEmbeddableRenderer = <
     };
   }, []);
 
-  return <PresentationPanel Component={componentPromise} />;
+  return <PresentationPanel {...panelProps} Component={componentPromise} />;
 };

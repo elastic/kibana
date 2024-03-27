@@ -15,6 +15,7 @@ import type { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 
 export const SERVICE_NAME = 'service.name' as const;
 export const TRANSACTION_TYPE = 'transaction.type' as const;
+export const TRANSACTION_NAME = 'transaction.name' as const;
 export interface AlertDetailsAppSectionProps {
   rule: Rule<{
     environment: string;
@@ -26,6 +27,7 @@ export interface AlertDetailsAppSectionProps {
     [SERVICE_NAME]: string;
     [TRANSACTION_TYPE]: string;
     [SERVICE_ENVIRONMENT]: string;
+    [TRANSACTION_NAME]: string;
   }>;
   timeZone: string;
   setAlertSummaryFields: React.Dispatch<
