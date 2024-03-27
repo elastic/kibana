@@ -13,19 +13,17 @@ import chalk from 'chalk';
 import fs from 'fs/promises';
 import globby from 'globby';
 import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { fixEslint } from './lib/fix_eslint';
 import { formatOutput } from './lib/format_output';
 import { getGeneratedFilePath } from './lib/get_generated_file_path';
 import { removeGenArtifacts } from './lib/remove_gen_artifacts';
 import { lint } from './openapi_linter';
 import { getGenerationContext } from './parser/get_generation_context';
-
 import type { OpenApiDocument } from './parser/openapi_types';
 import { initTemplateService, TemplateName } from './template_service/template_service';
 
 export interface GeneratorConfig {
-  title: string;
+  title?: string;
   rootDir: string;
   sourceGlob: string;
   templateName: TemplateName;
@@ -39,7 +37,7 @@ export interface GeneratorConfig {
 }
 
 export const generate = async (config: GeneratorConfig) => {
-  const { rootDir, sourceGlob, templateName, skipLinting, bundle } = config;
+  const { title = 'API schemas', rootDir, sourceGlob, templateName, skipLinting, bundle } = config;
 
   if (!skipLinting) {
     await lint({
@@ -81,30 +79,31 @@ export const generate = async (config: GeneratorConfig) => {
   console.log(`🪄   Generating new artifacts`);
   const TemplateService = await initTemplateService();
   if (bundle) {
-    console.log(`📦  Bundling API route schemas`);
-    const operations = parsedSources.flatMap(({ generationContext, sourcePath }) =>
-      // Add the sourcePath to each operation so we can generate the correct import paths for bundled operations
-      generationContext.operations.map((op) => ({
-        ...op,
-        sourcePath: sourcePath.split(`${REPO_ROOT}/`)[1],
-        version: generationContext.info.version,
-      }))
-    );
-
-    console.log('parsedSources');
-    console.log(parsedSources);
-    console.log('operations');
-    console.log(operations);
+    console.log(`📦  Bundling ${title}`);
+    const operations = parsedSources
+      .flatMap(({ generationContext, sourcePath }) =>
+        // Add the sourcePath to each operation so we can generate the correct import paths for bundled operations
+        generationContext.operations.map((op) => ({
+          ...op,
+          sourcePath,
+          version: generationContext.info.version,
+        }))
+      )
+      // Sort the operations by operationId so the output is deterministic
+      .sort((a, b) => a.operationId.localeCompare(b.operationId));
 
     const result = TemplateService.compileTemplate(templateName, {
       operations,
       components: {},
-      info: {},
+      info: {
+        title,
+        version: 'Bundle (no version)',
+      },
       imports: {},
     });
 
     await fs.writeFile(bundle.outFile, result);
-    console.log(`📖  Wrote bundled OpenAPI spec to ${chalk.bold(bundle.outFile)}`);
+    console.log(`📖  Wrote bundled artifact to ${chalk.bold(bundle.outFile)}`);
   } else {
     await Promise.all(
       parsedSources.map(async ({ sourcePath, generationContext }) => {

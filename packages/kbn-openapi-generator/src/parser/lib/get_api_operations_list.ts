@@ -12,9 +12,12 @@ import type {
   NormalizedSchemaItem,
   ObjectSchema,
   OpenApiDocument,
+  ResponseExample,
 } from '../openapi_types';
 
 const HTTP_METHODS = Object.values(OpenAPIV3.HttpMethods);
+
+
 
 export function getApiOperationsList(parsedSchema: OpenApiDocument): NormalizedOperation[] {
   const operations: NormalizedOperation[] = Object.entries(parsedSchema.paths).flatMap(
@@ -81,13 +84,15 @@ export function getApiOperationsList(parsedSchema: OpenApiDocument): NormalizedO
         if (!operationId) {
           throw new Error(`Missing operationId for ${method} ${path}`);
         }
-
         const response = operation.responses?.['200']?.content?.['application/json']?.schema as
           | NormalizedSchemaItem
           | undefined;
         const requestBody = operation.requestBody?.content?.['application/json']?.schema as
           | NormalizedSchemaItem
           | undefined;
+        const responseExample = operation.responses?.['200']?.content?.['application/json']
+          ?.example as ResponseExample;
+
         const normalizedOperation: NormalizedOperation = {
           path,
           method,
@@ -99,6 +104,7 @@ export function getApiOperationsList(parsedSchema: OpenApiDocument): NormalizedO
           requestQuery,
           requestBody,
           response,
+          responseExample,
         };
 
         return normalizedOperation;

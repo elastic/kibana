@@ -35,6 +35,7 @@ query: {{operationId}}RequestQuery,
 body: {{operationId}}RequestBody, 
 {{/if}}
 signal?: AbortSignal
+
 ) => KibanaServices.get().http.fetch<{{operationId}}Response>(
   {{#if requestParams}}
     replaceParams('{{path}}', params)
@@ -53,7 +54,6 @@ signal?: AbortSignal
     signal
     }
   );
-
 {{/each}}
 
 /**

@@ -34,4 +34,17 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
       ),
     },
   });
+  await generate({
+    title: 'API client response mocks',
+    rootDir: SECURITY_SOLUTION_ROOT,
+    sourceGlob: './**/*.schema.yaml',
+    templateName: 'api_client_mock_responses',
+    skipLinting: true,
+    bundle: {
+      outFile: join(
+        REPO_ROOT,
+        'x-pack/plugins/security_solution/public/common/api_client/client.mock.ts'
+      ),
+    },
+  });
 })();

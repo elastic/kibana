@@ -32,3 +32,13 @@ paths:
                 type: 'query'
                 risk_score: 55
                 language: 'kuery'
+                enabled: true
+                references:
+                  - 1
+                  - 2
+                  - "test"
+                pepe: 
+                  pipo: 1
+                  juan: 'hola'
+                arra: [1,2, "papapap"]
+                my_object: {'hi': ["you"]}
