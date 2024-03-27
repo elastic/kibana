@@ -71,8 +71,9 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     layoutOption,
     jobProviderOptions,
     objectType,
+    isDirty,
   } = props;
-  const isSaved = Boolean(objectId);
+  const isSaved = Boolean(objectId) || !isDirty;
   const [isStale, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
   const [selectedRadio, setSelectedRadio] = useState<AllowedImageExportType>('printablePdfV2');
@@ -382,10 +383,10 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             }}
           />
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="l" />
+        {renderOptions()}
       </EuiForm>
       <EuiModalFooter>
-        {renderOptions()}
         {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
         {saveWarningMessageWithButton}
       </EuiModalFooter>

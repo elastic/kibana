@@ -43,7 +43,7 @@ export function DownloadPanelContent({
         >
           <FormattedMessage
             id="xpack.lens.application.csvPanelContent.downloadButtonLabel"
-            defaultMessage="Export as CSV"
+            defaultMessage="Generate CSV"
           />
         </EuiButton>
       </EuiModalFooter>
