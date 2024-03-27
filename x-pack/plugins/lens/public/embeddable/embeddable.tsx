@@ -218,7 +218,10 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
   data: DataPublicPluginStart;
-  documentToExpression: (doc: Document) => Promise<DocumentToExpressionReturnType>;
+  documentToExpression: (
+    doc: Document,
+    canUseCache: boolean
+  ) => Promise<DocumentToExpressionReturnType>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -299,10 +302,11 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
 
 const getExpressionFromDocument = async (
   document: Document,
-  documentToExpression: LensEmbeddableDeps['documentToExpression']
+  documentToExpression: LensEmbeddableDeps['documentToExpression'],
+  canUseCache: boolean = false
 ) => {
   const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
-    await documentToExpression(document);
+    await documentToExpression(document, canUseCache);
   return {
     ast: ast ? toExpression(ast) : null,
     indexPatterns,
@@ -561,6 +565,9 @@ export class Embeddable
           debounceTime(0),
           switchMap(async ({ trigger, input }) => {
             if (trigger === 'attributesOrSavedObjectId') {
+              const canUseCache = input.viewMode === 'edit';
+              await this.initializeSavedVis(input, canUseCache);
+            } else {
               await this.initializeSavedVis(input);
             }
 
@@ -899,7 +906,7 @@ export class Embeddable
     return null;
   }
 
-  async initializeSavedVis(input: LensEmbeddableInput) {
+  async initializeSavedVis(input: LensEmbeddableInput, canUseCache: boolean = false) {
     const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
       .unwrapAttributes(input)
       .catch((e: Error) => {
@@ -926,7 +933,7 @@ export class Embeddable
 
     try {
       const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
-        await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
+        await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression, canUseCache);
 
       this.expression = ast;
       this.indexPatterns = indexPatterns;
