@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
   /*
    * Tests
    */
-  describe('Generate CSV from SearchSource', () => {
+  describe('Generate CSV from SearchSource', function () {
     // failsOnMKI, see https://github.com/elastic/kibana/issues/179456
     this.tags(['failsOnMKI']);
     beforeEach(async () => {
