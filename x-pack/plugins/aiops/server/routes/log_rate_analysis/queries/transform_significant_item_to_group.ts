@@ -7,8 +7,7 @@
 
 import { stringHash } from '@kbn/ml-string-hash';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
-
-import type { SignificantItemDuplicateGroup } from '../../../../common/types';
+import type { SignificantItemDuplicateGroup } from '@kbn/aiops-utils/log_rate_analysis/types';
 
 export function transformSignificantItemToGroup(
   significantItem: SignificantItem,

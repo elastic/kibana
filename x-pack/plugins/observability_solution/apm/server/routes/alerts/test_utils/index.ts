@@ -47,6 +47,10 @@ export const createRuleTypeMocks = () => {
     alertWithLifecycle: jest.fn(),
     logger: loggerMock,
     shouldWriteAlerts: () => true,
+    alertsClient: {
+      report: jest.fn(),
+      setAlertData: jest.fn(),
+    },
   };
 
   const dependencies = {

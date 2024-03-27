@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { CustomCheerio } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ObjectRemover } from '../../lib/object_remover';
 
 const FILTERABLE_SOLUTIONS = ['Stack management', 'Machine Learning', 'Observability', 'Security'];
 
@@ -26,17 +25,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const log = getService('log');
-  const supertest = getService('supertest');
-  const objectRemover = new ObjectRemover(supertest);
 
   describe('Global alerts page', function () {
-    // FLAKY: https://github.com/elastic/kibana/issues/178322
-    describe.skip('Loads the page with limited privileges', () => {
-      before(async () => {
-        await security.testUser.setRoles(['alerts_and_actions_role']);
-      });
-      after(async () => {
+    describe('Loads the page with limited privileges', () => {
+      beforeEach(async () => {
         await security.testUser.restoreDefaults();
+        await security.testUser.setRoles(['alerts_and_actions_role']);
       });
 
       it('Loads the page', async () => {
@@ -70,11 +64,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Loads the page with actions but not alerting privilege', () => {
-      before(async () => {
-        await security.testUser.setRoles(['only_actions_role']);
-      });
-      after(async () => {
+      beforeEach(async () => {
         await security.testUser.restoreDefaults();
+        await security.testUser.setRoles(['only_actions_role']);
       });
 
       it('Loads the page but shows missing permission prompt', async () => {
@@ -92,6 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Loads the page', () => {
       beforeEach(async () => {
+        await security.testUser.restoreDefaults();
         await pageObjects.common.navigateToUrl(
           'management',
           'insightsAndAlerting/triggersActionsAlerts',
@@ -99,10 +92,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             shouldUseHashForSubUrl: false,
           }
         );
-      });
-
-      afterEach(async () => {
-        await objectRemover.removeAll();
       });
 
       it('Loads the page', async () => {

@@ -8,6 +8,7 @@
 import { uniqBy } from 'lodash';
 
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
+import type { ItemSet } from '@kbn/aiops-utils/log_rate_analysis/types';
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { groupDuplicates } from './fetch_frequent_item_sets';
@@ -17,7 +18,6 @@ import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
 import { getMissingSignificantItems } from './get_missing_significant_items';
 import { transformSignificantItemToGroup } from './transform_significant_item_to_group';
-import type { ItemSet } from '../../../../common/types';
 
 export function getSignificantItemGroups(
   itemsets: ItemSet[],

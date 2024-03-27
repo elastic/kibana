@@ -68,7 +68,16 @@ export const renderApp = (
   const { history } = params;
   const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
-  const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
+  const {
+    charts,
+    cloud,
+    guidedOnboarding,
+    indexManagement: indexManagementPlugin,
+    lens,
+    security,
+    share,
+    ml,
+  } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
@@ -99,6 +108,9 @@ export const renderApp = (
   } catch {
     user = null;
   }
+  const indexMappingComponent = indexManagementPlugin.getIndexMappingComponent({ history });
+
+  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,
@@ -106,11 +118,13 @@ export const renderApp = (
     charts,
     cloud,
     config,
+    connectorTypes,
     console: plugins.console,
-    esConfig,
     data: plugins.data,
+    esConfig,
     guidedOnboarding,
     history,
+    indexMappingComponent,
     isSidebarEnabled,
     lens,
     ml,
@@ -121,6 +135,7 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
+    searchPlayground: plugins.searchPlayground,
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,

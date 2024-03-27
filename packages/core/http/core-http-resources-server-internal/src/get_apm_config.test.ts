@@ -66,6 +66,16 @@ describe('getApmConfig', () => {
     expect(config).not.toHaveProperty('secretToken');
   });
 
+  it('omits apiKey', () => {
+    getConfigurationMock.mockReturnValue({
+      ...defaultApmConfig,
+      apiKey: 'smurfs',
+    });
+    const config = getApmConfig('/some-other-path');
+
+    expect(config).not.toHaveProperty('apiKey');
+  });
+
   it('enhance the configuration with values from the current server-side transaction', () => {
     agentMock.currentTransaction = {
       sampled: 'sampled',
