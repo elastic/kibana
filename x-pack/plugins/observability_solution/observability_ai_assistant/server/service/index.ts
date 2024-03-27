@@ -128,8 +128,9 @@ export class ObservabilityAIAssistantService {
 
   private allowInit = () => {
     this.init = once(async () => {
-      return this.doInit().catch(() => {
+      return this.doInit().catch((error) => {
         this.allowInit();
+        throw error;
       });
     });
   };
