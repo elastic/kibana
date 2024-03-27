@@ -42,17 +42,20 @@ export function defineQueryApiKeysAggregationsRoute({
           await esClient.asCurrentUser.transport.request<ApiKeyAggregationsResponse>({
             method: 'POST',
             path: '/_security/_query/api_key',
+            querystring: {
+              filter_path: [
+                'total',
+                'aggregations.usernames.buckets.key',
+                'aggregations.types.buckets.key',
+                'aggregations.invalidated.doc_count',
+                'aggregations.expired.doc_count',
+                'aggregations.alertingKeys.doc_count',
+                'aggregations.managedMetadata.doc_count',
+              ],
+            },
             body: {
               size: 0,
-              query: {
-                bool: {
-                  must: {
-                    term: {
-                      invalidated: false,
-                    },
-                  },
-                },
-              },
+              query: { match: { invalidated: false } },
               aggs: {
                 usernames: {
                   terms: {

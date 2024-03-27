@@ -53,14 +53,7 @@ export function defineQueryApiKeysRoute({
         const [{ cluster: clusterPrivileges }, areApiKeysEnabled, areCrossClusterApiKeysEnabled] =
           await Promise.all([
             esClient.asCurrentUser.security.hasPrivileges({
-              body: {
-                cluster: [
-                  'manage_security',
-                  'read_security',
-                  'manage_api_key',
-                  'manage_own_api_key',
-                ],
-              },
+              cluster: ['manage_security', 'read_security', 'manage_api_key', 'manage_own_api_key'],
             }),
             authenticationService.apiKeys.areAPIKeysEnabled(),
             authenticationService.apiKeys.areCrossClusterAPIKeysEnabled(),
