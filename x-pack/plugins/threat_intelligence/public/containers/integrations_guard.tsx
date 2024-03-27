@@ -30,7 +30,7 @@ export const IntegrationsGuard: FC = memo(({ children }) => {
   if (integrationLoading || indicatorsTotalCountLoading) {
     return (
       <SecuritySolutionPluginTemplateWrapper
-        isEmptyState={true}
+        isEmptyState
         emptyPageBody={
           <EuiPageTemplate.EmptyPrompt color="transparent">
             <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />
