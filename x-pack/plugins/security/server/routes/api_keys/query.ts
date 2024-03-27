@@ -10,7 +10,7 @@ import type { SecurityQueryApiKeysRequest } from '@elastic/elasticsearch/lib/api
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
-import type { ApiKey } from '../../../common/model';
+import type { ApiKey, ApiKeyAggregations, ApiKeyAggregationsResponse } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -24,9 +24,11 @@ export interface QueryApiKeyResult {
   canManageOwnApiKeys: boolean;
   count: number;
   total: number;
+  aggregationTotal: number;
+  aggregations: ApiKeyAggregations;
 }
 
-export function defineQueryApiKeysRoute({
+export function defineQueryApiKeysAndAggregationsRoute({
   router,
   getAuthenticationService,
 }: RouteDefinitionParams) {
@@ -76,6 +78,57 @@ export function defineQueryApiKeysRoute({
           sort,
         });
 
+        const transportResponse =
+          await esClient.asCurrentUser.transport.request<ApiKeyAggregationsResponse>({
+            method: 'POST',
+            path: '/_security/_query/api_key',
+            querystring: {
+              filter_path: [
+                'total',
+                'aggregations.usernames.buckets.key',
+                'aggregations.types.buckets.key',
+                'aggregations.invalidated.doc_count',
+                'aggregations.expired.doc_count',
+                'aggregations.managed.buckets.metadataBased.doc_count',
+                'aggregations.managed.buckets.namePrefixBased.doc_count',
+              ],
+            },
+            body: {
+              size: 0,
+              query: { match: { invalidated: false } },
+              aggs: {
+                usernames: {
+                  terms: {
+                    field: 'username',
+                  },
+                },
+                types: {
+                  terms: {
+                    field: 'type',
+                  },
+                },
+                invalidated: {
+                  terms: {
+                    field: 'invalidated',
+                  },
+                },
+                expired: {
+                  filter: {
+                    range: { expiration: { lte: 'now/m' } },
+                  },
+                },
+                managed: {
+                  filters: {
+                    filters: {
+                      metadataBased: { term: { 'metadata.managed': true } },
+                      namePrefixBased: { prefix: { name: { value: 'Alerting' } } },
+                    },
+                  },
+                },
+              },
+            },
+          });
+
         return response.ok<QueryApiKeyResult>({
           body: {
             // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
@@ -86,6 +139,8 @@ export function defineQueryApiKeysRoute({
               clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled,
             canManageApiKeys: clusterPrivileges.manage_api_key,
             canManageOwnApiKeys: clusterPrivileges.manage_own_api_key,
+            aggregationTotal: transportResponse.total,
+            aggregations: transportResponse.aggregations,
           },
         });
       } catch (error) {

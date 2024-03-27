@@ -13,7 +13,7 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import { defineQueryApiKeysRoute } from './query';
+import { defineQueryApiKeysAndAggregationsRoute } from './query';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -28,7 +28,7 @@ describe('Query API Keys route', () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     authc = authenticationServiceMock.createStart();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
-    defineQueryApiKeysRoute(mockRouteDefinitionParams);
+    defineQueryApiKeysAndAggregationsRoute(mockRouteDefinitionParams);
     [[, routeHandler]] = mockRouteDefinitionParams.router.post.mock.calls;
     mockContext = coreMock.createCustomRequestHandlerContext({
       core: coreMock.createRequestHandlerContext(),

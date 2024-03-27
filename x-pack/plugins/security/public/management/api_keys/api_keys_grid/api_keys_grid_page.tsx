@@ -83,7 +83,6 @@ export const APIKeysGridPage: FunctionComponent = () => {
       size: pageSize,
     };
     return Promise.all([
-      new APIKeysAPIClient(services.http).queryApiKeyAggregations(),
       new APIKeysAPIClient(services.http).queryApiKeys(requestBody),
       authc.getCurrentUser(),
     ]);
@@ -141,8 +140,14 @@ export const APIKeysGridPage: FunctionComponent = () => {
   }
 
   const [
-    { aggregations, total: totalKeys },
-    { canManageApiKeys, apiKeys, canManageOwnApiKeys, canManageCrossClusterApiKeys },
+    {
+      aggregations,
+      canManageApiKeys,
+      apiKeys,
+      canManageOwnApiKeys,
+      canManageCrossClusterApiKeys,
+      aggregationTotal: totalKeys,
+    },
     currentUser,
   ] = state.value && state.value;
 
