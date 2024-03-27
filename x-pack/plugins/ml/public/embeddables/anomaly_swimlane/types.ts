@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { SerializedReactEmbeddableTitles } from '@kbn/embeddable-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { PublishesWritablePanelTitle, PublishingSubject } from '@kbn/presentation-publishing';
+import type {
+  PublishesWritablePanelTitle,
+  PublishingSubject,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
@@ -51,5 +54,5 @@ export function isSwimLaneEmbeddableContext(arg: unknown): arg is AnomalySwimLan
  * Persisted state for the Anomaly Swim Lane Embeddable.
  */
 export interface AnomalySwimLaneEmbeddableState
-  extends SerializedReactEmbeddableTitles,
+  extends SerializedTitles,
     AnomalySwimlaneEmbeddableCustomInput {}

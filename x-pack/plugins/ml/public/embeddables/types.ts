@@ -53,11 +53,12 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
   extends DefaultEmbeddableApi<StateType>,
     Pick<PublishesWritableUnifiedSearch, 'timeRange$' | 'setTimeRange'>,
     PublishesDataViews,
-    PublishesViewMode {
+    PublishesViewMode,
+    PublishesDataLoading {
   /**
    * Result time range based on the parent and panel time range APIs
    */
-  appliedTimeRange$?: PublishingSubject<TimeRange>;
+  appliedTimeRange$: PublishingSubject<TimeRange | undefined>;
 }
 
 /** Manual input by the user */
@@ -78,7 +79,7 @@ export interface AnomalySwimlaneEmbeddableCustomInput {
   filters?: Filter[];
   query?: Query;
   refreshConfig?: RefreshInterval;
-  timeRange?: TimeRange;
+  timeRange: TimeRange | undefined;
 }
 
 export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
