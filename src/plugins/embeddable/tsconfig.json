@@ -23,7 +23,6 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/content-management-plugin",
     "@kbn/data-views-plugin",
