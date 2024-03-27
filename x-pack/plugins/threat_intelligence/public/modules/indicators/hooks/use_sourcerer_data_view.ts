@@ -54,7 +54,7 @@ export const useSourcererDataView = () => {
 
   return useMemo(
     () => ({
-      sourcererDataView,
+      ...sourcererDataView,
       indexPatterns,
       indexPattern: updatedPattern,
       browserFields,

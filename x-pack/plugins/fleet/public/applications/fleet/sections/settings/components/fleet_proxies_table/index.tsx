@@ -11,7 +11,7 @@ import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } f
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useLink } from '../../../../hooks';
+import { useAuthz, useLink } from '../../../../hooks';
 import type { FleetProxy } from '../../../../types';
 
 export interface FleetProxiesTableProps {
@@ -27,6 +27,7 @@ export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> 
   proxies,
   deleteFleetProxy,
 }) => {
+  const authz = useAuthz();
   const { getHref } = useLink();
 
   const columns = useMemo((): Array<EuiBasicTableColumn<FleetProxy>> => {
@@ -73,7 +74,7 @@ export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> 
       {
         width: '68px',
         render: (fleetProxy: FleetProxy) => {
-          const isDeleteVisible = !fleetProxy.is_preconfigured;
+          const isDeleteVisible = authz.fleet.allSettings && !fleetProxy.is_preconfigured;
 
           return (
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
@@ -114,7 +115,7 @@ export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> 
         }),
       },
     ];
-  }, [deleteFleetProxy, getHref]);
+  }, [deleteFleetProxy, getHref, authz.fleet.allSettings]);
 
   return <EuiBasicTable columns={columns} items={proxies} data-test-subj="fleetProxiesTable" />;
 };

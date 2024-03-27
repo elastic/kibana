@@ -57,11 +57,24 @@ export const commandDefinitions: CommandDefinition[] = [
     },
   },
   {
+    name: 'meta',
+    description: i18n.translate('monaco.esql.definitions.metaDoc', {
+      defaultMessage: 'Returns information about the ES|QL environment',
+    }),
+    examples: ['meta functions'],
+    options: [],
+    modes: [],
+    signature: {
+      multipleParams: false,
+      params: [{ name: 'functions', type: 'function' }],
+    },
+  },
+  {
     name: 'show',
     description: i18n.translate('monaco.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
     }),
-    examples: ['show functions', 'show info'],
+    examples: ['show info'],
     options: [],
     modes: [],
     signature: {

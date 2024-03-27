@@ -251,6 +251,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
         generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
           domainId: domain.id,
           indexName,
+          tabId: 'domain_management',
         })
       );
       CrawlerLogic.actions.fetchCrawlerData();
