@@ -333,7 +333,6 @@ export const isBelowMinVersion = (version: string, minVersion: string) => {
 };
 
 export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
-  console.log(packageInfo)
   return packageInfo?.data_streams
     ?.filter((datastreams) => datastreams !== undefined)
     .map((ds) => ds.streams)

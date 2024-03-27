@@ -22,7 +22,6 @@ export const AwsInputVarFields = ({
   onChange: (key: string, value: string) => void;
   packageInfo: PackageInfo;
 }) => {
-  console.log(packageInfo);
   return (
     <div>
       {fields.map((field) => (
