@@ -362,11 +362,13 @@ export const useDiscoverHistogram = ({
           break;
         case UnifiedHistogramExternalVisContextStatus.automaticallyCreated:
         case UnifiedHistogramExternalVisContextStatus.applied:
+          // clearing the value in the internal state so we don't use it during saved search saving
           stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
             undefined
           );
           break;
         case UnifiedHistogramExternalVisContextStatus.unknown:
+          // using `{}` to overwrite the value inside the saved search SO during saving
           stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation({});
           break;
       }
