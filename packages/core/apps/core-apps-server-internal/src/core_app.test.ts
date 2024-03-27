@@ -316,7 +316,7 @@ describe('CoreApp', () => {
     });
   });
 
-  it('registers expected static dirs if there are public plugins', async () => {
+  it('registers expected static dirs for all plugins with static dirs', async () => {
     const uiPlugins = emptyPlugins();
     uiPlugins.public.set('some-plugin', {
       type: PluginType.preboot,
