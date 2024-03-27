@@ -16,7 +16,7 @@ const buildRuleGroup = themeRuleGroupBuilderFactory();
 
 const background = euiThemeVars.euiColorLightestShade;
 const stringTextColor = '#007C1E';
-const commentTextColor = '#4C886B'; //#41755C
+const commentTextColor = '#4C886B';
 const variableTextColor = '#0079A5';
 const booleanTextColor = '#990000';
 const numericTextColor = variableTextColor;

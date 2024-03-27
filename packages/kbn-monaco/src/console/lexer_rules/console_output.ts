@@ -52,6 +52,8 @@ export const consoleOutputLexerRules: monaco.languages.IMonarchLanguage = {
       [/['](?:(?:\\.)|(?:[^'\\]))*?[']/, { token: 'invalid' }],
       [/.+?/, { token: 'text' }],
       [/\/\/.*$/, { token: 'invalid' }],
+
+      // TODO: Comments in front of multiple responses are still not working
       [/#(.*?)(?=[1-5][0-9][0-9]\s(?:[\sA-Za-z]+)|(?:[1-5][0-9][0-9])|$)/, { token: 'comment' }],
       [/#!.*$/, { token: 'warning' }],
     ],
