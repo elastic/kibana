@@ -8,8 +8,8 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/aiops-api'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/aiops-api',
+  roots: ['<rootDir>/x-pack/plugins/aiops_api'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/aiops_api',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/aiops-api/server/**/*.{js,ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/aiops_api/server/**/*.{js,ts,tsx}'],
 };

@@ -3309,7 +3309,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-api-plugin@link:x-pack/plugins/aiops-api":
+"@kbn/aiops-api-plugin@link:x-pack/plugins/aiops_api":
   version "0.0.0"
   uid ""
 

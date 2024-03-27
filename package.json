@@ -157,7 +157,7 @@
     "@kbn/actions-types": "link:packages/kbn-actions-types",
     "@kbn/advanced-settings-plugin": "link:src/plugins/advanced_settings",
     "@kbn/ai-assistant-management-plugin": "link:src/plugins/ai_assistant_management/selection",
-    "@kbn/aiops-api-plugin": "link:x-pack/plugins/aiops-api",
+    "@kbn/aiops-api-plugin": "link:x-pack/plugins/aiops_api",
     "@kbn/aiops-change-point-detection": "link:x-pack/packages/ml/aiops_change_point_detection",
     "@kbn/aiops-common": "link:x-pack/packages/ml/aiops_common",
     "@kbn/aiops-components": "link:x-pack/packages/ml/aiops_components",
