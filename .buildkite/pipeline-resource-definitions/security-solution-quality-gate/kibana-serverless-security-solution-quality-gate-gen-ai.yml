@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: buildkite-pipeline-kibana-serverless-security-solution-quality-gate-gen-ai
+  name: kb-serverless-security-solution-quality-gate-gen-ai
   description: "[MKI] Executes Cypress tests for the Gen AI team"
 spec:
   type: buildkite-pipeline

@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: buildkite-pipeline-kibana-serverless-security-solution-quality-gate-detection-engine
+  name: kb-serverless-security-solution-quality-gate-detection-engine
   description: "[MKI] Executes Cypress tests for the Detection Engine team"
 spec:
   type: buildkite-pipeline
