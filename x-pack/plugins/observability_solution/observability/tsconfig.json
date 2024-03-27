@@ -95,9 +95,9 @@
     "@kbn/es-types",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/field-formats-plugin",
-    "@kbn/aiops-common",
     "@kbn/event-annotation-common",
     "@kbn/data-view-field-editor-plugin",
+    "@kbn/aiops-log-rate-analysis",
   ],
   "exclude": [
     "target/**/*"
