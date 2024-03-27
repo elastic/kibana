@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BulletSubtype } from '@elastic/charts';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
@@ -17,9 +18,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
 
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
+  const elasticChart = getService('elasticChart');
 
   describe('Gauge', function describeIndexTests() {
     const fixture =
@@ -38,6 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.navigateToApp(); // required for svl until dashboard PO navigation is fixed
       await dashboard.gotoDashboardEditMode('Convert to Lens - Gauge');
       await timePicker.setDefaultAbsoluteRange();
+      await elasticChart.setNewChartUiDebugFlag(true);
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
@@ -58,13 +60,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 0');
       expect(await dimensions[2].getVisibleText()).to.be('Static value: 100');
 
-      const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly');
-      const textContent = await elementWithInfo.getAttribute('textContent');
-      expect(textContent).to.contain('Average machine.ram');
-      expect(textContent).to.contain('horizontalBullet chart');
-      expect(textContent).to.contain('Minimum:0');
-      expect(textContent).to.contain('Maximum:100');
-      expect(textContent).to.contain('Value:100');
+      const { bullet } = await elasticChart.getChartDebugData();
+      const debugData = bullet?.rows[0][0];
+      expect(debugData?.subtype).to.be(BulletSubtype.twoThirdsCircle);
+      expect(debugData?.title).to.be('Average machine.ram');
+      expect(Math.round(debugData?.value ?? 0)).to.be(13104036081);
+      expect(debugData?.domain).to.eql([0, 100]);
     });
 
     it('should not convert aggregation with not supported field type', async () => {
@@ -85,13 +86,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 0');
       expect(await dimensions[2].getVisibleText()).to.be('Static value: 15000000000');
 
-      const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly');
-      const textContent = await elementWithInfo.getAttribute('textContent');
-      expect(textContent).to.contain('Average machine.ram');
-      expect(textContent).to.contain('horizontalBullet chart');
-      expect(textContent).to.contain('Minimum:0');
-      expect(textContent).to.contain('Maximum:15000000000');
-      expect(textContent).to.contain('Value:13104036080.615');
+      const { bullet } = await elasticChart.getChartDebugData();
+      const debugData = bullet?.rows[0][0];
+      expect(debugData?.subtype).to.be(BulletSubtype.twoThirdsCircle);
+      expect(debugData?.title).to.be('Average machine.ram');
+      expect(Math.round(debugData?.value ?? 0)).to.be(13104036081);
+      expect(debugData?.domain).to.eql([0, 15000000000]);
 
       await dimensions[0].click();
 

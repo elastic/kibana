@@ -58,6 +58,7 @@ describe('TableRowActions', () => {
     mockedUseAuthz.mockReturnValue({
       fleet: {
         all: true,
+        readAgents: true,
         allAgents: true,
       },
     } as any);
@@ -186,10 +187,10 @@ describe('TableRowActions', () => {
       expect(res).not.toBe(null);
       expect(res).toBeEnabled();
     });
-    it('should not render action if authz do not have Agents:All', async () => {
+    it('should not render action if authz do not have Agents:Read', async () => {
       mockedUseAuthz.mockReturnValue({
         fleet: {
-          allAgents: false,
+          readAgents: false,
         },
       } as any);
       const res = renderAndGetRestartUpgradeButton({
