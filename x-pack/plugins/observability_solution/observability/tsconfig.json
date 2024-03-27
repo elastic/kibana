@@ -98,6 +98,7 @@
     "@kbn/aiops-utils",
     "@kbn/event-annotation-common",
     "@kbn/data-view-field-editor-plugin",
+    "@kbn/cases-components",
   ],
   "exclude": ["target/**/*"]
 }
