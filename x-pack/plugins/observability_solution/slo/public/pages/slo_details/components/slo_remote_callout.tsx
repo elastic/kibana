@@ -44,6 +44,8 @@ export function SloRemoteCallout({ slo }: { slo: SLOWithSummaryResponse }) {
         href={sloDetailsUrl}
         color="primary"
         target="_blank"
+        iconType="popout"
+        iconSide="right"
       >
         {i18n.translate('xpack.slo.headerTitle.linkButtonButtonLabel', {
           defaultMessage: 'View remote SLO details',
