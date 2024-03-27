@@ -41,6 +41,9 @@ export const indicesOptionsSchema = schema.object({
   ignore_throttled: schema.maybe(schema.boolean()),
 });
 
+/**
+ * Defines the schema for the categorization API request body.
+ */
 export const categorizeSchema = schema.object({
   index: schema.string(),
   field: schema.string(),
@@ -51,6 +54,9 @@ export const categorizeSchema = schema.object({
   intervalMs: schema.maybe(schema.number()),
 });
 
+/**
+ * Schema for categorization API request body.
+ */
 export type CategorizeSchema = TypeOf<typeof categorizeSchema>;
 
 export const categorizationFieldValidationSchema = schema.object({
