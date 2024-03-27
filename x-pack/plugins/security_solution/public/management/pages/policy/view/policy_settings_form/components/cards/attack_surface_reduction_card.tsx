@@ -87,6 +87,7 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
           disabled={!isEditMode}
           onChange={handleSwitchChange}
           data-test-subj={getTestId('enableDisableSwitch')}
+          labelProps={{ 'data-test-subj': getTestId('switchLabel') }}
         />
       </SettingCard>
     );

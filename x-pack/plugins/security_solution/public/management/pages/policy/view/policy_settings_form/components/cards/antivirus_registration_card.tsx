@@ -84,6 +84,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
           disabled={!isEditMode}
           onChange={handleSwitchChange}
           data-test-subj={getTestId('switch')}
+          labelProps={{ 'data-test-subj': getTestId('label') }}
         />
       </SettingCard>
     );
