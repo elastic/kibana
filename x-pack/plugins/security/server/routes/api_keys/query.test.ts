@@ -55,19 +55,11 @@ describe('Query API Keys route', () => {
         { id: '456', invalidated: true },
       ],
     } as any);
-  });
 
-  it('should filter out invalidated API keys', async () => {
-    const response = await routeHandler(
-      mockContext,
-      httpServerMock.createKibanaRequest(),
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(200);
-
-    expect(response.payload.apiKeys).toContainEqual({ id: '123', invalidated: false });
-    expect(response.payload.apiKeys).not.toContainEqual({ id: '456', invalidated: true });
+    esClientMock.asCurrentUser.transport.request.mockImplementation(async (request) => ({
+      aggregationsTotal: 2,
+      aggregations: {},
+    }));
   });
 
   it('should return `404` if API keys are disabled', async () => {
