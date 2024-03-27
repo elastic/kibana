@@ -31,7 +31,6 @@ export const SummarizationPanel: React.FC = () => {
         <Controller
           name={ChatFormFields.openAIKey}
           control={control}
-          defaultValue=""
           render={({ field }) => (
             <OpenAIKeyFlyOut
               openAPIKey={field.value}
@@ -57,8 +56,8 @@ export const SummarizationPanel: React.FC = () => {
       <Controller
         name={ChatFormFields.prompt}
         control={control}
-        defaultValue=""
         render={({ field }) => <InstructionsField value={field.value} onChange={field.onChange} />}
+        rules={{ required: true }}
       />
 
       <Controller
