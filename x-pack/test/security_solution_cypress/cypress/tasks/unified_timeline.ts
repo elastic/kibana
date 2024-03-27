@@ -9,10 +9,12 @@ import {
   GET_UNIFIED_DATA_GRID_CELL,
   GET_UNIFIED_DATA_GRID_CELL_HEADER,
   HOST_DETAILS_FLYOUT,
+  HOST_DETAILS_LINK,
   TIMELINE_DETAILS_FLYOUT,
   TIMELINE_DETAILS_FLYOUT_BTN,
   TIMELINE_DETAILS_FLYOUT_CLOSE_BTN,
   USER_DETAILS_FLYOUT,
+  USER_DETAILS_LINK,
 } from '../screens/unified_timeline';
 
 export const openEventDetailsFlyout = (rowIndex: number) => {
@@ -21,13 +23,13 @@ export const openEventDetailsFlyout = (rowIndex: number) => {
 };
 
 export const openHostDetailsFlyout = (rowIndex: number) => {
-  cy.get(HOST_DETAILS_FLYOUT).eq(rowIndex).click();
-  cy.get(TIMELINE_DETAILS_FLYOUT).should('be.visible');
+  cy.get(HOST_DETAILS_LINK).eq(rowIndex).click();
+  cy.get(HOST_DETAILS_FLYOUT).should('be.visible');
 };
 
 export const openUserDetailsFlyout = (rowIndex: number) => {
-  cy.get(USER_DETAILS_FLYOUT).eq(rowIndex).click();
-  cy.get(TIMELINE_DETAILS_FLYOUT).should('be.visible');
+  cy.get(USER_DETAILS_LINK).eq(rowIndex).click();
+  cy.get(USER_DETAILS_FLYOUT).should('be.visible');
 };
 
 export const getUnifiedTableHeaderColumn = (columnName: string) => {

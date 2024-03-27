@@ -553,117 +553,149 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('unified fields list', () => {
-    it('should add the column when clicked on X sign', async () => {
-      const field = {
-        name: 'event.severity',
-      };
+    it(
+      'should add the column when clicked on X sign',
+      async () => {
+        const field = {
+          name: 'event.severity',
+        };
 
-      renderTestComponents();
-      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+        renderTestComponents();
+        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
 
-      await waitFor(() => {
-        expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('11');
-      });
-
-      // column exists in the table
-      expect(screen.getByTestId(`dataGridHeaderCell-${field.name}`)).toBeVisible();
-
-      fireEvent.click(screen.getAllByTestId(`fieldToggle-${field.name}`)[0]);
-
-      // column not longer exists in the table
-      await waitFor(() => {
-        expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('10');
-      });
-      expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
-    });
-
-    it('should remove the column when clicked on ⊕ sign', async () => {
-      const field = {
-        name: 'agent.id',
-      };
-
-      renderTestComponents();
-      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-
-      await waitFor(() => {
-        expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('11');
-      });
-
-      expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
-
-      // column exists in the table
-      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
-
-      fireEvent.click(within(availableFields).getByTestId(`fieldToggle-${field.name}`));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('12');
-      });
-      expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
-    });
-
-    it('should should show callout when field search does not matches any field', async () => {
-      renderTestComponents();
-      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-
-      await waitFor(() => {
-        expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('36');
-      });
-
-      fireEvent.change(screen.getByTestId('fieldListFiltersFieldSearch'), {
-        target: { value: 'fake_field' },
-      });
-
-      await waitFor(() => {
-        expect(
-          screen.getByTestId('fieldListGroupedAvailableFieldsNoFieldsCallout-noFieldsMatch')
-        ).toBeVisible();
-      });
-
-      expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('0');
-    }, 10000);
-
-    it('should toggle side bar correctly', async () => {
-      renderTestComponents();
-      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-      await waitFor(() => {
-        expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('36');
-      });
-
-      fireEvent.click(screen.getByTitle('Hide sidebar'));
-
-      await waitFor(() => {
-        expect(screen.queryAllByTestId('fieldListGroupedAvailableFields-count')).toHaveLength(0);
-      });
-    }, 10000);
-
-    it('should have all populated fields in Available fields section', async () => {
-      const listOfPopulatedFields = new Set(
-        flatten(
-          mockTimelineData.map((dataItem) =>
-            dataItem.data.map((item) =>
-              item.value && item.value.length > 0 ? item.field : undefined
-            )
-          )
-        ).filter((item) => typeof item !== 'undefined')
-      );
-
-      renderTestComponents();
-
-      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-      changeItemsPerPageTo(100);
-
-      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
-
-      for (const field of listOfPopulatedFields) {
-        fireEvent.change(screen.getByTestId('fieldListFiltersFieldSearch'), {
-          target: { value: field },
+        await waitFor(() => {
+          expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
+            '11'
+          );
         });
 
-        expect(within(availableFields).getByTestId(`field-${field}`));
-      }
-    });
+        // column exists in the table
+        expect(screen.getByTestId(`dataGridHeaderCell-${field.name}`)).toBeVisible();
+
+        fireEvent.click(screen.getAllByTestId(`fieldToggle-${field.name}`)[0]);
+
+        // column not longer exists in the table
+        await waitFor(() => {
+          expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
+            '10'
+          );
+        });
+        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should remove the column when clicked on ⊕ sign',
+      async () => {
+        const field = {
+          name: 'agent.id',
+        };
+
+        renderTestComponents();
+        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
+            '11'
+          );
+        });
+
+        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
+
+        // column exists in the table
+        const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+
+        fireEvent.click(within(availableFields).getByTestId(`fieldToggle-${field.name}`));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
+            '12'
+          );
+        });
+        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should should show callout when field search does not matches any field',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent(
+            '36'
+          );
+        });
+
+        fireEvent.change(screen.getByTestId('fieldListFiltersFieldSearch'), {
+          target: { value: 'fake_field' },
+        });
+
+        await waitFor(() => {
+          expect(
+            screen.getByTestId('fieldListGroupedAvailableFieldsNoFieldsCallout-noFieldsMatch')
+          ).toBeVisible();
+        });
+
+        expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('0');
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should toggle side bar correctly',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+        await waitFor(() => {
+          expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent(
+            '36'
+          );
+        });
+
+        fireEvent.click(screen.getByTitle('Hide sidebar'));
+
+        await waitFor(() => {
+          expect(screen.queryAllByTestId('fieldListGroupedAvailableFields-count')).toHaveLength(0);
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should have all populated fields in Available fields section',
+      async () => {
+        const listOfPopulatedFields = new Set(
+          flatten(
+            mockTimelineData.map((dataItem) =>
+              dataItem.data.map((item) =>
+                item.value && item.value.length > 0 ? item.field : undefined
+              )
+            )
+          ).filter((item) => typeof item !== 'undefined')
+        );
+
+        renderTestComponents();
+
+        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        changeItemsPerPageTo(100);
+
+        const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+
+        for (const field of listOfPopulatedFields) {
+          fireEvent.change(screen.getByTestId('fieldListFiltersFieldSearch'), {
+            target: { value: field },
+          });
+
+          expect(within(availableFields).getByTestId(`field-${field}`));
+        }
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
   });
 });
