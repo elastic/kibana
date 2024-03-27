@@ -16,8 +16,6 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   const jobId = `fq_single_1_${Date.now()}`;
-  const jobDescription =
-    'Create single metric job based on the farequote dataset with 30m bucketspan and mean(responsetime)';
   const jobGroups = ['automated', 'farequote', 'single-metric'];
   const aggAndFieldIdentifier = 'Mean(responsetime)';
   const bucketSpan = '30m';
@@ -141,9 +139,9 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.goBackToJobDetailsSection();
       await ml.jobWizardCommon.advanceToValidationSection();
       await ml.jobWizardCommon.assertValidationCallouts([
-        'Time range\nThe selected or available time range might be too short. The recommended minimum time range should be at least 2 hours and 25 times the bucket span.',
-        'The datafeed preview failed. This may be due to an error in the job or datafeed configurations.',
-        'Job validation has failed, but you can still continue and create the job. Please be aware the job may encounter problems when running.',
+        'mlValidationCallout-warning-The selected or available time',
+        'mlValidationCallout-danger-The datafeed preview failed. T',
+        'mlValidationCallout-warning-Job validation has failed, but',
       ]);
 
       await ml.jobWizardCommon.goBackToTimeRange();
@@ -153,8 +151,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.jobWizardCommon.advanceToValidationSection();
       await ml.jobWizardCommon.assertValidationCallouts([
-        'Time range\nValid and long enough to model patterns in the data.',
-        'Model memory limit\nValid and within the estimated model memory limit. Learn more',
+        'mlValidationCallout-success-Valid and long enough to model',
+        'mlValidationCallout-success-Valid and within the estimated',
       ]);
     });
 
@@ -166,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.jobWizardCommon.clickNextButton();
       await ml.jobWizardCommon.assertValidationCallouts([
-        'Job will not be able to run in the current cluster because model memory limit is higher than 9790MB.',
+        'mlValidationCallout-warning-Job will not be able to run in',
       ]);
     });
   });

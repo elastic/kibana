@@ -675,21 +675,11 @@ export function MachineLearningJobWizardCommonProvider(
       await testSubjects.click('mlJobWizardJobDetailsStep');
     },
 
-    async assertValidationCallouts(expectedCallouts: string[]) {
-      if (expectedCallouts.length === 1) {
-        const [, memLimitTooHighCalloutVisibleText] = await testSubjects.getVisibleTextAll(
-          'mlValidationCallout'
-        );
-
-        expect(memLimitTooHighCalloutVisibleText).to.be(expectedCallouts[0]);
-        return;
-      }
-
-      const allCallOutVisibleTexts = await testSubjects.getVisibleTextAll('mlValidationCallout');
-      const expectedWithinActual = expectedCallouts.every((expected) =>
-        allCallOutVisibleTexts.some((actual) => actual === expected)
-      );
-      expect(expectedWithinActual).to.be(true);
+    async assertValidationCallouts(expectedCallOutSelectors: string[]) {
+      for await (const sel of expectedCallOutSelectors)
+        await testSubjects.existOrFail(sel, {
+          timeout: 3_000,
+        });
     },
   };
 }
