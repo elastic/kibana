@@ -46,7 +46,8 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
-import { actionsMock as connectorSubActionsMock } from '@kbn/actions-plugin/server/mocks';
+import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
+import type { PluginStartContract } from '@kbn/actions-plugin/server';
 import { responseActionsClientMock } from './services/actions/clients/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
@@ -229,7 +230,9 @@ export const createMockEndpointAppContextServiceStartContract =
       esClient: elasticsearchClientMock.createElasticsearchClient(),
       productFeaturesService,
       savedObjectsClient: savedObjectsClientMock.create(),
-      connectorActions: connectorSubActionsMock.createStart(),
+      connectorActions: {
+        getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
+      } as unknown as jest.Mocked<PluginStartContract>,
     };
   };
 
