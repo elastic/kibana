@@ -116,7 +116,13 @@ export const GridColumn = ({
               >
                 {({ index, style }) => {
                   return (
-                    <VirtualizedRow index={index} style={style} onHeightChange={onHeightChange}>
+                    <VirtualizedRow
+                      index={index}
+                      // this extra top offset is necessary to prevent clipping of the first row
+                      // during animaiton, or if the cards have a badge
+                      style={{ ...style, top: (Number(style.top) ?? 0) + 15 }}
+                      onHeightChange={onHeightChange}
+                    >
                       <EuiFlexGrid gutterSize="l" columns={3}>
                         {list.slice(index * 3, index * 3 + 3).map((item) => {
                           return (
