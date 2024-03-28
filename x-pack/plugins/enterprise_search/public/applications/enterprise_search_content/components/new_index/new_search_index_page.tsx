@@ -9,20 +9,24 @@ import React from 'react';
 
 import { useLocation } from 'react-router-dom';
 
+import { useValues } from 'kea';
+
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
 import {
   CONNECTOR_CLIENTS_TYPE,
   CONNECTOR_NATIVE_TYPE,
   INGESTION_METHOD_IDS,
 } from '../../../../../common/constants';
+import { KibanaLogic } from '../../../shared/kibana';
 import { parseQueryParams } from '../../../shared/query_params';
 
 import { connectorsBreadcrumbs, crawlersBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
-import { CONNECTORS } from '../search_index/connector/constants';
 import { baseBreadcrumbs } from '../search_indices';
 
 import { MethodApi } from './method_api/method_api';
@@ -30,7 +34,11 @@ import { MethodConnector } from './method_connector/method_connector';
 import { MethodCrawler } from './method_crawler/method_crawler';
 import { getIngestionMethodIconType } from './utils';
 
-function getTitle(method: string, serviceType: string): string {
+function getTitle(
+  method: string,
+  serviceType: string,
+  connectorTypes: ConnectorDefinition[]
+): string {
   switch (method) {
     case INGESTION_METHOD_IDS.API:
       return i18n.translate('xpack.enterpriseSearch.content.new_index.apiTitle', {
@@ -38,7 +46,7 @@ function getTitle(method: string, serviceType: string): string {
       });
     case INGESTION_METHOD_IDS.CONNECTOR: {
       const connector =
-        Boolean(serviceType) && CONNECTORS.find((item) => item.serviceType === serviceType);
+        Boolean(serviceType) && connectorTypes.find((item) => item.serviceType === serviceType);
       return connector
         ? i18n.translate('xpack.enterpriseSearch.content.new_index.connectorTitleWithServiceType', {
             defaultMessage: 'New {name} connector',
@@ -96,11 +104,15 @@ const parseIsNativeParam = (queryString: string | string[] | null): boolean | un
   return undefined;
 };
 
-const getBreadcrumb = (method: string, serviceType: string): string[] => {
+const getBreadcrumb = (
+  method: string,
+  serviceType: string,
+  connectorTypes: ConnectorDefinition[]
+): string[] => {
   switch (method) {
     case INGESTION_METHOD_IDS.CONNECTOR:
       const connector =
-        Boolean(serviceType) && CONNECTORS.find((item) => item.serviceType === serviceType);
+        Boolean(serviceType) && connectorTypes.find((item) => item.serviceType === serviceType);
 
       const thisConnectorBreadcrumb = connector
         ? i18n.translate(
@@ -160,6 +172,7 @@ export interface NewSearchIndexPageProps {
   type: string;
 }
 export const NewSearchIndexPage: React.FC<NewSearchIndexPageProps> = ({ type }) => {
+  const { connectorTypes } = useValues(KibanaLogic);
   const { search } = useLocation();
   const { service_type: inputServiceType, connector_type: inputConnectorType } =
     parseQueryParams(search);
@@ -171,7 +184,7 @@ export const NewSearchIndexPage: React.FC<NewSearchIndexPageProps> = ({ type }) 
 
   return (
     <EnterpriseSearchContentPageTemplate
-      pageChrome={getBreadcrumb(type, serviceType)}
+      pageChrome={getBreadcrumb(type, serviceType, connectorTypes)}
       pageViewTelemetry="New Index"
       isLoading={false}
       pageHeader={{
@@ -181,7 +194,7 @@ export const NewSearchIndexPage: React.FC<NewSearchIndexPageProps> = ({ type }) 
             <EuiFlexItem grow={false}>
               <EuiIcon type={getIngestionMethodIconType(type)} size="xxl" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{getTitle(type, serviceType)}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{getTitle(type, serviceType, connectorTypes)}</EuiFlexItem>
             {type === INGESTION_METHOD_IDS.CONNECTOR && (
               <EuiFlexItem grow={false}>{getConnectorModeBadge(isNative)}</EuiFlexItem>
             )}
