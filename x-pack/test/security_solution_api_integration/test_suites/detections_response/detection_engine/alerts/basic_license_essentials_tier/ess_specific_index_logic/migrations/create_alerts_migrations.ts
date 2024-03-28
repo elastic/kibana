@@ -16,16 +16,20 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { SIGNALS_TEMPLATE_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
 import { Signal } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 
-import { deleteMigrations, getIndexNameFromLoad, waitForIndexToPopulate } from '../../../../utils';
+import {
+  deleteMigrations,
+  getIndexNameFromLoad,
+  waitForIndexToPopulate,
+} from '../../../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,
-} from '../../../../../../../common/services/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+} from '../../../../../../../../common/services/security_solution';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 interface CreateResponse {
   index: string;
@@ -45,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
 
-  describe('Creating signals migrations', () => {
+  describe('@ess Creating signals migrations', () => {
     let createdMigrations: CreateResponse[];
     let legacySignalsIndexName: string;
     let outdatedSignalsIndexName: string;

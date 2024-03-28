@@ -9,17 +9,17 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { getIndexNameFromLoad } from '../../../../utils';
+import { getIndexNameFromLoad } from '../../../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,
-} from '../../../../../../../common/services/security_solution';
+} from '../../../../../../../../common/services/security_solution';
 
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return filteredIndices;
   };
 
-  describe('Alerts migration status', () => {
+  describe('@ess Alerts migration status', () => {
     let legacyAlertsIndexName: string;
     beforeEach(async () => {
       legacyAlertsIndexName = getIndexNameFromLoad(
