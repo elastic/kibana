@@ -15,6 +15,7 @@ import { useGetAgentPolicies } from './use_request';
 
 interface AgentEnrollmentFlyoutData {
   agentPolicies: AgentPolicy[];
+  fleetServerAgentPolicies: AgentPolicy[];
   refreshAgentPolicies: () => void;
   isLoadingInitialAgentPolicies: boolean;
   isLoadingAgentPolicies: boolean;
@@ -39,8 +40,16 @@ export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
     return [];
   }, [isLoadingAgentPolicies, agentPoliciesData?.items]);
 
+  const fleetServerAgentPolicies = useMemo(() => {
+    if (!isLoadingAgentPolicies) {
+      return (agentPoliciesData?.items ?? []).filter((policy) => policyHasFleetServer(policy));
+    }
+    return [];
+  }, [isLoadingAgentPolicies, agentPoliciesData?.items]);
+
   return {
     agentPolicies,
+    fleetServerAgentPolicies,
     refreshAgentPolicies,
     isLoadingInitialAgentPolicies: isInitialRequest && isLoadingAgentPolicies,
     isLoadingAgentPolicies,

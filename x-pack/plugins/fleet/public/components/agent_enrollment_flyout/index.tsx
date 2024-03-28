@@ -72,6 +72,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
 
   const {
     agentPolicies,
+    fleetServerAgentPolicies,
     isLoadingInitialAgentPolicies,
     isLoadingAgentPolicies,
     refreshAgentPolicies,
@@ -200,6 +201,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}
             agentPolicies={agentPolicies}
+            fleetServerAgentPolicies={fleetServerAgentPolicies}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
             isK8s={isK8s}
             cloudSecurityIntegration={cloudSecurityIntegration}

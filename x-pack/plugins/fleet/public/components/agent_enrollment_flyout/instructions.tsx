@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useFleetStatus, useGetAgents, useFleetServerStandalone } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
-import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../constants';
+import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../constants';
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 import { Loading } from '..';
-import { policyHasFleetServer } from '../../services';
 import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
 
 import type { InstructionProps } from './types';
@@ -23,7 +22,7 @@ import { DefaultMissingRequirements } from './default_missing_requirements';
 
 export const Instructions = (props: InstructionProps) => {
   const {
-    agentPolicies,
+    fleetServerAgentPolicies,
     isFleetServerPolicySelected,
     fleetServerHosts,
     isLoadingAgentPolicies,
@@ -44,23 +43,18 @@ export const Instructions = (props: InstructionProps) => {
     refreshAgentPolicies();
   }, [refreshAgentPolicies]);
 
-  const fleetServerAgentPolicies: string[] = useMemo(
-    () => agentPolicies.filter((pol) => policyHasFleetServer(pol)).map((pol) => pol.id),
-    [agentPolicies]
-  );
-
   const { data: agents, isLoading: isLoadingAgents } = useGetAgents({
-    perPage: SO_SEARCH_LIMIT,
+    perPage: 0,
     showInactive: false,
     kuery:
       fleetServerAgentPolicies.length === 0
-        ? ''
+        ? '' // TODO shouldn't query if no fleet server policies, use sendGetAgents?
         : `${AGENTS_PREFIX}.policy_id:${fleetServerAgentPolicies
-            .map((id) => `"${id}"`)
+            .map((policy) => `"${policy.id}"`)
             .join(' or ')}`,
   });
 
-  const fleetServers = agents?.items || [];
+  const fleetServersCount = fleetServerAgentPolicies.length > 0 ? agents?.total ?? 0 : 0;
 
   const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
@@ -69,13 +63,13 @@ export const Instructions = (props: InstructionProps) => {
     isFleetServerStandalone ||
     (fleetStatus.isReady &&
       !isFleetServerUnhealthy &&
-      fleetServers.length > 0 &&
+      fleetServersCount > 0 &&
       (fleetServerHosts?.length ?? 0) > 0);
 
   const showFleetServerEnrollment =
     !isFleetServerStandalone &&
     !isFleetServerPolicySelected &&
-    (fleetServers.length === 0 ||
+    (fleetServersCount === 0 ||
       isFleetServerUnhealthy ||
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
