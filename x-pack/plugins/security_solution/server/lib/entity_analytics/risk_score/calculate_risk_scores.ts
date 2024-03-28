@@ -103,9 +103,9 @@ const formatForResponse = ({
       index: riskInput.index[0],
       description: `Alert from Rule: ${riskInput.rule_name ?? 'RULE_NOT_FOUND'}`,
       category: RiskCategories.category_1,
-      risk_score: riskInput.score ?? undefined,
-      timestamp: riskInput.time ?? undefined,
-      contribution_score: riskInput.contribution ?? undefined,
+      risk_score: riskInput.score,
+      timestamp: riskInput.time,
+      contribution_score: riskInput.contribution,
     })),
     ...(includeNewFields ? newFields : {}),
   };
