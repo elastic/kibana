@@ -699,7 +699,7 @@ export class ActionsClient {
       let actionTypeId: string | undefined;
 
       try {
-        if (this.isPreconfigured(actionId)) {
+        if (this.isPreconfigured(actionId) || this.isSystemAction(actionId)) {
           const connector = this.context.inMemoryConnectors.find(
             (inMemoryConnector) => inMemoryConnector.id === actionId
           );
