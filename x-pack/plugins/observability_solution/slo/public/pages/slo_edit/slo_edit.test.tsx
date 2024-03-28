@@ -37,7 +37,6 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_fetch_indices');
-jest.mock('../../hooks/use_fetch_data_views');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_fetch_slo_details');
 jest.mock('../../hooks/use_create_slo');
