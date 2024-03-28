@@ -5,51 +5,41 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import React from 'react';
+import { Controller, useController, useFormContext } from 'react-hook-form';
 
+import { useLLMsModels } from '../../hooks/use_llms_models';
 import { IncludeCitationsField } from './include_citations_field';
 import { InstructionsField } from './instructions_field';
-import { ChatFormFields } from '../../types';
-import { OpenAIKeyFlyOut } from './open_ai_key_flyout';
-import { OpenAISummarizationModel } from './open_ai_summarization_model';
+import { ChatForm, ChatFormFields } from '../../types';
+import { SummarizationModel } from './summarization_model';
 
 export const SummarizationPanel: React.FC = () => {
-  const { control } = useFormContext();
-  const [isOpenAIFlyOutOpen, setIsOpenAIFlyOutOpen] = useState<boolean>(false);
-
-  const onCloseOpenAIFlyOut = () => {
-    setIsOpenAIFlyOutOpen(!isOpenAIFlyOutOpen);
-  };
-  const handleOpenAIFlyOut = () => {
-    setIsOpenAIFlyOutOpen(true);
-  };
+  const { control } = useFormContext<ChatForm>();
+  const models = useLLMsModels();
+  const defaultModel = models.find((model) => !model.disabled);
+  const {
+    field: { onChange: handleChangeConnectorId },
+  } = useController({
+    name: ChatFormFields.connectorId,
+    defaultValue: defaultModel?.connectorId,
+  });
 
   return (
     <>
-      {isOpenAIFlyOutOpen && (
-        <Controller
-          name={ChatFormFields.openAIKey}
-          control={control}
-          defaultValue=""
-          render={({ field }) => (
-            <OpenAIKeyFlyOut
-              openAPIKey={field.value}
-              onSave={field.onChange}
-              onClose={onCloseOpenAIFlyOut}
-            />
-          )}
-        />
-      )}
-
       <Controller
         name={ChatFormFields.summarizationModel}
+        defaultValue={defaultModel?.name}
+        rules={{ required: true }}
         control={control}
         render={({ field }) => (
-          <OpenAISummarizationModel
-            model={field.value}
-            onSelect={field.onChange}
-            openAIFlyOutOpen={handleOpenAIFlyOut}
+          <SummarizationModel
+            selectedModel={field.value}
+            onSelect={(model, connectorId) => {
+              field.onChange(model);
+              handleChangeConnectorId(connectorId);
+            }}
+            models={models}
           />
         )}
       />
@@ -57,7 +47,8 @@ export const SummarizationPanel: React.FC = () => {
       <Controller
         name={ChatFormFields.prompt}
         control={control}
-        defaultValue=""
+        rules={{ required: true }}
+        defaultValue="You are an assistant for question-answering tasks."
         render={({ field }) => <InstructionsField value={field.value} onChange={field.onChange} />}
       />
 

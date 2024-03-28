@@ -15,9 +15,10 @@ import {
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import type { Toolbar } from './components/toolbar';
@@ -34,6 +35,7 @@ export interface SearchPlaygroundPluginStart {
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface AppServicesContext {
@@ -41,30 +43,31 @@ export interface AppServicesContext {
   security: SecurityPluginStart;
   share: SharePluginStart;
   cloud?: CloudSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export enum ChatFormFields {
   question = 'question',
   citations = 'citations',
   prompt = 'prompt',
-  openAIKey = 'api_key',
   indices = 'indices',
   elasticsearchQuery = 'elasticsearch_query',
   summarizationModel = 'summarization_model',
   sourceFields = 'source_fields',
   docSize = 'docSize',
+  connectorId = 'connector_id',
 }
 
 export interface ChatForm {
   [ChatFormFields.question]: string;
   [ChatFormFields.prompt]: string;
   [ChatFormFields.citations]: boolean;
-  [ChatFormFields.openAIKey]: string;
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: string;
   [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
   [ChatFormFields.sourceFields]: string[];
   [ChatFormFields.docSize]: number;
+  [ChatFormFields.connectorId]: string;
 }
 
 export enum MessageRole {
@@ -190,4 +193,11 @@ export interface UseChatHelpers {
     chatRequestOptions?: ChatRequestOptions
   ) => void;
   isLoading: boolean;
+}
+
+export interface LLMModel {
+  name: string;
+  icon: ComponentType;
+  disabled: boolean;
+  connectorId?: string;
 }

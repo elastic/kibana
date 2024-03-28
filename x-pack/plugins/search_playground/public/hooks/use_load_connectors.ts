@@ -14,28 +14,31 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/public/common';
 import { useKibana } from './use_kibana';
+import { LLMs } from '../types';
 
 const QUERY_KEY = ['search-playground, load-connectors'];
 
-const ActionTypeID = {
-  openai: OPENAI_CONNECTOR_ID,
-};
-
-const mapActionTypeToTransform: Record<
-  typeof ActionTypeID[keyof typeof ActionTypeID],
-  (connector: ActionConnector) => PlaygroundConnector
+const mapLLMToActionParam: Record<
+  LLMs,
+  { actionId: string; transform: (connector: ActionConnector) => PlaygroundConnector }
 > = {
-  [ActionTypeID.openai]: (connector) => ({
-    ...connector,
-    title: i18n.translate('xpack.searchPlayground.openAIConnectorTitle', {
-      defaultMessage: 'OpenAI',
+  [LLMs.openai]: {
+    actionId: OPENAI_CONNECTOR_ID,
+    transform: (connector) => ({
+      ...connector,
+      title: i18n.translate('xpack.searchPlayground.openAIConnectorTitle', {
+        defaultMessage: 'OpenAI',
+      }),
     }),
-  }),
+  },
 };
 
 type PlaygroundConnector = ActionConnector & { title: string };
 
-export const useLoadConnectors = (): UseQueryResult<PlaygroundConnector[], IHttpFetchError> => {
+export const useLoadConnectors = (): UseQueryResult<
+  Record<LLMs, PlaygroundConnector>,
+  IHttpFetchError
+> => {
   const {
     services: { http, notifications },
   } = useKibana();
@@ -44,15 +47,16 @@ export const useLoadConnectors = (): UseQueryResult<PlaygroundConnector[], IHttp
     QUERY_KEY,
     async () => {
       const queryResult = await loadConnectors({ http });
-      return Object.values(ActionTypeID).reduce<PlaygroundConnector[]>((result, actionTypeId) => {
-        const targetConnector = queryResult.find(
-          (connector) => !connector.isMissingSecrets && connector.actionTypeId === actionTypeId
-        );
+      return Object.entries(mapLLMToActionParam).reduce<Partial<Record<LLMs, PlaygroundConnector>>>(
+        (result, [llm, { actionId, transform }]) => {
+          const targetConnector = queryResult.find(
+            (connector) => !connector.isMissingSecrets && connector.actionTypeId === actionId
+          );
 
-        return targetConnector
-          ? [...result, mapActionTypeToTransform[actionTypeId](targetConnector)]
-          : result;
-      }, []);
+          return targetConnector ? { ...result, [llm]: transform(targetConnector) } : result;
+        },
+        {}
+      );
     },
     {
       retry: false,
