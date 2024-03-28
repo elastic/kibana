@@ -11,7 +11,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 
 import { login } from '../../../../tasks/login';
-import { visitWithTimeRange } from '../../../../tasks/navigation';
+import { visitWithTimeRange, visitGetStartedPage } from '../../../../tasks/navigation';
 
 import { TIMELINES_URL } from '../../../../urls/navigation';
 import {
@@ -40,6 +40,13 @@ const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
 describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+  before(() => {
+    cy.intercept('POST', '/api/fleet/epm/packages/_bulk?prerelease=true').as('fleetSetup');
+    cy.clearLocalStorage();
+    login();
+    visitGetStartedPage();
+    cy.wait('@fleetSetup');
+  });
   beforeEach(() => {
     cy.clearLocalStorage();
     login();
