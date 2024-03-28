@@ -284,6 +284,7 @@ function Sortable({ children, sortOrder = 'asc', onSort, ...props }: SortablePro
  */
 const ListColumn = styled(EuiFlexItem)`
   padding: ${euiThemeVars.euiSizeS} 0;
+  ${({ onClick }) => (onClick ? interactiveStyle : '')}
 `;
 
 const indentationStyle = css`
@@ -293,6 +294,13 @@ const indentationStyle = css`
 
 const rowMarginEnd = css`
   margin-inline-end: ${euiThemeVars.euiSizeXS};
+`;
+
+const interactiveStyle = css`
+  &:hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
 `;
 
 const headerStyle = css`

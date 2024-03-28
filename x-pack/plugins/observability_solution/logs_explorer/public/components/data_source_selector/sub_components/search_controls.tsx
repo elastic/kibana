@@ -49,6 +49,7 @@ export const SearchControls = ({
                 data-test-subj="logsExplorerSearchControlsFieldSearch"
                 compressed
                 incremental
+                fullWidth
                 value={search.name}
                 onChange={handleNameChange}
                 isLoading={isLoading}
@@ -63,7 +64,10 @@ export const SearchControls = ({
                   legend={sortOrdersLabel}
                   idSelected={search.sortOrder as SortOrder}
                   onChange={(id: string) =>
-                    onSort({ ...search, sortOrder: id as DataSourceSelectorSearchParams['sortOrder'] })
+                    onSort({
+                      ...search,
+                      sortOrder: id as DataSourceSelectorSearchParams['sortOrder'],
+                    })
                   }
                 />
               </EuiFlexItem>

@@ -8,7 +8,7 @@
 import { EuiContextMenu, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { dataViewsLabel, DATA_VIEWS_PANEL_ID } from '../constants';
+import { DATA_VIEWS_PANEL_ID } from '../constants';
 import { tabContentHeight } from '../shared_styles';
 
 interface DataViewListProps extends React.HTMLAttributes<HTMLElement> {
@@ -28,7 +28,6 @@ export function DataViewList({ children, items, ...props }: DataViewListProps) {
         panels={[
           {
             id: DATA_VIEWS_PANEL_ID,
-            title: dataViewsLabel,
             width: '100%',
             items,
           },
