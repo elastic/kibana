@@ -62,24 +62,6 @@ const getPreviewDataParamsSchema = t.type({
 
 const getPreviewDataResponseSchema = t.array(previewDataSchema);
 
-const groupBySchema = t.union([
-  t.literal('ungrouped'),
-  t.literal('slo.tags'),
-  t.literal('status'),
-  t.literal('slo.indicator.type'),
-  t.literal('_index'),
-]);
-
-const findSLOGroupsParamsSchema = t.partial({
-  query: t.partial({
-    page: t.string,
-    perPage: t.string,
-    groupBy: groupBySchema,
-    kqlQuery: t.string,
-    filters: t.string,
-  }),
-});
-
 const sloResponseSchema = t.intersection([
   t.type({
     id: sloIdSchema,
@@ -113,12 +95,6 @@ const sloWithSummaryResponseSchema = t.intersection([
   ]),
 ]);
 
-const sloGroupWithSummaryResponseSchema = t.type({
-  group: t.string,
-  groupBy: t.string,
-  summary: groupSummarySchema,
-});
-
 const getSLOQuerySchema = t.partial({
   query: t.partial({
     instanceId: allOrAnyString,
@@ -145,13 +121,6 @@ const resetSLOParamsSchema = t.type({
 });
 
 const resetSLOResponseSchema = sloResponseSchema;
-
-const findSLOGroupsResponseSchema = t.type({
-  page: t.number,
-  perPage: t.number,
-  total: t.number,
-  results: t.array(sloGroupWithSummaryResponseSchema),
-});
 
 const deleteSLOInstancesParamsSchema = t.type({
   body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: t.string })) }),
@@ -238,8 +207,6 @@ const getSLOInstancesResponseSchema = t.type({
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
-type SLOGroupWithSummaryResponse = t.OutputOf<typeof sloGroupWithSummaryResponseSchema>;
-
 type GetSLOParams = t.TypeOf<typeof getSLOQuerySchema.props.query>;
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
@@ -247,9 +214,6 @@ type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
 
 type ResetSLOParams = t.TypeOf<typeof resetSLOParamsSchema.props.path>;
 type ResetSLOResponse = t.OutputOf<typeof resetSLOResponseSchema>;
-
-type FindSLOGroupsParams = t.TypeOf<typeof findSLOGroupsParamsSchema.props.query>;
-type FindSLOGroupsResponse = t.OutputOf<typeof findSLOGroupsResponseSchema>;
 
 type DeleteSLOInstancesInput = t.OutputOf<typeof deleteSLOInstancesParamsSchema.props.body>;
 type DeleteSLOInstancesParams = t.TypeOf<typeof deleteSLOInstancesParamsSchema.props.body>;
@@ -289,8 +253,6 @@ type QuerySchema = t.TypeOf<typeof querySchema>;
 
 export {
   deleteSLOInstancesParamsSchema,
-  findSLOGroupsParamsSchema,
-  findSLOGroupsResponseSchema,
   getPreviewDataParamsSchema,
   getPreviewDataResponseSchema,
   getSLOParamsSchema,
@@ -304,7 +266,6 @@ export {
   resetSLOResponseSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
-  sloGroupWithSummaryResponseSchema,
   getSLOBurnRatesParamsSchema,
   getSLOBurnRatesResponseSchema,
   getSLOInstancesParamsSchema,
@@ -314,8 +275,6 @@ export type {
   BudgetingMethod,
   DeleteSLOInstancesInput,
   DeleteSLOInstancesParams,
-  FindSLOGroupsParams,
-  FindSLOGroupsResponse,
   GetPreviewDataParams,
   GetPreviewDataResponse,
   GetSLOParams,
@@ -330,7 +289,6 @@ export type {
   ResetSLOResponse,
   SLOResponse,
   SLOWithSummaryResponse,
-  SLOGroupWithSummaryResponse,
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   SyntheticsAvailabilityIndicator,

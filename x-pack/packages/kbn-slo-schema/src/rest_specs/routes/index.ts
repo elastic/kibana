@@ -9,3 +9,4 @@ export * from './create';
 export * from './update';
 export * from './delete';
 export * from './find';
+export * from './find_group';
