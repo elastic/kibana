@@ -32,11 +32,19 @@ export const ViewDetailsPopover = (props: Props) => {
 
   if (props.warnings.length === 1) {
     return props.displayAsLink ? (
-      <EuiLink color="primary" onClick={props.warnings[0].openInInspector}>
+      <EuiLink
+        color="primary"
+        onClick={props.warnings[0].openInInspector}
+        data-test-subj="searchResponseWarningsViewDetails"
+      >
         {viewDetailsLabel}
       </EuiLink>
     ) : (
-      <EuiButton color="primary" onClick={props.warnings[0].openInInspector}>
+      <EuiButton
+        color="primary"
+        onClick={props.warnings[0].openInInspector}
+        data-test-subj="searchResponseWarningsViewDetails"
+      >
         {viewDetailsLabel}
       </EuiButton>
     );
