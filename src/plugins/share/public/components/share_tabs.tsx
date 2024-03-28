@@ -47,7 +47,6 @@ export const ShareMenuTabs = () => {
 
   return (
     <TabbedModal
-      // @ts-ignore
       tabs={tabs}
       modalWidth={483}
       onClose={onClose}
