@@ -280,7 +280,7 @@ export function LayerPanels(
               updateDatasource={updateDatasource}
               updateDatasourceAsync={updateDatasourceAsync}
               displayLayerSettings={!props.hideLayerHeader}
-              shouldDisplayChartSwitch={props.shouldDisplayChartSwitch}
+              onlyAllowSwitchToSubtypes={props.onlyAllowSwitchToSubtypes}
               onChangeIndexPattern={(args) => {
                 onChangeIndexPattern(args);
                 const layersToRemove =

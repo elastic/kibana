@@ -1494,9 +1494,9 @@
         "label": "SloConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly sloOrphanSummaryCleanUpTaskEnabled: boolean; }"
+          "{ readonly experimental?: Readonly<{} & { ruleFormV2: Readonly<{} & { enabled: boolean; }>; }> | undefined; readonly enabled: boolean; readonly sloOrphanSummaryCleanUpTaskEnabled: boolean; }"
         ],
-        "path": "x-pack/plugins/observability_solution/slo/server/index.ts",
+        "path": "x-pack/plugins/observability_solution/slo/common/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
