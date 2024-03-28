@@ -16,6 +16,7 @@ import { StateComparators } from '@kbn/presentation-publishing';
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
+import { DefaultEmbeddableApi } from './types';
 
 interface SuperTestStateType {
   name: string;
@@ -28,7 +29,7 @@ describe('react embeddable unsaved changes', () => {
   let lastSavedState: SuperTestStateType;
   let comparators: StateComparators<SuperTestStateType>;
   let deserializeState: (state: SerializedPanelState) => SuperTestStateType;
-  let parentApi: (PresentationContainer & PublishesLastSavedState) | null;
+  let parentApi: (PresentationContainer<DefaultEmbeddableApi> & PublishesLastSavedState) | null;
 
   beforeEach(() => {
     initialState = {
@@ -62,7 +63,7 @@ describe('react embeddable unsaved changes', () => {
     deserializeState = jest.fn((state) => state.rawState as SuperTestStateType);
 
     parentApi = {
-      ...getMockPresentationContainer(),
+      ...getMockPresentationContainer<DefaultEmbeddableApi>(),
       getLastSavedStateForChild: () => ({ rawState: lastSavedState }),
       lastSavedState: new Subject<void>(),
     };

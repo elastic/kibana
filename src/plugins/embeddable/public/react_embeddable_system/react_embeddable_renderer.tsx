@@ -34,7 +34,7 @@ export const ReactEmbeddableRenderer = <
   maybeId?: string;
   type: string;
   state: SerializedPanelState<StateType>;
-  parentApi?: PresentationContainer;
+  parentApi?: PresentationContainer<DefaultEmbeddableApi>;
   onApiAvailable?: (api: ApiType) => void;
   panelProps?: Pick<
     PresentationPanelProps<ApiType>,

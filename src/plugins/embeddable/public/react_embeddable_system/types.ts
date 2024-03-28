@@ -48,6 +48,6 @@ export interface ReactEmbeddableFactory<
       comparators: StateComparators<StateType>
     ) => ApiType,
     uuid: string,
-    parentApi?: PresentationContainer
+    parentApi?: PresentationContainer<DefaultEmbeddableApi>
   ) => Promise<{ Component: React.FC<{}>; api: ApiType }>;
 }

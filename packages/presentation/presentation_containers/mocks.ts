@@ -9,11 +9,13 @@
 import { BehaviorSubject } from 'rxjs';
 import { PresentationContainer } from './interfaces/presentation_container';
 
-export const getMockPresentationContainer = (): PresentationContainer => {
+export const getMockPresentationContainer = <
+  GenericChildType = unknown
+>(): PresentationContainer<GenericChildType> => {
   return {
     removePanel: jest.fn(),
     addNewPanel: jest.fn(),
     replacePanel: jest.fn(),
-    children$: new BehaviorSubject<{ [key: string]: unknown }>({}),
+    children$: new BehaviorSubject<{ [key: string]: GenericChildType }>({}),
   };
 };
