@@ -19,12 +19,12 @@ export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_EUI_MARKDOWN_ACTION_ID,
     getIconType: () => 'editorCodeBlock',
-    isCompatible: async ({ embeddable: parentApi }) => {
-      return apiCanAddNewPanel(parentApi);
+    isCompatible: async ({ embeddable }) => {
+      return apiCanAddNewPanel(embeddable);
     },
-    execute: async ({ embeddable: parentApi }) => {
-      if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
-      parentApi.addNewPanel(
+    execute: async ({ embeddable }) => {
+      if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
+      embeddable.addNewPanel(
         {
           panelType: EUI_MARKDOWN_ID,
           initialState: { content: '# hello world!' },

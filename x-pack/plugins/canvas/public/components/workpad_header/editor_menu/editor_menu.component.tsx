@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 
 import {
   EuiContextMenu,
@@ -63,6 +63,21 @@ export const EditorMenu: FC<Props> = ({
   const [addPanelActions, setAddPanelActions] = useState<Array<Action<object>>>([]);
 
   let panelCount = 1;
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadPanelActions() {
+      const registeredActions = await uiActions?.getTriggerCompatibleActions?.(
+        ADD_CANVAS_ELEMENT_TRIGGER,
+        { embeddable: canvasApi }
+      );
+      if (mounted) setAddPanelActions(registeredActions);
+    }
+    loadPanelActions();
+    return () => {
+      mounted = false;
+    };
+  }, [uiActions, canvasApi]);
 
   // Maps factories with a group to create nested context menus for each group type
   // and pushes ungrouped factories into a separate array
@@ -148,43 +163,31 @@ export const EditorMenu: FC<Props> = ({
       } else action.execute(context);
     };
 
-  const getAddPanelActionMenuItems = (
-    api: CanvasContainer,
-    actions: Array<Action<object>> | undefined,
-    closePopover: () => void
-  ) => {
-    return (
-      actions?.map((item) => {
-        const context = {
-          embeddable: api,
-          trigger: addCanvasElementTrigger,
-        };
-        const actionName = item.getDisplayName(context);
-        return {
-          name: actionName,
-          icon: item.getIconType(context),
-          onClick: onAddPanelActionClick(item, context, closePopover),
-          'data-test-subj': `create-action-${actionName}`,
-          toolTipContent: item?.getDisplayNameTooltip?.(context),
-        };
-      }) ?? []
-    );
-  };
-
-  useEffect(() => {
-    let mounted = true;
-    async function loadPanelActions() {
-      const registeredActions = await uiActions?.getTriggerCompatibleActions?.(
-        ADD_CANVAS_ELEMENT_TRIGGER,
-        { embeddable: canvasApi }
+  const getAddPanelActionMenuItems = useCallback(
+    (
+      api: CanvasContainer,
+      actions: Array<Action<object>> | undefined,
+      closePopover: () => void
+    ) => {
+      return (
+        actions?.map((item) => {
+          const context = {
+            embeddable: api,
+            trigger: addCanvasElementTrigger,
+          };
+          const actionName = item.getDisplayName(context);
+          return {
+            name: actionName,
+            icon: item.getIconType(context),
+            onClick: onAddPanelActionClick(item, context, closePopover),
+            'data-test-subj': `create-action-${actionName}`,
+            toolTipContent: item?.getDisplayNameTooltip?.(context),
+          };
+        }) ?? []
       );
-      if (mounted) setAddPanelActions(registeredActions);
-    }
-    loadPanelActions();
-    return () => {
-      mounted = false;
-    };
-  }, [uiActions, canvasApi]);
+    },
+    []
+  );
 
   const getEditorMenuPanels = (closePopover: () => void) => [
     {

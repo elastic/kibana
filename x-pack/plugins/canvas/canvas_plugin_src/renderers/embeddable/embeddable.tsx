@@ -112,6 +112,9 @@ export const embeddableRendererFactory = (
       );
 
       if (reactEmbeddableRegistryHasKey(embeddableType)) {
+        /**
+         * Prioritize React embeddables
+         */
         ReactDOM.render(
           renderReactEmbeddable(embeddableType, uniqueId, input, canvasApi),
           domNode,

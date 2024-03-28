@@ -24,7 +24,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
   const dispatch = useDispatch();
 
   const createNewEmbeddable = useCallback(
-    (type: string, embeddableInput: EmbeddableInput) => async () => {
+    (type: string, embeddableInput: EmbeddableInput) => {
       if (trackCanvasUiMetric) {
         trackCanvasUiMetric(METRIC_TYPE.CLICK, type);
       }
@@ -34,6 +34,21 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
       }
     },
     [selectedPageId, dispatch]
+  );
+
+  const updateEmbeddable = useCallback(
+    (id: string, type: string, newEmbeddableInput: EmbeddableInput) => {
+      const embeddableExpression = embeddableInputToExpression(newEmbeddableInput, type);
+      if (embeddableExpression) {
+        dispatch(
+          updateEmbeddableExpression({
+            elementId: id,
+            embeddableExpression,
+          })
+        );
+      }
+    },
+    [dispatch]
   );
 
   const getCanvasApi = useCallback(() => {
@@ -46,19 +61,11 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
         panelType: string;
         initialState: EmbeddableInput;
       }) => {
-        await createNewEmbeddable(panelType, initialState)();
+        createNewEmbeddable(panelType, initialState);
       },
-      onEdit: (id, type, newState) => {
-        dispatch(
-          updateEmbeddableExpression({
-            elementId: id,
-            embeddableExpression:
-              embeddableInputToExpression(newState as unknown as EmbeddableInput, type) ?? '',
-          })
-        );
-      },
+      onEdit: updateEmbeddable,
     } as CanvasContainerApi;
-  }, [createNewEmbeddable, dispatch]);
+  }, [createNewEmbeddable, updateEmbeddable]);
 
   return useMemo(() => getCanvasApi(), [getCanvasApi]);
 };

@@ -21,6 +21,8 @@ import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
 import { DefaultEmbeddableApi, ReactEmbeddableApiRegistration } from './types';
 
+const ON_STATE_CHANGE_DEBOUNCE = 100;
+
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
  *
@@ -52,7 +54,11 @@ export const ReactEmbeddableRenderer = <
     | 'hideHeader'
     | 'hideInspector'
   >;
-  onAnyStateChange?: (state: SerializedPanelState<StateType>) => void; // backdoor for Canvas
+  /**
+   * This `onAnyStateChange` callback creates a backdoor for Canvas so that it can
+   * respond to React embeddables being edited
+   */
+  onAnyStateChange?: (state: SerializedPanelState<StateType>) => void;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
 
@@ -74,16 +80,14 @@ export const ReactEmbeddableRenderer = <
             );
 
           if (onAnyStateChange) {
-            combineLatest(
-              (
-                Object.values(comparators) as Array<
-                  ComparatorDefinition<StateType, keyof StateType>
-                >
-              ).map((comparator) => {
-                return comparator[0];
-              })
-            )
-              .pipe(debounceTime(100))
+            /**
+             * To avoid unnecessary re-renders, only subscribe to the comparator publishing subjects if
+             * an `onAnyStateChange` callback is provided
+             */
+            const comparatorDefinitions: Array<ComparatorDefinition<StateType, keyof StateType>> =
+              Object.values(comparators);
+            combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
+              .pipe(debounceTime(ON_STATE_CHANGE_DEBOUNCE))
               .subscribe(() => {
                 onAnyStateChange(apiRegistration.serializeState());
               });
