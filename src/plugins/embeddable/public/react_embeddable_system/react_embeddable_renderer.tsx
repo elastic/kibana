@@ -12,8 +12,14 @@ import {
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { StateComparators } from '@kbn/presentation-publishing';
+import {
+  ComparatorDefinition,
+  PublishingSubject,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import { combineLatest } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
@@ -34,6 +40,7 @@ export const ReactEmbeddableRenderer = <
   parentApi,
   onApiAvailable,
   panelProps,
+  onAnyStateChange,
 }: {
   maybeId?: string;
   type: string;
@@ -49,6 +56,7 @@ export const ReactEmbeddableRenderer = <
     | 'hideHeader'
     | 'hideInspector'
   >;
+  onAnyStateChange?: (state: SerializedPanelState<StateType>) => void; // backdoor for Canvas
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
 
@@ -68,6 +76,23 @@ export const ReactEmbeddableRenderer = <
               comparators,
               factory.deserializeState
             );
+
+          if (onAnyStateChange) {
+            combineLatest(
+              (
+                Object.values(comparators) as Array<
+                  ComparatorDefinition<StateType, keyof StateType>
+                >
+              ).map((comparator) => {
+                return comparator[0];
+              })
+            )
+              .pipe(debounceTime(100))
+              .subscribe(() => {
+                onAnyStateChange(apiRegistration.serializeState());
+              });
+          }
+
           const fullApi = {
             ...apiRegistration,
             uuid,

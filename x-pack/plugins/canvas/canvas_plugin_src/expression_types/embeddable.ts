@@ -6,8 +6,10 @@
  */
 
 import { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
+
 import { EmbeddableInput } from '../../types';
 import { EmbeddableTypes } from './embeddable_types';
+import { CanvasApi } from '../../public/';
 
 export const EmbeddableExpressionType = 'embeddable';
 export type { EmbeddableInput };
@@ -31,6 +33,11 @@ export interface EmbeddableExpression<Input extends EmbeddableInput> {
    * to force a reload of the embeddables internal data
    */
   generatedAt: number;
+
+  /**
+   * Needed to render the new react embeddables
+   */
+  canvasApi: CanvasContainer;
 }
 
 export const embeddableType = (): ExpressionTypeDefinition<

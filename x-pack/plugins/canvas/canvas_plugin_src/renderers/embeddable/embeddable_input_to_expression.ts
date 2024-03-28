@@ -24,7 +24,7 @@ export const inputToExpressionTypeMap = {
 export function embeddableInputToExpression(
   input: EmbeddableInput,
   embeddableType: string,
-  palettes: PaletteRegistry,
+  palettes?: PaletteRegistry,
   useGenericEmbeddable?: boolean
 ): string | undefined {
   if (useGenericEmbeddable) {
@@ -33,5 +33,7 @@ export function embeddableInputToExpression(
 
   if (inputToExpressionTypeMap[embeddableType]) {
     return inputToExpressionTypeMap[embeddableType](input as any, palettes);
+  } else {
+    return genericToExpression(input, embeddableType);
   }
 }

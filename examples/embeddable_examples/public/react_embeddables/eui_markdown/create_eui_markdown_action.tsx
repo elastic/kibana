@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { EmbeddableApiContext, apiPublishesViewMode } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
 
@@ -21,10 +21,16 @@ export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
     id: ADD_EUI_MARKDOWN_ACTION_ID,
     getIconType: () => 'editorCodeBlock',
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      if (
+        apiIsPresentationContainer(embeddable) ||
+        (apiPublishesViewMode(embeddable) && (embeddable as PresentationContainer).addNewPanel) // handles Canvas
+      ) {
+        return true;
+      }
+      return false;
     },
     execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
+      // if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
       embeddable.addNewPanel(
         {
           panelType: EUI_MARKDOWN_ID,
@@ -39,4 +45,5 @@ export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
       }),
   });
   uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_EUI_MARKDOWN_ACTION_ID);
+  uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', ADD_EUI_MARKDOWN_ACTION_ID);
 };

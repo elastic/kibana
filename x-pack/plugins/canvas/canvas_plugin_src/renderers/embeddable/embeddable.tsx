@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import type { EmbeddableAppContext } from '@kbn/embeddable-plugin/public';
 import {
-  IEmbeddable,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
-  isErrorEmbeddable,
   EmbeddablePanel,
+  IEmbeddable,
+  isErrorEmbeddable,
+  reactEmbeddableRegistryHasKey,
+  ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableAppContext } from '@kbn/embeddable-plugin/public';
-import { StartDeps } from '../../plugin';
-import { EmbeddableExpression } from '../../expression_types/embeddable';
-import { RendererStrings } from '../../../i18n';
-import { embeddableInputToExpression } from './embeddable_input_to_expression';
-import { RendererFactory, EmbeddableInput } from '../../../types';
+import { PresentationContainer } from '@kbn/presentation-containers';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import React, { FC } from 'react';
+import ReactDOM from 'react-dom';
+import useObservable from 'react-use/lib/useObservable';
 import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
+import { RendererStrings } from '../../../i18n';
+import { CanvasContainer } from '../../../public/components/hooks/use_canvas_api';
+import { updateEmbeddableExpression } from '../../../public/state/actions/embeddable';
+import { EmbeddableInput, RendererFactory } from '../../../types';
+import { EmbeddableExpression } from '../../expression_types/embeddable';
+import { StartDeps } from '../../plugin';
+import { embeddableInputToExpression } from './embeddable_input_to_expression';
 
 const { embeddable: strings } = RendererStrings;
 
@@ -31,6 +36,26 @@ const { embeddable: strings } = RendererStrings;
 const embeddablesRegistry: {
   [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
+
+const renderReactEmbeddable = (
+  type: string,
+  uuid: string,
+  input: EmbeddableInput,
+  container: CanvasContainer
+) => {
+  return (
+    <ReactEmbeddableRenderer
+      type={type}
+      maybeId={uuid}
+      parentApi={container as PresentationContainer}
+      key={`${type}_${uuid}`}
+      state={{ rawState: input }}
+      onAnyStateChange={(newState) =>
+        container.onEdit(uuid, type, newState.rawState as unknown as EmbeddableInput)
+      }
+    />
+  );
+};
 
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
@@ -82,13 +107,24 @@ export const embeddableRendererFactory = (
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
     reuseDomNode: true,
-    render: async (domNode, { input, embeddableType }, handlers) => {
+    render: async (domNode, { input, embeddableType, canvasApi }, handlers) => {
       const uniqueId = handlers.getElementId();
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
         'labs:canvas:byValueEmbeddable'
       );
 
-      if (!embeddablesRegistry[uniqueId]) {
+      if (reactEmbeddableRegistryHasKey(embeddableType)) {
+        ReactDOM.render(
+          renderReactEmbeddable(embeddableType, uniqueId, input, canvasApi),
+          domNode,
+          () => handlers.done()
+        );
+
+        handlers.onDestroy(() => {
+          handlers.onEmbeddableDestroyed();
+          return ReactDOM.unmountComponentAtNode(domNode);
+        });
+      } else if (!embeddablesRegistry[uniqueId]) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
           (embeddableFactory) => embeddableFactory.type === embeddableType
         ) as EmbeddableFactory<EmbeddableInput>;

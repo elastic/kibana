@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
+
 import {
   EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
   EuiContextMenuItemIcon,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
-import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
+import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+
+import { useUiActionsService } from '../../../services';
+import {
+  addCanvasElementTrigger,
+  ADD_CANVAS_ELEMENT_TRIGGER,
+} from '../../../state/triggers/add_canvas_element_trigger';
+import { CanvasContainer, useCanvasApi } from '../../hooks/use_canvas_api';
 
 const strings = {
   getEditorMenuButtonLabel: () =>
@@ -48,6 +57,10 @@ export const EditorMenu: FC<Props> = ({
 }: Props) => {
   const factoryGroupMap: Record<string, FactoryGroup> = {};
   const ungroupedFactories: EmbeddableFactoryDefinition[] = [];
+  const uiActions = useUiActionsService();
+  const canvasApi = useCanvasApi();
+
+  const [addPanelActions, setAddPanelActions] = useState<Array<Action<object>>>([]);
 
   let panelCount = 1;
 
@@ -118,11 +131,67 @@ export const EditorMenu: FC<Props> = ({
     };
   };
 
-  const editorMenuPanels = [
+  const onAddPanelActionClick =
+    (action: Action, context: ActionExecutionContext<object>, closePopover: () => void) =>
+    (event: React.MouseEvent) => {
+      closePopover();
+      if (event.currentTarget instanceof HTMLAnchorElement) {
+        if (
+          !event.defaultPrevented && // onClick prevented default
+          event.button === 0 &&
+          (!event.currentTarget.target || event.currentTarget.target === '_self') &&
+          !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
+        ) {
+          event.preventDefault();
+          action.execute(context);
+        }
+      } else action.execute(context);
+    };
+
+  const getAddPanelActionMenuItems = (
+    api: CanvasContainer,
+    actions: Array<Action<object>> | undefined,
+    closePopover: () => void
+  ) => {
+    return (
+      actions?.map((item) => {
+        const context = {
+          embeddable: api,
+          trigger: addCanvasElementTrigger,
+        };
+        const actionName = item.getDisplayName(context);
+        return {
+          name: actionName,
+          icon: item.getIconType(context),
+          onClick: onAddPanelActionClick(item, context, closePopover),
+          'data-test-subj': `create-action-${actionName}`,
+          toolTipContent: item?.getDisplayNameTooltip?.(context),
+        };
+      }) ?? []
+    );
+  };
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadPanelActions() {
+      const registeredActions = await uiActions?.getTriggerCompatibleActions?.(
+        ADD_CANVAS_ELEMENT_TRIGGER,
+        { embeddable: canvasApi }
+      );
+      if (mounted) setAddPanelActions(registeredActions);
+    }
+    loadPanelActions();
+    return () => {
+      mounted = false;
+    };
+  }, [uiActions, canvasApi]);
+
+  const getEditorMenuPanels = (closePopover: () => void) => [
     {
       id: 0,
       items: [
         ...visTypeAliases.map(getVisTypeAliasMenuItem),
+        ...getAddPanelActionMenuItems(canvasApi, addPanelActions, closePopover),
         ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
           name: appName,
           icon,
@@ -149,10 +218,10 @@ export const EditorMenu: FC<Props> = ({
       panelPaddingSize="none"
       data-test-subj="canvasEditorMenuButton"
     >
-      {() => (
+      {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenu
           initialPanelId={0}
-          panels={editorMenuPanels}
+          panels={getEditorMenuPanels(closePopover)}
           data-test-subj="canvasEditorContextMenu"
         />
       )}
