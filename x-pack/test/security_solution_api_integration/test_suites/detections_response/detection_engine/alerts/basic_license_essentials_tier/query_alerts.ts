@@ -103,7 +103,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('find_alerts_route', () => {
       describe('validation checks', () => {
-        // This fails and should be investigated or removed if it no longer applies
         it('should not give errors when querying and the alerts index does exist and is empty', async () => {
           await createAlertsIndex(supertest, log);
           const { body } = await supertest
