@@ -34,8 +34,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     type: 'eval',
     name: 'acos',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.acos', {
-      defaultMessage:
-        'Returns the {wikipedia}/Inverse_trigonometric_functions[arccosine] of `n` as an angle, expressed in radians.',
+      defaultMessage: 'Returns the arccosine of `n` as an angle, expressed in radians.',
     }),
     alias: undefined,
     signatures: [
@@ -56,7 +55,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     name: 'asin',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.asin', {
       defaultMessage:
-        'Returns the {wikipedia}/Inverse_trigonometric_functions[arcsine] of the input numeric expression as an angle, expressed in radians.',
+        'Returns the arcsine of the input numeric expression as an angle, expressed in radians.',
     }),
     alias: undefined,
     signatures: [
@@ -77,7 +76,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     name: 'atan',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.atan', {
       defaultMessage:
-        'Returns the {wikipedia}/Inverse_trigonometric_functions[arctangent] of the input numeric expression as an angle, expressed in radians.',
+        'Returns the arctangent of the input numeric expression as an angle, expressed in radians.',
     }),
     alias: undefined,
     signatures: [
@@ -98,7 +97,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     name: 'atan2',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.atan2', {
       defaultMessage:
-        'The {wikipedia}/Atan2[angle] between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane, expressed in radians.',
+        'The angle between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane, expressed in radians.',
     }),
     alias: undefined,
     signatures: [

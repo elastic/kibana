@@ -140,6 +140,11 @@ function getFunctionDefinition(value, columnIndices) {
 }
 
 function printGeneratedFunctionsFile(functionDefinitions) {
+  const removeInlineAsciiDocLinks = (asciidocString) => {
+    const inlineLinkRegex = /\{.+?\}\/.+?\[(.+?)\]/g;
+    return asciidocString.replace(inlineLinkRegex, '$1');
+  };
+
   const printFunctionDefinition = (functionDefinition) => {
     const { type, name, description, alias, signatures } = functionDefinition;
 
@@ -147,7 +152,7 @@ function printGeneratedFunctionsFile(functionDefinitions) {
     type: '${type}',
     name: '${name}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
-      description
+      removeInlineAsciiDocLinks(description)
     )} }),
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},
