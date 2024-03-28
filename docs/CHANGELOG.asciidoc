@@ -67,6 +67,19 @@ Review important information about the {kib} 8.x releases.
 For information about the {kib} 8.13.0 release, review the following information.
 
 [float]
+[[known-issues-8.13.0]]
+=== Known issues
+
+[discrete]
+[[known-179457]]
+.In Canvas, an empty text element incorrectly triggers a toast notification
+[%collapsible]
+====
+*Details* +
+In Canvas, an empty text element incorrectly triggers a "Markdown content is required in [readOnly] mode" toast notification. For more information, refer to ({kibana-pull}179457[#179457]).
+====
+
+[float]
 [[breaking-changes-8.13.0]]
 === Breaking changes
 
