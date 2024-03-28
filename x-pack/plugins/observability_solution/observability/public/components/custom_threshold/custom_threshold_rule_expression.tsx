@@ -23,9 +23,9 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { ISearchSource, Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewBase, isOfQueryType } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,16 +37,13 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
-import {
-  Aggregators,
-  Comparator,
-  CustomThresholdSearchSourceFields,
-} from '../../../common/custom_threshold_rule/types';
+import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
 import { RuleConditionChart as PreviewChart } from './components/rule_condition_chart/rule_condition_chart';
+import { getSearchConfiguration } from './helpers/get_search_configuration';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -54,18 +51,6 @@ type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
-
-const getSearchConfig = (
-  fields: SerializedSearchSourceFields
-): CustomThresholdSearchSourceFields => {
-  if (!fields.query || !isOfQueryType(fields.query)) {
-    throw new Error('Custom threshold does not support queries other than Query type.');
-  }
-  return {
-    ...fields,
-    query: fields.query,
-  };
-};
 
 export const defaultExpression: MetricExpression = {
   comparator: Comparator.GT,
@@ -99,6 +84,7 @@ export default function Expressions(props: Props) {
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [paramsError, setParamsError] = useState<Error>();
+  const [paramsWarning, setParamsWarning] = useState<string>();
   const derivedIndexPattern = useMemo<DataViewBase>(
     () => ({
       fields: dataView?.fields || [],
@@ -128,7 +114,10 @@ export default function Expressions(props: Props) {
             newSearchSource.setField('index', defaultDataView);
             setDataView(defaultDataView);
           }
-          initialSearchConfiguration = getSearchConfig(newSearchSource.getSerializedFields());
+          initialSearchConfiguration = getSearchConfiguration(
+            newSearchSource.getSerializedFields(),
+            setParamsWarning
+          );
         }
       }
 
@@ -206,7 +195,7 @@ export default function Expressions(props: Props) {
       searchSource?.setParent(undefined).setField('index', newDataView);
       setRuleParams(
         'searchConfiguration',
-        searchSource && getSearchConfig(searchSource.getSerializedFields())
+        searchSource && getSearchConfiguration(searchSource.getSerializedFields(), setParamsWarning)
       );
       setDataView(newDataView);
     },
@@ -242,6 +231,7 @@ export default function Expressions(props: Props) {
 
   const onFilterChange = useCallback(
     ({ query }: { query?: Query }) => {
+      setParamsWarning(undefined);
       setRuleParams('searchConfiguration', { ...ruleParams.searchConfiguration, query });
     },
     [setRuleParams, ruleParams.searchConfiguration]
@@ -384,6 +374,24 @@ export default function Expressions(props: Props) {
   );
   return (
     <>
+      {!!paramsWarning && (
+        <>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.observability.customThreshold.rule.alertFlyout.warning.title',
+              {
+                defaultMessage: 'Warning',
+              }
+            )}
+            color="warning"
+            iconType="warning"
+            data-test-subj="thresholdRuleExpressionWarning"
+          >
+            {paramsWarning}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
