@@ -42,30 +42,6 @@ import {
   querySchema,
 } from '../schema';
 
-const createSLOParamsSchema = t.type({
-  body: t.intersection([
-    t.type({
-      name: t.string,
-      description: t.string,
-      indicator: indicatorSchema,
-      timeWindow: timeWindowSchema,
-      budgetingMethod: budgetingMethodSchema,
-      objective: objectiveSchema,
-    }),
-    t.partial({
-      id: sloIdSchema,
-      settings: optionalSettingsSchema,
-      tags: tagsSchema,
-      groupBy: allOrAnyStringOrArray,
-      revision: t.number,
-    }),
-  ]),
-});
-
-const createSLOResponseSchema = t.type({
-  id: sloIdSchema,
-});
-
 const getPreviewDataParamsSchema = t.type({
   body: t.intersection([
     t.type({
@@ -316,10 +292,6 @@ type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
 type SLOGroupWithSummaryResponse = t.OutputOf<typeof sloGroupWithSummaryResponseSchema>;
 
-type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Raw payload sent by the frontend
-type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
-type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw response sent to the frontend
-
 type GetSLOParams = t.TypeOf<typeof getSLOQuerySchema.props.query>;
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
@@ -375,7 +347,6 @@ type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
 type QuerySchema = t.TypeOf<typeof querySchema>;
 
 export {
-  createSLOParamsSchema,
   deleteSLOParamsSchema,
   deleteSLOInstancesParamsSchema,
   findSLOParamsSchema,
@@ -405,9 +376,6 @@ export {
 };
 export type {
   BudgetingMethod,
-  CreateSLOInput,
-  CreateSLOParams,
-  CreateSLOResponse,
   DeleteSLOInstancesInput,
   DeleteSLOInstancesParams,
   FindSLOParams,

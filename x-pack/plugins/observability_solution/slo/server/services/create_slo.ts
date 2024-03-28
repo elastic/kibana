@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
