@@ -33,6 +33,7 @@ function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
     <ObservabilityAlertSearchBar
       {...stateProps}
       {...searchBarProps}
+      showFilterBar
       services={{ timeFilterService, AlertsSearchBar, useToasts, uiSettings }}
     />
   );
