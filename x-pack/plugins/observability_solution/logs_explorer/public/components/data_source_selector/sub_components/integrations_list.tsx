@@ -219,16 +219,16 @@ function ButtonWithIcon({ icon, text, ...props }: ButtonWithIconProps) {
 }
 
 function NameColumn(props: SelectorColumnProps) {
-  return <SelectorList.Column grow={3} {...props} />;
+  return <SelectorList.Column sidePadding={0} grow={3} {...props} />;
 }
 
 function DatasetCountColumn(props: SelectorColumnProps) {
-  return <SelectorList.Column grow={false} {...props} />;
+  return <SelectorList.Column sidePadding={0} grow={false} {...props} />;
 }
 
 // TODO: use this column to compose the integrations table using the right reserved space
 // function LastActivityColumn(props) {
-//   return <SelectorList.Column grow={2} {...props} />;
+//   return <SelectorList.Column sidePadding={0} grow={2} {...props} />;
 // }
 
 /**

@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { css, SerializedStyles } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { MouseEventHandler } from 'react';
+import React, { CSSProperties, MouseEventHandler } from 'react';
 import { itemRuleStyle, tabContentHeight } from '../shared_styles';
 
 type SelectorListProps = React.HTMLAttributes<HTMLElement>;
@@ -64,12 +64,17 @@ function Header(props: SelectorRowProps) {
 
 export interface SelectorColumnProps extends React.ComponentProps<typeof EuiFlexItem> {
   css?: SerializedStyles;
+  sidePadding?: CSSProperties['padding'];
   onClick?: MouseEventHandler<HTMLElement>;
 }
 
-function Column({ css: customCss, ...props }: SelectorColumnProps) {
+function Column({
+  css: customCss,
+  sidePadding = euiThemeVars.euiSizeS,
+  ...props
+}: SelectorColumnProps) {
   const styles = css`
-    padding: ${euiThemeVars.euiSizeS};
+    padding: ${euiThemeVars.euiSizeS} ${sidePadding};
     ${props.onClick ? interactiveStyle : ''}
     ${customCss}
   `;
