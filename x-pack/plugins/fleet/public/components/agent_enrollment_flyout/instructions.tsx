@@ -9,14 +9,12 @@ import React, { useEffect, useState } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useFleetStatus, useFleetServerStandalone } from '../../hooks';
+import { useFleetStatus, useFleetServerStandalone, sendAllFleetServerAgents } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 import { Loading } from '..';
 import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
-
-import { sendAllFleetServerAgents } from '../../applications/fleet/sections/agents/components/agent_upgrade_modal/hooks';
 
 import type { InstructionProps } from './types';
 import { ManagedSteps, StandaloneSteps } from './steps';
@@ -39,7 +37,7 @@ export const Instructions = (props: InstructionProps) => {
 
   const { isFleetServerStandalone } = useFleetServerStandalone();
   const [fleetServerAgentsCount, setFleetServerAgentsCount] = useState<number>(0);
-  const [isLoadingAgents, setIsLoadingAgents] = useState<boolean>(false);
+  const [isLoadingAgents, setIsLoadingAgents] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchFleetServerAgents = async () => {

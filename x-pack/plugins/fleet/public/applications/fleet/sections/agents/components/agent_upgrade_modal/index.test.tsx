@@ -11,9 +11,11 @@ import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { sendGetAgentsAvailableVersions, sendPostBulkAgentUpgrade } from '../../../../hooks';
-
-import { sendAllFleetServerAgents } from './hooks';
+import {
+  sendAllFleetServerAgents,
+  sendGetAgentsAvailableVersions,
+  sendPostBulkAgentUpgrade,
+} from '../../../../hooks';
 
 import { AgentUpgradeAgentModal } from '.';
 import type { AgentUpgradeAgentModalProps } from '.';
@@ -32,13 +34,13 @@ jest.mock('../../../../hooks', () => {
     sendPostBulkAgentUpgrade: jest.fn(),
     useAgentVersion: jest.fn().mockReturnValue('8.10.2'),
     useKibanaVersion: jest.fn().mockReturnValue('8.10.2'),
+    sendAllFleetServerAgents: jest.fn(),
   };
 });
 
 jest.mock('./hooks', () => {
   return {
     ...jest.requireActual('./hooks'),
-    sendAllFleetServerAgents: jest.fn(),
   };
 });
 

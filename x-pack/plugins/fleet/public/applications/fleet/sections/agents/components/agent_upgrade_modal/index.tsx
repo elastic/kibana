@@ -50,6 +50,7 @@ import {
   useConfig,
   sendGetAgentStatus,
   useAgentVersion,
+  sendAllFleetServerAgents,
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
@@ -64,7 +65,7 @@ import {
   MAINTENANCE_VALUES,
   ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION,
 } from './constants';
-import { useScheduleDateTime, sendAllFleetServerAgents } from './hooks';
+import { useScheduleDateTime } from './hooks';
 
 export interface AgentUpgradeAgentModalProps {
   onClose: () => void;
