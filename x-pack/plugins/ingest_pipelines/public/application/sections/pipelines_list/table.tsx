@@ -153,7 +153,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           aria-label="refresh button"
           data-test-subj="reloadButton"
           size="m"
-          display="fill"
+          display="base"
           onClick={onReloadClick}
         />,
       ],
