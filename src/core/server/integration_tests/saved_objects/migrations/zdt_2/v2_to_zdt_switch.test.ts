@@ -103,8 +103,9 @@ describe('ZDT upgrades - switching from v2 algorithm', () => {
       const records = await parseLogFile(logFilePath);
       expect(records).toContainLogEntries(
         [
-          'INIT: current algo check result: v2-compatible',
-          'INIT -> UPDATE_INDEX_MAPPINGS',
+          'INIT: current algo check result: v2-partially-migrated',
+          'INIT: mapping version check result: equal',
+          'INIT -> INDEX_STATE_UPDATE_DONE',
           'INDEX_STATE_UPDATE_DONE -> DOCUMENTS_UPDATE_INIT',
           'Migration completed',
         ],
@@ -117,13 +118,17 @@ describe('ZDT upgrades - switching from v2 algorithm', () => {
     it('fails and throws an explicit error', async () => {
       const { client } = await createBaseline({ kibanaVersion: '8.7.0' });
 
-      // even when specifying an older version, the `indexTypeMap` will be present on the index's meta,
-      // so we have to manually remove it there.
+      // even when specifying an older version, `indexTypeMap` and `mappingVersions` will be present on the index's meta,
+      // so we have to manually remove them.
       const indices = await client.indices.get({
         index: '.kibana_8.7.0_001',
       });
       const meta = indices['.kibana_8.7.0_001'].mappings!._meta! as IndexMappingMeta;
       delete meta.indexTypesMap;
+      delete meta.mappingVersions;
+      meta.migrationMappingPropertyHashes = {
+        sample_a: 'sampleAHash',
+      };
       await client.indices.putMapping({
         index: '.kibana_8.7.0_001',
         _meta: meta,

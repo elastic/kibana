@@ -61,7 +61,7 @@ import {
 import type { ChatFn, ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { rejectTokenCountEvents } from '../util/reject_token_count_events';
-import { createBedrockClaudeAdapter } from './adapters/bedrock_claude_adapter';
+import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
 
@@ -244,7 +244,7 @@ export class ObservabilityAIAssistantClient {
             return await next(nextMessages.concat(addedMessage));
           } else if (isUserMessage) {
             const functions =
-              numFunctionsCalled >= MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
+              numFunctionsCalled === MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
 
             const response$ = (
               await chatWithTokenCountIncrement(

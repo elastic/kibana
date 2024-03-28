@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { configSchema, type ConfigSchema } from '../common/config';
 
 export const plugin = async (ctx: PluginInitializerContext) => {
   const { TransformServerPlugin } = await import('./plugin');
   return new TransformServerPlugin(ctx);
+};
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    experimental: true,
+  },
 };
 
 export { registerTransformHealthRuleType } from './lib/alerting';
