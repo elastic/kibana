@@ -11,7 +11,6 @@ import {
   EuiPopover,
   EuiIcon,
   EuiContextMenu,
-  EuiBadge,
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';

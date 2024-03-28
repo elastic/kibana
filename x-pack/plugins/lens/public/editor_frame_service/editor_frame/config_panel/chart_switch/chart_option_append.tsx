@@ -7,9 +7,8 @@
 
 import './chart_switch.scss';
 import React from 'react';
-import { EuiFlexItem, EuiIconTip, EuiBetaBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiFlexItem, EuiIconTip, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { ExperimentalBadge } from '../../../../shared_components';
 
 export const getDataLossWarning = (dataLoss: 'nothing' | 'layers' | 'everything' | 'columns') => {

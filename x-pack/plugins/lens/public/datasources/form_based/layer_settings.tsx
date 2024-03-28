@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiBetaBadge, EuiLink, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RandomSamplingSlider } from '@kbn/random-sampling';
