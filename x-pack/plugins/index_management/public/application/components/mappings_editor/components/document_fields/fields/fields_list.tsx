@@ -8,14 +8,23 @@
 import React from 'react';
 
 import { FieldsListItemContainer } from './fields_list_item_container';
-import { NormalizedField } from '../../../types';
+import { NormalizedField, State } from '../../../types';
 
 interface Props {
   fields?: NormalizedField[];
   treeDepth?: number;
+  state: State;
+  setPreviousState?: (state: State) => void;
+  isAddingFields?: boolean;
 }
 
-export const FieldsList = React.memo(function FieldsListComponent({ fields, treeDepth }: Props) {
+export const FieldsList = React.memo(function FieldsListComponent({
+  fields,
+  treeDepth,
+  state,
+  setPreviousState,
+  isAddingFields,
+}: Props) {
   if (fields === undefined) {
     return null;
   }
@@ -27,6 +36,9 @@ export const FieldsList = React.memo(function FieldsListComponent({ fields, tree
           fieldId={field.id}
           treeDepth={treeDepth === undefined ? 0 : treeDepth}
           isLastItem={index === fields.length - 1}
+          state={state}
+          setPreviousState={setPreviousState}
+          isAddingFields={isAddingFields}
         />
       ))}
     </ul>
