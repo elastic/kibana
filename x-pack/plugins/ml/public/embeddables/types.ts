@@ -20,11 +20,8 @@ import type {
   EmbeddableApiContext,
   HasParentApi,
   HasType,
-  PublishesDataLoading,
   PublishesDataViews,
   PublishesUnifiedSearch,
-  PublishesViewMode,
-  PublishesWritableUnifiedSearch,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
@@ -51,10 +48,7 @@ import type {
  */
 export interface MlEmbeddableBaseApi<StateType extends object = object>
   extends DefaultEmbeddableApi<StateType>,
-    Pick<PublishesWritableUnifiedSearch, 'timeRange$' | 'setTimeRange'>,
-    PublishesDataViews,
-    PublishesViewMode,
-    PublishesDataLoading {
+    PublishesDataViews {
   /**
    * Result time range based on the parent and panel time range APIs
    */

@@ -8,16 +8,15 @@
 
 import { PresentationContainer } from '@kbn/presentation-containers';
 import {
+  HasParentApi,
+  HasUniqueId,
   PhaseEvent,
+  PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
-  PublishesBlockingError,
-  HasUniqueId,
   PublishesPanelDescription,
   PublishesPanelTitle,
-  HasParentApi,
   PublishesViewMode,
-  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
@@ -70,9 +69,9 @@ export interface DefaultPresentationPanelApi
         PublishesBlockingError &
         PublishesPanelDescription &
         PublishesDisabledActionIds &
-        HasParentApi<PresentationContainer> &
-        Partial<
-          Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode & PublishesUnifiedSearch
+        HasParentApi<
+          PresentationContainer &
+            Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode>
         >
     > {}
 

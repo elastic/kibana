@@ -26,7 +26,7 @@ export interface AnomalySwimLaneComponentApi {
   jobIds: PublishingSubject<JobId[]>;
   swimlaneType: PublishingSubject<SwimlaneType>;
   viewBy: PublishingSubject<string | undefined>;
-  perPage: PublishingSubject<number>;
+  perPage: PublishingSubject<number | undefined>;
   fromPage: PublishingSubject<number>;
   interval: PublishingSubject<number | undefined>;
   setInterval: (interval: number | undefined) => void;
