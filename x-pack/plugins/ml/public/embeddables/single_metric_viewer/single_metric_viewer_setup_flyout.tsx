@@ -30,10 +30,10 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
       const { jobIds } = await resolveJobSelection(
         coreStart,
         pluginStart.data.dataViews,
-        input?.jobIds,
+        input?.jobId ? [input.jobId] : undefined,
         true
       );
-      const title = getDefaultSingleMetricViewerPanelTitle(jobIds);
+      const title = getDefaultSingleMetricViewerPanelTitle(jobIds[0]);
       const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
 
       const modalSession = overlays.openModal(
@@ -52,7 +52,7 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
               onCreate={(explicitInput) => {
                 modalSession.close();
                 resolve({
-                  jobIds,
+                  jobId: jobIds[0],
                   ...explicitInput,
                 });
               }}

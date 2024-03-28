@@ -58,7 +58,7 @@ export function createOpenInSingleMetricViewerAction(
 
       if (isSingleMetricViewerEmbeddableContext(context)) {
         const { embeddable } = context;
-        const { jobIds, query$, selectedEntities } = embeddable;
+        const { jobId, query$, selectedEntities } = embeddable;
 
         return locator.getUrl(
           {
@@ -71,7 +71,7 @@ export function createOpenInSingleMetricViewerAction(
                 pause: true,
                 value: 0,
               },
-              jobIds: jobIds.getValue(),
+              jobIds: [jobId.getValue()],
               query: query$?.getValue(),
               entities: selectedEntities?.getValue(),
             },

@@ -30,10 +30,10 @@ import type {
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 
-export const getDefaultSingleMetricViewerPanelTitle = (jobIds: JobId[]) =>
+export const getDefaultSingleMetricViewerPanelTitle = (jobId: JobId) =>
   i18n.translate('xpack.ml.singleMetricViewerEmbeddable.title', {
-    defaultMessage: 'ML single metric viewer chart for {jobIds}',
-    values: { jobIds: jobIds.join(', ') },
+    defaultMessage: 'ML single metric viewer chart for {jobId}',
+    values: { jobId },
   });
 
 export type ISingleMetricViewerEmbeddable = typeof SingleMetricViewerEmbeddable;
@@ -48,7 +48,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
 
   // API
   public readonly functionDescription: BehaviorSubject<string | undefined>;
-  public readonly jobIds: BehaviorSubject<JobId[] | undefined>;
+  public readonly jobId: BehaviorSubject<JobId | undefined>;
   public readonly selectedDetectorIndex: BehaviorSubject<number | undefined>;
   public readonly selectedEntities: BehaviorSubject<MlEntityField[] | undefined>;
   public readonly title: BehaviorSubject<string | undefined>;
@@ -62,10 +62,10 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
   ) {
     super(initialInput, {} as AnomalyChartsEmbeddableOutput, parent);
 
-    this.jobIds = embeddableInputToSubject<JobId[], SingleMetricViewerEmbeddableInput>(
+    this.jobId = embeddableInputToSubject<JobId, SingleMetricViewerEmbeddableInput>(
       this.apiSubscriptions,
       this,
-      'jobIds'
+      'jobId'
     );
 
     this.functionDescription = embeddableInputToSubject<
