@@ -98,12 +98,6 @@ const manageSLOParamsSchema = t.type({
   path: t.type({ id: sloIdSchema }),
 });
 
-const resetSLOParamsSchema = t.type({
-  path: t.type({ id: sloIdSchema }),
-});
-
-const resetSLOResponseSchema = sloResponseSchema;
-
 const deleteSLOInstancesParamsSchema = t.type({
   body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: t.string })) }),
 });
@@ -175,9 +169,6 @@ type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
 type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
 
-type ResetSLOParams = t.TypeOf<typeof resetSLOParamsSchema.props.path>;
-type ResetSLOResponse = t.OutputOf<typeof resetSLOResponseSchema>;
-
 type DeleteSLOInstancesInput = t.OutputOf<typeof deleteSLOInstancesParamsSchema.props.body>;
 type DeleteSLOInstancesParams = t.TypeOf<typeof deleteSLOInstancesParamsSchema.props.body>;
 
@@ -218,8 +209,6 @@ export {
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
   manageSLOParamsSchema,
-  resetSLOParamsSchema,
-  resetSLOResponseSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
   getSLOBurnRatesParamsSchema,
@@ -227,6 +216,7 @@ export {
   getSLOInstancesParamsSchema,
   getSLOInstancesResponseSchema,
 };
+
 export type {
   BudgetingMethod,
   DeleteSLOInstancesInput,
@@ -237,8 +227,6 @@ export type {
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
   ManageSLOParams,
-  ResetSLOParams,
-  ResetSLOResponse,
   SLOResponse,
   SLOWithSummaryResponse,
   APMTransactionDurationIndicator,
