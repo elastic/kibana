@@ -19,6 +19,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
+import { getGenAiConfig } from '../../../connectorland/helpers';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { Conversation } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
@@ -108,6 +109,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
         let createdConversation;
         if (!optionExists) {
+          const config = getGenAiConfig(defaultConnector);
           const newConversation: Conversation = {
             id: '',
             title: searchValue,
@@ -120,6 +122,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
                     connectorId: defaultConnector.id,
                     provider: defaultConnector.apiProvider,
                     defaultSystemPromptId: defaultSystemPrompt?.id,
+                    model: config?.defaultModel,
                   },
                 }
               : {}),

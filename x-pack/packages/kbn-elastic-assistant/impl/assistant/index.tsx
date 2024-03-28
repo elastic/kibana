@@ -307,9 +307,15 @@ const AssistantComponent: React.FC<Props> = ({
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
         );
+        if (refetchedConversation) {
+          setConversations({
+            ...conversations,
+            [refetchedConversation.title]: refetchedConversation,
+          });
+        }
       }
     },
-    [allSystemPrompts, refetchCurrentConversation, refetchResults]
+    [allSystemPrompts, conversations, refetchCurrentConversation, refetchResults]
   );
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
