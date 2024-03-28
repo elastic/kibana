@@ -7,7 +7,7 @@
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { HasLibraryTransforms, SerializedTitles } from '@kbn/presentation-publishing';
+import { HasLibraryTransforms, PublishesDataLoading, SerializedTitles } from '@kbn/presentation-publishing';
 import { MapAttributes } from '../../common/content_management';
 import { MapCenterAndZoom, MapExtent, MapSettings } from '../../common/descriptor_types';
 
@@ -27,7 +27,13 @@ export interface MapSerializeState extends SerializedTitles {
   timeRange?: TimeRange;
   filterByMapExtent?: boolean;
   isMovementSynchronized?: boolean;
+
+  // Configuration item that are never persisted
+  // Putting in state as a temporary work around until
+  // MapApi and React component are seperated from embeddable
+  isSharable?: boolean;
 }
 
 export type MapApi = DefaultEmbeddableApi<MapSerializeState> &
+  PublishesDataLoading &
   HasLibraryTransforms<MapSerializeState>;

@@ -9,7 +9,7 @@ import React from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { TileMapVisConfig } from './types';
-import { MapComponent } from '../../embeddable/map_component';
+import { MapComponent } from '../../react_embeddable/map_component';
 import { createTileMapLayerDescriptor } from '../../classes/layers/create_tile_map_layer_descriptor';
 
 interface Props {

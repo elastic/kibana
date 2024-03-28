@@ -17,6 +17,7 @@ import {
   getMapCenter,
   getMapReady,
   getMapZoom,
+  isMapLoading,
 } from '../selectors/map_selectors';
 import {
   setGotoWithCenter,
@@ -39,7 +40,7 @@ function getHiddenLayerIds(state: MapStoreState) {
     .map((layer) => layer.id);
 }
 
-export function initializeReduxStateSync(store: MapStore, state: MapSerializeState) {
+export function initializeReduxSync(store: MapStore, state: MapSerializeState) {
   // initializing comparitor publishing subjects to state instead of store state values
   // because store is not settled until map is rendered and mapReady is true
   const hiddenLayers$ = new BehaviorSubject<string[]>(
@@ -54,6 +55,7 @@ export function initializeReduxStateSync(store: MapStore, state: MapSerializeSta
   const openTOCDetails$ = new BehaviorSubject<string[]>(
     state.openTOCDetails ?? getOpenTOCDetails(store.getState())
   );
+  const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const unsubscribeFromStore = store.subscribe(() => {
     if (!getMapReady(store.getState())) {
@@ -78,11 +80,19 @@ export function initializeReduxStateSync(store: MapStore, state: MapSerializeSta
     if (!fastIsEqual(openTOCDetails$.value, nextOpenTOCDetails)) {
       openTOCDetails$.next(nextOpenTOCDetails);
     }
+
+    const nextIsMapLoading = isMapLoading(store.getState());
+    if (nextIsMapLoading != dataLoading$.value) {
+      dataLoading$.next(nextIsMapLoading);
+    }
   });
 
   return {
-    cleanupReduxStateSync: unsubscribeFromStore,
-    reduxStateComparators: {
+    cleanupReduxSync: unsubscribeFromStore,
+    reduxApi: {
+      dataLoading: dataLoading$,
+    },
+    reduxComparators: {
       // mapBuffer comparator intentionally omitted and is not part of unsaved changes check
       hiddenLayers: [
         hiddenLayers$,
@@ -112,7 +122,7 @@ export function initializeReduxStateSync(store: MapStore, state: MapSerializeSta
         fastIsEqual,
       ],
     } as StateComparators<MapSerializeState>,
-    serializeReduxState: () => {
+    serializeRedux: () => {
       return {
         hiddenLayers: getHiddenLayerIds(store.getState()),
         isLayerTOCOpen: getIsLayerTOCOpen(store.getState()),

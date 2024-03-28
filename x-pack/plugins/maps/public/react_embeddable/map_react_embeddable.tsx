@@ -18,7 +18,7 @@ import { extract, type MapEmbeddablePersistableState } from '../../common/embedd
 import type { MapApi, MapSerializeState } from './types';
 import { SavedMap } from '../routes/map_page';
 import type { MapEmbeddableInput } from '../embeddable/types';
-import { initializeReduxStateSync } from './initialize_redux_state_sync';
+import { initializeReduxSync } from './initialize_redux_sync';
 import { initializeLibraryTransforms } from './initialize_library_transforms';
 import { getSpacesApi } from '../kibana_services';
 import { initializeActionHandlers } from './initialize_action_handlers';
@@ -43,14 +43,14 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
 
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
-    const { cleanupReduxStateSync, reduxStateComparators, serializeReduxState } =
-      initializeReduxStateSync(savedMap.getStore(), state);
+    const { cleanupReduxSync, reduxApi, reduxComparators, serializeRedux } =
+      initializeReduxSync(savedMap.getStore(), state);
 
     function serializeState() {
       const { state: rawState, references } = extract({
         ...state,
         ...serializeTitles(),
-        ...serializeReduxState(),
+        ...serializeRedux(),
       } as unknown as MapEmbeddablePersistableState);
       return {
         rawState: rawState as unknown as MapSerializeState,
@@ -62,12 +62,13 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       {
         defaultPanelTitle: new BehaviorSubject<string | undefined>(savedMap.getAttributes().title),
         ...titlesApi,
+        ...reduxApi,
         ...initializeLibraryTransforms(savedMap, serializeState),
         serializeState,
       },
       {
         ...titleComparators,
-        ...reduxStateComparators,
+        ...reduxComparators,
       }
     );
 
@@ -80,7 +81,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       Component: () => {
         useEffect(() => {
           return () => {
-            cleanupReduxStateSync();
+            cleanupReduxSync();
           };
         }, []);
 
@@ -108,7 +109,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
               title="title"
               description="description"
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
-              isSharable={true}
+              isSharable={state.isSharable ?? true}
             />
           </Provider>
         );
