@@ -19,7 +19,7 @@ import { toHighPrecision } from '../utils/number';
 import { getFlattenedGroupings } from './utils';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 
-import { fromSummaryDocumentToSlo } from './unsafe_federated/helper';
+import { fromSummaryDocumentToSlo } from './unsafe_federated/summary_doc_to_slo';
 
 export interface SLOSummary {
   id: SLOId;

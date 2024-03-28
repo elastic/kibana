@@ -9,7 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SLORepository } from './slo_repository';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { fromSummaryDocumentToSlo } from './unsafe_federated/helper';
+import { fromSummaryDocumentToSlo } from './unsafe_federated/summary_doc_to_slo';
 import { SLO } from '../domain/models';
 
 export class SloDefinitionClient {
