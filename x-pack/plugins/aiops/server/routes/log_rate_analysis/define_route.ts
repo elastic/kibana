@@ -9,10 +9,9 @@ import type { CoreStart, IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-
-import { aiopsLogRateAnalysisSchemaV1 } from '../../../common/api/log_rate_analysis/schema_v1';
-import { aiopsLogRateAnalysisSchemaV2 } from '../../../common/api/log_rate_analysis/schema_v2';
-import { AIOPS_API_ENDPOINT } from '../../../common/api';
+import { aiopsLogRateAnalysisSchemaV1 } from '@kbn/aiops-log-rate-analysis/api/schema_v1';
+import { aiopsLogRateAnalysisSchemaV2 } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
+import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
 import type { AiopsLicense } from '../../types';
 

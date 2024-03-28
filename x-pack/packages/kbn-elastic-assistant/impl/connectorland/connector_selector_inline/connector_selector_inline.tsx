@@ -68,11 +68,10 @@ const placeholderButtonClassName = css`
 export const ConnectorSelectorInline: React.FC<Props> = React.memo(
   ({ isDisabled = false, selectedConnectorId, selectedConversation, onConnectorSelected }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const { actionTypeRegistry, assistantAvailability, http } = useAssistantContext();
+    const { assistantAvailability, http } = useAssistantContext();
     const { setApiConfig } = useConversation();
 
     const { data: aiConnectors } = useLoadConnectors({
-      actionTypeRegistry,
       http,
     });
 
@@ -103,10 +102,9 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             apiConfig: {
               ...selectedConversation.apiConfig,
               connectorId,
-              connectorTypeTitle: connector.connectorTypeTitle,
               // With the inline component, prefer config args to handle 'new connector' case
-              provider: apiProvider ?? config?.apiProvider,
-              model: model ?? config?.defaultModel,
+              provider: apiProvider,
+              model,
             },
           });
 

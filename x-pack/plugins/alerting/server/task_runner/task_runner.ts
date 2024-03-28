@@ -13,16 +13,22 @@ import { Logger } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   createTaskRunError,
+  TaskErrorSource,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { ExecutionHandler, RunResult } from './execution_handler';
-import { TaskRunnerContext } from './types';
+import {
+  RuleTaskInstance,
+  RuleTaskRunResult,
+  RuleTaskStateAndMetrics,
+  RunRuleParams,
+  TaskRunnerContext,
+} from './types';
 import { getExecutorServices } from './get_executor_services';
 import {
   ElasticsearchError,
-  ErrorWithReason,
   executionStatusFromError,
   executionStatusFromState,
   getNextRun,
@@ -57,28 +63,17 @@ import {
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
 import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
-import {
-  RuleTaskInstance,
-  RuleTaskRunResult,
-  RuleTaskStateAndMetrics,
-  RunRuleParams,
-} from './types';
 import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import {
-  getDecryptedRule,
-  RuleData,
-  RuleDataResult,
-  validateRuleAndCreateFakeRequest,
-} from './rule_loader';
+import { getDecryptedRule, validateRuleAndCreateFakeRequest } from './rule_loader';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
 import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { getMaintenanceWindows, filterMaintenanceWindowsIds } from './get_maintenance_windows';
+import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 
@@ -151,7 +146,6 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
-  private ruleData?: RuleDataResult<RuleData>;
   private maintenanceWindows: MaintenanceWindow[] = [];
   private maintenanceWindowsWithoutScopedQueryIds: string[] = [];
   private ruleTypeRunner: RuleTypeRunner<
@@ -442,11 +436,36 @@ export class TaskRunner<
    * - clear expired snoozes
    */
   private async prepareToRun(): Promise<RunRuleParams<Params>> {
-    return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareToRun, async () => {
+    return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareRule, async () => {
       const {
-        params: { alertId: ruleId, spaceId },
+        params: { alertId: ruleId, spaceId, consumer },
         startedAt,
       } = this.taskInstance;
+
+      // Initially use consumer as stored inside the task instance
+      // This allows us to populate a consumer value for event log
+      // `execute-start` events (which are indexed before the rule SO is read)
+      // and in the event of decryption errors (where we cannot read the rule SO)
+      // Because "consumer" is set when a rule is created, this value should be static
+      // for the life of a rule but there may be edge cases where migrations cause
+      // the consumer values to become out of sync.
+      if (consumer) {
+        this.ruleConsumer = consumer;
+      }
+
+      // Start the event logger so that something is logged in the
+      // event that rule SO decryption fails.
+      const namespace = this.context.spaceIdToNamespace(spaceId);
+      this.alertingEventLogger.initialize({
+        ruleId,
+        ruleType: this.ruleType as UntypedNormalizedRuleType,
+        consumer: this.ruleConsumer!,
+        spaceId,
+        executionId: this.executionId,
+        taskScheduledAt: this.taskInstance.scheduledAt,
+        ...(namespace ? { namespace } : {}),
+      });
+      this.alertingEventLogger.start(this.runDate);
 
       if (apm.currentTransaction) {
         apm.currentTransaction.name = `Execute Alerting Rule`;
@@ -466,13 +485,10 @@ export class TaskRunner<
         this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, startedAt);
       }
 
-      // Load rule SO (indirect task params) if necessary
-      if (!this.ruleData) {
-        this.ruleData = await this.loadIndirectParams();
-      }
+      const ruleData = await getDecryptedRule(this.context, ruleId, spaceId);
 
       const runRuleParams = validateRuleAndCreateFakeRequest({
-        ruleData: this.ruleData,
+        ruleData,
         paramValidator: this.ruleType.validate.params,
         ruleId,
         spaceId,
@@ -559,7 +575,11 @@ export class TaskRunner<
         >(
           stateWithMetrics,
           (ruleRunStateWithMetrics) =>
-            executionStatusFromState(ruleRunStateWithMetrics, this.runDate),
+            executionStatusFromState({
+              stateWithMetrics: ruleRunStateWithMetrics,
+              lastExecutionDate: this.runDate,
+              ruleResultService: this.ruleResult,
+            }),
           (err: ElasticsearchError) => executionStatusFromError(err, this.runDate)
         );
 
@@ -651,53 +671,8 @@ export class TaskRunner<
     });
   }
 
-  async loadIndirectParams(): Promise<RuleDataResult<RuleData>> {
-    this.runDate = new Date();
-    return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareRule, async () => {
-      try {
-        const {
-          params: { alertId: ruleId, spaceId, consumer },
-        } = this.taskInstance;
-
-        // Initially use consumer as stored inside the task instance
-        // This allows us to populate a consumer value for event log
-        // `execute-start` events (which are indexed before the rule SO is read)
-        // and in the event of decryption errors (where we cannot read the rule SO)
-        // Because "consumer" is set when a rule is created, this value should be static
-        // for the life of a rule but there may be edge cases where migrations cause
-        // the consumer values to become out of sync.
-        if (consumer) {
-          this.ruleConsumer = consumer;
-        }
-
-        // Start the event logger so that something is logged in the
-        // event that rule SO decryption fails.
-        const namespace = this.context.spaceIdToNamespace(spaceId);
-        this.alertingEventLogger.initialize({
-          ruleId,
-          ruleType: this.ruleType as UntypedNormalizedRuleType,
-          consumer: this.ruleConsumer!,
-          spaceId,
-          executionId: this.executionId,
-          taskScheduledAt: this.taskInstance.scheduledAt,
-          ...(namespace ? { namespace } : {}),
-        });
-        this.alertingEventLogger.start(this.runDate);
-
-        const data = await getDecryptedRule(this.context, ruleId, spaceId);
-        this.ruleData = { data };
-      } catch (err) {
-        const error = createTaskRunError(
-          new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err),
-          getErrorSource(err)
-        );
-        this.ruleData = { error };
-      }
-      return this.ruleData;
-    });
-  }
-
   async run(): Promise<RuleTaskRunResult> {
+    this.runDate = new Date();
     const {
       params: { alertId: ruleId, spaceId },
       startedAt,
@@ -714,7 +689,7 @@ export class TaskRunner<
       // fetch the rule again to ensure we return the correct schedule as it may have
       // changed during the task execution
       const data = await getDecryptedRule(this.context, ruleId, spaceId);
-      schedule = asOk(data.indirectParams.schedule);
+      schedule = asOk(data.rawRule.schedule);
     } catch (err) {
       stateWithMetrics = asErr(err);
       schedule = asErr(err);
@@ -732,11 +707,23 @@ export class TaskRunner<
     };
 
     const getTaskRunError = (state: Result<RuleTaskStateAndMetrics, Error>) => {
-      return isErr(state)
-        ? {
-            taskRunError: createTaskRunError(state.error, getErrorSource(state.error)),
-          }
-        : {};
+      if (isErr(state)) {
+        return {
+          taskRunError: createTaskRunError(state.error, getErrorSource(state.error)),
+        };
+      }
+
+      const { errors: errorsFromLastRun } = this.ruleResult.getLastRunResults();
+      if (errorsFromLastRun.length > 0) {
+        return {
+          taskRunError: createTaskRunError(
+            new Error(errorsFromLastRun.join(',')),
+            TaskErrorSource.FRAMEWORK
+          ),
+        };
+      }
+
+      return {};
     };
 
     return {

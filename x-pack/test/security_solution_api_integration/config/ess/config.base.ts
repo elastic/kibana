@@ -82,7 +82,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'previewTelemetryUrlEnabled',
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
-            'alertSuppressionForIndicatorMatchRuleEnabled',
             'alertSuppressionForNonSequenceEqlRuleEnabled',
           ])}`,
           '--xpack.task_manager.poll_interval=1000',

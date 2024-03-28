@@ -28,6 +28,6 @@ export {
   useFormData,
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-export { Field, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+export { Field, SelectField, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 export type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';

@@ -32,6 +32,7 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/config",
     "@kbn/shared-ux-avatar-solution",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",
