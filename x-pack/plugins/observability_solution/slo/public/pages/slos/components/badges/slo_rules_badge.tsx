@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
@@ -22,12 +22,19 @@ export function SloRulesBadge({ rules, onClick }: Props) {
       position="top"
       content={i18n.translate('xpack.slo.slo.rulesBadge.popover', {
         defaultMessage:
-          'There are no rules configured for this SLO yet. You will not receive alerts when SLO is breached.',
+          'There are no rules configured for this SLO yet. You will not receive alerts when SLO is breached. Click to create a rule.',
       })}
       display="block"
     >
       <span onClick={onClick} onKeyDown={onClick}>
-        <EuiBadge color="text" iconType="alert" css={{ cursor: 'pointer' }} />
+        <EuiBadge
+          color="text"
+          iconType="alert"
+          css={{ cursor: 'pointer' }}
+          onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation(); // stops propagation of metric onElementClick
+          }}
+        />
       </span>
     </EuiToolTip>
   );

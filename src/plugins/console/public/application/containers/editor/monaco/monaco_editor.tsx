@@ -9,7 +9,7 @@
 import React, { FunctionComponent, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
-import { CONSOLE_LANG_ID } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from '@kbn/monaco';
 import { useEditorReadContext } from '../../../contexts';
 
 export const MonacoEditor: FunctionComponent = () => {
@@ -31,6 +31,7 @@ export const MonacoEditor: FunctionComponent = () => {
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
+          theme: CONSOLE_THEME_ID,
         }}
       />
     </div>

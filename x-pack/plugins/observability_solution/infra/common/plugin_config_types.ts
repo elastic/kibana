@@ -35,6 +35,7 @@ export interface InfraConfig {
     logThresholdAlertRuleEnabled: boolean;
     alertsAndRulesDropdownEnabled: boolean;
     profilingEnabled: boolean;
+    ruleFormV2Enabled: boolean;
   };
 }
 

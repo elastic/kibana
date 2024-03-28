@@ -29,6 +29,7 @@ describe('usePluginConfig()', () => {
         logThresholdAlertRuleEnabled: true,
         alertsAndRulesDropdownEnabled: true,
         profilingEnabled: false,
+        ruleFormV2Enabled: false,
       },
     };
     const { result } = renderHook(() => usePluginConfig(), {

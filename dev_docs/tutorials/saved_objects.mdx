@@ -246,6 +246,36 @@ That way:
 - SO type versions are decoupled from stack versioning
 - SO type versions are independent between types
 
+### Saved object migrations on serverless
+
+On serverless, Kibana cannot have any downtime &mdash; even during data migrations. In order to accomplish this we rollout new versions while old versions are still running. As soon as new versions are ready to start serving, requests will be directed to them.
+
+<DocCallOut title="Only once a new version is done being rolled out will data migrations be run.">
+</DocCallOut>
+
+
+
+This has a few implications:
+
+1. A _new version_ of application code should **never** introduce a new Saved Object field and treat it as a **required** field
+2. A _new version_ of application code must be **fully backward compatible** with the **previous version's (n-1) Saved Object fields**
+
+In order to introduce a new, required Saved Object field the following algorithm _must_ be followed:
+
+1. Introduce a new model version field, consider this field _optional_ in any application code that uses it
+2. Provide a `data_backfill` function for the new field
+3. Merge to `main`
+4. Wait for the next serverless release containing your data migration changes to complete
+5. Update your code marking the new field as required in interfaces
+6. Merge to `main`
+
+At step 6 your code that was just merged to `main` will be guaranteed to find a value for the new field in Saved Objects.
+
+<DocCallOut color="warning" title="What happens when you skip step 4?">
+  Not waiting until your `data_backfill` has been released means that none of your SO documents will have the field populated with the value you provided in the `data_backfill` function. The new field value will be `undefined` until migrations have run which only happens _after_ application code has already started running!
+</DocCallOut>
+
+
 ### Testing model versions
 Bugs in model version transitions cause downtime for our users and therefore have a very high impact. Follow the <DocLink id="kibDevTutorialTestingPlugins" section="saved-objects-model-versions" text="Saved Objects model versions"/> section in the plugin testing guide.
 
