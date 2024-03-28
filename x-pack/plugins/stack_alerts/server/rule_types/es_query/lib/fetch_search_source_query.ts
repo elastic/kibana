@@ -12,7 +12,6 @@ import {
   ISearchSource,
   ISearchStartSearchSource,
   SortDirection,
-  SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
 import {
   BUCKET_SELECTOR_FIELD,
@@ -27,6 +26,7 @@ import { Logger } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
+import { getInitialSearchSource } from './get_initial_search_source';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;
@@ -58,15 +58,7 @@ export async function fetchSearchSourceQuery({
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
 
-  const initialSearchSource = await searchSourceClient.create({
-    ...params.searchConfiguration,
-    fields: [
-      ...((params.searchConfiguration as SerializedSearchSourceFields)?.fields || []),
-      'index',
-      'filter',
-      'query',
-    ],
-  });
+  const initialSearchSource = await getInitialSearchSource(params, searchSourceClient);
 
   const index = initialSearchSource.getField('index') as DataView;
   const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
