@@ -12,6 +12,7 @@ export * from './find';
 export * from './find_group';
 export * from './find_definition';
 export * from './get';
+export * from './get_instances';
 export * from './reset';
 export * from './manage';
 export * from './delete_instance';

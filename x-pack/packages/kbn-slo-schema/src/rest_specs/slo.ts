@@ -147,15 +147,6 @@ const getSLOBurnRatesParamsSchema = t.type({
   ]),
 });
 
-const getSLOInstancesParamsSchema = t.type({
-  path: t.type({ id: t.string }),
-});
-
-const getSLOInstancesResponseSchema = t.type({
-  groupBy: t.union([t.string, t.array(t.string)]),
-  instances: t.array(t.string),
-});
-
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
@@ -165,8 +156,6 @@ type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
 type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
-
-type GetSLOInstancesResponse = t.OutputOf<typeof getSLOInstancesResponseSchema>;
 
 type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
 type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
@@ -198,10 +187,7 @@ export {
   sloWithSummaryResponseSchema,
   getSLOBurnRatesParamsSchema,
   getSLOBurnRatesResponseSchema,
-  getSLOInstancesParamsSchema,
-  getSLOInstancesResponseSchema,
 };
-
 export type {
   BudgetingMethod,
   GetPreviewDataParams,
@@ -215,7 +201,6 @@ export type {
   APMTransactionErrorRateIndicator,
   SyntheticsAvailabilityIndicator,
   GetSLOBurnRatesResponse,
-  GetSLOInstancesResponse,
   IndicatorType,
   Indicator,
   Objective,
