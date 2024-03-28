@@ -17,6 +17,10 @@ import type { EuiDataGridColumn, EuiDataGridColumnActions } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
+import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 type DataGridColumn = Partial<Omit<EuiDataGridColumn, 'actions'>> &
   Pick<EuiDataGridColumn, 'id' | 'displayAsText'> & {
@@ -67,13 +71,24 @@ const getComparisonColumn = ({
   };
 };
 
+const docs = generateEsHits(dataViewWithTimefieldMock, 4).map((hit) =>
+  buildDataTableRecord(hit, dataViewWithTimefieldMock)
+);
+
+const defaultGetDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
+
 const fieldColumnId = 'fieldColumnId';
 const selectedDocs = ['0', '1', '2', '3'];
 
 const renderColumns = ({
   wrapperWidth,
   isPlainRecord = false,
-}: { wrapperWidth?: number; isPlainRecord?: boolean } = {}) => {
+  getDocById = defaultGetDocById,
+}: {
+  wrapperWidth?: number;
+  isPlainRecord?: boolean;
+  getDocById?: (id: string) => DataTableRecord | undefined;
+} = {}) => {
   const wrapper = document.createElement('div');
   if (wrapperWidth) {
     Object.defineProperty(wrapper, 'offsetWidth', { value: wrapperWidth });
@@ -87,6 +102,7 @@ const renderColumns = ({
       isPlainRecord,
       fieldColumnId,
       selectedDocs,
+      getDocById,
       setSelectedDocs,
     })
   );
@@ -198,5 +214,14 @@ describe('useComparisonColumns', () => {
     expect(columns[2].displayAsText).toBe('Result 2');
     expect(columns[3].displayAsText).toBe('Result 3');
     expect(columns[4].displayAsText).toBe('Result 4');
+  });
+
+  it('should skip columns for missing docs', () => {
+    const getDocById = (id: string) => (id === selectedDocs[1] ? undefined : defaultGetDocById(id));
+    const { columns } = renderColumns({ getDocById });
+    expect(columns).toHaveLength(4);
+    expect(columns[1].displayAsText).toBe(selectedDocs[0]);
+    expect(columns[2].displayAsText).toBe(selectedDocs[2]);
+    expect(columns[3].displayAsText).toBe(selectedDocs[3]);
   });
 });

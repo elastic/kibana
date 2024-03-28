@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiListGroupItemProps,
 } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useMemo } from 'react';
@@ -22,6 +23,7 @@ export interface UseComparisonColumnsProps {
   isPlainRecord: boolean;
   fieldColumnId: string;
   selectedDocs: string[];
+  getDocById: (docId: string) => DataTableRecord | undefined;
   setSelectedDocs: (selectedDocs: string[]) => void;
 }
 
@@ -36,6 +38,7 @@ export const useComparisonColumns = ({
   isPlainRecord,
   fieldColumnId,
   selectedDocs,
+  getDocById,
   setSelectedDocs,
 }: UseComparisonColumnsProps) => {
   const comparisonColumns = useMemo<EuiDataGridColumn[]>(() => {
@@ -56,6 +59,12 @@ export const useComparisonColumns = ({
         : undefined;
 
     selectedDocs.forEach((docId, docIndex) => {
+      const doc = getDocById(docId);
+
+      if (!doc) {
+        return;
+      }
+
       const additional: EuiListGroupItemProps[] = [];
 
       if (docIndex !== 0) {
@@ -96,7 +105,7 @@ export const useComparisonColumns = ({
             defaultMessage: 'Result {resultNumber}',
             values: { resultNumber: Number(docId || 0) + 1 },
           })
-        : docId;
+        : doc.raw._id;
 
       currentColumns.push({
         id: docId,
@@ -125,7 +134,14 @@ export const useComparisonColumns = ({
     });
 
     return currentColumns;
-  }, [fieldColumnId, isPlainRecord, selectedDocs, setSelectedDocs, wrapper?.offsetWidth]);
+  }, [
+    fieldColumnId,
+    getDocById,
+    isPlainRecord,
+    selectedDocs,
+    setSelectedDocs,
+    wrapper?.offsetWidth,
+  ]);
 
   return comparisonColumns;
 };
