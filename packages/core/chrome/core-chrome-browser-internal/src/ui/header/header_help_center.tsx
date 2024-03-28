@@ -1,0 +1,195 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import * as Rx from 'rxjs';
+import React, { useEffect, useRef, useState } from 'react';
+import { type ChromeHelpExtension } from '@kbn/core-chrome-browser';
+import {
+  EuiText,
+  EuiTitle,
+  EuiIcon,
+  EuiPortal,
+  EuiSplitPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHeaderSectionItemButton,
+  EuiButtonIcon,
+} from '@elastic/eui';
+import type { CSSObject } from '@emotion/serialize';
+
+interface IHeaderHelpCenterTriggerProps {
+  helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
+}
+
+export const HeaderHelpCenterTrigger = ({ helpExtension$ }: IHeaderHelpCenterTriggerProps) => {
+  const [isPortalVisible, setIsPortalVisible] = useState(false);
+  const [helpExtension, setHelpExtension] = useState<ChromeHelpExtension>();
+
+  useEffect(() => {
+    helpExtension$.subscribe(setHelpExtension);
+  }, [helpExtension$]);
+
+  const togglePortal = () => {
+    setIsPortalVisible(!isPortalVisible);
+  };
+
+  const closePortal = () => {
+    setIsPortalVisible(false);
+  };
+
+  let portal;
+
+  if (isPortalVisible && helpExtension) {
+    portal = (
+      <EuiPortal>
+        <HeaderHelpCenter helpExtension={helpExtension} onClose={closePortal} />
+      </EuiPortal>
+    );
+  }
+
+  return (
+    <div style={{ display: 'contents' }}>
+      <EuiHeaderSectionItemButton onClick={togglePortal}>
+        <EuiIcon type={'questionInCircle'} />
+      </EuiHeaderSectionItemButton>
+      {portal}
+    </div>
+  );
+};
+
+interface IHeaderHelpCenter {
+  onClose: () => void;
+  helpExtension: ChromeHelpExtension;
+}
+
+const HeaderHelpCenter = ({ onClose, helpExtension }: IHeaderHelpCenter) => {
+  const positionPersistenceKey = useRef('help_center_position');
+  const persistedPosition = JSON.parse(
+    localStorage.getItem(positionPersistenceKey.current) || '{}'
+  );
+  const [helpCenterElm, setHelpCenterElm] = useState<HTMLElement | null>(null);
+  const [helpCenterStyling, setHelpCenterStyling] = useState<CSSObject>({
+    width: '654px',
+    position: 'absolute',
+    zIndex: 10,
+    ...(Object.keys(persistedPosition).length
+      ? {
+          top: `${persistedPosition.top}px`,
+          left: `${persistedPosition.left}px`,
+        }
+      : {}),
+  });
+
+  const dragEndPosition = useRef<Rx.Observable<{ position: { left: number; top: number } }>>();
+
+  useEffect(() => {
+    if (helpCenterElm) {
+      const mouseup = Rx.fromEvent<MouseEvent>(document, 'mouseup');
+      const mousemove = Rx.fromEvent<MouseEvent>(document, 'mousemove');
+      const mousedown = Rx.fromEvent<MouseEvent>(helpCenterElm, 'mousedown');
+
+      dragEndPosition.current = mousedown.pipe(
+        Rx.mergeMap(function (md) {
+          // calculate offsets when mouse down
+          const startX = md.offsetX;
+          const startY = md.offsetY;
+
+          // Calculate delta with mousemove until mouseup
+          return mousemove
+            .pipe(
+              Rx.map(function (mm) {
+                if (mm.preventDefault) mm.preventDefault();
+                else event.returnValue = false;
+
+                return {
+                  position: {
+                    left: mm.clientX - startX,
+                    top: mm.clientY - startY,
+                  },
+                };
+              }),
+              Rx.map(function (data) {
+                requestAnimationFrame(() => {
+                  setHelpCenterStyling((prevElmStyling) => ({
+                    ...prevElmStyling,
+                    top: data.position.top + 'px',
+                    left: data.position.left + 'px',
+                  }));
+                });
+
+                return data;
+              })
+            )
+            .pipe(Rx.takeUntil(mouseup), Rx.last());
+        })
+      );
+    }
+  }, [helpCenterElm]);
+
+  useEffect(() => {
+    if (helpCenterElm) {
+      const dragEndSubscription = dragEndPosition.current?.subscribe(function onDragEndHandler({
+        position,
+      }) {
+        localStorage.setItem(positionPersistenceKey.current, JSON.stringify(position));
+      });
+
+      return () => dragEndSubscription?.unsubscribe();
+    }
+  }, [helpCenterElm]);
+
+  const { appName, links, content } = helpExtension;
+
+  return (
+    <EuiFlexGroup ref={setHelpCenterElm} css={helpCenterStyling}>
+      <EuiFlexItem>
+        <EuiSplitPanel.Outer>
+          <EuiSplitPanel.Inner>
+            <EuiFlexGroup
+              justifyContent="spaceBetween"
+              alignItems="center"
+              css={{ cursor: 'move' }}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="grabOmnidirectional" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h3>Help Center</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon iconType="cross" onClick={onClose} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner color="subdued" css={{ minHeight: '200px' }}>
+            <EuiText>
+              <h4>{appName}</h4>
+            </EuiText>
+            <ul>
+              {links?.map((link) => (
+                <li>
+                  <a href={link.href}>{link.linkType}</a>
+                </li>
+              ))}
+            </ul>
+            <EuiText>
+              <p>{content}</p>
+            </EuiText>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner grow={false}>
+            <EuiText>
+              <p>Footer</p>
+            </EuiText>
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
