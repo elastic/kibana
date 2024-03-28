@@ -28,6 +28,8 @@ export function registerBsearchRoute(
     { request: IKibanaSearchRequest; options?: ISearchOptionsSerializable },
     IKibanaSearchResponse
   >('/internal/bsearch', (request) => {
+    console.log('bsearch route');
+
     const search = getScoped(request);
     const abortSignal = getRequestAbortedSignal(request.events.aborted$);
     return {
