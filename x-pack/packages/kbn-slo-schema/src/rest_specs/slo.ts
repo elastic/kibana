@@ -62,12 +62,6 @@ const getPreviewDataParamsSchema = t.type({
 
 const getPreviewDataResponseSchema = t.array(previewDataSchema);
 
-const deleteSLOParamsSchema = t.type({
-  path: t.type({
-    id: sloIdSchema,
-  }),
-});
-
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
 const sortBySchema = t.union([
   t.literal('error_budget_consumed'),
@@ -323,7 +317,6 @@ type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
 type QuerySchema = t.TypeOf<typeof querySchema>;
 
 export {
-  deleteSLOParamsSchema,
   deleteSLOInstancesParamsSchema,
   findSLOParamsSchema,
   findSLOResponseSchema,
