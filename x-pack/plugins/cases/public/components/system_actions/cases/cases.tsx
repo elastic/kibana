@@ -26,6 +26,7 @@ export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams
     selectMessage: i18n.CASE_ACTION_DESC,
     actionTypeTitle: CASES_CONNECTOR_TITLE,
     actionConnectorFields: lazy(() => import('./cases_connector')),
+    isExperimental: true,
     validateParams: async (
       actionParams: CasesActionParams
     ): Promise<GenericValidationResult<unknown>> => {
