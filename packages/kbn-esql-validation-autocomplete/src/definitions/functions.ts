@@ -89,12 +89,12 @@ if (usedOverrides.size !== Object.keys(functionOverrides).length) {
   throw new Error(`Unused function overrides: ${unusedOverrides.join(', ')}`);
 }
 
-if (
-  generatedFunctions.some((def) => !def.signatures.some((sig) => sig.params.some((p) => !p.name)))
-) {
-  throw new Error(
-    'Some function signatures have unnamed parameters... make sure the overrides match up with the JSON definitions.'
-  );
+for (const func of generatedFunctions) {
+  if (func.signatures.some((sig) => sig.params.some((p) => !p.name))) {
+    throw new Error(
+      `Some function signatures for ES|QL function ${func.name} have unnamed parameters... make sure the overrides match up with the generated definitions.`
+    );
+  }
 }
 
 const evalFunctionDefinitions: FunctionDefinition[] = generatedFunctions
