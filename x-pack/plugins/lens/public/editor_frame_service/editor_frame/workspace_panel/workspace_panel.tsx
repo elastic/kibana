@@ -380,6 +380,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     addUserMessages,
   ]);
 
+  const variables = useMemo(() => {
+    return getDataVariables(fromExpression(localState.expressionToRender!));
+  }, [localState.expressionToRender]);
+
   const isSaveable = Boolean(unappliedExpression);
 
   useEffect(() => {
@@ -601,7 +605,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     return (
       <VisualizationWrapper
         expression={localState.expressionToRender}
-        variables={getDataVariables(fromExpression(localState.expressionToRender!))}
+        variables={variables}
         lensInspector={lensInspector}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}

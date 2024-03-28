@@ -879,7 +879,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.openChartSwitchPopover(layerIndex);
       await this.waitForSearchInputValue(subVisualizationId, searchTerm);
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
     },
     async waitForSearchInputValue(subVisualizationId: string, searchTerm?: string) {
       await retry.try(async () => {
