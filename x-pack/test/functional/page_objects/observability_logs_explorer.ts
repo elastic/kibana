@@ -268,10 +268,6 @@ export function ObservabilityLogsExplorerPageObject({
       return testSubjects.find('dataSourceSelectorPopoverButton', 120000); // Increase timeout if refresh takes longer before opening the selector
     },
 
-    getDataSourceSelectorContent() {
-      return testSubjects.find('dataSourceSelectorContent');
-    },
-
     getDataSourceSelectorSearchControls() {
       return testSubjects.find('dataSourceSelectorSearchControls');
     },
@@ -282,10 +278,6 @@ export function ObservabilityLogsExplorerPageObject({
 
     getIntegrationsTab() {
       return testSubjects.find('dataSourceSelectorIntegrationsTab');
-    },
-
-    getUncategorizedContextMenu() {
-      return testSubjects.find('uncategorizedContextMenu');
     },
 
     getUncategorizedIntegration() {
@@ -322,15 +314,6 @@ export function ObservabilityLogsExplorerPageObject({
 
     getAllLogsButton() {
       return testSubjects.find('dataSourceSelectorShowAllLogs');
-    },
-
-    getUnmanagedDatasetsButton() {
-      return testSubjects.find('unmanagedDatasets');
-    },
-
-    async getFlyoutDetail(rowIndex: number = 0) {
-      await dataGrid.clickRowToggle({ rowIndex });
-      return testSubjects.find('logsExplorerFlyoutDetail');
     },
 
     async getIntegrations() {
