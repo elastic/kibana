@@ -119,8 +119,6 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         };
         const infraType = METRIC_FORMATTERS[criteria.metric].formatter;
         const formatter = createFormatter(infraType);
-
-        const fields = [criteria.metric];
         const comparator = criteria.comparator;
         const threshold = criteria.threshold;
         const thresholdFormattedAsString = criteria.threshold.map((v: number) => {

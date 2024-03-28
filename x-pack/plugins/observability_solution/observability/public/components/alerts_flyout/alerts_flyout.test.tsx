@@ -82,6 +82,26 @@ const activeAlert: TopAlert = {
     'kibana.space_ids': ['default'],
     'kibana.version': '8.0.0',
     'event.kind': 'signal',
+    'kibana.alert.rule.parameters': {
+      timeSize: 5,
+      timeUnit: 'm',
+      logView: {
+        type: 'log-view-reference',
+        logViewId: 'default',
+      },
+      count: {
+        value: 100.25,
+        comparator: 'more than',
+      },
+      criteria: [
+        {
+          field: 'host.name',
+          comparator: 'does not equal',
+          value: 'test',
+        },
+      ],
+      groupBy: ['host.name'],
+    },
     'kibana.alert.evaluation.threshold': 100.25,
   },
   active: true,
@@ -113,6 +133,25 @@ const recoveredAlert: TopAlert = {
     'kibana.version': '8.0.0',
     'event.kind': 'signal',
     'kibana.alert.end': '2021-09-02T13:08:45.729Z',
+    'kibana.alert.rule.parameters': {
+      nodeType: 'host',
+      criteria: [
+        {
+          metric: 'cpu',
+          comparator: '>',
+          threshold: [1],
+          timeSize: 1,
+          timeUnit: 'm',
+          customMetric: {
+            type: 'custom',
+            id: 'alert-custom-metric',
+            field: '',
+            aggregation: 'avg',
+          },
+        },
+      ],
+      sourceId: 'default',
+    },
   },
   active: false,
   start: 1630587936699,

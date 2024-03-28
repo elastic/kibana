@@ -89,10 +89,10 @@ export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
     };
   }, [alert, linkToRule]);
 
-  const tableTab = useMemo(
+  const metadataTab = useMemo(
     () => ({
       id: 'metadata',
-      'data-test-subj': 'metadata',
+      'data-test-subj': 'metadataTab',
       name: i18n.translate('xpack.observability.alertsFlyout.metadata', {
         defaultMessage: 'Metadata',
       }),
@@ -105,7 +105,7 @@ export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
     [rawAlert]
   );
 
-  const tabs = useMemo(() => [overviewTab, tableTab], [overviewTab, tableTab]);
+  const tabs = useMemo(() => [overviewTab, metadataTab], [overviewTab, metadataTab]);
   const [selectedTabId, setSelectedTabId] = useState<TabId>('overview');
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as TabId),

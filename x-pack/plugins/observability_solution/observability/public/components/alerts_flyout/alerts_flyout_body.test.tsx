@@ -16,7 +16,7 @@ import { fireEvent } from '@testing-library/react';
 
 const tabsData = [
   { name: 'Overview', subj: 'overviewTab' },
-  { name: 'Table', subj: 'tableTab' },
+  { name: 'Metadata', subj: 'metadataTab' },
 ];
 
 describe('AlertsFlyoutBody', () => {
