@@ -5,48 +5,43 @@
  * 2.0.
  */
 
-import { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
-import type { AnomalySwimlaneEmbeddableInput } from '..';
+import { getAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
+import type { AnomalySwimLaneEmbeddableState } from './types';
 
 jest.mock('./anomaly_swimlane_embeddable', () => ({
   AnomalySwimlaneEmbeddable: jest.fn(),
 }));
 
-describe('AnomalySwimlaneEmbeddableFactory', () => {
-  test('should provide required services on create', async () => {
-    // arrange
+describe('getAnomalySwimLaneEmbeddableFactory', () => {
+  it('should init embeddable api based on provided state', async () => {
+    // Mock dependencies
     const pluginStartDeps = { data: dataPluginMock.createStartContract() };
 
     const getStartServices = coreMock.createSetup({
       pluginStartDeps,
     }).getStartServices;
 
-    const [coreStart, pluginsStart] = await getStartServices();
+    const factory = getAnomalySwimLaneEmbeddableFactory(getStartServices);
 
-    // act
-    const factory = new AnomalySwimlaneEmbeddableFactory(getStartServices);
+    // Assert the returned factory
+    expect(factory.type).toBe('ml_anomaly_swimlane');
 
-    await factory.create({
-      jobIds: ['test-job'],
-    } as AnomalySwimlaneEmbeddableInput);
+    // Test the buildEmbeddable function
+    const state = {
+      jobIds: ['my-job-id'],
+      swimlaneType: 'overall',
+    } as AnomalySwimLaneEmbeddableState;
 
-    // assert
-    const mockCalls = (AnomalySwimlaneEmbeddable as unknown as jest.Mock<AnomalySwimlaneEmbeddable>)
-      .mock.calls[0];
-    const input = mockCalls[0];
-    const createServices = mockCalls[1];
+    const buildApi = jest.fn((v) => v);
+    const uuid = '123';
 
-    expect(input).toEqual({
-      jobIds: ['test-job'],
-    });
-    expect(Object.keys(createServices[0])).toEqual(Object.keys(coreStart));
-    expect(createServices[1]).toMatchObject(pluginsStart);
-    expect(Object.keys(createServices[2])).toEqual([
-      'anomalyDetectorService',
-      'anomalyTimelineService',
-    ]);
+    const embeddable = await factory.buildEmbeddable(state, buildApi, uuid);
+
+    // Assert the returned embeddable api
+    expect(embeddable.api).toBeDefined();
+    expect(embeddable.api.jobIds.getValue()).toEqual(state.jobIds);
+    expect(embeddable.api.swimlaneType.getValue()).toEqual(state.swimlaneType);
   });
 });
