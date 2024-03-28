@@ -187,5 +187,6 @@ export const farequoteDataViewTestDataWithQuery: TestData = {
         },
       },
     },
+    prompt: 'change-point',
   },
 };
