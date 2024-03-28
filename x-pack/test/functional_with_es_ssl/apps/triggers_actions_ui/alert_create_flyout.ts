@@ -18,7 +18,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
-  const browser = getService('browser');
   const rules = getService('rules');
   const toasts = getService('toasts');
 
