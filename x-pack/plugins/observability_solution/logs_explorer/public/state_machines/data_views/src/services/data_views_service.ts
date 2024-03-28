@@ -21,6 +21,11 @@ interface LoadDataViewsServiceDeps {
   dataViews: DataViewsPublicPluginStart;
 }
 
+interface DataViewsSearchCriteria {
+  search: DataViewsSearchParams;
+  filter: DataViewsFilterParams;
+}
+
 export const loadDataViews =
   ({ dataViews }: LoadDataViewsServiceDeps): InvokeCreator<DataViewsContext, DataViewsEvent> =>
   async (context) => {
@@ -31,14 +36,14 @@ export const loadDataViews =
     return dataViews
       .getIdsWithTitle()
       .then((views) => views.map(DataViewDescriptor.create))
-      .then((views) => searchDataViews(views, context.search, context.filter));
+      .then((views) => searchDataViews(views, { search: context.search, filter: context.filter }));
   };
 
 export const searchDataViews = (
   dataViews: DataViewDescriptor[],
-  search: DataViewsSearchParams,
-  filter: DataViewsFilterParams
+  searchCriteria: DataViewsSearchCriteria
 ) => {
+  const { search, filter } = searchCriteria;
   const { name, sortOrder } = search;
   const { dataType } = filter;
 

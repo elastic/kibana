@@ -31,6 +31,14 @@ interface DataViewFilterProps {
 
 const logsDataViewType = 'logs';
 
+function getSelectedFilterLabel(dataType: DataViewsFilterParams['dataType']) {
+  const availableFilters = {
+    [logsDataViewType]: logsDataViewTypeLabel,
+  };
+
+  return !dataType ? allDataViewTypesLabel : availableFilters[dataType];
+}
+
 export const DataViewsFilter = ({ count, filter, onFilter }: DataViewFilterProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -69,7 +77,7 @@ export const DataViewsFilter = ({ count, filter, onFilter }: DataViewFilterProps
               size="xs"
               onClick={togglePopover}
             >
-              {filter.dataType !== logsDataViewType ? allDataViewTypesLabel : logsDataViewTypeLabel}
+              {getSelectedFilterLabel(filter.dataType)}
             </EuiButtonEmpty>
           }
           isOpen={isPopoverOpen}
@@ -88,7 +96,7 @@ export const DataViewsFilter = ({ count, filter, onFilter }: DataViewFilterProps
                 items: [
                   {
                     'data-test-subj': 'logsExplorerDataSourceSelectorDataViewTypeAll',
-                    icon: filter.dataType !== logsDataViewType ? 'check' : 'empty',
+                    icon: !filter.dataType ? 'check' : 'empty',
                     name: allDataViewTypesLabel,
                     onClick: createSelectTypeFilter(undefined),
                   },
@@ -96,7 +104,7 @@ export const DataViewsFilter = ({ count, filter, onFilter }: DataViewFilterProps
                     'data-test-subj': 'logsExplorerDataSourceSelectorDataViewTypeLogs',
                     icon: filter.dataType === logsDataViewType ? 'check' : 'empty',
                     name: logsDataViewTypeLabel,
-                    onClick: createSelectTypeFilter('logs'),
+                    onClick: createSelectTypeFilter(logsDataViewType),
                   },
                 ],
               },

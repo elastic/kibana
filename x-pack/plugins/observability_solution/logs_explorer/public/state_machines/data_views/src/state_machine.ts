@@ -107,7 +107,10 @@ export const createPureDataViewsStateMachine = (
         searchDataViews: assign((context) => {
           if (context.dataViewsSource !== null) {
             return {
-              dataViews: searchDataViews(context.dataViewsSource, context.search, context.filter),
+              dataViews: searchDataViews(context.dataViewsSource, {
+                search: context.search,
+                filter: context.filter,
+              }),
             };
           }
           return {};
