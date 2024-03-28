@@ -12,7 +12,6 @@ import { useActions, useValues } from 'kea';
 import {
   EuiCallOut,
   EuiCode,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -46,8 +45,8 @@ import './index_mappings.scss';
 
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
-  const { hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
-  const { productFeatures } = useValues(KibanaLogic);
+  const { hasDocumentLevelSecurityFeature, isHiddenIndex } = useValues(IndexViewLogic);
+  const { indexMappingComponent: IndexMappingComponent, productFeatures } = useValues(KibanaLogic);
 
   const [selectedIndexType, setSelectedIndexType] =
     useState<AccessControlSelectorOption['value']>('content-index');
@@ -56,7 +55,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
       ? indexName
       : stripSearchPrefix(indexName, CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
   const { makeRequest: makeMappingRequest } = useActions(mappingsWithPropsApiLogic(indexToShow));
-  const { data: mappingData, error } = useValues(mappingsWithPropsApiLogic(indexToShow));
+  const { error } = useValues(mappingsWithPropsApiLogic(indexToShow));
   const shouldShowAccessControlSwitch =
     hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
   const isAccessControlIndexNotFound =
@@ -98,9 +97,28 @@ export const SearchIndexIndexMappings: React.FC = () => {
                   </p>
                 </EuiCallOut>
               ) : (
-                <EuiCodeBlock language="json" isCopyable>
-                  {JSON.stringify(mappingData, null, 2)}
-                </EuiCodeBlock>
+                <>
+                  {IndexMappingComponent ? (
+                    <IndexMappingComponent
+                      index={{
+                        aliases: [],
+                        hidden: isHiddenIndex,
+                        isFrozen: false,
+                        name: indexToShow,
+                      }}
+                      showAboutMappings={false}
+                    />
+                  ) : (
+                    <EuiCallOut
+                      color="danger"
+                      iconType="warn"
+                      title={i18n.translate(
+                        'xpack.enterpriseSearch.content.searchIndex.mappings.noMappingsComponent',
+                        { defaultMessage: 'Mappings component not found' }
+                      )}
+                    />
+                  )}
+                </>
               )}
             </EuiFlexItem>
           </EuiFlexGroup>

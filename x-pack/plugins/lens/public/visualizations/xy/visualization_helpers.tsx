@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
-import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
+import {
+  DatasourceLayers,
+  FramePublicAPI,
+  OperationMetadata,
+  VisualizationType,
+} from '../../types';
 import {
   State,
   visualizationTypes,
@@ -210,20 +215,26 @@ export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLa
   return options[layerTypes.ANNOTATIONS](layer);
 };
 
-export function getVisualizationType(state: State): VisualizationType | 'mixed' {
+export function getVisualizationType(state: State, layerId?: string): VisualizationType | 'mixed' {
   if (!state.layers.length) {
     return (
       visualizationTypes.find((t) => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
     );
   }
   const dataLayers = getDataLayers(state?.layers);
-  const visualizationType = visualizationTypes.find((t) => t.id === dataLayers?.[0].seriesType);
+  if (layerId) {
+    const dataLayerSeries = layerId
+      ? dataLayers.find((d) => d.layerId === layerId)?.seriesType
+      : dataLayers[0].seriesType;
+    return visualizationTypes.find((t) => t.id === dataLayerSeries) || 'mixed';
+  }
+  const visualizationType = visualizationTypes.find((t) => t.id === dataLayers[0].seriesType);
   const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
 
-export function getDescription(state?: State) {
+export function getDescription(state?: State, layerId?: string) {
   if (!state) {
     return {
       icon: defaultIcon,
@@ -233,7 +244,7 @@ export function getDescription(state?: State) {
     };
   }
 
-  const visualizationType = getVisualizationType(state);
+  const visualizationType = getVisualizationType(state, layerId);
 
   if (visualizationType === 'mixed' && isHorizontalChart(state.layers)) {
     return {
@@ -418,3 +429,16 @@ export const isNumericMetric = (op: OperationMetadata) =>
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
 export const isBucketed = (op: OperationMetadata) => op.isBucketed;
+
+export const isTimeChart = (
+  dataLayers: XYDataLayerConfig[],
+  frame?: Pick<FramePublicAPI, 'datasourceLayers'> | undefined
+) =>
+  Boolean(
+    dataLayers.length &&
+      dataLayers.every(
+        (dataLayer) =>
+          dataLayer.xAccessor &&
+          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
+      )
+  );
