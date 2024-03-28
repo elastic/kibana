@@ -267,7 +267,7 @@ export const getSampleOfDocumentsForNonAggregatableFields = (
     index,
     body: {
       fields: nonAggregatableFields.map((fieldName) => fieldName),
-      // _source: false,
+      _source: false,
       query: {
         bool: {
           filter: filterCriteria,
