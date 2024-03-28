@@ -64,7 +64,7 @@ describe(
         fillDefineEqlRule(rule);
       });
       after(() => {
-        cy.task('esArchiverUnload', 'auditbeat_multiple');
+        cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
       });
 
       it('creates rule with per rule execution suppression', () => {

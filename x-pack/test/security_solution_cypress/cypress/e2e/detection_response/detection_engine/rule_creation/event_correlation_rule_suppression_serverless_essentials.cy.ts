@@ -54,7 +54,7 @@ describe(
       login();
     });
     after(() => {
-      cy.task('esArchiverUnload', 'auditbeat_multiple');
+      cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
     });
     it('creates rule with per rule execution suppression for essentials license for non-sequence based alerts', () => {
       visit(CREATE_RULE_URL);
