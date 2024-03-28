@@ -209,7 +209,6 @@ export function AddLayerButton({
               ],
             },
             {
-              size: 's',
               id: AddLayerPanelType.layerVisualizationType,
               initialFocusedItemIndex: currentLayerVisType,
               title: i18n.translate('xpack.lens.layerPanel.layerVisualizationType', {
