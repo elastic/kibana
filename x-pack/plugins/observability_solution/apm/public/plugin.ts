@@ -137,7 +137,7 @@ export interface ApmPluginStartDeps {
   lens: LensPublicStart;
   uiActions: UiActionsStart;
   profiling?: ProfilingPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
@@ -436,7 +436,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
 
-    plugins.observabilityAIAssistant.service.register(
+    plugins.observabilityAIAssistant?.service.register(
       async ({ registerRenderFunction }) => {
         const mod = await import('./assistant_functions');
 

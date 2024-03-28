@@ -11,6 +11,7 @@ xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
 enterpriseSearch.enabled: false
 xpack.fleet.enabled: false
+xpack.observabilityAIAssistant.enabled: false
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search

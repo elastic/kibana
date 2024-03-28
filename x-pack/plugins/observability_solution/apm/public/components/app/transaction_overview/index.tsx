@@ -56,11 +56,11 @@ export function TransactionOverview() {
     false
   );
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const setScreenContext =
+    useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
-    return setScreenContext({
+    return setScreenContext?.({
       screenDescription: `The user is looking at the transactions overview for ${serviceName}, and the transaction type is ${transactionType}`,
     });
   }, [setScreenContext, serviceName, transactionType]);

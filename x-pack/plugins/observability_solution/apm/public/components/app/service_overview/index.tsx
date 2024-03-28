@@ -53,11 +53,11 @@ export function ServiceOverview() {
   const { serviceName, fallbackToTransactions, agentName, serverlessType } =
     useApmServiceContext();
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const setScreenContext =
+    useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
-    return setScreenContext({
+    return setScreenContext?.({
       screenDescription: `The user is looking at the service overview page for ${serviceName}.`,
       data: [
         {

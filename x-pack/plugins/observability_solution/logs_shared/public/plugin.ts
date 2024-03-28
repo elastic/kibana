@@ -60,6 +60,12 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       search: data.search,
     });
 
+    if (!observabilityAIAssistant) {
+      return {
+        logViews,
+      };
+    }
+
     const LogAIAssistant = createLogAIAssistant({ observabilityAIAssistant });
 
     return {

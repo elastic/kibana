@@ -16,19 +16,14 @@ interface Props {
 }
 
 export function FrameInformationAIAssistant({ frame }: Props) {
-  const {
-    observabilityAIAssistant: {
-      ObservabilityAIAssistantContextualInsight,
-      getContextualInsightMessages,
-    },
-  } = useProfilingDependencies().start;
+  const { observabilityAIAssistant } = useProfilingDependencies().start;
 
   const promptMessages = useMemo<Message[] | undefined>(() => {
-    if (frame?.functionName && frame.exeFileName) {
+    if (observabilityAIAssistant && frame?.functionName && frame.exeFileName) {
       const functionName = frame.functionName;
       const library = frame.exeFileName;
 
-      return getContextualInsightMessages({
+      return observabilityAIAssistant.getContextualInsightMessages({
         message: `I am trying to understand what this function does. Can you help me?`,
         instructions: `The library is: ${library}
         The function is: ${functionName}
@@ -78,12 +73,12 @@ export function FrameInformationAIAssistant({ frame }: Props) {
     }
 
     return undefined;
-  }, [frame?.functionName, frame?.exeFileName, getContextualInsightMessages]);
+  }, [frame?.functionName, frame?.exeFileName, observabilityAIAssistant]);
 
   return (
     <>
-      {ObservabilityAIAssistantContextualInsight && promptMessages ? (
-        <ObservabilityAIAssistantContextualInsight
+      {observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight && promptMessages ? (
+        <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
           messages={promptMessages}
           title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
             defaultMessage: 'Optimize function',

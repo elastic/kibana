@@ -233,7 +233,7 @@ export class APMPlugin
       this.logger?.error(e);
     });
 
-    plugins.observabilityAIAssistant.service.register(
+    plugins.observabilityAIAssistant?.service.register(
       registerAssistantFunctions({
         config: this.currentConfig!,
         coreSetup: core,

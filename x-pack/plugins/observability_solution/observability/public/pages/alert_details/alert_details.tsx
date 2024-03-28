@@ -57,9 +57,7 @@ export function AlertDetails() {
     },
     http,
     triggersActionsUi: { ruleTypeRegistry },
-    observabilityAIAssistant: {
-      service: { setScreenContext },
-    },
+    observabilityAIAssistant,
     uiSettings,
   } = useKibana().services;
 
@@ -76,7 +74,7 @@ export function AlertDetails() {
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
 
   useEffect(() => {
-    if (!alertDetail) {
+    if (!alertDetail || !observabilityAIAssistant) {
       return;
     }
 
@@ -96,7 +94,7 @@ export function AlertDetails() {
     }
     `);
 
-    return setScreenContext({
+    return observabilityAIAssistant.service.setScreenContext({
       screenDescription,
       data: [
         {
@@ -106,7 +104,7 @@ export function AlertDetails() {
         },
       ],
     });
-  }, [setScreenContext, alertDetail]);
+  }, [observabilityAIAssistant, alertDetail]);
 
   useEffect(() => {
     if (alertDetail) {
