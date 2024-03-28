@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 import type { LLMModel } from '../../types';
+import { useManagementLink } from '../../hooks/use_management_link';
 
 interface SummarizationModelProps {
   selectedModel: string;
@@ -34,6 +35,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   models,
   onSelect,
 }) => {
+  const managementLink = useManagementLink();
   const onChange = (modelName: string) => {
     const model = models.find(({ name }) => name === modelName);
 
@@ -76,7 +78,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
       }
       labelAppend={
         <EuiText size="xs">
-          <EuiLink>
+          <EuiLink target="_blank" href={managementLink}>
             <FormattedMessage
               id="xpack.searchPlayground.sidebar.summarizationModel.manageConnectors"
               defaultMessage="Manage Gen AI connectors"
