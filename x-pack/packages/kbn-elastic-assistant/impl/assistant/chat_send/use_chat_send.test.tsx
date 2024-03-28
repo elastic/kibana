@@ -47,7 +47,6 @@ export const testProps: UseChatSendProps = {
   setPromptTextPreview,
   setSelectedPromptContexts,
   setUserPrompt,
-  refresh,
   setCurrentConversation,
 };
 const robotMessage = { response: 'Response message from the robot', isError: false };
