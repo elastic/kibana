@@ -44,6 +44,7 @@ import {
   RULES_TAGS_FILTER_BTN,
   RULES_TAGS_FILTER_POPOVER,
   RULES_TAGS_FILTER_SELECTABLE_OPTION,
+  RULES_TAGS_FILTER_SELECTED_OPTION,
   RULES_TABLE_REFRESH_INDICATOR,
   RULES_MANAGEMENT_TAB,
   RULES_MONITORING_TAB,
@@ -318,7 +319,7 @@ export const expectFilterByTags = (tags: string[]) => {
   cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
 
   cy.get(RULES_TAGS_FILTER_POPOVER)
-    .find(RULES_SELECTED_TAG)
+    .find(RULES_TAGS_FILTER_SELECTED_OPTION)
     .should('have.length', tags.length)
     .each(($el, index) => {
       cy.wrap($el).contains(tags[index]);
