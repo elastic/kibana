@@ -11,7 +11,7 @@ import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
 import type { ESQLFunction } from '@kbn/esql-ast';
 import { isLiteralItem } from '../shared/helpers';
-import type { FunctionDefinition } from './types';
+import type { FunctionDefinition, GeneratedFunctionDefinition } from './types';
 import { generatedFunctions } from './eval_functions_generated';
 
 const validateLogFunctions = (fnDef: ESQLFunction) => {
@@ -40,12 +40,51 @@ const validateLogFunctions = (fnDef: ESQLFunction) => {
 };
 
 /**
- * Overrides for function definitions
+ * Applies information that can't be automatically gleaned from Elasticsearch.
+ * @param functions
+ * @param overrides
+ * @returns
+ */
+export const enrichGeneratedFunctionDefinitions = (
+  functions: GeneratedFunctionDefinition[],
+  enrichments: Record<string, RecursivePartial<FunctionDefinition>>
+): Array<Partial<FunctionDefinition> & GeneratedFunctionDefinition> => {
+  const usedOverrides = new Set<string>();
+
+  functions.forEach((def) => {
+    if (enrichments[def.name]) {
+      usedOverrides.add(def.name);
+      _.merge(def, enrichments[def.name]);
+    }
+  });
+
+  if (usedOverrides.size !== Object.keys(enrichments).length) {
+    const unusedOverrides = Object.keys(enrichments).filter((name) => !usedOverrides.has(name));
+    throw new Error(
+      `Unused ES|QL function overrides: ${unusedOverrides.join(
+        ', '
+      )}. Your overrides may be out of date.`
+    );
+  }
+
+  for (const func of generatedFunctions) {
+    if (func.signatures.some((sig) => sig.params.some((p) => !p.name))) {
+      throw new Error(
+        `Some function signatures for ES|QL function ${func.name} have unnamed parameters... make sure the overrides match up with the generated definitions.`
+      );
+    }
+  }
+
+  return functions;
+};
+
+/**
+ * Enrichments for function definitions
  *
  * This is the place to put information that is not reported by the `show functions` command
  * and, hence, won't be present in the JSON file.
  */
-const functionOverrides: Record<string, RecursivePartial<FunctionDefinition>> = {
+const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> = {
   log10: {
     validate: validateLogFunctions,
   },
@@ -75,35 +114,21 @@ const functionOverrides: Record<string, RecursivePartial<FunctionDefinition>> = 
   },
 };
 
-const usedOverrides = new Set<string>();
+const enrichedFunctions = enrichGeneratedFunctionDefinitions(
+  generatedFunctions,
+  functionEnrichments
+);
 
-generatedFunctions.forEach((def) => {
-  if (functionOverrides[def.name]) {
-    usedOverrides.add(def.name);
-    _.merge(def, functionOverrides[def.name]);
-  }
-});
-
-if (usedOverrides.size !== Object.keys(functionOverrides).length) {
-  const unusedOverrides = Object.keys(functionOverrides).filter((name) => !usedOverrides.has(name));
-  throw new Error(`Unused function overrides: ${unusedOverrides.join(', ')}`);
-}
-
-for (const func of generatedFunctions) {
-  if (func.signatures.some((sig) => sig.params.some((p) => !p.name))) {
-    throw new Error(
-      `Some function signatures for ES|QL function ${func.name} have unnamed parameters... make sure the overrides match up with the generated definitions.`
-    );
-  }
-}
-
-const evalFunctionDefinitions: FunctionDefinition[] = generatedFunctions
+const evalFunctionDefinitions: FunctionDefinition[] = enrichedFunctions
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-  .map((def) => ({
-    ...def,
-    supportedCommands: ['stats', 'eval', 'where', 'row'],
-    supportedOptions: ['by'],
-    type: 'eval',
-  }));
+  .map(
+    (def) =>
+      ({
+        ...def,
+        supportedCommands: ['stats', 'eval', 'where', 'row'],
+        supportedOptions: ['by'],
+        type: 'eval',
+      } as FunctionDefinition)
+  );
 
 export { evalFunctionDefinitions };
