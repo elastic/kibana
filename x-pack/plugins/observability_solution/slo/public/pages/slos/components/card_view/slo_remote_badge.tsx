@@ -7,12 +7,15 @@
 
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { createSloDetailsUrl } from '../../../../utils/slo/create_slo_details_url';
+import React, { MouseEvent } from 'react';
+import { useSpace } from '../../../../hooks/use_space';
+import { createRemoteSloDetailsUrl } from '../../../../utils/slo/create_remote_slo_details_url';
 
 export function SloRemoteBadge({ slo }: { slo: SLOWithSummaryResponse }) {
-  const sloDetailsUrl = createSloDetailsUrl(slo);
+  const spaceId = useSpace();
+
+  const sloDetailsUrl = createRemoteSloDetailsUrl(slo, spaceId);
   return slo.remoteName ? (
     <EuiFlexItem grow={false}>
       <EuiToolTip content={slo.kibanaUrl} title={slo.remoteName}>

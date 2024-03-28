@@ -26,10 +26,9 @@ export const paths = {
   sloEditWithEncodedForm: (sloId: string, encodedParams: string) =>
     `${SLOS_BASE_PATH}/edit/${encodeURIComponent(sloId)}?_a=${encodedParams}`,
   sloDetails: (sloId: string, instanceId?: string, remoteName?: string) => {
-    const additionalArgs = remoteName ? `remoteName=${remoteName}` : '';
-    const sloPath = `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}`;
-    return !!instanceId
-      ? `${sloPath}?instanceId=${encodeURIComponent(instanceId)}&${additionalArgs}`
-      : `${sloPath}?${additionalArgs}`;
+    const qs = new URLSearchParams();
+    if (!!instanceId) qs.append('instanceId', instanceId);
+    if (!!remoteName) qs.append('remoteName', remoteName);
+    return `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}?${qs.toString()}`;
   },
 };
