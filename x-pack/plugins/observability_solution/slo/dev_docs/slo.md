@@ -1,6 +1,69 @@
 # SLO
 
-Starting in 8.8, SLO is enabled by default.
+Starting in 8.8, SLO is enabled by default. SLO is GA since 8.12
+
+
+## Development & testing
+
+1. Data generation
+
+> [!TIP]
+> The following commands uses [kbn-data-forge](../../../../packages/kbn-data-forge/README.md) to generate some data for developping or testing SLOs
+
+Basic command to generate 7 days of data with a couple of services:
+```sh
+node x-pack/scripts/data_forge.js \
+	--events-per-cycle 100 \
+	--lookback now-7d  \
+	--dataset fake_stack \
+	--install-kibana-assets \
+	--kibana-url http://localhost:5601/kibana
+```
+
+Command to generate data for 7 days, including some ephemeral project ids. This is useful for working on the groupBy feature:
+```sh
+node x-pack/scripts/data_forge.js \
+	--events-per-cycle 50 \
+	--lookback now-7d \
+	--ephemeral-project-ids 10 \
+	--dataset fake_stack \
+	--install-kibana-assets \
+	--kibana-url http://localhost:5601/kibana
+```
+
+Get help with the data forge tool: `node x-pack/scripts/data_forge.js --help`
+
+2. Create SLOs
+
+> [!TIP]
+> Using the API is possible, but to prevent this document of becoming out of date, we refer to the [openAPI](../docs/openapi/slo/bundled.yaml) specification instead.
+> Using the UI for developping/testing is the simpler approach.
+
+
+Start your kibana instance as usual, and open [kibana](http://localhost:5601/kibana/app/observability/slos). You might need to use the correct base path for your setup.
+On this page, you'll be able to create SLOs.
+
+
+> [!WARNING]
+> Wait for the data to be fully generated (it can take a few minutes to a couple of hours depending of the settings you use).
+> Inspect the created Kibana dashboards to know when the lookback period is generated.
+
+
+With the data generated from the above section, the easiest SLO you can setup would be:
+
+> **Type**: Custom Query
+>
+> **Index**: Admin Console
+>
+> **Good** (query): `http.response.status_code < 500`
+>
+> **Total** (query): `http.response.status_code : *`
+>
+> **Group By** (optional): `url.domain` or `host.name` or `none`
+
+
+
+
 
 ## Supported SLI
 
@@ -8,17 +71,18 @@ We currently support the following SLI:
 
 - APM Transaction Error Rate, known as APM Availability
 - APM Transaction Duration, known as APM Latency
-- Custom KQL
+- Custom Query
 - Custom Metric
-- Custom Histogram
+- Histogram Metric
+- Timeslice Metric
 
 For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, we use the `event.outcome` as a way to discriminate the good and the bad responses(events). The API supports an optional kql filter to further filter the apm data.
 
-The **custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query. A custom `timestampField` can be provided to override the default @timestamp field.
+The **Custom Query** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query. A custom `timestampField` can be provided to override the default @timestamp field.
 
-The **custom Metric** SLI requires an index pattern, an optional filter query, a set of metrics for the numerator, and a set of metrics for the denominator. A custom `timestampField` can be provided to override the default @timestamp field.
+The **Custom Metric** SLI requires an index pattern, an optional filter query, a set of metrics for the numerator, and a set of metrics for the denominator. A custom `timestampField` can be provided to override the default @timestamp field.
 
-The **custom Histogram** SLI requires an index pattern, an optional filter query, and an optional `timestampField`. `good` represents the numerator and `total` represents the denominator, and both require the following fields:
+The **Histogram Metric** SLI requires an index pattern, an optional filter query, and an optional `timestampField`. `good` represents the numerator and `total` represents the denominator, and both require the following fields:
 
 * field - the histogram field used to aggregate good/total events.
 * aggregation - type of aggregation to use, limited to `value_count` or `range`.
@@ -283,7 +347,7 @@ curl --request POST \
 
 </details>
 
-### Custom KQL
+### Custom Query
 
 <details>
 <summary>98.5% of 'logs lantency < 300ms' for 'groupId: group-0' over the last 7 days</summary>
