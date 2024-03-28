@@ -30,9 +30,9 @@ const navTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
-          title: i18n.translate('navigation.obltNav.discover', {
-            defaultMessage: 'Discover',
-          }),
+          link: 'observability-overview',
+        },
+        {
           link: 'discover',
           renderAs: 'item',
           children: [
@@ -43,25 +43,9 @@ const navTree: NavigationTreeDefinition = {
           ],
         },
         {
-          title: i18n.translate('navigation.obltNav.dashboards', {
-            defaultMessage: 'Dashboards',
-          }),
           link: 'dashboards',
           getIsActive: ({ pathNameSerialized, prepend }) => {
             return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-          },
-        },
-        {
-          title: i18n.translate('navigation.obltNav.visualizations', {
-            defaultMessage: 'Visualizations',
-          }),
-          link: 'visualize',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return (
-              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
-              pathNameSerialized.startsWith(prepend('/app/lens')) ||
-              pathNameSerialized.startsWith(prepend('/app/maps'))
-            );
           },
         },
         {
@@ -83,15 +67,19 @@ const navTree: NavigationTreeDefinition = {
           link: 'slo',
         },
         {
-          id: 'aiops',
-          title: 'AIOps',
+          id: 'aiMl',
+          title: i18n.translate('navigation.obltNav.ml.aiAndMlGroupTitle', {
+            defaultMessage: 'AI & ML',
+          }),
           renderAs: 'accordion',
-          spaceBefore: null,
           children: [
             {
-              title: i18n.translate('navigation.obltNav.ml.anomalyDetection', {
-                defaultMessage: 'Anomaly detection',
+              link: 'observabilityAIAssistant',
+              title: i18n.translate('navigation.obltNav.aiMl.aiAssistant', {
+                defaultMessage: 'AI Assistant',
               }),
+            },
+            {
               link: 'ml:anomalyDetection',
               renderAs: 'item',
               children: [
@@ -114,6 +102,12 @@ const navTree: NavigationTreeDefinition = {
               getIsActive: ({ pathNameSerialized, prepend }) => {
                 return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
               },
+            },
+            {
+              link: 'logs:anomalies',
+            },
+            {
+              link: 'logs:log-categories',
             },
             {
               title: i18n.translate('navigation.obltNav.ml.changePointDetection', {
@@ -158,6 +152,23 @@ const navTree: NavigationTreeDefinition = {
                 return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
               },
             },
+            {
+              id: 'synthetics',
+              title: i18n.translate('navigation.obltNav.apm.syntheticsGroupTitle', {
+                defaultMessage: 'Synthetics',
+              }),
+              renderAs: 'accordion',
+              children: [
+                {
+                  link: 'synthetics',
+                  title: i18n.translate('navigation.obltNav.apm.synthetics.monitors', {
+                    defaultMessage: 'Monitors',
+                  }),
+                },
+                { link: 'synthetics:certificates' },
+              ],
+            },
+            { link: 'ux' },
           ],
         },
         {
@@ -178,6 +189,42 @@ const navTree: NavigationTreeDefinition = {
               getIsActive: ({ pathNameSerialized, prepend }) => {
                 return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
               },
+            },
+            {
+              link: 'metrics:metrics-explorer',
+            },
+            {
+              id: 'profiling',
+              title: i18n.translate('navigation.obltNav.infrastructure.universalProfiling', {
+                defaultMessage: 'Universal Profiling',
+              }),
+              renderAs: 'accordion',
+              children: [
+                {
+                  link: 'profiling:stacktraces',
+                },
+                {
+                  link: 'profiling:flamegraphs',
+                },
+                {
+                  link: 'profiling:functions',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'otherTools',
+          title: i18n.translate('navigation.obltNav.otherTools', {
+            defaultMessage: 'Other tools',
+          }),
+          renderAs: 'accordion',
+          children: [
+            {
+              link: 'logs:stream',
+              title: i18n.translate('navigation.obltNav.otherTools.logsStream', {
+                defaultMessage: 'Logs stream',
+              }),
             },
           ],
         },

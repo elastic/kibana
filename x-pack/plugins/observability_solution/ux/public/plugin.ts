@@ -47,6 +47,7 @@ import {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -98,7 +99,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       };
 
       plugins.observability.dashboard.register({
-        appName: 'ux',
+        appName: OBLT_UX_APP_ID,
         hasData: async (params?: HasDataParams) => {
           const dataHelper = await getUxDataHelper();
           const dataStartPlugin = await getDataStartPlugin(core);
@@ -118,7 +119,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       });
 
       plugins.exploratoryView.register({
-        appName: 'ux',
+        appName: OBLT_UX_APP_ID,
         hasData: async (params?: HasDataParams) => {
           const dataHelper = await getUxDataHelper();
           const dataStartPlugin = await getDataStartPlugin(core);
@@ -155,7 +156,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
                     label: i18n.translate('xpack.ux.overview.heading', {
                       defaultMessage: 'Dashboard',
                     }),
-                    app: 'ux',
+                    app: OBLT_UX_APP_ID,
                     path: '/',
                     matchFullPath: true,
                     ignoreTrailingSlash: true,
@@ -173,7 +174,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
     const isDev = this.initContext.env.mode.dev;
 
     core.application.register({
-      id: 'ux',
+      id: OBLT_UX_APP_ID,
       title: 'User Experience',
       order: 8500,
       euiIconType: 'logoObservability',
