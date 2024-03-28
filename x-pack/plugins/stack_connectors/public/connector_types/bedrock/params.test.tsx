@@ -134,6 +134,35 @@ describe('Bedrock Params Fields renders', () => {
     );
   });
 
+  it('removes trailing spaces from the body argument', () => {
+    const editAction = jest.fn();
+    const errors = {};
+    const { getByTestId } = render(
+      <BedrockParamsFields
+        actionParams={{
+          subAction: SUB_ACTION.RUN,
+          subActionParams: {
+            body: '{"key": "value"}',
+          },
+        }}
+        editAction={editAction}
+        index={0}
+        messageVariables={messageVariables}
+        errors={errors}
+      />,
+      {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      }
+    );
+    const jsonEditor = getByTestId('bodyJsonEditor');
+    fireEvent.change(jsonEditor, { target: { value: '{"new_key": "new_value"} ' } });
+    expect(editAction).toHaveBeenCalledWith(
+      'subActionParams',
+      { body: '{"new_key": "new_value"}' },
+      0
+    );
+  });
+
   it('calls editAction function with the model argument', () => {
     const editAction = jest.fn();
     const errors = {};

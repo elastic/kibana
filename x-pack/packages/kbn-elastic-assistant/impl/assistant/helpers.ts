@@ -118,9 +118,3 @@ export const getOptionalRequestParams = ({
     ...optionalSize,
   };
 };
-
-export const llmTypeDictionary: Record<string, string> = {
-  'Amazon Bedrock': 'bedrock',
-  'Azure OpenAI': 'openai',
-  OpenAI: 'openai',
-};

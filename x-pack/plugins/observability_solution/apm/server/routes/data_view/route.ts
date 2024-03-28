@@ -8,7 +8,7 @@
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   CreateDataViewResponse,
-  createStaticDataView,
+  createOrUpdateStaticDataView,
 } from './create_static_data_view';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmDataViewIndexPattern } from './get_apm_data_view_index_pattern';
@@ -39,7 +39,7 @@ const staticDataViewRoute = createApmServerRoute({
       true
     );
 
-    const res = await createStaticDataView({
+    const res = await createOrUpdateStaticDataView({
       dataViewService,
       resources,
       apmEventClient,

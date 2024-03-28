@@ -736,6 +736,7 @@
     "titleKeyword"
   ],
   "risk-engine-configuration": [
+    "alertSampleSizePerShard",
     "dataViewId",
     "enabled",
     "filter",

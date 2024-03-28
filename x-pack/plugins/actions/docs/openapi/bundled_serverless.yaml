@@ -887,7 +887,7 @@ components:
           type: string
           description: |
             The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.
-          default: anthropic.claude-v2:1
+          default: anthropic.claude-3-sonnet-20240229-v1:0
     secrets_properties_bedrock:
       title: Connector secrets properties for an Amazon Bedrock connector
       description: Defines secrets for connectors when type is `.bedrock`.
@@ -1071,7 +1071,7 @@ components:
           type: boolean
         host:
           description: |
-            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
+            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
           type: string
         oauthTokenUrl:
           type:
@@ -1079,7 +1079,7 @@ components:
             - 'null'
         port:
           description: |
-            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
+            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
           type: integer
         secure:
           description: |
@@ -2617,7 +2617,7 @@ components:
     is_preconfigured:
       type: boolean
       description: |
-        Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. 
+        Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.
       examples:
         - false
     is_system_action:

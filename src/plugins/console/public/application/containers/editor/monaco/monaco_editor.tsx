@@ -9,9 +9,12 @@
 import React, { FunctionComponent, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
-import { CONSOLE_LANG_ID } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from '@kbn/monaco';
+import { useEditorReadContext } from '../../../contexts';
 
 export const MonacoEditor: FunctionComponent = () => {
+  const { settings } = useEditorReadContext();
+
   const [value, setValue] = useState('GET /.kibana/_search');
   return (
     <div
@@ -19,7 +22,18 @@ export const MonacoEditor: FunctionComponent = () => {
         width: 100%;
       `}
     >
-      <CodeEditor languageId={CONSOLE_LANG_ID} value={value} onChange={setValue} fullWidth={true} />
+      <CodeEditor
+        languageId={CONSOLE_LANG_ID}
+        value={value}
+        onChange={setValue}
+        fullWidth={true}
+        accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
+        options={{
+          fontSize: settings.fontSize,
+          wordWrap: settings.wrapMode === true ? 'on' : 'off',
+          theme: CONSOLE_THEME_ID,
+        }}
+      />
     </div>
   );
 };
