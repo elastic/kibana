@@ -23,17 +23,24 @@ const renderExpandableSection = (expanded: boolean) =>
   );
 
 describe('<ExpandableSection />', () => {
-  it('should render the component collapsed', () => {
+  it('should render ExpandableSection component', () => {
     const { getByTestId } = renderExpandableSection(false);
 
     expect(getByTestId(headerTestId)).toBeInTheDocument();
+    expect(getByTestId(headerTestId)).toHaveTextContent('title');
+    expect(getByTestId(contentTestId)).toBeInTheDocument();
+  });
+
+  it('should render the component collapsed', () => {
+    const { getByTestId } = renderExpandableSection(false);
+
+    expect(getByTestId(contentTestId)).not.toBeVisible();
   });
 
   it('should render the component expanded', () => {
     const { getByTestId } = renderExpandableSection(true);
 
-    expect(getByTestId(headerTestId)).toBeInTheDocument();
-    expect(getByTestId(contentTestId)).toBeInTheDocument();
+    expect(getByTestId(contentTestId)).toBeVisible();
   });
 
   it('should expand the component when clicking on the arrow on header', () => {
