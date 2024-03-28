@@ -30,7 +30,6 @@ jest.mock('../../../../hooks', () => {
     sendPostBulkAgentUpgrade: jest.fn(),
     useAgentVersion: jest.fn().mockReturnValue('8.10.2'),
     useKibanaVersion: jest.fn().mockReturnValue('8.10.2'),
-    sendGetAllFleetServerAgents: jest.fn(),
   };
 });
 
