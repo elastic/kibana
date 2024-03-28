@@ -84,15 +84,6 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
 
     const I18nContext = this.deps.i18n.Context;
 
-    const summary = {
-      worst: {
-        sliValue: 12,
-        status: 'healthy',
-      },
-      total: 10,
-      violated: 9,
-    };
-
     const renderOverview = () => {
       if (overviewMode === 'groups') {
         const groups = groupFilters?.groups;
@@ -102,10 +93,9 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
               groups.map((group) => (
                 <GroupListView
                   groupBy={groupFilters!.groupBy}
-                  isCompact={true}
-                  group={group}
+                  group={group.group}
                   sloView={groupFilters!.sloView}
-                  summary={summary}
+                  summary={group.summary}
                 />
               ))}
           </EuiFlexItem>

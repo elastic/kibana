@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from '../alerts/slo_selector';
-import type { EmbeddableSloProps, SloEmbeddableInput } from './types';
+import type { EmbeddableSloProps, SloEmbeddableInput, GroupFilters } from './types';
 import { SloGroupConfiguration } from './slo_group_configuration';
 import { OverviewModeSelector } from './overview_mode_selector';
 
@@ -36,10 +36,10 @@ export type SLOView = 'cardView' | 'listView';
 
 export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
   const [overviewMode, setOverviewMode] = useState<string>(initialInput?.overviewMode ?? 'single');
-  const [selectedGroupFilters, setSelectedGroupFilters] = useState({
+  const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
     groupBy: 'tags',
     groups: [],
-    sloView: 'cards',
+    sloView: 'cardView',
   });
   const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
   const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
@@ -73,9 +73,9 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
           <EuiFlexItem>
             {overviewMode === 'groups' ? (
               <SloGroupConfiguration
-                onSelected={(prop, value) =>
-                  setSelectedGroupFilters((prevState) => ({ ...prevState, [prop]: value }))
-                }
+                onSelected={(prop, value) => {
+                  setSelectedGroupFilters((prevState) => ({ ...prevState, [prop]: value }));
+                }}
               />
             ) : (
               <SloSelector

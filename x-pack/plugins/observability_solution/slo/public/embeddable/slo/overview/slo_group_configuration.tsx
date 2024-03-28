@@ -50,7 +50,7 @@ const groupByOptions: Option[] = [
 export type SLOView = 'cardView' | 'listView';
 
 interface Props {
-  onSelected: (prop: string, value: string | string[] | undefined) => void;
+  onSelected: (prop: string, value: string | SLOGroupWithSummaryResponse[] | undefined) => void;
 }
 
 export function SloGroupConfiguration({ onSelected }: Props) {
@@ -106,9 +106,7 @@ export function SloGroupConfiguration({ onSelected }: Props) {
     setSelectedGroupOptions(opts);
     const selectedGroups =
       opts.length >= 1
-        ? groupOptions
-            ?.filter((group) => opts.find((opt) => opt.value === group.value))
-            .map((opt) => opt.label)
+        ? data!.results?.filter((group) => opts.find((opt) => opt.value === group.group))
         : undefined;
     onSelected('groups', selectedGroups);
   };
