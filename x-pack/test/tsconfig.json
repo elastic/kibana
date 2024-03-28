@@ -170,5 +170,6 @@
     "@kbn/slo-plugin",
     "@kbn/aiops-test-utils",
     "@kbn/observability-ai-assistant-app-plugin",
+    "@kbn/apm-data-view",
   ]
 }
