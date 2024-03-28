@@ -22,7 +22,7 @@ Object {
           "circle",
         ],
         "ticksPosition": Array [
-          "hidden",
+          "bands",
         ],
       },
       "function": "gauge",
