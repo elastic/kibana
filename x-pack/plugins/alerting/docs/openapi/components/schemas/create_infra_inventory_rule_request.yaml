@@ -22,7 +22,7 @@ properties:
   notify_when:
     $ref: 'notify_when.yaml'
   params:
-    $ref: '../../../../../infra/server/lib/alerting/docs/params_property_infra_inventory.yaml'
+    $ref: '../../../../../observability_solution/infra/server/lib/alerting/docs/params_property_infra_inventory.yaml'
   rule_type_id:
     type: string
     description: The ID of the rule type that you want to call when the rule is scheduled to run.

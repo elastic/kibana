@@ -31,6 +31,12 @@ export {
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export { apiHasForceRefresh, type HasForceRefresh } from './interfaces/has_force_refresh';
+export {
+  apiHasLegacyLibraryTransforms,
+  apiHasLibraryTransforms,
+  type HasLegacyLibraryTransforms,
+  type HasLibraryTransforms,
+} from './interfaces/has_library_transforms';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
 export {
   apiHasSupportedTriggers,
@@ -45,22 +51,15 @@ export {
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
 export {
   apiPublishesBlockingError,
-  useBlockingError,
   type PublishesBlockingError,
 } from './interfaces/publishes_blocking_error';
 export {
   apiPublishesDataLoading,
-  useDataLoading,
   type PublishesDataLoading,
 } from './interfaces/publishes_data_loading';
-export {
-  apiPublishesDataViews,
-  useDataViews,
-  type PublishesDataViews,
-} from './interfaces/publishes_data_views';
+export { apiPublishesDataViews, type PublishesDataViews } from './interfaces/publishes_data_views';
 export {
   apiPublishesDisabledActionIds,
-  useDisabledActionIds,
   type PublishesDisabledActionIds,
 } from './interfaces/publishes_disabled_action_ids';
 export {
@@ -71,18 +70,15 @@ export {
 } from './interfaces/publishes_phase_events';
 export {
   apiPublishesSavedObjectId,
-  useSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
 export {
   apiPublishesUnsavedChanges,
-  useUnsavedChanges,
   type PublishesUnsavedChanges,
 } from './interfaces/publishes_unsaved_changes';
 export {
   apiPublishesViewMode,
   apiPublishesWritableViewMode,
-  useViewMode,
   type PublishesViewMode,
   type PublishesWritableViewMode,
   type ViewMode,
@@ -90,8 +86,6 @@ export {
 export {
   apiPublishesPanelDescription,
   apiPublishesWritablePanelDescription,
-  useDefaultPanelDescription,
-  usePanelDescription,
   type PublishesPanelDescription,
   type PublishesWritablePanelDescription,
 } from './interfaces/titles/publishes_panel_description';
