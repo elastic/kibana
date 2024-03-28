@@ -67,52 +67,25 @@ export function SloGroupConfiguration({ onSelected }: Props) {
   >([]);
   const [sloView, setSloView] = useState<SLOView>('cardView');
 
-  // Fetch the groups for slo.tags, status and slo.indicator.type
-  const { data: tags, isLoading: isTagsLoading } = useFetchSloGroups({
+  const { data, isLoading } = useFetchSloGroups({
     perPage: 100,
-    groupBy: 'slo.tags',
-  });
-
-  const { data: statuses, isLoading: isStatusesLoading } = useFetchSloGroups({
-    perPage: 100,
-    groupBy: 'status',
-  });
-
-  const { data: sliTypes, isLoading: isSliTypesLoading } = useFetchSloGroups({
-    perPage: 100,
-    groupBy: 'slo.indicator.type',
+    groupBy: selectedGroupBy,
   });
 
   useEffect(() => {
-    let isLoadedWithData = false;
-    let results;
-    if (selectedGroupBy === 'slo.tags') {
-      isLoadedWithData = !isTagsLoading && tags?.results !== undefined;
-      results = tags?.results;
-      setSelectedGroupByLabel('Tags');
-    } else if (selectedGroupBy === 'status') {
-      isLoadedWithData = !isStatusesLoading && statuses?.results !== undefined;
-      results = statuses?.results;
-      setSelectedGroupByLabel('Status');
-    } else if (selectedGroupBy === 'slo.indicator.type') {
-      isLoadedWithData = !isSliTypesLoading && sliTypes?.results !== undefined;
-      results = sliTypes?.results;
-      setSelectedGroupByLabel('SLI type');
-    }
-
+    const isLoadedWithData = !isLoading && data?.results !== undefined;
     const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
-      ? mapGroupsToOptions(results)
+      ? mapGroupsToOptions(data?.results)
       : [];
     setGroupOptions(opts);
-  }, [
-    isSliTypesLoading,
-    isStatusesLoading,
-    isTagsLoading,
-    selectedGroupBy,
-    sliTypes?.results,
-    statuses?.results,
-    tags?.results,
-  ]);
+    if (selectedGroupBy === 'slo.tags') {
+      setSelectedGroupByLabel('Tags');
+    } else if (selectedGroupBy === 'status') {
+      setSelectedGroupByLabel('Status');
+    } else if (selectedGroupBy === 'slo.indicator.type') {
+      setSelectedGroupByLabel('SLI type');
+    }
+  }, [isLoading, data, selectedGroupBy]);
 
   const toggleButtonsIcons = [
     {

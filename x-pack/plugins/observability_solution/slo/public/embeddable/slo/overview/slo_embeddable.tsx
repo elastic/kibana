@@ -80,7 +80,6 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     this.node.setAttribute('data-shared-item', '');
     const { sloId, sloInstanceId, showAllGroupByInstances, overviewMode, groupFilters } =
       this.getInput();
-    console.log(groupFilters, '!!groupFilters');
     const queryClient = new QueryClient();
 
     const I18nContext = this.deps.i18n.Context;
