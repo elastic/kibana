@@ -227,16 +227,6 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ['data as mlInferencePipelineProcessors'],
     ],
   },
-  events: ({ actions, values }) => ({
-    afterMount: () => {
-      actions.fetchDefaultPipeline(undefined);
-      actions.setPipelineState(
-        isConnectorIndex(values.index) || isCrawlerIndex(values.index)
-          ? values.index.connector?.pipeline ?? values.defaultPipelineValues
-          : values.defaultPipelineValues
-      );
-    },
-  }),
   listeners: ({ actions, values }) => ({
     apiSuccess: ({ pipeline }) => {
       if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
