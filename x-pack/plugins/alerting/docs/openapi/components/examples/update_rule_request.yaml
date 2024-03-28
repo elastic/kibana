@@ -12,7 +12,7 @@ value:
   params:
     aggField: sheet.version
     aggType: avg
-    index: [".test-index"]
+    index: [".updated-index"]
     groupBy: top
     termField: name.keyword
     termSize: 6
@@ -25,4 +25,3 @@ value:
   schedule:
     interval: 1m
   tags: []
-  throttle: null
