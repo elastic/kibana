@@ -16,7 +16,6 @@ import {
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
   EuiPopover,
-  EuiContextMenu,
   EuiBadge,
   EuiToolTip,
   EuiFilterGroup,
@@ -34,6 +33,7 @@ import { useKibana } from '../../../shared_imports';
 export interface Props {
   pipelines: Pipeline[];
   onReloadClick: () => void;
+  isLoading: boolean;
   onEditPipelineClick: (pipelineName: string) => void;
   onClonePipelineClick: (pipelineName: string) => void;
   onDeletePipelineClick: (pipelineName: string[]) => void;
@@ -62,6 +62,7 @@ const managedFilterLabel = i18n.translate('xpack.ingestPipelines.list.table.mana
 
 export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
+  isLoading,
   onReloadClick,
   onEditPipelineClick,
   onClonePipelineClick,
@@ -73,30 +74,6 @@ export const PipelineTable: FunctionComponent<Props> = ({
   ]);
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
-  const [showPopover, setShowPopover] = useState(false);
-
-  const createMenuItems = [
-    /**
-     * Create pipeline
-     */
-    {
-      name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
-        defaultMessage: 'New pipeline',
-      }),
-      ...reactRouterNavigate(history, '/create'),
-      'data-test-subj': `createNewPipeline`,
-    },
-    /**
-     * Create pipeline from CSV
-     */
-    {
-      name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineFromCsvButtonLabel', {
-        defaultMessage: 'New pipeline from CSV',
-      }),
-      ...reactRouterNavigate(history, '/csv_create'),
-      'data-test-subj': `createPipelineFromCsv`,
-    },
-  ];
 
   const filteredPipelines = useMemo(() => {
     return (pipelines || []).filter((pipeline) => {
@@ -173,43 +150,12 @@ export const PipelineTable: FunctionComponent<Props> = ({
           key="reloadButton"
           iconType="refresh"
           color="success"
+          aria-label="refresh button"
           data-test-subj="reloadButton"
           size="m"
           display="fill"
           onClick={onReloadClick}
         />,
-        <EuiPopover
-          key="createPipelinePopover"
-          isOpen={showPopover}
-          closePopover={() => setShowPopover(false)}
-          button={
-            <EuiButton
-              fill
-              iconSide="right"
-              iconType="arrowDown"
-              data-test-subj="createPipelineDropdown"
-              key="createPipelineDropdown"
-              onClick={() => setShowPopover((previousBool) => !previousBool)}
-            >
-              {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
-                defaultMessage: 'Create pipeline',
-              })}
-            </EuiButton>
-          }
-          panelPaddingSize="none"
-          repositionOnScroll
-        >
-          <EuiContextMenu
-            initialPanelId={0}
-            data-test-subj="autoFollowPatternActionContextMenu"
-            panels={[
-              {
-                id: 0,
-                items: createMenuItems,
-              },
-            ]}
-          />
-        </EuiPopover>,
       ],
       box: {
         incremental: true,
@@ -371,6 +317,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
       },
     ],
     items: filteredPipelines,
+    loading: isLoading,
   };
 
   return <EuiInMemoryTable {...tableProps} />;
