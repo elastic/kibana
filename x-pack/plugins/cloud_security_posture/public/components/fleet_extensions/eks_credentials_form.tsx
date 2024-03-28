@@ -10,8 +10,6 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 import { AwsInputVarFields } from './aws_credentials_form/aws_input_var_fields';
@@ -284,42 +282,3 @@ const AwsCredentialTypeSelector = ({
     onChange={(id) => onChange(id as AwsCredentialsType)}
   />
 );
-
-export const PackageVarFields = ({
-  packageInfo,
-  fields,
-  onChange,
-}: {
-  packageInfo: PackageInfo;
-  fields: AwsOptions[keyof AwsOptions]['fields'][number] & { value: string; id: string };
-  onChange: (key: string, value: string) => void;
-}) => {
-  const stream = packageInfo?.data_streams?.[0].streams?.find((v) => v.input.endsWith('eks'));
-  const varDef = stream?.vars?.find((v) => v.name === fields.id);
-  return (
-    <div
-      css={css`
-        width: 100%;
-        .euiFormControlLayout,
-        .euiFormControlLayout__childrenWrapper,
-        .euiFormRow,
-        input {
-          max-width: 100%;
-          width: 100%;
-        }
-      `}
-    >
-      <PackagePolicyInputVarField
-        varDef={varDef!}
-        value={fields.value || ''}
-        onChange={(value) => {
-          onChange(fields.id, value);
-        }}
-        // errors={validationResults?.vars?.[varName] ?? []}
-        errors={[]}
-        forceShowErrors={false}
-        isEditPage={true}
-      />
-    </div>
-  );
-};
