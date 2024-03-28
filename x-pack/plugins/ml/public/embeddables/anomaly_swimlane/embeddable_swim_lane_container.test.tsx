@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import type { ExplorerSwimlaneContainerProps } from './embeddable_swim_lane_container';
-import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { I18nProvider } from '@kbn/i18n-react';
-import type { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import type { CoreStart } from '@kbn/core/public';
-import { useSwimlaneInputResolver } from './swimlane_input_resolver';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import { render } from '@testing-library/react';
+import React from 'react';
+import { BehaviorSubject } from 'rxjs';
+import type { AnomalySwimlaneServices } from '..';
+import type { MlDependencies } from '../../application/app';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { SwimlaneContainer } from '../../application/explorer/swimlane_container';
-import type { MlDependencies } from '../../application/app';
-import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
-import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
 import { createCoreStartMock } from '../../__mocks__/core_start';
 import { createMlStartDepsMock } from '../../__mocks__/ml_start_deps';
+import type { ExplorerSwimlaneContainerProps } from './embeddable_swim_lane_container';
+import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
+import { useSwimlaneInputResolver } from './swimlane_input_resolver';
+import type { AnomalySwimLaneEmbeddableApi } from './types';
 
 jest.mock('./swimlane_input_resolver', () => ({
   useSwimlaneInputResolver: jest.fn(() => {
@@ -39,23 +38,23 @@ jest.mock('../../application/explorer/swimlane_container', () => ({
 const defaultOptions = { wrapper: I18nProvider };
 
 describe('ExplorerSwimlaneContainer', () => {
-  let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;
+  let api: AnomalySwimLaneEmbeddableApi;
   let refresh: BehaviorSubject<any>;
   let services: jest.Mocked<[CoreStart, MlDependencies, AnomalySwimlaneServices]>;
-  let embeddableContext: AnomalySwimlaneEmbeddable;
   let trigger: jest.Mocked<TriggerContract>;
 
-  const onInputChange = jest.fn();
-  const onOutputChange = jest.fn();
   const onRenderComplete = jest.fn();
   const onLoading = jest.fn();
   const onError = jest.fn();
 
   beforeEach(() => {
-    embeddableContext = { id: 'test-id' } as AnomalySwimlaneEmbeddable;
-    embeddableInput = new BehaviorSubject({
-      id: 'test-swimlane-embeddable',
-    } as Partial<AnomalySwimlaneEmbeddableInput>);
+    api = {
+      jobIds: new BehaviorSubject(['test-job']),
+      swimlaneType: new BehaviorSubject(SWIMLANE_TYPE.OVERALL),
+      fromPage: new BehaviorSubject(1),
+      perPage: new BehaviorSubject(10),
+      setInterval: jest.fn(),
+    } as unknown as AnomalySwimLaneEmbeddableApi;
 
     trigger = { exec: jest.fn() } as unknown as jest.Mocked<TriggerContract>;
 
@@ -86,8 +85,6 @@ describe('ExplorerSwimlaneContainer', () => {
     (useSwimlaneInputResolver as jest.Mock).mockReturnValueOnce([
       SWIMLANE_TYPE.OVERALL,
       mockOverallData,
-      10,
-      jest.fn(),
       {},
       false,
       null,
@@ -96,14 +93,9 @@ describe('ExplorerSwimlaneContainer', () => {
     render(
       <EmbeddableSwimLaneContainer
         id={'test-swimlane-embeddable'}
-        embeddableContext={embeddableContext}
-        embeddableInput$={
-          embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
-        }
+        api={api}
         services={services}
         refresh={refresh}
-        onInputChange={onInputChange}
-        onOutputChange={onOutputChange}
         onLoading={onLoading}
         onRenderComplete={onRenderComplete}
         onError={onError}
@@ -129,23 +121,16 @@ describe('ExplorerSwimlaneContainer', () => {
       undefined,
       undefined,
       undefined,
-      undefined,
-      undefined,
       false,
       { message: 'Something went wrong' },
     ]);
 
     const { findByText } = render(
       <EmbeddableSwimLaneContainer
-        embeddableContext={embeddableContext}
         id={'test-swimlane-embeddable'}
-        embeddableInput$={
-          embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
-        }
+        api={api}
         services={services}
         refresh={refresh}
-        onInputChange={onInputChange}
-        onOutputChange={onOutputChange}
         onLoading={onLoading}
         onRenderComplete={onRenderComplete}
         onError={onError}
