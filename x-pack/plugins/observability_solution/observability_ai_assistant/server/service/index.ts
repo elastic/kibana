@@ -96,6 +96,8 @@ export class ObservabilityAIAssistantService {
     this.logger = logger;
     this.getModelId = getModelId;
 
+    this.allowInit();
+
     taskManager.registerTaskDefinitions({
       [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
         title: 'Index queued KB articles',
@@ -122,7 +124,18 @@ export class ObservabilityAIAssistantService {
     });
   }
 
-  init = once(async () => {
+  init = async () => {};
+
+  private allowInit = () => {
+    this.init = once(async () => {
+      return this.doInit().catch((error) => {
+        this.allowInit();
+        throw error;
+      });
+    });
+  };
+
+  private doInit = async () => {
     try {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
@@ -242,7 +255,7 @@ export class ObservabilityAIAssistantService {
       this.logger.debug(error);
       throw error;
     }
-  });
+  };
 
   async getClient({
     request,
