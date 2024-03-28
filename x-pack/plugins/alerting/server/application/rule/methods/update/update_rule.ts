@@ -89,7 +89,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
   try {
     updateRuleDataSchema.validate(data);
   } catch (error) {
-    throw Boom.badRequest(`Error validating create data - ${error.message}`);
+    throw Boom.badRequest(`Error validating update data - ${error.message}`);
   }
 
   let originalRuleSavedObject: SavedObject<RuleAttributes>;
@@ -113,6 +113,55 @@ async function updateWithOCC<Params extends RuleParams = never>(
       savedObjectsClient: context.unsecuredSavedObjectsClient,
     });
   }
+
+  const { alertTypeId, consumer, enabled, schedule, name, apiKey, apiKeyCreatedByUser } =
+    originalRuleSavedObject.attributes;
+
+  let validationPayload: ValidateScheduleLimitResult = null;
+  if (enabled && schedule.interval !== data.schedule.interval) {
+    validationPayload = await validateScheduleLimit({
+      context,
+      prevInterval: schedule?.interval,
+      updatedInterval: data.schedule.interval,
+    });
+  }
+
+  if (validationPayload) {
+    throw Boom.badRequest(
+      getRuleCircuitBreakerErrorMessage({
+        name,
+        interval: validationPayload.interval,
+        intervalAvailable: validationPayload.intervalAvailable,
+        action: 'update',
+      })
+    );
+  }
+
+  try {
+    await context.authorization.ensureAuthorized({
+      ruleTypeId: alertTypeId,
+      consumer,
+      operation: WriteOperations.Update,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
+  } catch (error) {
+    context.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.UPDATE,
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        error,
+      })
+    );
+    throw error;
+  }
+
+  context.auditLogger?.log(
+    ruleAuditEvent({
+      action: RuleAuditAction.UPDATE,
+      outcome: 'unknown',
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+    })
+  );
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(originalRuleSavedObject.attributes.alertTypeId);
 
@@ -175,55 +224,6 @@ async function updateWithOCC<Params extends RuleParams = never>(
       throttle: undefined,
     };
   }
-
-  const { alertTypeId, consumer, enabled, schedule, name, apiKey, apiKeyCreatedByUser } =
-    originalRule;
-
-  let validationPayload: ValidateScheduleLimitResult = null;
-  if (enabled && schedule.interval !== data.schedule.interval) {
-    validationPayload = await validateScheduleLimit({
-      context,
-      prevInterval: schedule?.interval,
-      updatedInterval: data.schedule.interval,
-    });
-  }
-
-  if (validationPayload) {
-    throw Boom.badRequest(
-      getRuleCircuitBreakerErrorMessage({
-        name,
-        interval: validationPayload.interval,
-        intervalAvailable: validationPayload.intervalAvailable,
-        action: 'update',
-      })
-    );
-  }
-
-  try {
-    await context.authorization.ensureAuthorized({
-      ruleTypeId: alertTypeId,
-      consumer,
-      operation: WriteOperations.Update,
-      entity: AlertingAuthorizationEntity.Rule,
-    });
-  } catch (error) {
-    context.auditLogger?.log(
-      ruleAuditEvent({
-        action: RuleAuditAction.UPDATE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
-        error,
-      })
-    );
-    throw error;
-  }
-
-  context.auditLogger?.log(
-    ruleAuditEvent({
-      action: RuleAuditAction.UPDATE,
-      outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
-    })
-  );
 
   const updateResult = await updateRuleAttributes<Params>({
     context,

@@ -13,7 +13,7 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
-import { RuleNotifyWhen } from '../../../common';
+import { RuleNotifyWhen, SanitizedRule } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
@@ -63,7 +63,7 @@ describe('updateAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
 
-    rulesClient.update.mockResolvedValueOnce(mockedResponse);
+    rulesClient.update.mockResolvedValueOnce(mockedResponse as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -139,7 +139,7 @@ describe('updateAlertRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    rulesClient.update.mockResolvedValueOnce(mockedResponse);
+    rulesClient.update.mockResolvedValueOnce(mockedResponse as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -186,7 +186,7 @@ describe('updateAlertRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    rulesClient.update.mockResolvedValueOnce(mockedResponse);
+    rulesClient.update.mockResolvedValueOnce(mockedResponse as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
