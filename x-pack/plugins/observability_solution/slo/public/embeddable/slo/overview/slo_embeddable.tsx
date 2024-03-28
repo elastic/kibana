@@ -94,7 +94,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
                 <GroupListView
                   groupBy={groupFilters!.groupBy}
                   group={group.group}
-                  sloView={groupFilters!.sloView}
+                  sloView="cardView"
                   summary={group.summary}
                 />
               ))}

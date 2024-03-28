@@ -5,17 +5,7 @@
  * 2.0.
  */
 import React, { useState, useEffect } from 'react';
-import {
-  EuiFormRow,
-  EuiComboBox,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiSelect,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiSelect, EuiComboBoxOptionOption } from '@elastic/eui';
 import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
 
 import { i18n } from '@kbn/i18n';
@@ -47,8 +37,6 @@ const groupByOptions: Option[] = [
   },
 ];
 
-export type SLOView = 'cardView' | 'listView';
-
 interface Props {
   onSelected: (prop: string, value: string | SLOGroupWithSummaryResponse[] | undefined) => void;
 }
@@ -65,7 +53,6 @@ export function SloGroupConfiguration({ onSelected }: Props) {
   const [selectedGroupOptions, setSelectedGroupOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
-  const [sloView, setSloView] = useState<SLOView>('cardView');
 
   const { data, isLoading } = useFetchSloGroups({
     perPage: 100,
@@ -86,21 +73,6 @@ export function SloGroupConfiguration({ onSelected }: Props) {
       setSelectedGroupByLabel('SLI type');
     }
   }, [isLoading, data, selectedGroupBy]);
-
-  const toggleButtonsIcons = [
-    {
-      id: `cardView`,
-      label: 'Card View',
-      iconType: 'visGauge',
-      'data-test-subj': 'sloCardViewButton',
-    },
-    {
-      id: `listView`,
-      label: 'List View',
-      iconType: 'list',
-      'data-test-subj': 'sloListViewButton',
-    },
-  ];
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedGroupOptions(opts);
@@ -156,32 +128,6 @@ export function SloGroupConfiguration({ onSelected }: Props) {
           singleSelection={false}
         />
       </EuiFormRow>
-
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiText>
-            {i18n.translate('xpack.slo.sloGroupConfiguration.viewModeTextLabel', {
-              defaultMessage: 'View mode',
-            })}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            buttonSize="compressed"
-            legend={i18n.translate('xpack.slo.toggleSLOView.euiButtonGroup.sloView', {
-              defaultMessage: 'SLO View',
-            })}
-            options={toggleButtonsIcons}
-            idSelected={sloView}
-            onChange={(id) => {
-              setSloView(id as SLOView);
-              onSelected('sloView', id);
-            }}
-            isIconOnly
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </>
   );
 }

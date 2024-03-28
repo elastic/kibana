@@ -38,7 +38,6 @@ interface SloConfigurationProps {
   onCreate: (props: SingleSloProps | GroupSloProps) => void;
   onCancel: () => void;
 }
-export type SLOView = 'cardView' | 'listView';
 
 interface SingleConfigurationProps {
   onCreate: (props: SingleSloProps) => void;
@@ -133,7 +132,6 @@ function GroupSloConfiguration({ overviewMode, onCreate, onCancel }: GroupConfig
   const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
     groupBy: 'tags',
     groups: [],
-    sloView: 'cardView',
   });
 
   const onConfirmClick = () =>

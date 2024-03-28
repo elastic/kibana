@@ -8,13 +8,11 @@ import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { Subject } from 'rxjs';
 import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
 
-export type SLOView = 'cardView' | 'listView';
 export type OverviewMode = 'single' | 'groups';
 
 export interface GroupFilters {
   groupBy: string;
   groups: SLOGroupWithSummaryResponse[];
-  sloView: SLOView;
 }
 
 export type SingleSloProps = EmbeddableSloProps & {
