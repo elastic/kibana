@@ -21,6 +21,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { SingleMetricViewerEmbeddableInput } from '..';
@@ -48,27 +49,35 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   onCreate,
   onCancel,
 }) => {
+  const isNewJob = initialInput?.jobId !== undefined && initialInput?.jobId !== job.job_id;
+
   const [panelTitle, setPanelTitle] = useState<string>(defaultTitle);
   const [functionDescription, setFunctionDescription] = useState<string | undefined>(
     initialInput?.functionDescription
   );
+  // Reset detector index and entities if the job has changed
   const [selectedDetectorIndex, setSelectedDetectorIndex] = useState<number>(
-    initialInput?.selectedDetectorIndex ?? 0
+    !isNewJob && initialInput?.selectedDetectorIndex ? initialInput.selectedDetectorIndex : 0
   );
-  const [selectedEntities, setSelectedEntities] = useState<any>(initialInput?.selectedEntities);
+  const [selectedEntities, setSelectedEntities] = useState<MlEntityField | undefined>(
+    !isNewJob && initialInput?.selectedEntities ? initialInput.selectedEntities : undefined
+  );
 
   const isPanelTitleValid = panelTitle.length > 0;
 
-  const handleStateUpdate = (action: TimeseriesexplorerActionType, payload: any) => {
+  const handleStateUpdate = (
+    action: TimeseriesexplorerActionType,
+    payload: string | number | MlEntityField
+  ) => {
     switch (action) {
       case APP_STATE_ACTION.SET_ENTITIES:
-        setSelectedEntities(payload);
+        setSelectedEntities(payload as MlEntityField);
         break;
       case APP_STATE_ACTION.SET_FUNCTION_DESCRIPTION:
-        setFunctionDescription(payload);
+        setFunctionDescription(payload as string);
         break;
       case APP_STATE_ACTION.SET_DETECTOR_INDEX:
-        setSelectedDetectorIndex(payload);
+        setSelectedDetectorIndex(payload as number);
         break;
       default:
         break;

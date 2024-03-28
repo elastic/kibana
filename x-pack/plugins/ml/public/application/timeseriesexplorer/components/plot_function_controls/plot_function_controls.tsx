@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
@@ -50,7 +51,7 @@ export const PlotByFunctionControls = ({
   setFunctionDescription: (func: string) => void;
   selectedDetectorIndex: number;
   selectedJobId: string;
-  selectedEntities: Record<string, any>;
+  selectedEntities?: MlEntityField;
   entityControlsCount: number;
 }) => {
   const toastNotificationService = useToastNotificationService();
@@ -59,7 +60,7 @@ export const PlotByFunctionControls = ({
   const getFunctionDescriptionToPlot = useCallback(
     async (
       _selectedDetectorIndex: number,
-      _selectedEntities: Record<string, any>,
+      _selectedEntities: MlEntityField | undefined,
       _selectedJobId: string,
       _selectedJob: CombinedJob
     ) => {

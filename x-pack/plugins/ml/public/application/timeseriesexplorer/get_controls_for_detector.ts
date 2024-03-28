@@ -14,7 +14,7 @@ import type { JobId, CombinedJob } from '../../../common/types/anomaly_detection
  */
 export function getControlsForDetector(
   selectedDetectorIndex: number,
-  selectedEntities: Record<string, any>,
+  selectedEntities: Record<string, any> | undefined,
   selectedJobId: JobId,
   job?: CombinedJob
 ): Entity[] {

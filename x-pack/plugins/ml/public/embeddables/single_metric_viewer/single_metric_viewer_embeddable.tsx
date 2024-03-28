@@ -166,6 +166,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
   }
 
   public destroy() {
+    this.apiSubscriptions.unsubscribe();
     super.destroy();
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);

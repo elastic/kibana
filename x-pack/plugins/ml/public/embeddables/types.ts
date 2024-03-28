@@ -125,7 +125,7 @@ export interface SingleMetricViewerEmbeddableCustomInput {
   functionDescription?: string;
   panelTitle: string;
   selectedDetectorIndex: number;
-  selectedEntities?: MlEntityField[];
+  selectedEntities?: MlEntityField;
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
   query: Query;
@@ -139,7 +139,7 @@ export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
 export interface SingleMetricViewerComponentApi {
   jobId: PublishingSubject<JobId>;
   selectedDetectorIndex: PublishingSubject<number>;
-  selectedEntities?: PublishingSubject<MlEntityField[]>;
+  selectedEntities?: PublishingSubject<MlEntityField>;
 
   updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
 }
