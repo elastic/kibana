@@ -19,6 +19,9 @@ jest.mock('../../../../../kibana_services', () => {
         },
       };
     },
+    getSpaceId() {
+      return 'default';
+    },
   };
 });
 
@@ -30,7 +33,9 @@ import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 
 describe('createLayerDescriptor', () => {
   test('apm index', () => {
-    expect(createSecurityLayerDescriptors('id', 'apm-*-transaction*')).toEqual([
+    expect(
+      createSecurityLayerDescriptors('apm_static_data_view_id_default', 'apm-*-transaction*')
+    ).toEqual([
       {
         __dataRequests: [],
         alpha: 0.75,
@@ -48,7 +53,7 @@ describe('createLayerDescriptor', () => {
           filterByMapBounds: true,
           geoField: 'client.geo.location',
           id: '12345',
-          indexPatternId: 'id',
+          indexPatternId: 'apm_static_data_view_id_default',
           applyForceRefresh: true,
           scalingType: 'TOP_HITS',
           sortField: '',
@@ -127,7 +132,7 @@ describe('createLayerDescriptor', () => {
           filterByMapBounds: true,
           geoField: 'server.geo.location',
           id: '12345',
-          indexPatternId: 'id',
+          indexPatternId: 'apm_static_data_view_id_default',
           applyForceRefresh: true,
           scalingType: 'TOP_HITS',
           sortField: '',
@@ -205,7 +210,7 @@ describe('createLayerDescriptor', () => {
           applyGlobalTime: true,
           destGeoField: 'server.geo.location',
           id: '12345',
-          indexPatternId: 'id',
+          indexPatternId: 'apm_static_data_view_id_default',
           metrics: [
             {
               field: 'client.bytes',
@@ -488,7 +493,9 @@ describe('createLayerDescriptor', () => {
   });
 
   test('apm data stream', () => {
-    expect(createSecurityLayerDescriptors('id', 'traces-apm-opbean-node')).toEqual([
+    expect(
+      createSecurityLayerDescriptors('apm_static_data_view_id_foo', 'traces-apm-opbean-node')
+    ).toEqual([
       {
         __dataRequests: [],
         alpha: 0.75,
@@ -507,7 +514,7 @@ describe('createLayerDescriptor', () => {
           geoField: 'client.geo.location',
           id: '12345',
           applyForceRefresh: true,
-          indexPatternId: 'id',
+          indexPatternId: 'apm_static_data_view_id_foo',
           scalingType: 'TOP_HITS',
           sortField: '',
           sortOrder: 'desc',
@@ -585,7 +592,7 @@ describe('createLayerDescriptor', () => {
           filterByMapBounds: true,
           geoField: 'server.geo.location',
           id: '12345',
-          indexPatternId: 'id',
+          indexPatternId: 'apm_static_data_view_id_foo',
           scalingType: 'TOP_HITS',
           applyForceRefresh: true,
           sortField: '',
@@ -657,7 +664,7 @@ describe('createLayerDescriptor', () => {
           applyGlobalTime: true,
           destGeoField: 'server.geo.location',
           id: '12345',
-          indexPatternId: 'id',
+          indexPatternId: 'apm_static_data_view_id_foo',
           metrics: [
             {
               field: 'client.bytes',
