@@ -149,9 +149,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          {Object.keys(slo.indicator.params).length > 0 && (
-            <EventsChartPanel slo={slo} range={range} />
-          )}
+          <EventsChartPanel slo={slo} range={range} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>
