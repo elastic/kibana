@@ -21,7 +21,7 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { getBeforeSetup } from '../lib';
+import { getBeforeSetup } from './lib';
 import { RuleDomain } from '../../application/rule/types';
 import { ConstructorOptions, RulesClient } from '../rules_client';
 
