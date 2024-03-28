@@ -9,9 +9,9 @@ import { Subject } from 'rxjs';
 import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
 
 export type OverviewMode = 'single' | 'groups';
-
+type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface GroupFilters {
-  groupBy: string;
+  groupBy: GroupBy;
   groups: SLOGroupWithSummaryResponse[];
 }
 

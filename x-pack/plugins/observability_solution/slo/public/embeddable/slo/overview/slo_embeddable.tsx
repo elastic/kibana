@@ -7,6 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 import { Router } from '@kbn/shared-ux-router';
@@ -88,17 +89,19 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
       if (overviewMode === 'groups') {
         const groups = groupFilters?.groups;
         return (
-          <EuiFlexItem grow={0}>
-            {groups &&
-              groups.map((group) => (
-                <GroupListView
-                  groupBy={groupFilters!.groupBy}
-                  group={group.group}
-                  sloView="cardView"
-                  summary={group.summary}
-                />
-              ))}
-          </EuiFlexItem>
+          <Wrapper>
+            <EuiFlexItem grow={false}>
+              {groups &&
+                groups.map((group) => (
+                  <GroupListView
+                    groupBy={groupFilters!.groupBy}
+                    group={group.group}
+                    sloView="cardView"
+                    summary={group.summary}
+                  />
+                ))}
+            </EuiFlexItem>
+          </Wrapper>
         );
       } else {
         return (
@@ -141,3 +144,9 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     }
   }
 }
+
+const Wrapper = styled.div`
+  width: 100%;
+  padding: 5px 15px;
+  overflow: scroll;
+`;
