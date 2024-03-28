@@ -318,17 +318,17 @@ export const reducer = (state: State, action: Action): State => {
     }
     case 'field.addSemanticText': {
       const addRootFieldActionValue: Field = {
-        name: action.value.reference_field as string,
+        name: action.value.reference_field,
         type: 'text',
-        copy_to: [action.value.name as string],
+        copy_to: [action.value.name],
       };
 
       // Add root field to state and update fieldToAddFieldTo
       let updatedState = addFieldToState(addRootFieldActionValue, state);
 
       const addSemanticTextFieldActionValue: Field = {
-        name: action.value.name as string,
-        inference_id: action.value.inference_id as string,
+        name: action.value.name,
+        inference_id: action.value.inference_id,
         type: 'semantic_text',
       };
 
