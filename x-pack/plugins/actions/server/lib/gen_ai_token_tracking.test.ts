@@ -111,6 +111,10 @@ describe('getGenAiTokenTracking', () => {
       status: 'ok' as const,
       data: {
         message: 'Sample completion',
+        usage: {
+          input_tokens: 43,
+          output_tokens: 12,
+        },
       },
     };
     const validatedParams = {
@@ -131,6 +135,7 @@ describe('getGenAiTokenTracking', () => {
       validatedParams,
     });
 
+    // does not equal the usage values because mockGetTokenCountFromBedrockInvoke mocks the response
     expect(tokenTracking).toEqual({
       total_tokens: 100,
       prompt_tokens: 50,
@@ -140,6 +145,10 @@ describe('getGenAiTokenTracking', () => {
     expect(mockGetTokenCountFromBedrockInvoke).toHaveBeenCalledWith({
       response: 'Sample completion',
       body: '{"prompt":"Sample message"}',
+      usage: {
+        input_tokens: 43,
+        output_tokens: 12,
+      },
     });
   });
 

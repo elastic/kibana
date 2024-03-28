@@ -875,8 +875,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
      * lnsDatatable or bar_stacked
      */
-    async switchToVisualization(subVisualizationId: string, searchTerm?: string) {
-      await this.openChartSwitchPopover();
+    async switchToVisualization(subVisualizationId: string, searchTerm?: string, layerIndex = 0) {
+      await this.openChartSwitchPopover(layerIndex);
       await this.waitForSearchInputValue(subVisualizationId, searchTerm);
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -893,12 +893,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async openChartSwitchPopover() {
+    async openChartSwitchPopover(layerIndex = 0) {
       if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
         return;
       }
       await retry.try(async () => {
-        await testSubjects.click('lnsChartSwitchPopover');
+        const allChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        await allChartSwitches[layerIndex].click();
         await testSubjects.existOrFail('lnsChartSwitchList');
       });
     },
@@ -967,25 +968,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Uses the Lens layer switcher to switch seriesType for xy charts.
-     *
-     * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
-     * line,
-     */
-    async switchLayerSeriesType(seriesType: string) {
-      await retry.try(async () => {
-        await testSubjects.click('lns_layer_settings');
-        await testSubjects.exists(`lnsXY_seriesType-${seriesType}`);
-      });
-
-      return await testSubjects.click(`lnsXY_seriesType-${seriesType}`);
-    },
-
-    /**
      * Returns the number of layers visible in the chart configuration
      */
     async getLayerCount() {
       return (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length;
+    },
+
+    /**
+     * Returns the layer vis type from chart switch label
+     */
+    async getLayerType(index = 0) {
+      return (await find.allByCssSelector(`[data-test-subj^="lnsChartSwitchPopover"]`))[
+        index
+      ].getVisibleText();
     },
 
     /**

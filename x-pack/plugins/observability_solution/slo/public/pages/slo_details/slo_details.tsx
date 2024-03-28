@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useIsMutating } from '@tanstack/react-query';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
@@ -124,7 +124,8 @@ export function SloDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <HeaderTitle isLoading={isPerformingAction} slo={slo} />,
+        pageTitle: slo?.name ?? <EuiSkeletonText lines={1} />,
+        children: <HeaderTitle isLoading={isPerformingAction} slo={slo} />,
         rightSideItems: [
           <HeaderControl isLoading={isPerformingAction} slo={slo} />,
           <AutoRefreshButton

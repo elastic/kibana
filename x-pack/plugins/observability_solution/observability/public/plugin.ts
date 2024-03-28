@@ -106,6 +106,9 @@ export interface ConfigSchema {
     thresholdRule?: {
       enabled: boolean;
     };
+    ruleFormV2?: {
+      enabled: boolean;
+    };
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
