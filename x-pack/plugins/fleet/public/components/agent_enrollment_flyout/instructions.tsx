@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useFleetStatus, useGetAgents, useFleetServerStandalone } from '../../hooks';
+import { useFleetStatus, useFleetServerStandalone } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
-import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../constants';
+import { FLEET_SERVER_PACKAGE } from '../../constants';
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 import { Loading } from '..';
 import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
+
+import { sendAllFleetServerAgents } from '../../applications/fleet/sections/agents/components/agent_upgrade_modal/hooks';
 
 import type { InstructionProps } from './types';
 import { ManagedSteps, StandaloneSteps } from './steps';
@@ -22,7 +24,6 @@ import { DefaultMissingRequirements } from './default_missing_requirements';
 
 export const Instructions = (props: InstructionProps) => {
   const {
-    fleetServerAgentPolicies,
     isFleetServerPolicySelected,
     fleetServerHosts,
     isLoadingAgentPolicies,
@@ -31,30 +32,29 @@ export const Instructions = (props: InstructionProps) => {
     mode,
     setMode,
     isIntegrationFlow,
-    refreshAgentPolicies,
   } = props;
   const fleetStatus = useFleetStatus();
   const { isUnhealthy: isFleetServerUnhealthy, isLoading: isLoadingFleetServerHealth } =
     useFleetServerUnhealthy();
 
   const { isFleetServerStandalone } = useFleetServerStandalone();
+  const [fleetServerAgentsCount, setFleetServerAgentsCount] = useState<number>(0);
+  const [isLoadingAgents, setIsLoadingAgents] = useState<boolean>(false);
 
   useEffect(() => {
-    refreshAgentPolicies();
-  }, [refreshAgentPolicies]);
+    const fetchFleetServerAgents = async () => {
+      try {
+        const { fleetServerAgentsCount: count } = await sendAllFleetServerAgents(true);
+        setFleetServerAgentsCount(count ?? 0);
+        setIsLoadingAgents(false);
+      } catch (error) {
+        return;
+      }
+    };
 
-  const { data: agents, isLoading: isLoadingAgents } = useGetAgents({
-    perPage: 0,
-    showInactive: false,
-    kuery:
-      fleetServerAgentPolicies.length === 0
-        ? '' // TODO shouldn't query if no fleet server policies, use sendGetAgents?
-        : `${AGENTS_PREFIX}.policy_id:${fleetServerAgentPolicies
-            .map((policy) => `"${policy.id}"`)
-            .join(' or ')}`,
-  });
-
-  const fleetServersCount = fleetServerAgentPolicies.length > 0 ? agents?.total ?? 0 : 0;
+    setIsLoadingAgents(true);
+    fetchFleetServerAgents();
+  }, []);
 
   const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
@@ -63,13 +63,13 @@ export const Instructions = (props: InstructionProps) => {
     isFleetServerStandalone ||
     (fleetStatus.isReady &&
       !isFleetServerUnhealthy &&
-      fleetServersCount > 0 &&
+      fleetServerAgentsCount > 0 &&
       (fleetServerHosts?.length ?? 0) > 0);
 
   const showFleetServerEnrollment =
     !isFleetServerStandalone &&
     !isFleetServerPolicySelected &&
-    (fleetServersCount === 0 ||
+    (fleetServerAgentsCount === 0 ||
       isFleetServerUnhealthy ||
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 

@@ -55,7 +55,7 @@ export function useScheduleDateTime(now?: string) {
   };
 }
 
-export async function sendAllFleetServerAgents() {
+export async function sendAllFleetServerAgents(onlyCount: boolean = false) {
   const packagePoliciesRes = await sendGetPackagePolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,
@@ -72,9 +72,12 @@ export async function sendAllFleetServerAgents() {
 
   const response = await sendGetAgents({
     kuery,
-    perPage: SO_SEARCH_LIMIT,
+    perPage: onlyCount ? 0 : SO_SEARCH_LIMIT,
     showInactive: false,
   });
 
-  return { allFleetServerAgents: response.data?.items || [] };
+  return {
+    allFleetServerAgents: response.data?.items || [],
+    fleetServerAgentsCount: response.data?.total ?? 0,
+  };
 }
