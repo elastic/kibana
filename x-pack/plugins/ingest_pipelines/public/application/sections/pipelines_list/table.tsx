@@ -222,7 +222,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         width: '100px',
         render: (pipeline: Pipeline) => {
           return (
-            <EuiFlexGroup direction='column' gutterSize="xs" alignItems="center">
+            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="center">
               {pipeline.isManaged && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow" data-test-subj="isManagedBadge">
@@ -243,7 +243,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
               )}
             </EuiFlexGroup>
           );
-        }
+        },
       },
       {
         field: 'description',

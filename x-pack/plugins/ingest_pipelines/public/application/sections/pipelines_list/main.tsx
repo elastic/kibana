@@ -13,7 +13,15 @@ import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { EuiPageHeader, EuiButtonEmpty, EuiButton, EuiSpacer, EuiPageTemplate, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSpacer,
+  EuiPageTemplate,
+  EuiContextMenu,
+  EuiPopover,
+} from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
