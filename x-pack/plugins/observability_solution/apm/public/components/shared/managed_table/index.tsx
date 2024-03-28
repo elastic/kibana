@@ -16,14 +16,12 @@ import React, {
   useState,
 } from 'react';
 import { useHistory } from 'react-router-dom';
-import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import {
   getItemsFilteredBySearchQuery,
   TableSearchBar,
 } from '../table_search_bar/table_search_bar';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -46,7 +44,7 @@ export interface ITableColumn<T extends object> {
 }
 
 export interface TableSearchBar<T> {
-  isEnabled?: boolean;
+  isEnabled: boolean;
   fieldsToSearch: Array<keyof T>;
   maxCountExceeded: boolean;
   placeholder: string;
@@ -108,11 +106,6 @@ function UnoptimizedManagedTable<T extends object>(props: {
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
-  const { core } = useApmPluginContext();
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
-    apmEnableTableSearchBar,
-    true
-  );
 
   const {
     items,
@@ -276,12 +269,9 @@ function UnoptimizedManagedTable<T extends object>(props: {
     [searchQuery, tableSearchBar]
   );
 
-  const isSearchBarEnabled =
-    isTableSearchBarEnabled && (tableSearchBar.isEnabled ?? true);
-
   return (
     <>
-      {isSearchBarEnabled ? (
+      {tableSearchBar.isEnabled ? (
         <TableSearchBar
           placeholder={tableSearchBar.placeholder}
           searchQuery={searchQuery}

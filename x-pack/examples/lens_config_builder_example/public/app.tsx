@@ -60,7 +60,7 @@ export const App = (props: {
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
   const attributes = useAsync(async () => {
-    const configBuilder = new LensConfigBuilder(props.formula, props.dataViews);
+    const configBuilder = new LensConfigBuilder(props.dataViews, props.formula);
     return (await configBuilder.build(lensConfig, {
       embeddable: false,
     })) as TypedLensByValueInput['attributes'];

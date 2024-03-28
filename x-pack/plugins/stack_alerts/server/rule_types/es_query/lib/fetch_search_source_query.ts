@@ -248,5 +248,5 @@ export function updateFilterReferences(
 export function getSmallerDataViewSpec(
   dataView: DataView
 ): DiscoverAppLocatorParams['dataViewSpec'] {
-  return dataView.toMinimalSpec();
+  return dataView.toMinimalSpec({ keepFieldAttrs: ['customLabel'] });
 }

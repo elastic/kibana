@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           panels[0]
         )
       ).to.be(true);
-      await dashboardPanelActions.unlinkFromLibary(panels[0]);
+      await dashboardPanelActions.legacyUnlinkFromLibary(panels[0]);
       await testSubjects.existOrFail('unlinkPanelSuccess');
       panels = await testSubjects.findAll('embeddablePanel');
       expect(panels.length).to.be(1);

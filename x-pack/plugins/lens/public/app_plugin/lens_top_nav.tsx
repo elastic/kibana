@@ -103,7 +103,6 @@ function getSaveButtonMeta({
 
 function getLensTopNavConfig(options: {
   isByValueMode: boolean;
-  allowByValue: boolean;
   actions: LensTopNavActions;
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
@@ -115,7 +114,6 @@ function getLensTopNavConfig(options: {
 }): TopNavMenuData[] {
   const {
     actions,
-    allowByValue,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     contextOriginatingApp,
@@ -130,7 +128,7 @@ function getLensTopNavConfig(options: {
 
   const enableSaveButton =
     savingToLibraryPermitted ||
-    (allowByValue && savingToDashboardPermitted && !isByValueMode && !showSaveAndReturn);
+    (savingToDashboardPermitted && !isByValueMode && !showSaveAndReturn);
 
   const saveButtonLabel = isByValueMode
     ? i18n.translate('xpack.lens.app.addToLibrary', {
@@ -296,7 +294,6 @@ export const LensTopNavMenu = ({
     application,
     attributeService,
     share,
-    dashboardFeatureFlag,
     dataViewFieldEditor,
     dataViewEditor,
     dataViews: dataViewsService,
@@ -539,14 +536,10 @@ export const LensTopNavMenu = ({
       !(initialInput as LensByReferenceInput)?.savedObjectId;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
+
     const showSaveAndReturn =
       !(showReplaceInDashboard || showReplaceInCanvas) &&
-      (Boolean(
-        isLinkedToOriginatingApp &&
-          // Temporarily required until the 'by value' paradigm is default.
-          (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-      ) ||
-        Boolean(initialContextIsEmbedded));
+      (isLinkedToOriginatingApp || Boolean(initialContextIsEmbedded));
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -555,7 +548,6 @@ export const LensTopNavMenu = ({
     const showShareMenu = csvEnabled || shareUrlEnabled;
     const baseMenuEntries = getLensTopNavConfig({
       isByValueMode: getIsByValueMode(),
-      allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
       savingToLibraryPermitted,
       savingToDashboardPermitted,
       isSaveable,
@@ -762,7 +754,6 @@ export const LensTopNavMenu = ({
     initialContext,
     initialInput,
     isLinkedToOriginatingApp,
-    dashboardFeatureFlag.allowByValueEmbeddables,
     initialContextIsEmbedded,
     activeData,
     isSaveable,
@@ -776,6 +767,8 @@ export const LensTopNavMenu = ({
     lensInspector,
     title,
     share,
+    visualization,
+    visualizationMap,
     shortUrlService,
     data,
     filters,
@@ -783,12 +776,11 @@ export const LensTopNavMenu = ({
     activeDatasourceId,
     datasourceStates,
     datasourceMap,
-    visualizationMap,
-    visualization,
     currentDoc,
     adHocDataViews,
-    defaultLensTitle,
     isCurrentStateDirty,
+    dataViews.indexPatterns,
+    defaultLensTitle,
     onAppLeave,
     runSave,
     attributeService,
@@ -798,7 +790,6 @@ export const LensTopNavMenu = ({
     discoverLocator,
     indexPatterns,
     uiSettings,
-    dataViews.indexPatterns,
     isOnTextBasedMode,
     lensStore,
     theme$,
