@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 
 import { useComponentTemplatesContext } from '../../../../component_templates/component_templates_context';
 import { getFieldConfig } from '../../../lib';
-import {
-  FieldHook,
-  Form,
-  FormDataProvider,
-  SuperSelectField,
-  UseField,
-  useForm,
-} from '../../../shared_imports';
+import { FieldHook, Form, SuperSelectField, UseField, useForm } from '../../../shared_imports';
 import { SuperSelectOption } from '../../../types';
 interface Props {
   onChange(value: unknown): void;
@@ -69,32 +62,26 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
 
   return (
     <Form form={form}>
-      <FormDataProvider pathsToWatch="main">
-        {({ main }) => {
-          return (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <UseField path="main" config={fieldConfigModelId}>
-                  {(field) => renderSelect(field, inferenceIdOptions)}
-                </UseField>
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <EuiCallOut
-                  size="s"
-                  color="warning"
-                  title={i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.parameters.noReferenceModelStartWarningMessage',
-                    {
-                      defaultMessage:
-                        'The referenced model for this inference endpoint will be stated when adding this field.',
-                    }
-                  )}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        }}
-      </FormDataProvider>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <UseField path="main" config={fieldConfigModelId}>
+            {(field) => renderSelect(field, inferenceIdOptions)}
+          </UseField>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            title={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.noReferenceModelStartWarningMessage',
+              {
+                defaultMessage:
+                  'The referenced model for this inference endpoint will be stated when adding this field.',
+              }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Form>
   );
 };
