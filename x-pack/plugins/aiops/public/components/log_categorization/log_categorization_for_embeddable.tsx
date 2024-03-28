@@ -22,11 +22,10 @@ import type { unitOfTime } from 'moment';
 import moment from 'moment';
 import { useStorage } from '@kbn/ml-local-storage';
 
-import type { CategorizationAdditionalFilter } from '../../../common/api/log_categorization/create_category_request';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
-import type { Category } from '../../../common/api/log_categorization/types';
-
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-log-rate-analysis/constants';
+import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,

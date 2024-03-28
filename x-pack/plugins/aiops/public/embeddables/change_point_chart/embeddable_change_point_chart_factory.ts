@@ -10,13 +10,14 @@ import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+
 import type {
-  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
   EmbeddableChangePointType,
-} from '../../../common/constants';
-import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
+  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+} from '@kbn/aiops-log-rate-analysis/constants';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import { EmbeddableChangePointChart } from './embeddable_change_point_chart';
+import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 
 export interface EmbeddableChangePointChartStartServices {
   data: DataPublicPluginStart;

@@ -30,8 +30,9 @@ import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 // import useObservable from 'react-use/lib/useObservable';
-import type { EmbeddableLogCategorizationType } from '../../../common/constants';
-import { EMBEDDABLE_ORIGIN } from '../../../common/constants';
+
+import type { EmbeddableLogCategorizationType } from '@kbn/aiops-log-pattern-analysis/constants';
+import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-log-rate-analysis/constants';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { LogCategorizationEmbeddable } from '../../components/log_categorization/log_categorization_for_embeddable';

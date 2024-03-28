@@ -12,7 +12,8 @@ import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-pl
 // import type { DataVisualizerGridEmbeddableServices } from './grid_embeddable';
 // import type { DataVisualizerGridEmbeddableInput } from './types';
 // import type { EmbeddableLogCategorizationType } from '../../../common/constants';
-import { EMBEDDABLE_LOG_CATEGORIZATION_TYPE } from '../../../common/constants';
+
+import { EMBEDDABLE_LOG_CATEGORIZATION_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import type {
   EmbeddableLogCategorizationDeps,

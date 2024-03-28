@@ -32,14 +32,13 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
-import { MaxSeriesControl } from './max_series_control';
-import type { ChangePointDetectionViewType } from '../../../common/constants';
+import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import {
   CHANGE_POINT_DETECTION_VIEW_TYPE,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-} from '../../../common/constants';
+} from '@kbn/aiops-change-point-detection/constants';
+import { MaxSeriesControl } from './max_series_control';
 import { useCasesModal } from '../../hooks/use_cases_modal';
-import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ChangePointsTable } from './change_points_table';
@@ -56,6 +55,7 @@ import {
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';
+import type { EmbeddableChangePointChartInput } from '../../embeddables/change_point_chart/embeddable_change_point_chart';
 
 const selectControlCss = { width: '350px' };
 
