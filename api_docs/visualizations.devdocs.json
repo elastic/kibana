@@ -6800,7 +6800,7 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          "> | undefined; parentApi: (Partial<",
+          "> | undefined; canLinkToLibrary: (() => Promise<boolean>) | undefined; canUnlinkFromLibrary: (() => Promise<boolean>) | undefined; parentApi: (Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -6928,7 +6928,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => void; isCompatibleWithUnifiedSearch: (() => boolean) | undefined; canLinkToLibrary: (() => Promise<boolean>) | undefined; linkToLibrary: (() => Promise<void>) | undefined; canUnlinkFromLibrary: (() => Promise<boolean>) | undefined; unlinkFromLibrary: (() => Promise<void>) | undefined; viewMode: ",
+          " | undefined) => void; isCompatibleWithUnifiedSearch: (() => boolean) | undefined; linkToLibrary: (() => Promise<void>) | undefined; unlinkFromLibrary: (() => Promise<void>) | undefined; viewMode: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
