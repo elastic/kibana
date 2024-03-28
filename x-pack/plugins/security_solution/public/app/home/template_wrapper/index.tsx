@@ -85,7 +85,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           component="div"
           grow={true}
         >
-          <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.eventFlyout}>
+          <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
             {children}
             <SecuritySolutionFlyout />
           </ExpandableFlyoutProvider>
