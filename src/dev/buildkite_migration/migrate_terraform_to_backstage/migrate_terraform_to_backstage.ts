@@ -294,6 +294,18 @@ function valueOrDefault(value: any, defaultValue: any) {
   return value === undefined ? defaultValue : value;
 }
 
+function renameField(fieldName: string, newFieldName: string, obj: any) {
+  if (Object.hasOwn(obj, fieldName)) {
+    obj[newFieldName] = obj[fieldName];
+    delete obj[fieldName];
+  }
+  return obj;
+}
+
+function slugify(str: string) {
+  return str.replace(/[^a-zA-Z0-9-]+/g, '-').toLowerCase();
+}
+
 function convertBuildkitePipeline(
   pipelineId: string,
   pipeline: BuildkitePipelineConfig,
@@ -317,16 +329,26 @@ function convertBuildkitePipeline(
 
   const providerSettings = pipeline.provider_settings?.[0] || {};
 
-  const canonicalPipelineId =
-    `buildkite-pipeline-` + pipelineId.replace(/[^a-zA-Z0-9-]+/g, '-').toLowerCase();
+  const pipelineSlug = slugify(pipelineId);
+  let canonicalPipelineId = `bk-` + pipelineSlug;
+  if (canonicalPipelineId.length > 63) {
+    canonicalPipelineId = canonicalPipelineId + '-TOO-LONG-FIND-SOMETHING-SHORTER!';
+  }
 
   const teams = pipeline.team.reduce(
     (acc, team) => ({ ...acc, [team.slug]: { access_level: team.access_level } }),
     {} as Record<string, { access_level: string }>
   );
+
   if (!teams.everyone) {
     teams.everyone = { access_level: 'BULID_AND_READ' };
   }
+  // https://github.com/elastic/kibana-operations/issues/41
+  ['kibana-operations', 'appex-qa', 'kibana-tech-leads'].forEach((team) => {
+    if (!teams[team]) {
+      teams[team] = { access_level: 'MANAGE_BUILD_AND_READ' };
+    }
+  });
 
   const pipelineObj = {
     apiVersion: 'backstage.io/v1alpha1',
@@ -334,10 +356,17 @@ function convertBuildkitePipeline(
     metadata: {
       name: canonicalPipelineId,
       description: pipeline.description,
+      links: [
+        {
+          url: `https://buildkite.com/elastic/${pipelineSlug}`,
+          title: 'Pipeline link',
+        },
+      ],
     },
     spec: {
       type: 'buildkite-pipeline',
       owner: 'group:kibana-operations', // TODO: try to associate to other owners
+      system: 'buildkite',
       implementation: {
         apiVersion: 'buildkite.elastic.dev/v1',
         kind: 'Pipeline',
@@ -346,7 +375,11 @@ function convertBuildkitePipeline(
           description: pipeline.description,
         },
         spec: {
-          env,
+          env: renameField(
+            'SLACK_NOTIFICATIONS_ENABLED',
+            'ELASTIC_SLACK_NOTIFICATIONS_ENABLED',
+            env
+          ),
           allow_rebuilds: valueOrDefault(pipeline.allow_rebuilds, false),
           branch_configuration: pipeline.branch_configuration,
           cancel_intermediate_builds: pipeline.cancel_intermediate_builds,
