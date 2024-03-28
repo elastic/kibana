@@ -110,6 +110,130 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.handleBedrockChunk",
+        "type": "Function",
+        "tags": [],
+        "label": "handleBedrockChunk",
+        "description": [
+          "\nHandle a chunk of data from the bedrock API."
+        ],
+        "signature": [
+          "({ chunk, bedrockBuffer, chunkHandler, logger, }: { chunk: Uint8Array; bedrockBuffer: Uint8Array; chunkHandler?: ((chunk: string) => void) | undefined; logger?: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          " | undefined; }) => { decodedChunk: string; bedrockBuffer: Uint8Array; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.handleBedrockChunk.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  chunk,\n  bedrockBuffer,\n  chunkHandler,\n  logger,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.handleBedrockChunk.$1.chunk",
+                "type": "Object",
+                "tags": [],
+                "label": "chunk",
+                "description": [],
+                "signature": [
+                  "Uint8Array"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.handleBedrockChunk.$1.bedrockBuffer",
+                "type": "Object",
+                "tags": [],
+                "label": "bedrockBuffer",
+                "description": [],
+                "signature": [
+                  "Uint8Array"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.handleBedrockChunk.$1.chunkHandler",
+                "type": "Function",
+                "tags": [],
+                "label": "chunkHandler",
+                "description": [],
+                "signature": [
+                  "((chunk: string) => void) | undefined"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant-common",
+                    "id": "def-common.handleBedrockChunk.$1.chunkHandler.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "chunk",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.handleBedrockChunk.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [
+          ", bedrockBuffer } - The decoded chunk and the updated buffer."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.isAllowed",
         "type": "Function",
         "tags": [],
