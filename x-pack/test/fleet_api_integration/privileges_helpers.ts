@@ -17,7 +17,7 @@ interface PrivilegeTestScenario {
 
 interface PrivilegeTestRoute {
   method: string;
-  path: string;
+  path: string | (() => string);
   send?: any;
   beforeEach?: () => any;
   afterEach?: () => any;
@@ -57,27 +57,28 @@ export function runPrivilegeTests(
           }
         };
         it(`should return a ${scenario.statusCode} for user: ${scenario.user.username}`, async () => {
+          const path = typeof route.path === 'function' ? route.path() : route.path;
           if (route.method === 'GET') {
             return supertestWithoutAuth
-              .get(route.path)
+              .get(path)
               .auth(scenario.user.username, scenario.user.password)
               .expect(expectFn);
           } else if (route.method === 'PUT') {
             return supertestWithoutAuth
-              .put(route.path)
+              .put(path)
               .set('kbn-xsrf', 'xx')
               .auth(scenario.user.username, scenario.user.password)
               .send(route.send)
               .expect(expectFn);
           } else if (route.method === 'DELETE') {
             return supertestWithoutAuth
-              .delete(route.path)
+              .delete(path)
               .set('kbn-xsrf', 'xx')
               .auth(scenario.user.username, scenario.user.password)
               .expect(expectFn);
           } else if (route.method === 'POST') {
             await supertestWithoutAuth
-              .post(route.path)
+              .post(path)
               .set('kbn-xsrf', 'xx')
               .auth(scenario.user.username, scenario.user.password)
               .send(route.send)
