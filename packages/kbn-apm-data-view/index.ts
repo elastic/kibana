@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { type CanLinkToLibrary, apiCanLinkToLibrary } from './interfaces/can_link_to_library';
-export {
-  type CanUnlinkFromLibrary,
-  apiCanUnlinkFromLibrary,
-} from './interfaces/can_unlink_from_library';
+const APM_STATIC_DATA_VIEW_ID_PREFIX = 'apm_static_data_view_id';
+
+export function getStaticDataViewId(spaceId: string) {
+  return `${APM_STATIC_DATA_VIEW_ID_PREFIX}_${spaceId}`;
+}
+
+export function isAPMDataView(dataViewId: string) {
+  return dataViewId.includes(APM_STATIC_DATA_VIEW_ID_PREFIX);
+}

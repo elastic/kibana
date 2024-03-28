@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: buildkite-pipeline-kibana-serverless-security-solution-quality-gate-entity-analytics
+  name: bk-kibana-serverless-secsol-qg-entity-analytics
   description: "[MKI] Executes Cypress tests for the Entity Analytics team"
 spec:
   type: buildkite-pipeline

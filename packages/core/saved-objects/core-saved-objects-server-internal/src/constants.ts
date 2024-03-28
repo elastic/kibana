@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/presentation/presentation_library'],
-};
+/**
+ * Defines settings for the elasticsearch-js client used for the SO migrations
+ */
+export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 310_000 };
