@@ -8,19 +8,20 @@
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { AlertRawData } from '../tabs/risk_inputs/risk_inputs_tab';
+import type { EntityRiskInput } from '../../../../../common/entity_analytics/risk_engine';
+
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
 
 interface ActionColumnProps {
-  alert: AlertRawData;
+  input: EntityRiskInput;
 }
 
-export const ActionColumn: React.FC<ActionColumnProps> = ({ alert }) => {
+export const ActionColumn: React.FC<ActionColumnProps> = ({ input }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
-  const alerts = useMemo(() => [alert], [alert]);
-  const panels = useRiskInputActionsPanels(alerts, closePopover);
+  const inputs = useMemo(() => [input], [input]);
+  const panels = useRiskInputActionsPanels(inputs, closePopover);
 
   return (
     <EuiPopover

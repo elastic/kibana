@@ -27,7 +27,7 @@ export interface InitRiskEngineResult {
   errors: string[];
 }
 
-export interface SimpleRiskInput {
+export interface EntityRiskInput {
   id: string;
   index: string;
   category: RiskCategories;
@@ -49,7 +49,7 @@ export interface EcsRiskScore {
   };
 }
 
-export type RiskInputs = SimpleRiskInput[];
+export type RiskInputs = EntityRiskInput[];
 
 /**
  * The API response object representing a risk score

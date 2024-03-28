@@ -14,13 +14,13 @@ import type { CasesService } from '@kbn/triggers-actions-ui-plugin/public/applic
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import type { EntityRiskInput } from '../../../../../common/entity_analytics/risk_engine/types';
 import { useRiskInputActions } from './use_risk_input_actions';
-import type { AlertRawData } from '../tabs/risk_inputs/risk_inputs_tab';
 
-export const useRiskInputActionsPanels = (alerts: AlertRawData[], closePopover: () => void) => {
+export const useRiskInputActionsPanels = (inputs: EntityRiskInput[], closePopover: () => void) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
   const { addToExistingCase, addToNewCaseClick, addToNewTimeline } = useRiskInputActions(
-    alerts,
+    inputs,
     closePopover
   );
   const userCasesPermissions = casesService?.helpers.canUseCases([SECURITY_SOLUTION_OWNER]);
@@ -37,21 +37,21 @@ export const useRiskInputActionsPanels = (alerts: AlertRawData[], closePopover: 
 
       onClick: addToNewTimeline,
     };
-    const ruleName = get(['fields', ALERT_RULE_NAME], alerts[0]) ?? [''];
+    const ruleName = get(['fields', ALERT_RULE_NAME], inputs[0]) ?? [''];
     const title = i18n.translate(
       'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.title',
       {
         defaultMessage: 'Risk input: {description}',
         values: {
           description:
-            alerts.length === 1
+            inputs.length === 1
               ? ruleName[0]
               : i18n.translate(
                   'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.titleDescription',
                   {
                     defaultMessage: '{quantity} selected',
                     values: {
-                      quantity: alerts.length,
+                      quantity: inputs.length,
                     },
                   }
                 ),
@@ -96,5 +96,5 @@ export const useRiskInputActionsPanels = (alerts: AlertRawData[], closePopover: 
           : [timelinePanel],
       },
     ];
-  }, [addToExistingCase, addToNewCaseClick, addToNewTimeline, alerts, hasCasesPermissions]);
+  }, [addToExistingCase, addToNewCaseClick, addToNewTimeline, inputs, hasCasesPermissions]);
 };

@@ -15,12 +15,13 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useAddBulkToTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { AlertRawData } from '../tabs/risk_inputs/risk_inputs_tab';
+
+import { EntityRiskInput } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine/types';
 
 /**
  * The returned actions only support alerts risk inputs.
  */
-export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => void) => {
+export const useRiskInputActions = (inputs: EntityRiskInput[], closePopover: () => void) => {
   const { from, to } = useGlobalTime();
   const timelineAction = useAddBulkToTimelineAction({
     localFilters: [],
@@ -36,16 +37,16 @@ export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => 
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(
     () =>
-      alerts.map((alert: AlertRawData) => ({
-        alertId: alert._id,
-        index: alert._index,
+      inputs.map((input: EntityRiskInput) => ({
+        alertId: input.id,
+        index: input.index,
         type: AttachmentType.alert,
         rule: {
-          id: get(ALERT_RULE_UUID, alert.fields)[0],
-          name: get(ALERT_RULE_NAME, alert.fields)[0],
+          id: get(ALERT_RULE_UUID, input.id), // TODO:QUESTION: Add the rule UUID to the input data?
+          name: get(ALERT_RULE_NAME, input.description),
         },
       })),
-    [alerts]
+    [inputs]
   );
 
   return useMemo(
@@ -61,19 +62,19 @@ export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => 
 
       addToNewTimeline: () => {
         telemetry.reportAddRiskInputToTimelineClicked({
-          quantity: alerts.length,
+          quantity: inputs.length,
         });
 
         closePopover();
         timelineAction.onClick(
-          alerts.map((alert: AlertRawData) => {
+          inputs.map((input: EntityRiskInput) => {
             return {
-              _id: alert._id,
-              _index: alert._index,
+              _id: input.id,
+              _index: input.index,
               data: [],
               ecs: {
-                _id: alert._id,
-                _index: alert._index,
+                _id: input.id,
+                _index: input.index,
               },
             };
           }),
@@ -85,7 +86,7 @@ export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => 
       },
     }),
     [
-      alerts,
+      inputs,
       caseAttachments,
       closePopover,
       createCaseFlyout,

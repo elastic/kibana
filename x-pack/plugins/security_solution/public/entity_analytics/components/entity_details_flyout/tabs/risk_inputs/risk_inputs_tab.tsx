@@ -16,7 +16,6 @@ import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/const
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 import { ActionColumn } from '../../components/action_column';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
-import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributing_alerts';
 import { useRiskScore } from '../../../../api/hooks/use_risk_score';
 import type { HostRiskScore, UserRiskScore } from '../../../../../../common/search_strategy';
 import {
@@ -24,6 +23,7 @@ import {
   buildUserNamesFilter,
   isUserRiskScore,
 } from '../../../../../../common/search_strategy';
+import type { EntityRiskInput } from '../../../../../../common/entity_analytics/risk_engine';
 import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
 import { AssetCriticalityBadgeAllowMissing } from '../../../asset_criticality';
 
@@ -44,7 +44,7 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) => {
-  const [selectedItems, setSelectedItems] = useState<AlertRawData[]>([]);
+  const [selectedItems, setSelectedItems] = useState<EntityRiskInput[]>([]);
 
   const nameFilterQuery = useMemo(() => {
     if (entityType === RiskScoreEntity.host) {
@@ -67,15 +67,16 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
   });
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
-  const {
-    loading: loadingAlerts,
-    data: alertsData,
-    error: riskAlertsError,
-  } = useRiskContributingAlerts({ riskScore });
+
+  // const {
+  //   loading: loadingAlerts,
+  //   data: alertsData,
+  //   error: riskAlertsError,
+  // } = useRiskContributingAlerts({ riskScore });
 
   const euiTableSelectionProps = useMemo(
     () => ({
-      onSelectionChange: (selected: AlertRawData[]) => {
+      onSelectionChange: (selected: EntityRiskInput[]) => {
         setSelectedItems(selected);
       },
       initialSelected: [],
@@ -84,7 +85,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     []
   );
 
-  const alertsColumns: Array<EuiBasicTableColumn<AlertRawData>> = useMemo(
+  const inputColumns: Array<EuiBasicTableColumn<EntityRiskInput>> = useMemo(
     () => [
       {
         name: (
@@ -94,12 +95,12 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
           />
         ),
         width: '80px',
-        render: (alert: AlertRawData) => {
-          return <ActionColumn alert={alert} />;
+        render: (input: EntityRiskInput) => {
+          return <ActionColumn input={input} />;
         },
       },
       {
-        field: 'fields.@timestamp',
+        field: 'timestamp',
         name: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.dateColumn"
@@ -113,7 +114,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         render: (timestamp: string) => <PreferenceFormattedDate value={new Date(timestamp)} />,
       },
       {
-        field: 'fields',
+        field: 'description',
         'data-test-subj': 'risk-input-table-description-cell',
         name: (
           <FormattedMessage
@@ -125,6 +126,20 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         mobileOptions: { show: true },
         sortable: true,
         render: (fields: AlertRawData['fields']) => get(ALERT_RULE_NAME, fields),
+      },
+      {
+        field: 'contribution_score',
+        'data-test-subj': 'risk-input-table-contribution-cell',
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.contributionColumn"
+            defaultMessage="Contribution"
+          />
+        ),
+        truncateText: false,
+        mobileOptions: { show: true },
+        sortable: true,
+        render: (contribution: number) => contribution.toFixed(2),
       },
     ],
     []
@@ -141,16 +156,16 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
 
   const pagination: Pagination = useMemo(
     () => ({
-      totalItemCount: alertsData?.length ?? 0,
+      totalItemCount: riskScoreData?.length ?? 0,
       pageIndex: currentPage.index,
       pageSize: currentPage.size,
     }),
-    [currentPage.index, currentPage.size, alertsData?.length]
+    [currentPage.index, currentPage.size, riskScoreData?.length]
   );
 
   const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
 
-  if (riskScoreError || riskAlertsError) {
+  if (riskScoreError) {
     return (
       <EuiCallOut
         title={
@@ -172,6 +187,13 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     );
   }
 
+  console.log('riskScoreData', riskScoreData);
+
+  const inputsData =
+    entityType === RiskScoreEntity.user
+      ? (riskScoreData?.[0] as UserRiskScore)?.user.risk.inputs
+      : (riskScoreData?.[0] as HostRiskScore)?.host.risk.inputs;
+
   const riskInputsAlertSection = (
     <>
       <EuiTitle size="xs" data-test-subj="risk-input-alert-title">
@@ -187,9 +209,9 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
       <EuiSpacer size="xs" />
       <EuiInMemoryTable
         compressed={true}
-        loading={loadingRiskScore || loadingAlerts}
-        items={alertsData ?? []}
-        columns={alertsColumns}
+        loading={loadingRiskScore}
+        items={inputsData || []}
+        columns={inputColumns}
         pagination
         sorting
         selection={euiTableSelectionProps}
