@@ -14,7 +14,7 @@ import { getFieldConfig } from '../../../lib';
 import { FieldHook, Form, SuperSelectField, UseField, useForm } from '../../../shared_imports';
 import { SuperSelectOption } from '../../../types';
 interface Props {
-  onChange(value: unknown): void;
+  onChange(value: string): void;
   'data-test-subj'?: string;
 }
 
