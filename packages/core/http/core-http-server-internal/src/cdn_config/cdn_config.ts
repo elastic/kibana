@@ -7,7 +7,7 @@
  */
 
 import { URL, format } from 'node:url';
-import type { CspAdditionalConfig } from './csp';
+import type { CspAdditionalConfig } from '../csp';
 
 export interface Input {
   url?: string;
