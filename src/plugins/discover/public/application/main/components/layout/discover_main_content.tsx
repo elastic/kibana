@@ -179,8 +179,6 @@ export const DiscoverMainContent = ({
                     return (
                       <KibanaContextProvider services={services}>
                         <EuiFlexItem grow={false}>{viewModeToggle2(patternCount)}</EuiFlexItem>
-
-                        {/* <div>Hello there</div> */}
                       </KibanaContextProvider>
                     );
                   } catch (error) {

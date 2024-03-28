@@ -112,7 +112,7 @@ export const EmbeddableMenu: FC<Props> = ({
           label={i18n.translate(
             'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerRowLabel',
             {
-              defaultMessage: 'Additional time',
+              defaultMessage: 'Minimum time range',
             }
           )}
           helpText={

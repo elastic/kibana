@@ -10,10 +10,9 @@ import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-
 import type {
-  EmbeddableChangePointType,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+  EmbeddableChangePointType,
 } from '@kbn/aiops-change-point-detection/constants';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import { EmbeddableChangePointChart } from './embeddable_change_point_chart';

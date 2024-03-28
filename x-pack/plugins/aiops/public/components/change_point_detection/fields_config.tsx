@@ -39,6 +39,7 @@ import {
 } from '@kbn/aiops-change-point-detection/constants';
 import { MaxSeriesControl } from './max_series_control';
 import { useCasesModal } from '../../hooks/use_cases_modal';
+import type { EmbeddableChangePointChartInput } from '../../embeddables/change_point_chart/embeddable_change_point_chart';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ChangePointsTable } from './change_points_table';
@@ -55,7 +56,6 @@ import {
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';
-import type { EmbeddableChangePointChartInput } from '../../embeddables/change_point_chart/embeddable_change_point_chart';
 
 const selectControlCss = { width: '350px' };
 
