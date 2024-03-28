@@ -23,10 +23,12 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
   } = useKibana();
   const {
     data: connectors,
+    refetch: refetchConnectors,
     isLoading: isConnectorListLoading,
     isSuccess: isConnectorListLoadSuccess,
   } = useLoadConnectors();
   const handleConnectorCreated = () => {
+    refetchConnectors();
     setConnectorFlyoutOpen(false);
   };
 
