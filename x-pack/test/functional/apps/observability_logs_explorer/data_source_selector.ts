@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const noIntegrationsTitle = 'No integrations found';
   const noUncategorizedTitle = 'No data streams found';
 
-  describe.only('DataSourceSelector', () => {
+  describe('DataSourceSelector', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
@@ -193,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(integrations).to.eql(initialPackagesTexts);
         });
 
-        it('should sort the integrations list by the clicked sorting option', async () => {
+        it('should sort the integrations list by name when clicking the header', async () => {
           // Test ascending order
           await retry.try(async () => {
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
@@ -380,9 +380,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         beforeEach(async () => {
           await browser.refresh();
           await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
-          await PageObjects.observabilityLogsExplorer
-            .getDataViewsTab()
-            .then((tab: WebElementWrapper) => tab.click());
+          await PageObjects.observabilityLogsExplorer.getDataViewsTab().then((tab) => tab.click());
         });
 
         it('should display a list of available data views', async () => {
