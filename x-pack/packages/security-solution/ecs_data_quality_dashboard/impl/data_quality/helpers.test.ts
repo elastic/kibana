@@ -751,7 +751,7 @@ describe('helpers', () => {
   describe('getDocsCount', () => {
     test('it returns the expected docs count when `stats` contains the `indexName`', () => {
       const indexName = '.ds-packetbeat-8.6.1-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].primaries?.docs?.count;
+      const expectedCount = mockStatsYellowIndex[indexName].num_docs;
 
       expect(
         getDocsCount({
@@ -791,14 +791,14 @@ describe('helpers', () => {
           indexName,
           stats: mockStatsGreenIndex,
         })
-      ).toEqual(mockStatsGreenIndex[indexName].primaries?.docs?.count);
+      ).toEqual(mockStatsGreenIndex[indexName].num_docs);
     });
   });
 
   describe('getSizeInBytes', () => {
     test('it returns the expected size when `stats` contains the `indexName`', () => {
       const indexName = '.ds-packetbeat-8.6.1-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].primaries?.store?.size_in_bytes;
+      const expectedCount = mockStatsYellowIndex[indexName].size_in_bytes;
 
       expect(
         getSizeInBytes({
@@ -838,14 +838,14 @@ describe('helpers', () => {
           indexName,
           stats: mockStatsGreenIndex,
         })
-      ).toEqual(mockStatsGreenIndex[indexName].primaries?.store?.size_in_bytes);
+      ).toEqual(mockStatsGreenIndex[indexName].size_in_bytes);
     });
   });
 
   describe('getTotalDocsCount', () => {
     test('it returns the expected total given a subset of index names in the stats', () => {
       const indexName = '.ds-packetbeat-8.5.3-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].primaries?.docs?.count;
+      const expectedCount = mockStatsYellowIndex[indexName].num_docs;
 
       expect(
         getTotalDocsCount({
@@ -880,7 +880,7 @@ describe('helpers', () => {
 
     test('it returns the expected total for a green index', () => {
       const indexName = 'auditbeat-custom-index-1';
-      const expectedCount = mockStatsGreenIndex[indexName].primaries?.docs?.count;
+      const expectedCount = mockStatsGreenIndex[indexName].num_docs;
 
       expect(
         getTotalDocsCount({
@@ -894,7 +894,7 @@ describe('helpers', () => {
   describe('getTotalSizeInBytes', () => {
     test('it returns the expected total given a subset of index names in the stats', () => {
       const indexName = '.ds-packetbeat-8.5.3-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].primaries?.store?.size_in_bytes;
+      const expectedCount = mockStatsYellowIndex[indexName].size_in_bytes;
 
       expect(
         getTotalSizeInBytes({
@@ -929,7 +929,7 @@ describe('helpers', () => {
 
     test('it returns the expected total for a green index', () => {
       const indexName = 'auditbeat-custom-index-1';
-      const expectedCount = mockStatsGreenIndex[indexName].primaries?.store?.size_in_bytes;
+      const expectedCount = mockStatsGreenIndex[indexName].size_in_bytes;
 
       expect(
         getTotalSizeInBytes({

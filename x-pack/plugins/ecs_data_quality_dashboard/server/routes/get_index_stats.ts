@@ -7,13 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import type { IRouter, Logger } from '@kbn/core/server';
 
-import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { fetchStats, fetchAvailableIndices } from '../lib';
+import { fetchStats, fetchAvailableIndices, fetchMeteringStats } from '../lib';
 import { buildResponse } from '../lib/build_response';
 import { GET_INDEX_STATS, INTERNAL_API_VERSION } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetIndexStatsParams, GetIndexStatsQuery } from '../schemas/get_index_stats';
 import { API_DEFAULT_ERROR_MESSAGE } from '../translations';
+import type { MeteringStatsIndex } from '../../common/types';
 
 export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -41,12 +41,24 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
 
           const decodedIndexName = decodeURIComponent(request.params.pattern);
 
-          const stats = await fetchStats(client, decodedIndexName);
           const { isILMAvailable, startDate, endDate } = request.query;
 
           if (isILMAvailable === true) {
+            const stats = await fetchStats(client, decodedIndexName);
+
+            const parsedIndices = Object.entries(stats.indices ?? {}).reduce<
+              Record<string, MeteringStatsIndex>
+            >((acc, [key, value]) => {
+              acc[key] = {
+                uuid: value.uuid,
+                name: key,
+                num_docs: value?.primaries?.docs?.count ?? null,
+                size_in_bytes: value?.primaries?.store?.size_in_bytes ?? null,
+              };
+              return acc;
+            }, {});
             return response.ok({
-              body: stats.indices,
+              body: parsedIndices,
             });
           }
 
@@ -57,6 +69,19 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
           if (startDate && endDate) {
             const decodedStartDate = decodeURIComponent(startDate);
             const decodedEndDate = decodeURIComponent(endDate);
+            const stats = await fetchMeteringStats(
+              client,
+              decodedIndexName,
+              request.headers.authorization
+            );
+
+            const statsIndices = stats.indices.reduce<Record<string, MeteringStatsIndex>>(
+              (acc, curr) => {
+                acc[curr.name] = curr;
+                return acc;
+              },
+              {}
+            );
 
             const indices = await fetchAvailableIndices(esClient, {
               indexPattern: decodedIndexName,
@@ -64,9 +89,9 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
               endDate: decodedEndDate,
             });
             const availableIndices = indices?.aggregations?.index?.buckets?.reduce(
-              (acc: Record<string, IndicesStatsIndicesStats>, { key }: { key: string }) => {
-                if (stats.indices?.[key]) {
-                  acc[key] = stats.indices?.[key];
+              (acc: Record<string, MeteringStatsIndex>, { key }: { key: string }) => {
+                if (statsIndices?.[key]) {
+                  acc[key] = statsIndices?.[key];
                 }
                 return acc;
               },
