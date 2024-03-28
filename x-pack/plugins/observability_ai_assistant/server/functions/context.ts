@@ -122,23 +122,33 @@ export function registerContextFunction({
           };
         }
 
-        const { relevantDocuments, scores } = await scoreSuggestions({
-          suggestions,
-          queries: queriesOrUserPrompt,
-          messages,
-          client,
-          connectorId,
-          signal,
-          logger: resources.logger,
-        });
-
-        return {
-          content: { ...content, learnings: relevantDocuments as unknown as Serializable },
-          data: {
-            scores,
+        try {
+          const { relevantDocuments, scores } = await scoreSuggestions({
             suggestions,
-          },
-        };
+            queries: queriesOrUserPrompt,
+            messages,
+            client,
+            connectorId,
+            signal,
+            logger: resources.logger,
+          });
+
+          return {
+            content: { ...content, learnings: relevantDocuments as unknown as Serializable },
+            data: {
+              scores,
+              suggestions,
+            },
+          };
+        } catch (error) {
+          return {
+            content: { ...content, learnings: suggestions.slice(0, 5) },
+            data: {
+              error,
+              suggestions,
+            },
+          };
+        }
       }
 
       return new Observable<MessageAddEvent>((subscriber) => {
