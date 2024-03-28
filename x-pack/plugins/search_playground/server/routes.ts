@@ -9,13 +9,18 @@ import { schema } from '@kbn/config-schema';
 import { ChatOpenAI } from '@langchain/openai';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { Logger } from '@kbn/logging';
-import { IRouter } from '@kbn/core/server';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { RawAction } from '@kbn/actions-plugin/server/types';
 import { fetchFields } from './utils/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './utils/conversational_chain';
 import { Prompt } from '../common/prompt';
 import { errorHandler } from './utils/error_handler';
-import { APIRoutes } from './types';
+import {
+  APIRoutes,
+  SearchPlaygroundPluginStart,
+  SearchPlaygroundPluginStartDependencies,
+} from './types';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -28,7 +33,18 @@ export function createRetriever(esQuery: string) {
   };
 }
 
-export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) {
+export function defineRoutes({
+  log,
+  router,
+  getStartServices,
+}: {
+  log: Logger;
+  router: IRouter;
+  getStartServices: StartServicesAccessor<
+    SearchPlaygroundPluginStartDependencies,
+    SearchPlaygroundPluginStart
+  >;
+}) {
   router.post(
     {
       path: APIRoutes.POST_QUERY_SOURCE_FIELDS,
@@ -56,13 +72,26 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
       path: APIRoutes.POST_CHAT_MESSAGE,
       validate: {
         body: schema.object({
-          data: schema.any(),
+          data: schema.object({
+            connector_id: schema.string(),
+            indices: schema.string(),
+            prompt: schema.string(),
+            citations: schema.boolean(),
+            elasticsearch_query: schema.string(),
+            summarization_model: schema.string(),
+            doc_size: schema.number(),
+            source_fields: schema.string(),
+          }),
           messages: schema.any(),
         }),
       },
     },
     errorHandler(async (context, request, response) => {
+      const [_, { encryptedSavedObjects }] = await getStartServices();
       const { client } = (await context.core).elasticsearch;
+      const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
+        includedHiddenTypes: ['action'],
+      });
 
       const aiClient = Assist({
         es_client: client.asCurrentUser,
@@ -70,8 +99,15 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
 
       const { messages, data } = await request.body;
 
+      const decryptedApiKey =
+        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
+          'action',
+          data.connector_id
+        );
+
       const model = new ChatOpenAI({
-        openAIApiKey: data.api_key,
+        modelName: data.summarization_model,
+        openAIApiKey: decryptedApiKey.attributes.secrets.apiKey as string,
       });
 
       let sourceFields = {};
@@ -87,9 +123,9 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
         model,
         rag: {
           index: data.indices,
-          retriever: createRetriever(data.elasticsearchQuery),
+          retriever: createRetriever(data.elasticsearch_query),
           content_field: sourceFields,
-          size: Number(data.docSize),
+          size: Number(data.doc_size),
         },
         prompt: Prompt(data.prompt, {
           citations: data.citations,

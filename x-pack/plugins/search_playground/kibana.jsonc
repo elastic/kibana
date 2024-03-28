@@ -12,6 +12,7 @@
     ],
     "requiredPlugins": [
       "actions",
+      "encryptedSavedObjects",
       "navigation",
       "security",
       "stackConnectors",

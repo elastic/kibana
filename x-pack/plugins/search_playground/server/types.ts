@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginStart {}
+
+export interface SearchPlaygroundPluginStartDependencies {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+}
 
 export * from '../common/types';

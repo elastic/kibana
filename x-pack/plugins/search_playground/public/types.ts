@@ -54,7 +54,7 @@ export enum ChatFormFields {
   elasticsearchQuery = 'elasticsearch_query',
   summarizationModel = 'summarization_model',
   sourceFields = 'source_fields',
-  docSize = 'docSize',
+  docSize = 'doc_size',
   connectorId = 'connector_id',
 }
 
