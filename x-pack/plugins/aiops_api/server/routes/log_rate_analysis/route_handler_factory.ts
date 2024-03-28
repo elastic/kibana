@@ -26,10 +26,10 @@ import type {
 // import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsApiLicense } from '../../types';
 
+import { significantTerms } from '../../significant_terms_kibana_logs';
+
 /**
- * The log rate analysis route handler sets up `responseStreamFactory`
- * to create the response stream and then uses its handlers to
- * walk through the steps of the analysis.
+ * Log rate analysis route handler.
  */
 export function routeHandlerFactory<T extends ApiVersion>(
   version: T,
@@ -59,9 +59,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
     // const executionContext = createExecutionContext(coreStart, AIOPS_PLUGIN_ID, request.route.path);
 
     return response.ok({
-      body: {
-        time: new Date().toISOString(),
-      },
+      body: significantTerms,
     });
   };
 }

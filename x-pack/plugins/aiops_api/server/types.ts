@@ -9,16 +9,22 @@ import type { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
+  ObservabilityAIAssistantServerSetup,
+  ObservabilityAIAssistantServerStart,
+} from '@kbn/observability-ai-assistant-plugin/server';
 
 export interface AiopsApiPluginSetupDeps {
   data: PluginSetup;
   licensing: LicensingPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantServerSetup;
   cases?: CasesServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
 export interface AiopsApiPluginStartDeps {
   data: PluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantServerStart;
 }
 
 /**

@@ -26,6 +26,7 @@ import type {
   AiopsApiPluginStartDeps,
 } from './types';
 import { defineRoute as defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_route';
+import { registerAssistantFunctions } from './assistant_functions';
 
 export class AiopsApiPlugin
   implements
@@ -40,8 +41,9 @@ export class AiopsApiPlugin
   private licenseSubscription: Subscription | null = null;
   private usageCounter?: UsageCounter;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.initContext = initContext;
+    this.logger = initContext.logger.get();
   }
 
   public setup(
@@ -65,6 +67,21 @@ export class AiopsApiPlugin
     core.getStartServices().then(([coreStart, depsStart]) => {
       defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart, this.usageCounter);
     });
+
+    // Register Observability AI Assistant functions
+    const kibanaVersion = this.initContext.env.packageInfo.version;
+
+    plugins.observabilityAIAssistant.service.register(
+      registerAssistantFunctions({
+        config: undefined,
+        coreSetup: core,
+        featureFlags: true,
+        kibanaVersion,
+        logger: this.logger.get('assistant'),
+        plugins: [], // resourcePlugins,
+        ruleDataClient: undefined,
+      })
+    );
 
     return {};
   }
