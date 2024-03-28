@@ -139,6 +139,8 @@ export const EditorFooter = memo(function EditorFooter({
       // update the query first
       updateQuery(qs);
       // submit the query with some latency
+      // if I do it immediately there is some race condition until
+      // the state is updated and it won't be sumbitted correctly
       setTimeout(() => {
         runQuery();
       }, 300);
