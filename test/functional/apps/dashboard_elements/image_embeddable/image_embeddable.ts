@@ -54,6 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('image embeddable should support drilldowns', async () => {
       await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickContextMenuMoreItem();
       await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
