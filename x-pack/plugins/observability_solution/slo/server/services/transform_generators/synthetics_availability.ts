@@ -19,6 +19,7 @@ import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
   SYNTHETICS_INDEX_PATTERN,
+  SYNTHETICS_DEFAULT_GROUPINGS,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { InvalidTransformError } from '../../errors';
@@ -53,7 +54,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     const groupings =
       flattenedGroupBy.length && !flattenedGroupBy.includes(ALL_VALUE)
         ? slo.groupBy
-        : ['monitor.name', 'observer.geo.name'];
+        : SYNTHETICS_DEFAULT_GROUPINGS;
 
     const hasTags =
       !indicator.params.tags?.find((param) => param.value === ALL_VALUE) &&

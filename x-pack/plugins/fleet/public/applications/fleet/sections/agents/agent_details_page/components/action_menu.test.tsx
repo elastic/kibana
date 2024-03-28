@@ -48,6 +48,7 @@ describe('AgentDetailsActionMenu', () => {
     } as any);
     mockedUseAuthz.mockReturnValue({
       fleet: {
+        readAgents: true,
         allAgents: true,
       },
     } as any);
@@ -127,10 +128,10 @@ describe('AgentDetailsActionMenu', () => {
       expect(res).not.toBeEnabled();
     });
 
-    it('should not render an active action button if agent version >= 8.7 and user do not have Agent:All authz', async () => {
+    it('should not render an active action button if agent version >= 8.7 and user do not have Agent:Read authz', async () => {
       mockedUseAuthz.mockReturnValue({
         fleet: {
-          allAgents: false,
+          readAgents: false,
         },
       } as any);
       const res = renderAndGetDiagnosticsButton({
