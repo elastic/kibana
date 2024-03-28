@@ -10,6 +10,8 @@ import { ManagementSetup } from '@kbn/management-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { ScopedHistory } from '@kbn/core-application-browser';
+import { IndexMappingProps } from './application/sections/home/index_list/details_page/index_mapping_with_context_types';
 import { ExtensionsSetup, PublicApiServiceSetup } from './services';
 
 export interface IndexManagementPluginSetup {
@@ -19,6 +21,9 @@ export interface IndexManagementPluginSetup {
 
 export interface IndexManagementPluginStart {
   extensionsService: ExtensionsSetup;
+  getIndexMappingComponent: (deps: {
+    history: ScopedHistory<unknown>;
+  }) => React.FC<IndexMappingProps>;
 }
 
 export interface SetupDependencies {
@@ -30,8 +35,12 @@ export interface SetupDependencies {
 }
 
 export interface StartDependencies {
+  cloud?: CloudSetup;
   console?: ConsolePluginStart;
   share: SharePluginStart;
+  fleet?: unknown;
+  usageCollection: UsageCollectionSetup;
+  management: ManagementSetup;
 }
 
 export interface ClientConfigType {

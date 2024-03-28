@@ -65,6 +65,7 @@
     "@kbn/config-schema",
     "@kbn/repo-info",
     "@kbn/apm-utils",
+    "@kbn/apm-data-view",
     "@kbn/logging",
     "@kbn/std",
     "@kbn/core-saved-objects-api-server-mocks",

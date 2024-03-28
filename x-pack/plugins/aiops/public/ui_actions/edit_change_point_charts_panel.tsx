@@ -9,7 +9,7 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import type { EditChangePointChartsPanelContext } from '../embeddable/types';
 import type { AiopsPluginStartDeps } from '../types';
 
