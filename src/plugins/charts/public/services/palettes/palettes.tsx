@@ -12,8 +12,8 @@ import {
   euiPaletteColorBlind,
   euiPaletteCool,
   euiPaletteGray,
-  euiPaletteNegative,
-  euiPalettePositive,
+  euiPaletteRed,
+  euiPaletteGreen,
   euiPaletteWarm,
   euiPaletteForStatus,
   euiPaletteForTemperature,
@@ -281,11 +281,11 @@ export const buildPalettes: (
     },
     negative: {
       title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'Negative' }),
-      ...buildGradient('negative', euiPaletteNegative),
+      ...buildGradient('negative', euiPaletteRed),
     },
     positive: {
       title: i18n.translate('charts.palettes.positiveLabel', { defaultMessage: 'Positive' }),
-      ...buildGradient('positive', euiPalettePositive),
+      ...buildGradient('positive', euiPaletteGreen),
     },
     cool: {
       title: i18n.translate('charts.palettes.coolLabel', { defaultMessage: 'Cool' }),

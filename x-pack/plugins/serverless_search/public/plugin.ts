@@ -121,17 +121,22 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    const { serverless, management, indexManagement } = services;
+    const { serverless, management, indexManagement, security } = services;
     serverless.setProjectHome('/app/elasticsearch');
 
     const navigationTree$ = of(navigationTree);
     serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
-    management.setIsSidebarEnabled(false);
+    const extendCardNavDefinitions = serverless.getNavigationCards(
+      security.authz.isRoleManagementEnabled()
+    );
+
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
+      extendCardNavDefinitions,
     });
+
     indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
     indexManagement?.extensionsService.addIndexDetailsTab(
       createIndexDocumentsContent(core, services)

@@ -39,7 +39,6 @@ import { AlertingRulesConfig } from '.';
 import { AlertsService } from './alerts_service/alerts_service';
 import { getRuleTypeIdValidLegacyConsumers } from './rule_type_registry_deprecated_consumers';
 import { AlertingConfig } from './config';
-import { rawRuleSchemaV1 } from './saved_objects/schemas/raw_rule';
 
 export interface ConstructorOptions {
   config: AlertingConfig;
@@ -315,7 +314,6 @@ export class RuleTypeRegistry {
           spaceId: schema.string(),
           consumer: schema.maybe(schema.string()),
         }),
-        indirectParamsSchema: rawRuleSchemaV1,
       },
     });
 

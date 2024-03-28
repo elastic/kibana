@@ -47,6 +47,7 @@ export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' |
   type: TypeSelection;
   __meta__: {
     isCustomLabelVisible: boolean;
+    isCustomDescriptionVisible: boolean;
     isValueVisible: boolean;
     isFormatVisible: boolean;
     isPopularityVisible: boolean;
@@ -86,6 +87,7 @@ const formDeserializer = (field: Field): FieldFormInternal => {
     format,
     __meta__: {
       isCustomLabelVisible: field.customLabel !== undefined,
+      isCustomDescriptionVisible: field.customDescription !== undefined,
       isValueVisible: field.script !== undefined,
       isFormatVisible: field.format !== undefined,
       isPopularityVisible: field.popularity !== undefined,
@@ -126,6 +128,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     form,
     discard: [
       '__meta__.isCustomLabelVisible',
+      '__meta__.isCustomDescriptionVisible',
       '__meta__.isValueVisible',
       '__meta__.isFormatVisible',
       '__meta__.isPopularityVisible',
