@@ -44,6 +44,7 @@ import {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
@@ -74,11 +75,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('elastic admin', () => {
         it('creates a custom query rule', async () => {
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(getCustomQueryRuleParams())
+          const { body } = await securitySolutionApi
+            .createRule({ body: getCustomQueryRuleParams() })
             .expect(200);
 
           expect(body).toEqual(
@@ -97,11 +95,8 @@ export default ({ getService }: FtrProviderContext) => {
             saved_id: 'my-saved-query-id',
           });
 
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(savedQueryRuleParams)
+          const { body } = await securitySolutionApi
+            .createRule({ body: savedQueryRuleParams })
             .expect(200);
 
           expect(body).toEqual(
@@ -135,11 +130,8 @@ export default ({ getService }: FtrProviderContext) => {
         it('expects rule runs successfully', async () => {
           const {
             body: { id },
-          } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(getCustomQueryRuleParams({ enabled: true }))
+          } = await securitySolutionApi
+            .createRule({ body: getCustomQueryRuleParams({ enabled: true }) })
             .expect(200);
 
           await waitForRuleSuccess({ supertest, log, id });
@@ -152,16 +144,13 @@ export default ({ getService }: FtrProviderContext) => {
         it('expects rule partial failure due to index pattern matching nothing', async () => {
           const {
             body: { id },
-          } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(
-              getCustomQueryRuleParams({
+          } = await securitySolutionApi
+            .createRule({
+              body: getCustomQueryRuleParams({
                 index: ['does-not-exist-*'],
                 enabled: true,
-              })
-            )
+              }),
+            })
             .expect(200);
 
           await waitForRulePartialFailure({
@@ -181,16 +170,13 @@ export default ({ getService }: FtrProviderContext) => {
         it('expects rule runs successfully with only one index pattern matching existing index', async () => {
           const {
             body: { id },
-          } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(
-              getCustomQueryRuleParams({
+          } = await securitySolutionApi
+            .createRule({
+              body: getCustomQueryRuleParams({
                 index: ['does-not-exist-*', 'logs-test'],
                 enabled: true,
-              })
-            )
+              }),
+            })
             .expect(200);
 
           await waitForRuleSuccess({ supertest, log, id });
@@ -205,12 +191,7 @@ export default ({ getService }: FtrProviderContext) => {
             index: undefined,
           });
 
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(ruleParams)
-            .expect(200);
+          const { body } = await securitySolutionApi.createRule({ body: ruleParams }).expect(200);
 
           expect(body.index).toBeUndefined();
           expect(body).toEqual(expect.objectContaining(omit(ruleParams, 'index')));
@@ -221,12 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: undefined,
           });
 
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(ruleParams)
-            .expect(200);
+          const { body } = await securitySolutionApi.createRule({ body: ruleParams }).expect(200);
 
           expect(body).toEqual(
             expect.objectContaining({ ...ruleParams, rule_id: expect.any(String) })
@@ -234,11 +210,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('creates a ML rule with legacy machine_learning_job_id', async () => {
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(getMLRuleParams({ machine_learning_job_id: 'some_job_id' }))
+          const { body } = await securitySolutionApi
+            .createRule({ body: getMLRuleParams({ machine_learning_job_id: 'some_job_id' }) })
             .expect(200);
 
           expect(body).toEqual(
@@ -249,29 +222,18 @@ export default ({ getService }: FtrProviderContext) => {
         it('creates a ML rule', async () => {
           const ruleParams = getMLRuleParams({ machine_learning_job_id: ['some_job_id'] });
 
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(ruleParams)
-            .expect(200);
+          const { body } = await securitySolutionApi.createRule({ body: ruleParams }).expect(200);
 
           expect(body).toEqual(expect.objectContaining(ruleParams));
         });
 
         it('causes a 409 conflict if the same rule_id is used twice', async () => {
-          await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(getCustomQueryRuleParams({ rule_id: 'rule-1' }))
+          await securitySolutionApi
+            .createRule({ body: getCustomQueryRuleParams({ rule_id: 'rule-1' }) })
             .expect(200);
 
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(getCustomQueryRuleParams({ rule_id: 'rule-1' }))
+          const { body } = await securitySolutionApi
+            .createRule({ body: getCustomQueryRuleParams({ rule_id: 'rule-1' }) })
             .expect(409);
 
           expect(body).toEqual({
@@ -283,12 +245,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('exception', () => {
         it('does NOT create a rule if trying to add more than one default rule exception list', async () => {
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(
-              getCustomQueryRuleParams({
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: getCustomQueryRuleParams({
                 exceptions_list: [
                   {
                     id: '2',
@@ -303,8 +262,8 @@ export default ({ getService }: FtrProviderContext) => {
                     type: ExceptionListTypeEnum.RULE_DEFAULT,
                   },
                 ],
-              })
-            )
+              }),
+            })
             .expect(500);
 
           expect(body).toEqual({
@@ -314,12 +273,9 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('does NOT create a rule when there is an attempt to share non sharable exception ("rule_default" type)', async () => {
-          const { body: ruleWithException } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(
-              getCustomQueryRuleParams({
+          const { body: ruleWithException } = await securitySolutionApi
+            .createRule({
+              body: getCustomQueryRuleParams({
                 rule_id: 'rule-1',
                 exceptions_list: [
                   {
@@ -329,16 +285,13 @@ export default ({ getService }: FtrProviderContext) => {
                     type: ExceptionListTypeEnum.RULE_DEFAULT,
                   },
                 ],
-              })
-            )
+              }),
+            })
             .expect(200);
 
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(
-              getCustomQueryRuleParams({
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: getCustomQueryRuleParams({
                 rule_id: 'rule-2',
                 exceptions_list: [
                   {
@@ -348,8 +301,8 @@ export default ({ getService }: FtrProviderContext) => {
                     type: ExceptionListTypeEnum.RULE_DEFAULT,
                   },
                 ],
-              })
-            )
+              }),
+            })
             .expect(409);
 
           expect(body).toEqual({
@@ -359,12 +312,9 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('creates a rule when shared exception type is used ("detection" type)', async () => {
-          await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(
-              getCustomQueryRuleParams({
+          await securitySolutionApi
+            .createRule({
+              body: getCustomQueryRuleParams({
                 rule_id: 'rule-1',
                 exceptions_list: [
                   {
@@ -374,16 +324,13 @@ export default ({ getService }: FtrProviderContext) => {
                     type: ExceptionListTypeEnum.DETECTION,
                   },
                 ],
-              })
-            )
+              }),
+            })
             .expect(200);
 
-          await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(
-              getCustomQueryRuleParams({
+          await securitySolutionApi
+            .createRule({
+              body: getCustomQueryRuleParams({
                 rule_id: 'rule-2',
                 exceptions_list: [
                   {
@@ -393,8 +340,8 @@ export default ({ getService }: FtrProviderContext) => {
                     type: ExceptionListTypeEnum.DETECTION,
                   },
                 ],
-              })
-            )
+              }),
+            })
             .expect(200);
         });
       });
@@ -424,11 +371,11 @@ export default ({ getService }: FtrProviderContext) => {
       describe('threshold validation', () => {
         it('returns HTTP 400 error when NO threshold field is provided', async () => {
           const ruleParams = getThresholdRuleParams();
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(omit(ruleParams, 'threshold'))
+          const { body } = await securitySolutionApi
+            .createRule({
+              // @ts-expect-error we are testing the invalid payload
+              body: omit(ruleParams, 'threshold'),
+            })
             .expect(400);
 
           expect(body).toEqual({
@@ -439,18 +386,15 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('returns HTTP 400 error when there are more than 3 threshold fields provided', async () => {
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(
-              getThresholdRuleParams({
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: getThresholdRuleParams({
                 threshold: {
                   field: ['field-1', 'field-2', 'field-3', 'field-4'],
                   value: 1,
                 },
-              })
-            )
+              }),
+            })
             .expect(400);
 
           expect(body).toEqual({
@@ -460,18 +404,15 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('returns HTTP 400 error when threshold value is less than 1', async () => {
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(
-              getThresholdRuleParams({
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: getThresholdRuleParams({
                 threshold: {
                   field: ['field-1'],
                   value: 0,
                 },
-              })
-            )
+              }),
+            })
             .expect(400);
 
           expect(body).toEqual({
@@ -482,24 +423,21 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('returns HTTP 400 error when cardinality is also an agg field', async () => {
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(
-              getThresholdRuleParams({
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: getThresholdRuleParams({
                 threshold: {
-                  field: ['process.name'],
+                  field: ['field-1'],
                   value: 1,
                   cardinality: [
                     {
-                      field: 'process.name',
+                      field: 'field-1',
                       value: 5,
                     },
                   ],
                 },
-              })
-            )
+              }),
+            })
             .expect(400);
 
           expect(body).toEqual({
@@ -511,17 +449,14 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('investigation_fields', () => {
         it('creates a rule with investigation_fields', async () => {
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(
-              getCustomQueryRuleParams({
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: getCustomQueryRuleParams({
                 investigation_fields: {
                   field_names: ['host.name'],
                 },
-              })
-            )
+              }),
+            })
             .expect(200);
 
           expect(body.investigation_fields).toEqual({
@@ -530,14 +465,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('does NOT create a rule with legacy investigation_fields', async () => {
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send({
-              ...getCustomQueryRuleParams(),
-              // type system doesn't allow to use the legacy format as params for getCustomQueryRuleParams()
-              investigation_fields: ['host.name'],
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: {
+                ...getCustomQueryRuleParams(),
+                // @ts-expect-error type system doesn't allow to use the legacy format as params for getCustomQueryRuleParams()
+                investigation_fields: ['host.name'],
+              },
             })
             .expect(400);
 
@@ -576,17 +510,14 @@ export default ({ getService }: FtrProviderContext) => {
       it('expects partial failure for a rule with timestamp override and index pattern matching no indices', async () => {
         const {
           body: { id },
-        } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(
-            getCustomQueryRuleParams({
+        } = await securitySolutionApi
+          .createRule({
+            body: getCustomQueryRuleParams({
               index: ['myfakeindex-1'],
               timestamp_override: 'event.ingested',
               enabled: true,
-            })
-          )
+            }),
+          })
           .expect(200);
 
         await waitForAlertToComplete(supertest, log, id);
@@ -607,17 +538,14 @@ export default ({ getService }: FtrProviderContext) => {
       it('generates two signals with a "partial failure" status', async () => {
         const {
           body: { id },
-        } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(
-            getCustomQueryRuleParams({
+        } = await securitySolutionApi
+          .createRule({
+            body: getCustomQueryRuleParams({
               index: ['myfa*'],
               timestamp_override: 'event.ingested',
               enabled: true,
-            })
-          )
+            }),
+          })
           .expect(200);
 
         await waitForRulePartialFailure({
@@ -643,16 +571,13 @@ export default ({ getService }: FtrProviderContext) => {
         [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
           (throttle) => {
             it(`sets each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
-              const { body } = await supertest
-                .post(DETECTION_ENGINE_RULES_URL)
-                .set('kbn-xsrf', 'true')
-                .set('elastic-api-version', '2023-10-31')
-                .send(
-                  getCustomQueryRuleParams({
+              const { body } = await securitySolutionApi
+                .createRule({
+                  body: getCustomQueryRuleParams({
                     throttle,
                     actions: await getActionsWithoutFrequencies(supertest),
-                  })
-                )
+                  }),
+                })
                 .expect(200);
 
               for (const action of body.actions) {
@@ -664,18 +589,15 @@ export default ({ getService }: FtrProviderContext) => {
 
         ['300s', '5m', '3h', '4d'].forEach((throttle) => {
           it(`transforms correctly 'throttle = ${throttle}' and sets it as a frequency of each action`, async () => {
-            const { body } = await supertest
-              .post(DETECTION_ENGINE_RULES_URL)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .send(
-                getCustomQueryRuleParams({
+            const { body } = await securitySolutionApi
+              .createRule({
+                body: getCustomQueryRuleParams({
                   // Action throttle cannot be shorter than the schedule interval
                   interval: '5m',
                   throttle,
                   actions: await getActionsWithoutFrequencies(supertest),
-                })
-              )
+                }),
+              })
               .expect(200);
 
             for (const action of body.actions) {
@@ -701,16 +623,13 @@ export default ({ getService }: FtrProviderContext) => {
         ].forEach((throttle) => {
           it(`does NOT change action frequency when 'throttle' is '${throttle}'`, async () => {
             const actionsWithFrequencies = await getActionsWithFrequencies(supertest);
-            const { body } = await supertest
-              .post(DETECTION_ENGINE_RULES_URL)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .send(
-                getCustomQueryRuleParams({
+            const { body } = await securitySolutionApi
+              .createRule({
+                body: getCustomQueryRuleParams({
                   throttle,
                   actions: actionsWithFrequencies,
-                })
-              )
+                }),
+              })
               .expect(200);
 
             expect(body.actions).toEqual(
@@ -725,16 +644,13 @@ export default ({ getService }: FtrProviderContext) => {
           (throttle) => {
             it(`overrides each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
               const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
-              const { body } = await supertest
-                .post(DETECTION_ENGINE_RULES_URL)
-                .set('kbn-xsrf', 'true')
-                .set('elastic-api-version', '2023-10-31')
-                .send(
-                  getCustomQueryRuleParams({
+              const { body } = await securitySolutionApi
+                .createRule({
+                  body: getCustomQueryRuleParams({
                     throttle,
                     actions: someActionsWithFrequencies,
-                  })
-                )
+                  }),
+                })
                 .expect(200);
 
               expect(body.actions).toEqual(
@@ -749,18 +665,15 @@ export default ({ getService }: FtrProviderContext) => {
         ['430s', '7m', '1h', '8d'].forEach((throttle) => {
           it(`transforms correctly 'throttle = ${throttle}' and overrides frequency attribute of each action`, async () => {
             const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
-            const { body } = await supertest
-              .post(DETECTION_ENGINE_RULES_URL)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .send(
-                getCustomQueryRuleParams({
+            const { body } = await securitySolutionApi
+              .createRule({
+                body: getCustomQueryRuleParams({
                   // Action throttle cannot be shorter than the schedule interval
                   interval: '5m',
                   throttle,
                   actions: someActionsWithFrequencies,
-                })
-              )
+                }),
+              })
               .expect(200);
 
             expect(body.actions).toEqual(

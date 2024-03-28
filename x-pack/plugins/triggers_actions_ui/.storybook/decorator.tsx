@@ -67,6 +67,7 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
       ruleKqlBar: true,
       isMustacheAutocompleteOn: false,
       showMustacheAutocompleteSwitch: false,
+      ruleFormV2: false,
     },
   });
   return (
