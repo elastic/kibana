@@ -30,7 +30,7 @@ import type {
   GroupFilters,
   OverviewMode,
 } from './types';
-import { SloGroupConfiguration } from './slo_group_configuration';
+import { SloGroupFilters } from './slo_group_filters';
 import { OverviewModeSelector } from './overview_mode_selector';
 
 interface SloConfigurationProps {
@@ -147,7 +147,7 @@ function GroupSloConfiguration({ overviewMode, onCreate, onCancel }: GroupConfig
           <EuiFlexItem>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <SloGroupConfiguration
+                <SloGroupFilters
                   onSelected={(prop, value) => {
                     setSelectedGroupFilters((prevState) => ({ ...prevState, [prop]: value }));
                   }}

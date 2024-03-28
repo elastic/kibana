@@ -41,7 +41,7 @@ interface Props {
   onSelected: (prop: string, value: string | SLOGroupWithSummaryResponse[] | undefined) => void;
 }
 
-export function SloGroupConfiguration({ onSelected }: Props) {
+export function SloGroupFilters({ onSelected }: Props) {
   const mapGroupsToOptions = (items: SLOGroupWithSummaryResponse[] | undefined) =>
     items?.map((item) => ({
       label: item.group,
