@@ -389,7 +389,7 @@ describe('handleState', () => {
         latestExecutedState: {
           name: 'state1',
           started_at: expect.anything(),
-          errors:
+          error:
             'Error during execution of state "state2" with status "failed": Installation failed',
         },
       })
@@ -494,7 +494,7 @@ describe('handleState', () => {
         latestExecutedState: {
           name: 'state1',
           started_at: expect.anything(),
-          errors:
+          error:
             'Error during execution of state "state2" with status "failed": Installation failed',
         },
       })
@@ -508,7 +508,7 @@ describe('handleState', () => {
         latestExecutedState: {
           name: 'state1',
           started_at: expect.anything(),
-          errors:
+          error:
             'Error during execution of state "state2" with status "failed": Installation failed',
         },
       })
