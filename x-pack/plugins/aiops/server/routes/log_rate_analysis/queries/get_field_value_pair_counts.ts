@@ -6,7 +6,7 @@
  */
 
 import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
-import type { FieldValuePairCounts } from '@kbn/aiops-utils/types';
+import type { FieldValuePairCounts } from '@kbn/aiops-utils/log_rate_analysis/types';
 
 /**
  * Get a nested record of field/value pairs with counts
