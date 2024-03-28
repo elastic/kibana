@@ -62,25 +62,6 @@ const getPreviewDataParamsSchema = t.type({
 
 const getPreviewDataResponseSchema = t.array(previewDataSchema);
 
-const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
-const sortBySchema = t.union([
-  t.literal('error_budget_consumed'),
-  t.literal('error_budget_remaining'),
-  t.literal('sli_value'),
-  t.literal('status'),
-]);
-
-const findSLOParamsSchema = t.partial({
-  query: t.partial({
-    filters: t.string,
-    kqlQuery: t.string,
-    page: t.string,
-    perPage: t.string,
-    sortBy: sortBySchema,
-    sortDirection: sortDirectionSchema,
-  }),
-});
-
 const groupBySchema = t.union([
   t.literal('ungrouped'),
   t.literal('slo.tags'),
@@ -164,13 +145,6 @@ const resetSLOParamsSchema = t.type({
 });
 
 const resetSLOResponseSchema = sloResponseSchema;
-
-const findSLOResponseSchema = t.type({
-  page: t.number,
-  perPage: t.number,
-  total: t.number,
-  results: t.array(sloWithSummaryResponseSchema),
-});
 
 const findSLOGroupsResponseSchema = t.type({
   page: t.number,
@@ -274,9 +248,6 @@ type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
 type ResetSLOParams = t.TypeOf<typeof resetSLOParamsSchema.props.path>;
 type ResetSLOResponse = t.OutputOf<typeof resetSLOResponseSchema>;
 
-type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
-type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
-
 type FindSLOGroupsParams = t.TypeOf<typeof findSLOGroupsParamsSchema.props.query>;
 type FindSLOGroupsResponse = t.OutputOf<typeof findSLOGroupsResponseSchema>;
 
@@ -318,8 +289,6 @@ type QuerySchema = t.TypeOf<typeof querySchema>;
 
 export {
   deleteSLOInstancesParamsSchema,
-  findSLOParamsSchema,
-  findSLOResponseSchema,
   findSLOGroupsParamsSchema,
   findSLOGroupsResponseSchema,
   getPreviewDataParamsSchema,
@@ -345,8 +314,6 @@ export type {
   BudgetingMethod,
   DeleteSLOInstancesInput,
   DeleteSLOInstancesParams,
-  FindSLOParams,
-  FindSLOResponse,
   FindSLOGroupsParams,
   FindSLOGroupsResponse,
   GetPreviewDataParams,
