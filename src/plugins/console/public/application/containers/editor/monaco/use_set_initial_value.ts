@@ -36,27 +36,16 @@ const readLoadFromParam = () => {
   return queryParams.load_from;
 };
 
+/**
+ * Hook to provide a function that will set the initial value in the Console editor.
+ *
+ * @param params The {@link SetInitialValueParams} to use.
+ */
 export const useSetInitialValue = (params: SetInitialValueParams) => {
   const { initialTextValue, setValue, toasts } = params;
 
   const loadBufferFromRemote = (url: string) => {
-    // Normalize and encode the URL to avoid issues with spaces and other special characters.
-    const encodedUrl = new URL(url).toString();
-    if (/^https?:\/\//.test(encodedUrl)) {
-      const loadFrom: Record<string, any> = {
-        url,
-        // Having dataType here is required as it doesn't allow jQuery to `eval` content
-        // coming from the external source thereby preventing XSS attack.
-        dataType: 'text',
-        kbnXsrfToken: false,
-      };
-
-      // Fire and forget.
-      $.ajax(loadFrom).done((data) => {
-        // when we load data from another Api we also must pass history
-        setValue(`${initialTextValue}\n ${data}`);
-      });
-    }
+    // TODO: Add support for fetching from HTTP
 
     // If we have a data URI instead of HTTP, LZ-decode it. This enables
     // opening requests in Console from anywhere in Kibana.
