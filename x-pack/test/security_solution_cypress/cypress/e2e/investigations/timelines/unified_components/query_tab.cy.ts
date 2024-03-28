@@ -11,7 +11,12 @@ import {
   openHostDetailsFlyout,
   openUserDetailsFlyout,
 } from '../../../../tasks/unified_timeline';
-import { GET_UNIFIED_DATA_GRID_CELL_HEADER } from '../../../../screens/unified_timeline';
+import {
+  GET_UNIFIED_DATA_GRID_CELL_HEADER,
+  HOST_DETAILS_FLYOUT,
+  TIMELINE_DETAILS_FLYOUT,
+  USER_DETAILS_FLYOUT,
+} from '../../../../screens/unified_timeline';
 import { GET_DISCOVER_DATA_GRID_CELL_HEADER } from '../../../../screens/discover';
 import { addFieldToTable, removeFieldFromTable } from '../../../../tasks/discover';
 import { login } from '../../../../tasks/login';
@@ -54,13 +59,15 @@ describe(
       it('should be able to open/close details details/host/user flyout', () => {
         cy.log('Event Details Flyout');
         openEventDetailsFlyout(0);
+        cy.get(TIMELINE_DETAILS_FLYOUT).should('be.visible');
         closeTimelineFlyout();
         cy.log('Host Details Flyout');
         openHostDetailsFlyout(0);
+        cy.get(HOST_DETAILS_FLYOUT).should('be.visible');
         closeTimelineFlyout();
         cy.log('User Details Flyout');
         openUserDetailsFlyout(0);
-        closeTimelineFlyout();
+        cy.get(USER_DETAILS_FLYOUT).should('be.visible');
       });
     });
   }

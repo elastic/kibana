@@ -113,7 +113,7 @@ export const addFieldToTable = (fieldId: string) => {
 };
 
 export const removeFieldFromTable = (fieldId: string) => {
-  cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().trigger('click');
+  cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().click();
 };
 
 export const createAdHocDataView = (name: string, indexPattern: string, save: boolean = false) => {
