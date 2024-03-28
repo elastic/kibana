@@ -18,10 +18,10 @@ import {
   APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,
 } from './embeddable';
 import { ApmPluginStartDeps, ApmPluginStart } from '../../../plugin';
-import type { APMAlertingThroughputChartEmbeddableInput } from './types';
+import type { APMAlertingVizEmbeddableInput } from '../types';
 
-export type APMThroughputChartEmbeddableFactory = EmbeddableFactory;
-export class APMThroughputChartEmbeddableFactoryDefinition
+export type APMAlertingThroughputChartEmbeddableFactory = EmbeddableFactory;
+export class APMAlertingThroughputChartEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition
 {
   public readonly type = APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE;
@@ -38,7 +38,7 @@ export class APMThroughputChartEmbeddableFactoryDefinition
   }
 
   public async create(
-    initialInput: APMAlertingThroughputChartEmbeddableInput,
+    initialInput: APMAlertingVizEmbeddableInput,
     parent?: IContainer
   ) {
     try {

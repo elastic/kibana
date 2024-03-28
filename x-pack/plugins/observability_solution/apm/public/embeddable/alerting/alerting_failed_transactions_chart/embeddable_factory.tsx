@@ -18,10 +18,11 @@ import {
   APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
 } from './embeddable';
 import { ApmPluginStartDeps, ApmPluginStart } from '../../../plugin';
-import type { APMAlertingFailedTransactionsChartEmbeddableInput } from './types';
+import type { APMAlertingVizEmbeddableInput } from '../types';
 
-export type APMFailedTransactionsChartEmbeddableFactory = EmbeddableFactory;
-export class APMFailedTransactionsChartEmbeddableFactoryDefinition
+export type APMAlertingFailedTransactionsChartEmbeddableFactory =
+  EmbeddableFactory;
+export class APMAlertingFailedTransactionsChartEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition
 {
   public readonly type = APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE;
@@ -38,7 +39,7 @@ export class APMFailedTransactionsChartEmbeddableFactoryDefinition
   }
 
   public async create(
-    initialInput: APMAlertingFailedTransactionsChartEmbeddableInput,
+    initialInput: APMAlertingVizEmbeddableInput,
     parent?: IContainer
   ) {
     try {

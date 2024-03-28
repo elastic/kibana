@@ -18,10 +18,10 @@ import {
   APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
 } from './embeddable';
 import { ApmPluginStartDeps, ApmPluginStart } from '../../../plugin';
-import type { APMAlertingLatencyChartEmbeddableInput } from './types';
+import type { APMAlertingVizEmbeddableInput } from '../types';
 
-export type APMLatencyChartEmbeddableFactory = EmbeddableFactory;
-export class APMLatencyChartEmbeddableFactoryDefinition
+export type APMAlertingLatencyChartEmbeddableFactory = EmbeddableFactory;
+export class APMAlertingLatencyChartEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition
 {
   public readonly type = APM_ALERTING_LATENCY_CHART_EMBEDDABLE;
@@ -38,7 +38,7 @@ export class APMLatencyChartEmbeddableFactoryDefinition
   }
 
   public async create(
-    initialInput: APMAlertingLatencyChartEmbeddableInput,
+    initialInput: APMAlertingVizEmbeddableInput,
     parent?: IContainer
   ) {
     try {
