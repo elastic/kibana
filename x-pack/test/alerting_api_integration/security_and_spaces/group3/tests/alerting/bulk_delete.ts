@@ -711,6 +711,8 @@ export default ({ getService }: FtrProviderContext) => {
           )
           .expect(200);
 
+        objectRemover.add(space.id, createdRule1.body.id, 'rule', 'alerting');
+
         const response = await supertestWithoutAuth
           .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
           .set('kbn-xsrf', 'foo')

@@ -602,6 +602,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           expect(response.status).to.eql(200);
           expect(response.body.actions[0][Object.keys(propertyToAdd)[0]]).to.be(undefined);
 
+          objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
           const esResponse = await es.get<SavedObject<RawRule>>(
             {
               index: ALERTING_CASES_SAVED_OBJECT_INDEX,

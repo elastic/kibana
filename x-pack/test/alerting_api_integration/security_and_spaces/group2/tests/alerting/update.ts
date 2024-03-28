@@ -1109,6 +1109,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .send(getTestRuleData())
           .expect(200);
 
+        objectRemover.add(space.id, createdRule.body.id, 'rule', 'alerting');
+
         await supertestWithoutAuth
           .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
           .set('kbn-xsrf', 'foo')
@@ -1137,6 +1139,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send(getTestRuleData())
           .expect(200);
+
+        objectRemover.add(space.id, createdRule.body.id, 'rule', 'alerting');
 
         for (const propertyToAdd of [
           { group: 'default' },
@@ -1201,6 +1205,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .send(getTestRuleData())
           .expect(200);
 
+        objectRemover.add(space.id, createdRule.body.id, 'rule', 'alerting');
+
         await supertestWithoutAuth
           .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
           .set('kbn-xsrf', 'foo')
@@ -1245,6 +1251,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send(getTestRuleData())
           .expect(200);
+
+        objectRemover.add(space.id, createdRule.body.id, 'rule', 'alerting');
 
         await supertestWithoutAuth
           .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
