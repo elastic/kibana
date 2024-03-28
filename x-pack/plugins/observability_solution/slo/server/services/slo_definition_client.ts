@@ -29,7 +29,7 @@ export class SloDefinitionClient {
         index: `${remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
         query: {
           bool: {
-            filter: [{ term: { spaceId: spaceId } }, { term: { 'slo.id': sloId } }],
+            filter: [{ term: { spaceId } }, { term: { 'slo.id': sloId } }],
           },
         },
       });
