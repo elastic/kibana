@@ -60,8 +60,7 @@ export const apiHasLibraryTransforms = <StateT extends object = object>(
       typeof (unknownApi as HasLibraryTransforms<StateT>).canUnlinkFromLibrary === 'function' &&
       typeof (unknownApi as HasLibraryTransforms<StateT>).saveToLibrary === 'function' &&
       typeof (unknownApi as HasLibraryTransforms<StateT>).getByReferenceState === 'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).getByValueState ===
-        'function' &&
+      typeof (unknownApi as HasLibraryTransforms<StateT>).getByValueState === 'function' &&
       typeof (unknownApi as HasLibraryTransforms<StateT>).checkForDuplicateTitle === 'function'
   );
 };
