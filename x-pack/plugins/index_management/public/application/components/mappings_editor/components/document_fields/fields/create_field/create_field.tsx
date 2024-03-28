@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import classNames from 'classnames';
+import React, { useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useForm, Form, FormDataProvider, UseField } from '../../../../shared_imports';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
-import { useDispatch } from '../../../../mappings_state_context';
 import { fieldSerializer } from '../../../../lib';
-import { NormalizedFields, MainType } from '../../../../types';
-import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
-import { FieldBetaBadge } from '../field_beta_badge';
-import { getRequiredParametersFormForType } from './required_parameters_forms';
+import { useDispatch } from '../../../../mappings_state_context';
+import { Form, FormDataProvider, UseField, useForm, useFormData } from '../../../../shared_imports';
+import { MainType, NormalizedFields } from '../../../../types';
+import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { InferenceIdSelects } from '../../field_parameters/inference_id_selects';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
+import { FieldBetaBadge } from '../field_beta_badge';
+import { getRequiredParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
 
@@ -61,6 +61,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
     serializer: fieldSerializer,
     options: { stripEmptyFields: false },
   });
+
+  const [formData] = useFormData({ form });
 
   const { subscribe } = form;
 
@@ -145,21 +147,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       </FormDataProvider>
 
       {/* Field reference_field for semantic_text field type */}
-      <FormDataProvider pathsToWatch="type">
-        {({ type }) => {
-          if (type === undefined || type[0]?.value !== 'semantic_text') {
-            return null;
-          }
-
-          return (
-            <EuiFlexItem grow={false}>
-              <UseField path="referenceField">
-                {(field) => <ReferenceFieldSelects onChange={field.setValue} />}
-              </UseField>
-            </EuiFlexItem>
-          );
-        }}
-      </FormDataProvider>
+      <ReferenceFieldCombo />
 
       {/* Field name */}
       <EuiFlexItem>
@@ -256,26 +244,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               }}
             </FormDataProvider>
             {/* Field inference_id for semantic_text field type */}
-            <FormDataProvider pathsToWatch="type">
-              {({ type }) => {
-                if (type === undefined || type[0]?.value !== 'semantic_text') {
-                  return null;
-                }
-
-                return (
-                  <>
-                    <EuiSpacer />
-                    <EuiFlexGroup gutterSize="s" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <UseField path="inferenceId">
-                          {(field) => <InferenceIdSelects onChange={field.setValue} />}
-                        </UseField>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
-                );
-              }}
-            </FormDataProvider>
+            <ModelIdCombo />
 
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={true} />
@@ -287,3 +256,40 @@ export const CreateField = React.memo(function CreateFieldComponent({
     </EuiOutsideClickDetector>
   );
 });
+
+function ReferenceFieldCombo() {
+  const [{ type }] = useFormData({ watch: 'type' });
+
+  if (type === undefined || type[0]?.value !== 'semantic_text') {
+    return null;
+  }
+
+  return (
+    <EuiFlexItem grow={false}>
+      <UseField path="referenceField">
+        {(field) => <ReferenceFieldSelects onChange={field.setValue} />}
+      </UseField>
+    </EuiFlexItem>
+  );
+}
+
+function ModelIdCombo() {
+  const [{ type }] = useFormData({ watch: 'type' });
+
+  if (type === undefined || type[0]?.value !== 'semantic_text') {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <UseField path="inferenceId">
+            {(field) => <InferenceIdSelects onChange={field.setValue} />}
+          </UseField>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+}
