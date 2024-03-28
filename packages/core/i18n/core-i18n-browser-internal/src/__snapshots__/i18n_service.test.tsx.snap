@@ -155,6 +155,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiHeaderLinks.appNavigation": "App menu",
           "euiHeaderLinks.openNavigationMenu": "Open menu",
           "euiHue.label": "Select the HSV color mode \\"hue\\" value",
+          "euiIconTip.defaultAriaLabel": "Info",
           "euiImageButton.closeFullScreen": "Press Escape or click to close image fullscreen mode",
           "euiImageButton.openFullScreen": "Click to open this image in fullscreen mode",
           "euiInlineEditForm.activateEditModeDescription": "Click to edit this text inline.",
