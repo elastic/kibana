@@ -16,14 +16,6 @@ import { DataDocuments$, DataTotalHits$ } from '../../services/discover_data_sta
 import { FetchStatus } from '../../../types';
 
 describe('useFetchMoreRecords', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
 
   const getStateContainer = ({
