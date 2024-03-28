@@ -109,7 +109,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, itemIsEditable, deleteItems, getDetailViewLink, onClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, }: ",
+          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, deleteItems, getDetailViewLink, getOnClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, }: ",
           {
             "pluginId": "@kbn/content-management-table-list-view-table",
             "scope": "public",
@@ -661,15 +661,15 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-public.TableListViewTableProps.onClickTitle",
+            "id": "def-public.TableListViewTableProps.getOnClickTitle",
             "type": "Function",
             "tags": [],
-            "label": "onClickTitle",
+            "label": "getOnClickTitle",
             "description": [
               "Handler to execute when clicking the item title"
             ],
             "signature": [
-              "((item: T) => void) | undefined"
+              "((item: T) => (() => void) | undefined) | undefined"
             ],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
@@ -677,7 +677,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-public.TableListViewTableProps.onClickTitle.$1",
+                "id": "def-public.TableListViewTableProps.getOnClickTitle.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "item",
@@ -760,40 +760,6 @@
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
                 "id": "def-public.TableListViewTableProps.editItem.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "item",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-public.TableListViewTableProps.itemIsEditable",
-            "type": "Function",
-            "tags": [],
-            "label": "itemIsEditable",
-            "description": [
-              "\nHandler to set edit action visiblity, and content editor readonly state per item. If not provided all non-managed items are considered editable. Note: Items with the managed property set to true will always be non-editable."
-            ],
-            "signature": [
-              "((item: T) => boolean) | undefined"
-            ],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-public.TableListViewTableProps.itemIsEditable.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "item",
@@ -961,7 +927,7 @@
         "label": "RowActions",
         "description": [],
         "signature": [
-          "{ delete?: { enabled: boolean; reason?: string | undefined; } | undefined; }"
+          "{ delete?: { enabled: boolean; reason?: string | undefined; } | undefined; edit?: { enabled: boolean; reason?: string | undefined; } | undefined; }"
         ],
         "path": "packages/content-management/table_list_view_table/src/types.ts",
         "deprecated": false,

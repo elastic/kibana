@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ACTION_CUSTOMIZE_PANEL, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';
@@ -34,7 +34,7 @@ import { useVisualizationResponse } from './use_visualization_response';
 import { useInspect } from '../inspect/use_inspect';
 
 const HOVER_ACTIONS_PADDING = 24;
-const DISABLED_ACTIONS = [ACTION_CUSTOMIZE_PANEL];
+const DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL'];
 
 const LensComponentWrapper = styled.div<{
   $height?: number;
@@ -63,6 +63,7 @@ const LensComponentWrapper = styled.div<{
 
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   applyGlobalQueriesAndFilters = true,
+  applyPageAndTabsFilters = true,
   extraActions,
   extraOptions,
   getLensAttributes,
@@ -79,6 +80,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   width: wrapperWidth,
   withActions = DEFAULT_ACTIONS,
   disableOnClickFilter = false,
+  casesAttachmentMetadata,
 }) => {
   const style = useMemo(
     () => ({
@@ -98,6 +100,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const { searchSessionId } = useVisualizationResponse({ visualizationId: id });
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
+    applyPageAndTabsFilters,
     extraOptions,
     getLensAttributes,
     lensAttributes,
@@ -152,6 +155,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     inspectActionProps,
     timeRange: timerange,
     withActions,
+    lensMetadata: casesAttachmentMetadata,
   });
 
   const updateDateRange = useCallback(
@@ -240,6 +244,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             timerange={timerange}
             title={inspectTitle}
             withActions={withActions}
+            casesAttachmentMetadata={casesAttachmentMetadata}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

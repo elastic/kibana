@@ -6,16 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { type EmbeddableApiContext, apiHasType } from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { SynchronizeMovementActionContext } from './types';
+import type { SynchronizeMovementActionApi } from './types';
 
 export const SYNCHRONIZE_MOVEMENT_ACTION = 'SYNCHRONIZE_MOVEMENT_ACTION';
 
-export const synchronizeMovementAction = createAction<SynchronizeMovementActionContext>({
+export const isApiCompatible = (api: unknown | null): api is SynchronizeMovementActionApi =>
+  Boolean(apiHasType(api));
+
+export const synchronizeMovementAction = createAction<EmbeddableApiContext>({
   id: SYNCHRONIZE_MOVEMENT_ACTION,
   type: SYNCHRONIZE_MOVEMENT_ACTION,
   order: 21,
-  getDisplayName: ({ embeddable }: SynchronizeMovementActionContext) => {
+  getDisplayName: () => {
     return i18n.translate('xpack.maps.synchronizeMovementAction.title', {
       defaultMessage: 'Synchronize map movement',
     });
@@ -29,11 +33,12 @@ export const synchronizeMovementAction = createAction<SynchronizeMovementActionC
   getIconType: () => {
     return 'crosshairs';
   },
-  isCompatible: async (context: SynchronizeMovementActionContext) => {
+  isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
+    if (!isApiCompatible(embeddable)) return false;
     const { isCompatible } = await import('./is_compatible');
-    return isCompatible(context);
+    return isCompatible(embeddable);
   },
-  execute: async (context: SynchronizeMovementActionContext) => {
+  execute: async () => {
     const { openModal } = await import('./modal');
     openModal();
   },

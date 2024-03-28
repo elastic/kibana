@@ -12,6 +12,7 @@ import expect from '@kbn/expect';
 import { stringify } from 'query-string';
 import { registerHelpers } from './rollup.test_helpers';
 import { getRandomString } from './lib';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -40,7 +41,7 @@ export default function ({ getService }) {
           uri = `${BASE_URI}?${stringify(
             {
               pattern: 'foo',
-              type: 'rollup',
+              type: DataViewType.ROLLUP,
               rollup_index: 'bar',
             },
             { sort: false }
@@ -63,7 +64,7 @@ export default function ({ getService }) {
         // Query for wildcard
         const params = {
           pattern: indexName,
-          type: 'rollup',
+          type: DataViewType.ROLLUP,
           rollup_index: rollupIndex,
         };
         const uri = `${BASE_URI}?${stringify(params, { sort: false })}`;

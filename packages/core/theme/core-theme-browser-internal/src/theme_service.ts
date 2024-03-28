@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Subject, of } from 'rxjs';
+import { of } from 'rxjs';
+import { _setDarkMode } from '@kbn/ui-theme';
+import type { InjectedMetadataTheme } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
+import { systemThemeIsDark, browsersSupportsSystemTheme } from './system_theme';
+import { createStyleSheet } from './utils';
 
 /** @internal */
 export interface ThemeServiceSetupDeps {
@@ -18,15 +22,26 @@ export interface ThemeServiceSetupDeps {
 /** @internal */
 export class ThemeService {
   private contract?: ThemeServiceSetup;
-  private stop$ = new Subject<void>();
+  private themeMetadata?: InjectedMetadataTheme;
+  private stylesheets: HTMLLinkElement[] = [];
 
   public setup({ injectedMetadata }: ThemeServiceSetupDeps): ThemeServiceSetup {
-    const themeMeta = injectedMetadata.getTheme();
-    const theme: CoreTheme = { darkMode: themeMeta.darkMode };
+    const themeMetadata = injectedMetadata.getTheme();
+    this.themeMetadata = themeMetadata;
+
+    let theme: CoreTheme;
+    if (themeMetadata.darkMode === 'system' && browsersSupportsSystemTheme()) {
+      theme = { darkMode: systemThemeIsDark() };
+    } else {
+      const darkMode = themeMetadata.darkMode === 'system' ? false : themeMetadata.darkMode;
+      theme = { darkMode };
+    }
+
+    this.applyTheme(theme);
 
     this.contract = {
-      theme$: of(theme),
       getTheme: () => theme,
+      theme$: of(theme),
     };
 
     return this.contract;
@@ -40,7 +55,28 @@ export class ThemeService {
     return this.contract;
   }
 
-  public stop() {
-    this.stop$.next();
+  public stop() {}
+
+  private applyTheme(theme: CoreTheme) {
+    const { darkMode } = theme;
+    this.stylesheets.forEach((stylesheet) => {
+      stylesheet.remove();
+    });
+    this.stylesheets = [];
+    const newStylesheets = darkMode
+      ? this.themeMetadata!.stylesheetPaths.dark
+      : this.themeMetadata!.stylesheetPaths.default;
+
+    newStylesheets.forEach((stylesheet) => {
+      this.stylesheets.push(createStyleSheet({ href: stylesheet }));
+    });
+
+    _setDarkMode(darkMode);
+    updateKbnThemeTag(darkMode);
   }
 }
+
+const updateKbnThemeTag = (darkMode: boolean) => {
+  const globals: any = typeof window === 'undefined' ? {} : window;
+  globals.__kbnThemeTag__ = darkMode ? 'v8dark' : 'v8light';
+};

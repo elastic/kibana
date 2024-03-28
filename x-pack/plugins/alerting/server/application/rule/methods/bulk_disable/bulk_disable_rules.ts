@@ -50,7 +50,7 @@ export const bulkDisableRules = async <Params extends RuleParams>(
     throw Boom.badRequest(`Error validating bulk disable data - ${error.message}`);
   }
 
-  const { ids, filter } = options;
+  const { ids, filter, untrack = false } = options;
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DISABLE' });
@@ -72,7 +72,7 @@ export const bulkDisableRules = async <Params extends RuleParams>(
         action: 'DISABLE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDisableRulesWithOCC(context, { filter: filterKueryNode }),
+          bulkDisableRulesWithOCC(context, { filter: filterKueryNode, untrack }),
         filter: kueryNodeFilterWithAuth,
       })
   );
@@ -120,7 +120,13 @@ export const bulkDisableRules = async <Params extends RuleParams>(
 
 const bulkDisableRulesWithOCC = async (
   context: RulesClientContext,
-  { filter }: { filter: KueryNode | null }
+  {
+    filter,
+    untrack = false,
+  }: {
+    filter: KueryNode | null;
+    untrack: boolean;
+  }
 ) => {
   const additionalFilter = nodeBuilder.is('alert.attributes.enabled', 'true');
 
@@ -151,7 +157,9 @@ const bulkDisableRulesWithOCC = async (
       for await (const response of rulesFinder.find()) {
         await pMap(response.saved_objects, async (rule) => {
           try {
-            await untrackRuleAlerts(context, rule.id, rule.attributes);
+            if (untrack) {
+              await untrackRuleAlerts(context, rule.id, rule.attributes);
+            }
 
             if (rule.attributes.name) {
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;

@@ -72,36 +72,39 @@ const upgradeRule = async (
     return createRules({
       rulesClient,
       immutable: true,
+      id: existingRule.id,
       params: {
         ...rule,
         // Force the prepackaged rule to use the enabled state from the existing rule,
         // regardless of what the prepackaged rule says
         enabled: existingRule.enabled,
+        exceptions_list: existingRule.params.exceptionsList,
         actions: existingRule.actions.map(transformAlertToRuleAction),
+        timeline_id: existingRule.params.timelineId,
+        timeline_title: existingRule.params.timelineTitle,
       },
     });
-  } else {
-    await patchRules({
-      rulesClient,
-      existingRule,
-      nextParams: {
-        ...rule,
-        // Force enabled to use the enabled state from the existing rule by passing in undefined to patchRules
-        enabled: undefined,
-        actions: undefined,
-      },
-    });
-
-    const updatedRule = await readRules({
-      rulesClient,
-      ruleId: rule.rule_id,
-      id: undefined,
-    });
-
-    if (!updatedRule) {
-      throw new PrepackagedRulesError(`Rule ${rule.rule_id} not found after upgrade`, 500);
-    }
-
-    return updatedRule;
   }
+
+  await patchRules({
+    rulesClient,
+    existingRule,
+    nextParams: {
+      ...rule,
+      // Force enabled to use the enabled state from the existing rule by passing in undefined to patchRules
+      enabled: undefined,
+    },
+  });
+
+  const updatedRule = await readRules({
+    rulesClient,
+    ruleId: rule.rule_id,
+    id: undefined,
+  });
+
+  if (!updatedRule) {
+    throw new PrepackagedRulesError(`Rule ${rule.rule_id} not found after upgrade`, 500);
+  }
+
+  return updatedRule;
 };

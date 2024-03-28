@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/index-management-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "indexManagement",
     "server": true,
@@ -20,7 +20,8 @@
       "security",
       "usageCollection",
       "fleet",
-      "cloud"
+      "cloud",
+      "console"
     ],
     "requiredBundles": [
       "kibanaReact",

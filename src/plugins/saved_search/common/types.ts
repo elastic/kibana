@@ -36,6 +36,7 @@ export interface SavedSearchAttributes {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  headerRowHeight?: number;
 
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
@@ -63,6 +64,7 @@ export interface SavedSearch {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  headerRowHeight?: number;
   isTextBasedQuery?: boolean;
   usesAdHocDataView?: boolean;
 
@@ -74,6 +76,8 @@ export interface SavedSearch {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  // Whether or not this saved search is managed by the system
+  managed: boolean;
   references?: SavedObjectReference[];
   sharingSavedObjectProps?: {
     outcome?: SavedObjectsResolveResponse['outcome'];

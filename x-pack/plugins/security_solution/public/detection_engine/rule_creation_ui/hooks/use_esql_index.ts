@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getIndexListFromIndexString } from '@kbn/securitysolution-utils';
 
 import type { Query } from '@kbn/es-query';

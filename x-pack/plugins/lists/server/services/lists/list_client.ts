@@ -37,6 +37,7 @@ import type {
 
 import type { ConfigType } from '../../config';
 import {
+  BufferLines,
   createListItem,
   deleteListItem,
   deleteListItemByValue,
@@ -69,6 +70,7 @@ import type {
   FindAllListItemsOptions,
   FindListItemOptions,
   FindListOptions,
+  GetImportFilename,
   GetListItemByValueOptions,
   GetListItemOptions,
   GetListItemsByValueOptions,
@@ -712,6 +714,33 @@ export class ListClient {
       listItemIndex: listItemName,
       stream,
       stringToAppend,
+    });
+  };
+
+  /**
+   * Gets the filename of the imported file
+   * @param options
+   * @param options.stream The stream to pull the import from
+   * @returns
+   */
+  public getImportFilename = ({ stream }: GetImportFilename): Promise<string | undefined> => {
+    return new Promise<string | undefined>((resolve, reject) => {
+      const { config } = this;
+      const readBuffer = new BufferLines({ bufferSize: config.importBufferSize, input: stream });
+      let fileName: string | undefined;
+      readBuffer.on('fileName', async (fileNameEmitted: string) => {
+        try {
+          readBuffer.pause();
+          fileName = decodeURIComponent(fileNameEmitted);
+          readBuffer.resume();
+        } catch (err) {
+          reject(err);
+        }
+      });
+
+      readBuffer.on('close', () => {
+        resolve(fileName);
+      });
     });
   };
 

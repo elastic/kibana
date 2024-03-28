@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const scriptedFiledName = 'versionConflictScript';
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
   const log = getService('log');
+  const toasts = getService('toasts');
 
   describe('FOO index version conflict', function describeIndexTests() {
     before(async function () {
@@ -62,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.setFieldFormat('url');
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async function () {
-        const message = await PageObjects.common.closeToast();
+        const message = await toasts.getTitleAndDismiss();
         expect(message).to.contain('Unable');
       });
     });
@@ -95,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(response.body.result).to.be('updated');
       await PageObjects.settings.controlChangeSave();
       await retry.try(async function () {
-        const message = await PageObjects.common.closeToast();
+        const message = await toasts.getTitleAndDismiss();
         expect(message).to.contain('Unable');
       });
     });

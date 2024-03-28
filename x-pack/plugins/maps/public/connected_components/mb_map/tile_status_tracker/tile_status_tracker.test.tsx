@@ -58,6 +58,10 @@ class MockMbMap {
       },
     };
   }
+
+  querySourceFeatures() {
+    return [];
+  }
 }
 
 class MockLayer {
@@ -75,14 +79,21 @@ class MockLayer {
     return this._mbSourceId === mbSourceId;
   }
 
+  getMbSourceId() {
+    return this._mbSourceId;
+  }
+
   isVisible() {
     return true;
   }
 
   getSource() {
     return {
-      isESSource() {
+      isMvt: () => {
         return true;
+      },
+      getIndexPatternId: () => {
+        return '1234';
       },
     };
   }
@@ -281,9 +292,6 @@ describe('TileStatusTracker', () => {
       const geojsonLayer1 = createMockLayer('layer1', 'layer1Source');
       geojsonLayer1.getSource = () => {
         return {
-          isESSource() {
-            return true;
-          },
           isMvt() {
             return false;
           },

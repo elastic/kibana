@@ -16,11 +16,16 @@ const API_BASE_URL: string = `/api/index_patterns/`;
 const version = '1';
 
 async function sha1(str: string) {
-  const enc = new TextEncoder();
-  const hash = await crypto.subtle.digest('SHA-1', enc.encode(str));
-  return Array.from(new Uint8Array(hash))
-    .map((v) => v.toString(16).padStart(2, '0'))
-    .join('');
+  if (crypto.subtle) {
+    const enc = new TextEncoder();
+    const hash = await crypto.subtle.digest('SHA-256', enc.encode(str));
+    return Array.from(new Uint8Array(hash))
+      .map((v) => v.toString(16).padStart(2, '0'))
+      .join('');
+  } else {
+    const { sha256 } = await import('./sha256');
+    return sha256(str);
+  }
 }
 
 /**
@@ -90,6 +95,8 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       fields,
       forceRefresh,
       allowHidden,
+      fieldTypes,
+      includeEmptyFields,
     } = options;
     const path = indexFilter ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
     const versionQueryParam = indexFilter ? {} : { apiVersion: version };
@@ -104,8 +111,10 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         allow_no_index: allowNoIndex,
         include_unmapped: includeUnmapped,
         fields,
+        fieldTypes,
         // default to undefined to keep value out of URL params and improve caching
         allow_hidden: allowHidden || undefined,
+        include_empty_fields: includeEmptyFields,
         ...versionQueryParam,
       },
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,

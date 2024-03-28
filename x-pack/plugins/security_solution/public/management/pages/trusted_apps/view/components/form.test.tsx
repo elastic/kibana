@@ -531,6 +531,16 @@ describe('Trusted apps form', () => {
     });
   });
 
+  describe('and a wildcard value is used with the IS operator', () => {
+    beforeEach(() => render());
+    it('shows callout warning and help text warning', () => {
+      setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
+      rerenderWithLatestProps();
+      expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeTruthy();
+      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0)));
+    });
+  });
+
   describe('and all required data passes validation', () => {
     it('should call change callback with isValid set to true and contain the new item', () => {
       const propsItem: Partial<ArtifactFormComponentProps['item']> = {

@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/managed-content-badge",
+  "owner": "@elastic/kibana-visualizations"
+}

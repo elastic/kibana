@@ -442,7 +442,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (
     state: T,
-    indexPatterns: IndexPatternMap,
+    indexPatterns?: IndexPatternMap,
     filterFn?: (layerId: string) => boolean,
     activeData?: Record<string, Datatable>
   ) => Array<DatasourceSuggestion<T>>;
@@ -1071,6 +1071,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * the active subtype of the visualization.
    */
   getVisualizationTypeId: (state: T) => string;
+
+  hideFromChartSwitch?: (frame: FramePublicAPI) => boolean;
   /**
    * If the visualization has subtypes, update the subtype in state.
    */
@@ -1239,8 +1241,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   DimensionTriggerComponent?: (props: {
     columnId: string;
     label: string;
-    hideTooltip?: boolean;
-  }) => null | ReactElement<{ columnId: string; label: string; hideTooltip?: boolean }>;
+  }) => null | ReactElement<{ columnId: string; label: string }>;
   getAddLayerButtonComponent?: (
     props: AddLayerButtonProps
   ) => null | ReactElement<AddLayerButtonProps>;
@@ -1320,6 +1321,14 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * A visualization can return custom dimensions for the reporting tool
    */
   getReportingLayout?: (state: T) => { height: number; width: number };
+  /**
+   * A visualization can share how columns are visually sorted
+   */
+  getSortedColumns?: (state: T, datasourceLayers?: DatasourceLayers) => string[];
+  /**
+   * returns array of telemetry events for the visualization on save
+   */
+  getTelemetryEventsOnSave?: (state: T, prevState?: T) => string[];
 }
 
 // Use same technique as TriggerContext

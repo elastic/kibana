@@ -1332,6 +1332,21 @@
       },
       {
         "parentPluginId": "share",
+        "id": "def-public.ConfigSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "ConfigSchema",
+        "description": [],
+        "signature": [
+          "{ readonly new_version: Readonly<{} & { enabled: boolean; }>; }"
+        ],
+        "path": "src/plugins/share/common/config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
         "id": "def-public.CSV_QUOTE_VALUES_SETTING",
         "type": "string",
         "tags": [],

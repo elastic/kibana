@@ -906,7 +906,8 @@
             "section": "def-public.ResizeChecker",
             "text": "ResizeChecker"
           },
-          " extends EventEmitter"
+          " extends ",
+          "events"
         ],
         "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
         "deprecated": false,
@@ -6715,7 +6716,7 @@
             "section": "def-common.StateContainer",
             "text": "StateContainer"
           },
-          "<infer T, any, {}> ? T : never"
+          "<infer T extends object, any, {}> ? T : never"
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
@@ -11595,7 +11596,7 @@
             "section": "def-common.StateContainer",
             "text": "StateContainer"
           },
-          "<infer T, any, {}> ? T : never"
+          "<infer T extends object, any, {}> ? T : never"
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,

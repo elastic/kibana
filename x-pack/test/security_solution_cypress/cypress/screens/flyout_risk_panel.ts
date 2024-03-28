@@ -11,3 +11,7 @@ export const RISK_INPUTS_BUTTON = getDataTestSubjectSelector('riskInputsTitleLin
 export const RISK_INPUT_PANEL_HEADER = getDataTestSubjectSelector(
   'securitySolutionFlyoutRiskInputsTab'
 );
+
+export const ASSET_CRITICALITY_BADGE = getDataTestSubjectSelector(
+  'risk-inputs-asset-criticality-badge'
+);

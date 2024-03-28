@@ -32,8 +32,8 @@ pageLoadAssetSize:
   datasetQuality: 50624
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
-  dataViewManagement: 5136
-  dataViews: 51000
+  dataViewManagement: 5176
+  dataViews: 65000
   dataVisualizer: 27530
   devTools: 38637
   discover: 99999
@@ -90,7 +90,7 @@ pageLoadAssetSize:
   licensing: 29004
   links: 44490
   lists: 22900
-  logExplorer: 44977
+  logsExplorer: 60000
   logsShared: 281060
   logstash: 53548
   management: 46112
@@ -103,13 +103,15 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 115443
-  observabilityAIAssistant: 25000
-  observabilityLogExplorer: 46650
+  observability: 167673
+  observabilityAIAssistant: 58230
+  observabilityAIAssistantApp: 27680
+  observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
-  observabilityShared: 52256
+  observabilityShared: 72039
   osquery: 107090
   painlessLab: 179748
+  presentationPanel: 55463
   presentationUtil: 58834
   profiling: 36694
   remoteClusters: 51327
@@ -124,6 +126,7 @@ pageLoadAssetSize:
   savedSearch: 16225
   screenshotMode: 17856
   screenshotting: 22870
+  searchPlayground: 19325
   searchprofiler: 67080
   security: 81771
   securitySolution: 82780
@@ -134,6 +137,7 @@ pageLoadAssetSize:
   serverlessSearch: 72995
   sessionView: 77750
   share: 71239
+  slo: 37039
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316

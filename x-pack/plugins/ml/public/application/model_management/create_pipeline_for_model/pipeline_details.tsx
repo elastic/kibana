@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, memo, useState } from 'react';
+import type { FC } from 'react';
+import React, { memo, useState } from 'react';
 
 import {
   EuiButtonEmpty,

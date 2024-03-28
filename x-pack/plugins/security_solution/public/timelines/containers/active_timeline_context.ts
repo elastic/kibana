@@ -9,8 +9,6 @@ import type {
   TimelineEventsAllOptionsInput,
   TimelineEqlRequestOptionsInput,
 } from '@kbn/timelines-plugin/common';
-import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../common/types';
-import { TimelineTabs } from '../../../common/types/timeline';
 import type { TimelineArgs } from '.';
 
 /*
@@ -26,7 +24,6 @@ import type { TimelineArgs } from '.';
 
 class ActiveTimelineEvents {
   private _activePage: number = 0;
-  private _expandedDetail: ExpandedDetailTimeline = {};
   private _pageName: string = '';
   private _request: TimelineEventsAllOptionsInput | null = null;
   private _response: TimelineArgs | null = null;
@@ -39,42 +36,6 @@ class ActiveTimelineEvents {
 
   setActivePage(activePage: number) {
     this._activePage = activePage;
-  }
-
-  getExpandedDetail() {
-    return this._expandedDetail;
-  }
-
-  toggleExpandedDetail(expandedDetail: ExpandedDetailType) {
-    const queryTab = TimelineTabs.query;
-    const currentExpandedDetail = this._expandedDetail[queryTab];
-    let isSameExpandedDetail;
-
-    // Check if the stored details matches the incoming detail
-    if (currentExpandedDetail?.panelView === 'eventDetail') {
-      isSameExpandedDetail =
-        expandedDetail?.panelView === 'eventDetail' &&
-        expandedDetail?.params?.eventId === currentExpandedDetail?.params?.eventId;
-    } else if (currentExpandedDetail?.panelView === 'hostDetail') {
-      isSameExpandedDetail =
-        expandedDetail?.panelView === 'hostDetail' &&
-        expandedDetail?.params?.hostName === currentExpandedDetail?.params?.hostName;
-    } else if (currentExpandedDetail?.panelView === 'networkDetail') {
-      isSameExpandedDetail =
-        expandedDetail?.panelView === 'networkDetail' &&
-        expandedDetail?.params?.ip === currentExpandedDetail?.params?.ip;
-    }
-
-    // if so, unset it, otherwise set it
-    if (isSameExpandedDetail) {
-      this._expandedDetail = {};
-    } else {
-      this._expandedDetail = { [queryTab]: { ...expandedDetail } };
-    }
-  }
-
-  setExpandedDetail(expandedDetail: ExpandedDetailTimeline) {
-    this._expandedDetail = expandedDetail;
   }
 
   getPageName() {

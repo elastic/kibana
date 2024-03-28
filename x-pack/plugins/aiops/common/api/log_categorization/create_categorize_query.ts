@@ -10,11 +10,11 @@ import { cloneDeep } from 'lodash';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 export function createCategorizeQuery(
-  queryIn: QueryDslQueryContainer,
+  queryIn: QueryDslQueryContainer | undefined,
   timeField: string,
   timeRange: { from: number; to: number } | undefined
 ) {
-  const query = cloneDeep(queryIn);
+  const query = cloneDeep(queryIn ?? { match_all: {} });
 
   if (query.bool === undefined) {
     query.bool = {};

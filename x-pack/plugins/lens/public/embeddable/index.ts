@@ -6,3 +6,5 @@
  */
 
 export * from './embeddable';
+
+export { type LensApi, isLensApi } from './interfaces/lens_api';

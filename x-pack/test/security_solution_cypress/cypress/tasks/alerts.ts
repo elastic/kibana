@@ -62,8 +62,6 @@ import {
   ENRICHMENT_QUERY_START_INPUT,
   THREAT_INTEL_TAB,
   CELL_EXPAND_VALUE,
-  CELL_EXPANSION_POPOVER,
-  USER_DETAILS_LINK,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
 import {
@@ -143,8 +141,9 @@ export const expandFirstAlertActions = () => {
 };
 
 export const expandFirstAlert = () => {
-  cy.get(EXPAND_ALERT_BTN).should('be.visible');
-  cy.get(EXPAND_ALERT_BTN).first().click();
+  cy.get(EXPAND_ALERT_BTN).first().should('be.visible');
+  // Cypress is flaky on clicking this button despite production not having that issue
+  cy.get(EXPAND_ALERT_BTN).first().trigger('click');
 };
 
 export const hideMessageTooltip = () => {
@@ -420,10 +419,6 @@ export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
   });
 };
 
-export const openUserDetailsFlyout = () => {
-  cy.get(CELL_EXPANSION_POPOVER).find(USER_DETAILS_LINK).click();
-};
-
 export const waitForPageFilters = () => {
   cy.log('Waiting for Page Filters');
   cy.url().then((urlString) => {
@@ -469,8 +464,9 @@ export const sumAlertCountFromAlertCountTable = (callback?: (sumOfEachRow: numbe
 };
 
 export const selectFirstPageAlerts = () => {
-  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().scrollIntoView();
-  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().click({ force: true });
+  const ALERTS_DATA_GRID = '[data-test-subj="alertsTable"]';
+  cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).scrollIntoView();
+  cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).click({ force: true });
 };
 
 export const selectAllAlerts = () => {

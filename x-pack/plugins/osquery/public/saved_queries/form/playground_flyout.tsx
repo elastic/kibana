@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useFormContext } from 'react-hook-form';
+import { QUERY_TIMEOUT } from '../../../common/constants';
 import { LiveQuery } from '../../live_queries';
 
 const euiFlyoutHeaderCss = {
@@ -28,7 +29,7 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
   // @ts-expect-error update types
   const { serializer, watch } = useFormContext();
   const watchedValues = watch();
-  const { query, ecs_mapping: ecsMapping, id } = watchedValues;
+  const { query, ecs_mapping: ecsMapping, id, timeout } = watchedValues;
   /* recalculate the form data when ecs_mapping changes */
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const serializedFormData = useMemo(() => serializer(watchedValues), [ecsMapping]);
@@ -52,6 +53,7 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
           query={query}
           ecs_mapping={serializedFormData.ecs_mapping}
           savedQueryId={id}
+          timeout={timeout || QUERY_TIMEOUT.DEFAULT}
           queryField={false}
           ecsMappingField={false}
         />

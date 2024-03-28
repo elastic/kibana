@@ -15,6 +15,7 @@ describe('getCategoryCountRequest', () => {
       key: 'runTask ended no files to process',
       count: 667,
       examples: ['[runTask()] ended: no files to process'],
+      regex: '',
     };
 
     const query = getCategoryCountRequest(
@@ -65,8 +66,9 @@ describe('getCategoryCountMSearchRequest', () => {
         key: 'SLO summary transforms installed and started',
         count: 500,
         examples: ['SLO summary transforms installed and started'],
+        regex: '',
       },
-      { key: 'Trusted Apps', count: 500, examples: ['Trusted Apps: '] },
+      { key: 'Trusted Apps', count: 500, examples: ['Trusted Apps: '], regex: '' },
     ];
 
     const query = getCategoryCountMSearchRequest(

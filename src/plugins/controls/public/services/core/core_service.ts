@@ -16,10 +16,11 @@ export type CoreServiceFactory = KibanaPluginServiceFactory<
 >;
 
 export const coreServiceFactory: CoreServiceFactory = ({ coreStart }) => {
-  const { theme, i18n } = coreStart;
+  const { theme, i18n, notifications } = coreStart;
 
   return {
     theme,
     i18n,
+    notifications,
   };
 };

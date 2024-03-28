@@ -1,0 +1,23 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: true
+
+indexing:
+  eventsPerCycle: 1000
+  dataset: "fake_logs"
+
+schedule:
+  - template: "good"
+    start: "now-2h"
+    end: "now-1h"
+  - template: "bad"
+    start: "now-1h"
+    end: "now-15m"
+    eventsPerCycle: 5000
+  - template: "good"
+    start: "now-15m"
+    end: false
+

@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
 import semverRcompare from 'semver/functions/rcompare';
 import semverLt from 'semver/functions/lt';
 
+import { differsOnlyInPatch } from '../../common/services';
+
 import { useKibanaVersion } from './use_kibana_version';
 import { sendGetAgentsAvailableVersions } from './use_request';
 
@@ -49,17 +51,4 @@ export const useAgentVersion = (): string | undefined => {
   }, [kibanaVersion]);
 
   return agentVersion;
-};
-
-export const differsOnlyInPatch = (
-  versionA: string,
-  versionB: string,
-  allowEqualPatch: boolean = true
-): boolean => {
-  const [majorA, minorA, patchA] = versionA.split('.');
-  const [majorB, minorB, patchB] = versionB.split('.');
-
-  return (
-    majorA === majorB && minorA === minorB && (allowEqualPatch ? patchA >= patchB : patchA > patchB)
-  );
 };

@@ -27,14 +27,18 @@ import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../mocks';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 import { v4 as uuidv4 } from 'uuid';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_ACTION_AGENT_TYPE,
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
+  RESPONSE_ACTION_TYPE,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import { OUTPUT_MESSAGES } from '../translations';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { getUiCommand } from '../components/hooks';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
 
@@ -238,6 +242,7 @@ describe('Response actions history', () => {
         page: 1,
         pageSize: 10,
         agentIds: undefined,
+        agentTypes: [],
         commands: [],
         statuses: [],
         types: [],
@@ -307,6 +312,7 @@ describe('Response actions history', () => {
       expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
         {
           agentIds: undefined,
+          agentTypes: [],
           commands: [],
           endDate: 'now',
           page: 1,
@@ -562,6 +568,30 @@ describe('Response actions history', () => {
           'Parameters',
           'Comment',
           'Hostname',
+          'Output:',
+        ]
+      );
+    });
+
+    it('should contain agent type info in each expanded row', async () => {
+      mockedContext.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: true });
+      render();
+      const { getAllByTestId } = renderResult;
+
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+      expandButtons.map((button) => userEvent.click(button));
+      const trays = getAllByTestId(`${testPrefix}-details-tray`);
+      expect(trays).toBeTruthy();
+      expect(Array.from(trays[0].querySelectorAll('dt')).map((title) => title.textContent)).toEqual(
+        [
+          'Command placed',
+          'Execution started on',
+          'Execution completed',
+          'Input',
+          'Parameters',
+          'Comment',
+          'Hostname',
+          'Agent type',
           'Output:',
         ]
       );
@@ -982,7 +1012,7 @@ describe('Response actions history', () => {
 
         render();
 
-        const outputCommand = getUiCommand(command);
+        const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
 
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
@@ -1009,7 +1039,7 @@ describe('Response actions history', () => {
         });
         render();
 
-        const outputCommand = getUiCommand(command);
+        const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
           `${outputCommand} failed`,
@@ -1036,7 +1066,7 @@ describe('Response actions history', () => {
         });
         render();
 
-        const outputCommand = getUiCommand(command);
+        const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
           `${outputCommand} failed: action expired`,
@@ -1158,6 +1188,7 @@ describe('Response actions history', () => {
       expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
         {
           agentIds: undefined,
+          agentTypes: [],
           commands: [],
           endDate: 'now',
           page: 1,
@@ -1360,6 +1391,7 @@ describe('Response actions history', () => {
       expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
         {
           agentIds: ['id-0', 'id-2', 'id-4', 'id-6'],
+          agentTypes: [],
           commands: [],
           endDate: 'now',
           page: 1,
@@ -1372,6 +1404,51 @@ describe('Response actions history', () => {
         },
         expect.anything()
       );
+    });
+  });
+
+  describe('Types  filter', () => {
+    const filterPrefix = 'types-filter';
+    it('should show a list of action types when opened', () => {
+      render();
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(RESPONSE_ACTION_TYPE.length);
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'Triggered by rule',
+        'Triggered manually',
+      ]);
+    });
+
+    it('should show a list of agent and action types when opened in page view', () => {
+      mockedContext.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: true });
+      render({ isFlyout: false });
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
+        [...RESPONSE_ACTION_AGENT_TYPE, ...RESPONSE_ACTION_TYPE].length
+      );
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'Elastic Defend',
+        'SentinelOne',
+        'Triggered by rule',
+        'Triggered manually',
+      ]);
+    });
+
+    it('should have `clear all` button `disabled` when no selected values', () => {
+      render();
+      const { getByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
+      expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
     });
   });
 });

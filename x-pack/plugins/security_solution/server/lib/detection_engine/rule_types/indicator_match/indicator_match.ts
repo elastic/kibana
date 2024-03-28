@@ -7,6 +7,7 @@
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import type {
   AlertInstanceContext,
@@ -15,7 +16,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type { Filter, DataViewFieldBase } from '@kbn/es-query';
-import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import type { RuleRangeTuple, BulkCreate, WrapHits, WrapSuppressedHits, RunOpts } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
@@ -41,6 +42,9 @@ export const indicatorMatchExecutor = async ({
   exceptionFilter,
   unprocessedExceptions,
   inputIndexFields,
+  wrapSuppressedHits,
+  runOpts,
+  licensing,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -59,6 +63,9 @@ export const indicatorMatchExecutor = async ({
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
   inputIndexFields: DataViewFieldBase[];
+  wrapSuppressedHits: WrapSuppressedHits;
+  runOpts: RunOpts<ThreatRuleParams>;
+  licensing: LicensingPluginSetup;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -89,12 +96,15 @@ export const indicatorMatchExecutor = async ({
       tuple,
       type: ruleParams.type,
       wrapHits,
+      wrapSuppressedHits,
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
       exceptionFilter,
       unprocessedExceptions,
       inputIndexFields,
+      runOpts,
+      licensing,
     });
   });
 };

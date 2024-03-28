@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+import { CriticalityModifiers } from '../../../../common/entity_analytics/asset_criticality';
+import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 import { RISK_SCORING_NORMALIZATION_MAX } from '../risk_score/constants';
-import { CriticalityModifiers } from './constants';
 
 /**
  * Retrieves the criticality modifier for a given criticality level.
@@ -15,9 +15,7 @@ import { CriticalityModifiers } from './constants';
  * @param criticalityLevel The criticality level for which to get the modifier.
  * @returns The associated criticality modifier for the given criticality level.
  */
-export const getCriticalityModifier = (
-  criticalityLevel?: AssetCriticalityRecord['criticality_level']
-): number | undefined => {
+export const getCriticalityModifier = (criticalityLevel?: CriticalityLevel): number | undefined => {
   if (criticalityLevel == null) {
     return;
   }

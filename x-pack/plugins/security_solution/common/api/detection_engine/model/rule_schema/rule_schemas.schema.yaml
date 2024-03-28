@@ -279,7 +279,7 @@ components:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TiebreakerField'
         timestamp_field:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TimestampField'
-
+          
     EqlRuleCreateFields:
       allOf:
         - $ref: '#/components/schemas/EqlRequiredFields'
@@ -346,7 +346,7 @@ components:
           items:
             $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
-          $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppression'
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
     QueryRuleDefaultableFields:
       type: object
@@ -427,7 +427,7 @@ components:
           items:
             $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
-          $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppression'
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
 
@@ -604,6 +604,8 @@ components:
           $ref: './specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ConcurrentSearches'
         items_per_search:
           $ref: './specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ItemsPerSearch'
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
     ThreatMatchRuleDefaultableFields:
       type: object

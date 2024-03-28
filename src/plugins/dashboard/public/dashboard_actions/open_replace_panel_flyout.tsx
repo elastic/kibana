@@ -8,25 +8,21 @@
 
 import React from 'react';
 
-import type {
-  IContainer,
-  IEmbeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-} from '@kbn/embeddable-plugin/public';
-import { tracksOverlays } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { ReplacePanelFlyout } from './replace_panel_flyout';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import { pluginServices } from '../services/plugin_services';
+import { ReplacePanelActionApi } from './replace_panel_action';
+import { ReplacePanelFlyout } from './replace_panel_flyout';
+import { ReplacePanelSOFinder } from '.';
 
-export async function openReplacePanelFlyout(options: {
-  embeddable: IContainer;
-  savedObjectFinder: React.ComponentType<any>;
-  panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
-}) {
-  const { embeddable, panelToRemove, savedObjectFinder } = options;
-
+export const openReplacePanelFlyout = async ({
+  savedObjectFinder,
+  api,
+}: {
+  savedObjectFinder: ReplacePanelSOFinder;
+  api: ReplacePanelActionApi;
+}) => {
   const {
     settings: {
       theme: { theme$ },
@@ -34,22 +30,19 @@ export async function openReplacePanelFlyout(options: {
     overlays: { openFlyout },
   } = pluginServices.getServices();
 
-  // send the overlay ref to the root embeddable if it is capable of tracking overlays
-  const rootEmbeddable = embeddable.getRoot();
-  const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
+  // send the overlay ref to the parent if it is capable of tracking overlays
+  const overlayTracker = tracksOverlays(api.parentApi) ? api.parentApi : undefined;
 
   const flyoutSession = openFlyout(
     toMountPoint(
       <ReplacePanelFlyout
-        container={embeddable}
+        api={api}
         onClose={() => {
           if (flyoutSession) {
             if (overlayTracker) overlayTracker.clearOverlays();
-
             flyoutSession.close();
           }
         }}
-        panelToRemove={panelToRemove}
         savedObjectsFinder={savedObjectFinder}
       />,
       { theme$ }
@@ -65,4 +58,4 @@ export async function openReplacePanelFlyout(options: {
   );
 
   overlayTracker?.openOverlay(flyoutSession);
-}
+};

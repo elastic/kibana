@@ -6,7 +6,7 @@
  */
 
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { ExportTypesRegistry } from '../lib';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { createMockReportingCore } from '../test_helpers';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';

@@ -38,7 +38,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { CodeEditorField } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useDarkMode, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
 import type { CategorizedApiKey } from './api_keys_grid_page';
@@ -146,6 +146,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
+  const isDarkMode = useDarkMode();
   const { value: currentUser, loading: isLoadingCurrentUser } = useCurrentUser();
   const [{ value: roles, loading: isLoadingRoles }, getRoles] = useAsyncFn(
     () => new RolesAPIClient(services.http!).getRoles(),
@@ -281,7 +282,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       title={
                         <FormattedMessage
                           id="xpack.security.accountManagement.apiKeyFlyout.readonlyOwnedByOtherUserWarning"
-                          defaultMessage="You cannot update this API key, since it is owned by another user."
+                          defaultMessage="You can’t update this API key. It belongs to another user."
                         />
                       }
                     />
@@ -294,7 +295,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       title={
                         <FormattedMessage
                           id="xpack.security.accountManagement.apiKeyFlyout.readonlyExpiredWarning"
-                          defaultMessage="You cannot update this API key, since it has already expired."
+                          defaultMessage="This API key has expired. You can no longer update it."
                         />
                       }
                     />
@@ -450,7 +451,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                                     <h2>
                                       <FormattedMessage
                                         id="xpack.security.accountManagement.apiKeyFlyout.restTypeLabel"
-                                        defaultMessage="Personal API key"
+                                        defaultMessage="User API key"
                                       />
                                     </h2>
                                   </EuiTitle>
@@ -476,7 +477,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                                     <h2>
                                       <FormattedMessage
                                         id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeLabel"
-                                        defaultMessage="Cross-Cluster API key"
+                                        defaultMessage="Cross-cluster API key"
                                       />
                                     </h2>
                                   </EuiTitle>
@@ -484,7 +485,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                                   <EuiText size="s">
                                     <FormattedMessage
                                       id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeDescription"
-                                      defaultMessage="Allow remote clusters to connect to your local cluster."
+                                      defaultMessage="Allow other clusters to connect to this cluster."
                                     />
                                   </EuiText>
                                 </>
@@ -662,6 +663,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       fullWidth
                       languageId="xjson"
                       height={200}
+                      useDarkTheme={isDarkMode}
                     />
                   </FormRow>
                 </EuiPanel>
@@ -749,6 +751,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                           fullWidth
                           languageId="xjson"
                           height={200}
+                          useDarkTheme={isDarkMode}
                         />
                       </FormRow>
                     </>
@@ -833,6 +836,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         fullWidth
                         languageId="xjson"
                         height={200}
+                        useDarkTheme={isDarkMode}
                       />
                     </FormRow>
                   </>

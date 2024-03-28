@@ -29,6 +29,7 @@ import { getData, getCore } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { isVectorLayer } from '../../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../../classes/sources/source';
+import { isESSource } from '../../classes/sources/es_source';
 import { IField } from '../../classes/fields/field';
 import { isLayerGroup } from '../../classes/layers/layer_group';
 import { isSpatialJoin } from '../../classes/joins/is_spatial_join';
@@ -127,7 +128,7 @@ export class EditLayerPanel extends Component<Props, State> {
     if (
       !this.props.selectedLayer ||
       isLayerGroup(this.props.selectedLayer) ||
-      !this.props.selectedLayer.supportsElasticsearchFilters()
+      !isESSource(this.props.selectedLayer.getSource())
     ) {
       return null;
     }

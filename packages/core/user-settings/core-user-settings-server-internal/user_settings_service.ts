@@ -9,6 +9,7 @@
 import { CoreContext } from '@kbn/core-base-server-internal';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { DarkModeValue } from '@kbn/core-ui-settings-common';
 import { UserProfileSettingsClientContract } from '@kbn/core-user-settings-server';
 
 /**
@@ -16,7 +17,7 @@ import { UserProfileSettingsClientContract } from '@kbn/core-user-settings-serve
  */
 export interface InternalUserSettingsServiceSetup {
   setUserProfileSettings: (client: UserProfileSettingsClientContract) => void;
-  getUserSettingDarkMode: (request: KibanaRequest) => Promise<boolean | undefined>;
+  getUserSettingDarkMode: (request: KibanaRequest) => Promise<DarkModeValue | undefined>;
 }
 
 export class UserSettingsService {
@@ -52,7 +53,7 @@ export class UserSettingsService {
 
   private async getUserSettingDarkMode(
     userSettings: Record<string, string>
-  ): Promise<boolean | undefined> {
+  ): Promise<DarkModeValue | undefined> {
     let result;
 
     if (userSettings?.darkMode) {

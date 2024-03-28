@@ -10,11 +10,13 @@ import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
   checkResults,
+  fillInQueryTimeout,
   inputQuery,
   selectAllAgents,
   submitQuery,
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
+  verifyQueryTimeout,
 } from '../../tasks/live_query';
 import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
@@ -93,6 +95,8 @@ describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'
     selectAllAgents();
     cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
     inputQuery('{selectall}{backspace}select * from users;');
+    getAdvancedButton().click();
+    fillInQueryTimeout('601');
     cy.wait(1000);
     submitQuery();
     checkResults();
@@ -100,6 +104,7 @@ describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'
     cy.get('[aria-label="Run query"]').first().should('be.visible').click();
 
     cy.getBySel(LIVE_QUERY_EDITOR).contains('select * from users;');
+    verifyQueryTimeout('601');
   });
 
   it('should open query details by clicking the details icon', () => {

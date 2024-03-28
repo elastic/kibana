@@ -7,7 +7,7 @@
 
 import { RuleType, ActionVariables } from '../../types';
 import { transformActionVariables } from './action_variables';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -68,6 +68,10 @@ const expectedTransformResult = [
     description:
       'A flag on the alert that indicates whether the alert status is changing repeatedly.',
     name: 'alert.flapping',
+  },
+  {
+    description: 'The number of consecutive runs that meet the rule conditions.',
+    name: 'alert.consecutiveMatches',
   },
   {
     description: 'The configured server.publicBaseUrl value or empty string if not configured.',
@@ -321,7 +325,7 @@ function getAlertType(actionVariables: ActionVariables): RuleType {
     defaultActionGroupId: 'default',
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     authorizedConsumers: {},
-    producer: ALERTS_FEATURE_ID,
+    producer: ALERTING_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
   };

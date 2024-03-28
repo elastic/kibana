@@ -85,8 +85,8 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
             .then(() => true)
             .catch(() => false)
         );
-        browser.refresh();
-        this.expectConnectorTableToHaveNoItems();
+        await browser.refresh();
+        await this.expectConnectorTableToHaveNoItems();
       },
       async expectConnectorOverviewPageComponentsToExist() {
         await testSubjects.existOrFail('serverlessSearchConnectorsTitle');

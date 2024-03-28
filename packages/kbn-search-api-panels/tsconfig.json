@@ -17,10 +17,10 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/core-http-browser",
     "@kbn/core-application-browser",
     "@kbn/share-plugin",
     "@kbn/i18n-react",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/console-plugin"
   ]
 }

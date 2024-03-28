@@ -35,6 +35,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser",
     "@kbn/react-kibana-context-render",
+    "@kbn/field-utils",
     "@kbn/no-data-page-plugin",
     "@kbn/core-application-browser",
     "@kbn/core-doc-links-browser",

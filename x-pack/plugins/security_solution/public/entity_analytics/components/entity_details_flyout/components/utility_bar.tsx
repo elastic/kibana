@@ -20,7 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
-import type { AlertRawData } from '../tabs/risk_inputs';
+import type { AlertRawData } from '../tabs/risk_inputs/risk_inputs_tab';
 
 interface Props {
   selectedAlerts: AlertRawData[];
@@ -57,14 +57,14 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
               {pagination.totalItemCount <= 1 ? (
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.selectionTextSingle"
-                  defaultMessage="Showing {totalInputs} {riskInputs}"
+                  defaultMessage="Showing {totalContributions} {riskInputs}"
                   values={{
-                    totalInputs: pagination.totalItemCount,
+                    totalContributions: pagination.totalItemCount,
                     riskInputs: (
                       <b>
                         <FormattedMessage
                           id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.riskInput"
-                          defaultMessage="Risk input"
+                          defaultMessage="Risk contribution"
                         />
                       </b>
                     ),
@@ -73,15 +73,15 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
               ) : (
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.selectionTextRange"
-                  defaultMessage="Showing {displayedRange} of {totalInputs} {riskInputs}"
+                  defaultMessage="Showing {displayedRange} of {totalContributions} {riskContributions}"
                   values={{
                     displayedRange: <b>{`${fromItem}-${toItem}`}</b>,
-                    totalInputs: pagination.totalItemCount,
-                    riskInputs: (
+                    totalContributions: pagination.totalItemCount,
+                    riskContributions: (
                       <b>
                         <FormattedMessage
                           id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.riskInputs"
-                          defaultMessage="Risk inputs"
+                          defaultMessage="Risk contributions"
                         />
                       </b>
                     ),
@@ -106,9 +106,9 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
                   >
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.text"
-                      defaultMessage="{totalSelectedInputs} selected risk input"
+                      defaultMessage="{totalSelectedContributions} selected risk contribution"
                       values={{
-                        totalSelectedInputs: selectedAlerts.length,
+                        totalSelectedContributions: selectedAlerts.length,
                       }}
                     />
                   </EuiButtonEmpty>

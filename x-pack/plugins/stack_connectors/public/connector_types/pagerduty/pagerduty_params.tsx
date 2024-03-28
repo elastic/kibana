@@ -370,7 +370,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               }}
               onBlur={() => {
                 if (!customDetails) {
-                  editAction('customDetails', '', index);
+                  editAction('customDetails', '{}', index);
                 }
               }}
               dataTestSubj="customDetailsJsonEditor"

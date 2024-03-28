@@ -7,6 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 const fields = [
   {
@@ -77,10 +78,12 @@ export const buildDataViewMock = ({
   name,
   fields: definedFields,
   timeFieldName,
+  type = 'default',
 }: {
   name: string;
   fields: DataView['fields'];
   timeFieldName?: string;
+  type?: string;
 }): DataView => {
   const dataViewFields = [...definedFields] as DataView['fields'];
 
@@ -98,7 +101,7 @@ export const buildDataViewMock = ({
     name,
     metaFields: ['_index', '_score'],
     fields: dataViewFields,
-    type: 'default',
+    type,
     getName: () => name,
     getComputedFields: () => ({ docvalueFields: [], scriptFields: {} }),
     getSourceFiltering: () => ({}),
@@ -125,6 +128,11 @@ export const dataViewMockWithTimefield = buildDataViewMock({
   timeFieldName: '@timestamp',
   name: 'the-data-view-with-timefield',
   fields,
+});
+export const dataViewMockEsql = buildDataViewMock({
+  name: 'the-data-view-esql',
+  fields,
+  type: ESQL_TYPE,
 });
 
 export const dataViewMockList = [dataViewMock, dataViewMockWithTimefield];

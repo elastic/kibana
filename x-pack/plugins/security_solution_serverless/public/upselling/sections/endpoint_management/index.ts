@@ -18,3 +18,15 @@ export const RuleDetailsEndpointExceptionsLazy = lazy(() =>
     default: RuleDetailsEndpointExceptions,
   }))
 );
+
+export const EndpointProtectionUpdatesLazy = lazy(() =>
+  import('./endpoint_protection_updates').then(({ EndpointProtectionUpdates }) => ({
+    default: EndpointProtectionUpdates,
+  }))
+);
+
+export const EndpointAgentTamperProtectionLazy = lazy(() =>
+  import('./endpoint_agent_tamper_protection').then(({ EndpointAgentTamperProtection }) => ({
+    default: EndpointAgentTamperProtection,
+  }))
+);

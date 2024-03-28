@@ -45,7 +45,7 @@
           },
           ", setCellProps: (props: ",
           "EuiDataGridSetCellProps",
-          ") => void, defaultStyles?: React.CSSProperties | undefined) => void"
+          ") => void) => void"
         ],
         "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
         "deprecated": false,
@@ -109,21 +109,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.addBuildingBlockStyle.$4",
-            "type": "Object",
-            "tags": [],
-            "label": "defaultStyles",
-            "description": [],
-            "signature": [
-              "React.CSSProperties | undefined"
-            ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -471,15 +456,15 @@
         "label": "getTableByIdSelector",
         "description": [],
         "signature": [
-          "() => ((state: { dataTable: ",
+          "() => ((state: ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
             "scope": "common",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableState",
-            "text": "TableState"
+            "section": "def-common.DataTableState",
+            "text": "DataTableState"
           },
-          "; }, params_0: string) => ",
+          ", tableId: string) => ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
             "scope": "common",
@@ -505,7 +490,7 @@
             "section": "def-common.DataTableModel",
             "text": "DataTableModel"
           },
-          " & { clearCache: () => void; }> & { clearCache: () => void; }"
+          ", { clearCache: () => void; }> & { clearCache: () => void; }"
         ],
         "path": "x-pack/packages/security-solution/data_table/store/data_table/selectors.ts",
         "deprecated": false,

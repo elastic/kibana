@@ -7,6 +7,7 @@
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
@@ -15,17 +16,18 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-  AppNavLinkStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
+import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
@@ -40,6 +42,10 @@ import {
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
+import {
+  CreatIndexLocatorDefinition,
+  CreatIndexLocatorParams,
+} from '../common/locators/create_index_locator';
 import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { docLinks } from './applications/shared/doc_links';
@@ -56,18 +62,21 @@ interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface PluginsStart {
   charts: ChartsPluginStart;
   cloud?: CloudSetup & CloudStart;
+  console?: ConsolePluginStart;
   data: DataPublicPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  ml: MlPluginStart;
+  searchPlayground: SearchPlaygroundPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
-  ml: MlPluginStart;
 }
 
 export interface ESConfig {
@@ -76,7 +85,6 @@ export interface ESConfig {
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
-  private esConfig: ESConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -84,6 +92,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   private data: ClientData = {} as ClientData;
+  private esConfig: ESConfig;
 
   private async getInitialData(http: HttpSetup) {
     try {
@@ -142,7 +151,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (!config.ui?.enabled) {
       return;
     }
-    const { cloud } = plugins;
+    const { cloud, share } = plugins;
 
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
@@ -165,6 +174,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
       },
       title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
+      visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
     });
 
     core.application.register({
@@ -250,8 +260,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(EnterpriseSearchAISearch, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.hidden,
       title: AI_SEARCH_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -272,8 +282,6 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(Applications, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.default,
-      searchable: true,
       title: APPLICATIONS_PLUGIN.NAV_TITLE,
     });
 
@@ -295,8 +303,6 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(Analytics, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.default,
-      searchable: true,
       title: ANALYTICS_PLUGIN.NAME,
     });
 
@@ -318,9 +324,11 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(SearchExperiences, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.hidden,
       title: SEARCH_EXPERIENCES_PLUGIN.NAME,
+      visibleIn: [],
     });
+
+    share.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
 
     if (config.canDeployEntSearch) {
       core.application.register({
@@ -341,8 +349,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
           return renderApp(AppSearch, kibanaDeps, pluginData);
         },
-        navLinkStatus: AppNavLinkStatus.hidden,
         title: APP_SEARCH_PLUGIN.NAME,
+        visibleIn: [],
       });
 
       core.application.register({
@@ -366,8 +374,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
           return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
         },
-        navLinkStatus: AppNavLinkStatus.hidden,
         title: WORKPLACE_SEARCH_PLUGIN.NAME,
+        visibleIn: [],
       });
     }
 
@@ -435,13 +443,17 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     if (!this.config.ui?.enabled) {
       return;
     }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
+
+    // Return empty start contract rather than void in order for plugins
+    // that depend on the enterprise search plugin to determine whether it is enabled or not
+    return {};
   }
 
   public stop() {}

@@ -81,6 +81,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
   const [selectedWebhookOption, setSelectedWebhookOption] = useState<
     WebhookOption | null | undefined
   >();
+  const [bodyOption, setBodyOption] = useState<string>('');
 
   const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
@@ -88,8 +89,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     if (!subAction) {
       editAction('subAction', isTest ? SUB_ACTION.TEST : SUB_ACTION.RUN, index);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTest, subAction]);
+  }, [editAction, index, isTest, subAction]);
 
   if (connectorId !== actionConnector?.id) {
     // Story (and webhook) reset needed before requesting with a different connectorId
@@ -197,6 +197,12 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       });
     }
   }, [selectedWebhookOption, webhook, webhooks, toasts, editSubActionParams]);
+
+  useEffect(() => {
+    if (body !== bodyOption) {
+      editSubActionParams({ body: bodyOption });
+    }
+  }, [body, bodyOption, editSubActionParams]);
 
   const selectedStoryOptions = useMemo(
     () => (selectedStoryOption ? [selectedStoryOption] : []),
@@ -309,14 +315,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             label={i18n.BODY_LABEL}
             ariaLabel={i18n.BODY_ARIA_LABEL}
             errors={errors.body as string[]}
-            onDocumentsChange={(json: string) => {
-              editSubActionParams({ body: json });
-            }}
-            onBlur={() => {
-              if (!body) {
-                editSubActionParams({ body: '' });
-              }
-            }}
+            onDocumentsChange={setBodyOption}
             dataTestSubj="tines-bodyJsonEditor"
           />
         </EuiFlexItem>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CellValueContext } from '@kbn/embeddable-plugin/public';
+import type { CellValueContext, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -82,9 +82,9 @@ export const createAddToTimelineLensAction = ({
     getIconType: () => ADD_TO_TIMELINE_ICON,
     getDisplayName: () => ADD_TO_TIMELINE,
     isCompatible: async ({ embeddable, data }) =>
-      !isErrorEmbeddable(embeddable) &&
-      isLensEmbeddable(embeddable) &&
-      isFilterableEmbeddable(embeddable) &&
+      !isErrorEmbeddable(embeddable as IEmbeddable) &&
+      isLensEmbeddable(embeddable as IEmbeddable) &&
+      isFilterableEmbeddable(embeddable as IEmbeddable) &&
       isDataColumnsFilterable(data) &&
       isInSecurityApp(currentAppId),
     execute: async ({ data }) => {

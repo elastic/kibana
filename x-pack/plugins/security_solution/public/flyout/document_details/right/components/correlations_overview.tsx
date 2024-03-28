@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
@@ -38,8 +38,9 @@ export const CorrelationsOverview: React.FC = () => {
     indexName,
     getFieldsData,
     scopeId,
+    isPreview,
   } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToCorrelationsTab = useCallback(() => {
     openLeftPanel({
@@ -56,10 +57,16 @@ export const CorrelationsOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const { show: showAlertsByAncestry, indices } = useShowRelatedAlertsByAncestry({
+  const {
+    show: showAlertsByAncestry,
+    documentId,
+    indices,
+  } = useShowRelatedAlertsByAncestry({
     getFieldsData,
     dataAsNestedObject,
     dataFormattedForFieldBrowser,
+    eventId,
+    isPreview,
   });
   const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
     getFieldsData,
@@ -111,8 +118,8 @@ export const CorrelationsOverview: React.FC = () => {
           {showAlertsBySession && entityId && (
             <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
           )}
-          {showAlertsByAncestry && indices && (
-            <RelatedAlertsByAncestry documentId={eventId} indices={indices} scopeId={scopeId} />
+          {showAlertsByAncestry && documentId && indices && (
+            <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
           )}
         </EuiFlexGroup>
       ) : (

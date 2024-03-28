@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
+
 import { createFilter, isEmptyFilterValue } from './create_filter';
 import { FILTER_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
@@ -46,13 +47,15 @@ export const createFilterInActionFactory = createCellActionFactory(
         isTypeSupportedByDefaultActions(field.type as KBN_FIELD_TYPES)
       );
     },
-    execute: async ({ data }) => {
+    execute: async ({ data, metadata }) => {
       const field = data[0]?.field;
       const rawValue = data[0]?.value;
+      const dataViewId = typeof metadata?.dataViewId === 'string' ? metadata.dataViewId : undefined;
+
       const value = filterOutNullableValues(valueToArray(rawValue));
 
       if (isValueSupportedByDefaultActions(value)) {
-        addFilterIn({ filterManager, fieldName: field.name, value });
+        addFilterIn({ filterManager, fieldName: field.name, value, dataViewId });
       } else {
         toasts.addWarning({
           title: ACTION_INCOMPATIBLE_VALUE_WARNING,
@@ -66,16 +69,19 @@ export const addFilterIn = ({
   filterManager,
   fieldName,
   value,
+  dataViewId,
 }: {
   filterManager: FilterManager | undefined;
   fieldName: string;
   value: DefaultActionsSupportedValue;
+  dataViewId?: string;
 }) => {
   if (filterManager != null) {
     const filter = createFilter({
       key: fieldName,
       value,
       negate: isEmptyFilterValue(value),
+      dataViewId,
     });
     filterManager.addFilters(filter);
   }

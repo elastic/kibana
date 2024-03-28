@@ -10,13 +10,7 @@ import type { ComponentProps, FC } from 'react';
 import React from 'react';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
+import { TestProviders } from '../../mock';
 import type {
   ControlGroupOutput,
   ControlGroupInput,
@@ -24,7 +18,6 @@ import type {
 } from '@kbn/controls-plugin/public';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import { initialInputData, sampleOutputData } from './mocks/data';
-import { createStore } from '../../store';
 import { useGetInitialUrlParamValue } from '../../utils/global_query_string/helpers';
 import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS } from './constants';
 import {
@@ -88,19 +81,12 @@ jest.mock('@kbn/controls-plugin/public/control_group/external_api/control_group_
 const onFilterChangeMock = jest.fn();
 const onInitMock = jest.fn();
 
-const state = mockGlobalState;
-const { storage } = createSecuritySolutionStorageMock();
-
-const getStoreWithCustomState = (newState: typeof state = state) => {
-  return createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-};
-
 const TestComponent: FC<
   ComponentProps<typeof TestProviders> & {
     filterGroupProps?: Partial<ComponentProps<typeof FilterGroup>>;
   }
 > = (props) => (
-  <TestProviders store={getStoreWithCustomState()} {...props}>
+  <TestProviders {...props}>
     <FilterGroup
       initialControls={DEFAULT_DETECTION_PAGE_FILTERS}
       dataViewId="security-solution-default"

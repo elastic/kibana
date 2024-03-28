@@ -12,8 +12,9 @@ import React from 'react';
 import { parseJson, stringifyJson } from '../../lib/utils';
 import { FormSchema, FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
 
-const { emptyField, isJsonField } = fieldValidators;
+const { emptyField, isJsonField, containsCharsField } = fieldValidators;
 const { toInt } = fieldFormatters;
+const DISALLOWED_CHARS = [',', '*'];
 
 export const pipelineFormSchema: FormSchema = {
   name: {
@@ -28,6 +29,20 @@ export const pipelineFormSchema: FormSchema = {
             defaultMessage: 'Name is required.',
           })
         ),
+      },
+      {
+        validator: containsCharsField({
+          message: i18n.translate(
+            'xpack.ingestPipelines.form.pipelineInvalidCharactersInNameError',
+            {
+              defaultMessage: `Should not contain any of the following characters: {notAllowedChars}`,
+              values: {
+                notAllowedChars: DISALLOWED_CHARS.join(', '),
+              },
+            }
+          ),
+          chars: DISALLOWED_CHARS,
+        }),
       },
     ],
   },

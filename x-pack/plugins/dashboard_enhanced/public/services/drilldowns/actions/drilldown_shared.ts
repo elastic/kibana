@@ -6,13 +6,18 @@
  */
 
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  IEmbeddable,
-  Container as EmbeddableContainer,
-} from '@kbn/embeddable-plugin/public';
-import { isEnhancedEmbeddable } from '@kbn/embeddable-enhanced-plugin/public';
+  apiIsPresentationContainer,
+  type PresentationContainer,
+} from '@kbn/presentation-containers';
+import {
+  getPanelTitle,
+  type PublishesPanelTitle,
+  type HasUniqueId,
+  type HasParentApi,
+} from '@kbn/presentation-publishing';
+import { apiHasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { UiActionsEnhancedDrilldownTemplate as DrilldownTemplate } from '@kbn/ui-actions-enhanced-plugin/public';
 
 /**
@@ -36,31 +41,22 @@ export function ensureNestedTriggers(triggers: string[]): string[] {
   return triggers;
 }
 
-const isEmbeddableContainer = (x: unknown): x is EmbeddableContainer =>
-  x instanceof EmbeddableContainer;
-
 /**
  * Given a dashboard panel embeddable, it will find the parent (dashboard
  * container embeddable), then iterate through all the dashboard panels and
  * generate DrilldownTemplate for each existing drilldown.
  */
 export const createDrilldownTemplatesFromSiblings = (
-  embeddable: IEmbeddable
+  embeddable: Partial<HasUniqueId> & HasParentApi<Partial<PresentationContainer>>
 ): DrilldownTemplate[] => {
+  const parentApi = embeddable.parentApi;
+  if (!apiIsPresentationContainer(parentApi)) return [];
+
   const templates: DrilldownTemplate[] = [];
-  const embeddableId = embeddable.id;
-
-  const container = embeddable.getRoot();
-
-  if (!container) return templates;
-  if (!isEmbeddableContainer(container)) return templates;
-
-  const childrenIds = (container as EmbeddableContainer).getChildIds();
-
-  for (const childId of childrenIds) {
-    const child = (container as EmbeddableContainer).getChild(childId);
-    if (child.id === embeddableId) continue;
-    if (!isEnhancedEmbeddable(child)) continue;
+  for (const childId of parentApi.getChildIds()) {
+    const child = parentApi.getChild(childId) as Partial<HasUniqueId & PublishesPanelTitle>;
+    if (childId === embeddable.uuid) continue;
+    if (!apiHasDynamicActions(child)) continue;
     const events = child.enhancements.dynamicActions.state.get().events;
 
     for (const event of events) {
@@ -68,7 +64,7 @@ export const createDrilldownTemplatesFromSiblings = (
         id: event.eventId,
         name: event.action.name,
         icon: 'dashboardApp',
-        description: child.getTitle() || child.id,
+        description: getPanelTitle(child) ?? child.uuid ?? '',
         config: event.action.config,
         factoryId: event.action.factoryId,
         triggers: event.triggers,

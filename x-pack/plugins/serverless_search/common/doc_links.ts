@@ -21,6 +21,7 @@ class ESDocLinks {
   public dataStreams: string = '';
   // Connectors links
   public connectors: string = '';
+  public connectorClientAvailableConnectors: string = '';
   public connectorsRunFromSource: string = '';
   public connectorsRunWithDocker: string = '';
   // Client links
@@ -68,10 +69,13 @@ class ESDocLinks {
 
     // Connectors links
     this.connectors = newDocLinks.serverlessSearch.integrationsConnectorClient;
+    this.connectorClientAvailableConnectors =
+      newDocLinks.serverlessSearch.integrationsConnectorClientAvailableConnectors;
     this.connectorsRunFromSource =
       newDocLinks.serverlessSearch.integrationsConnectorClientRunFromSource;
     this.connectorsRunWithDocker =
       newDocLinks.serverlessSearch.integrationsConnectorClientRunWithDocker;
+
     // Client links
     this.elasticsearchClients = newDocLinks.serverlessClients.clientLib;
     // Go

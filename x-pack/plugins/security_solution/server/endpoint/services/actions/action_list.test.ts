@@ -27,6 +27,7 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from '../../mocks';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 
 describe('When using `getActionList()', () => {
   let esClient: ElasticsearchClientMock;
@@ -326,6 +327,7 @@ describe('When using `getActionList()', () => {
       esClient,
       logger,
       metadataService: endpointAppContextService.getEndpointMetadataService(),
+      agentTypes: ['endpoint'] as ResponseActionAgentType[],
       elasticAgentIds: ['123'],
       pageSize: 20,
       startDate: 'now-10d',
@@ -361,6 +363,11 @@ describe('When using `getActionList()', () => {
                       {
                         terms: {
                           'data.command': ['isolate', 'unisolate', 'get-file'],
+                        },
+                      },
+                      {
+                        terms: {
+                          input_type: ['endpoint'],
                         },
                       },
                       {

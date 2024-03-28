@@ -11,6 +11,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
   ApplicationStart,
   Capabilities,
@@ -24,6 +25,7 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
+import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -42,6 +44,7 @@ export interface KibanaLogicProps {
   charts: ChartsPluginStart;
   cloud?: CloudSetup;
   config: ClientConfigType;
+  console?: ConsolePluginStart;
   data: DataPublicPluginStart;
   esConfig: ESConfig;
   guidedOnboarding?: GuidedOnboardingPluginStart;
@@ -53,6 +56,7 @@ export interface KibanaLogicProps {
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchPlayground: SearchPlaygroundPluginStart;
   security: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -62,8 +66,9 @@ export interface KibanaLogicProps {
   user: AuthenticatedUser | null;
 }
 
-export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
+export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud' | 'console'> {
   cloud: Partial<CloudSetup>;
+  consolePlugin: Partial<ConsolePluginStart>;
   data: DataPublicPluginStart;
   isCloud: boolean;
   lens: LensPublicStart;
@@ -78,6 +83,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
     config: [props.config || {}, {}],
+    consolePlugin: [props.console || {}, {}],
     data: [props.data, {}],
     esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
@@ -96,6 +102,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productAccess: [props.productAccess, {}],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
+    searchPlayground: [props.searchPlayground || {}, {}],
     security: [props.security, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],

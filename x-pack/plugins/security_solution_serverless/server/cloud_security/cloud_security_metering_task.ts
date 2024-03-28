@@ -222,14 +222,12 @@ const getSearchStartDate = (lastSuccessfulReport: Date): Date => {
   const initialDate = new Date();
   const thresholdDate = new Date(initialDate.getTime() - THRESHOLD_MINUTES * 60 * 1000);
 
-  let lastSuccessfulReport1;
-
   if (lastSuccessfulReport) {
-    lastSuccessfulReport1 = new Date(lastSuccessfulReport);
+    const lastSuccessfulReportDate = new Date(lastSuccessfulReport);
 
     const searchFrom =
-      lastSuccessfulReport && lastSuccessfulReport1 > thresholdDate
-        ? lastSuccessfulReport1
+      lastSuccessfulReport && lastSuccessfulReportDate > thresholdDate
+        ? lastSuccessfulReportDate
         : thresholdDate;
     return searchFrom;
   }

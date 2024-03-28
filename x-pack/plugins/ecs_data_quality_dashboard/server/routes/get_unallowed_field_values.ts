@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 
 import { getUnallowedFieldValues } from '../lib';
 import { buildResponse } from '../lib/build_response';

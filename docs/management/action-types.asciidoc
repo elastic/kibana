@@ -47,6 +47,10 @@ a| <<pagerduty-action-type,PagerDuty>>
 
 | Send an event in PagerDuty.
 
+a| <<sentinelone-action-type,SentinelOne>>
+
+| Send a request to SentinelOne.
+
 a| <<server-log-action-type,ServerLog>>
 
 | Add a message to a Kibana log.

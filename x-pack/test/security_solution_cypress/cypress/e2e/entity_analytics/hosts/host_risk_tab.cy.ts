@@ -22,7 +22,6 @@ import { hostsUrl } from '../../../urls/navigation';
 import { kqlSearch } from '../../../tasks/security_header';
 import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
-// Tracked by https://github.com/elastic/security-team/issues/7696
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
@@ -35,11 +34,12 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       // by some reason after navigate to host risk, page is sometimes is reload or go to all host tab
       // this fix wait until we fave host in all host table, and then we go to risk tab
       cy.contains('siem-kibana');
+
       navigateToHostRiskDetailTab();
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
     });
 
     it('renders the table', () => {
@@ -86,7 +86,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new');
+      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
     });
 
     it('renders the table', () => {
@@ -105,7 +105,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       removeCriticalFilterAndCloseRiskTableFilter();
     });
 
-    // Flaky
     it('should be able to change items count per page', () => {
       selectFiveItemsPerPageOption();
 

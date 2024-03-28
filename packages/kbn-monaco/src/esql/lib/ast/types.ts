@@ -17,7 +17,8 @@ export type ESQLSingleAstItem =
   | ESQLColumn
   | ESQLTimeInterval
   | ESQLList
-  | ESQLLiteral;
+  | ESQLLiteral
+  | ESQLCommandMode;
 
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
@@ -41,6 +42,10 @@ export interface ESQLCommand extends ESQLAstBaseItem {
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
   args: ESQLAstItem[];
+}
+
+export interface ESQLCommandMode extends ESQLAstBaseItem {
+  type: 'mode';
 }
 
 export interface ESQLFunction extends ESQLAstBaseItem {
@@ -79,6 +84,7 @@ export interface ESQLMessage {
   type: 'error' | 'warning';
   text: string;
   location: ESQLLocation;
+  code: string;
 }
 
 export type AstProviderFn = (

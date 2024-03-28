@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate, EuiText, EuiCode } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
+import { resetIndexUrlParams } from './reset_index_url_params';
 import {
   IndexDetailsSection,
   IndexDetailsTabId,
@@ -34,8 +35,9 @@ export const DetailsPage: FunctionComponent<
   const [index, setIndex] = useState<Index | null>();
 
   const navigateToIndicesList = useCallback(() => {
-    history.push(`/${Section.Indices}`);
-  }, [history]);
+    const paramsString = resetIndexUrlParams(search);
+    history.push(`/${Section.Indices}${paramsString ? '?' : ''}${paramsString}`);
+  }, [history, search]);
 
   const fetchIndexDetails = useCallback(async () => {
     if (indexName) {
@@ -109,6 +111,7 @@ export const DetailsPage: FunctionComponent<
       tab={tab}
       fetchIndexDetails={fetchIndexDetails}
       history={history}
+      search={search}
       navigateToIndicesList={navigateToIndicesList}
     />
   );

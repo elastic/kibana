@@ -74,7 +74,7 @@ export const setup = async (
 
   const clickIncludeHiddenIndicesToggle = () => {
     const { find } = testBed;
-    find('indexTableIncludeHiddenIndicesToggle').simulate('click');
+    find('checkboxToggles-includeHiddenIndices').simulate('click');
   };
 
   const clickManageContextMenuButton = async () => {
@@ -88,7 +88,7 @@ export const setup = async (
 
   const getIncludeHiddenIndicesToggleStatus = () => {
     const { find } = testBed;
-    const props = find('indexTableIncludeHiddenIndicesToggle').props();
+    const props = find('checkboxToggles-includeHiddenIndices').props();
     return Boolean(props['aria-checked']);
   };
 

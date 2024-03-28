@@ -7,3 +7,5 @@
  */
 
 export const MIN_POPOVER_WIDTH = 300;
+
+export const CHANGE_CHECK_DEBOUNCE = 100;

@@ -27,6 +27,7 @@ export function ResizableButton({
       onMouseDown={onMouseDownResizeHandler}
       onKeyDown={onKeyDownResizeHandler}
       onTouchStart={onMouseDownResizeHandler}
+      indicator="border"
       css={css`
         position: ${editorIsInline ? 'relative' : 'absolute'};
         bottom: 0;

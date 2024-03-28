@@ -54,12 +54,12 @@ describe('AddConnectorLogic', () => {
     describe('apiSuccess', () => {
       it('navigates to correct spot and flashes success toast', async () => {
         jest.useFakeTimers({ legacyFakeTimers: true });
-        AddConnectorApiLogic.actions.apiSuccess({ indexName: 'success' } as any);
+        AddConnectorApiLogic.actions.apiSuccess({ id: 'success123' } as any);
         await nextTick();
         jest.advanceTimersByTime(1001);
         await nextTick();
         expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(
-          '/search_indices/success/configuration'
+          '/connectors/success123/configuration'
         );
       });
     });

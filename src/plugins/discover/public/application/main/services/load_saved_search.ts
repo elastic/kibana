@@ -22,6 +22,7 @@ import {
   DiscoverAppStateContainer,
   getInitialState,
 } from './discover_app_state_container';
+import { DiscoverGlobalStateContainer } from './discover_global_state_container';
 import { DiscoverServices } from '../../../build_services';
 
 interface LoadSavedSearchDeps {
@@ -29,6 +30,7 @@ interface LoadSavedSearchDeps {
   dataStateContainer: DiscoverDataStateContainer;
   internalStateContainer: DiscoverInternalStateContainer;
   savedSearchContainer: DiscoverSavedSearchContainer;
+  globalStateContainer: DiscoverGlobalStateContainer;
   services: DiscoverServices;
   setDataView: DiscoverStateContainer['actions']['setDataView'];
 }
@@ -43,10 +45,16 @@ export const loadSavedSearch = async (
   deps: LoadSavedSearchDeps
 ): Promise<SavedSearch> => {
   addLog('[discoverState] loadSavedSearch');
-  const { savedSearchId } = params ?? {};
-  const { appStateContainer, internalStateContainer, savedSearchContainer, services } = deps;
+  const { savedSearchId, initialAppState } = params ?? {};
+  const {
+    appStateContainer,
+    internalStateContainer,
+    savedSearchContainer,
+    globalStateContainer,
+    services,
+  } = deps;
   const appStateExists = !appStateContainer.isEmptyURL();
-  const appState = appStateExists ? appStateContainer.getState() : undefined;
+  const appState = appStateExists ? appStateContainer.getState() : initialAppState;
 
   // Loading the saved search or creating a new one
   let nextSavedSearch = savedSearchId
@@ -58,6 +66,15 @@ export const loadSavedSearch = async (
   // Cleaning up the previous state
   services.filterManager.setAppFilters([]);
   services.data.query.queryString.clearQuery();
+
+  // Sync global filters (coming from URL) to filter manager.
+  // It needs to be done manually here as `syncGlobalQueryStateWithUrl` is being called after this `loadSavedSearch` function.
+  const globalFilters = globalStateContainer?.get()?.filters;
+  const shouldUpdateWithGlobalFilters =
+    globalFilters?.length && !services.filterManager.getGlobalFilters()?.length;
+  if (shouldUpdateWithGlobalFilters) {
+    services.filterManager.setGlobalFilters(globalFilters);
+  }
 
   // reset appState in case a saved search with id is loaded and
   // the url is empty so the saved search is loaded in a clean
@@ -78,7 +95,11 @@ export const loadSavedSearch = async (
         savedSearch: nextSavedSearch,
       });
       const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
-      if (stateDataView && (dataViewDifferentToAppState || !savedSearchDataViewId)) {
+      if (
+        !nextSavedSearch.isTextBasedQuery &&
+        stateDataView &&
+        (dataViewDifferentToAppState || !savedSearchDataViewId)
+      ) {
         nextSavedSearch.searchSource.setField('index', stateDataView);
       }
     }
@@ -98,6 +119,10 @@ export const loadSavedSearch = async (
 
   // Update all other services and state containers by the next saved search
   updateBySavedSearch(nextSavedSearch, deps);
+
+  if (!appState && shouldUpdateWithGlobalFilters) {
+    nextSavedSearch = savedSearchContainer.updateWithFilterManagerFilters();
+  }
 
   return nextSavedSearch;
 };
@@ -121,6 +146,7 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
   // set data service filters
   const filters = savedSearch.searchSource.getField('filter');
   if (Array.isArray(filters) && filters.length) {
+    // Saved search SO persists all filters as app filters
     services.data.query.filterManager.setAppFilters(cloneDeep(filters));
   }
   // some filters may not be valid for this context, so update
@@ -130,6 +156,7 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
   if (!isEqual(currentFilters, validFilters)) {
     services.filterManager.setFilters(validFilters);
   }
+
   // set data service query
   const query = savedSearch.searchSource.getField('query');
   if (query) {

@@ -9,19 +9,18 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { HostPanelKey } from '../../../../../flyout/entity_details/host_right';
 import type { ExpandedDetailType } from '../../../../../../common/types';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 import { HostDetailsLink } from '../../../../../common/components/links';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 interface Props {
   contextId: string;
@@ -51,7 +50,7 @@ const HostNameComponent: React.FC<Props> = ({
   value,
 }) => {
   const isNewHostDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newHostDetailsFlyout');
-  const { openRightPanel } = useExpandableFlyoutContext();
+  const { openRightPanel } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
@@ -95,10 +94,6 @@ const HostNameComponent: React.FC<Props> = ({
                 tabType: tabType as TimelineTabs,
               })
             );
-          }
-
-          if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
-            activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
           }
         }
       }

@@ -11,7 +11,8 @@ import path from 'path';
 import type SuperTest from 'supertest';
 import { format as formatUrl } from 'url';
 import { promisify } from 'util';
-import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-plugin/common/constants';
+
+import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 import { FtrService } from '../ftr_provider_context';
 
 const writeFileAsync = promisify(fs.writeFile);
@@ -96,11 +97,6 @@ export class ReportingPageObject extends FtrService {
   async openPngReportingPanel() {
     this.log.debug('openPngReportingPanel');
     await this.share.openShareMenuItem('PNG Reports');
-  }
-
-  async clearToastNotifications() {
-    const toasts = await this.testSubjects.findAll('toastCloseButton');
-    await Promise.all(toasts.map(async (t) => await t.click()));
   }
 
   async getQueueReportError() {

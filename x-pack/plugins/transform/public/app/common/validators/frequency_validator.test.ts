@@ -8,9 +8,6 @@
 import { frequencyValidator } from './frequency_validator';
 
 describe('Transform: frequencyValidator()', () => {
-  // frequencyValidator() returns an array of error messages so
-  // an array with a length of 0 means a successful validation.
-
   it('should fail when the input is not an integer and valid time unit.', () => {
     expect(frequencyValidator('0')).toEqual(['The frequency value is not valid.']);
     expect(frequencyValidator('0.1s')).toEqual(['The frequency value is not valid.']);

@@ -16,7 +16,7 @@ import { RESPONSE_VIEW_ID } from '../../inspector/vector_tile_adapter/components
 
 interface Props {
   inspectorAdapters: Adapters;
-  isESSource: boolean;
+  isESVectorTileSource: boolean;
   layerId: string;
   tileErrors: TileError[];
 }
@@ -59,7 +59,7 @@ export function TileErrorsList(props: Props) {
   ];
 
   function renderError(tileError: TileError) {
-    if (!props.isESSource || !tileError.error) {
+    if (!props.isESVectorTileSource || !tileError.error) {
       return tileError.message;
     }
 

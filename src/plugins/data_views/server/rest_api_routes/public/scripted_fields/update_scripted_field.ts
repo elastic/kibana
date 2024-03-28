@@ -91,8 +91,8 @@ export const registerUpdateScriptedFieldRoute = (
           const name = req.params.name;
           const field = { ...req.body.field, name } as unknown as FieldSpec;
 
-          const indexPattern = await indexPatternsService.get(id);
-          let fieldObject = indexPattern.fields.getByName(field.name);
+          const indexPattern = await indexPatternsService.getDataViewLazy(id);
+          let fieldObject = await indexPattern.getFieldByName(name);
 
           if (!fieldObject) {
             throw new ErrorIndexPatternFieldNotFound(id, name);
@@ -112,12 +112,12 @@ export const registerUpdateScriptedFieldRoute = (
 
           await indexPatternsService.updateSavedObject(indexPattern);
 
-          fieldObject = indexPattern.fields.getByName(field.name);
+          fieldObject = await indexPattern.getFieldByName(name);
           if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
 
           const body: IndexPatternsRuntimeResponseType = {
             field: fieldObject.toSpec(),
-            index_pattern: indexPattern.toSpec(),
+            index_pattern: await indexPattern.toSpec({ fieldParams: { fieldName: ['*'] } }),
           };
 
           return res.ok({

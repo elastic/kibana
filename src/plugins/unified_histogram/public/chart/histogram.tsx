@@ -38,6 +38,7 @@ import { useLensProps } from './hooks/use_lens_props';
 import type { LensAttributesContext } from './utils/get_lens_attributes';
 
 export interface HistogramProps {
+  abortController?: AbortController;
   services: UnifiedHistogramServices;
   dataView: DataView;
   request?: UnifiedHistogramRequestContext;
@@ -102,6 +103,7 @@ export function Histogram({
   onFilter,
   onBrushEnd,
   withDefaultActions,
+  abortController,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
   const [chartSize, setChartSize] = useState('100%');
@@ -223,6 +225,7 @@ export function Histogram({
       >
         <lens.EmbeddableComponent
           {...lensProps}
+          abortController={abortController}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           onFilter={onFilter}

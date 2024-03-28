@@ -159,8 +159,8 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   // Flyout
-  const openAlertsFlyout = retryOnStale.wrap(async () => {
-    await openActionsMenuForRow(0);
+  const openAlertsFlyout = retryOnStale.wrap(async (index: number = 0) => {
+    await openActionsMenuForRow(index);
     await testSubjects.click('viewAlertDetailsFlyout');
     await retry.waitFor(
       'flyout open',
@@ -241,8 +241,8 @@ export function ObservabilityAlertsCommonProvider({
     }
 
     // wait for a confirmation toast (the css index is 1-based)
-    await toasts.getToastElement(1);
-    await toasts.dismissAllToasts();
+    await toasts.getElementByIndex(1);
+    await toasts.dismissAll();
   };
 
   const setWorkflowStatusFilter = retryOnStale.wrap(async (workflowStatus: WorkflowStatus) => {

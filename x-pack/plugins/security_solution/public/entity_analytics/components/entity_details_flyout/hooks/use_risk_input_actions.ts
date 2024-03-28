@@ -15,7 +15,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useAddBulkToTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { AlertRawData } from '../tabs/risk_inputs';
+import type { AlertRawData } from '../tabs/risk_inputs/risk_inputs_tab';
 
 /**
  * The returned actions only support alerts risk inputs.

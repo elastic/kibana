@@ -13,14 +13,7 @@ import { cloneDeep } from 'lodash';
 import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
-import { createStore } from '../../store';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -81,7 +74,6 @@ const { id, patternList } = mockGlobalState.sourcerer.defaultDataView;
 const patternListNoSignals = sortWithExcludesAtEnd(
   patternList.filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
 );
-let store: ReturnType<typeof createStore>;
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
@@ -94,8 +86,7 @@ describe('No data', () => {
       ...initialSourcererState,
     },
   };
-
-  const { storage } = createSecuritySolutionStorageMock();
+  let store = createMockStore(mockNoIndicesState);
   const pollForSignalIndexMock = jest.fn();
 
   beforeEach(() => {
@@ -107,7 +98,7 @@ describe('No data', () => {
       pollForSignalIndex: pollForSignalIndexMock,
       signalIndexNeedsInit: false,
     });
-    store = createStore(mockNoIndicesState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createMockStore(mockNoIndicesState);
     jest.clearAllMocks();
   });
 
@@ -141,7 +132,6 @@ describe('No data', () => {
 });
 
 describe('Update available', () => {
-  const { storage } = createSecuritySolutionStorageMock();
   const state2 = {
     ...mockGlobalState,
     sourcerer: {
@@ -174,7 +164,7 @@ describe('Update available', () => {
       },
     },
   };
-
+  let store = createMockStore(state2);
   const pollForSignalIndexMock = jest.fn();
   beforeEach(() => {
     (useSignalHelpers as jest.Mock).mockReturnValue({
@@ -185,7 +175,7 @@ describe('Update available', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createMockStore(state2);
 
     render(
       <TestProviders store={store}>
@@ -265,7 +255,6 @@ describe('Update available', () => {
 });
 
 describe('Update available for timeline template', () => {
-  const { storage } = createSecuritySolutionStorageMock();
   const state2 = {
     ...mockGlobalState,
     timeline: {
@@ -308,13 +297,14 @@ describe('Update available for timeline template', () => {
       },
     },
   };
+  let store = createMockStore(state2);
 
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createMockStore(state2);
 
     render(
       <TestProviders store={store}>
@@ -341,7 +331,6 @@ describe('Update available for timeline template', () => {
 });
 
 describe('Missing index patterns', () => {
-  const { storage } = createSecuritySolutionStorageMock();
   const state2 = {
     ...mockGlobalState,
     timeline: {
@@ -384,7 +373,7 @@ describe('Missing index patterns', () => {
       },
     },
   };
-
+  let store = createMockStore(state2);
   beforeEach(() => {
     const pollForSignalIndexMock = jest.fn();
     (useSignalHelpers as jest.Mock).mockReturnValue({
@@ -404,7 +393,7 @@ describe('Missing index patterns', () => {
     });
     const state3 = cloneDeep(state2);
     state3.timeline.timelineById[TimelineId.active].timelineType = TimelineType.default;
-    store = createStore(state3, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createMockStore(state3);
 
     render(
       <TestProviders store={store}>
@@ -435,7 +424,7 @@ describe('Missing index patterns', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createMockStore(state2);
 
     render(
       <TestProviders store={store}>
@@ -493,8 +482,7 @@ describe('Sourcerer integration tests', () => {
     },
   };
 
-  const { storage } = createSecuritySolutionStorageMock();
-
+  let store = createMockStore(state);
   beforeEach(() => {
     const pollForSignalIndexMock = jest.fn();
     (useSignalHelpers as jest.Mock).mockReturnValue({
@@ -506,7 +494,7 @@ describe('Sourcerer integration tests', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createMockStore(state);
     jest.clearAllMocks();
   });
 

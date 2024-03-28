@@ -8,7 +8,7 @@
 import type { VFC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { SentinelOneAgentStatus } from '../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 import { EndpointAgentStatusById } from '../../../../common/components/endpoint/endpoint_agent_status';
@@ -40,7 +40,7 @@ interface LinkFieldCellProps {
  */
 const LinkFieldCell: VFC<LinkFieldCellProps> = ({ value }) => {
   const { scopeId, eventId, indexName } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToInsightsEntities = useCallback(() => {
     openLeftPanel({

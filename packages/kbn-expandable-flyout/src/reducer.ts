@@ -6,107 +6,139 @@
  * Side Public License, v 1.
  */
 
-import { FlyoutPanelProps } from './types';
-import { Action, ActionType } from './actions';
+import { createReducer } from '@reduxjs/toolkit';
+import {
+  openPanelsAction,
+  openLeftPanelAction,
+  openRightPanelAction,
+  closePanelsAction,
+  closeLeftPanelAction,
+  closePreviewPanelAction,
+  closeRightPanelAction,
+  previousPreviewPanelAction,
+  openPreviewPanelAction,
+  urlChangedAction,
+} from './actions';
+import { initialState } from './state';
 
-export interface State {
-  /**
-   * Panel to render in the left section
-   */
-  left: FlyoutPanelProps | undefined;
-  /**
-   * Panel to render in the right section
-   */
-  right: FlyoutPanelProps | undefined;
-  /**
-   * Panels to render in the preview section
-   */
-  preview: FlyoutPanelProps[];
-}
-
-export const initialState: State = {
-  left: undefined,
-  right: undefined,
-  preview: [],
-};
-
-export function reducer(state: State, action: Action) {
-  switch (action.type) {
-    /**
-     * Open the flyout by replacing the entire state with new panels.
-     */
-    case ActionType.openFlyout: {
-      const { left, right, preview } = action.payload;
-      return {
+export const reducer = createReducer(initialState, (builder) => {
+  builder.addCase(openPanelsAction, (state, { payload: { preview, left, right, id } }) => {
+    if (id in state.byId) {
+      state.byId[id].right = right;
+      state.byId[id].left = left;
+      state.byId[id].preview = preview ? [preview] : undefined;
+    } else {
+      state.byId[id] = {
         left,
         right,
-        preview: preview ? [preview] : [],
+        preview: preview ? [preview] : undefined,
       };
     }
 
-    /**
-     * Opens a right section by replacing the previous right panel with the new one.
-     */
-    case ActionType.openRightPanel: {
-      return { ...state, right: action.payload };
-    }
+    state.needsSync = true;
+  });
 
-    /**
-     * Opens a left section by replacing the previous left panel with the new one.
-     */
-    case ActionType.openLeftPanel: {
-      return { ...state, left: action.payload };
-    }
-
-    /**
-     * Opens a preview section by adding to the array of preview panels.
-     */
-    case ActionType.openPreviewPanel: {
-      return { ...state, preview: [...state.preview, action.payload] };
-    }
-
-    /**
-     * Closes the right section by removing the right panel.
-     */
-    case ActionType.closeRightPanel: {
-      return { ...state, right: undefined };
-    }
-
-    /**
-     * Close the left section by  removing the left panel.
-     */
-    case ActionType.closeLeftPanel: {
-      return { ...state, left: undefined };
-    }
-
-    /**
-     * Closes the preview section by removing all the preview panels.
-     */
-    case ActionType.closePreviewPanel: {
-      return { ...state, preview: [] };
-    }
-
-    /**
-     * Navigates to the previous preview panel by removing the last entry in the array of preview panels.
-     */
-    case ActionType.previousPreviewPanel: {
-      const p: FlyoutPanelProps[] = [...state.preview];
-      p.pop();
-      return { ...state, preview: p };
-    }
-
-    /**
-     * Close the flyout by removing all the panels.
-     */
-    case ActionType.closeFlyout: {
-      return {
-        left: undefined,
+  builder.addCase(openLeftPanelAction, (state, { payload: { left, id } }) => {
+    if (id in state.byId) {
+      state.byId[id].left = left;
+    } else {
+      state.byId[id] = {
+        left,
         right: undefined,
-        preview: [],
+        preview: undefined,
       };
     }
 
-    default:
-      return state;
-  }
-}
+    state.needsSync = true;
+  });
+
+  builder.addCase(openRightPanelAction, (state, { payload: { right, id } }) => {
+    if (id in state.byId) {
+      state.byId[id].right = right;
+    } else {
+      state.byId[id] = {
+        right,
+        left: undefined,
+        preview: undefined,
+      };
+    }
+
+    state.needsSync = true;
+  });
+
+  builder.addCase(openPreviewPanelAction, (state, { payload: { preview, id } }) => {
+    if (id in state.byId) {
+      if (state.byId[id].preview) {
+        state.byId[id].preview?.push(preview);
+      } else {
+        state.byId[id].preview = preview ? [preview] : undefined;
+      }
+    } else {
+      state.byId[id] = {
+        right: undefined,
+        left: undefined,
+        preview: preview ? [preview] : undefined,
+      };
+    }
+
+    state.needsSync = true;
+  });
+
+  builder.addCase(previousPreviewPanelAction, (state, { payload: { id } }) => {
+    if (id in state.byId) {
+      state.byId[id].preview?.pop();
+    }
+
+    state.needsSync = true;
+  });
+
+  builder.addCase(closePanelsAction, (state, { payload: { id } }) => {
+    if (id in state.byId) {
+      state.byId[id].right = undefined;
+      state.byId[id].left = undefined;
+      state.byId[id].preview = undefined;
+    }
+
+    state.needsSync = true;
+  });
+
+  builder.addCase(closeLeftPanelAction, (state, { payload: { id } }) => {
+    if (id in state.byId) {
+      state.byId[id].left = undefined;
+    }
+
+    state.needsSync = true;
+  });
+
+  builder.addCase(closeRightPanelAction, (state, { payload: { id } }) => {
+    if (id in state.byId) {
+      state.byId[id].right = undefined;
+    }
+
+    state.needsSync = true;
+  });
+
+  builder.addCase(closePreviewPanelAction, (state, { payload: { id } }) => {
+    if (id in state.byId) {
+      state.byId[id].preview = undefined;
+    }
+
+    state.needsSync = true;
+  });
+
+  builder.addCase(urlChangedAction, (state, { payload: { preview, left, right, id } }) => {
+    if (id in state.byId) {
+      state.byId[id].right = right;
+      state.byId[id].left = left;
+      state.byId[id].preview = preview ? [preview] : undefined;
+    } else {
+      state.byId[id] = {
+        right,
+        left,
+        preview: preview ? [preview] : undefined,
+      };
+    }
+
+    state.needsSync = false;
+  });
+});

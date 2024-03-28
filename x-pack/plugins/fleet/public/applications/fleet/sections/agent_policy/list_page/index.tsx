@@ -26,13 +26,13 @@ import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   useAuthz,
-  useGetAgentPolicies,
   usePagination,
   useSorting,
   useLink,
   useConfig,
   useUrlParams,
   useBreadcrumbs,
+  useGetAgentPoliciesQuery,
 } from '../../../hooks';
 import { SearchBar } from '../../../components';
 import { AgentPolicySummaryLine } from '../../../../../components';
@@ -83,8 +83,8 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   const {
     isLoading,
     data: agentPolicyData,
-    resendRequest,
-  } = useGetAgentPolicies({
+    refetch: resendRequest,
+  } = useGetAgentPoliciesQuery({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     sortField: sorting?.field,

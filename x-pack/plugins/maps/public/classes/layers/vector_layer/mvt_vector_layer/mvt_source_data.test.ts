@@ -12,6 +12,7 @@ jest.mock('uuid', () => ({
 import sinon from 'sinon';
 import { MockSyncContext } from '../../__fixtures__/mock_sync_context';
 import { IMvtVectorSource } from '../../../sources/vector_source';
+import { IESSource } from '../../../sources/es_source';
 import { DataRequest } from '../../../util/data_request';
 import { syncMvtSourceData } from './mvt_source_data';
 
@@ -40,8 +41,8 @@ const mockSource = {
   isGeoGridPrecisionAware: () => {
     return false;
   },
-  isESSource: () => {
-    return false;
+  isMvt: () => {
+    return true;
   },
 } as unknown as IMvtVectorSource;
 
@@ -471,10 +472,10 @@ describe('syncMvtSourceData', () => {
       },
       source: {
         ...mockSource,
-        isESSource: () => {
-          return true;
+        getIndexPatternId: () => {
+          return '1234';
         },
-      },
+      } as unknown as IMvtVectorSource & IESSource,
       syncContext,
     });
     sinon.assert.calledOnce(syncContext.inspectorAdapters.vectorTiles.addLayer);

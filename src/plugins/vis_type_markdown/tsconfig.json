@@ -12,11 +12,11 @@
     "@kbn/core",
     "@kbn/expressions-plugin",
     "@kbn/visualizations-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/vis-default-editor-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/config-schema",
+    "@kbn/shared-ux-markdown",
   ],
   "exclude": [
     "target/**/*",

@@ -62,14 +62,13 @@ export function fetchTextBased(
             const rows = table?.rows ?? [];
             textBasedQueryColumns = table?.columns ?? undefined;
             textBasedHeaderWarning = table.warning ?? undefined;
-            finalData = rows.map(
-              (row: Record<string, string>, idx: number) =>
-                ({
-                  id: String(idx),
-                  raw: row,
-                  flattened: row,
-                } as unknown as DataTableRecord)
-            );
+            finalData = rows.map((row: Record<string, string>, idx: number) => {
+              return {
+                id: String(idx),
+                raw: row,
+                flattened: row,
+              } as unknown as DataTableRecord;
+            });
           }
         });
         return lastValueFrom(execution).then(() => {

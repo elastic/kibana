@@ -47,19 +47,20 @@ export const createRuntimeField = async ({
   runtimeField,
 }: CreateRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
-
-  if (dataView.fields.getByName(name) || dataView.getRuntimeField(name)) {
-    throw new Error(`Field [name = ${name}] already exists.`);
-  }
+  const dataView = await dataViewsService.getDataViewLazy(id);
 
   const firstNameSegment = name.split('.')[0];
 
-  if (dataView.fields.getByName(firstNameSegment) || dataView.getRuntimeField(firstNameSegment)) {
-    throw new Error(`Field [name = ${firstNameSegment}] already exists.`);
+  const fld = Object.keys(
+    (await dataView.getFields({ fieldName: [name, firstNameSegment] })).getFieldMap()
+  );
+
+  // check getRuntimeField to cover composite fields
+  if (fld.length || dataView.getRuntimeField(name) || dataView.getRuntimeField(firstNameSegment)) {
+    throw new Error(`Field [name = ${name}] already exists.`);
   }
 
-  const createdRuntimeFields = dataView.addRuntimeField(name, runtimeField);
+  const createdRuntimeFields = await dataView.addRuntimeField(name, runtimeField);
 
   await dataViewsService.updateSavedObject(dataView);
 
@@ -124,7 +125,7 @@ const runtimeCreateFieldRouteFactory =
           runtimeField: runtimeField as RuntimeField,
         });
 
-        const response: RuntimeResponseType = responseFormatter({
+        const response: RuntimeResponseType = await responseFormatter({
           serviceKey,
           dataView,
           fields,

@@ -22,7 +22,9 @@
       "esUiShared",
       "lens",
       "embeddable",
-      "share"
+      "share",
+      "console",
+      "searchPlayground"
     ],
     "optionalPlugins": [
       "customIntegrations",

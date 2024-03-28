@@ -29,11 +29,16 @@ export type LogDocument = Fields &
     'orchestrator.cluster.name'?: string;
     'orchestrator.cluster.id'?: string;
     'orchestrator.resource.id'?: string;
+    'orchestrator.namespace'?: string;
+    'container.name'?: string;
     'cloud.provider'?: string;
     'cloud.region'?: string;
     'cloud.availability_zone'?: string;
     'cloud.project.id'?: string;
     'cloud.instance.id'?: string;
+    'error.stack_trace'?: string;
+    'error.exception.stacktrace'?: string;
+    'error.log.stacktrace'?: string;
   }>;
 
 class Log extends Serializable<LogDocument> {

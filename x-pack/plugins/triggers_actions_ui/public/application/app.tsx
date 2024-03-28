@@ -23,6 +23,7 @@ import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/publi
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -37,12 +38,17 @@ import {
   AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
-import { Section, legacyRouteToRuleDetails, routeToConnectors } from './constants';
+import {
+  Section,
+  legacyRouteToRuleDetails,
+  routeToConnectors,
+  legacyRouteToAlerts,
+} from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
-import { CONNECTORS_PLUGIN_ID } from '../common/constants';
+import { ALERTS_PLUGIN_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
@@ -74,6 +80,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   expressions: ExpressionsStart;
   isServerless: boolean;
   fieldFormats: FieldFormatsStart;
+  lens: LensPublicStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -86,7 +93,7 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const { dataViews, theme } = deps;
-  const sections: Section[] = ['rules', 'logs', 'alerts'];
+  const sections: Section[] = ['rules', 'logs'];
   const isDarkMode = theme.getTheme().darkMode;
 
   const sectionsRegex = sections.join('|');
@@ -127,6 +134,14 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
         />
         <Route
           exact
+          path={legacyRouteToAlerts}
+          render={() => {
+            navigateToApp(`management/insightsAndAlerting/${ALERTS_PLUGIN_ID}`);
+            return null;
+          }}
+        />
+        <Route
+          exact
           path={legacyRouteToRuleDetails}
           render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
         />
@@ -140,7 +155,6 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
         />
 
         <Redirect from={'/'} to="rules" />
-        <Redirect from={'/alerts'} to="rules" />
       </Routes>
     </ConnectorProvider>
   );

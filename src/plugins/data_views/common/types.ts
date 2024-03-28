@@ -80,6 +80,10 @@ export interface FieldConfiguration {
    */
   customLabel?: string;
   /**
+   * Custom description
+   */
+  customDescription?: string;
+  /**
    * Popularity - used for discover
    */
   popularity?: number;
@@ -183,6 +187,10 @@ export type FieldAttrSet = {
    * Custom field label
    */
   customLabel?: string;
+  /**
+   * Custom field description
+   */
+  customDescription?: string;
   /**
    * Popularity count - used for discover
    */
@@ -306,8 +314,6 @@ export interface PersistenceAPI {
 export interface GetFieldsOptions {
   pattern: string;
   type?: string;
-  // lookBack?: boolean;
-  // todo, these shouldn't be passed.
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
@@ -316,13 +322,15 @@ export interface GetFieldsOptions {
   fields?: string[];
   allowHidden?: boolean;
   forceRefresh?: boolean;
+  fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
  * FieldsForWildcard response
  */
 export interface FieldsForWildcardResponse {
-  fields: FieldSpec[];
+  fields: FieldsForWildcardSpec[];
   indices: string[];
   etag?: string;
 }
@@ -379,6 +387,12 @@ export enum DataViewType {
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
 
+// omit items saved DataView
+type FieldsForWildcardSpec = Omit<
+  FieldSpec,
+  'format' | 'customLabel' | 'runtimeField' | 'count' | 'customDescription'
+>;
+
 /**
  * Serialized version of DataViewField
  * @public
@@ -409,6 +423,10 @@ export type FieldSpec = DataViewFieldBase & {
    */
   aggregatable: boolean;
   /**
+   * True if field is empty
+   */
+  isNull?: boolean;
+  /**
    * True if can be read from doc values
    */
   readFromDocValues?: boolean;
@@ -420,6 +438,10 @@ export type FieldSpec = DataViewFieldBase & {
    * Custom label for field, used for display in kibana
    */
   customLabel?: string;
+  /**
+   * Custom description for field, used for display in kibana
+   */
+  customDescription?: string;
   /**
    * Runtime field definition
    */
@@ -459,6 +481,8 @@ export type FieldSpec = DataViewFieldBase & {
    * Name of parent field for composite runtime field subfields.
    */
   parentName?: string;
+
+  defaultFormatter?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
@@ -545,5 +569,6 @@ export interface HasDataService {
 
 export interface ClientConfigType {
   scriptedFieldsEnabled?: boolean;
+  dataTiersExcludedForFields?: string;
   fieldListCachingEnabled?: boolean;
 }

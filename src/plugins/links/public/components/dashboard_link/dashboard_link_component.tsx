@@ -22,6 +22,7 @@ import {
   DashboardDrilldownOptions,
   DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from '@kbn/presentation-util-plugin/public';
+import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 
 import {
   DASHBOARD_LINK_TYPE,
@@ -115,7 +116,12 @@ export const DashboardLinkComponent = ({
 
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,
-      ...getDashboardLocatorParamsFromEmbeddable(linksEmbeddable, linkOptions),
+      ...getDashboardLocatorParamsFromEmbeddable(
+        linksEmbeddable as Partial<
+          PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>
+        >,
+        linkOptions
+      ),
     };
 
     const locator = dashboardContainer.locator;
@@ -189,6 +195,7 @@ export const DashboardLinkComponent = ({
       label={linkLabel}
       external={link.options?.openInNewTab}
       data-test-subj={error ? `${id}--error` : `${id}`}
+      aria-current={link.destination === parentDashboardId}
     />
   );
 };
