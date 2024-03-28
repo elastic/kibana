@@ -23,89 +23,87 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from '../alerts/slo_selector';
-import type { EmbeddableSloProps, SloEmbeddableInput, GroupFilters } from './types';
+import type {
+  SingleSloProps,
+  GroupSloProps,
+  SloEmbeddableInput,
+  GroupFilters,
+  OverviewMode,
+} from './types';
 import { SloGroupConfiguration } from './slo_group_configuration';
 import { OverviewModeSelector } from './overview_mode_selector';
 
 interface SloConfigurationProps {
   initialInput?: Partial<SloEmbeddableInput>;
-  onCreate: (props: EmbeddableSloProps) => void;
+  onCreate: (props: SingleSloProps | GroupSloProps) => void;
   onCancel: () => void;
 }
 export type SLOView = 'cardView' | 'listView';
 
-export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
-  const [overviewMode, setOverviewMode] = useState<string>(initialInput?.overviewMode ?? 'single');
-  const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
-    groupBy: 'tags',
-    groups: [],
-    sloView: 'cardView',
-  });
-  const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
+interface SingleConfigurationProps {
+  onCreate: (props: SingleSloProps) => void;
+  onCancel: () => void;
+  overviewMode: OverviewMode;
+}
+
+interface GroupConfigurationProps {
+  onCreate: (props: GroupSloProps) => void;
+  onCancel: () => void;
+  overviewMode: OverviewMode;
+}
+
+function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConfigurationProps) {
+  const [selectedSlo, setSelectedSlo] = useState<SingleSloProps>();
   const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const hasGroupBy = selectedSlo && selectedSlo.sloInstanceId !== ALL_VALUE;
+
   const onConfirmClick = () =>
     onCreate({
       showAllGroupByInstances,
       sloId: selectedSlo?.sloId,
       sloInstanceId: selectedSlo?.sloInstanceId,
       overviewMode,
-      groupFilters: selectedGroupFilters,
     });
-  const [hasError, setHasError] = useState(false);
-  const hasGroupBy = selectedSlo && selectedSlo.sloInstanceId !== ALL_VALUE;
 
   return (
-    <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
-            defaultMessage: 'SLO configuration',
-          })}
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
+    <>
       <EuiModalBody>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <OverviewModeSelector value={overviewMode} onChange={(mode) => setOverviewMode(mode)} />
-            <EuiSpacer size="m" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            {overviewMode === 'groups' ? (
-              <SloGroupConfiguration
-                onSelected={(prop, value) => {
-                  setSelectedGroupFilters((prevState) => ({ ...prevState, [prop]: value }));
-                }}
-              />
-            ) : (
-              <SloSelector
-                singleSelection={true}
-                hasError={hasError}
-                onSelected={(slo) => {
-                  setHasError(slo === undefined);
-                  if (slo && 'id' in slo) {
-                    setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
-                  }
-                }}
-              />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <SloSelector
+                  singleSelection={true}
+                  hasError={hasError}
+                  onSelected={(slo) => {
+                    setHasError(slo === undefined);
+                    if (slo && 'id' in slo) {
+                      setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
+                    }
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {hasGroupBy && (
+              <>
+                <EuiSpacer />
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.slo.sloConfiguration.euiSwitch.showAllGroupByLabel',
+                    {
+                      defaultMessage: 'Show all related group-by instances',
+                    }
+                  )}
+                  checked={showAllGroupByInstances}
+                  onChange={(e) => {
+                    setShowAllGroupByInstances(e.target.checked);
+                  }}
+                />
+              </>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-        {overviewMode === 'single' && hasGroupBy && (
-          <>
-            <EuiSpacer />
-            <EuiSwitch
-              label={i18n.translate('xpack.slo.sloConfiguration.euiSwitch.showAllGroupByLabel', {
-                defaultMessage: 'Show all related group-by instances',
-              })}
-              checked={showAllGroupByInstances}
-              onChange={(e) => {
-                setShowAllGroupByInstances(e.target.checked);
-              }}
-            />
-          </>
-        )}
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
@@ -127,6 +125,99 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
           />
         </EuiButton>
       </EuiModalFooter>
+    </>
+  );
+}
+
+function GroupSloConfiguration({ overviewMode, onCreate, onCancel }: GroupConfigurationProps) {
+  const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
+    groupBy: 'tags',
+    groups: [],
+    sloView: 'cardView',
+  });
+
+  const onConfirmClick = () =>
+    onCreate({
+      groupFilters: selectedGroupFilters,
+      overviewMode,
+    });
+
+  return (
+    <>
+      <EuiModalBody>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <SloGroupConfiguration
+                  onSelected={(prop, value) => {
+                    setSelectedGroupFilters((prevState) => ({ ...prevState, [prop]: value }));
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
+          <FormattedMessage
+            id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
+
+        <EuiButton
+          data-test-subj="sloConfirmButton"
+          // isDisabled={!selectedSlo || hasError}
+          onClick={onConfirmClick}
+          fill
+        >
+          <FormattedMessage
+            id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
+            defaultMessage="Confirm configurations"
+          />
+        </EuiButton>
+      </EuiModalFooter>
+    </>
+  );
+}
+
+export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
+  const [overviewMode, setOverviewMode] = useState<OverviewMode>(
+    initialInput?.overviewMode ?? 'single'
+  );
+
+  return (
+    <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
+      <EuiModalHeader css={{ paddingBottom: 0 }}>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiModalHeaderTitle>
+              {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
+                defaultMessage: 'SLO configuration',
+              })}
+            </EuiModalHeaderTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <OverviewModeSelector value={overviewMode} onChange={(mode) => setOverviewMode(mode)} />
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiModalHeader>
+      {overviewMode === 'groups' ? (
+        <GroupSloConfiguration
+          overviewMode={overviewMode}
+          onCreate={onCreate}
+          onCancel={onCancel}
+        />
+      ) : (
+        <SingleSloConfiguration
+          overviewMode={overviewMode}
+          onCreate={onCreate}
+          onCancel={onCancel}
+        />
+      )}
     </EuiModal>
   );
 }

@@ -9,22 +9,28 @@ import { Subject } from 'rxjs';
 import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
 
 export type SLOView = 'cardView' | 'listView';
+export type OverviewMode = 'single' | 'groups';
 
 export interface GroupFilters {
   groupBy: string;
   groups: SLOGroupWithSummaryResponse[];
-  // sloView: string;
   sloView: SLOView;
 }
 
-export interface EmbeddableSloProps {
+export type SingleSloProps = EmbeddableSloProps & {
   sloId: string | undefined;
   sloInstanceId: string | undefined;
+  showAllGroupByInstances?: boolean;
+};
+
+export type GroupSloProps = EmbeddableSloProps & {
+  groupFilters: GroupFilters;
+};
+
+export interface EmbeddableSloProps {
   reloadSubject?: Subject<boolean>;
   onRenderComplete?: () => void;
-  showAllGroupByInstances?: boolean;
-  overviewMode?: string;
-  groupFilters?: GroupFilters;
+  overviewMode?: OverviewMode;
 }
 
-export type SloEmbeddableInput = EmbeddableInput & EmbeddableSloProps;
+export type SloEmbeddableInput = EmbeddableInput & Partial<GroupSloProps> & Partial<SingleSloProps>;

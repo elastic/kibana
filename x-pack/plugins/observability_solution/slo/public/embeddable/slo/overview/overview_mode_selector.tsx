@@ -8,6 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonGroup, type EuiButtonGroupOptionProps } from '@elastic/eui';
+import { OverviewMode } from './types';
 
 const overviewModeOptions: EuiButtonGroupOptionProps[] = [
   {
@@ -32,7 +33,7 @@ const overviewModeOptions: EuiButtonGroupOptionProps[] = [
 
 export interface OverviewModeSelectorProps {
   value: string;
-  onChange: (update: string) => void;
+  onChange: (update: OverviewMode) => void;
 }
 
 export function OverviewModeSelector({ value, onChange }: OverviewModeSelectorProps) {
