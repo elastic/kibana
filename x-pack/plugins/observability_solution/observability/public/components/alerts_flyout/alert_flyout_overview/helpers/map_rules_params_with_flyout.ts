@@ -33,7 +33,6 @@ import { isFieldsSameType } from './is_fields_same_type';
 export interface FlyoutThresholdData {
   observedValue: string;
   threshold: string[];
-  fields: string[];
   comparator: string;
   pctAboveThreshold: string;
 }
@@ -137,7 +136,6 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         return {
           observedValue: formatter(observedValue),
           threshold: thresholdFormattedAsString,
-          fields,
           comparator,
           pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
         } as unknown as FlyoutThresholdData;
@@ -157,7 +155,6 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       const APMFlyoutMapErrorCount = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
-        fields: [],
         comparator: '>',
       } as unknown as FlyoutThresholdData;
       return [APMFlyoutMapErrorCount];
@@ -175,7 +172,6 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       const APMFlyoutMapTransactionDuration = {
         observedValue: [asDuration(alert.fields[ALERT_EVALUATION_VALUE])],
         threshold: [asDuration(alert.fields[ALERT_EVALUATION_THRESHOLD])],
-        fields: [],
         comparator: '>',
       } as unknown as FlyoutThresholdData;
       return [APMFlyoutMapTransactionDuration];
@@ -185,7 +181,6 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       const ESQueryFlyoutMap = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold,
-        fields: [],
         comparator: thresholdComparator,
       } as unknown as FlyoutThresholdData;
       return [ESQueryFlyoutMap];
