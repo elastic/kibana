@@ -575,7 +575,7 @@ export type InstallLatestExecutedState = LatestExecutedState<StateNames>;
 
 export interface StateContext<T> {
   [key: string]: any;
-  latestExecutedState: LatestExecutedState<T>;
+  latestExecutedState?: LatestExecutedState<T>;
 }
 
 export interface Installation {
