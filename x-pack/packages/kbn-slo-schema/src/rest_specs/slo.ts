@@ -94,14 +94,6 @@ const sloWithSummaryResponseSchema = t.intersection([
   ]),
 ]);
 
-const manageSLOParamsSchema = t.type({
-  path: t.type({ id: sloIdSchema }),
-});
-
-const deleteSLOInstancesParamsSchema = t.type({
-  body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: t.string })) }),
-});
-
 const fetchHistoricalSummaryParamsSchema = t.type({
   body: t.type({
     list: t.array(
@@ -167,11 +159,6 @@ const getSLOInstancesResponseSchema = t.type({
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
-type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
-
-type DeleteSLOInstancesInput = t.OutputOf<typeof deleteSLOInstancesParamsSchema.props.body>;
-type DeleteSLOInstancesParams = t.TypeOf<typeof deleteSLOInstancesParamsSchema.props.body>;
-
 type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParamsSchema.props.body>;
 type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
 type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
@@ -203,12 +190,10 @@ type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
 type QuerySchema = t.TypeOf<typeof querySchema>;
 
 export {
-  deleteSLOInstancesParamsSchema,
   getPreviewDataParamsSchema,
   getPreviewDataResponseSchema,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
-  manageSLOParamsSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
   getSLOBurnRatesParamsSchema,
@@ -219,14 +204,11 @@ export {
 
 export type {
   BudgetingMethod,
-  DeleteSLOInstancesInput,
-  DeleteSLOInstancesParams,
   GetPreviewDataParams,
   GetPreviewDataResponse,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
-  ManageSLOParams,
   SLOResponse,
   SLOWithSummaryResponse,
   APMTransactionDurationIndicator,
