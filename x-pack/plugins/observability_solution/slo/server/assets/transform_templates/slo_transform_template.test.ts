@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { TransformSource } from '@elastic/elasticsearch/lib/api/types';
 import { getSLOTransformTemplate } from './slo_transform_template';
 import { createKQLCustomIndicator, createSLO } from '../../services/fixtures/slo';
-import { KQLCustomTransformGenerator } from '../../services/transform_generators/kql_custom';
 
 describe('slo transform template', () => {
-  const generator = new KQLCustomTransformGenerator();
   const transformId = 'irrelevant';
   const description = 'irrelevant';
   const destination = {
@@ -40,7 +39,7 @@ describe('slo transform template', () => {
         ],
       },
     },
-  };
+  } as TransformSource;
   const groupBy = {
     'slo.id': { terms: { field: 'slo.id' } },
     'slo.revision': { terms: { field: 'slo.revision' } },

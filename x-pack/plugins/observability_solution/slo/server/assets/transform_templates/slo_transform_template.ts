@@ -11,6 +11,7 @@ import {
   TransformPutTransformRequest,
   TransformSource,
   TransformTimeSync,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_RESOURCES_VERSION } from '../../../common/constants';
@@ -62,21 +63,22 @@ export const getSLOTransformTemplate = (
   };
 };
 
-const buildGroupingFilters = (slo: SLO) => {
+const buildGroupingFilters = (slo: SLO): QueryDslQueryContainer[] => {
   // build exists filters for each groupBy field to make sure the field exists
   const groups = [slo.groupBy].flat().filter((group) => !!group && group !== ALL_VALUE);
   return groups.map((group) => ({ exists: { field: group } }));
 };
 
-const buildSourceWithFilters = (source: TransformSource, slo: SLO) => {
+const buildSourceWithFilters = (source: TransformSource, slo: SLO): TransformSource => {
   const groupingFilters = buildGroupingFilters(slo);
+  const sourceFilters = [source.query?.bool?.filter].flat() || [];
   return {
     ...source,
     query: {
       ...source.query,
       bool: {
-        ...source.query.bool,
-        filter: [...source.query.bool.filter, ...groupingFilters],
+        ...source.query?.bool,
+        filter: [...sourceFilters, ...groupingFilters] as QueryDslQueryContainer[],
       },
     },
   };
