@@ -27,12 +27,12 @@ interface EditServiceTypeProps {
 
 export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) => {
   const { http } = useKibanaServices();
-  const { data: connectorTypes } = useConnectorTypes();
+  const connectorTypes = useConnectorTypes();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
 
   const options =
-    connectorTypes?.connectors.map((connectorType) => ({
+    connectorTypes.map((connectorType) => ({
       inputDisplay: (
         <EuiFlexGroup direction="row" alignItems="center">
           <EuiFlexItem

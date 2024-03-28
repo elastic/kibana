@@ -36,7 +36,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CONNECTOR_CLIENTS_TYPE, CONNECTOR_NATIVE_TYPE } from '../../../../../../common/constants';
 
-import connectorLogo from '../../../../../assets/source_icons/network_drive.svg';
+import connectorLogo from '../../../../../assets/images/connector_logo_network_drive_version.svg';
 import { BACK_BUTTON_LABEL } from '../../../../shared/constants';
 
 import { KibanaLogic } from '../../../../shared/kibana';
@@ -45,8 +45,6 @@ import { parseQueryParams } from '../../../../shared/query_params';
 
 import { NEW_CONNECTOR_PATH, NEW_INDEX_PATH } from '../../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
-
-import { CONNECTORS } from '../../search_index/connector/constants';
 
 import { connectorsBreadcrumbs } from '../connectors';
 
@@ -69,7 +67,7 @@ export const parseConnectorFilter = (filter: string | string[] | null): Connecto
 
 export const SelectConnector: React.FC = () => {
   const { search } = useLocation();
-  const { isCloud } = useValues(KibanaLogic);
+  const { connectorTypes, isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const hasNativeAccess = isCloud;
   const { filter } = parseQueryParams(search);
@@ -83,18 +81,18 @@ export const SelectConnector: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const filteredConnectors = useMemo(() => {
     const nativeConnectors = hasNativeAccess
-      ? CONNECTORS.filter((connector) => connector.isNative).sort((a, b) =>
-          a.name.localeCompare(b.name)
-        )
+      ? connectorTypes
+          .filter((connector) => connector.isNative)
+          .sort((a, b) => a.name.localeCompare(b.name))
       : [];
     const nonNativeConnectors = hasNativeAccess
-      ? CONNECTORS.filter((connector) => !connector.isNative).sort((a, b) =>
-          a.name.localeCompare(b.name)
-        )
-      : CONNECTORS.sort((a, b) => a.name.localeCompare(b.name));
+      ? connectorTypes
+          .filter((connector) => !connector.isNative)
+          .sort((a, b) => a.name.localeCompare(b.name))
+      : connectorTypes.sort((a, b) => a.name.localeCompare(b.name));
     const connectors =
       !hasNativeAccess || useClientsFilter
-        ? CONNECTORS.sort((a, b) => a.name.localeCompare(b.name))
+        ? connectorTypes.sort((a, b) => a.name.localeCompare(b.name))
         : [...nativeConnectors, ...nonNativeConnectors];
 
     return connectors
@@ -141,7 +139,7 @@ export const SelectConnector: React.FC = () => {
               <EuiFacetGroup>
                 {hasNativeAccess && (
                   <EuiFacetButton
-                    quantity={CONNECTORS.length}
+                    quantity={connectorTypes.length}
                     isSelected={!useNativeFilter && !useClientsFilter}
                     onClick={() => setSelectedConnectorFilter(null)}
                   >
@@ -155,7 +153,7 @@ export const SelectConnector: React.FC = () => {
                 {hasNativeAccess && (
                   <EuiFacetButton
                     key="native"
-                    quantity={CONNECTORS.filter((connector) => connector.isNative).length}
+                    quantity={connectorTypes.filter((connector) => connector.isNative).length}
                     isSelected={useNativeFilter}
                     onClick={() =>
                       setSelectedConnectorFilter(!useNativeFilter ? CONNECTOR_NATIVE_TYPE : null)
@@ -171,7 +169,7 @@ export const SelectConnector: React.FC = () => {
                 )}
 
                 <EuiFacetButton
-                  quantity={CONNECTORS.length}
+                  quantity={connectorTypes.length}
                   isSelected={(!hasNativeAccess && !useNativeFilter) || useClientsFilter}
                   onClick={() =>
                     setSelectedConnectorFilter(!useClientsFilter ? CONNECTOR_CLIENTS_TYPE : null)
@@ -187,7 +185,7 @@ export const SelectConnector: React.FC = () => {
                 {!hasNativeAccess && (
                   <EuiFacetButton
                     key="native"
-                    quantity={CONNECTORS.filter((connector) => connector.isNative).length}
+                    quantity={connectorTypes.filter((connector) => connector.isNative).length}
                     isSelected={useNativeFilter}
                     onClick={() =>
                       setSelectedConnectorFilter(!useNativeFilter ? CONNECTOR_NATIVE_TYPE : null)
@@ -319,7 +317,7 @@ export const SelectConnector: React.FC = () => {
                   showNativePopover={(!hasNativeAccess && useNativeFilter) ?? false}
                   showLicensePopover={connector.platinumOnly && !hasPlatinumLicense && !isCloud}
                   isDisabled={(!hasNativeAccess && useNativeFilter) ?? false}
-                  iconType={connector.icon}
+                  iconType={connector.iconPath}
                   isBeta={connector.isBeta}
                   isTechPreview={Boolean(connector.isTechPreview)}
                   showNativeBadge={
