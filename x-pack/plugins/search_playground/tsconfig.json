@@ -27,7 +27,14 @@
     "@kbn/navigation-plugin",
     "@kbn/core-http-server",
     "@kbn/share-plugin",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/encrypted-saved-objects-plugin"
   ],
   "exclude": [
     "target/**/*",
