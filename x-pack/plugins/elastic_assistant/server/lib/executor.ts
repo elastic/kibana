@@ -10,6 +10,7 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { PassThrough, Readable } from 'stream';
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { Logger } from '@kbn/core/server';
 import { handleStreamStorage } from './parse_stream';
 
 export interface Props {
@@ -19,6 +20,7 @@ export interface Props {
   params: InvokeAIActionsParams;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   llmType: string;
+  logger: Logger;
 }
 interface StaticResponse {
   connector_id: string;
@@ -47,6 +49,7 @@ export const executeAction = async ({
   connectorId,
   llmType,
   request,
+  logger,
 }: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
 
@@ -78,7 +81,7 @@ export const executeAction = async ({
   }
 
   // do not await, blocks stream for UI
-  handleStreamStorage(readable, llmType, onLlmResponse);
+  handleStreamStorage({ responseStream: readable, llmType, onMessageSent: onLlmResponse, logger });
 
   return readable.pipe(new PassThrough());
 };
