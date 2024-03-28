@@ -13,9 +13,9 @@ import {
 
 import { SIGNALS_FIELD_ALIASES_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
 
-import { deleteAllAlerts } from '../../../../../../common/utils/security_solution';
+import { deleteAllAlerts } from '../../../../../../../common/utils/security_solution';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('@ess create_index', () => {
+  describe('@ess legacy create index route deals with 7.x to 8.x alerts index logic', () => {
     afterEach(async () => {
       await deleteAllAlerts(supertest, log, es);
     });
@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/signals/index_alias_clash');
         });
 
-        // This fails and should be investigated or removed if it no longer applies
+        // Skipped: see https://github.com/elastic/kibana/issues/179208
         it.skip('should report that alerts index does not exist', async () => {
           const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(404);
           expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });

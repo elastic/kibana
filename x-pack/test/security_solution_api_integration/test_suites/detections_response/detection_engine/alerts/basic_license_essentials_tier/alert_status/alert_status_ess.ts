@@ -6,48 +6,59 @@
  */
 
 import expect from '@kbn/expect';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { parse as parseCookie } from 'tough-cookie';
+import { adminTestUser } from '@kbn/test';
+
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { setAlertStatus } from '../../../utils';
+import { refreshIndex, setAlertStatus } from '../../../../utils';
 import {
+  createAlertsIndex,
+  deleteAllAlerts,
   getQueryAlertIds,
+  deleteAllRules,
   createRule,
   waitForAlertsToBePresent,
   getAlertsByIds,
   waitForRuleSuccess,
   getRuleForAlertTesting,
-  deleteAllRules,
-  deleteAllAlerts,
-  createAlertsIndex,
-} from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
+} from '../../../../../../../common/utils/security_solution';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+} from '../../../../../../../common/services/security_solution';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
-  const auditbeatHost = dataPathBuilder.getPath('auditbeat/hosts');
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless open_close_alerts', () => {
-    describe('tests with auditbeat data', () => {
+  describe('@ess change alert status endpoints ESS specific logic', () => {
+    describe('authentication checks', () => {
       before(async () => {
-        await esArchiver.load(auditbeatHost);
+        await esArchiver.load(path);
+        await createUserAndRole(getService, ROLES.hunter);
+        await createUserAndRole(getService, ROLES.reader);
       });
 
       after(async () => {
-        await esArchiver.unload(auditbeatHost);
+        await esArchiver.unload(path);
+        await deleteUserAndRole(getService, ROLES.hunter);
+        await deleteUserAndRole(getService, ROLES.reader);
       });
 
       beforeEach(async () => {
@@ -60,34 +71,24 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
-      it('should be able to execute and get 10 alerts', async () => {
-        const rule = {
-          ...getRuleForAlertTesting(['auditbeat-*']),
-          query: 'process.executable: "/usr/bin/sudo"',
-        };
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 10, [id]);
-        const alertsOpen = await getAlertsByIds(supertest, log, [id]);
-        expect(alertsOpen.hits.hits.length).equal(10);
-      });
+      it('should be able to close alerts while logged in and populate workflow_user', async () => {
+        // Login so we can test changing alert status within an interactive session
+        // We write `profile_uid` to `kibana.alert.workflow_user` if it's available,
+        // but `profile_uid` is only available in interactive sessions
+        const response = await supertestWithoutAuth
+          .post('/internal/security/login')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            providerType: 'basic',
+            providerName: 'basic',
+            currentURL: '/',
+            params: { username: adminTestUser.username, password: adminTestUser.password },
+          })
+          .expect(200);
 
-      it('should be have set the alerts in an open state initially', async () => {
-        const rule = {
-          ...getRuleForAlertTesting(['auditbeat-*']),
-          query: 'process.executable: "/usr/bin/sudo"',
-        };
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 10, [id]);
-        const alertsOpen = await getAlertsByIds(supertest, log, [id]);
-        const everyAlertOpen = alertsOpen.hits.hits.every(
-          (hit) => hit._source?.[ALERT_WORKFLOW_STATUS] === 'open'
-        );
-        expect(everyAlertOpen).to.eql(true);
-      });
+        const cookies = response.header['set-cookie'];
+        expect(cookies).to.have.length(1);
 
-      it('should be able to get a count of 10 closed alerts when closing 10', async () => {
         const rule = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
@@ -101,11 +102,14 @@ export default ({ getService }: FtrProviderContext) => {
         // set all of the alerts to the state of closed. There is no reason to use a waitUntil here
         // as this route intentionally has a waitFor within it and should only return when the query has
         // the data.
-        await supertest
+        await supertestWithoutAuth
           .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
           .set('kbn-xsrf', 'true')
+          .set('Cookie', parseCookie(cookies[0])!.cookieString())
           .send(setAlertStatus({ alertIds, status: 'closed' }))
           .expect(200);
+
+        await refreshIndex(es, '.alerts-security.alerts-default*');
 
         const { body: alertsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
           await supertest
@@ -114,40 +118,39 @@ export default ({ getService }: FtrProviderContext) => {
             .send(getQueryAlertIds(alertIds))
             .expect(200);
         expect(alertsClosed.hits.hits.length).to.equal(10);
+        const everyAlertClosed = alertsClosed.hits.hits.every(
+          (hit) => hit._source?.['kibana.alert.workflow_status'] === 'closed'
+        );
+        expect(everyAlertClosed).to.eql(true);
+        const everyAlertWorkflowUserExists = alertsClosed.hits.hits.every(
+          (hit) => hit._source?.['kibana.alert.workflow_user'] !== null
+        );
+        expect(everyAlertWorkflowUserExists).to.eql(true);
+        const everyAlertWorkflowStatusUpdatedAtExists = alertsClosed.hits.hits.every(
+          (hit) => hit._source?.['kibana.alert.workflow_status_updated_at'] !== null
+        );
+        expect(everyAlertWorkflowStatusUpdatedAtExists).to.eql(true);
       });
 
-      // Test is failing after changing refresh to false
-      it.skip('should be able close 10 alerts immediately and they all should be closed', async () => {
+      it('should NOT be able to close alerts with reader user', async () => {
         const rule = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 10, [id]);
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsByIds(supertest, log, [id]);
         const alertIds = alertsOpen.hits.hits.map((alert) => alert._id);
 
-        // set all of the alerts to the state of closed. There is no reason to use a waitUntil here
-        // as this route intentionally has a waitFor within it and should only return when the query has
-        // the data.
-        await supertest
+        // Try to set all of the alerts to the state of closed.
+        // This should not be possible with the given user.
+        await supertestWithoutAuth
           .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
           .set('kbn-xsrf', 'true')
+          .auth(ROLES.reader, 'changeme') // each user has the same password
           .send(setAlertStatus({ alertIds, status: 'closed' }))
-          .expect(200);
-
-        const { body: alertsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
-          await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQueryAlertIds(alertIds))
-            .expect(200);
-
-        const everyAlertClosed = alertsClosed.hits.hits.every(
-          (hit) => hit._source?.[ALERT_WORKFLOW_STATUS] === 'closed'
-        );
-        expect(everyAlertClosed).to.eql(true);
+          .expect(403);
       });
     });
   });

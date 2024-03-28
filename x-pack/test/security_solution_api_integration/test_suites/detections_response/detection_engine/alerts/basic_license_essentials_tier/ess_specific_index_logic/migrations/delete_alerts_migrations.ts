@@ -13,13 +13,13 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { getIndexNameFromLoad } from '../../../../utils';
+import { deleteMigrations, getIndexNameFromLoad } from '../../../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
   waitFor,
-} from '../../../../../../../common/utils/security_solution';
-import { createUserAndRole } from '../../../../../../../common/services/security_solution';
+} from '../../../../../../../../common/utils/security_solution';
+import { createUserAndRole } from '../../../../../../../../common/services/security_solution';
 
 interface CreateResponse {
   index: string;
@@ -31,7 +31,7 @@ interface FinalizeResponse extends CreateResponse {
   completed?: boolean;
   error?: unknown;
 }
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -39,6 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const kbnClient = getService('kibanaServer');
 
   describe('@ess Deleting alerts migrations', () => {
     let outdatedAlertsIndexName: string;
@@ -83,6 +84,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
+      await deleteMigrations({
+        kbnClient,
+        ids: [createdMigration.migration_id],
+      });
       await deleteAllAlerts(supertest, log, es);
     });
 
