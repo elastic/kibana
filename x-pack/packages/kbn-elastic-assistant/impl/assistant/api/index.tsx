@@ -73,6 +73,7 @@ export const fetchConnectorExecuteAction = async ({
     message,
     subAction: isStream ? 'invokeStream' : 'invokeAI',
     conversationId,
+    actionTypeId: apiConfig.actionTypeId,
     replacements,
     isEnabledKnowledgeBase,
     isEnabledRAGAlerts,

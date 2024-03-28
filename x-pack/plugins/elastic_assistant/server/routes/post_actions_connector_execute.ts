@@ -9,7 +9,6 @@ import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
-import { StaticReturnType } from '../lib/langchain/executors/types';
 
 import { schema } from '@kbn/config-schema';
 import {
@@ -20,6 +19,7 @@ import {
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { StaticReturnType } from '../lib/langchain/executors/types';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
@@ -70,9 +70,6 @@ export const postActionsConnectorExecuteRoute = (
         const telemetry = assistantContext.telemetry;
 
         try {
-          // Get the actions plugin start contract from the request context for the agents
-          const actionsClient = await assistantContext.actions.getActionsClientWithRequest(request);
-
           const authenticatedUser = assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return response.unauthorized({
@@ -106,6 +103,7 @@ export const postActionsConnectorExecuteRoute = (
           let prevMessages;
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
+          const actionTypeId = request.body.actionTypeId;
 
           // if message is undefined, it means the user is regenerating a message from the stored conversation
           if (request.body.message) {
@@ -196,10 +194,6 @@ export const postActionsConnectorExecuteRoute = (
           }
 
           const connectorId = decodeURIComponent(request.params.connectorId);
-          const connectors = await actionsClient.getBulk({
-            ids: [connectorId],
-            throwIfSystemAction: false,
-          });
 
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
@@ -214,13 +208,13 @@ export const postActionsConnectorExecuteRoute = (
               actions,
               request,
               connectorId,
-              llmType: connectors[0]?.actionTypeId,
+              actionTypeId,
               params: {
                 subAction: request.body.subAction,
                 subActionParams: {
                   model: request.body.model,
                   messages: [...(prevMessages ?? []), ...(newMessage ? [newMessage] : [])],
-                  ...(connectors[0]?.actionTypeId === '.gen-ai'
+                  ...(actionTypeId === '.gen-ai'
                     ? { n: 1, stop: null, temperature: 0.2 }
                     : { temperature: 0, stopSequences: [] }),
                 },
@@ -273,10 +267,10 @@ export const postActionsConnectorExecuteRoute = (
             elserId,
             esClient,
             isStream:
-            // TODO implement llmClass for bedrock streaming
-            // tracked here: https://github.com/elastic/security-team/issues/7363
-              request.body.params.subAction !== 'invokeAI' && connectors[0]?.actionTypeId === '.gen-ai',
-            llmType: connectors[0]?.actionTypeId,
+              // TODO implement llmClass for bedrock streaming
+              // tracked here: https://github.com/elastic/security-team/issues/7363
+              request.body.params.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
+            llmType: actionTypeId,
             kbResource: ESQL_RESOURCE,
             langChainMessages,
             logger,
@@ -302,9 +296,9 @@ export const postActionsConnectorExecuteRoute = (
                 staticResponse.data,
                 staticResponse.trace_data
                   ? {
-                    traceId: staticResponse.trace_data.trace_id,
-                    transactionId: staticResponse.trace_data.transaction_id,
-                  }
+                      traceId: staticResponse.trace_data.trace_id,
+                      transactionId: staticResponse.trace_data.transaction_id,
+                    }
                   : {}
               );
             }

@@ -20,7 +20,7 @@ export interface Props {
   connectorId: string;
   params: InvokeAIActionsParams;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-  llmType: string;
+  actionTypeId: string;
   logger: Logger;
 }
 interface StaticResponse {
@@ -35,6 +35,7 @@ interface InvokeAIActionsParams {
     model?: string;
     n?: number;
     stop?: string | string[] | null;
+    stopSequences?: string[];
     temperature?: number;
   };
   subAction: 'invokeAI' | 'invokeStream';
@@ -48,13 +49,14 @@ export const executeAction = async ({
   actions,
   params,
   connectorId,
-  llmType,
+  actionTypeId,
   request,
   logger,
   abortSignal,
 }: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const genericParams = convertToGenericType(params);
+  console.log('genericParams', genericParams);
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
     params: {
@@ -89,7 +91,12 @@ export const executeAction = async ({
   }
 
   // do not await, blocks stream for UI
-  handleStreamStorage({ responseStream: readable, llmType, onMessageSent: onLlmResponse, logger });
+  handleStreamStorage({
+    actionTypeId,
+    onMessageSent: onLlmResponse,
+    logger,
+    responseStream: readable,
+  });
 
   return readable.pipe(new PassThrough());
 };
