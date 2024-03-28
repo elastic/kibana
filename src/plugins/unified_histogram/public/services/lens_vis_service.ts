@@ -691,11 +691,13 @@ function deriveLensSuggestionFromLensAttributes({
       // should be based on same columns
       if (
         !datasourceState?.layers ||
-        Object.values(datasourceState?.layers).some((layer) =>
-          layer.columns?.some(
-            // unknown column
-            (c: { fieldName: string }) => !queryParams.columnsMap?.[c.fieldName]
-          )
+        Object.values(datasourceState?.layers).some(
+          (layer) =>
+            isEqual(layer.query, queryParams.query) &&
+            layer.columns?.some(
+              // unknown column
+              (c: { fieldName: string }) => !queryParams.columnsMap?.[c.fieldName]
+            )
         )
       ) {
         return undefined;
