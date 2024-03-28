@@ -8,6 +8,7 @@
 import {
   ALL_VALUE,
   BudgetingMethod,
+  Indicator,
   IndicatorType,
   Objective,
   timeWindowSchema,
@@ -27,6 +28,7 @@ export interface EsSummaryDocument {
   slo: {
     indicator: {
       type: IndicatorType;
+      params?: string; // >= 8.14: We store the stringified params on the temp summary document as well as the real summary document (from the ingest pipeline)
     };
     timeWindow: t.OutputOf<typeof timeWindowSchema>;
     groupBy: string | string[];
@@ -39,8 +41,8 @@ export interface EsSummaryDocument {
     revision: number;
     objective: Objective;
     tags: string[];
-    createdAt?: string;
-    updatedAt?: string;
+    createdAt?: string; // >= 8.14
+    updatedAt?: string; // >= 8.14
   };
   goodEvents: number;
   totalEvents: number;
@@ -71,6 +73,7 @@ export function createTempSummaryDocument(slo: SLO, spaceId: string): EsSummaryD
     slo: {
       indicator: {
         type: slo.indicator.type,
+        params: JSON.stringify(slo.indicator.params),
       },
       timeWindow: {
         duration: slo.timeWindow.duration.format(),
@@ -90,6 +93,8 @@ export function createTempSummaryDocument(slo: SLO, spaceId: string): EsSummaryD
         timesliceWindow: slo.objective.timesliceWindow?.format() ?? undefined,
       },
       tags: slo.tags,
+      createdAt: slo.createdAt.toISOString(),
+      updatedAt: slo.updatedAt.toISOString(),
     },
     goodEvents: 0,
     totalEvents: 0,

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Indicator, sloSchema } from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/lib/Either';
 import { Logger } from '@kbn/logging';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { Indicator, sloSchema } from '@kbn/slo-schema';
+import { assertNever } from '@kbn/std';
+import { isLeft } from 'fp-ts/lib/Either';
 import { SLO } from '../../domain/models';
 import { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 
@@ -16,6 +17,53 @@ export function fromSummaryDocumentToSlo(
   summaryDoc: EsSummaryDocument,
   logger: Logger
 ): SLO | undefined {
+  const res = sloSchema.decode({
+    ...summaryDoc.slo,
+    indicator: {
+      type: summaryDoc.slo.indicator.type,
+      params: getIndicatorParams(logger, summaryDoc),
+    },
+    objective: {
+      target: summaryDoc.slo.objective.target,
+      timesliceTarget: summaryDoc.slo.objective.timesliceTarget ?? undefined,
+      timesliceWindow: summaryDoc.slo.objective.timesliceWindow ?? undefined,
+    },
+    kibanaUrl: summaryDoc.kibanaUrl,
+    settings: { syncDelay: '1m', frequency: '1m' },
+    enabled: true,
+    createdAt: summaryDoc.slo.createdAt ?? '2024-01-01T00:00:00.000Z',
+    updatedAt: summaryDoc.slo.updatedAt ?? '2024-01-01T00:00:00.000Z',
+    version: 1,
+  });
+
+  if (isLeft(res)) {
+    const errors = formatErrors(res.left);
+    logger.error(`Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]`);
+    logger.error(errors.join('|'));
+
+    return undefined;
+  }
+
+  return res.right;
+}
+
+function getIndicatorParams(logger: Logger, summaryDoc: EsSummaryDocument): Indicator['params'] {
+  const stringifiedParams = summaryDoc.slo.indicator.params;
+  if (typeof stringifiedParams === 'string') {
+    try {
+      return JSON.parse(stringifiedParams);
+    } catch (e) {
+      logger.error(
+        `Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]. Error parsing indicator params. Falling back on dummy indicator params.`
+      );
+      logger.error(e);
+    }
+  }
+
+  return getDummyIndicatorParams(summaryDoc);
+}
+
+function getDummyIndicatorParams(summaryDoc: EsSummaryDocument) {
   let params: Indicator['params'] | undefined;
   switch (summaryDoc.slo.indicator.type) {
     case 'sli.kql.custom':
@@ -86,51 +134,10 @@ export function fromSummaryDocumentToSlo(
         index: 'synthetics-*',
         filter: '',
       };
+      break;
+    default:
+      assertNever(summaryDoc.slo.indicator.type);
   }
-  const res = sloSchema.decode({
-    ...summaryDoc.slo,
-    indicator: {
-      type: summaryDoc.slo.indicator.type,
-      params,
-    },
-    kibanaUrl: summaryDoc.kibanaUrl,
-    settings: { syncDelay: '1m', frequency: '1m' },
-    enabled: true,
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
-    version: 1,
-  });
 
-  if (isLeft(res)) {
-    const errors = formatErrors(res.left);
-    logger.error(`Invalid remote stored SLO with id [${summaryDoc.slo.id}]`);
-
-    logger.error(errors.join('|'));
-    return undefined;
-  } else {
-    const formattedSlo = res.right;
-    if ('params' in summaryDoc.slo.indicator) {
-      const rawParams = summaryDoc.slo.indicator.params;
-      if (typeof rawParams === 'string') {
-        try {
-          formattedSlo.indicator.params = JSON.parse(rawParams);
-        } catch (e) {
-          logger.error(
-            `Invalid remote stored SLO with id [${summaryDoc.slo.id}]. Error parsing params`
-          );
-          logger.error(e);
-        }
-      } else {
-        // @ts-expect-error
-        formattedSlo.indicator.params = rawParams;
-      }
-      if (summaryDoc.slo.createdAt) formattedSlo.createdAt = new Date(summaryDoc.slo.createdAt);
-      if (summaryDoc.slo.updatedAt) formattedSlo.updatedAt = new Date(summaryDoc.slo.updatedAt);
-      return formattedSlo;
-    } else {
-      // @ts-expect-error
-      formattedSlo.indicator.params = {};
-      return formattedSlo;
-    }
-  }
+  return params;
 }

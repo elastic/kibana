@@ -129,7 +129,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         total: finalTotal,
         results: finalResults.map((doc) => {
           const summaryDoc = doc._source;
-          const remoteName = this.getNameOfRemoteCluster(doc._index);
+          const remoteName = getRemoteClusterName(doc._index);
           let unsafeSlo;
           if (remoteName) {
             unsafeSlo = fromSummaryDocumentToSlo(summaryDoc, this.logger);
@@ -164,12 +164,6 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     }
   }
 
-  getNameOfRemoteCluster = (index: string) => {
-    if (index.includes(':')) {
-      return index.split(':')?.[0];
-    }
-  };
-
   async deleteOutdatedSummaries(summarySloIds: string[]) {
     // Always attempt to delete temporary summary documents with an existing non-temp summary document
     // The temp summary documents are _eventually_ removed as we get through the real summary documents
@@ -183,6 +177,12 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         },
       },
     });
+  }
+}
+
+function getRemoteClusterName(index: string) {
+  if (index.includes(':')) {
+    return index.split(':')[0];
   }
 }
 

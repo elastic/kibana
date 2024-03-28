@@ -166,8 +166,10 @@ export const getSLOSummaryPipelineTemplate = (
           value: spaceId,
         },
       },
+      // >= 8.14:
       {
         set: {
+          description: 'Store the stringified indicator params',
           field: 'slo.indicator.params',
           value: slo.indicator.params,
           ignore_failure: true,
