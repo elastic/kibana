@@ -62,9 +62,9 @@ export async function handleState(
     } catch (error) {
       currentStatus = 'failed';
       const errorMessage = `Error during execution of state "${currentStateName}" with status "${currentStatus}": ${error.message}`;
-      logger.warn(errorMessage);
       const latestStateWithError = { ...updatedContext.latestExecutedState, errors: errorMessage };
       updatedContext = { ...updatedContext, latestExecutedState: latestStateWithError };
+      logger.warn(errorMessage);
     }
   } else {
     currentStatus = 'failed';

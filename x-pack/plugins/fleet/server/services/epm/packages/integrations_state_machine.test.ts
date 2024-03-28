@@ -76,22 +76,6 @@ describe('handleState', () => {
     );
   });
 
-  it('should execute the transition from the provided state', async () => {
-    const mockOnTransitionState1 = jest.fn();
-    const mockOnTransitionState2 = jest.fn();
-    const mockOnTransitionState3 = jest.fn();
-    const testDefinition = getTestDefinition(
-      mockOnTransitionState1,
-      mockOnTransitionState2,
-      mockOnTransitionState3
-    );
-    await handleState('state2', testDefinition, testDefinition.context);
-
-    expect(mockOnTransitionState1).toHaveBeenCalledTimes(0);
-    expect(mockOnTransitionState2).toHaveBeenCalledTimes(1);
-    expect(mockOnTransitionState3).toHaveBeenCalledTimes(1);
-  });
-
   it('should call the onTransition function with context data and the return value is saved for the next iteration', async () => {
     const mockOnTransitionState1 = jest.fn().mockReturnValue({ arrayData: ['test1', 'test2'] });
     const mockOnTransitionState2 = jest
@@ -196,7 +180,7 @@ describe('handleState', () => {
     );
   });
 
-  it('should return updated context data ', async () => {
+  it('should return updated context data', async () => {
     const mockOnTransitionState1 = jest
       .fn()
       .mockImplementation(() => Promise.resolve({ promiseData: {} }));
@@ -304,6 +288,51 @@ describe('handleState', () => {
     );
   });
 
+  it('should execute the transition starting from the provided state', async () => {
+    const mockOnTransitionState1 = jest.fn().mockReturnValue({ runningVal: 'test1' });
+    const mockOnTransitionState2 = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve({ runningVal: 'test2' }));
+    const mockOnTransitionState3 = jest.fn().mockReturnValue({ runningVal: 'test3' });
+    const contextData = { runningVal: [], fixedVal: 'something' };
+    const testDefinition = getTestDefinition(
+      mockOnTransitionState1,
+      mockOnTransitionState2,
+      mockOnTransitionState3,
+      contextData
+    );
+
+    const updatedContext = await handleState('state2', testDefinition, testDefinition.context);
+
+    expect(mockOnTransitionState1).toHaveBeenCalledTimes(0);
+    expect(mockOnTransitionState2).toHaveBeenCalledWith(
+      expect.objectContaining({
+        runningVal: [],
+        fixedVal: 'something',
+      })
+    );
+    expect(mockOnTransitionState3).toHaveBeenCalledWith(
+      expect.objectContaining({
+        runningVal: 'test2',
+        fixedVal: 'something',
+        latestExecutedState: {
+          name: 'state2',
+          started_at: expect.anything(),
+        },
+      })
+    );
+    expect(updatedContext).toEqual(
+      expect.objectContaining({
+        fixedVal: 'something',
+        runningVal: 'test3',
+        latestExecutedState: {
+          name: 'state3',
+          started_at: expect.anything(),
+        },
+      })
+    );
+  });
+
   it('should exit when a state returns error', async () => {
     const error = new Error('Installation failed');
     const mockOnTransitionState1 = jest.fn().mockRejectedValue(error);
@@ -336,7 +365,7 @@ describe('handleState', () => {
       mockOnTransitionState3,
       contextData
     );
-    const result = await handleState('state1', testDefinition, testDefinition.context);
+    const updatedContext = await handleState('state1', testDefinition, testDefinition.context);
 
     expect(mockOnTransitionState1).toHaveBeenCalledWith({ testData: 'test' });
     expect(mockOnTransitionState2).toHaveBeenCalledWith(
@@ -353,7 +382,7 @@ describe('handleState', () => {
     expect(mockContract.logger?.warn).toHaveBeenCalledWith(
       'Error during execution of state "state2" with status "failed": Installation failed'
     );
-    expect(result).toEqual(
+    expect(updatedContext).toEqual(
       expect.objectContaining({
         testData: 'test',
         result1: 'test',
@@ -427,6 +456,139 @@ describe('handleState', () => {
     expect(mockPostTransition).toHaveBeenCalledWith(updatedContext);
     expect(mockContract.logger?.debug).toHaveBeenCalledWith(
       'Executing post transition function: mockConstructor'
+    );
+  });
+
+  it('should execute postTransition correctly also when a transition exits with erros', async () => {
+    const error = new Error('Installation failed');
+    const mockOnTransitionState1 = jest.fn().mockReturnValue({ result1: 'test' });
+    const mockOnTransitionState2 = jest.fn().mockRejectedValue(error);
+    const mockOnTransitionState3 = jest.fn();
+    const mockPostTransition = jest.fn();
+    const contextData = { testData: 'test' };
+    const testDefinition = getTestDefinition(
+      mockOnTransitionState1,
+      mockOnTransitionState2,
+      mockOnTransitionState3,
+      contextData,
+      mockPostTransition
+    );
+    const updatedContext = await handleState('state1', testDefinition, testDefinition.context);
+
+    expect(mockOnTransitionState1).toHaveBeenCalledTimes(1);
+    expect(mockPostTransition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        result1: 'test',
+        testData: 'test',
+        latestExecutedState: {
+          name: 'state1',
+          started_at: expect.anything(),
+        },
+      })
+    );
+    expect(mockOnTransitionState2).toHaveBeenCalledTimes(1);
+    expect(mockPostTransition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        result1: 'test',
+        testData: 'test',
+        latestExecutedState: {
+          name: 'state1',
+          started_at: expect.anything(),
+          errors:
+            'Error during execution of state "state2" with status "failed": Installation failed',
+        },
+      })
+    );
+    expect(mockOnTransitionState3).toHaveBeenCalledTimes(0);
+
+    expect(updatedContext).toEqual(
+      expect.objectContaining({
+        testData: 'test',
+        result1: 'test',
+        latestExecutedState: {
+          name: 'state1',
+          started_at: expect.anything(),
+          errors:
+            'Error during execution of state "state2" with status "failed": Installation failed',
+        },
+      })
+    );
+  });
+
+  it('should log a warning when postTransition exits with erros and continue executing the states', async () => {
+    const error = new Error('Installation failed');
+    const mockOnTransitionState1 = jest.fn().mockReturnValue({ result1: 'test' });
+    const mockOnTransitionState2 = jest.fn();
+    const mockOnTransitionState3 = jest.fn();
+    const mockPostTransition = jest.fn().mockRejectedValue(error);
+    const contextData = { testData: 'test' };
+    const testDefinition = getTestDefinition(
+      mockOnTransitionState1,
+      mockOnTransitionState2,
+      mockOnTransitionState3,
+      contextData,
+      mockPostTransition
+    );
+    const updatedContext = await handleState('state1', testDefinition, testDefinition.context);
+
+    expect(mockOnTransitionState1).toHaveBeenCalledTimes(1);
+    expect(mockPostTransition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        result1: 'test',
+        testData: 'test',
+        latestExecutedState: {
+          name: 'state1',
+          started_at: expect.anything(),
+        },
+      })
+    );
+    expect(mockOnTransitionState2).toHaveBeenCalledTimes(1);
+    expect(mockOnTransitionState3).toHaveBeenCalledTimes(1);
+    expect(mockContract.logger?.warn).toHaveBeenCalledWith(
+      'Error during execution of post transition function: Installation failed'
+    );
+
+    expect(updatedContext).toEqual(
+      expect.objectContaining({
+        testData: 'test',
+        result1: 'test',
+        latestExecutedState: {
+          name: 'state3',
+          started_at: expect.anything(),
+        },
+      })
+    );
+  });
+
+  it('should exit and log a warning when the provided OnTransition is not a function', async () => {
+    const mockOnTransitionState1 = jest.fn().mockReturnValue({ result1: 'test' });
+    const mockOnTransitionState2 = undefined;
+    const mockOnTransitionState3 = jest.fn();
+
+    const contextData = { testData: 'test' };
+    const testDefinition = getTestDefinition(
+      mockOnTransitionState1,
+      mockOnTransitionState2,
+      mockOnTransitionState3,
+      contextData
+    );
+    const updatedContext = await handleState('state1', testDefinition, testDefinition.context);
+
+    expect(mockOnTransitionState1).toHaveBeenCalledTimes(1);
+    expect(mockOnTransitionState3).toHaveBeenCalledTimes(0);
+    expect(mockContract.logger?.warn).toHaveBeenCalledWith(
+      'Execution of state "state2" with status "failed": provided onTransition is not a valid function'
+    );
+
+    expect(updatedContext).toEqual(
+      expect.objectContaining({
+        testData: 'test',
+        result1: 'test',
+        latestExecutedState: {
+          name: 'state1',
+          started_at: expect.anything(),
+        },
+      })
     );
   });
 });
