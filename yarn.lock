@@ -1746,10 +1746,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@93.5.1":
-  version "93.5.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.5.1.tgz#e663017052a1461ec0c67e825f1d7c1346f3c3ee"
-  integrity sha512-40zFwuYakCDxzEDnh2ePgUh4KVfmy8p6sXc8FFES07zoboRt82YxQxwmgouqu02TZHaXir1bXSpmEyXe4T7CMg==
+"@elastic/eui@93.5.1-rc.0":
+  version "93.5.1-rc.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.5.1-rc.0.tgz#d5f86e061d901dd003897996e38d05103c8f595d"
+  integrity sha512-9L1YHF47ST7HvaiefbCxO4SkVjE8M64CY0hkc9YCfaAKJQH8/GTd4lKuPfQaVdgrKiAb07AQkLIMq6s6vjPKMA==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.202"
@@ -1768,7 +1768,7 @@
     react-is "^17.0.2"
     react-remove-scroll-bar "^2.3.4"
     react-virtualized-auto-sizer "^1.0.20"
-    react-window "^1.8.9"
+    react-window "^1.8.10"
     refractor "^3.6.0"
     rehype-raw "^5.1.0"
     rehype-react "^6.2.1"
@@ -26177,6 +26177,14 @@ react-virtualized@^9.22.5:
     loose-envify "^1.4.0"
     prop-types "^15.7.2"
     react-lifecycles-compat "^3.0.4"
+
+react-window@^1.8.10:
+  version "1.8.10"
+  resolved "https://registry.yarnpkg.com/react-window/-/react-window-1.8.10.tgz#9e6b08548316814b443f7002b1cf8fd3a1bdde03"
+  integrity sha512-Y0Cx+dnU6NLa5/EvoHukUD0BklJ8qITCtVEPY1C/nL8wwoZ0b5aEw8Ff1dOVHw7fCzMt55XfJDd8S8W8LCaUCg==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    memoize-one ">=3.1.1 <6"
 
 react-window@^1.8.9:
   version "1.8.9"
