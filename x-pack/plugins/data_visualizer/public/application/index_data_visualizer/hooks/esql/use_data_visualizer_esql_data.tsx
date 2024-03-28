@@ -43,6 +43,7 @@ import type {
   ESQLDataVisualizerIndexBasedAppState,
 } from '../../embeddables/grid_embeddable/types';
 import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
+import { DEFAULT_ESQL_LIMIT } from '../../constants/esql_constants';
 
 const defaultSearchQuery = {
   match_all: {},
@@ -195,7 +196,7 @@ export const useESQLDataVisualizerData = (
         aggInterval,
         intervalMs: aggInterval?.asMilliseconds(),
         searchQuery: query,
-        limitSize,
+        limit: limitSize !== undefined ? parseInt(limitSize, 10) : DEFAULT_ESQL_LIMIT,
         sessionId: undefined,
         indexPattern,
         timeFieldName: currentDataView?.timeFieldName,
@@ -337,7 +338,7 @@ export const useESQLDataVisualizerData = (
     searchQuery: fieldStatsRequest?.searchQuery,
     columns: fieldStatFieldsToFetch,
     filter: fieldStatsRequest?.filter,
-    limitSize: fieldStatsRequest?.limitSize,
+    limit: fieldStatsRequest?.limit ?? DEFAULT_ESQL_LIMIT,
   });
 
   useEffect(

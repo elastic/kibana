@@ -39,7 +39,7 @@ describe('Transform partial URL state into form state', () => {
       ).toMatchSnapshot();
     });
 
-    it('handles partial Custom KQL state', () => {
+    it('handles partial Custom Query state', () => {
       expect(
         transform({
           indicator: {

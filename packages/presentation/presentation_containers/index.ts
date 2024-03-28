@@ -9,7 +9,6 @@
 export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
-  useExpandedPanelId,
   type CanDuplicatePanels,
   type CanExpandPanels,
 } from './interfaces/panel_management';
