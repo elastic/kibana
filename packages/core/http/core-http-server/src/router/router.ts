@@ -13,7 +13,7 @@ import type { RouteConfig, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
 import type { RouteConfigOptions } from './route';
-import { RouteValidatorContainer } from './route_validator';
+import { RouteValidator } from './route_validator';
 
 /**
  * Route handler common definition
@@ -124,7 +124,7 @@ export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
-  validationSchemas?: RouteValidatorContainer<unknown, unknown, unknown> | false;
+  validationSchemas?: RouteValidator<unknown, unknown, unknown> | false;
   handler: (
     req: Request,
     responseToolkit: ResponseToolkit

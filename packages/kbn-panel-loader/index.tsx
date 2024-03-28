@@ -10,7 +10,11 @@ import React from 'react';
 import { EuiLoadingChart, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const PanelLoader = (props: { showShadow?: boolean; dataTestSubj?: string }) => {
+export const PanelLoader = (props: {
+  showShadow?: boolean;
+  showBorder?: boolean;
+  dataTestSubj?: string;
+}) => {
   return (
     <EuiPanel
       css={css`
@@ -26,7 +30,8 @@ export const PanelLoader = (props: { showShadow?: boolean; dataTestSubj?: string
       `}
       role="figure"
       paddingSize="none"
-      hasShadow={props.showShadow ?? false}
+      hasShadow={props.showShadow}
+      hasBorder={props.showBorder}
       data-test-subj={props.dataTestSubj}
     >
       <EuiLoadingChart size="l" mono />

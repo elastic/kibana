@@ -12,10 +12,9 @@ import {
   type RouteValidationFunction,
   RouteValidationError,
 } from '@kbn/core-http-server';
-import { z, extractErrorMessage } from '@kbn/zod';
-import type { ApiVersion } from '@kbn/core-http-server';
-import { instanceofZodType } from '@kbn/zod';
 import type { Type } from '@kbn/config-schema';
+import { z, extractErrorMessage, instanceofZodType } from '@kbn/zod';
+import type { ApiVersion } from '@kbn/core-http-server';
 import { RouteValidator } from '../validator';
 
 function makeValidationFunction(schema: z.ZodTypeAny): RouteValidationFunction<unknown> {

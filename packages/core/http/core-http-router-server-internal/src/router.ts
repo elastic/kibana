@@ -28,7 +28,7 @@ import type {
   RouteValidatorFullConfigContainer,
   RouteValidatorFullConfig,
 } from '@kbn/core-http-server';
-import { validBodyOutput, type RouteValidatorContainer } from '@kbn/core-http-server';
+import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
@@ -83,17 +83,15 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   }
 
   if (route.validate !== false) {
-    Object.entries(route.validate).forEach(([key, schema]) => {
+    const validation = getRequestValidation(route.validate);
+    Object.entries(validation).forEach(([key, schema]) => {
       if (!(isConfigSchema(schema) || typeof schema === 'function')) {
         throw new Error(
           `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
         );
       }
     });
-  }
-
-  if (route.validate) {
-    return RouteValidator.from(getRequestValidation(route.validate));
+    return RouteValidator.from(validation);
   }
 }
 

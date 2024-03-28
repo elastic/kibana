@@ -15,7 +15,7 @@ import type {
   RequestHandler,
   IKibanaResponse,
   RouteConfigOptions,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   RequestHandlerContextBase,
   RouteValidationFunction,
 } from '../..';
@@ -197,13 +197,13 @@ interface ZodEsque<V> {
  * public routes via zod.
  */
 export type VersionedSpecValidation<V = unknown> =
-  | ZodEsque<V>
+  | Type<V>
   | RouteValidationFunction<V>
-  | Type<V>;
+  | ZodEsque<V>;
 
 /** @public */
 export type VersionedRouteRequestValidation<P, Q, B> = Omit<
-  RouteValidatorFullConfig<P, Q, B>,
+  RouteValidatorFullConfigRequest<P, Q, B>,
   'params' | 'query' | 'body'
 > & {
   params?: VersionedSpecValidation<P>;
