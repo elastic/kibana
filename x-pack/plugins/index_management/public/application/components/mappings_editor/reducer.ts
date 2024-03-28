@@ -317,14 +317,14 @@ export const reducer = (state: State, action: Action): State => {
       return addFieldToState(action.value, state);
     }
     case 'field.addSemanticText': {
-      const addRootFieldActionValue: Field = {
+      const addTexFieldWithCopyToActionValue: Field = {
         name: action.value.referenceField,
         type: 'text',
         copy_to: [action.value.name],
       };
 
-      // Add root field to state and update fieldToAddFieldTo
-      let updatedState = addFieldToState(addRootFieldActionValue, state);
+      // Add text field to state with copy_to of semantic_text field
+      let updatedState = addFieldToState(addTexFieldWithCopyToActionValue, state);
 
       const addSemanticTextFieldActionValue: Field = {
         name: action.value.name,
@@ -332,7 +332,7 @@ export const reducer = (state: State, action: Action): State => {
         type: 'semantic_text',
       };
 
-      // Add multi field to state and reset fieldToAddFieldTo
+      // Add semantic_text field to state and reset fieldToAddFieldTo
       updatedState = addFieldToState(addSemanticTextFieldActionValue, updatedState);
       updatedState.documentFields.fieldToAddFieldTo = undefined;
 
