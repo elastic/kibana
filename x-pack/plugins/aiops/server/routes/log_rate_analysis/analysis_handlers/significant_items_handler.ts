@@ -9,21 +9,18 @@ import { queue } from 'async';
 
 import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
-
 import {
   addSignificantItemsAction,
   updateLoadingStateAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-
-import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
-
-import { fetchSignificantCategories } from '../queries/fetch_significant_categories';
-import { fetchSignificantTermPValues } from '../queries/fetch_significant_term_p_values';
-
+} from '@kbn/aiops-log-rate-analysis/api/actions';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
+
+import { fetchSignificantCategories } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_categories';
+import { fetchSignificantTermPValues } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_term_p_values';
 
 import {
   LOADED_FIELD_CANDIDATES,
