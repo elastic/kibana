@@ -17,26 +17,47 @@ import {
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
+import { i18n } from '@kbn/i18n';
+import { asDuration, asPercent } from '../../../../../common';
+import { createFormatter } from '../../../../../common/custom_threshold_rule/formatters';
+import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
+import { METRIC_FORMATTERS } from '../../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../pages/alert_details/alert_details';
 import {
   BaseMetricExpressionParams,
   CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
 import { TopAlert } from '../../../../typings/alerts';
+import { isFieldsSameType } from './is_fields_same_type';
 
 export interface FlyoutThresholdData {
-  observedValue: number;
-  threshold: number[];
+  observedValue: string;
+  threshold: string[];
   fields: string[];
   comparator: string;
+  pctAboveThreshold: string;
 }
+
+const getPctAboveThreshold = (observedValue: number, threshold: number[]) => {
+  if (threshold.length > 1) {
+    return i18n.translate('xpack.observability.alertFlyout.overview.rangeThresholdLabel', {
+      defaultMessage: ' (Range threshold)',
+    });
+  }
+  return i18n.translate('xpack.observability.alertFlyout.overview.aboveThresholdLabel', {
+    defaultMessage: ' ({pctValue}% above the threshold)',
+    values: {
+      pctValue: Math.floor((observedValue * 100) / threshold[0]),
+    },
+  });
+};
 
 export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] => {
   const ruleParams = alert.fields[ALERT_RULE_PARAMETERS];
   const ruleCriteria = ruleParams?.criteria as Array<Record<string, any>>;
   const ruleId = alert.fields[ALERT_RULE_TYPE_ID];
-  const observedValues = alert.fields[ALERT_EVALUATION_VALUES] || [
-    alert.fields[ALERT_EVALUATION_VALUE],
+  const observedValues: number[] = alert.fields[ALERT_EVALUATION_VALUES]! || [
+    alert.fields[ALERT_EVALUATION_VALUE]!,
   ];
 
   switch (ruleId) {
@@ -46,15 +67,25 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         const fields = criteria.metrics.map((metric) => metric.field || 'COUNT_AGG');
         const comparator = criteria.comparator;
         const threshold = criteria.threshold;
+        const isSameFieldsType = isFieldsSameType(fields);
+        const formattedValue = metricValueFormatter(
+          observedValue as number,
+          isSameFieldsType ? fields[0] : 'noType'
+        );
+        const thresholdFormattedAsString = threshold
+          .map((thresholdWithRange) =>
+            metricValueFormatter(thresholdWithRange, isSameFieldsType ? fields[0] : 'noType')
+          )
+          .join(' AND ');
+
         return {
-          observedValue,
-          threshold,
-          fields,
+          observedValue: formattedValue,
+          threshold: thresholdFormattedAsString,
           comparator,
+          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
         } as unknown as FlyoutThresholdData;
       });
 
-    case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID:
     case METRIC_THRESHOLD_ALERT_TYPE_ID:
       return observedValues.map((observedValue, metricIndex) => {
         const criteria = ruleCriteria[metricIndex] as BaseMetricExpressionParams & {
@@ -63,11 +94,52 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         const fields = [criteria.metric];
         const comparator = criteria.comparator;
         const threshold = criteria.threshold;
+        const isSameFieldsType = isFieldsSameType(fields);
+        const formattedValue = metricValueFormatter(
+          observedValue as number,
+          isSameFieldsType ? fields[0] : 'noType'
+        );
+        const thresholdFormattedAsString = threshold
+          .map((thresholdWithRange) =>
+            metricValueFormatter(thresholdWithRange, isSameFieldsType ? fields[0] : 'noType')
+          )
+          .join(' AND ');
+
         return {
-          observedValue,
-          threshold,
+          observedValue: formattedValue,
+          threshold: thresholdFormattedAsString,
+          comparator,
+          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
+        } as unknown as FlyoutThresholdData;
+      });
+
+    case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID:
+      return observedValues.map((observedValue, metricIndex) => {
+        const criteria = ruleCriteria[metricIndex] as BaseMetricExpressionParams & {
+          metric: string;
+        };
+        const infraType = METRIC_FORMATTERS[criteria.metric].formatter;
+        const formatter = createFormatter(infraType);
+
+        const fields = [criteria.metric];
+        const comparator = criteria.comparator;
+        const threshold = criteria.threshold;
+        const thresholdFormattedAsString = criteria.threshold.map((v: number) => {
+          if (infraType === 'percent') {
+            v = Number(v) / 100;
+          }
+          if (infraType === 'bits') {
+            v = Number(v) / 8;
+          }
+          return formatter(v);
+        });
+
+        return {
+          observedValue: formatter(observedValue),
+          threshold: thresholdFormattedAsString,
           fields,
           comparator,
+          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
         } as unknown as FlyoutThresholdData;
       });
 
@@ -82,15 +154,31 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       return [flyoutMap];
 
     case ApmRuleType.ErrorCount:
-    case ApmRuleType.TransactionDuration:
-    case ApmRuleType.TransactionErrorRate:
-      const APMFlyoutMap = {
+      const APMFlyoutMapErrorCount = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         fields: [],
         comparator: '>',
       } as unknown as FlyoutThresholdData;
-      return [APMFlyoutMap];
+      return [APMFlyoutMapErrorCount];
+
+    case ApmRuleType.TransactionErrorRate:
+      const APMFlyoutMapTransactionErrorRate = {
+        observedValue: [asPercent(alert.fields[ALERT_EVALUATION_VALUE], 100)],
+        threshold: [asPercent(alert.fields[ALERT_EVALUATION_THRESHOLD], 100)],
+        fields: [],
+        comparator: '>',
+      } as unknown as FlyoutThresholdData;
+      return [APMFlyoutMapTransactionErrorRate];
+
+    case ApmRuleType.TransactionDuration:
+      const APMFlyoutMapTransactionDuration = {
+        observedValue: [asDuration(alert.fields[ALERT_EVALUATION_VALUE])],
+        threshold: [asDuration(alert.fields[ALERT_EVALUATION_THRESHOLD])],
+        fields: [],
+        comparator: '>',
+      } as unknown as FlyoutThresholdData;
+      return [APMFlyoutMapTransactionDuration];
 
     case '.es-query':
       const { thresholdComparator, threshold } = ruleParams as EsQueryRuleParams;

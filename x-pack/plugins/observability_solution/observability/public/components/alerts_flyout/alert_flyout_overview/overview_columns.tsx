@@ -15,10 +15,9 @@ import React from 'react';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
 import type { Group } from '../../../../common/custom_threshold_rule/types';
 import { NavigateToCaseView } from '../../../hooks/use_case_view_navigation';
-import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
+
 import { Groups } from '../../custom_threshold/components/alert_details_app_section/groups';
 import { formatCase } from './helpers/format_cases';
-import { isFieldsSameType } from './helpers/is_fields_same_type';
 import { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
 
 interface AlertOverviewField {
@@ -97,38 +96,12 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
           return (
             <div>
               {ruleCriteria.map((criteria, criteriaIndex) => {
-                const fields = criteria.fields;
                 const observedValue = criteria.observedValue;
-                const threshold = criteria.threshold;
-                const isRangeThreshold = threshold.length > 1;
-                const isSameFieldsType = isFieldsSameType(fields);
-                const formattedValue = metricValueFormatter(
-                  observedValue,
-                  isSameFieldsType ? fields[0] : 'noType'
-                );
+                const pctAboveThreshold = criteria.pctAboveThreshold;
                 return (
                   <EuiText size="s" key={`${observedValue}-${criteriaIndex}`}>
-                    <h4 style={{ display: 'inline' }}>{formattedValue}</h4>
-                    {isRangeThreshold ? (
-                      <span>
-                        {i18n.translate(
-                          'xpack.observability.alertFlyout.overview.rangeThresholdLabel',
-                          { defaultMessage: ' (Range threshold)' }
-                        )}
-                      </span>
-                    ) : (
-                      <span>
-                        {i18n.translate(
-                          'xpack.observability.alertFlyout.overview.aboveThresholdLabel',
-                          {
-                            defaultMessage: ' ({pctValue}% above the threshold)',
-                            values: {
-                              pctValue: Math.floor((observedValue * 100) / threshold[0]),
-                            },
-                          }
-                        )}
-                      </span>
-                    )}
+                    <h4 style={{ display: 'inline' }}>{observedValue}</h4>
+                    <span>{pctAboveThreshold}</span>
                   </EuiText>
                 );
               })}
@@ -150,34 +123,13 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
           return (
             <div>
               {ruleCriteria.map((criteria, criticalIndex) => {
-                const fields = criteria.fields;
                 const threshold = criteria.threshold;
-                const isRangeThreshold = threshold.length > 1;
-                const isSameFieldsType = isFieldsSameType(fields);
                 const comparator = criteria.comparator;
-                if (isRangeThreshold) {
-                  const rangeThresholdFormattedAsString = threshold
-                    .map((thresholdWithRange) =>
-                      metricValueFormatter(
-                        thresholdWithRange,
-                        isSameFieldsType ? fields[0] : 'noType'
-                      )
-                    )
-                    .join(' AND ');
-                  return (
-                    <EuiText size="s" key={`${rangeThresholdFormattedAsString}-${criticalIndex}`}>
-                      <h4>{`${comparator.toUpperCase()} ${rangeThresholdFormattedAsString}`}</h4>
-                    </EuiText>
-                  );
-                }
-                return criteria.threshold.map((thresholdWithRange) => {
-                  const formattedValue = metricValueFormatter(thresholdWithRange, fields[0]);
-                  return (
-                    <EuiText size="s" key={`${thresholdWithRange}-${criticalIndex}`}>
-                      <h4>{`${comparator} ${formattedValue}`}</h4>
-                    </EuiText>
-                  );
-                });
+                return (
+                  <EuiText size="s" key={`${threshold}-${criticalIndex}`}>
+                    <h4>{`${comparator.toUpperCase()} ${threshold}`}</h4>
+                  </EuiText>
+                );
               })}
             </div>
           );
