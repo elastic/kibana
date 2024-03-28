@@ -10,3 +10,4 @@ export * from './update';
 export * from './delete';
 export * from './find';
 export * from './find_group';
+export * from './find_definition';

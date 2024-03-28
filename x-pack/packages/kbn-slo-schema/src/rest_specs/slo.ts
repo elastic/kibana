@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import {
   allOrAnyString,
@@ -153,22 +152,6 @@ const fetchHistoricalSummaryResponseSchema = t.array(
   })
 );
 
-const findSloDefinitionsParamsSchema = t.partial({
-  query: t.partial({
-    search: t.string,
-    includeOutdatedOnly: toBooleanRt,
-    page: t.string,
-    perPage: t.string,
-  }),
-});
-
-const findSloDefinitionsResponseSchema = t.type({
-  page: t.number,
-  perPage: t.number,
-  total: t.number,
-  results: t.array(sloResponseSchema),
-});
-
 const getSLOBurnRatesResponseSchema = t.type({
   burnRates: t.array(
     t.type({
@@ -222,9 +205,6 @@ type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParams
 type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
 type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
-type FindSLODefinitionsParams = t.TypeOf<typeof findSloDefinitionsParamsSchema.props.query>;
-type FindSLODefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
-
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
 type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
 
@@ -259,8 +239,6 @@ export {
   getSLOResponseSchema,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
-  findSloDefinitionsParamsSchema,
-  findSloDefinitionsResponseSchema,
   manageSLOParamsSchema,
   resetSLOParamsSchema,
   resetSLOResponseSchema,
@@ -282,8 +260,6 @@ export type {
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
-  FindSLODefinitionsParams,
-  FindSLODefinitionsResponse,
   ManageSLOParams,
   ResetSLOParams,
   ResetSLOResponse,
