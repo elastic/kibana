@@ -157,6 +157,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
+      connectorsClientDeploy: `${ENTERPRISE_SEARCH_DOCS}deploy-connector-client.html`,
       connectorsAzureBlobStorage: `${ENTERPRISE_SEARCH_DOCS}connectors-azure-blob.html`,
       connectorsBox: `${ENTERPRISE_SEARCH_DOCS}connectors-box.html`,
       connectorsClients: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-build`,

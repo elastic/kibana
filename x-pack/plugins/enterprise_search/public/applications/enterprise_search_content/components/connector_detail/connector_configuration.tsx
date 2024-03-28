@@ -158,7 +158,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           values={{
                             link: (
                               <EuiLink
-                                href="https://www.elastic.co/guide/en/enterprise-search/current/deploy-connector-client.html"
+                                href={docLinks.connectorsClientDeploy}
                                 target="_blank"
                                 external
                               >
