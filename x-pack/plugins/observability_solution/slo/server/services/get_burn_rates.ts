@@ -27,12 +27,14 @@ interface LookbackWindow {
 
 export async function getBurnRates({
   sloId,
+  spaceId,
   windows,
   instanceId,
   remoteName,
   services,
 }: {
   sloId: string;
+  spaceId: string;
   instanceId: string;
   remoteName?: string;
   windows: LookbackWindow[];
@@ -43,7 +45,7 @@ export async function getBurnRates({
   const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
   const sliClient = new DefaultSLIClient(esClient);
   const definitionClient = new SloDefinitionClient(repository, esClient, logger);
-  const slo = await definitionClient.execute(sloId, remoteName);
+  const slo = await definitionClient.execute(sloId, spaceId, remoteName);
 
   if (!slo) {
     return [];

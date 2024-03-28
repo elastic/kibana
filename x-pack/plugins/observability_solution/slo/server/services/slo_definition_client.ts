@@ -19,27 +19,28 @@ export class SloDefinitionClient {
     private logger: Logger
   ) {}
 
-  public async execute(sloId: string, remoteName?: string) {
-    let slo: SLO | undefined;
+  public async execute(
+    sloId: string,
+    spaceId: string,
+    remoteName?: string
+  ): Promise<SLO | undefined> {
     if (remoteName) {
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
         index: `${remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
         query: {
           bool: {
-            filter: [{ term: { spaceId: 'default' } }, { term: { 'slo.id': sloId } }],
+            filter: [{ term: { spaceId: spaceId } }, { term: { 'slo.id': sloId } }],
           },
         },
       });
 
       if (summarySearch.hits.hits.length === 0) {
-        throw new Error('SLO not found');
+        return undefined;
       }
       const doc = summarySearch.hits.hits[0]._source!;
-
-      slo = fromRemoteSummaryDocumentToSlo(doc, this.logger);
-    } else {
-      slo = await this.repository.findById(sloId);
+      return fromRemoteSummaryDocumentToSlo(doc, this.logger);
     }
-    return slo;
+
+    return await this.repository.findById(sloId);
   }
 }

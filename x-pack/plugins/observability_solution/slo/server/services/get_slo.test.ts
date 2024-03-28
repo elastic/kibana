@@ -52,7 +52,7 @@ describe('GetSLO', () => {
         },
       });
 
-      const result = await getSLO.execute(slo.id);
+      const result = await getSLO.execute(slo.id, 'default');
 
       expect(mockRepository.findById).toHaveBeenCalledWith(slo.id);
       expect(result).toEqual({

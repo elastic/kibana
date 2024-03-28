@@ -26,6 +26,7 @@ interface Props {
   instanceId?: string;
   remoteName?: string;
 }
+
 export interface SummaryClient {
   computeSummary(props: Props): Promise<{ summary: Summary; groupings: Groupings; meta: Meta }>;
 }
@@ -153,7 +154,7 @@ function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: 
   return Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
 }
 
-export function getMetaFields(
+function getMetaFields(
   slo: SLO,
   source: { monitor?: { id?: string }; config_id?: string; observer?: { name?: string } }
 ): Meta {

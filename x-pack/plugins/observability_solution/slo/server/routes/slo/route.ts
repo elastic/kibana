@@ -270,8 +270,11 @@ const getSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: getSLOParamsSchema,
-  handler: async ({ context, params, logger }) => {
+  handler: async ({ request, context, params, logger, dependencies }) => {
     await assertPlatinumLicense(context);
+
+    const spaceId =
+      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -280,7 +283,7 @@ const getSLORoute = createSloServerRoute({
     const defintionClient = new SloDefinitionClient(repository, esClient, logger);
     const getSLO = new GetSLO(defintionClient, summaryClient);
 
-    return await getSLO.execute(params.path.id, params.query);
+    return await getSLO.execute(params.path.id, spaceId, params.query);
   },
 });
 
@@ -550,14 +553,18 @@ const getSloBurnRates = createSloServerRoute({
     access: 'internal',
   },
   params: getSLOBurnRatesParamsSchema,
-  handler: async ({ context, params, logger }) => {
+  handler: async ({ request, context, params, logger, dependencies }) => {
     await assertPlatinumLicense(context);
+
+    const spaceId =
+      (await dependencies.spaces?.spacesService.getActiveSpace(request))?.id ?? 'default';
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
     const { instanceId, windows, remoteName } = params.body;
     const burnRates = await getBurnRates({
       instanceId,
+      spaceId,
       windows,
       remoteName,
       sloId: params.path.id,
