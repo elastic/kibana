@@ -94,23 +94,6 @@ const sloWithSummaryResponseSchema = t.intersection([
   ]),
 ]);
 
-const getSLOQuerySchema = t.partial({
-  query: t.partial({
-    instanceId: allOrAnyString,
-    remoteName: t.string,
-  }),
-});
-const getSLOParamsSchema = t.intersection([
-  t.type({
-    path: t.type({
-      id: sloIdSchema,
-    }),
-  }),
-  getSLOQuerySchema,
-]);
-
-const getSLOResponseSchema = sloWithSummaryResponseSchema;
-
 const manageSLOParamsSchema = t.type({
   path: t.type({ id: sloIdSchema }),
 });
@@ -190,9 +173,6 @@ const getSLOInstancesResponseSchema = t.type({
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
-type GetSLOParams = t.TypeOf<typeof getSLOQuerySchema.props.query>;
-type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
-
 type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
 
 type ResetSLOParams = t.TypeOf<typeof resetSLOParamsSchema.props.path>;
@@ -235,8 +215,6 @@ export {
   deleteSLOInstancesParamsSchema,
   getPreviewDataParamsSchema,
   getPreviewDataResponseSchema,
-  getSLOParamsSchema,
-  getSLOResponseSchema,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
   manageSLOParamsSchema,
@@ -255,8 +233,6 @@ export type {
   DeleteSLOInstancesParams,
   GetPreviewDataParams,
   GetPreviewDataResponse,
-  GetSLOParams,
-  GetSLOResponse,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,

@@ -11,3 +11,4 @@ export * from './delete';
 export * from './find';
 export * from './find_group';
 export * from './find_definition';
+export * from './get';
