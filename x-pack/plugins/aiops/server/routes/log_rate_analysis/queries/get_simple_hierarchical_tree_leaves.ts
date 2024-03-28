@@ -8,8 +8,7 @@
 import { orderBy } from 'lodash';
 import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
 import { stringHash } from '@kbn/ml-string-hash';
-
-import type { SimpleHierarchicalTreeNode } from '../../../../common/types';
+import type { SimpleHierarchicalTreeNode } from '@kbn/aiops-utils/log_rate_analysis/types';
 
 /**
  * Get leaves from hierarchical tree.

@@ -27,8 +27,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { AlertHit, parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
-import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
-import { TaskRunnerContext } from './task_runner_factory';
+import { Executable, ExecutionHandlerOptions, RuleTaskInstance, TaskRunnerContext } from './types';
 import {
   transformActionParams,
   TransformActionParamsOptions,
@@ -319,6 +318,7 @@ export class ExecutionHandler<
             actionParams: action.params,
             flapping: executableAlert.getFlapping(),
             ruleUrl: ruleUrl?.absoluteUrl,
+            consecutiveMatches: executableAlert.getActiveCount(),
           };
 
           if (executableAlert.isAlertAsData()) {

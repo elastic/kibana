@@ -14,6 +14,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
+  AnalyticsServiceStart,
   CoreSetup,
   CoreStart,
   ExecutionContextStart,
@@ -39,6 +40,10 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
  * AIOps App Dependencies to be provided via React context.
  */
 export interface AiopsAppDependencies {
+  /**
+   * Used for telemetry/performance metrics.
+   */
+  analytics: AnalyticsServiceStart;
   /**
    * Used to check capabilities for links to other plugins.
    * `application.currentAppId$` is used to close the log pattern analysis flyout

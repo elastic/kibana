@@ -6,7 +6,8 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JobMemoryTreeMap } from './tree_map';
 

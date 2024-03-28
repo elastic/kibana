@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Token } from 'antlr4ts';
-import { painless_lexer as PainlessLexer } from '../../antlr/painless_lexer';
+import type { Token } from 'antlr4';
+import { default as PainlessLexer } from '../../antlr/painless_lexer';
 
 /*
  * This extends the PainlessLexer class in order to handle backslashes appropriately

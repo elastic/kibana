@@ -24,5 +24,24 @@ export const farequoteDataViewTestData: TestData = {
     totalDocCountFormatted: '86,374',
     sampleProbabilityFormatted: '0.5',
     fieldSelectorPopover: ['airline', 'custom_field.keyword'],
+    globalState: {
+      refreshInterval: { pause: true, value: 60000 },
+      time: { from: '2016-02-07T00:00:00.000Z', to: '2016-02-11T23:59:54.000Z' },
+    },
+    appState: {
+      logRateAnalysis: {
+        filters: [],
+        searchQuery: { match_all: {} },
+        searchQueryLanguage: 'kuery',
+        searchString: '',
+        wp: {
+          bMax: 1454940000000,
+          bMin: 1454817600000,
+          dMax: 1455040800000,
+          dMin: 1455033600000,
+        },
+      },
+    },
+    prompt: 'empty',
   },
 };

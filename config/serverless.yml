@@ -11,6 +11,9 @@ xpack.fleet.internal.retrySetupOnBoot: true
 # Cloud links
 xpack.cloud.base_url: 'https://cloud.elastic.co'
 
+# Disable preboot phase for serverless
+core.lifecycle.disablePreboot: true
+
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
 
@@ -137,9 +140,6 @@ uiSettings:
 xpack.task_manager.allow_reading_invalid_state: false
 xpack.task_manager.request_timeouts.update_by_query: 60000
 
-## TaskManager requeue invalid tasks, supports ZDT
-xpack.task_manager.requeue_invalid_tasks.enabled: true
-
 # Reporting feature
 xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
@@ -149,7 +149,6 @@ xpack.reporting.statefulSettings.enabled: false
 # Disabled Observability plugins
 xpack.ux.enabled: false
 xpack.monitoring.enabled: false
-xpack.uptime.enabled: false
 xpack.legacy_uptime.enabled: false
 monitoring.ui.enabled: false
 

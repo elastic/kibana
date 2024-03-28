@@ -22,12 +22,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const browser = getService('browser');
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const log = getService('log');
 
   const driver = getService('__webdriver__');
 
   const toasts = getService('toasts');
 
-  const { header, common } = getPageObjects(['header', 'common']);
+  const { header } = getPageObjects(['header', 'common']);
 
   const flyoutService = getService('flyout');
 
@@ -67,7 +68,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await deleteConnectors();
       await deleteConversations();
 
-      proxy = await createLlmProxy();
+      proxy = await createLlmProxy(log);
 
       await ui.auth.login();
 
@@ -212,19 +213,24 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   arguments: JSON.stringify({ queries: [], categories: [] }),
                 });
 
-                expect(pick(contextResponse, 'name', 'content')).to.eql({
-                  name: 'context',
-                  content: JSON.stringify({ screen_description: '', learnings: [] }),
-                });
+                expect(contextResponse.name).to.eql('context');
+
+                const parsedContext = JSON.parse(contextResponse.content || '');
+
+                expect(parsedContext.screen_description).to.contain('The user is looking at');
 
                 expect(pick(assistantResponse, 'role', 'content')).to.eql({
                   role: 'assistant',
                   content: 'My response',
                 });
+              });
 
-                await common.waitUntilUrlIncludes(
-                  `/conversations/${response.body.conversations[0].conversation.id}`
-                );
+              it('updates the list of conversations', async () => {
+                const links = await testSubjects.findAll(ui.pages.conversations.conversationLink);
+                expect(links.length).to.eql(1);
+
+                const title = await links[0].getVisibleText();
+                expect(title).to.eql('My title');
               });
 
               describe('and adding another prompt', () => {
@@ -271,10 +277,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     arguments: JSON.stringify({ queries: [], categories: [] }),
                   });
 
-                  expect(pick(contextResponse, 'name', 'content')).to.eql({
-                    name: 'context',
-                    content: JSON.stringify({ screen_description: '', learnings: [] }),
-                  });
+                  expect(contextResponse.name).to.eql('context');
 
                   expect(pick(assistantResponse, 'role', 'content')).to.eql({
                     role: 'assistant',
@@ -299,7 +302,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await deleteConversations();
 
       await ui.auth.logout();
-      await proxy.close();
+      proxy.close();
     });
   });
 }

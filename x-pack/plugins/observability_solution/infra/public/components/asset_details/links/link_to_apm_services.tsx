@@ -7,7 +7,6 @@
 import React from 'react';
 import { stringify } from 'querystring';
 import { encode } from '@kbn/rison';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -32,20 +31,18 @@ export const LinkToApmServices = ({ assetName, apmField }: LinkToApmServicesProp
   const linkToApmServices = http.basePath.prepend(`/app/apm/services?${queryString}`);
 
   return (
-    <RedirectAppLinks coreStart={services}>
-      <EuiButtonEmpty
-        data-test-subj="infraAssetDetailsViewAPMShowAllServicesButton"
-        size="xs"
-        flush="both"
-        href={linkToApmServices}
-        iconSide="right"
-        iconType="sortRight"
-      >
-        <FormattedMessage
-          id="xpack.infra.hostsViewPage.flyout.viewApmServicesLinkLabel"
-          defaultMessage="Show all"
-        />
-      </EuiButtonEmpty>
-    </RedirectAppLinks>
+    <EuiButtonEmpty
+      data-test-subj="infraAssetDetailsViewAPMShowAllServicesButton"
+      size="xs"
+      flush="both"
+      href={linkToApmServices}
+      iconSide="right"
+      iconType="sortRight"
+    >
+      <FormattedMessage
+        id="xpack.infra.hostsViewPage.flyout.viewApmServicesLinkLabel"
+        defaultMessage="Show all"
+      />
+    </EuiButtonEmpty>
   );
 };

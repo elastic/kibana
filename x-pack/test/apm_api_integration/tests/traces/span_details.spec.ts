@@ -52,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177544
-  registry.when.skip('Span details', { config: 'basic', archives: [] }, () => {
+  registry.when('Span details', { config: 'basic', archives: [] }, () => {
     let traceId: string;
     let spanId: string;
     let parentTransactionId: string;

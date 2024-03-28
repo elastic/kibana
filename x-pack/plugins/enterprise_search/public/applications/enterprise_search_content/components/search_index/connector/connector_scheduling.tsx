@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { IngestionStatus, SchedulingConfiguraton } from '@kbn/search-connectors';
+import { ConnectorStatus, SchedulingConfiguraton } from '@kbn/search-connectors';
 import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components/scheduling/connector_scheduling';
 
 import { Status } from '../../../../../../common/types/api';
@@ -24,10 +24,9 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
 import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update_connector_scheduling_api_logic';
-import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
-import * as indices from '../../../utils/indices';
-import { IndexViewLogic } from '../index_view_logic';
-import { SearchIndexTabId } from '../search_index';
+import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
+import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 
 interface SchedulePanelProps {
   description: string;
@@ -56,9 +55,8 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description
 
 export const ConnectorScheduling: React.FC = () => {
   const { productFeatures, navigateToUrl } = useValues(KibanaLogic);
-  const { ingestionStatus, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
-    useValues(IndexViewLogic);
-  const { index } = useValues(IndexViewLogic);
+  const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
+    useValues(ConnectorViewLogic);
   const { status } = useValues(UpdateConnectorSchedulingApiLogic);
   const { makeRequest } = useActions(UpdateConnectorSchedulingApiLogic);
   const [hasChanges, setHasChanges] = useState<boolean>(false);
@@ -70,7 +68,7 @@ export const ConnectorScheduling: React.FC = () => {
   const shouldShowAccessControlSync =
     hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
 
-  if (!indices.isConnectorIndex(index)) {
+  if (!connector) {
     return <></>;
   }
 
@@ -110,25 +108,25 @@ export const ConnectorScheduling: React.FC = () => {
             <EuiSpacer size="l" />
           </>
         }
-        connector={index.connector}
+        connector={connector}
         configurationPathOnClick={() =>
           navigateToUrl(
-            generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-              indexName: index.name,
-              tabId: SearchIndexTabId.CONFIGURATION,
+            generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+              connectorId: connector.id,
+              tabId: ConnectorDetailTabId.CONFIGURATION,
             })
           )
         }
         dataTelemetryIdPrefix="entSearchContent"
         hasChanges={hasChanges}
-        hasIngestionError={ingestionStatus === IngestionStatus.ERROR}
+        hasIngestionError={connector.status === ConnectorStatus.ERROR}
         hasPlatinumLicense={hasPlatinumLicense}
         setHasChanges={setHasChanges}
         shouldShowAccessControlSync={shouldShowAccessControlSync}
         shouldShowIncrementalSync={shouldShowIncrementalSync}
         updateConnectorStatus={status === Status.LOADING}
         updateScheduling={(scheduling: SchedulingConfiguraton) =>
-          makeRequest({ connectorId: index.connector.id, scheduling })
+          makeRequest({ connectorId: connector.id, scheduling })
         }
       />
     </>

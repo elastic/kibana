@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_EVALUATION_VALUES, ALERT_REASON } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUES,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils';
 import { isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
@@ -40,8 +44,9 @@ import {
   flattenAdditionalContext,
   getGroupByObject,
 } from '../common/utils';
+import { getEvaluationValues, getThresholds } from '../common/get_values';
 
-import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
+import { EvaluatedRuleParams, evaluateRule, Evaluation } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
@@ -50,7 +55,8 @@ export type MetricThresholdAlert = Omit<
   'kibana.alert.evaluation.values'
 > & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
-  'kibana.alert.evaluation.values'?: Array<number | null>;
+  [ALERT_EVALUATION_VALUES]?: Array<number | null>;
+  [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
 };
 
 export type MetricThresholdRuleParams = Record<string, any>;
@@ -83,7 +89,8 @@ type MetricThresholdAlertReporter = (
   actionGroup: MetricThresholdActionGroup,
   context: MetricThresholdAlertContext,
   additionalContext?: AdditionalContext | null,
-  evaluationValues?: Array<number | null>
+  evaluationValues?: Array<number | null>,
+  thresholds?: Array<number | null>
 ) => void;
 
 export const createMetricThresholdExecutor =
@@ -129,7 +136,8 @@ export const createMetricThresholdExecutor =
       actionGroup,
       contextWithoutAlertDetailsUrl,
       additionalContext,
-      evaluationValues
+      evaluationValues,
+      thresholds
     ) => {
       const { uuid, start } = alertsClient.report({
         id,
@@ -141,6 +149,7 @@ export const createMetricThresholdExecutor =
         payload: {
           [ALERT_REASON]: reason,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
+          [ALERT_EVALUATION_THRESHOLD]: thresholds,
           ...flattenAdditionalContext(additionalContext),
         },
         context: {
@@ -215,7 +224,12 @@ export const createMetricThresholdExecutor =
     const groupByIsSame = isEqual(state.groupBy, params.groupBy);
     const previousMissingGroups =
       alertOnGroupDisappear && filterQueryIsSame && groupByIsSame && state.missingGroups
-        ? state.missingGroups
+        ? state.missingGroups.filter((missingGroup) =>
+            // We use isTrackedAlert to remove missing groups that are untracked by the user
+            typeof missingGroup === 'string'
+              ? alertsClient.isTrackedAlert(missingGroup)
+              : alertsClient.isTrackedAlert(missingGroup.key)
+          )
         : [];
 
     const alertResults = await evaluateRule(
@@ -324,12 +338,8 @@ export const createMetricThresholdExecutor =
           new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
         );
 
-        const evaluationValues = alertResults.reduce((acc: Array<number | null>, result) => {
-          if (result[group]) {
-            acc.push(result[group].currentValue);
-          }
-          return acc;
-        }, []);
+        const evaluationValues = getEvaluationValues<Evaluation>(alertResults, group);
+        const thresholds = getThresholds<any>(criteria);
 
         const alertContext = {
           alertState: stateToAlertMessage[nextState],
@@ -374,7 +384,8 @@ export const createMetricThresholdExecutor =
           actionGroupId,
           alertContext,
           additionalContext,
-          evaluationValues
+          evaluationValues,
+          thresholds
         );
         scheduledActionsCount++;
       }

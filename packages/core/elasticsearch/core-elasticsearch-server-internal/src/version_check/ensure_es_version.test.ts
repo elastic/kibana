@@ -131,10 +131,6 @@ describe('mapNodesVersionCompatibility', () => {
 
 describe('pollEsNodesVersion', () => {
   let internalClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
-  const getTestScheduler = () =>
-    new TestScheduler((actual, expected) => {
-      expect(actual).toEqual(expected);
-    });
 
   beforeEach(() => {
     internalClient = elasticsearchClientMock.createInternalClient();
@@ -159,7 +155,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -186,7 +182,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -217,7 +213,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -252,7 +248,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -276,7 +272,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -302,7 +298,7 @@ describe('pollEsNodesVersion', () => {
 
     pollEsNodesVersion({
       internalClient,
-      esVersionCheckInterval: 1,
+      healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
@@ -315,77 +311,114 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
-  it('starts polling immediately and then every esVersionCheckInterval', () => {
-    expect.assertions(1);
-
-    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-    internalClient.nodes.info.mockReturnValueOnce([createNodes('5.1.0', '5.2.0', '5.0.0')]);
-    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-    internalClient.nodes.info.mockReturnValueOnce([createNodes('5.1.1', '5.2.0', '5.0.0')]);
-
-    getTestScheduler().run(({ expectObservable }) => {
-      const expected = 'a 99ms (b|)';
-
-      const esNodesCompatibility$ = pollEsNodesVersion({
-        internalClient,
-        esVersionCheckInterval: 100,
-        ignoreVersionMismatch: false,
-        kibanaVersion: KIBANA_VERSION,
-        log: mockLogger,
-      }).pipe(take(2));
-
-      expectObservable(esNodesCompatibility$).toBe(expected, {
-        a: mapNodesVersionCompatibility(
-          createNodes('5.1.0', '5.2.0', '5.0.0'),
-          KIBANA_VERSION,
-          false
-        ),
-        b: mapNodesVersionCompatibility(
-          createNodes('5.1.1', '5.2.0', '5.0.0'),
-          KIBANA_VERSION,
-          false
-        ),
+  describe('marble testing', () => {
+    const getTestScheduler = () =>
+      new TestScheduler((actual, expected) => {
+        expect(actual).toEqual(expected);
       });
-    });
-  });
 
-  it('waits for es version check requests to complete before scheduling the next one', () => {
-    expect.assertions(2);
+    const mockTestSchedulerInfoResponseOnce = (infos: NodesInfo) => {
+      // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+      internalClient.nodes.info.mockReturnValueOnce([infos]);
+    };
 
-    getTestScheduler().run(({ expectObservable }) => {
-      const expected = '100ms a 99ms (b|)';
+    it('starts polling immediately and then every healthCheckInterval', () => {
+      expect.assertions(1);
 
-      internalClient.nodes.info.mockReturnValueOnce(
-        // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-        of(createNodes('5.1.0', '5.2.0', '5.0.0')).pipe(delay(100))
-      );
-      internalClient.nodes.info.mockReturnValueOnce(
-        // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-        of(createNodes('5.1.1', '5.2.0', '5.0.0')).pipe(delay(100))
-      );
+      mockTestSchedulerInfoResponseOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
+      mockTestSchedulerInfoResponseOnce(createNodes('5.1.1', '5.2.0', '5.0.0'));
 
-      const esNodesCompatibility$ = pollEsNodesVersion({
-        internalClient,
-        esVersionCheckInterval: 10,
-        ignoreVersionMismatch: false,
-        kibanaVersion: KIBANA_VERSION,
-        log: mockLogger,
-      }).pipe(take(2));
+      getTestScheduler().run(({ expectObservable }) => {
+        const expected = 'a 99ms (b|)';
 
-      expectObservable(esNodesCompatibility$).toBe(expected, {
-        a: mapNodesVersionCompatibility(
-          createNodes('5.1.0', '5.2.0', '5.0.0'),
-          KIBANA_VERSION,
-          false
-        ),
-        b: mapNodesVersionCompatibility(
-          createNodes('5.1.1', '5.2.0', '5.0.0'),
-          KIBANA_VERSION,
-          false
-        ),
+        const esNodesCompatibility$ = pollEsNodesVersion({
+          internalClient,
+          healthCheckInterval: 100,
+          ignoreVersionMismatch: false,
+          kibanaVersion: KIBANA_VERSION,
+          log: mockLogger,
+        }).pipe(take(2));
+
+        expectObservable(esNodesCompatibility$).toBe(expected, {
+          a: mapNodesVersionCompatibility(
+            createNodes('5.1.0', '5.2.0', '5.0.0'),
+            KIBANA_VERSION,
+            false
+          ),
+          b: mapNodesVersionCompatibility(
+            createNodes('5.1.1', '5.2.0', '5.0.0'),
+            KIBANA_VERSION,
+            false
+          ),
+        });
       });
     });
 
-    expect(internalClient.nodes.info).toHaveBeenCalledTimes(2);
+    it('waits for es version check requests to complete before scheduling the next one', () => {
+      expect.assertions(2);
+
+      getTestScheduler().run(({ expectObservable }) => {
+        const expected = '100ms a 99ms (b|)';
+
+        internalClient.nodes.info.mockReturnValueOnce(
+          // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+          of(createNodes('5.1.0', '5.2.0', '5.0.0')).pipe(delay(100))
+        );
+        internalClient.nodes.info.mockReturnValueOnce(
+          // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+          of(createNodes('5.1.1', '5.2.0', '5.0.0')).pipe(delay(100))
+        );
+
+        const esNodesCompatibility$ = pollEsNodesVersion({
+          internalClient,
+          healthCheckInterval: 10,
+          ignoreVersionMismatch: false,
+          kibanaVersion: KIBANA_VERSION,
+          log: mockLogger,
+        }).pipe(take(2));
+
+        expectObservable(esNodesCompatibility$).toBe(expected, {
+          a: mapNodesVersionCompatibility(
+            createNodes('5.1.0', '5.2.0', '5.0.0'),
+            KIBANA_VERSION,
+            false
+          ),
+          b: mapNodesVersionCompatibility(
+            createNodes('5.1.1', '5.2.0', '5.0.0'),
+            KIBANA_VERSION,
+            false
+          ),
+        });
+      });
+
+      expect(internalClient.nodes.info).toHaveBeenCalledTimes(2);
+    });
+
+    it('switch from startup interval to normal interval after first green status', () => {
+      expect.assertions(1);
+
+      mockTestSchedulerInfoResponseOnce(createNodes('6.3.0'));
+      mockTestSchedulerInfoResponseOnce(createNodes('5.1.0'));
+      mockTestSchedulerInfoResponseOnce(createNodes('5.2.0'));
+      mockTestSchedulerInfoResponseOnce(createNodes('5.3.0'));
+
+      getTestScheduler().run(({ expectObservable }) => {
+        const esNodesCompatibility$ = pollEsNodesVersion({
+          internalClient,
+          healthCheckInterval: 100,
+          healthCheckStartupInterval: 50,
+          ignoreVersionMismatch: false,
+          kibanaVersion: KIBANA_VERSION,
+          log: mockLogger,
+        }).pipe(take(4));
+
+        expectObservable(esNodesCompatibility$).toBe('a 49ms b 99ms c 99ms (d|)', {
+          a: expect.any(Object),
+          b: expect.any(Object),
+          c: expect.any(Object),
+          d: expect.any(Object),
+        });
+      });
+    });
   });
 });

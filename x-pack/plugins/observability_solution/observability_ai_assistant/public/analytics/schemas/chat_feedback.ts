@@ -7,7 +7,8 @@
 
 import type { EventTypeOpts } from '@kbn/analytics-client';
 import type { Message, Conversation } from '../../../common';
-import type { Feedback } from '../../components/feedback_buttons';
+import type { Feedback } from '../../components/buttons/feedback_buttons';
+import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
 import { messageSchema } from './common';
 
 export interface ChatFeedback {
@@ -18,10 +19,8 @@ export interface ChatFeedback {
   conversation: Conversation;
 }
 
-export const eventType = 'observability_ai_assistant_chat_feedback';
-
 export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
-  eventType,
+  eventType: ObservabilityAIAssistantTelemetryEventType.ChatFeedback,
   schema: {
     messageWithFeedback: {
       properties: {
@@ -79,6 +78,28 @@ export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
               type: 'text',
               _meta: {
                 description: 'The timestamp of the last message in the conversation.',
+              },
+            },
+            token_count: {
+              properties: {
+                completion: {
+                  type: 'long',
+                  _meta: {
+                    description: 'The number of tokens in the completion.',
+                  },
+                },
+                prompt: {
+                  type: 'long',
+                  _meta: {
+                    description: 'The number of tokens in the prompt.',
+                  },
+                },
+                total: {
+                  type: 'long',
+                  _meta: {
+                    description: 'The total number of tokens in the conversation.',
+                  },
+                },
               },
             },
           },

@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
 import type { RollupFields } from '@kbn/ml-anomaly-utils';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 
 export interface RollupJob {
   job_id: string;
@@ -67,7 +68,8 @@ async function loadRollupIndexPattern(
 ): Promise<DataView | null> {
   const resp = await dataViewsService.find('*', 10000);
   const obj = resp.find(
-    (dv) => dv.type === 'rollup' && dv.title === indexPattern && dv.typeMeta !== undefined
+    (dv) =>
+      dv.type === DataViewType.ROLLUP && dv.title === indexPattern && dv.typeMeta !== undefined
   );
 
   return obj ?? null;

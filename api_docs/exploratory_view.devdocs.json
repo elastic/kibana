@@ -972,8 +972,8 @@
                 "pluginId": "cases",
                 "scope": "public",
                 "docId": "kibCasesPluginApi",
-                "section": "def-public.CasesUiStart",
-                "text": "CasesUiStart"
+                "section": "def-public.CasesPublicStart",
+                "text": "CasesPublicStart"
               }
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
@@ -1161,7 +1161,7 @@
                 "section": "def-common.AppUpdater",
                 "text": "AppUpdater"
               },
-              ">; }) => void; setIsSidebarEnabled: (isEnabled: boolean) => void; }"
+              ">; }) => void; }"
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
@@ -1341,8 +1341,8 @@
                 "pluginId": "observabilityAIAssistant",
                 "scope": "public",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-public.ObservabilityAIAssistantPluginStart",
-                "text": "ObservabilityAIAssistantPluginStart"
+                "section": "def-public.ObservabilityAIAssistantPublicStart",
+                "text": "ObservabilityAIAssistantPublicStart"
               }
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",

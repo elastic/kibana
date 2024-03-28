@@ -21,8 +21,11 @@ interface TestDataTableActionLogPatternAnalysis {
 
 interface TestDataExpectedWithSampleProbability {
   totalDocCountFormatted: string;
+  globalState: object;
+  appState: object;
   sampleProbabilityFormatted: string;
   fieldSelectorPopover: string[];
+  prompt: 'empty' | 'change-point';
 }
 
 export function isTestDataExpectedWithSampleProbability(
@@ -33,6 +36,8 @@ export function isTestDataExpectedWithSampleProbability(
 
 interface TestDataExpectedWithoutSampleProbability {
   totalDocCountFormatted: string;
+  globalState: object;
+  appState: object;
   analysisGroupsTable: Array<{ group: string; docCount: string }>;
   filteredAnalysisGroupsTable?: Array<{ group: string; docCount: string }>;
   analysisTable: Array<{
@@ -43,6 +48,7 @@ interface TestDataExpectedWithoutSampleProbability {
     impact: string;
   }>;
   fieldSelectorPopover: string[];
+  prompt: 'empty' | 'change-point';
 }
 
 export interface TestData {

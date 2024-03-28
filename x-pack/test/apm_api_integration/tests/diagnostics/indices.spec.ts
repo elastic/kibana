@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/pull/177039
   registry.when.skip('Diagnostics: Indices', { config: 'basic', archives: [] }, () => {
-    describe('When there is no data', () => {
+    describe.skip('When there is no data', () => {
       it('returns empty response`', async () => {
         const { status, body } = await apmApiClient.adminUser({
           endpoint: 'GET /internal/apm/diagnostics',
@@ -115,7 +115,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('ingest pipelines', () => {
+    describe.skip('ingest pipelines', () => {
       before(async () => {
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })

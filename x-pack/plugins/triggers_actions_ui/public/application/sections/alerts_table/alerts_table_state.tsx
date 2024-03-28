@@ -16,9 +16,16 @@ import {
   EuiDataGridToolBarVisibilityOptions,
   EuiDataGridCellProps,
   EuiDataGridControlColumn,
+  EuiButton,
+  EuiCode,
+  EuiCopy,
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
+import {
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_UUID,
+} from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
   BrowserFields,
@@ -44,7 +51,13 @@ import {
   RowSelectionState,
   TableUpdateHandlerArgs,
 } from '../../../types';
-import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
+import {
+  ALERTS_TABLE_CONF_ERROR_MESSAGE,
+  ALERTS_TABLE_CONF_ERROR_TITLE,
+  ALERTS_TABLE_UNKNOWN_ERROR_TITLE,
+  ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE,
+  ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL,
+} from './translations';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
@@ -53,6 +66,7 @@ import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
 import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
+import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -144,10 +158,37 @@ const initialBulkActionsState = {
   updatedAt: Date.now(),
 };
 
+const ErrorBoundaryFallback: FallbackComponent = ({ error }) => {
+  return (
+    <EuiEmptyPrompt
+      iconType="error"
+      color="danger"
+      title={<h2>{ALERTS_TABLE_UNKNOWN_ERROR_TITLE}</h2>}
+      body={
+        <>
+          <p>{ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE}</p>
+          {error.message && <EuiCode>{error.message}</EuiCode>}
+        </>
+      }
+      actions={
+        <EuiCopy textToCopy={[error.message, error.stack].filter(Boolean).join('\n')}>
+          {(copy) => (
+            <EuiButton onClick={copy} color="danger" fill>
+              {ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL}
+            </EuiButton>
+          )}
+        </EuiCopy>
+      }
+    />
+  );
+};
+
 const AlertsTableState = memo((props: AlertsTableStateProps) => {
   return (
     <QueryClientProvider client={alertsTableQueryClient} context={AlertsTableQueryContext}>
-      <AlertsTableStateWithQueryProvider {...props} />
+      <ErrorBoundary fallback={ErrorBoundaryFallback}>
+        <AlertsTableStateWithQueryProvider {...props} />
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 });

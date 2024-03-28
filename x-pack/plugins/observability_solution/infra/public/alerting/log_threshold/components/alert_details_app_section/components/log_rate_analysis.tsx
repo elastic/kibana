@@ -15,11 +15,11 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
-} from '@kbn/aiops-utils/log_rate_analysis_type';
+} from '@kbn/aiops-utils/log_rate_analysis/log_rate_analysis_type';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { TopAlert } from '@kbn/observability-plugin/public';
-import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { ALERT_END } from '@kbn/rule-data-utils';
@@ -52,7 +52,10 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
   const {
     dataViews,
     logsShared,
-    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
+    observabilityAIAssistant: {
+      ObservabilityAIAssistantContextualInsight,
+      getContextualInsightMessages,
+    },
   } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
@@ -194,7 +197,10 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       .map((item) => Object.values(item).join(','))
       .join('\n');
 
-    const content = `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a ${logRateAnalysisType} in log messages. Your job is to take immediate action and proceed with both urgency and precision.
+    return getContextualInsightMessages({
+      message:
+        'Can you identify possible causes and remediations for these log rate analysis results',
+      instructions: `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a ${logRateAnalysisType} in log messages. Your job is to take immediate action and proceed with both urgency and precision.
       "Log Rate Analysis" is an AIOps feature that uses advanced statistical methods to identify reasons for increases and decreases in log rates. It makes it easy to find and investigate causes of unusual spikes or dips by using the analysis workflow view.
       You are using "Log Rate Analysis" and ran the statistical analysis on the log messages which occured during the alert.
       You received the following analysis results from "Log Rate Analysis" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that ${
@@ -227,20 +233,9 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
       Do not mention individual p-values from the analysis results.
       Do not repeat the full list of field names and field values back to the user.
-      Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
-
-    const now = new Date().toISOString();
-
-    return [
-      {
-        '@timestamp': now,
-        message: {
-          content,
-          role: MessageRole.User,
-        },
-      },
-    ];
-  }, [logRateAnalysisParams]);
+      Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`,
+    });
+  }, [logRateAnalysisParams, getContextualInsightMessages]);
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -268,6 +263,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
             barHighlightColorOverride={colorTransformer(Color.color1)}
             onAnalysisCompleted={onAnalysisCompleted}
             appDependencies={pick(services, [
+              'analytics',
               'application',
               'data',
               'executionContext',

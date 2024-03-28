@@ -6,12 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor } from '@kbn/core/public';
-import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
-import { DataVisualizerGridEmbeddableServices } from './grid_embeddable';
-import { DataVisualizerPluginStart, DataVisualizerStartDependencies } from '../../../../plugin';
-import { DataVisualizerGridEmbeddableInput } from './types';
+import type { DataVisualizerGridEmbeddableServices } from './grid_embeddable';
+import type {
+  DataVisualizerPluginStart,
+  DataVisualizerStartDependencies,
+} from '../../../../plugin';
+import type { DataVisualizerGridEmbeddableInput } from './types';
 
 export class DataVisualizerGridEmbeddableFactory
   implements EmbeddableFactoryDefinition<DataVisualizerGridEmbeddableInput>

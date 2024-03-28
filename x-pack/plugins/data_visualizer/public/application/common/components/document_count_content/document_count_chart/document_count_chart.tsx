@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  Axis,
-  HistogramBarSeries,
+import type {
   BrushEndListener,
-  Chart,
   ElementClickListener,
-  Position,
-  ScaleType,
-  Settings,
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
+import { Axis, HistogramBarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import moment from 'moment';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';

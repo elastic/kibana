@@ -4,28 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import useAsync from 'react-use/lib/useAsync';
 import { HostMetricsExplanationContent } from '../../../../../../components/lens';
 import { Chart } from './chart';
 import { Popover } from '../../common/popover';
 import { useMetricsDataViewContext } from '../../../hooks/use_metrics_data_view';
+import { useMetricsCharts } from '../../../hooks/use_metrics_charts';
 
 export const MetricsGrid = () => {
-  const model = findInventoryModel('host');
   const { dataView } = useMetricsDataViewContext();
 
-  const { value: dashboards } = useAsync(() => {
-    return model.metrics.getDashboards();
-  });
-
-  const charts = useMemo(
-    () => dashboards?.hostsView.get({ metricsDataViewId: dataView?.id }).charts ?? [],
-    [dataView, dashboards]
-  );
+  const charts = useMetricsCharts({ dataViewId: dataView?.id });
 
   return (
     <>

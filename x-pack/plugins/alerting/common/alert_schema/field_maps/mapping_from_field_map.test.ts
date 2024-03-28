@@ -211,6 +211,9 @@ describe('mappingFromFieldMap', () => {
                 case_ids: {
                   type: 'keyword',
                 },
+                consecutive_matches: {
+                  type: 'long',
+                },
                 duration: {
                   properties: {
                     us: {

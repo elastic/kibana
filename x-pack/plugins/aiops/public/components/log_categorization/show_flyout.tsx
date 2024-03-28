@@ -34,7 +34,8 @@ export async function showCategorizeFlyout(
   originatingApp: string,
   additionalFilter?: CategorizationAdditionalFilter
 ): Promise<void> {
-  const { http, theme, overlays, application, notifications, uiSettings, i18n } = coreStart;
+  const { analytics, http, theme, overlays, application, notifications, uiSettings, i18n } =
+    coreStart;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -44,6 +45,7 @@ export async function showCategorizeFlyout(
       };
 
       const appDependencies: AiopsAppDependencies = {
+        analytics,
         notifications,
         uiSettings,
         http,

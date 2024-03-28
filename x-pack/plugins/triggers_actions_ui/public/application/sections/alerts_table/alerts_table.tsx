@@ -25,10 +25,16 @@ import {
   EuiFlexGroup,
   EuiDataGridProps,
   RenderCellValueWithContext,
+  EuiCodeBlock,
+  EuiText,
+  EuiIcon,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import type {
   AlertsTableProps,

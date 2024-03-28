@@ -1008,25 +1008,6 @@
       },
       {
         "parentPluginId": "@kbn/reporting-common",
-        "id": "def-common.getRedirectAppPath",
-        "type": "Function",
-        "tags": [],
-        "label": "getRedirectAppPath",
-        "description": [
-          "\nA way to get the client side route for the reporting redirect app.\n\nTODO: Add a job ID and a locator to use so that we can redirect without expecting state to\nbe injected to the page"
-        ],
-        "signature": [
-          "() => string"
-        ],
-        "path": "packages/kbn-reporting/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-common",
         "id": "def-common.numberToDuration",
         "type": "Function",
         "tags": [],
@@ -1117,36 +1098,6 @@
         "description": [],
         "signature": [
           "string[]"
-        ],
-        "path": "packages/kbn-reporting/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-common",
-        "id": "def-common.API_USAGE_COUNTER_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "API_USAGE_COUNTER_TYPE",
-        "description": [],
-        "signature": [
-          "\"reportingApi\""
-        ],
-        "path": "packages/kbn-reporting/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-common",
-        "id": "def-common.API_USAGE_ERROR_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "API_USAGE_ERROR_TYPE",
-        "description": [],
-        "signature": [
-          "\"reportingApiError\""
         ],
         "path": "packages/kbn-reporting/common/constants.ts",
         "deprecated": false,
@@ -1275,21 +1226,6 @@
       },
       {
         "parentPluginId": "@kbn/reporting-common",
-        "id": "def-common.PLUGIN_ID",
-        "type": "string",
-        "tags": [],
-        "label": "PLUGIN_ID",
-        "description": [],
-        "signature": [
-          "\"reporting\""
-        ],
-        "path": "packages/kbn-reporting/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-common",
         "id": "def-common.REPORT_TABLE_ID",
         "type": "string",
         "tags": [],
@@ -1335,6 +1271,21 @@
       },
       {
         "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_REDIRECT_APP",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_REDIRECT_APP",
+        "description": [],
+        "signature": [
+          "\"/app/reportingRedirect\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
         "id": "def-common.REPORTING_REDIRECT_LOCATOR_STORE_KEY",
         "type": "string",
         "tags": [],
@@ -1342,36 +1293,6 @@
         "description": [],
         "signature": [
           "\"__REPORTING_REDIRECT_LOCATOR_STORE_KEY__\""
-        ],
-        "path": "packages/kbn-reporting/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-common",
-        "id": "def-common.REPORTING_SYSTEM_INDEX",
-        "type": "string",
-        "tags": [],
-        "label": "REPORTING_SYSTEM_INDEX",
-        "description": [],
-        "signature": [
-          "\".reporting\""
-        ],
-        "path": "packages/kbn-reporting/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-common",
-        "id": "def-common.REPORTING_TRANSACTION_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "REPORTING_TRANSACTION_TYPE",
-        "description": [],
-        "signature": [
-          "\"reporting\""
         ],
         "path": "packages/kbn-reporting/common/constants.ts",
         "deprecated": false,
@@ -1417,21 +1338,6 @@
         "description": [],
         "signature": [
           "\"search:includeFrozen\""
-        ],
-        "path": "packages/kbn-reporting/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-common",
-        "id": "def-common.UNVERSIONED_VERSION",
-        "type": "string",
-        "tags": [],
-        "label": "UNVERSIONED_VERSION",
-        "description": [],
-        "signature": [
-          "\"7.14.0\""
         ],
         "path": "packages/kbn-reporting/common/constants.ts",
         "deprecated": false,

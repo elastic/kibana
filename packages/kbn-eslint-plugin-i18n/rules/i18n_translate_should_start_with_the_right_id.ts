@@ -57,7 +57,7 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
             translationFunction: 'i18n.translate',
           });
 
-        if (!identifier || (identifier && !identifier.startsWith(`${i18nAppId}.`))) {
+        if (!identifier) {
           report({
             node: node as any,
             message: RULE_WARNING_MESSAGE,
@@ -73,6 +73,40 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
                     : fixer.insertTextAfterRange(rangeToAddI18nImportLine, `\n${i18nImportLine}`)
                   : null,
               ].filter(isTruthy);
+            },
+          });
+        }
+
+        if (identifier && !identifier.startsWith(`${i18nAppId}.`)) {
+          const oldI18nIdentifierArray = identifier.split('.');
+
+          const newI18nIdentifier =
+            oldI18nIdentifierArray[0] === 'xpack'
+              ? `${i18nAppId}.${oldI18nIdentifierArray.slice(2).join('.')}`
+              : `${i18nAppId}.${oldI18nIdentifierArray.slice(1).join('.')}`;
+
+          let defaultMessage = '';
+
+          if (
+            node.arguments[1] &&
+            'properties' in node.arguments[1] &&
+            node.arguments[1].properties.length &&
+            'value' in node.arguments[1].properties[0] &&
+            node.arguments[1].properties[0].value &&
+            'value' in node.arguments[1].properties[0].value &&
+            typeof node.arguments[1].properties[0].value.value === 'string'
+          ) {
+            defaultMessage = node.arguments[1].properties[0].value.value;
+          }
+
+          report({
+            node: node as any,
+            message: RULE_WARNING_MESSAGE,
+            fix(fixer) {
+              return fixer.replaceTextRange(
+                node.range,
+                `i18n.translate('${newI18nIdentifier}', { defaultMessage: '${defaultMessage}' })`
+              );
             },
           });
         }

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { frequentItemSets } from '../../../../common/__mocks__/artificial_logs/frequent_item_sets';
+import { frequentItemSets } from '@kbn/aiops-test-utils/artificial_logs/frequent_item_sets';
+
 import { getValueCounts } from './get_value_counts';
 
 describe('getValueCounts', () => {

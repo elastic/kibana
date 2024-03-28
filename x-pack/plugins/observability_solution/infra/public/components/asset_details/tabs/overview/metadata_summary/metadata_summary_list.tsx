@@ -98,7 +98,7 @@ const MetadataSummaryListWrapper = ({
             key="metadata-link"
           >
             <FormattedMessage
-              id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
+              id="xpack.infra.assetDetails.metadataSummary.showAllMetadataButton"
               defaultMessage="Show all"
             />
           </EuiButtonEmpty>

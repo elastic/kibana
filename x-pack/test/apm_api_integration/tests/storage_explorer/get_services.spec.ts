@@ -52,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/177519
-  registry.when.skip('Get services', { config: 'basic', archives: [] }, () => {
+  registry.when('Get services', { config: 'basic', archives: [] }, () => {
     before(async () => {
       const serviceA = apm
         .service({ name: `${SERVICE_NAME_PREFIX}a`, environment: 'production', agentName: 'java' })

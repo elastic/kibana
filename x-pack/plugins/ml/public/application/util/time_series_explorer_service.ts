@@ -11,24 +11,19 @@ import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import { isMultiBucketAnomaly, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import moment from 'moment';
-import { forkJoin, Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { each, get } from 'lodash';
 import { catchError, map } from 'rxjs/operators';
 import { type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+import type { TimeRangeBounds, TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { parseInterval } from '../../../common/util/parse_interval';
 import type { GetAnnotationsResponse } from '../../../common/types/annotations';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { CHARTS_POINT_TARGET } from '../timeseriesexplorer/timeseriesexplorer_constants';
 import { timeBucketsServiceFactory } from './time_buckets_service';
-import type { TimeRangeBounds } from './time_buckets';
 import type { Job } from '../../../common/types/anomaly_detection_jobs';
-import type { TimeBucketsInterval } from './time_buckets';
-import type {
-  ChartDataPoint,
-  FocusData,
-  Interval,
-} from '../timeseriesexplorer/timeseriesexplorer_utils/get_focus_data';
 import type { CriteriaField } from '../services/results_service';
 import {
   MAX_SCHEDULED_EVENTS,
@@ -36,9 +31,31 @@ import {
 } from '../timeseriesexplorer/timeseriesexplorer_constants';
 import type { MlApiServices } from '../services/ml_api_service';
 import { mlResultsServiceProvider, type MlResultsService } from '../services/results_service';
-import { forecastServiceProvider } from '../services/forecast_service_provider';
+import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesSearchServiceFactory } from '../timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import { useMlKibana } from '../contexts/kibana';
+
+export interface Interval {
+  asMilliseconds: () => number;
+  expression: string;
+}
+
+interface ChartDataPoint {
+  date: Date;
+  value: number | null;
+  upper?: number | null;
+  lower?: number | null;
+}
+
+interface FocusData {
+  focusChartData: ChartDataPoint[];
+  anomalyRecords: MlAnomalyRecordDoc[];
+  scheduledEvents: any;
+  showForecastCheckbox?: boolean;
+  focusAnnotationError?: string;
+  focusAnnotationData?: any[];
+  focusForecastData?: any;
+}
 
 // TODO Consolidate with legacy code in
 // `ml/public/application/timeseriesexplorer/timeseriesexplorer_utils/timeseriesexplorer_utils.js`.
@@ -48,7 +65,7 @@ export function timeSeriesExplorerServiceFactory(
   mlResultsService: MlResultsService
 ) {
   const timeBuckets = timeBucketsServiceFactory(uiSettings);
-  const mlForecastService = forecastServiceProvider(mlApiServices);
+  const mlForecastService = forecastServiceFactory(mlApiServices);
   const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApiServices);
 
   function getAutoZoomDuration(selectedJob: Job) {

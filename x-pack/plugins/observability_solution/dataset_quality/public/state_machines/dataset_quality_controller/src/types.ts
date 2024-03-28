@@ -40,6 +40,7 @@ interface FiltersCriteria {
   fullNames: boolean;
   timeRange: TimeRangeConfig;
   integrations: string[];
+  namespaces: string[];
   query?: string;
 }
 
@@ -154,6 +155,10 @@ export type DatasetQualityControllerEvent =
   | {
       type: 'UPDATE_INTEGRATIONS';
       integrations: string[];
+    }
+  | {
+      type: 'UPDATE_NAMESPACES';
+      namespaces: string[];
     }
   | {
       type: 'UPDATE_QUERY';

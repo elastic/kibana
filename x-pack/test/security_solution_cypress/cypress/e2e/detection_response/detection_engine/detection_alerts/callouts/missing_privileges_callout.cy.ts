@@ -44,7 +44,8 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/178176
+describe.skip(
   'Detections > Callouts',
   { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {

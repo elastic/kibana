@@ -7,9 +7,9 @@
 
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
-import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server/types';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { ObservabilityAIAssistantService } from '../service';
 import type {
   ObservabilityAIAssistantPluginSetupDependencies,
@@ -17,8 +17,9 @@ import type {
 } from '../types';
 
 export type ObservabilityAIAssistantRequestHandlerContext = CustomRequestHandlerContext<{
-  rac: RacApiRequestHandlerContext;
   licensing: LicensingApiRequestHandlerContext;
+  // these two are here for compatibility with APM functions
+  rac: RacApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
 }>;
 

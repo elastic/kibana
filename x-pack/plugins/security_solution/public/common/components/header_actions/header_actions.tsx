@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo, useCallback, memo } from 'react';
-import type { EuiDataGridSorting } from '@elastic/eui';
-import { EuiButtonIcon, EuiCheckbox, EuiToolTip, useDataGridColumnSorting } from '@elastic/eui';
+import type { EuiDataGridSorting, EuiDataGridSchemaDetector } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useDataGridColumnSorting } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
@@ -63,6 +63,10 @@ const ActionsContainer = styled.div`
   align-items: center;
   display: flex;
 `;
+
+// Defined statically to reduce rerenders
+const emptySchema = {};
+const emptySchemaDetectors: EuiDataGridSchemaDetector[] = [];
 
 const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
   ({
@@ -196,23 +200,16 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
       [columnHeaders, dispatch, timelineId, defaultColumns]
     );
 
-    const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
+    const ColumnSorting = useDataGridColumnSorting({
+      columns: myColumns,
+      sorting: sortedColumns,
+      schema: emptySchema,
+      schemaDetectors: emptySchemaDetectors,
+      displayValues,
+    });
 
     return (
       <ActionsContainer>
-        {showSelectAllCheckbox && (
-          <EventsTh role="checkbox">
-            <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-              <EuiCheckbox
-                data-test-subj="select-all-events"
-                id={'select-all-events'}
-                checked={isSelectAllChecked}
-                onChange={handleSelectAllChange}
-              />
-            </EventsThContent>
-          </EventsTh>
-        )}
-
         <EventsTh role="button">
           <FieldBrowserContainer>
             {triggersActionsUi.getFieldBrowser({

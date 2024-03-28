@@ -220,9 +220,9 @@ function checkIfStringHasParentheses(s: string) {
 }
 
 function getFunctionName(metadata: StackFrameMetadata) {
-  return metadata.FunctionName !== '' && !checkIfStringHasParentheses(metadata.FunctionName)
-    ? `${metadata.FunctionName}()`
-    : metadata.FunctionName;
+  return checkIfStringHasParentheses(metadata.FunctionName)
+    ? metadata.FunctionName
+    : `${metadata.FunctionName}()`;
 }
 
 function getExeFileName(metadata: StackFrameMetadata) {
@@ -241,17 +241,32 @@ function getExeFileName(metadata: StackFrameMetadata) {
  * @returns string
  */
 export function getCalleeLabel(metadata: StackFrameMetadata) {
-  const inlineLabel = metadata.Inline ? '-> ' : '';
   if (metadata.FrameType === FrameType.Error) {
     return `Error: unwinding error code #${metadata.AddressOrLine.toString()}`;
-  } else if (metadata.FunctionName !== '') {
-    const sourceFilename = metadata.SourceFilename;
-    const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
+  }
+
+  const inlineLabel = metadata.Inline ? '-> ' : '';
+
+  if (metadata.FunctionName === '') {
+    return `${inlineLabel}${getExeFileName(metadata)}`;
+  }
+
+  const sourceFilename = metadata.SourceFilename;
+  const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
+
+  if (!sourceURL) {
+    return `${inlineLabel}${getExeFileName(metadata)}: ${getFunctionName(metadata)}`;
+  }
+
+  if (metadata.SourceLine === 0) {
     return `${inlineLabel}${getExeFileName(metadata)}: ${getFunctionName(
       metadata
-    )} in ${sourceURL}#${metadata.SourceLine}`;
+    )} in ${sourceURL}`;
   }
-  return `${inlineLabel}${getExeFileName(metadata)}`;
+
+  return `${inlineLabel}${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL}#${
+    metadata.SourceLine
+  }`;
 }
 /**
  * Get callee function name

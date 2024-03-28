@@ -19,7 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
 
   // FLAKY: https://github.com/elastic/kibana/issues/177520
-  registry.when.skip('contains linked children', { config: 'basic', archives: [] }, () => {
+  registry.when('contains linked children', { config: 'basic', archives: [] }, () => {
     let ids: ReturnType<typeof generateSpanLinksData>['ids'];
 
     before(async () => {

@@ -21,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
   // FLAKY: https://github.com/elastic/kibana/issues/177144
-  registry.when.skip('Diagnostics: APM Events', { config: 'basic', archives: [] }, () => {
+  registry.when('Diagnostics: APM Events', { config: 'basic', archives: [] }, () => {
     describe('When there is no data', () => {
       before(async () => {
         // delete APM data streams

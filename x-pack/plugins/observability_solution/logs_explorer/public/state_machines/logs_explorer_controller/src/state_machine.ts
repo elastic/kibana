@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core/public';
+import { IToasts, IUiSettingsClient } from '@kbn/core/public';
 import { QueryStart } from '@kbn/data-plugin/public';
 import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
 import { LogsExplorerCustomizations } from '../../../controller';
 import { ControlPanelRT } from '../../../../common/control_panels';
 import {
@@ -162,11 +163,11 @@ export const createPureLogsExplorerControllerStateMachine = (
                   on: {
                     UPDATE_DATA_SOURCE_SELECTION: [
                       {
-                        cond: 'isUnknownDataViewDescriptor',
+                        cond: 'isDataViewNotAllowed',
                         actions: ['redirectToDiscover'],
                       },
                       {
-                        cond: 'isLogsDataViewDescriptor',
+                        cond: 'isDataViewAllowed',
                         target: 'changingDataView',
                         actions: ['storeDataSourceSelection'],
                       },
@@ -299,13 +300,15 @@ export const createPureLogsExplorerControllerStateMachine = (
         controlGroupAPIExists: (_context, event) => {
           return 'controlGroupAPI' in event && event.controlGroupAPI != null;
         },
-        isLogsDataViewDescriptor: (_context, event) => {
+        // Default guard to allow logs data views, it is over-writable on the final config when creating a machine
+        isDataViewAllowed: (_context, event) => {
           if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
             return event.data.selection.dataView.isLogsDataType();
           }
           return false;
         },
-        isUnknownDataViewDescriptor: (_context, event) => {
+        // Default guard to not allow unknown data views, it is over-writable on the final config when creating a machine
+        isDataViewNotAllowed: (_context, event) => {
           if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
             return event.data.selection.dataView.isUnknownDataType();
           }
@@ -322,6 +325,7 @@ export interface LogsExplorerControllerStateMachineDependencies {
   initialContext?: LogsExplorerControllerContext;
   query: QueryStart;
   toasts: IToasts;
+  uiSettings: IUiSettingsClient;
 }
 
 export const createLogsExplorerControllerStateMachine = ({
@@ -331,6 +335,7 @@ export const createLogsExplorerControllerStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
   query,
   toasts,
+  uiSettings,
 }: LogsExplorerControllerStateMachineDependencies) =>
   createPureLogsExplorerControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -344,11 +349,29 @@ export const createLogsExplorerControllerStateMachine = ({
       changeDataView: changeDataView({ dataViews }),
       createAdHocDataView: createAdHocDataView(),
       initializeControlPanels: initializeControlPanels(),
-      initializeSelection: initializeSelection({ datasetsClient, dataViews, events }),
+      initializeSelection: initializeSelection({ datasetsClient, dataViews, events, uiSettings }),
       subscribeControlGroup: subscribeControlGroup(),
       updateControlPanels: updateControlPanels(),
       discoverStateService: subscribeToDiscoverState(),
       timefilterService: subscribeToTimefilterService(query),
+    },
+    guards: {
+      isDataViewAllowed: (_context, event) => {
+        if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
+          return event.data.selection.dataView.testAgainstAllowedList(
+            uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+          );
+        }
+        return false;
+      },
+      isDataViewNotAllowed: (_context, event) => {
+        if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
+          return !event.data.selection.dataView.testAgainstAllowedList(
+            uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+          );
+        }
+        return false;
+      },
     },
   });
 

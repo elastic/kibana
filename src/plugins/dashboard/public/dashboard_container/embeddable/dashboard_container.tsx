@@ -20,7 +20,6 @@ import {
   EmbeddableFactoryNotFoundError,
   isExplicitInputWithAttributes,
   PanelNotFoundError,
-  ReactEmbeddableParentContext,
   reactEmbeddableRegistryHasKey,
   ViewMode,
   type EmbeddableFactory,
@@ -304,9 +303,7 @@ export class DashboardContainer
         >
           <KibanaThemeProvider theme$={this.theme$}>
             <DashboardContainerContext.Provider value={this}>
-              <ReactEmbeddableParentContext.Provider value={{ parentApi: this }}>
-                <DashboardViewport />
-              </ReactEmbeddableParentContext.Provider>
+              <DashboardViewport />
             </DashboardContainerContext.Provider>
           </KibanaThemeProvider>
         </ExitFullScreenButtonKibanaProvider>

@@ -20,6 +20,7 @@ import {
   ALERT_STATUS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
@@ -238,6 +239,9 @@ function compareAlertDocs(
     expect(get(updatedAlert, 'kibana.alert.workflow_status')).to.eql(
       get(DocUpdate, 'kibana.alert.workflow_status')
     );
+    expect(get(updatedAlert, 'kibana.alert.consecutive_matches')).to.eql(
+      get(DocUpdate, 'kibana.alert.consecutive_matches') + 1
+    );
 
     expect(get(initialAlert, 'kibana.alert.status')).to.be('active');
     expect(get(updatedAlert, 'kibana.alert.status')).to.be('untracked');
@@ -264,6 +268,7 @@ const DocUpdate = {
   [ALERT_WORKFLOW_TAGS]: ['fee', 'fi', 'fo', 'fum'],
   [ALERT_CASE_IDS]: ['123', '456', '789'],
   [ALERT_STATUS]: 'untracked',
+  [ALERT_CONSECUTIVE_MATCHES]: 1,
 };
 
 const SkipFields = [
@@ -280,6 +285,7 @@ const SkipFields = [
   'kibana.alert.case_ids',
   'kibana.alert.workflow_tags',
   'kibana.alert.workflow_status',
+  'kibana.alert.consecutive_matches',
 ];
 
 function log(message: string) {

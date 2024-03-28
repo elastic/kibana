@@ -32,10 +32,10 @@ import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plu
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
-import {
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -50,12 +50,11 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import {
-  getMlSharedServices,
-  MlSharedServices,
-} from './application/services/get_shared_ml_services';
+import type { MlSharedServices } from './application/services/get_shared_ml_services';
+import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
-import { MlLocatorDefinition, MlLocatorParams, type MlLocator } from './locator';
+import type { MlLocatorParams } from './locator';
+import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
@@ -66,9 +65,11 @@ import {
   PLUGIN_ICON_SOLUTION,
   PLUGIN_ID,
   type ConfigSchema,
+  type ExperimentalFeatures,
+  initExperimentalFeatures,
 } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
-import { ElasticModels } from './application/services/elastic_models_service';
+import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApiServices } from './application/services/ml_api_service';
 
 export interface MlStartDependencies {
@@ -128,10 +129,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     dfa: true,
     nlp: true,
   };
+  private experimentalFeatures: ExperimentalFeatures = {
+    ruleFormV2: false,
+  };
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
+    initExperimentalFeatures(this.experimentalFeatures, initializerContext.config.get());
   }
 
   setup(
@@ -184,7 +189,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           },
           params,
           this.isServerless,
-          this.enabledFeatures
+          this.enabledFeatures,
+          this.experimentalFeatures
         );
       },
     });
@@ -292,10 +298,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   } {
     setDependencyCache({
       docLinks: core.docLinks!,
-      basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,
-      lens: deps.lens,
     });
 
     return {

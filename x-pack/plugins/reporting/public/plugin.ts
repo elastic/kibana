@@ -22,21 +22,21 @@ import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { durationToNumber } from '@kbn/reporting-common';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import {
+  ReportingCsvPanelAction,
   getSharedComponents,
   reportingCsvShareProvider,
   reportingScreenshotShareProvider,
 } from '@kbn/reporting-public/share';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
-import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
 
 export interface ReportingPublicPluginSetupDependencies {
   home: HomePublicPluginSetup;
@@ -193,7 +193,13 @@ export class ReportingPublicPlugin
 
     uiActionsSetup.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
+      new ReportingCsvPanelAction({
+        core,
+        apiClient,
+        startServices$,
+        usesUiCapabilities,
+        csvConfig: this.config.csv,
+      })
     );
 
     const reportingStart = this.getContract(core);

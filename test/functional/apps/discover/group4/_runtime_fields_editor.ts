@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const fieldEditor = getService('fieldEditor');
   const security = getService('security');
+  const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -38,7 +39,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  describe('discover integration with runtime fields editor', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/179297
+  // FLAKY: https://github.com/elastic/kibana/issues/179310
+  describe.skip('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -66,6 +69,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
       expect(await PageObjects.discover.getDocHeader()).to.have.string(customLabel);
+    });
+
+    it('allows adding custom description to existing fields', async function () {
+      const customDescription = 'custom bytes description here';
+      const customDescription2 = `${customDescription} updated`;
+      // set a custom description
+      await PageObjects.discover.editField('bytes');
+      await fieldEditor.enableCustomDescription();
+      await fieldEditor.setCustomDescription(customDescription);
+      await fieldEditor.save();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+      await retry.waitFor('field popover text', async () => {
+        return (await testSubjects.getVisibleText('fieldDescription-bytes')) === customDescription;
+      });
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('bytes');
+
+      // edit the custom description
+      await PageObjects.discover.editField('bytes');
+      await fieldEditor.enableCustomDescription();
+      await fieldEditor.setCustomDescription(customDescription2);
+      await fieldEditor.save();
+      await fieldEditor.waitUntilClosed();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+      await retry.waitFor('field popover text', async () => {
+        return (await testSubjects.getVisibleText('fieldDescription-bytes')) === customDescription2;
+      });
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('bytes');
+
+      // check it in the doc viewer too
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      await testSubjects.click('fieldDescriptionPopoverButton-bytes');
+      await retry.waitFor('doc viewer popover text', async () => {
+        return (await testSubjects.getVisibleText('fieldDescription-bytes')) === customDescription2;
+      });
+
+      await dataGrid.closeFlyout();
+    });
+
+    it('should show a validation error when adding a too long custom description to existing fields', async function () {
+      const customDescription = 'custom bytes long description here'.repeat(10);
+      // set a custom description
+      await PageObjects.discover.editField('bytes');
+      await fieldEditor.enableCustomDescription();
+      await fieldEditor.setCustomDescription(customDescription);
+      await fieldEditor.save();
+      expect(await fieldEditor.getFormError()).to.contain(
+        'The length of the description is too long. The maximum length is 300 characters.'
+      );
+      await fieldEditor.closeFlyoutAndDiscardChanges();
     });
 
     it('allows creation of a new field', async function () {

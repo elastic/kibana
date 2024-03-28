@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { finalSignificantItemGroups } from '../../../../common/__mocks__/artificial_logs/final_significant_item_groups';
+import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
 
 import { getGroupFilter } from './get_group_filter';
 

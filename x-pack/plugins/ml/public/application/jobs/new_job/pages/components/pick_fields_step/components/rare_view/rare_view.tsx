@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { RareDetectors } from './metric_selection';

@@ -15,7 +15,9 @@ import {
   PostEvaluateBody,
   PostEvaluateRequestQuery,
   PostEvaluateResponse,
+  ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
@@ -28,9 +30,12 @@ import {
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
 import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
-import { RequestBody } from '../../lib/langchain/types';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { buildRouteValidationWithZod } from '../../schemas/common';
+
+/**
+ * To support additional Agent Executors from the UI, add them to this map
+ * and reference your specific AgentExecutor function
+ */
 import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
 
 const DEFAULT_SIZE = 20;
@@ -43,6 +48,7 @@ export const postEvaluateRoute = (
     .post({
       access: INTERNAL_API_ACCESS,
       path: EVALUATE,
+
       options: {
         tags: ['access:elasticAssistant'],
       },
@@ -136,22 +142,18 @@ export const postEvaluateRoute = (
 
           // Skeleton request from route to pass to the agents
           // params will be passed to the actions executor
-          const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
+          const skeletonRequest: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody> = {
             ...request,
             body: {
               alertsIndexPattern: '',
               allow: [],
               allowReplacement: [],
-              params: {
-                subAction: 'invokeAI',
-                subActionParams: {
-                  messages: [],
-                },
-              },
-              replacements: {},
+              subAction: 'invokeAI',
+              replacements: [],
               size: DEFAULT_SIZE,
               isEnabledKnowledgeBase: true,
               isEnabledRAGAlerts: true,
+              conversationId: '',
             },
           };
 
@@ -193,6 +195,7 @@ export const postEvaluateRoute = (
                       ],
                       tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
                     },
+                    replacements: [],
                   }),
                 metadata: {
                   connectorName,

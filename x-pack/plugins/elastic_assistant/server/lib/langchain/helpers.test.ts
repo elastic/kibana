@@ -8,6 +8,7 @@
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 
 import {
   getLangChainMessage,
@@ -16,7 +17,6 @@ import {
   requestHasRequiredAnonymizationParams,
 } from './helpers';
 import { langChainMessages } from '../../__mocks__/lang_chain_messages';
-import { RequestBody } from './types';
 
 describe('helpers', () => {
   describe('getLangChainMessage', () => {
@@ -119,9 +119,9 @@ describe('helpers', () => {
         body: {
           allow: ['a', 'b', 'c'],
           allowReplacement: ['b', 'c'],
-          replacements: { key: 'value' },
+          replacements: [{ uuid: 'key', value: 'value' }],
         },
-      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
       const result = requestHasRequiredAnonymizationParams(request);
 
@@ -133,9 +133,9 @@ describe('helpers', () => {
         body: {
           // allow is undefined
           allowReplacement: ['b', 'c'],
-          replacements: { key: 'value' },
+          replacements: [{ uuid: 'key', value: 'value' }],
         },
-      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
       const result = requestHasRequiredAnonymizationParams(request);
 
@@ -147,9 +147,9 @@ describe('helpers', () => {
         body: {
           allow: [], // <-- empty
           allowReplacement: ['b', 'c'],
-          replacements: { key: 'value' },
+          replacements: [{ uuid: 'key', value: 'value' }],
         },
-      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
       const result = requestHasRequiredAnonymizationParams(request);
 
@@ -161,9 +161,9 @@ describe('helpers', () => {
         body: {
           allow: ['a', 9876, 'c'], // <-- non-string value
           allowReplacement: ['b', 'c'],
-          replacements: { key: 'value' },
+          replacements: [{ uuid: 'key', value: 'value' }],
         },
-      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
       const result = requestHasRequiredAnonymizationParams(request);
 
@@ -175,9 +175,9 @@ describe('helpers', () => {
         body: {
           allow: ['a', 'b', 'c'],
           allowReplacement: [],
-          replacements: { key: 'value' },
+          replacements: [{ uuid: 'key', value: 'value' }],
         },
-      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
       const result = requestHasRequiredAnonymizationParams(request);
 
@@ -189,9 +189,9 @@ describe('helpers', () => {
         body: {
           allow: ['a', 'b', 'c'],
           allowReplacement: ['b', 12345], // <-- non-string value
-          replacements: { key: 'value' },
+          replacements: [{ uuid: 'key', value: 'value' }],
         },
-      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
       const result = requestHasRequiredAnonymizationParams(request);
 
@@ -203,9 +203,9 @@ describe('helpers', () => {
         body: {
           allow: ['a', 'b', 'c'],
           allowReplacement: ['b', 'c'],
-          replacements: {},
+          replacements: [],
         },
-      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
       const result = requestHasRequiredAnonymizationParams(request);
 
@@ -217,9 +217,9 @@ describe('helpers', () => {
         body: {
           allow: ['a', 'b', 'c'],
           allowReplacement: ['b', 'c'],
-          replacements: { key: 76543 }, // <-- non-string value
+          replacements: [{ uuid: 'key', value: 76543 }], // <-- non-string value
         },
-      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
       const result = requestHasRequiredAnonymizationParams(request);
 

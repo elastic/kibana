@@ -130,36 +130,7 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [
-      {
-        "parentPluginId": "cases",
-        "id": "def-public.CasesUiSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "CasesUiSetup",
-        "description": [],
-        "path": "x-pack/plugins/cases/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "cases",
-            "id": "def-public.CasesUiSetup.attachmentFramework",
-            "type": "Object",
-            "tags": [],
-            "label": "attachmentFramework",
-            "description": [],
-            "signature": [
-              "AttachmentFramework"
-            ],
-            "path": "x-pack/plugins/cases/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [
       {
@@ -219,15 +190,7 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; onClose?: ((theCase?: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CaseUI",
-            "text": "CaseUI"
-          },
-          " | undefined, isCreateCase?: boolean | undefined) => void) | undefined; owner: string[]; permissions: ",
+          "> | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -253,7 +216,15 @@
             "section": "def-common.CaseUI",
             "text": "CaseUI"
           },
-          " | undefined) => void) | undefined; onCreateCaseClicked?: (() => void) | undefined; }"
+          " | undefined) => void) | undefined; onClose?: ((theCase?: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CaseUI",
+            "text": "CaseUI"
+          },
+          " | undefined, isCreateCase?: boolean | undefined) => void) | undefined; onCreateCaseClicked?: (() => void) | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_all_cases_selector_modal.tsx",
         "deprecated": false,
@@ -270,7 +241,7 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: ",
+          "> | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -280,7 +251,7 @@
           },
           "; basePath?: string | undefined; releasePhase?: ",
           "ReleasePhase",
-          " | undefined; attachments?: ",
+          " | undefined; onClose?: (() => void) | undefined; attachments?: ",
           {
             "pluginId": "cases",
             "scope": "public",
@@ -455,10 +426,10 @@
     ],
     "start": {
       "parentPluginId": "cases",
-      "id": "def-public.CasesUiStart",
+      "id": "def-public.CasesPublicStart",
       "type": "Interface",
       "tags": [],
-      "label": "CasesUiStart",
+      "label": "CasesPublicStart",
       "description": [],
       "path": "x-pack/plugins/cases/public/types.ts",
       "deprecated": false,
@@ -466,7 +437,7 @@
       "children": [
         {
           "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.api",
+          "id": "def-public.CasesPublicStart.api",
           "type": "Object",
           "tags": [],
           "label": "api",
@@ -702,7 +673,7 @@
         },
         {
           "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.ui",
+          "id": "def-public.CasesPublicStart.ui",
           "type": "Object",
           "tags": [],
           "label": "ui",
@@ -754,7 +725,7 @@
         },
         {
           "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.hooks",
+          "id": "def-public.CasesPublicStart.hooks",
           "type": "Object",
           "tags": [],
           "label": "hooks",
@@ -794,7 +765,7 @@
         },
         {
           "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.helpers",
+          "id": "def-public.CasesPublicStart.helpers",
           "type": "Object",
           "tags": [],
           "label": "helpers",
@@ -828,6 +799,35 @@
         }
       ],
       "lifecycle": "start",
+      "initialIsOpen": true
+    },
+    "setup": {
+      "parentPluginId": "cases",
+      "id": "def-public.CasesPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CasesPublicSetup",
+      "description": [],
+      "path": "x-pack/plugins/cases/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "cases",
+          "id": "def-public.CasesPublicSetup.attachmentFramework",
+          "type": "Object",
+          "tags": [],
+          "label": "attachmentFramework",
+          "description": [],
+          "signature": [
+            "AttachmentFramework"
+          ],
+          "path": "x-pack/plugins/cases/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
       "initialIsOpen": true
     }
   },
@@ -963,150 +963,151 @@
       }
     ],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "cases",
-        "id": "def-server.CasesSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "CasesSetup",
-        "description": [],
-        "path": "x-pack/plugins/cases/server/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "cases",
-            "id": "def-server.CasesSetup.attachmentFramework",
-            "type": "Object",
-            "tags": [],
-            "label": "attachmentFramework",
-            "description": [],
-            "signature": [
-              "AttachmentFramework"
-            ],
-            "path": "x-pack/plugins/cases/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-server.CasesStart",
-        "type": "Interface",
-        "tags": [],
-        "label": "CasesStart",
-        "description": [
-          "\nCases server exposed contract for interacting with cases entities."
-        ],
-        "path": "x-pack/plugins/cases/server/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "cases",
-            "id": "def-server.CasesStart.getCasesClientWithRequest",
-            "type": "Function",
-            "tags": [],
-            "label": "getCasesClientWithRequest",
-            "description": [
-              "\nReturns a client which can be used to interact with the cases backend entities.\n"
-            ],
-            "signature": [
-              "(request: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>) => Promise<",
-              {
-                "pluginId": "cases",
-                "scope": "server",
-                "docId": "kibCasesPluginApi",
-                "section": "def-server.CasesClient",
-                "text": "CasesClient"
-              },
-              ">"
-            ],
-            "path": "x-pack/plugins/cases/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "cases",
-                "id": "def-server.CasesStart.getCasesClientWithRequest.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "request",
-                "description": [
-                  "a KibanaRequest"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "path": "x-pack/plugins/cases/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "a {@link CasesClient }"
-            ]
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-server.CasesStart.getExternalReferenceAttachmentTypeRegistry",
-            "type": "Function",
-            "tags": [],
-            "label": "getExternalReferenceAttachmentTypeRegistry",
-            "description": [],
-            "signature": [
-              "() => ",
-              "ExternalReferenceAttachmentTypeRegistry"
-            ],
-            "path": "x-pack/plugins/cases/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-server.CasesStart.getPersistableStateAttachmentTypeRegistry",
-            "type": "Function",
-            "tags": [],
-            "label": "getPersistableStateAttachmentTypeRegistry",
-            "description": [],
-            "signature": [
-              "() => ",
-              "PersistableStateAttachmentTypeRegistry"
-            ],
-            "path": "x-pack/plugins/cases/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cases",
+      "id": "def-server.CasesServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CasesServerSetup",
+      "description": [],
+      "path": "x-pack/plugins/cases/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "cases",
+          "id": "def-server.CasesServerSetup.attachmentFramework",
+          "type": "Object",
+          "tags": [],
+          "label": "attachmentFramework",
+          "description": [],
+          "signature": [
+            "AttachmentFramework"
+          ],
+          "path": "x-pack/plugins/cases/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cases",
+      "id": "def-server.CasesServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CasesServerStart",
+      "description": [
+        "\nCases server exposed contract for interacting with cases entities."
+      ],
+      "path": "x-pack/plugins/cases/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "cases",
+          "id": "def-server.CasesServerStart.getCasesClientWithRequest",
+          "type": "Function",
+          "tags": [],
+          "label": "getCasesClientWithRequest",
+          "description": [
+            "\nReturns a client which can be used to interact with the cases backend entities.\n"
+          ],
+          "signature": [
+            "(request: ",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "common",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-common.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>) => Promise<",
+            {
+              "pluginId": "cases",
+              "scope": "server",
+              "docId": "kibCasesPluginApi",
+              "section": "def-server.CasesClient",
+              "text": "CasesClient"
+            },
+            ">"
+          ],
+          "path": "x-pack/plugins/cases/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "cases",
+              "id": "def-server.CasesServerStart.getCasesClientWithRequest.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [
+                "a KibanaRequest"
+              ],
+              "signature": [
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "common",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-common.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/plugins/cases/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "a {@link CasesClient }"
+          ]
+        },
+        {
+          "parentPluginId": "cases",
+          "id": "def-server.CasesServerStart.getExternalReferenceAttachmentTypeRegistry",
+          "type": "Function",
+          "tags": [],
+          "label": "getExternalReferenceAttachmentTypeRegistry",
+          "description": [],
+          "signature": [
+            "() => ",
+            "ExternalReferenceAttachmentTypeRegistry"
+          ],
+          "path": "x-pack/plugins/cases/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cases",
+          "id": "def-server.CasesServerStart.getPersistableStateAttachmentTypeRegistry",
+          "type": "Function",
+          "tags": [],
+          "label": "getPersistableStateAttachmentTypeRegistry",
+          "description": [],
+          "signature": [
+            "() => ",
+            "PersistableStateAttachmentTypeRegistry"
+          ],
+          "path": "x-pack/plugins/cases/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { deleteTimelines } from '../../../../tasks/api_calls/common';
 import { GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON } from '../../../../screens/date_picker';
 import {
   setStartDate,
@@ -25,10 +24,11 @@ import {
   addFieldToTable,
   convertEditorNonBreakingSpaceToSpace,
 } from '../../../../tasks/discover';
-import { createNewTimeline, goToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
+import { deleteTimelines } from '../../../../tasks/api_calls/timelines';
+import { openActiveTimeline, createNewTimeline, goToEsqlTab } from '../../../../tasks/timeline';
 
 const DEFAULT_DATE = '~ 15 minutes ago';
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
@@ -36,7 +36,8 @@ const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/175180
+describe.skip(
   'Basic esql search and filter operations',
   {
     tags: ['@ess'],

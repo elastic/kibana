@@ -74,7 +74,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/177104
-    describe.skip('create rule without kql query', () => {
+    describe('create rule without kql query', () => {
       let ruleId: string;
       let actionId: string;
       let alerts: ApmAlertFields[];
@@ -198,7 +198,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/177108
-    describe.skip('create rule with kql query', () => {
+    describe('create rule with kql query', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 

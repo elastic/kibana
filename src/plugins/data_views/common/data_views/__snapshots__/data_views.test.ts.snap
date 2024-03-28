@@ -6,6 +6,7 @@ FldList [
     "aggregatable": true,
     "conflictDescriptions": undefined,
     "count": 5,
+    "customDescription": undefined,
     "customLabel": "A Runtime Field",
     "defaultFormatter": undefined,
     "esTypes": Array [

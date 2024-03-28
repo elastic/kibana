@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import { type LogRateAnalysisType, LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
 
 import type { TestData } from '../../types';
 
@@ -88,7 +88,7 @@ export const getArtificialLogDataViewTestData = ({
   }
 
   function getBrushBaselineTargetTimestamp() {
-    if (analysisType === 'dip' && zeroDocsFallback) {
+    if (analysisType === LOG_RATE_ANALYSIS_TYPE.DIP && zeroDocsFallback) {
       return DEVIATION_TS;
     }
 
@@ -96,11 +96,38 @@ export const getArtificialLogDataViewTestData = ({
   }
 
   function getBrushDeviationTargetTimestamp() {
-    if (analysisType === 'dip' && zeroDocsFallback) {
+    if (analysisType === LOG_RATE_ANALYSIS_TYPE.DIP && zeroDocsFallback) {
       return DEVIATION_TS + DAY_MS * 1.5;
     }
 
     return zeroDocsFallback ? DEVIATION_TS : DEVIATION_TS + DAY_MS / 2;
+  }
+
+  function getGlobalStateTime() {
+    if (zeroDocsFallback) {
+      return analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+        ? { from: '2022-11-17T08:12:34.793Z', to: '2022-11-21T08:12:34.793Z' }
+        : { from: '2022-11-17T08:12:34.793Z', to: '2022-11-21T08:12:34.793Z' };
+    }
+
+    return analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+      ? { from: '2022-11-18T08:26:58.793Z', to: '2022-11-20T08:16:11.193Z' }
+      : { from: '2022-11-18T08:16:10.793Z', to: '2022-11-20T08:12:34.793Z' };
+  }
+
+  function getWindowParameters() {
+    if (zeroDocsFallback) {
+      return analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+        ? { bMax: 1668722400000, bMin: 1668715200000, dMax: 1668852000000, dMin: 1668844800000 }
+        : { bMax: 1668852000000, bMin: 1668844800000, dMax: 1668981600000, dMin: 1668974400000 };
+    }
+
+    return {
+      bMax: 1668837600000,
+      bMin: 1668769200000,
+      dMax: 1668924000000,
+      dMin: 1668855600000,
+    };
   }
 
   return {
@@ -121,6 +148,20 @@ export const getArtificialLogDataViewTestData = ({
       filteredAnalysisGroupsTable: getFilteredAnalysisGroupsTable(),
       analysisTable: getAnalysisTable(),
       fieldSelectorPopover: getFieldSelectorPopover(),
+      globalState: {
+        refreshInterval: { pause: true, value: 60000 },
+        time: getGlobalStateTime(),
+      },
+      appState: {
+        logRateAnalysis: {
+          filters: [],
+          searchQuery: { match_all: {} },
+          searchQueryLanguage: 'kuery',
+          searchString: '',
+          wp: getWindowParameters(),
+        },
+      },
+      prompt: 'change-point',
     },
   };
 };

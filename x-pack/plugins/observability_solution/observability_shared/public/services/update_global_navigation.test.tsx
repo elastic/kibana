@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
-import { casesFeatureId, sloFeatureId } from '../../common';
+import { casesFeatureId } from '../../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback
@@ -150,71 +150,6 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              visibleIn: ['sideNav', 'globalSearch'],
-            },
-          ],
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
-        });
-      });
-    });
-
-    it("hides the slo link when the capabilities don't include it", () => {
-      const capabilities = {
-        navLinks: { apm: true, logs: false, metrics: false, uptime: false },
-      } as unknown as ApplicationStart['capabilities'];
-
-      const sloRoute = {
-        id: 'slos',
-        title: 'SLOs',
-        order: 8002,
-        path: '/slos',
-        visibleIn: [],
-      };
-
-      const deepLinks = [sloRoute];
-
-      const callback = jest.fn();
-      const updater$ = {
-        next: (cb: AppUpdater) => callback(cb(app)),
-      } as unknown as Subject<AppUpdater>;
-
-      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
-
-      expect(callback).toHaveBeenCalledWith({
-        deepLinks: [], // Deeplink has been filtered out
-        visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
-      });
-    });
-
-    describe('when slos are enabled', () => {
-      it('shows the slos deep link', () => {
-        const capabilities = {
-          [casesFeatureId]: { read_cases: true },
-          [sloFeatureId]: { read: true },
-          navLinks: { apm: false, logs: false, metrics: false, uptime: false },
-        } as unknown as ApplicationStart['capabilities'];
-
-        const sloRoute = {
-          id: 'slos',
-          title: 'SLOs',
-          order: 8002,
-          path: '/slos',
-          visibleIn: [],
-        };
-
-        const deepLinks = [sloRoute];
-
-        const callback = jest.fn();
-        const updater$ = {
-          next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown as Subject<AppUpdater>;
-
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
-
-        expect(callback).toHaveBeenCalledWith({
-          deepLinks: [
-            {
-              ...sloRoute,
               visibleIn: ['sideNav', 'globalSearch'],
             },
           ],

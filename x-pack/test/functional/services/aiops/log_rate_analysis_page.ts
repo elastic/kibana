@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { decode } from '@kbn/rison';
 
 import type { LogRateAnalysisType } from '@kbn/aiops-utils';
 
@@ -24,6 +25,17 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
   return {
     async assertTimeRangeSelectorSectionExists() {
       await testSubjects.existOrFail('aiopsTimeRangeSelectorSection');
+    },
+
+    async assertUrlState(expectedGlogalState: object, expectedAppState: object) {
+      const currentUrl = await browser.getCurrentUrl();
+      const parsedUrl = new URL(currentUrl);
+
+      const stateG = decode(parsedUrl.searchParams.get('_g') ?? '');
+      const stateA = decode(parsedUrl.searchParams.get('_a') ?? '');
+
+      expect(stateG).to.eql(expectedGlogalState);
+      expect(stateA).to.eql(expectedAppState);
     },
 
     async assertTotalDocumentCount(expectedFormattedTotalDocCount: string) {
@@ -94,6 +106,10 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
 
     async assertSearchPanelExists() {
       await testSubjects.existOrFail(`aiopsSearchPanel`);
+    },
+
+    async assertChangePointDetectedPromptExists() {
+      await testSubjects.existOrFail(`aiopsChangePointDetectedPrompt`);
     },
 
     async assertNoWindowParametersEmptyPromptExists() {

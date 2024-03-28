@@ -8,7 +8,7 @@
 import React, { type FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
+import type {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
@@ -17,7 +17,7 @@ import type { LogRateHistogramItem, WindowParameters } from '@kbn/aiops-utils';
 import { DocumentCountChart, type BrushSelectionUpdateHandler } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
-import { DocumentCountStats } from '../../../get_document_stats';
+import type { DocumentCountStats } from '../../../get_document_stats';
 
 import { TotalCountHeader } from '../total_count_header';
 
@@ -113,6 +113,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
             autoAnalysisStart={initialAnalysisStart}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            changePoint={documentCountStats.changePoint}
             {...docCountChartProps}
           />
         </EuiFlexItem>

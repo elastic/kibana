@@ -30,5 +30,11 @@
     "@kbn/screenshotting-plugin",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
+    "@kbn/discover-utils",
+    "@kbn/saved-search-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/react-kibana-mount",
   ]
 }

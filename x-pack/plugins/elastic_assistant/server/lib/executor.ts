@@ -6,15 +6,21 @@
  */
 
 import { get } from 'lodash/fp';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { PassThrough, Readable } from 'stream';
-import { RequestBody } from './langchain/types';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { Logger } from '@kbn/core/server';
+import { handleStreamStorage } from './parse_stream';
 
 export interface Props {
+  onLlmResponse?: (content: string) => Promise<void>;
   actions: ActionsPluginStart;
   connectorId: string;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
+  params: InvokeAIActionsParams;
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  llmType: string;
+  logger: Logger;
 }
 interface StaticResponse {
   connector_id: string;
@@ -22,16 +28,34 @@ interface StaticResponse {
   status: string;
 }
 
+interface InvokeAIActionsParams {
+  subActionParams: {
+    messages: Array<{ role: string; content: string }>;
+    model?: string;
+    n?: number;
+    stop?: string | string[] | null;
+    temperature?: number;
+  };
+  subAction: 'invokeAI' | 'invokeStream';
+}
+
+const convertToGenericType = (params: InvokeAIActionsParams): Record<string, unknown> =>
+  params as unknown as Record<string, unknown>;
+
 export const executeAction = async ({
+  onLlmResponse,
   actions,
-  request,
+  params,
   connectorId,
+  llmType,
+  request,
+  logger,
 }: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
 
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
-    params: request.body.params,
+    params: convertToGenericType(params),
   });
 
   if (actionResult.status === 'error') {
@@ -41,17 +65,23 @@ export const executeAction = async ({
   }
   const content = get('data.message', actionResult);
   if (typeof content === 'string') {
+    if (onLlmResponse) {
+      await onLlmResponse(content);
+    }
     return {
       connector_id: connectorId,
       data: content, // the response from the actions framework
       status: 'ok',
     };
   }
-  const readable = get('data', actionResult) as Readable;
 
+  const readable = get('data', actionResult) as Readable;
   if (typeof readable?.read !== 'function') {
     throw new Error('Action result status is error: result is not streamable');
   }
+
+  // do not await, blocks stream for UI
+  handleStreamStorage({ responseStream: readable, llmType, onMessageSent: onLlmResponse, logger });
 
   return readable.pipe(new PassThrough());
 };

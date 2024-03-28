@@ -67,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177135
-  registry.when.skip(
+  registry.when(
     'Top dependency spans when data is loaded',
     { config: 'basic', archives: [] },
     () => {

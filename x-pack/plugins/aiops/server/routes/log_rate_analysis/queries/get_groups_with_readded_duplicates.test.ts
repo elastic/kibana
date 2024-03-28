@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { significantItemGroups } from '../../../../common/__mocks__/artificial_logs/significant_item_groups';
-import { significantTerms } from '../../../../common/__mocks__/artificial_logs/significant_terms';
+import { significantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/significant_item_groups';
+import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';

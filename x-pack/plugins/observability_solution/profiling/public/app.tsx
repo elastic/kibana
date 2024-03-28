@@ -26,7 +26,6 @@ import { ProfilingHeaderActionMenu } from './components/profiling_header_action_
 import { RouterErrorBoundary } from './routing/router_error_boundary';
 import { LicenseProvider } from './components/contexts/license/license_context';
 import { ProfilingSetupStatusContextProvider } from './components/contexts/profiling_setup_status/profiling_setup_status_context';
-import { useProfilingDependencies } from './components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
   profilingFetchServices: Services;
@@ -48,23 +47,12 @@ function MountProfilingActionMenu({
   theme$: AppMountParameters['theme$'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }) {
-  const {
-    start: {
-      observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
-    },
-  } = useProfilingDependencies();
-
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <ProfilingHeaderActionMenu />
         </EuiFlexItem>
-        {ObservabilityAIAssistantActionMenuItem ? (
-          <EuiFlexItem>
-            <ObservabilityAIAssistantActionMenuItem />
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
     </HeaderMenuPortal>
   );

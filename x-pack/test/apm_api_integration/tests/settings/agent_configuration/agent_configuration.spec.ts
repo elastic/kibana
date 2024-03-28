@@ -388,67 +388,63 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177661
-  registry.when.skip(
-    'Agent configurations through fleet',
-    { config: 'basic', archives: [] },
-    () => {
-      const name = 'myservice';
-      const environment = 'development';
-      const testConfig = {
-        service: { name, environment },
-        settings: { transaction_sample_rate: '0.9' },
-      };
+  registry.when('Agent configurations through fleet', { config: 'basic', archives: [] }, () => {
+    const name = 'myservice';
+    const environment = 'development';
+    const testConfig = {
+      service: { name, environment },
+      settings: { transaction_sample_rate: '0.9' },
+    };
 
-      let agentConfiguration: APIReturnType<'GET /api/apm/settings/agent-configuration/view 2023-10-31'>;
+    let agentConfiguration: APIReturnType<'GET /api/apm/settings/agent-configuration/view 2023-10-31'>;
 
+    before(async () => {
+      log.debug('creating agent configuration');
+      await createConfiguration(testConfig);
+      const { body } = await findExactConfiguration(name, environment);
+      agentConfiguration = body;
+    });
+
+    after(async () => {
+      await deleteConfiguration(testConfig);
+    });
+
+    it(`should have 'applied_by_agent=false' when there are no agent config metrics for this etag`, async () => {
+      expect(agentConfiguration.applied_by_agent).to.be(false);
+    });
+
+    describe('when there are agent config metrics for this etag', () => {
       before(async () => {
-        log.debug('creating agent configuration');
-        await createConfiguration(testConfig);
-        const { body } = await findExactConfiguration(name, environment);
-        agentConfiguration = body;
-      });
-
-      after(async () => {
-        await deleteConfiguration(testConfig);
-      });
-
-      it(`should have 'applied_by_agent=false' when there are no agent config metrics for this etag`, async () => {
-        expect(agentConfiguration.applied_by_agent).to.be(false);
-      });
-
-      describe('when there are agent config metrics for this etag', () => {
-        before(async () => {
-          await addAgentConfigEtagMetric({
-            synthtraceEsClient,
-            timestamp: Date.now(),
-            etag: agentConfiguration.etag,
-          });
-        });
-
-        after(() => synthtraceEsClient.clean());
-
-        it(`should have 'applied_by_agent=true' when getting a config from all configurations`, async () => {
-          const {
-            body: { configurations },
-          } = await getAllConfigurations();
-
-          const updatedConfig = configurations.find(
-            (x) => x.service.name === name && x.service.environment === environment
-          );
-
-          expect(updatedConfig?.applied_by_agent).to.be(true);
-        });
-
-        it(`should have 'applied_by_agent=true' when getting a single config`, async () => {
-          const {
-            body: { applied_by_agent: appliedByAgent },
-          } = await findExactConfiguration(name, environment);
-
-          expect(appliedByAgent).to.be(true);
+        await addAgentConfigEtagMetric({
+          synthtraceEsClient,
+          timestamp: Date.now(),
+          etag: agentConfiguration.etag,
         });
       });
-    }
-  );
+
+      after(() => synthtraceEsClient.clean());
+
+      it(`should have 'applied_by_agent=true' when getting a config from all configurations`, async () => {
+        const {
+          body: { configurations },
+        } = await getAllConfigurations();
+
+        const updatedConfig = configurations.find(
+          (x) => x.service.name === name && x.service.environment === environment
+        );
+
+        expect(updatedConfig?.applied_by_agent).to.be(true);
+      });
+
+      it(`should have 'applied_by_agent=true' when getting a single config`, async () => {
+        const {
+          body: { applied_by_agent: appliedByAgent },
+        } = await findExactConfiguration(name, environment);
+
+        expect(appliedByAgent).to.be(true);
+      });
+    });
+  });
 
   registry.when(
     'agent configuration when data is loaded',

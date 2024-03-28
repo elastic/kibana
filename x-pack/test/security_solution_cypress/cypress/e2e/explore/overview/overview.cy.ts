@@ -27,7 +27,7 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'overview');
+    cy.task('esArchiverUnload', { archiveName: 'overview' });
   });
 
   it('Host stats render with correct values', () => {

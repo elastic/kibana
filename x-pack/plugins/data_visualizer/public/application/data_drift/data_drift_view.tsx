@@ -13,7 +13,7 @@ import type { Query } from '@kbn/es-query';
 import { ProgressControls } from '@kbn/aiops-components';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
+import type { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';

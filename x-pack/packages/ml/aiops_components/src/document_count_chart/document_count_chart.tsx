@@ -8,29 +8,27 @@
 import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
-import {
-  Axis,
+import type {
   BrushEndListener,
-  Chart,
   ElementClickListener,
-  HistogramBarSeries,
-  Position,
-  ScaleType,
-  Settings,
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
-import {
+import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
+import type {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+
 import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   getLogRateAnalysisType,
+  getSnappedTimestamps,
   getSnappedWindowParameters,
-  getWindowParameters,
+  getWindowParametersForTrigger,
+  type DocumentCountStatsChangePoint,
   type LogRateAnalysisType,
   type LogRateHistogramItem,
   type WindowParameters,
@@ -134,6 +132,8 @@ export interface DocumentCountChartProps {
   baselineBrush?: BrushSettings;
   /** Optional data-test-subject */
   dataTestSubj?: string;
+  /** Optional change point metadata */
+  changePoint?: DocumentCountStatsChangePoint;
 }
 
 const SPEC_ID = 'document_count';
@@ -168,6 +168,7 @@ function getBaselineBadgeOverflow(
  */
 export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   const {
+    changePoint,
     dataTestSubj,
     dependencies,
     brushSelectionUpdateHandler,
@@ -255,17 +256,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPointsSplit, timeRangeEarliest, timeRangeLatest, interval]);
 
-  const snapTimestamps = useMemo(() => {
-    const timestamps: number[] = [];
-    let n = timeRangeEarliest;
-
-    while (n <= timeRangeLatest + interval) {
-      timestamps.push(n);
-      n += interval;
-    }
-
-    return timestamps;
-  }, [timeRangeEarliest, timeRangeLatest, interval]);
+  const snapTimestamps = useMemo(
+    () => getSnappedTimestamps(timeRangeEarliest, timeRangeLatest, interval),
+    [timeRangeEarliest, timeRangeLatest, interval]
+  );
 
   const timefilterUpdateHandler = useCallback(
     (range: TimeFilterRange) => {
@@ -311,14 +305,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           windowParameters === undefined &&
           adjustedChartPoints !== undefined
         ) {
-          const wp =
-            typeof startRange === 'number'
-              ? getWindowParameters(
-                  startRange + interval / 2,
-                  timeRangeEarliest,
-                  timeRangeLatest + interval
-                )
-              : startRange;
+          const wp = getWindowParametersForTrigger(
+            startRange,
+            interval,
+            timeRangeEarliest,
+            timeRangeLatest,
+            changePoint
+          );
           const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
           setOriginalWindowParameters(wpSnap);
           setWindowParameters(wpSnap);
@@ -334,6 +327,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
       }
     },
     [
+      changePoint,
       interval,
       timeRangeEarliest,
       timeRangeLatest,
@@ -441,7 +435,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           </div>
           <div
             css={{
-              'margin-bottom': '-4px',
+              marginBottom: '-4px',
             }}
           >
             <DualBrush

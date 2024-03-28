@@ -233,6 +233,21 @@ Note that the command will create the folder if it does not exist.
 
 Task [cypress/support/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/cypress/support/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
 
+Archives used only for Cypress tests purposes are stored in `x-pack/test/security_solution_cypress/es_archives` and are used as follow on the tests.
+
+```typescript
+cy.task('esArchiverLoad', { archiveName: 'overview' });
+cy.task('esArchiverUnload', { archiveName: 'overview'});
+
+```
+
+You can also use archives stored in `kibana/x-pack/test/functional/es_archives`. In order to do sow uste it on the tests as follow.
+
+```typescript
+cy.task('esArchiverLoad', { archiveName: 'security_solution/alias' }, type: 'ftr');
+cy.task('esArchiverUnload', { archiveName: 'security_solution/alias', type:'ftr'});
+```
+
 ## Serverless
 
 Note that we use tags in order to select which tests we want to execute, if you want a test to be executed on serverless you need to add @serverless tag to it.

@@ -42,7 +42,3 @@ export const AssetDetails = ({
     </ContextProviders>
   );
 };
-
-// Allow for lazy loading
-// eslint-disable-next-line import/no-default-export
-export default AssetDetails;

@@ -73,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177492
-  registry.when.skip(
+  registry.when(
     'Instances main statistics when data is loaded',
     { config: 'basic', archives: [] },
     () => {
