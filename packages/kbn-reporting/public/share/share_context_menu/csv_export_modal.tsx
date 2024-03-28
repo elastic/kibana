@@ -47,7 +47,8 @@ export type Props = CsvModalProps & { intl: InjectedIntl };
 
 export const CsvModalContentUI: FC<Props> = (props: Props) => {
   const isSaved = Boolean(props.objectId);
-  const { apiClient, getJobParams, intl, toasts, theme, onClose, objectType, reportType } = props;
+  const { apiClient, getJobParams, intl, toasts, theme, onClose, objectType, reportType, isDirty } =
+    props;
   const isMounted = useMountedState();
   const [createReportingJob, setCreatingReportJob] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
@@ -222,7 +223,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
             })}
           >
             <EuiButton
-              disabled={Boolean(createReportingJob)}
+              disabled={Boolean(createReportingJob) || isDirty}
               onClick={() => generateReportingJob()}
               data-test-subj="generateReportButton"
               isLoading={Boolean(createReportingJob)}
@@ -235,7 +236,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
           </EuiToolTip>
         ) : (
           <EuiButton
-            disabled={Boolean(createReportingJob)}
+            disabled={Boolean(createReportingJob) || isDirty}
             fill
             onClick={() => generateReportingJob()}
             data-test-subj="generateReportButton"
