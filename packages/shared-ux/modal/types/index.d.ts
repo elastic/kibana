@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ModalProps } from '@kbn/share-modal';
 import { ReactElement } from 'react';
 
 /**

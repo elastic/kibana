@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { copyToClipboard } from '@elastic/eui';
-import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
+import { type ITabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { EmbedContent } from './embed_content';
 import { useShareTabsContext } from '../../context';
 
@@ -17,7 +17,7 @@ const EMBED_TAB_ACTIONS = {
   SET_EMBED_URL: 'SET_EMBED_URL',
 };
 
-type IEmbedTab = IModalTabDeclaration<{ url: string }>;
+type IEmbedTab = ITabDeclaration<{ url: string }>;
 
 const embedTabReducer: IEmbedTab['reducer'] = (state = { url: '' }, action) => {
   switch (action.type) {
