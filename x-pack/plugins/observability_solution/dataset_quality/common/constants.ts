@@ -23,5 +23,3 @@ export const DEFAULT_DEGRADED_DOCS = { percentage: 0, count: 0 };
 export const SO_SEARCH_LIMIT = 300;
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
-
-export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';

@@ -13,3 +13,5 @@ export const DASHBOARD_APP_ID = 'dashboards';
 export const VISUALIZE_APP_ID = 'visualize';
 
 export const DISCOVER_ESQL_LOCATOR = 'DISCOVER_ESQL_LOCATOR';
+
+export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';
