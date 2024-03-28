@@ -327,14 +327,14 @@ export const reducer = (state: State, action: Action): State => {
       let updatedState = addFieldToState(addRootFieldActionValue, state);
       updatedState.documentFields.fieldToAddFieldTo = undefined;
 
-      const addMultiFieldActionValue: Field = {
+      const addSemanticTextFieldActionValue: Field = {
         name: action.value.name as string,
         inference_id: action.value.inference_id as string,
         type: 'semantic_text',
       };
 
       // Add multi field to state and reset fieldToAddFieldTo
-      updatedState = addFieldToState(addMultiFieldActionValue, updatedState);
+      updatedState = addFieldToState(addSemanticTextFieldActionValue, updatedState);
       updatedState.documentFields.fieldToAddFieldTo = undefined;
 
       return updatedState;
