@@ -119,7 +119,6 @@ export function ObservabilityLogsExplorerPageObject({
   getService,
 }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
-  const dataGrid = getService('dataGrid');
   const es = getService('es');
   const log = getService('log');
   const queryBar = getService('queryBar');
