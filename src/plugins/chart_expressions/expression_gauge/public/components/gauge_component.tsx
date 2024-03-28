@@ -311,12 +311,11 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     ? metricColumn?.meta?.params
     : undefined;
 
-  const defaultMetricFormatParams = (args.metric
-    ? getFormatByAccessor(args.metric, data.columns)
-    : null) ?? {
+  const defaultMetricFormatParams = (args.metric &&
+    getFormatByAccessor(args.metric, data.columns)) || {
     id: 'number',
     params: {
-      pattern: max - min > 5 ? `0,0` : `0,0.0`,
+      pattern: max - min > 5 ? '0,0' : '0,0.0',
     },
   };
 

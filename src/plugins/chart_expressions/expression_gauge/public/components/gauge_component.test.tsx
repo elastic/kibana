@@ -11,7 +11,7 @@ import { ColorStop } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import { DatatableColumn, DatatableColumnMeta, DatatableRow } from '@kbn/expressions-plugin/common';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import {
   GaugeRenderProps,
@@ -29,6 +29,7 @@ import {
   ColorBandSimpleConfig,
   Color,
 } from '@elastic/charts';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 const numberColumn = (id = 'metric-accessor'): DatatableColumn => ({
   id,
@@ -42,8 +43,8 @@ const numberColumn = (id = 'metric-accessor'): DatatableColumn => ({
   },
 });
 
-const chartsThemeService = chartPluginMock.createSetupContract().theme;
-const paletteThemeService = chartPluginMock.createSetupContract().palettes;
+const { theme: chartsThemeService, palettes: paletteThemeService } =
+  chartPluginMock.createSetupContract();
 const formatService = fieldFormatsServiceMock.createStartContract();
 const args: GaugeArguments = {
   labelMajor: 'Gauge',
@@ -95,13 +96,17 @@ describe('GaugeComponent', function () {
     };
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders the chart', () => {
     const component = shallowWithIntl(<GaugeComponent {...wrapperProps} />);
     expect(component.find(Chart)).toMatchSnapshot();
   });
 
   it('returns null when metric is not provided', async () => {
-    const customProps = {
+    const customProps: GaugeRenderProps = {
       ...wrapperProps,
       args: {
         ...wrapperProps.args,
@@ -116,7 +121,7 @@ describe('GaugeComponent', function () {
   });
 
   it('shows empty placeholder when minimum accessor equals maximum accessor', async () => {
-    const customProps = {
+    const customProps: GaugeRenderProps = {
       ...wrapperProps,
       args: {
         ...wrapperProps.args,
@@ -130,7 +135,7 @@ describe('GaugeComponent', function () {
     expect(component.find('EmptyPlaceholder')).toHaveLength(1);
   });
   it('shows empty placeholder when minimum accessor value is greater maximum accessor value', async () => {
-    const customProps = {
+    const customProps: GaugeRenderProps = {
       ...wrapperProps,
       args: {
         ...wrapperProps.args,
@@ -144,7 +149,7 @@ describe('GaugeComponent', function () {
     expect(component.find('EmptyPlaceholder')).toHaveLength(1);
   });
   it('when metric value is bigger than max, it takes maximum value', () => {
-    const customProps = {
+    const customProps: GaugeRenderProps = {
       ...wrapperProps,
       args: {
         ...wrapperProps.args,
@@ -162,7 +167,7 @@ describe('GaugeComponent', function () {
 
   describe('labelMajor and labelMinor settings', () => {
     it('displays no labelMajor and no labelMinor when no passed', () => {
-      const customProps = {
+      const customProps: GaugeRenderProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
@@ -176,7 +181,7 @@ describe('GaugeComponent', function () {
       expect(datum?.subtitle).toEqual('');
     });
     it('displays custom labelMajor and labelMinor when passed', () => {
-      const customProps = {
+      const customProps: GaugeRenderProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
@@ -191,7 +196,7 @@ describe('GaugeComponent', function () {
       expect(datum?.subtitle).toEqual('custom labelMinor');
     });
     it('displays auto labelMajor', () => {
-      const customProps = {
+      const customProps: GaugeRenderProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
@@ -219,7 +224,7 @@ describe('GaugeComponent', function () {
           rangeMax: 4,
         },
       };
-      const customProps = {
+      const customProps: GaugeRenderProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
@@ -249,7 +254,7 @@ describe('GaugeComponent', function () {
           rangeMax: 4,
         },
       };
-      const customProps = {
+      const customProps: GaugeRenderProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
@@ -277,7 +282,7 @@ describe('GaugeComponent', function () {
           rangeMax: 100,
         },
       };
-      const customProps = {
+      const customProps: GaugeRenderProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
@@ -305,7 +310,7 @@ describe('GaugeComponent', function () {
           rangeMax: 10,
         },
       };
-      const customProps = {
+      const customProps: GaugeRenderProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
@@ -333,7 +338,7 @@ describe('GaugeComponent', function () {
           rangeMax: 30,
         },
       };
-      const customProps = {
+      const customProps: GaugeRenderProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
@@ -361,7 +366,7 @@ describe('GaugeComponent', function () {
           rangeMax: 10,
         },
       };
-      const customProps = {
+      const customProps: GaugeRenderProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
@@ -391,7 +396,7 @@ describe('GaugeComponent', function () {
           rangeMax: 100,
         },
       };
-      const customProps = {
+      const customProps: GaugeRenderProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
@@ -422,6 +427,124 @@ describe('GaugeComponent', function () {
       const settingsComponent = component.find(Settings);
       expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
       expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
+  });
+
+  describe('formatting', () => {
+    let baseFormattingProps: GaugeRenderProps;
+    const metricFormat: ExpressionValueVisDimension['format'] = {
+      id: 'bytes',
+    };
+    const tableFormatParams = {
+      id: 'number',
+      params: {
+        pattern: '0,00000',
+      },
+    };
+    const metricMetaParams: DatatableColumnMeta = {
+      type: 'number',
+      params: {
+        id: 'test',
+        params: {
+          pattern: '000,000.00',
+        },
+      },
+    };
+    const createColumnsWithMetricParams = (params: DatatableColumnMeta['params']) =>
+      wrapperProps.data.columns.map((c) =>
+        c.id !== 'metric-accessor'
+          ? c
+          : {
+              ...c,
+              meta: {
+                ...c.meta,
+                params,
+              },
+            }
+      );
+
+    beforeAll(() => {
+      baseFormattingProps = {
+        ...wrapperProps,
+        args: {
+          ...wrapperProps.args,
+          metric: {
+            ...(wrapperProps.args.metric as ExpressionValueVisDimension),
+            accessor: {
+              id: 'metric-accessor',
+              name: 'metric-accessor',
+              meta: metricMetaParams,
+            },
+            format: metricFormat,
+          },
+        },
+        data: {
+          ...wrapperProps.data,
+          columns: createColumnsWithMetricParams(tableFormatParams),
+        },
+      };
+    });
+
+    it('should use custom metric format params, if provided', () => {
+      shallowWithIntl(<GaugeComponent {...baseFormattingProps} />);
+      expect(formatService.deserialize).toBeCalledWith(metricFormat);
+    });
+
+    it('should use table metric format params, if provided', () => {
+      const customProps: GaugeRenderProps = {
+        ...baseFormattingProps,
+        args: {
+          ...baseFormattingProps.args,
+          metric: 'metric-accessor',
+        },
+      };
+      shallowWithIntl(<GaugeComponent {...customProps} />);
+      expect(formatService.deserialize).toBeCalledWith(tableFormatParams);
+    });
+
+    it('should use default metric format params, if no others provided', () => {
+      const testParams = {
+        id: 'test',
+      };
+      const customProps: GaugeRenderProps = {
+        ...baseFormattingProps,
+        args: {
+          ...baseFormattingProps.args,
+          metric: 'metric-accessor',
+        },
+        data: {
+          ...baseFormattingProps.data,
+          columns: createColumnsWithMetricParams(testParams),
+        },
+      };
+
+      shallowWithIntl(<GaugeComponent {...customProps} />);
+      expect(formatService.deserialize).toBeCalledWith(testParams);
+    });
+
+    it('should use fallback if no default metric format and no others provided', () => {
+      const customProps: GaugeRenderProps = {
+        ...baseFormattingProps,
+        args: {
+          ...baseFormattingProps.args,
+          metric: {
+            ...(baseFormattingProps.args.metric as ExpressionValueVisDimension),
+            format: undefined,
+          },
+        },
+        data: {
+          ...wrapperProps.data,
+          columns: createColumnsWithMetricParams({ id: 'test' }),
+        },
+      };
+
+      shallowWithIntl(<GaugeComponent {...customProps} />);
+      expect(formatService.deserialize).toBeCalledWith({
+        id: 'number',
+        params: {
+          pattern: '0,0.0',
+        },
+      });
     });
   });
 });
