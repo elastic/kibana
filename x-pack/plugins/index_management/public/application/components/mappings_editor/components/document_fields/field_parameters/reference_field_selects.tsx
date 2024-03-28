@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { useLocation } from 'react-router-dom';
 import {
@@ -54,8 +54,6 @@ export const ReferenceFieldSelects = ({ onChange, 'data-test-subj': dataTestSubj
     return subscription.unsubscribe;
   }, [subscribe, onChange]);
 
-  const onMainValueChange = useCallback(async (mainValue: unknown) => {}, []);
-
   const renderSelect = (field: FieldHook, opts: SuperSelectOption[]) => {
     return (
       <SuperSelectField
@@ -73,11 +71,7 @@ export const ReferenceFieldSelects = ({ onChange, 'data-test-subj': dataTestSubj
           return (
             <EuiFlexGroup>
               <EuiFlexItem>
-                <UseField
-                  path="main"
-                  config={fieldConfigReferenceField}
-                  onChange={onMainValueChange}
-                >
+                <UseField path="main" config={fieldConfigReferenceField}>
                   {(field) => renderSelect(field, referenceFieldOptions)}
                 </UseField>
               </EuiFlexItem>

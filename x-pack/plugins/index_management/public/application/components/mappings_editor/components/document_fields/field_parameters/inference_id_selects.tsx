@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useComponentTemplatesContext } from '../../../../component_templates/component_templates_context';
@@ -57,8 +57,6 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
     return subscription.unsubscribe;
   }, [subscribe, onChange]);
 
-  const onMainValueChange = useCallback(async (mainValue: unknown) => {}, []);
-
   const renderSelect = (field: FieldHook, opts: SuperSelectOption[]) => {
     return (
       <SuperSelectField
@@ -76,7 +74,7 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
           return (
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <UseField path="main" config={fieldConfigModelId} onChange={onMainValueChange}>
+                <UseField path="main" config={fieldConfigModelId}>
                   {(field) => renderSelect(field, inferenceIdOptions)}
                 </UseField>
               </EuiFlexItem>
