@@ -4252,12 +4252,11 @@ describe('create()', () => {
         Array [
           Object {
             "actionTypeId": "test",
-            "group": "default",
-            "id": "1",
+            "id": "system_action-id",
             "params": Object {
-              "foo": true,
+              "foo": "test",
             },
-            "uuid": "test-uuid",
+            "uuid": "test-uuid-1",
           },
         ]
       `);

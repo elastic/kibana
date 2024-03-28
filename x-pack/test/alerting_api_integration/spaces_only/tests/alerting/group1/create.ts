@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
-import { RawRule } from '@kbn/alerting-plugin/server/types';
+import { RawRule, RuleNotifyWhen } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { omit } from 'lodash';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
@@ -514,8 +514,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         );
 
         expect(esResponse.statusCode).to.eql(200);
-        const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+        expect((esResponse.body._source as any)?.alert.systemActions).to.be(undefined);
 
+        const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
         const rawAction = rawActions[0];
         const { uuid: rawActionUuid, ...rawActionRest } = rawAction;
 
@@ -569,6 +570,52 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         expect(res.body.message).to.eql(
           'Invalid system action params. System action type: test.system-action-connector-adapter - [myParam]: expected value of type [string] but got [undefined]'
         );
+      });
+
+      it('strips out properties from system actions that are part of the default actions', async () => {
+        for (const propertyToAdd of [
+          { group: 'default' },
+          {
+            frequency: {
+              summary: false,
+              throttle: '1s',
+              notify_when: RuleNotifyWhen.THROTTLE,
+            },
+          },
+          {
+            alerts_filter: {
+              query: { kql: 'kibana.alert.rule.name:abc', filters: [] },
+            },
+          },
+        ]) {
+          const systemActionWithProperty = { ...systemAction, ...propertyToAdd };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                actions: [systemActionWithProperty],
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          expect(response.body.actions[0][Object.keys(propertyToAdd)[0]]).to.be(undefined);
+
+          const esResponse = await es.get<SavedObject<RawRule>>(
+            {
+              index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+              id: `alert:${response.body.id}`,
+            },
+            { meta: true }
+          );
+
+          expect(esResponse.statusCode).to.eql(200);
+          expect((esResponse.body._source as any)?.alert.systemActions).to.be(undefined);
+
+          const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+          expect(rawActions[0][Object.keys(propertyToAdd)[0]]).to.be(undefined);
+        }
       });
     });
 
