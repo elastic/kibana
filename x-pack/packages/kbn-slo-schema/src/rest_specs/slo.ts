@@ -13,7 +13,6 @@ import {
   apmTransactionErrorRateIndicatorSchema,
   budgetingMethodSchema,
   dateType,
-  durationType,
   groupingsSchema,
   groupSummarySchema,
   histogramIndicatorSchema,
@@ -121,32 +120,6 @@ const fetchHistoricalSummaryResponseSchema = t.array(
   })
 );
 
-const getSLOBurnRatesResponseSchema = t.type({
-  burnRates: t.array(
-    t.type({
-      name: t.string,
-      burnRate: t.number,
-      sli: t.number,
-    })
-  ),
-});
-
-const getSLOBurnRatesParamsSchema = t.type({
-  path: t.type({ id: t.string }),
-  body: t.intersection([
-    t.type({
-      instanceId: allOrAnyString,
-      windows: t.array(
-        t.type({
-          name: t.string,
-          duration: durationType,
-        })
-      ),
-    }),
-    t.partial({ remoteName: t.string }),
-  ]),
-});
-
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
@@ -157,7 +130,6 @@ type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
 type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
 
-type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
 type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
 type TimeWindowType = t.OutputOf<typeof timeWindowTypeSchema>;
 type TimeWindow = t.OutputOf<typeof timeWindowSchema>;
@@ -185,8 +157,6 @@ export {
   fetchHistoricalSummaryResponseSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
-  getSLOBurnRatesParamsSchema,
-  getSLOBurnRatesResponseSchema,
 };
 export type {
   BudgetingMethod,
@@ -200,7 +170,6 @@ export type {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   SyntheticsAvailabilityIndicator,
-  GetSLOBurnRatesResponse,
   IndicatorType,
   Indicator,
   Objective,
