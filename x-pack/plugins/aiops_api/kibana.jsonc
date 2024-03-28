@@ -9,6 +9,7 @@
     "browser": false,
     "requiredPlugins": [
       "licensing",
+      "observabilityAIAssistant"
     ],
     "optionalPlugins": [],
     "requiredBundles": []
