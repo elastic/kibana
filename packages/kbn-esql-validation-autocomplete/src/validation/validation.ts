@@ -28,7 +28,7 @@ import {
 } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
-  extractSingleType,
+  extractSingularType,
   getAllArrayTypes,
   getAllArrayValues,
   getColumnHit,
@@ -358,9 +358,7 @@ function validateFunction(
           messageId: 'wrongArgumentNumber',
           values: {
             fn: astFunction.name,
-            numArgs:
-              refSignature.minParams ??
-              refSignature.params.filter(({ optional }) => !optional).length,
+            numArgs: refSignature.params.filter(({ optional }) => !optional).length,
             passedArgs: astFunction.args.length,
           },
           locations: astFunction.location,
@@ -432,56 +430,41 @@ function validateFunction(
         // few lines above
         return;
       }
-      // if the arg is an array of values, check each element
-      if (Array.isArray(outerArg) && isArrayType(argDef.type)) {
-        const extractedType = extractSingleType(argDef.type);
-        const everyArgInListMessages = outerArg
-          .map((arg) => {
-            return [
-              validateFunctionLiteralArg,
-              validateNestedFunctionArg,
-              validateFunctionColumnArg,
-            ].flatMap((validateFn) => {
-              return validateFn(
-                astFunction,
-                arg,
-                { ...argDef, type: extractedType },
-                references,
-                parentCommand
-              );
-            });
-          })
-          .filter((ms) => ms.length);
-        if (everyArgInListMessages.length) {
-          failingSignature.push(
-            getMessageFromId({
-              messageId: 'wrongArgumentType',
-              values: {
-                name: astFunction.name,
-                argType: argDef.type,
-                value: `(${getAllArrayValues(outerArg).join(', ')})`,
-                givenType: `(${getAllArrayTypes(outerArg, parentCommand, references).join(', ')})`,
-              },
-              locations: {
-                min: (outerArg[0] as ESQLSingleAstItem).location.min,
-                max: (outerArg[outerArg.length - 1] as ESQLSingleAstItem).location.max,
-              },
-            })
-          );
-        }
-        return;
+
+      // check every element of the argument (may be an array of elements, or may be a single element)
+      const hasMultipleElements = Array.isArray(outerArg) && isArrayType(argDef.type);
+      const argElements = hasMultipleElements ? outerArg : [outerArg];
+      const singularType = extractSingularType(argDef.type);
+      let messagesFromAllArgElements = argElements
+        .map((arg) => {
+          return [
+            validateFunctionLiteralArg,
+            validateNestedFunctionArg,
+            validateFunctionColumnArg,
+          ].flatMap((validateFn) => {
+            return validateFn(
+              astFunction,
+              arg,
+              { ...argDef, type: singularType },
+              references,
+              parentCommand
+            );
+          });
+        })
+        .flat();
+
+      if (hasMultipleElements) {
+        messagesFromAllArgElements = collapseWrongArgumentTypeMessages(
+          messagesFromAllArgElements,
+          outerArg,
+          astFunction.name,
+          argDef.type,
+          parentCommand,
+          references
+        );
       }
-      const wrappedArg = Array.isArray(outerArg) ? outerArg : [outerArg];
-      for (const actualArg of wrappedArg) {
-        const argValidationMessages = [
-          validateFunctionLiteralArg,
-          validateNestedFunctionArg,
-          validateFunctionColumnArg,
-        ].flatMap((validateFn) => {
-          return validateFn(astFunction, actualArg, argDef, references, parentCommand);
-        });
-        failingSignature.push(...argValidationMessages);
-      }
+
+      failingSignature.push(...messagesFromAllArgElements);
     });
     if (failingSignature.length) {
       failingSignatures.push(failingSignature);
@@ -498,6 +481,43 @@ function validateFunction(
   // This is due to a special case in enrich where an implicit assignment is possible
   // so the AST needs to store an explicit "columnX = columnX" which duplicates the message
   return uniqBy(messages, ({ location }) => `${location.min}-${location.max}`);
+}
+
+/**
+ * We only want to report one message when any number of the elements in an array argument is of the wrong type
+ */
+function collapseWrongArgumentTypeMessages(
+  messages: ESQLMessage[],
+  arg: ESQLAstItem[],
+  funcName: string,
+  argType: string,
+  parentCommand: string,
+  references: ReferenceMaps
+) {
+  if (!messages.some(({ code }) => code === 'wrongArgumentType')) {
+    return messages;
+  }
+
+  // Replace the individual "wrong argument type" messages with a single one for the whole array
+  messages = messages.filter(({ code }) => code !== 'wrongArgumentType');
+
+  messages.push(
+    getMessageFromId({
+      messageId: 'wrongArgumentType',
+      values: {
+        name: funcName,
+        argType,
+        value: `(${getAllArrayValues(arg).join(', ')})`,
+        givenType: `(${getAllArrayTypes(arg, parentCommand, references).join(', ')})`,
+      },
+      locations: {
+        min: (arg[0] as ESQLSingleAstItem).location.min,
+        max: (arg[arg.length - 1] as ESQLSingleAstItem).location.max,
+      },
+    })
+  );
+
+  return messages;
 }
 
 function validateSetting(

@@ -233,7 +233,10 @@ export function isArrayType(type: string) {
   return ARRAY_REGEXP.test(type);
 }
 
-export function extractSingleType(type: string) {
+/**
+ * Given an array type for example `string[]` it will return `string`
+ */
+export function extractSingularType(type: string) {
   return type.replace(ARRAY_REGEXP, '');
 }
 
