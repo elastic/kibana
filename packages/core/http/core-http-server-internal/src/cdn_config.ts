@@ -34,13 +34,14 @@ export class CdnConfig {
   public getCspConfig(): CspAdditionalConfig {
     const host = this.host;
     if (!host) return {};
+    // We exclude `connect_src` from this list as it causes issues for features
+    // like maps that rely on being able to load any external resources.
     return {
       font_src: [host],
       img_src: [host],
       script_src: [host],
       style_src: [host],
       worker_src: [host],
-      connect_src: [host],
     };
   }
 
