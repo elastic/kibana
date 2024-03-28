@@ -14,7 +14,6 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -152,9 +151,7 @@ export function makeDefaultServices(
       inspect: jest.fn(),
       close: jest.fn(),
     },
-    dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
-    dashboardFeatureFlag: { allowByValueEmbeddables: false },
     savedObjectStore: {
       load: jest.fn(),
       search: jest.fn(),

@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../../../common/constants';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { ObservabilityLayerTemplate } from './observability_layer_template';
-import { APM_INDEX_PATTERN_ID } from './create_layer_descriptor';
-import { getIndexPatternService } from '../../../../../kibana_services';
+import { getIndexPatternService, getSpaceId } from '../../../../../kibana_services';
 
 export const ObservabilityLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.OBSERVABILITY,
@@ -19,7 +19,7 @@ export const ObservabilityLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH, LAYER_WIZARD_CATEGORY.SOLUTIONS],
   getIsDisabled: async () => {
     try {
-      await getIndexPatternService().get(APM_INDEX_PATTERN_ID);
+      await getIndexPatternService().get(getStaticDataViewId(getSpaceId()));
       return false;
     } catch (e) {
       return true;

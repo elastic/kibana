@@ -53,7 +53,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardPanelActions.expectExistsEditPanelAction();
       await dashboardPanelActions.expectExistsClonePanelAction();
-      await dashboardPanelActions.expectExistsReplacePanelAction();
       await dashboardPanelActions.expectExistsRemovePanelAction();
       await dashboardPanelActions.expectExistsToggleExpandAction();
     });
@@ -69,7 +68,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardPanelActions.expectExistsEditPanelAction();
       await dashboardPanelActions.expectExistsClonePanelAction();
-      await dashboardPanelActions.expectExistsReplacePanelAction();
       await dashboardPanelActions.expectExistsRemovePanelAction();
 
       // Get rid of the timestamp in the url.
@@ -156,7 +154,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('context menu actions are hidden in view mode', async function () {
         await dashboardPanelActions.expectMissingEditPanelAction();
         await dashboardPanelActions.expectMissingDuplicatePanelAction();
-        await dashboardPanelActions.expectMissingReplacePanelAction();
         await dashboardPanelActions.expectMissingRemovePanelAction();
       });
 
@@ -168,7 +165,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('some context menu actions should be present', async function () {
           await dashboardPanelActions.expectExistsEditPanelAction();
           await dashboardPanelActions.expectExistsClonePanelAction();
-          await dashboardPanelActions.expectExistsReplacePanelAction();
         });
 
         it('"remove panel" action should not be present', async function () {
