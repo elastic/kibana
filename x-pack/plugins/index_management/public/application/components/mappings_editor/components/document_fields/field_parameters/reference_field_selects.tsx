@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 
 import { useLocation } from 'react-router-dom';
-import {
-  FieldHook,
-  Form,
-  FormDataProvider,
-  SuperSelectField,
-  UseField,
-  useForm,
-} from '../../../shared_imports';
-import { SuperSelectOption } from '../../../types';
 import { useLoadIndexMappings } from '../../../../../services';
 import { getFieldConfig } from '../../../lib';
+import { FieldHook, Form, SuperSelectField, UseField, useForm } from '../../../shared_imports';
+import { SuperSelectOption } from '../../../types';
 
 interface Props {
   onChange(value: unknown): void;
@@ -66,19 +58,9 @@ export const ReferenceFieldSelects = ({ onChange, 'data-test-subj': dataTestSubj
 
   return (
     <Form form={form}>
-      <FormDataProvider pathsToWatch="main">
-        {({ main }) => {
-          return (
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <UseField path="main" config={fieldConfigReferenceField}>
-                  {(field) => renderSelect(field, referenceFieldOptions)}
-                </UseField>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        }}
-      </FormDataProvider>
+      <UseField path="main" config={fieldConfigReferenceField}>
+        {(field) => renderSelect(field, referenceFieldOptions)}
+      </UseField>
     </Form>
   );
 };
