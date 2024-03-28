@@ -50,5 +50,8 @@ export default function ({ loadTestFile, getService }) {
 
     // Uninstall tokens
     loadTestFile(require.resolve('./uninstall_token/get')); // ~ 20s
+
+    // Uninstall tokens
+    loadTestFile(require.resolve('./fleet_settings_privileges')); // ~ 20s
   });
 }

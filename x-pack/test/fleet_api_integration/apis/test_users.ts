@@ -81,6 +81,16 @@ export const testUsers: {
     username: 'fleet_settings_read_only',
     password: 'changeme',
   },
+  fleet_settings_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['settings_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_settings_all_only',
+    password: 'changeme',
+  },
   fleet_agent_policies_read_only: {
     permissions: {
       feature: {
