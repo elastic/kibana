@@ -23,7 +23,7 @@ import { useForm, Form, FormDataProvider, UseField } from '../../../../shared_im
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { useDispatch } from '../../../../mappings_state_context';
 import { fieldSerializer } from '../../../../lib';
-import { Field, NormalizedFields, MainType } from '../../../../types';
+import { NormalizedFields, MainType } from '../../../../types';
 import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
@@ -57,7 +57,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 }: Props) {
   const dispatch = useDispatch();
 
-  const { form } = useForm<Field>({
+  const { form } = useForm<any>({
     serializer: fieldSerializer,
     options: { stripEmptyFields: false },
   });
@@ -153,7 +153,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
           return (
             <EuiFlexItem grow={false}>
-              <UseField path="reference_field">
+              <UseField path="referenceField">
                 {(field) => (
                   <div className="mappingsEditor__selectSemanticTextReferenceField">
                     <ReferenceFieldSelects onChange={field.setValue} />
@@ -271,7 +271,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                     <EuiSpacer />
                     <EuiFlexGroup gutterSize="s" alignItems="center">
                       <EuiFlexItem grow={false}>
-                        <UseField path="inference_id">
+                        <UseField path="inferenceId">
                           {(field) => (
                             <div className="mappingsEditor__selectSemanticTextInferenceId">
                               <InferenceIdSelects onChange={field.setValue} />

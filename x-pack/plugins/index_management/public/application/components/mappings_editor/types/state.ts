@@ -109,7 +109,7 @@ export type Action =
   | { type: 'field.add'; value: Field }
   | {
       type: 'field.addSemanticText';
-      value: { name: string; reference_field: string; inference_id: string };
+      value: { name: string; referenceField: string; inferenceId: string };
     }
   | { type: 'field.remove'; value: string }
   | { type: 'field.edit'; value: Field }
