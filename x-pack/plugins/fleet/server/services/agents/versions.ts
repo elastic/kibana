@@ -13,9 +13,13 @@ import pRetry from 'p-retry';
 import { uniq } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import semverGt from 'semver/functions/gt';
+import semverRcompare from 'semver/functions/rcompare';
+import semverLt from 'semver/functions/lt';
 import semverCoerce from 'semver/functions/coerce';
 
 import { REPO_ROOT } from '@kbn/repo-info';
+
+import { differsOnlyInPatch } from '../../../common/services';
 
 import { appContextService } from '..';
 
@@ -31,12 +35,41 @@ const CACHE_DURATION = 1000 * 60 * 60;
 let CACHED_AVAILABLE_VERSIONS: string[] | undefined;
 let LAST_FETCHED: number | undefined;
 
-export const getLatestAvailableVersion = async (
-  includeCurrentVersion?: boolean
-): Promise<string> => {
-  const versions = await getAvailableVersions({ includeCurrentVersion });
+export const getLatestAvailableAgentVersion = async ({
+  includeCurrentVersion = false,
+  ignoreCache = false,
+}: {
+  includeCurrentVersion?: boolean;
+  ignoreCache?: boolean;
+} = {}): Promise<string> => {
+  const versions = await getAvailableVersions({ includeCurrentVersion, ignoreCache });
 
   return versions[0];
+};
+
+export const getLatestCompatibleAgentVersion = async ({
+  includeCurrentVersion = false,
+  ignoreCache = false,
+}: {
+  includeCurrentVersion?: boolean;
+  ignoreCache?: boolean;
+} = {}): Promise<string> => {
+  const kibanaVersion = appContextService.getKibanaVersion();
+
+  const versions = await getAvailableVersions({ includeCurrentVersion, ignoreCache });
+  let latestCompatibleVersion;
+
+  versions.sort(semverRcompare);
+  if (versions && versions.length > 0 && versions.indexOf(kibanaVersion) !== 0) {
+    latestCompatibleVersion =
+      versions.find((version) => {
+        return semverLt(version, kibanaVersion) || differsOnlyInPatch(version, kibanaVersion);
+      }) || versions[0];
+  } else {
+    latestCompatibleVersion = kibanaVersion;
+  }
+
+  return latestCompatibleVersion;
 };
 
 export const getAvailableVersions = async ({
