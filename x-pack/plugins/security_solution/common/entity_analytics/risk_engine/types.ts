@@ -34,6 +34,7 @@ export interface SimpleRiskInput {
   description: string;
   risk_score: string | number | undefined;
   timestamp: string | undefined;
+  contribution_score?: number;
 }
 
 export interface EcsRiskScore {
