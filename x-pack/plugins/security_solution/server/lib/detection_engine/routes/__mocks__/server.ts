@@ -13,6 +13,7 @@ import { requestMock } from '.';
 import { responseAdapter } from './test_adapters';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { RegisteredVersionedRoute } from '@kbn/core-http-router-server-mocks';
+import { getRequestValidation } from '@kbn/core-http-server';
 
 interface Route {
   validate: RouteConfig<
@@ -95,10 +96,12 @@ class MockServer {
   }
 
   private validateRequest(request: KibanaRequest): KibanaRequest {
-    const validations = this.getRoute().validate;
-    if (!validations) {
+    const route = this.getRoute();
+    if (!route.validate) {
       return request;
     }
+
+    const validations = getRequestValidation(route.validate);
 
     const validatedRequest = requestMock.create({
       path: request.route.path,

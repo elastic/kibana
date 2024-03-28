@@ -22,6 +22,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { apiCanExpandPanels } from '@kbn/presentation-containers/interfaces/panel_management';
 
 import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
@@ -48,7 +49,8 @@ const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
     apiHasUniqueId(api) &&
     apiHasParentApi(api) &&
     apiIsOfType(api.parentApi, DASHBOARD_CONTAINER_TYPE) &&
-    apiPublishesSavedObjectId(api.parentApi)
+    apiPublishesSavedObjectId(api.parentApi) &&
+    !(apiCanExpandPanels(api.parentApi) && api.parentApi.expandedPanelId.getValue())
   );
 };
 

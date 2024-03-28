@@ -16,6 +16,7 @@ import { PassThrough } from 'stream';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { loggerMock } from '@kbn/logging-mocks';
 const request = {
   body: {
     subAction: 'invokeAI',
@@ -24,6 +25,7 @@ const request = {
 } as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 const onLlmResponse = jest.fn();
 const connectorId = 'testConnectorId';
+const mockLogger = loggerMock.create();
 const testProps: Omit<Props, 'actions'> = {
   params: {
     subAction: 'invokeAI',
@@ -33,6 +35,7 @@ const testProps: Omit<Props, 'actions'> = {
   request,
   connectorId,
   onLlmResponse,
+  logger: mockLogger,
 };
 
 describe('executeAction', () => {

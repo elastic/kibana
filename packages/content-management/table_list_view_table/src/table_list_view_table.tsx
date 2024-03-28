@@ -450,12 +450,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             }),
           },
           ...ret[item.id],
-          delete: {
-            enabled: false,
-            reason: i18n.translate('contentManagement.tableList.managedItemNoDelete', {
-              defaultMessage: 'Elastic manages this item. Deleting it is not possible.',
-            }),
-          },
         };
       }
 

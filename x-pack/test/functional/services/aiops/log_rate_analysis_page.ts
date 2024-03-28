@@ -108,6 +108,10 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       await testSubjects.existOrFail(`aiopsSearchPanel`);
     },
 
+    async assertChangePointDetectedPromptExists() {
+      await testSubjects.existOrFail(`aiopsChangePointDetectedPrompt`);
+    },
+
     async assertNoWindowParametersEmptyPromptExists() {
       await testSubjects.existOrFail(`aiopsNoWindowParametersEmptyPrompt`);
     },
