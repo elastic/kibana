@@ -15,14 +15,17 @@ import {
 
 import { DashboardStartDependencies } from '../plugin';
 import { AddToLibraryAction } from './add_to_library_action';
+import { LegacyAddToLibraryAction } from './legacy_add_to_library_action';
 import { ClonePanelAction } from './clone_panel_action';
 import { CopyToDashboardAction } from './copy_to_dashboard_action';
 import { ExpandPanelAction } from './expand_panel_action';
 import { ExportCSVAction } from './export_csv_action';
 import { FiltersNotificationAction } from './filters_notification_action';
-import { LibraryNotificationAction } from './library_notification_action';
+import { LegacyLibraryNotificationAction } from './legacy_library_notification_action';
 import { ReplacePanelAction } from './replace_panel_action';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
+import { LegacyUnlinkFromLibraryAction } from './legacy_unlink_from_library_action';
+import { LibraryNotificationAction } from './library_notification_action';
 
 interface BuildAllDashboardActionsProps {
   core: CoreStart;
@@ -70,6 +73,10 @@ export const buildAllDashboardActions = async ({
     uiActions.registerAction(addToLibraryAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
 
+    const legacyAddToLibraryAction = new LegacyAddToLibraryAction();
+    uiActions.registerAction(legacyAddToLibraryAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, legacyAddToLibraryAction.id);
+
     const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
     uiActions.registerAction(unlinkFromLibraryAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
@@ -77,6 +84,16 @@ export const buildAllDashboardActions = async ({
     const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
     uiActions.registerAction(libraryNotificationAction);
     uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
+
+    const legacyUnlinkFromLibraryAction = new LegacyUnlinkFromLibraryAction();
+    uiActions.registerAction(legacyUnlinkFromLibraryAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, legacyUnlinkFromLibraryAction.id);
+
+    const legacyLibraryNotificationAction = new LegacyLibraryNotificationAction(
+      legacyUnlinkFromLibraryAction
+    );
+    uiActions.registerAction(legacyLibraryNotificationAction);
+    uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, legacyLibraryNotificationAction.id);
 
     const copyToDashboardAction = new CopyToDashboardAction(core);
     uiActions.registerAction(copyToDashboardAction);
