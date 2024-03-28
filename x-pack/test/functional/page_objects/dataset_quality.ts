@@ -104,6 +104,10 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
+    async waitUntilTableLoaded() {
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+    },
+
     async waitUntilSummaryPanelLoaded() {
       await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
       await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
@@ -151,6 +155,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async getDatasetTableRows(): Promise<WebElementWrapper[]> {
+      await this.waitUntilTableLoaded();
       const table = await testSubjects.find(testSubjectSelectors.datasetQualityTable);
       const tBody = await table.findByTagName('tbody');
       return tBody.findAllByTagName('tr');
