@@ -18,7 +18,7 @@ import type {
   SignificantItemDuplicateGroup,
   ItemSet,
   FetchFrequentItemSetsResponse,
-} from '@kbn/aiops-utils/types';
+} from '@kbn/aiops-utils/log_rate_analysis/types';
 
 import { RANDOM_SAMPLER_SEED, LOG_RATE_ANALYSIS_SETTINGS } from '../../../../common/constants';
 
