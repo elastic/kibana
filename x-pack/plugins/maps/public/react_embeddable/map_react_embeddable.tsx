@@ -1,9 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -12,107 +11,107 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { initializeTitles } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { inject } from '../../common/embeddable';
 import { extract, type MapEmbeddablePersistableState } from '../../common/embeddable';
 import type { MapApi, MapSerializeState } from './types';
 import { SavedMap } from '../routes/map_page';
 import type { MapEmbeddableInput } from '../embeddable/types';
-import { initReduxStateSync } from './init_redux_state_sync';
-import { BehaviorSubject } from 'rxjs';
-import { getLibraryInterface } from './get_library_interface';
+import { initializeReduxStateSync } from './initialize_redux_state_sync';
+import { initializeLibraryTransforms } from './initialize_library_transforms';
 import { getSpacesApi } from '../kibana_services';
-import { useActionHandlers } from './use_action_handlers';
+import { initializeActionHandlers } from './initialize_action_handlers';
 import { MapContainer } from '../connected_components/map_container';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 
-export const mapEmbeddableFactory: ReactEmbeddableFactory<
-  MapSerializeState,
-  MapApi
-> = {
+export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
   deserializeState: (state) => {
     return state.rawState
-        ? inject(state.rawState as EmbeddableStateWithType, state.references ?? []) as unknown as MapSerializeState
-        : {};
+      ? (inject(
+          state.rawState as EmbeddableStateWithType,
+          state.references ?? []
+        ) as unknown as MapSerializeState)
+      : {};
   },
   buildEmbeddable: async (state, buildApi) => {
     const savedMap = new SavedMap({
-      mapEmbeddableInput: state as unknown as MapEmbeddableInput
+      mapEmbeddableInput: state as unknown as MapEmbeddableInput,
     });
     await savedMap.whenReady();
-  
+
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-    
-    const {
-      cleanupReduxStateSync,
-      reduxStateComparators,
-      serializeReduxState,
-    } = initReduxStateSync(savedMap.getStore(), state);
-  
+
+    const { cleanupReduxStateSync, reduxStateComparators, serializeReduxState } =
+      initializeReduxStateSync(savedMap.getStore(), state);
+
+    function serializeState() {
+      const { state: rawState, references } = extract({
+        ...state,
+        ...serializeTitles(),
+        ...serializeReduxState(),
+      } as unknown as MapEmbeddablePersistableState);
+      return {
+        rawState: rawState as unknown as MapSerializeState,
+        references,
+      };
+    }
+
     const api = buildApi(
       {
         defaultPanelTitle: new BehaviorSubject<string | undefined>(savedMap.getAttributes().title),
         ...titlesApi,
-        ...getLibraryInterface(savedMap),
-        serializeState: () => {
-          const { state: rawState, references } = extract({
-            ...state,
-            ...serializeTitles(),
-            ...serializeReduxState(),
-          } as unknown as MapEmbeddablePersistableState);
-          return {
-            rawState: rawState as unknown as MapEmbeddableInput,
-            references
-          };
-        },
+        ...initializeLibraryTransforms(savedMap, serializeState),
+        serializeState,
       },
       {
         ...titleComparators,
         ...reduxStateComparators,
       }
     );
-  
+
     const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
     const spaces = getSpacesApi();
-  
+    const actionHandlers = initializeActionHandlers(api);
+
     return {
       api,
       Component: () => {
         useEffect(() => {
           return () => {
             cleanupReduxStateSync();
-          }
+          };
         }, []);
-  
-        const { addFilters, getActionContext, getFilterActions, onSingleValueTrigger } = useActionHandlers(api);
-    
-        return sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
-            <div className="mapEmbeddedError">
-              <EuiEmptyPrompt
-                iconType="warning"
-                iconColor="danger"
-                data-test-subj="embeddable-maps-failure"
-                body={spaces.ui.components.getEmbeddableLegacyUrlConflict({
-                  targetType: MAP_SAVED_OBJECT_TYPE,
-                  sourceId: sharingSavedObjectProps.sourceId!,
-                })}
-              />
-            </div>
-          ) : (
-            <Provider store={savedMap.getStore()}>
-              <MapContainer
-                onSingleValueTrigger={onSingleValueTrigger}
-                addFilters={state.hideFilterActions ? null : addFilters}
-                getFilterActions={getFilterActions}
-                getActionContext={getActionContext}
-                title="title"
-                description="description"
-                waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
-                isSharable={true}
-              />
-            </Provider>
-          );
+
+        return sharingSavedObjectProps &&
+          spaces &&
+          sharingSavedObjectProps?.outcome === 'conflict' ? (
+          <div className="mapEmbeddedError">
+            <EuiEmptyPrompt
+              iconType="warning"
+              iconColor="danger"
+              data-test-subj="embeddable-maps-failure"
+              body={spaces.ui.components.getEmbeddableLegacyUrlConflict({
+                targetType: MAP_SAVED_OBJECT_TYPE,
+                sourceId: sharingSavedObjectProps.sourceId!,
+              })}
+            />
+          </div>
+        ) : (
+          <Provider store={savedMap.getStore()}>
+            <MapContainer
+              onSingleValueTrigger={actionHandlers.onSingleValueTrigger}
+              addFilters={state.hideFilterActions ? null : actionHandlers.addFilters}
+              getFilterActions={actionHandlers.getFilterActions}
+              getActionContext={actionHandlers.getActionContext}
+              title="title"
+              description="description"
+              waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
+              isSharable={true}
+            />
+          </Provider>
+        );
       },
     };
   },

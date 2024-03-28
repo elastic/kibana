@@ -1,12 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
@@ -17,8 +15,8 @@ import type { MapApi } from './types';
 import { getUiActions } from '../kibana_services';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 
-export function useActionHandlers(api: MapApi) {
-  const getActionContext = useCallback(() => {
+export function initializeActionHandlers(api: MapApi) {
+  function getActionContext() {
     const trigger = getUiActions().getTrigger(APPLY_FILTER_TRIGGER);
     if (!trigger) {
       throw new Error('Unable to get context, could not locate trigger');
@@ -27,10 +25,10 @@ export function useActionHandlers(api: MapApi) {
       embeddable: api,
       trigger,
     } as ActionExecutionContext;
-  }, [api]);
+  }
 
   return {
-    addFilters: useCallback(async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
+    addFilters: async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
       const executeContext = {
         ...getActionContext(),
         filters,
@@ -40,9 +38,9 @@ export function useActionHandlers(api: MapApi) {
         throw new Error('Unable to apply filter, could not locate action');
       }
       action.execute(executeContext);
-    }, [api]),
+    },
     getActionContext,
-    getFilterActions: useCallback(async () => {
+    getFilterActions: async () => {
       const filterActions = await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
         embeddable: api,
         filters: [],
@@ -61,8 +59,8 @@ export function useActionHandlers(api: MapApi) {
         }
       );
       return [...filterActions, ...valueClickActions.filter(isUrlDrilldown)];
-    }, [api]),
-    onSingleValueTrigger: useCallback((actionId: string, key: string, value: RawValue) => {
+    },
+    onSingleValueTrigger: (actionId: string, key: string, value: RawValue) => {
       const action = getUiActions().getAction(actionId);
       if (!action) {
         throw new Error('Unable to apply action, could not locate action');
@@ -74,6 +72,6 @@ export function useActionHandlers(api: MapApi) {
         },
       };
       action.execute(executeContext);
-    }, [api])
+    },
   };
 }

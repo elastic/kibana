@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
+import { StateComparators } from '@kbn/presentation-publishing';
+import { MapCenterAndZoom } from '../../common/descriptor_types';
 import { MapStore, MapStoreState } from '../reducers/store';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -17,29 +18,42 @@ import {
   getMapReady,
   getMapZoom,
 } from '../selectors/map_selectors';
-import { setGotoWithCenter, setHiddenLayers, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions';
-import { MapCenterAndZoom } from '@kbn/maps-plugin/common/descriptor_types';
+import {
+  setGotoWithCenter,
+  setHiddenLayers,
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
+} from '../actions';
 import type { MapSerializeState } from './types';
-import { EmbeddableStateComparators } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {
     ...getMapCenter(state),
-    zoom: getMapZoom(state)
+    zoom: getMapZoom(state),
   };
 }
 
 function getHiddenLayerIds(state: MapStoreState) {
-  return getLayerListRaw(state).filter((layer) => !layer.visible).map((layer) => layer.id)
+  return getLayerListRaw(state)
+    .filter((layer) => !layer.visible)
+    .map((layer) => layer.id);
 }
 
-export function initReduxStateSync(store: MapStore, state: MapSerializeState) {
+export function initializeReduxStateSync(store: MapStore, state: MapSerializeState) {
   // initializing comparitor publishing subjects to state instead of store state values
   // because store is not settled until map is rendered and mapReady is true
-  const hiddenLayers$ = new BehaviorSubject<string[]>(state.hiddenLayers ?? getHiddenLayerIds(store.getState()));
-  const isLayerTOCOpen$ = new BehaviorSubject<boolean>(state.isLayerTOCOpen ?? getIsLayerTOCOpen(store.getState()));
-  const mapCenterAndZoom$ = new BehaviorSubject<MapCenterAndZoom>(state.mapCenter ?? getMapCenterAndZoom(store.getState()));
-  const openTOCDetails$ = new BehaviorSubject<string[]>(state.openTOCDetails ?? getOpenTOCDetails(store.getState()));
+  const hiddenLayers$ = new BehaviorSubject<string[]>(
+    state.hiddenLayers ?? getHiddenLayerIds(store.getState())
+  );
+  const isLayerTOCOpen$ = new BehaviorSubject<boolean>(
+    state.isLayerTOCOpen ?? getIsLayerTOCOpen(store.getState())
+  );
+  const mapCenterAndZoom$ = new BehaviorSubject<MapCenterAndZoom>(
+    state.mapCenter ?? getMapCenterAndZoom(store.getState())
+  );
+  const openTOCDetails$ = new BehaviorSubject<string[]>(
+    state.openTOCDetails ?? getOpenTOCDetails(store.getState())
+  );
 
   const unsubscribeFromStore = store.subscribe(() => {
     if (!getMapReady(store.getState())) {
@@ -75,29 +89,29 @@ export function initReduxStateSync(store: MapStore, state: MapSerializeState) {
         (nextValue: string[]) => {
           store.dispatch<any>(setHiddenLayers(nextValue));
         },
-        fastIsEqual
+        fastIsEqual,
       ],
       isLayerTOCOpen: [
         isLayerTOCOpen$,
         (nextValue: boolean) => {
           store.dispatch(setIsLayerTOCOpen(nextValue));
-        }
+        },
       ],
       mapCenter: [
         mapCenterAndZoom$,
         (nextValue: MapCenterAndZoom) => {
           store.dispatch(setGotoWithCenter(nextValue));
         },
-        fastIsEqual
+        fastIsEqual,
       ],
       openTOCDetails: [
         openTOCDetails$,
         (nextValue: string[]) => {
           store.dispatch(setOpenTOCDetails(nextValue));
         },
-        fastIsEqual
-      ]
-    } as EmbeddableStateComparators<MapSerializeState>,
+        fastIsEqual,
+      ],
+    } as StateComparators<MapSerializeState>,
     serializeReduxState: () => {
       return {
         hiddenLayers: getHiddenLayerIds(store.getState()),
@@ -106,6 +120,6 @@ export function initReduxStateSync(store: MapStore, state: MapSerializeState) {
         mapCenter: getMapCenterAndZoom(store.getState()),
         openTOCDetails: getOpenTOCDetails(store.getState()),
       };
-    }
-  }
+    },
+  };
 }

@@ -272,9 +272,7 @@ export class MapsPlugin
     }
 
     registerReactEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, async () => {
-      const { mapEmbeddableFactory } = await import(
-        './react_embeddable/map_react_embeddable'
-      );
+      const { mapEmbeddableFactory } = await import('./react_embeddable/map_react_embeddable');
       return mapEmbeddableFactory;
     });
 

@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type {
-  DefaultEmbeddableApi, SerializedReactEmbeddableTitles,
-} from '@kbn/embeddable-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { MapAttributes } from '@kbn/maps-plugin/common/content_management';
-import { MapCenterAndZoom, MapExtent, MapSettings } from '@kbn/maps-plugin/common/descriptor_types';
-import { CanLinkToLibrary, CanUnlinkFromLibrary } from '@kbn/presentation-library';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { TimeRange } from '@kbn/es-query';
+import { HasLibraryTransforms, SerializedTitles } from '@kbn/presentation-publishing';
+import { MapAttributes } from '../../common/content_management';
+import { MapCenterAndZoom, MapExtent, MapSettings } from '../../common/descriptor_types';
 
-export interface MapSerializeState extends SerializedReactEmbeddableTitles {
+export interface MapSerializeState extends SerializedTitles {
   // by-valye
   attributes?: MapAttributes;
   // by-reference
@@ -26,14 +24,10 @@ export interface MapSerializeState extends SerializedReactEmbeddableTitles {
   mapSettings?: Partial<MapSettings>;
   hiddenLayers?: string[];
   hideFilterActions?: boolean;
-  filters?: Filter[];
-  query?: Query;
   timeRange?: TimeRange;
-  timeslice?: [number, number];
   filterByMapExtent?: boolean;
   isMovementSynchronized?: boolean;
 }
 
-export type MapApi = DefaultEmbeddableApi<MapSerializeState> & 
-  CanLinkToLibrary &
-  CanUnlinkFromLibrary;
+export type MapApi = DefaultEmbeddableApi<MapSerializeState> &
+  HasLibraryTransforms<MapSerializeState>;

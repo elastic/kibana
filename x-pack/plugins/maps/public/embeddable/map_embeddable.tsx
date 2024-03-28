@@ -116,7 +116,9 @@ import {
 import { MapStoreState } from '../reducers/store';
 
 function getHiddenLayerIds(state: MapStoreState) {
-  return getLayerListRaw(state).filter((layer) => !layer.visible).map((layer) => layer.id)
+  return getLayerListRaw(state)
+    .filter((layer) => !layer.visible)
+    .map((layer) => layer.id);
 }
 
 async function getChartsPaletteServiceGetColor(): Promise<((value: string) => string) | null> {
