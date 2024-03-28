@@ -46,7 +46,7 @@ import {
   IContainer,
   PanelState,
 } from './i_container';
-import { reactEmbeddableRegistryHasKey } from '../../react_embeddable_system';
+import { DefaultEmbeddableApi, reactEmbeddableRegistryHasKey } from '../../react_embeddable_system';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -56,14 +56,16 @@ export abstract class Container<
     TContainerOutput extends ContainerOutput = ContainerOutput
   >
   extends Embeddable<TContainerInput, TContainerOutput>
-  implements IContainer<TChildInput, TContainerInput, TContainerOutput>, PresentationContainer
+  implements
+    IContainer<TChildInput, TContainerInput, TContainerOutput>,
+    PresentationContainer<DefaultEmbeddableApi>
 {
   public readonly isContainer: boolean = true;
   public readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
   } = {};
-  public children$: BehaviorSubject<{ [key: string]: unknown }> = new BehaviorSubject<{
-    [key: string]: unknown;
+  public children$: BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }> = new BehaviorSubject<{
+    [key: string]: DefaultEmbeddableApi;
   }>({});
 
   private subscription: Subscription | undefined;

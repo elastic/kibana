@@ -18,16 +18,17 @@ export interface PanelPackage {
   initialState?: object;
 }
 
-export interface PresentationContainer extends Partial<PublishesViewMode> {
-  addNewPanel: (
+export interface PresentationContainer<GenericChildType = unknown>
+  extends Partial<PublishesViewMode> {
+  addNewPanel: <ApiType extends GenericChildType = GenericChildType>(
     panel: PanelPackage,
     displaySuccessMessage?: boolean
-  ) => Promise<unknown | undefined>;
+  ) => Promise<ApiType | undefined>;
   removePanel: (panelId: string) => void;
   canRemovePanels?: () => boolean;
   replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
 
-  children$: PublishingSubject<{ [key: string]: unknown }>;
+  children$: PublishingSubject<{ [key: string]: GenericChildType }>;
 }
 
 export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {
