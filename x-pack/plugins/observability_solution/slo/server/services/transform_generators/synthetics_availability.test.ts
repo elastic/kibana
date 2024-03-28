@@ -78,6 +78,11 @@ describe('Synthetics Availability Transform Generator', () => {
               field: 'observer.geo.name',
             },
           },
+          'slo.groupings.monitor.id': {
+            terms: {
+              field: 'monitor.id',
+            },
+          },
           'slo.id': {
             terms: {
               field: 'slo.id',
