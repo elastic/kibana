@@ -1,5 +1,4 @@
 {
-    "job_type": "anomaly_detector",
     "description": "Security: Auditbeat - Looks for sudo activity from an unusual user context.",
     "groups": [
       "security",

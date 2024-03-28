@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Metricbeat outages: Detect unusual decreases in metricbeat documents (ECS)",
   "groups": [
     "metricbeat"
