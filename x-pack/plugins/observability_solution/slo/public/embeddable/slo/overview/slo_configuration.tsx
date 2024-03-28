@@ -116,7 +116,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
 
         <EuiButton
           data-test-subj="sloConfirmButton"
-          // isDisabled={!selectedSlo || hasError}
+          isDisabled={!selectedSlo || hasError}
           onClick={onConfirmClick}
           fill
         >

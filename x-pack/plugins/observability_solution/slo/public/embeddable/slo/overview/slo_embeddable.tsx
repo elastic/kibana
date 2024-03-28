@@ -6,6 +6,8 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { EuiFlexItem } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { Router } from '@kbn/shared-ux-router';
 import {
@@ -76,16 +78,9 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     this.node = node;
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
-    const {
-      sloId,
-      sloInstanceId,
-      showAllGroupByInstances,
-      overviewMode,
-      groupBy,
-      groups,
-      sloView,
-    } = this.getInput();
-
+    const { sloId, sloInstanceId, showAllGroupByInstances, overviewMode, groupFilters } =
+      this.getInput();
+    console.log(groupFilters, '!!groupFilters');
     const queryClient = new QueryClient();
 
     const I18nContext = this.deps.i18n.Context;
@@ -101,14 +96,20 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
 
     const renderOverview = () => {
       if (overviewMode === 'groups') {
+        const groups = groupFilters?.groups;
         return (
-          <GroupListView
-            groupBy={groupBy}
-            isCompact={true}
-            group="production"
-            sloView={sloView}
-            summary={summary}
-          />
+          <EuiFlexItem grow={0}>
+            {groups &&
+              groups.map((group) => (
+                <GroupListView
+                  groupBy={groupFilters!.groupBy}
+                  isCompact={true}
+                  group={group}
+                  sloView={groupFilters!.sloView}
+                  summary={summary}
+                />
+              ))}
+          </EuiFlexItem>
         );
       } else {
         return (

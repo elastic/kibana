@@ -11,7 +11,8 @@ export type SLOView = 'cardView' | 'listView';
 interface GroupFilters {
   groupBy: string;
   groups: string[];
-  sloView: string;
+  // sloView: string;
+  sloView: SLOView;
 }
 
 export interface EmbeddableSloProps {
