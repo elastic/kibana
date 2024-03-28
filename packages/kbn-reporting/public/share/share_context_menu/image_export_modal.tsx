@@ -390,8 +390,9 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiModalFooter
+        // dashboard has three buttons in the footer and needs to have them in the footer
         css={
-          selectedRadio === 'printablePdfV2'
+          selectedRadio === 'printablePdfV2' && objectType === 'dashboard'
             ? { justifyContent: 'center', alignItems: 'center' }
             : {}
         }
@@ -406,10 +407,12 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             data-test-subj="generateReportButton"
             isLoading={Boolean(createReportingJob)}
           >
-            <FormattedMessage
-              id="reporting.share.generateReportButtonLabel"
-              defaultMessage="Generate export"
-            />
+            <EuiText size="xs">
+              <FormattedMessage
+                id="reporting.share.generateReportButtonLabel"
+                defaultMessage="Generate export"
+              />
+            </EuiText>
           </EuiButton>
         ) : (
           saveWarningMessageWithButton
