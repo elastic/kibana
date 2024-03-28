@@ -99,6 +99,7 @@ export function SloGroupFilters({ onSelected }: Props) {
           onChange={(e) => {
             setSelectedGroupBy(e.target.value);
             onSelected('groupBy', e.target.value);
+            setSelectedGroupOptions([]);
           }}
         />
       </EuiFormRow>
