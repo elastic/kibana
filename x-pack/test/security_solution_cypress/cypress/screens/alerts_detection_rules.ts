@@ -161,6 +161,8 @@ export const RULES_TAGS_FILTER_POPOVER = '[data-test-subj="tags-filter-popover"]
 
 export const RULES_TAGS_FILTER_SELECTABLE_OPTION = '[data-test-subj="tagsFilter-selectableOption"]';
 
+export const RULES_TAGS_FILTER_SELECTED_OPTION = '[data-test-subj="tagsFilter-selectedOption"]';
+
 export const RULES_SELECTED_TAG = '.euiSelectableListItem[aria-checked="true"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';

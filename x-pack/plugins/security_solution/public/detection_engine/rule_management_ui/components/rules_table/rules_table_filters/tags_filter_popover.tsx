@@ -49,7 +49,8 @@ const TagsFilterPopoverComponent = ({
   );
 
   const selectedOptions = useMemo(
-    () => selectedTags.map((tag) => ({ label: tag })),
+    () =>
+      selectedTags.map((tag) => ({ label: tag, 'data-test-subj': 'tagsFilter-selectedOption' })),
     [selectedTags]
   );
 
