@@ -210,7 +210,8 @@ export class DashboardPanelActionsService extends FtrService {
     } else {
       await this.openContextMenu();
     }
-    await this.clickContextMenuMoreItem();
+    const isActionVisible = await this.testSubjects.exists(CLONE_PANEL_DATA_TEST_SUBJ);
+    if (!isActionVisible) await this.clickContextMenuMoreItem();
     await this.testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
     await this.dashboard.waitForRenderComplete();
   }
