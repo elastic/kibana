@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.enableValue();
     await fieldEditor.typeScript("emit('abc')");
     await fieldEditor.save();
+    await fieldEditor.waitUntilClosed();
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
@@ -61,6 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.enableCustomLabel();
       await fieldEditor.setCustomLabel(customLabel);
       await fieldEditor.save();
+      await fieldEditor.waitUntilClosed();
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect((await PageObjects.unifiedFieldList.getAllFieldNames()).includes(customLabel)).to.be(
         true
@@ -77,6 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.enableCustomDescription();
       await fieldEditor.setCustomDescription(customDescription);
       await fieldEditor.save();
+      await fieldEditor.waitUntilClosed();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.unifiedFieldList.clickFieldListItem('agent');
       await retry.waitFor('field popover text', async () => {
@@ -145,6 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.setName(newFieldName, true);
       await fieldEditor.save();
       await fieldEditor.confirmSave();
+      await fieldEditor.waitUntilClosed();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitForDocTableLoadingComplete();
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
