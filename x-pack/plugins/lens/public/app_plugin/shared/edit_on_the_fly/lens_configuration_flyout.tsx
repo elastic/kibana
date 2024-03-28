@@ -82,6 +82,7 @@ export function LensEditConfigurationFlyout({
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
+  const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
 
@@ -296,6 +297,7 @@ export function LensEditConfigurationFlyout({
         setErrors([]);
         updateSuggestion?.(attrs);
       }
+      setIsVisualizationLoading(false);
     },
     [
       startDependencies,
@@ -366,6 +368,8 @@ export function LensEditConfigurationFlyout({
         isSaveable={isSaveable}
       >
         <LayerConfiguration
+          // TODO: remove this once we support switching to any chart in Discover
+          onlyAllowSwitchToSubtypes
           getUserMessages={getUserMessages}
           attributes={attributes}
           coreStart={coreStart}
@@ -449,11 +453,13 @@ export function LensEditConfigurationFlyout({
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
                   if (q) {
+                    setIsVisualizationLoading(true);
                     await runQuery(q, a);
                   }
                 }}
                 isDisabled={false}
                 allowQueryCancellation
+                isLoading={isVisualizationLoading}
               />
             </EuiFlexItem>
           )}
@@ -502,8 +508,6 @@ export function LensEditConfigurationFlyout({
             >
               <>
                 <LayerConfiguration
-                  // TODO: remove this prop once we add support for multiple layers (form-based mode)
-                  shouldDisplayChartSwitch={!!textBasedMode}
                   attributes={attributes}
                   getUserMessages={getUserMessages}
                   coreStart={coreStart}

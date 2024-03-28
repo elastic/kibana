@@ -22,7 +22,6 @@ import {
   Visualization,
 } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
-import { ChartSwitch } from './chart_switch';
 import { MessageList } from './message_list';
 import {
   useLensDispatch,
@@ -189,14 +188,6 @@ export function WorkspacePanelWrapper({
             {!isFullscreen && (
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-                  <EuiFlexItem grow={false}>
-                    <ChartSwitch
-                      data-test-subj="lnsChartSwitcher"
-                      visualizationMap={visualizationMap}
-                      datasourceMap={datasourceMap}
-                      framePublicAPI={framePublicAPI}
-                    />
-                  </EuiFlexItem>
                   <VisualizationToolbar
                     activeVisualization={activeVisualization}
                     framePublicAPI={framePublicAPI}

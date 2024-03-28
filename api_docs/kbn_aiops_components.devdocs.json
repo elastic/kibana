@@ -621,6 +621,29 @@
             "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DocumentCountChartProps.changePoint",
+            "type": "Object",
+            "tags": [],
+            "label": "changePoint",
+            "description": [
+              "Optional change point metadata"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-utils",
+                "scope": "common",
+                "docId": "kibKbnAiopsUtilsPluginApi",
+                "section": "def-common.DocumentCountStatsChangePoint",
+                "text": "DocumentCountStatsChangePoint"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
