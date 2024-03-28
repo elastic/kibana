@@ -62,7 +62,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     options: { stripEmptyFields: false },
   });
 
-  const [formData] = useFormData({ form });
+  useFormData({ form });
 
   const { subscribe } = form;
 
@@ -244,7 +244,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               }}
             </FormDataProvider>
             {/* Field inference_id for semantic_text field type */}
-            <ModelIdCombo />
+            <InferenceIdCombo />
 
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={true} />
@@ -273,7 +273,7 @@ function ReferenceFieldCombo() {
   );
 }
 
-function ModelIdCombo() {
+function InferenceIdCombo() {
   const [{ type }] = useFormData({ watch: 'type' });
 
   if (type === undefined || type[0]?.value !== 'semantic_text') {
@@ -283,13 +283,9 @@ function ModelIdCombo() {
   return (
     <>
       <EuiSpacer />
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <UseField path="inferenceId">
-            {(field) => <InferenceIdSelects onChange={field.setValue} />}
-          </UseField>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <UseField path="inferenceId">
+        {(field) => <InferenceIdSelects onChange={field.setValue} />}
+      </UseField>
     </>
   );
 }
