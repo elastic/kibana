@@ -385,23 +385,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should display a list of available data views', async () => {
           await retry.try(async () => {
-            const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu: WebElementWrapper) =>
-                Promise.all([
-                  PageObjects.observabilityLogsExplorer.getPanelTitle(menu),
-                  PageObjects.observabilityLogsExplorer.getPanelEntries(menu),
-                ])
-              );
+            const menu = await PageObjects.observabilityLogsExplorer.getDataViewsContextMenu();
+            const menuEntries = await PageObjects.observabilityLogsExplorer.getPanelEntries(menu);
 
-            expect(
-              await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
-                panelTitleNode
-              )
-            ).to.be('Data Views');
             expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
             expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
+          });
+        });
+
+        it('should filter the list of data views by type', async () => {
+          // Test descending order
+          await PageObjects.observabilityLogsExplorer.changeDataViewTypeFilter('Logs');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogsExplorer
+              .getDataViewsContextMenu()
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
+
+            expect(menuEntries.length).to.be(1);
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+          });
+
+          // Test back all filter
+          await PageObjects.observabilityLogsExplorer.changeDataViewTypeFilter('All');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogsExplorer
+              .getDataViewsContextMenu()
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
+
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[2]);
           });
         });
 
@@ -437,20 +455,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should filter the data views list by the typed data view name', async () => {
           await retry.try(async () => {
-            const panelTitleNode = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu: WebElementWrapper) =>
-                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
-              );
-
-            expect(
-              await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
-                panelTitleNode
-              )
-            ).to.be('Data Views');
-          });
-
-          await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
               .then((menu: WebElementWrapper) =>
@@ -479,20 +483,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should load a data view allowed by the settings upon click', async () => {
           await retry.try(async () => {
-            const panelTitleNode = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu: WebElementWrapper) =>
-                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
-              );
-
-            expect(
-              await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
-                panelTitleNode
-              )
-            ).to.be('Data Views');
-          });
-
-          await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
               .then((menu: WebElementWrapper) =>
@@ -517,20 +507,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should navigate to Discover and load a data view not allowed by the settings upon click', async () => {
-          await retry.try(async () => {
-            const panelTitleNode = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu: WebElementWrapper) =>
-                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
-              );
-
-            expect(
-              await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
-                panelTitleNode
-              )
-            ).to.be('Data Views');
-          });
-
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()

@@ -12,6 +12,7 @@ import {
   DatasetSelectionHandler,
   DataSourceSelectorScrollHandler,
   DataSourceSelectorSearchHandler,
+  DataViewFilterHandler,
   DataViewSelectionHandler,
 } from '../types';
 import { createDataSourceSelectorStateMachine } from './state_machine';
@@ -20,6 +21,7 @@ import { DataSourceSelectorStateMachineDependencies } from './types';
 export const useDataSourceSelector = ({
   initialContext,
   onDataViewsSearch,
+  onDataViewsFilter,
   onDataViewsSort,
   onIntegrationsLoadMore,
   onIntegrationsReload,
@@ -34,6 +36,7 @@ export const useDataSourceSelector = ({
     createDataSourceSelectorStateMachine({
       initialContext,
       onDataViewsSearch,
+      onDataViewsFilter,
       onDataViewsSort,
       onIntegrationsLoadMore,
       onIntegrationsReload,
@@ -51,6 +54,10 @@ export const useDataSourceSelector = ({
   );
 
   const search = useSelector(dataSourceSelectorStateService, (state) => state.context.search);
+  const dataViewsFilter = useSelector(
+    dataSourceSelectorStateService,
+    (state) => state.context.dataViewsFilter
+  );
   const selection = useSelector(dataSourceSelectorStateService, (state) => state.context.selection);
   const tabId = useSelector(dataSourceSelectorStateService, (state) => state.context.tabId);
 
@@ -71,6 +78,11 @@ export const useDataSourceSelector = ({
 
   const searchByName = useCallback<DataSourceSelectorSearchHandler>(
     (params) => dataSourceSelectorStateService.send({ type: 'SEARCH_BY_NAME', search: params }),
+    [dataSourceSelectorStateService]
+  );
+
+  const filterByType = useCallback<DataViewFilterHandler>(
+    (params) => dataSourceSelectorStateService.send({ type: 'FILTER_BY_TYPE', filter: params }),
     [dataSourceSelectorStateService]
   );
 
@@ -112,6 +124,7 @@ export const useDataSourceSelector = ({
   return {
     // Data
     search,
+    dataViewsFilter,
     selection,
     tabId,
     // Flags
@@ -121,6 +134,7 @@ export const useDataSourceSelector = ({
     closePopover,
     scrollToIntegrationsBottom,
     searchByName,
+    filterByType,
     selectAllLogs,
     selectDataset,
     selectDataView,

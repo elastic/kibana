@@ -16,6 +16,7 @@ interface SearchControlsProps {
   onSearch: DataSourceSelectorSearchHandler;
   onSort?: DataSourceSelectorSearchHandler;
   search: DataSourceSelectorSearchParams;
+  filterComponent?: React.ReactNode;
 }
 
 export const SearchControls = ({
@@ -23,6 +24,7 @@ export const SearchControls = ({
   onSearch,
   onSort,
   isLoading = false,
+  filterComponent,
 }: SearchControlsProps) => {
   const handleNameChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     const newSearch = {
@@ -39,32 +41,36 @@ export const SearchControls = ({
       css={{ width: '100%' }}
       data-test-subj="dataSourceSelectorSearchControls"
     >
-      <EuiFlexGroup gutterSize="xs" responsive={false}>
+      <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem>
-          <EuiFieldSearch
-            data-test-subj="logsExplorerSearchControlsFieldSearch"
-            compressed
-            incremental
-            fullWidth
-            value={search.name}
-            onChange={handleNameChange}
-            isLoading={isLoading}
-          />
+          <EuiFlexGroup gutterSize="xs" responsive={false}>
+            <EuiFlexItem>
+              <EuiFieldSearch
+                data-test-subj="logsExplorerSearchControlsFieldSearch"
+                compressed
+                incremental
+                value={search.name}
+                onChange={handleNameChange}
+                isLoading={isLoading}
+              />
+            </EuiFlexItem>
+            {onSort && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  isIconOnly
+                  buttonSize="compressed"
+                  options={sortOptions}
+                  legend={sortOrdersLabel}
+                  idSelected={search.sortOrder as SortOrder}
+                  onChange={(id: string) =>
+                    onSort({ ...search, sortOrder: id as DataSourceSelectorSearchParams['sortOrder'] })
+                  }
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
-        {onSort && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              isIconOnly
-              buttonSize="compressed"
-              options={sortOptions}
-              legend={sortOrdersLabel}
-              idSelected={search.sortOrder as SortOrder}
-              onChange={(id: string) =>
-                onSort({ ...search, sortOrder: id as DataSourceSelectorSearchParams['sortOrder'] })
-              }
-            />
-          </EuiFlexItem>
-        )}
+        {filterComponent && <EuiFlexItem>{filterComponent}</EuiFlexItem>}
       </EuiFlexGroup>
     </EuiPanel>
   );

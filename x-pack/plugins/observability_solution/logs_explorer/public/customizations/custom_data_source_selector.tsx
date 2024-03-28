@@ -49,6 +49,7 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
 
   const {
     dataViews,
+    dataViewCount,
     error: dataViewsError,
     isLoading: isLoadingDataViews,
     isDataViewAllowed,
@@ -56,6 +57,7 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
     loadDataViews,
     reloadDataViews,
     searchDataViews,
+    filterDataViews,
     sortDataViews,
   } = useDataViewsContext();
 
@@ -67,6 +69,7 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
       datasetsError={datasetsError}
       dataSourceSelection={dataSourceSelection}
       dataViews={dataViews}
+      dataViewCount={dataViewCount}
       dataViewsError={dataViewsError}
       discoverEsqlUrlProps={discoverEsqlUrlProps}
       integrations={integrations}
@@ -80,6 +83,7 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
       isSearchingIntegrations={isSearchingIntegrations}
       onDataViewsReload={reloadDataViews}
       onDataViewsSearch={searchDataViews}
+      onDataViewsFilter={filterDataViews}
       onDataViewsSort={sortDataViews}
       onDataViewsTabClick={loadDataViews}
       onIntegrationsLoadMore={loadMore}

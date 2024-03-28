@@ -27,12 +27,14 @@ import { SelectorPopover } from './sub_components/selector_popover';
 import { DataSourceSelectorTabs } from './sub_components/selector_tabs';
 import { DataSourceSelectorProps } from './types';
 import { buildIntegrationsTree, createDataViewsStatusItem } from './utils';
+import { DataViewsFilter } from './sub_components/data_view_filter';
 
 export function DataSourceSelector({
   datasets,
   dataSourceSelection,
   datasetsError,
   dataViews,
+  dataViewCount,
   dataViewsError,
   discoverEsqlUrlProps,
   integrations,
@@ -46,6 +48,7 @@ export function DataSourceSelector({
   isSearchingIntegrations,
   onDataViewsReload,
   onDataViewsSearch,
+  onDataViewsFilter,
   onDataViewsSort,
   onDataViewsTabClick,
   onIntegrationsLoadMore,
@@ -59,12 +62,14 @@ export function DataSourceSelector({
 }: DataSourceSelectorProps) {
   const {
     search,
+    dataViewsFilter,
     tabId,
     isOpen,
     isAllMode,
     closePopover,
     scrollToIntegrationsBottom,
     searchByName,
+    filterByType,
     selectAllLogs,
     selectDataset,
     selectDataView,
@@ -75,6 +80,7 @@ export function DataSourceSelector({
   } = useDataSourceSelector({
     initialContext: { selection: dataSourceSelection },
     onDataViewsSearch,
+    onDataViewsFilter,
     onDataViewsSort,
     onIntegrationsLoadMore,
     onIntegrationsReload,
@@ -204,6 +210,15 @@ export function DataSourceSelector({
             onSearch={searchByName}
             onSort={sortByOrder}
             search={search}
+            filterComponent={
+              tabId === DATA_VIEWS_TAB_ID && (
+                <DataViewsFilter
+                  filter={dataViewsFilter}
+                  count={dataViewCount}
+                  onFilter={filterByType}
+                />
+              )
+            }
           />
         )}
         <EuiHorizontalRule margin="none" />

@@ -21,4 +21,5 @@ export const DEFAULT_CONTEXT: DefaultDataSourceSelectorContext = {
   searchCache: new HashedCache(),
   tabId: INTEGRATIONS_TAB_ID,
   search: defaultSearch,
+  dataViewsFilter: {},
 };
