@@ -8,9 +8,11 @@
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { apiIsOfType } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { type EmbeddableApiContext, apiIsOfType } from '@kbn/presentation-publishing';
+import {
+  type UiActionsActionDefinition,
+  IncompatibleActionError,
+} from '@kbn/ui-actions-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import type { MlEmbeddableBaseApi, SingleMetricViewerEmbeddableApi } from '../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
@@ -56,9 +58,7 @@ export function createOpenInSingleMetricViewerAction(
 
       if (isSingleMetricViewerEmbeddableContext(context)) {
         const { embeddable } = context;
-        const {
-          input: { jobIds, query, selectedEntities },
-        } = embeddable;
+        const { jobIds, query$, selectedEntities } = embeddable;
 
         return locator.getUrl(
           {
@@ -71,9 +71,9 @@ export function createOpenInSingleMetricViewerAction(
                 pause: true,
                 value: 0,
               },
-              jobIds,
-              query,
-              entities: selectedEntities,
+              jobIds: jobIds.getValue(),
+              query: query$?.getValue(),
+              entities: selectedEntities?.getValue(),
             },
           },
           { absolute: true }
@@ -81,8 +81,8 @@ export function createOpenInSingleMetricViewerAction(
       }
     },
     async execute(context) {
-      if (!context.embeddable) {
-        throw new Error('Not possible to execute an action without the embeddable context');
+      if (!isSingleMetricViewerEmbeddableContext(context)) {
+        throw new IncompatibleActionError();
       }
       const [{ application }] = await getStartServices();
       const singleMetricViewerUrl = await this.getHref!(context);

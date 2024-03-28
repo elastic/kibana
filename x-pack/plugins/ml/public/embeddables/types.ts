@@ -18,6 +18,7 @@ import type {
   PublishesUnifiedSearch,
   PublishesViewMode,
   PublishesWritablePanelTitle,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
@@ -135,11 +136,11 @@ export interface SingleMetricViewerEmbeddableCustomInput {
 export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
   SingleMetricViewerEmbeddableCustomInput;
 
-export interface SingleMetricViewerFieldSelectionApi {
-  input: Partial<SingleMetricViewerEmbeddableInput>;
-}
+export interface SingleMetricViewerComponentApi {
+  jobIds: PublishingSubject<JobId[]>;
+  selectedDetectorIndex: PublishingSubject<number>;
+  selectedEntities?: PublishingSubject<MlEntityField[]>;
 
-export interface SingleMetricViewerComponentApi extends SingleMetricViewerFieldSelectionApi {
   updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
 }
 
