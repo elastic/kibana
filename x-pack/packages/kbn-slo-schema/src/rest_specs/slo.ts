@@ -5,41 +5,40 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
 import {
   allOrAnyString,
+  allOrAnyStringOrArray,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
-  syntheticsAvailabilityIndicatorSchema,
   budgetingMethodSchema,
   dateType,
   durationType,
   groupingsSchema,
+  groupSummarySchema,
   histogramIndicatorSchema,
   historicalSummarySchema,
   indicatorSchema,
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
-  metricCustomIndicatorSchema,
+  kqlWithFiltersSchema,
   metaSchema,
-  timesliceMetricIndicatorSchema,
+  metricCustomIndicatorSchema,
   objectiveSchema,
-  optionalSettingsSchema,
   previewDataSchema,
+  querySchema,
   settingsSchema,
   sloIdSchema,
   summarySchema,
-  groupSummarySchema,
+  syntheticsAvailabilityIndicatorSchema,
   tagsSchema,
-  timeWindowSchema,
-  timeWindowTypeSchema,
   timesliceMetricBasicMetricWithField,
   timesliceMetricDocCountMetric,
+  timesliceMetricIndicatorSchema,
   timesliceMetricPercentileMetric,
-  allOrAnyStringOrArray,
-  kqlWithFiltersSchema,
-  querySchema,
+  timeWindowSchema,
+  timeWindowTypeSchema,
 } from '../schema';
 
 const getPreviewDataParamsSchema = t.type({
@@ -162,23 +161,6 @@ const getSLOParamsSchema = t.intersection([
 
 const getSLOResponseSchema = sloWithSummaryResponseSchema;
 
-const updateSLOParamsSchema = t.type({
-  path: t.type({
-    id: sloIdSchema,
-  }),
-  body: t.partial({
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    timeWindow: timeWindowSchema,
-    budgetingMethod: budgetingMethodSchema,
-    objective: objectiveSchema,
-    settings: optionalSettingsSchema,
-    tags: tagsSchema,
-    groupBy: allOrAnyStringOrArray,
-  }),
-});
-
 const manageSLOParamsSchema = t.type({
   path: t.type({ id: sloIdSchema }),
 });
@@ -188,8 +170,6 @@ const resetSLOParamsSchema = t.type({
 });
 
 const resetSLOResponseSchema = sloResponseSchema;
-
-const updateSLOResponseSchema = sloResponseSchema;
 
 const findSLOResponseSchema = t.type({
   page: t.number,
@@ -300,10 +280,6 @@ type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
 type ResetSLOParams = t.TypeOf<typeof resetSLOParamsSchema.props.path>;
 type ResetSLOResponse = t.OutputOf<typeof resetSLOResponseSchema>;
 
-type UpdateSLOInput = t.OutputOf<typeof updateSLOParamsSchema.props.body>;
-type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
-type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
-
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
@@ -367,8 +343,6 @@ export {
   sloResponseSchema,
   sloWithSummaryResponseSchema,
   sloGroupWithSummaryResponseSchema,
-  updateSLOParamsSchema,
-  updateSLOResponseSchema,
   getSLOBurnRatesParamsSchema,
   getSLOBurnRatesResponseSchema,
   getSLOInstancesParamsSchema,
@@ -397,9 +371,6 @@ export type {
   SLOResponse,
   SLOWithSummaryResponse,
   SLOGroupWithSummaryResponse,
-  UpdateSLOInput,
-  UpdateSLOParams,
-  UpdateSLOResponse,
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   SyntheticsAvailabilityIndicator,
