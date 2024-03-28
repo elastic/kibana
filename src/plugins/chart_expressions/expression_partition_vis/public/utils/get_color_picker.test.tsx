@@ -23,15 +23,6 @@ import { createMockBucketColumns, createMockVisData } from '../mocks';
 const bucketColumns = createMockBucketColumns();
 const visData = createMockVisData();
 
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
-
-  return {
-    ...original,
-    getSpecId: jest.fn(() => {}),
-  };
-});
-
 describe('LegendColorPickerWrapper', () => {
   const mockState = new Map();
   const uiState = {

@@ -30,15 +30,6 @@ import {
   Color,
 } from '@elastic/charts';
 
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
-
-  return {
-    ...original,
-    getSpecId: jest.fn(() => {}),
-  };
-});
-
 const numberColumn = (id = 'metric-accessor'): DatatableColumn => ({
   id,
   name: 'Count of records',
@@ -49,15 +40,6 @@ const numberColumn = (id = 'metric-accessor'): DatatableColumn => ({
       id: 'number',
     },
   },
-});
-
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
-
-  return {
-    ...original,
-    getSpecId: jest.fn(() => {}),
-  };
 });
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;

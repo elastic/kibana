@@ -28,15 +28,6 @@ import { ChartTypes } from '../../common/types';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { cloneDeep } from 'lodash';
 
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
-
-  return {
-    ...original,
-    getSpecId: jest.fn(() => {}),
-  };
-});
-
 const actWithTimeout = (action: Function, timer: number = 1) =>
   act(
     () =>
