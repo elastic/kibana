@@ -10,5 +10,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./agent_policy_with_agents_setup'));
     loadTestFile(require.resolve('./agent_policy'));
     loadTestFile(require.resolve('./agent_policy_datastream_permissions'));
+    loadTestFile(require.resolve('./privileges'));
   });
 }

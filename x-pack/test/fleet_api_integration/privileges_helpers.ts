@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import supertest, { type SuperTest } from 'supertest';
+
 interface PrivilegeTestScenario {
   user: {
     username: string;
     password: string;
   };
-  expect: number;
+  statusCode: number;
 }
 
 interface PrivilegeTestRoute {
@@ -22,42 +24,64 @@ interface PrivilegeTestRoute {
   scenarios: PrivilegeTestScenario[];
 }
 
-export function runPrivilegeTests(routes: PrivilegeTestRoute[], supertestWithoutAuth: any) {
+export function runPrivilegeTests(
+  routes: PrivilegeTestRoute[],
+  supertestWithoutAuth: SuperTest<supertest.Test>
+) {
   for (const route of routes) {
     describe(`${route.method} ${route.path}`, () => {
-      beforeEach(() => {
-        return route.beforeEach ? route.beforeEach() : undefined;
-      });
-      afterEach(() => {
-        return route.afterEach ? route.afterEach() : undefined;
-      });
+      if (route.beforeEach) {
+        beforeEach(() => {
+          return route.beforeEach ? route.beforeEach() : undefined;
+        });
+      }
+      if (route.afterEach) {
+        afterEach(() => {
+          return route.afterEach ? route.afterEach() : undefined;
+        });
+      }
       for (const scenario of route.scenarios) {
-        it(`should return a ${scenario.expect} for user: ${scenario.user.username}`, async () => {
+        const expectFn = (res: supertest.Response) => {
+          if (res.status !== scenario.statusCode) {
+            let message = '';
+            try {
+              message = res.body.error
+                ? `${res.body.error}:${res.body.message}`
+                : res.body.message ?? '';
+            } catch (err) {
+              // swallow error
+            }
+            throw new Error(
+              `Expected status ${scenario.statusCode}, got: ${res.status} ${message}`
+            );
+          }
+        };
+        it(`should return a ${scenario.statusCode} for user: ${scenario.user.username}`, async () => {
           if (route.method === 'GET') {
             return supertestWithoutAuth
               .get(route.path)
               .auth(scenario.user.username, scenario.user.password)
-              .expect(scenario.expect);
+              .expect(expectFn);
           } else if (route.method === 'PUT') {
             return supertestWithoutAuth
               .put(route.path)
               .set('kbn-xsrf', 'xx')
               .auth(scenario.user.username, scenario.user.password)
               .send(route.send)
-              .expect(scenario.expect);
+              .expect(expectFn);
           } else if (route.method === 'DELETE') {
             return supertestWithoutAuth
               .delete(route.path)
               .set('kbn-xsrf', 'xx')
               .auth(scenario.user.username, scenario.user.password)
-              .expect(scenario.expect);
+              .expect(expectFn);
           } else if (route.method === 'POST') {
-            return supertestWithoutAuth
+            await supertestWithoutAuth
               .post(route.path)
               .set('kbn-xsrf', 'xx')
               .auth(scenario.user.username, scenario.user.password)
               .send(route.send)
-              .expect(scenario.expect);
+              .expect(expectFn);
           } else {
             throw new Error('not implemented');
           }
