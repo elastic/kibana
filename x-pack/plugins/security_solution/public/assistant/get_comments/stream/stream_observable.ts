@@ -13,7 +13,7 @@ import { API_ERROR } from '../translations';
 const MIN_DELAY = 35;
 
 interface StreamObservable {
-  llmType: string;
+  actionTypeId: string;
   isEnabledLangChain: boolean;
   isError: boolean;
   reader: ReadableStreamDefaultReader<Uint8Array>;
@@ -30,7 +30,7 @@ interface StreamObservable {
  * @returns {Observable<PromptObservableState>} An Observable that emits PromptObservableState
  */
 export const getStreamObservable = ({
-  llmType,
+  actionTypeId,
   isEnabledLangChain,
   isError,
   reader,
@@ -210,15 +210,15 @@ export const getStreamObservable = ({
     // this should never actually happen
     function badConnector() {
       observer.next({
-        chunks: [`Invalid connector type - ${llmType} is not a supported GenAI connector.`],
-        message: `Invalid connector type - ${llmType} is not a supported GenAI connector.`,
+        chunks: [`Invalid connector type - ${actionTypeId} is not a supported GenAI connector.`],
+        message: `Invalid connector type - ${actionTypeId} is not a supported GenAI connector.`,
         loading: false,
       });
       observer.complete();
     }
     if (isEnabledLangChain) readLangChain();
-    else if (llmType === '.bedrock') readBedrock();
-    else if (llmType === '.gen-ai') readOpenAI();
+    else if (actionTypeId === '.bedrock') readBedrock();
+    else if (actionTypeId === '.gen-ai') readOpenAI();
     else badConnector();
 
     return () => {
@@ -295,6 +295,5 @@ const getLangChainChunks = (lines: string[]): string[] =>
     }
     return acc;
   }, []);
-
 
 export const getPlaceholderObservable = () => new Observable<PromptObservableState>();

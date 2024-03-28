@@ -36,6 +36,7 @@ export const transformESToConversations = (
           ? {
               apiConfig: {
                 connectorId: conversationSchema.api_config.connector_id,
+                actionTypeId: conversationSchema.api_config.action_type_id,
                 defaultSystemPromptId: conversationSchema.api_config.default_system_prompt_id,
                 model: conversationSchema.api_config.model,
                 provider: conversationSchema.api_config.provider,

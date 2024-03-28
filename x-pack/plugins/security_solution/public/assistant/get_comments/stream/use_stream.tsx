@@ -14,7 +14,7 @@ interface UseStreamProps {
   isEnabledLangChain: boolean;
   isError: boolean;
   content?: string;
-  llmType: string;
+  actionTypeId: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
 interface UseStream {
@@ -33,7 +33,7 @@ interface UseStream {
  * A hook that takes a ReadableStreamDefaultReader and returns an object with properties and functions
  * that can be used to handle streaming data from a readable stream
  * @param content - the content of the message. If provided, the function will not use the reader to stream data.
- * @param llmType - the actionTypeId of the connector type
+ * @param actionTypeId - the actionTypeId of the connector type
  * @param refetchCurrentConversation - refetch the current conversation
  * @param reader - The readable stream reader used to stream data. If provided, the function will use this reader to stream data.
  * @param isEnabledLangChain - indicates whether langchain is enabled or not
@@ -42,7 +42,7 @@ interface UseStream {
  */
 export const useStream = ({
   content,
-  llmType,
+  actionTypeId,
   isEnabledLangChain,
   isError,
   reader,
@@ -55,9 +55,9 @@ export const useStream = ({
   const observer$ = useMemo(
     () =>
       content == null && reader != null
-        ? getStreamObservable({ llmType, reader, setLoading, isEnabledLangChain, isError })
+        ? getStreamObservable({ actionTypeId, reader, setLoading, isEnabledLangChain, isError })
         : getPlaceholderObservable(),
-    [content, isEnabledLangChain, isError, reader, llmType]
+    [content, isEnabledLangChain, isError, reader, actionTypeId]
   );
   const onCompleteStream = useCallback(() => {
     subscription?.unsubscribe();

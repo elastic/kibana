@@ -9,7 +9,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
 import { ApiConfig, Replacement } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
-import { getOptionalRequestParams, hasParsableResponse } from '../helpers';
+import { getOptionalRequestParams } from '../helpers';
 export * from './conversations';
 
 export interface FetchConnectorExecuteAction {
@@ -53,14 +53,12 @@ export const fetchConnectorExecuteAction = async ({
   signal,
   size,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
-  const llmType='todo';
-  // TODO
   const isStream =
     assistantStreamingEnabled &&
-    (llmType === 'openai' ||
+    (apiConfig.actionTypeId === '.gen-ai' ||
       // TODO add streaming support for bedrock with langchain on
       // tracked here: https://github.com/elastic/security-team/issues/7363
-      (llmType === 'bedrock' && !isEnabledRAGAlerts && !isEnabledKnowledgeBase));
+      (apiConfig.actionTypeId === '.bedrock' && !isEnabledRAGAlerts && !isEnabledKnowledgeBase));
 
   const optionalRequestParams = getOptionalRequestParams({
     isEnabledRAGAlerts,

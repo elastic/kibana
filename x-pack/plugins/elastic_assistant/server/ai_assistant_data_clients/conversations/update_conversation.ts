@@ -36,6 +36,7 @@ export interface UpdateConversationSchema {
     };
   }>;
   api_config?: {
+    action_type_id?: string;
     connector_id?: string;
     default_system_prompt_id?: string;
     provider?: Provider;
@@ -65,7 +66,9 @@ export const updateConversation = async ({
   user,
 }: UpdateConversationParams): Promise<ConversationResponse | null> => {
   const updatedAt = new Date().toISOString();
+  console.log('conversationUpdateProps', conversationUpdateProps);
   const params = transformToUpdateScheme(updatedAt, conversationUpdateProps);
+  console.log('params', params);
   try {
     const response = await esClient.updateByQuery({
       conflicts: 'proceed',
@@ -116,6 +119,7 @@ export const transformToUpdateScheme = (
     updated_at: updatedAt,
     title,
     api_config: {
+      action_type_id: apiConfig?.actionTypeId,
       connector_id: apiConfig?.connectorId,
       default_system_prompt_id: apiConfig?.defaultSystemPromptId,
       model: apiConfig?.model,

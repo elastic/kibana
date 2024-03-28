@@ -172,6 +172,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     if (!isLoading && Object.keys(conversations).length > 0) {
+      console.log('conversations', conversations);
       const conversation =
         conversations[selectedConversationTitle ?? getLastConversationTitle(conversationTitle)];
       if (conversation) {

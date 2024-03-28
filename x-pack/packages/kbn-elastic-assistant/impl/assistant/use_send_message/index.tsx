@@ -42,7 +42,7 @@ export const useSendMessage = (): UseSendMessage => {
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
   const sendMessage = useCallback(
-    async ({ apiConfig, http, message, replacements }: SendMessageProps) => {
+    async ({ apiConfig, http, message, conversationId, replacements }: SendMessageProps) => {
       setIsLoading(true);
 
       try {

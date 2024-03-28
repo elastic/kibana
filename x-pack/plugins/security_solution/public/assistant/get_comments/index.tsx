@@ -62,7 +62,8 @@ export const getComments = ({
   const regenerateMessageOfConversation = () => {
     regenerateMessage(currentConversation.id);
   };
-  const connectorId = currentConversation.apiConfig?.connectorId ?? '';
+  // TODO handle error
+  const actionTypeId = currentConversation.apiConfig?.actionTypeId ?? '';
 
   const extraLoadingComment = isFetchingResponse
     ? [
@@ -73,7 +74,7 @@ export const getComments = ({
           children: (
             <StreamComment
               abortStream={abortStream}
-              connectorId={connectorId}
+              actionTypeId={actionTypeId}
               content=""
               refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
@@ -128,7 +129,7 @@ export const getComments = ({
           children: (
             <StreamComment
               abortStream={abortStream}
-              connectorId={connectorId}
+              actionTypeId={actionTypeId}
               index={index}
               isControlsEnabled={isControlsEnabled}
               isEnabledLangChain={isEnabledLangChain}
@@ -152,7 +153,7 @@ export const getComments = ({
         actions: <CommentActions message={transformedMessage} />,
         children: (
           <StreamComment
-            connectorId={connectorId}
+            actionTypeId={actionTypeId}
             abortStream={abortStream}
             content={transformedMessage.content}
             index={index}

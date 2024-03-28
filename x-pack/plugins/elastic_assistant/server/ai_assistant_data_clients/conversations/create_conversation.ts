@@ -85,6 +85,7 @@ export const transformToCreateScheme = (
     category: category ?? ConversationCategoryEnum.assistant,
     api_config: apiConfig
       ? {
+          action_type_id: apiConfig.actionTypeId,
           connector_id: apiConfig.connectorId,
           default_system_prompt_id: apiConfig.defaultSystemPromptId,
           model: apiConfig.model,

@@ -144,6 +144,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
                       apiConfig: {
                         defaultSystemPromptId: getDefaultSystemPromptId(convo),
                         connectorId: defaultConnector?.id ?? '',
+                        actionTypeId: defaultConnector?.actionTypeId ?? '',
                       },
                     }),
               }))
