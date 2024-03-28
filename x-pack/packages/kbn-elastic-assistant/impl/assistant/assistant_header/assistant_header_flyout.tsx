@@ -20,7 +20,6 @@ import {
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
