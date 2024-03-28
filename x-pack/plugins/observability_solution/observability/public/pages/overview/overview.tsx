@@ -39,7 +39,6 @@ const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
 
 export function OverviewPage() {
   const {
-    charts,
     http,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
@@ -102,10 +101,6 @@ export function OverviewPage() {
       ),
     [bucketSize, relativeEnd, relativeStart]
   );
-
-  const chartProps = {
-    baseTheme: charts.theme.useChartsBaseTheme(),
-  };
 
   useEffect(() => {
     setEsQuery(
@@ -184,7 +179,6 @@ export function OverviewPage() {
             hasError={false}
           >
             <AlertSummaryWidget
-              chartProps={chartProps}
               featureIds={observabilityAlertFeatureIds}
               filter={esQuery}
               fullSize
