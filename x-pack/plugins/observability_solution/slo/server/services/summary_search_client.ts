@@ -5,26 +5,24 @@
  * 2.0.
  */
 
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import { Groupings, SLO, SLOId, Summary } from '../domain/models';
+import { toHighPrecision } from '../utils/number';
 import { createEsParams, typedSearch } from '../utils/queries';
 import { getListOfSummaryIndices } from './slo_settings';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { SLO, SLOId, Summary, Groupings } from '../domain/models';
-import { toHighPrecision } from '../utils/number';
-import { getFlattenedGroupings } from './utils';
+import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
-
-import { fromSummaryDocumentToSlo } from './unsafe_federated/summary_doc_to_slo';
+import { fromRemoteSummaryDocumentToSlo } from './unsafe_federated/remote_summary_doc_to_slo';
+import { getFlattenedGroupings } from './utils';
 
 export interface SLOSummary {
   id: SLOId;
   remoteName?: string;
-  kibanaUrl?: string;
   unsafeSlo?: SLO;
   instanceId: string;
   summary: Summary;
@@ -132,13 +130,12 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
           const remoteName = getRemoteClusterName(doc._index);
           let unsafeSlo;
           if (remoteName) {
-            unsafeSlo = fromSummaryDocumentToSlo(summaryDoc, this.logger);
+            unsafeSlo = fromRemoteSummaryDocumentToSlo(summaryDoc, this.logger);
           }
 
           return {
             remoteName,
             unsafeSlo,
-            kibanaUrl: summaryDoc.kibanaUrl,
             id: summaryDoc.slo.id,
             instanceId: summaryDoc.slo.instanceId ?? ALL_VALUE,
             summary: {

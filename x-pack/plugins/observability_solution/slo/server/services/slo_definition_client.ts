@@ -6,11 +6,11 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { SLORepository } from './slo_repository';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { fromSummaryDocumentToSlo } from './unsafe_federated/summary_doc_to_slo';
 import { SLO } from '../domain/models';
+import { SLORepository } from './slo_repository';
+import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import { fromRemoteSummaryDocumentToSlo } from './unsafe_federated/remote_summary_doc_to_slo';
 
 export class SloDefinitionClient {
   constructor(
@@ -36,7 +36,7 @@ export class SloDefinitionClient {
       }
       const doc = summarySearch.hits.hits[0]._source!;
 
-      slo = fromSummaryDocumentToSlo(doc, this.logger);
+      slo = fromRemoteSummaryDocumentToSlo(doc, this.logger);
     } else {
       slo = await this.repository.findById(sloId);
     }

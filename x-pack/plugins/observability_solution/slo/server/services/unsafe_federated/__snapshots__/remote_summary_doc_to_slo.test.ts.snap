@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FromSummaryDocToSlo with kibana < v8.14 fallbacks to dummy indicator params and dates 1`] = `
+exports[`FromRemoteSummaryDocToSlo with kibana < v8.14 fallbacks to dummy indicator params and dates 1`] = `
 Object {
   "budgetingMethod": "timeslices",
   "createdAt": 2024-01-01T00:00:00.000Z,
@@ -55,7 +55,7 @@ Object {
 }
 `;
 
-exports[`FromSummaryDocToSlo with kibana >= v8.14 uses the stringified indicator params and dates 1`] = `
+exports[`FromRemoteSummaryDocToSlo with kibana >= v8.14 uses the stringified indicator params and dates 1`] = `
 Object {
   "budgetingMethod": "occurrences",
   "createdAt": 2024-02-01T00:00:00.000Z,

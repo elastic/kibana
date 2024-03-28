@@ -13,7 +13,7 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { SLO } from '../../domain/models';
 import { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 
-export function fromSummaryDocumentToSlo(
+export function fromRemoteSummaryDocumentToSlo(
   summaryDoc: EsSummaryDocument,
   logger: Logger
 ): SLO | undefined {
