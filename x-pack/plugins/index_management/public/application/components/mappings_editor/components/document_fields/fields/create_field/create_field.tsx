@@ -154,11 +154,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
           return (
             <EuiFlexItem grow={false}>
               <UseField path="referenceField">
-                {(field) => (
-                  <div className="mappingsEditor__selectSemanticTextReferenceField">
-                    <ReferenceFieldSelects onChange={field.setValue} />
-                  </div>
-                )}
+                {(field) => <ReferenceFieldSelects onChange={field.setValue} />}
               </UseField>
             </EuiFlexItem>
           );
@@ -272,11 +268,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                     <EuiFlexGroup gutterSize="s" alignItems="center">
                       <EuiFlexItem grow={false}>
                         <UseField path="inferenceId">
-                          {(field) => (
-                            <div className="mappingsEditor__selectSemanticTextInferenceId">
-                              <InferenceIdSelects onChange={field.setValue} />
-                            </div>
-                          )}
+                          {(field) => <InferenceIdSelects onChange={field.setValue} />}
                         </UseField>
                       </EuiFlexItem>
                     </EuiFlexGroup>
