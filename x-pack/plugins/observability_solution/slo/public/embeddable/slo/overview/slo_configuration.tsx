@@ -52,6 +52,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
       groupFilters: selectedGroupFilters,
     });
   const [hasError, setHasError] = useState(false);
+  const hasGroupBy = selectedSlo && selectedSlo.sloInstanceId !== ALL_VALUE;
 
   return (
     <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
@@ -91,7 +92,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-        {selectedSlo?.sloInstanceId !== ALL_VALUE && (
+        {overviewMode === 'single' && hasGroupBy && (
           <>
             <EuiSpacer />
             <EuiSwitch
