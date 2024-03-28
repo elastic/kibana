@@ -3326,7 +3326,7 @@ describe('Task Runner', () => {
       errorReason: 'unknown',
     });
 
-    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
   function testAlertingEventLogCalls({

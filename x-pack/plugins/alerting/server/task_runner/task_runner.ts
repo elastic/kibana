@@ -718,7 +718,7 @@ export class TaskRunner<
         return {
           taskRunError: createTaskRunError(
             new Error(errorsFromLastRun.join(',')),
-            TaskErrorSource.USER
+            TaskErrorSource.FRAMEWORK
           ),
         };
       }
