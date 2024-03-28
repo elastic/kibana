@@ -51,6 +51,14 @@
             "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
@@ -59,12 +67,12 @@
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/add_to_library_action.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/add_to_library_action.tsx"
           },
           {
             "plugin": "discover",

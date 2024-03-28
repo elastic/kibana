@@ -1480,7 +1480,7 @@
             "label": "unsafe",
             "description": [],
             "signature": [
-              "{ alertDetails: { metrics: { enabled: boolean; }; logs?: { enabled: boolean; } | undefined; uptime: { enabled: boolean; }; observability?: { enabled: boolean; } | undefined; }; thresholdRule?: { enabled: boolean; } | undefined; }"
+              "{ alertDetails: { metrics: { enabled: boolean; }; logs?: { enabled: boolean; } | undefined; uptime: { enabled: boolean; }; observability?: { enabled: boolean; } | undefined; }; thresholdRule?: { enabled: boolean; } | undefined; ruleFormV2?: { enabled: boolean; } | undefined; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
@@ -8576,7 +8576,7 @@
             "label": "config",
             "description": [],
             "signature": [
-              "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
+              "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
             "deprecated": false,
@@ -8696,7 +8696,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
+          "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability/server/index.ts",
         "deprecated": false,
@@ -10470,6 +10470,118 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableTableSearchBar.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmEnableServiceInventoryTableSearchBar]",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -13234,6 +13346,21 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableProfilingIntegration\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmEnableServiceInventoryTableSearchBar",
+        "type": "string",
+        "tags": [],
+        "label": "apmEnableServiceInventoryTableSearchBar",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceInventoryTableSearchBar\""
         ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
