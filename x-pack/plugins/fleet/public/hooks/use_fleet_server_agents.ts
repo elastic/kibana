@@ -14,7 +14,7 @@ import {
 
 import { sendGetAgents, sendGetPackagePolicies } from './use_request';
 
-export async function sendAllFleetServerAgents(onlyCount: boolean = false) {
+export async function sendGetAllFleetServerAgents(onlyCount: boolean = false) {
   const packagePoliciesRes = await sendGetPackagePolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,

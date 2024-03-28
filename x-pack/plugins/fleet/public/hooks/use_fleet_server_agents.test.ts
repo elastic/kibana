@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sendAllFleetServerAgents } from './use_fleet_server_agents';
+import { sendGetAllFleetServerAgents } from './use_fleet_server_agents';
 import { sendGetAgents, sendGetPackagePolicies } from './use_request';
 
 jest.mock('./use_request', () => ({
@@ -13,7 +13,7 @@ jest.mock('./use_request', () => ({
   sendGetPackagePolicies: jest.fn(),
 }));
 
-describe('sendAllFleetServerAgents', () => {
+describe('sendGetAllFleetServerAgents', () => {
   beforeEach(() => {
     (sendGetPackagePolicies as jest.Mock).mockResolvedValue({
       data: {
@@ -29,7 +29,7 @@ describe('sendAllFleetServerAgents', () => {
       },
     });
 
-    const result = await sendAllFleetServerAgents();
+    const result = await sendGetAllFleetServerAgents();
 
     expect(result).toEqual({ fleetServerAgentsCount: 1, allFleetServerAgents: [{ id: '1' }] });
   });
@@ -42,7 +42,7 @@ describe('sendAllFleetServerAgents', () => {
       },
     });
 
-    const result = await sendAllFleetServerAgents(true);
+    const result = await sendGetAllFleetServerAgents(true);
 
     expect(result).toEqual({ fleetServerAgentsCount: 1, allFleetServerAgents: [] });
   });

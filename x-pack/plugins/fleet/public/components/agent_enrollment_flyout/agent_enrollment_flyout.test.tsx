@@ -15,7 +15,7 @@ import { createFleetTestRendererMock } from '../../mock';
 import type { AgentPolicy } from '../../../common';
 import { useGetFleetServerHosts, sendGetOneAgentPolicy } from '../../hooks/use_request';
 import {
-  sendAllFleetServerAgents,
+  sendGetAllFleetServerAgents,
   useAgentEnrollmentFlyoutData,
   useFleetServerStandalone,
 } from '../../hooks';
@@ -92,7 +92,7 @@ describe('<AgentEnrollmentFlyout />', () => {
       setDeploymentMode: jest.fn(),
     });
 
-    (sendAllFleetServerAgents as jest.Mock).mockResolvedValue({
+    (sendGetAllFleetServerAgents as jest.Mock).mockResolvedValue({
       fleetServerAgentsCount: 1,
     });
 

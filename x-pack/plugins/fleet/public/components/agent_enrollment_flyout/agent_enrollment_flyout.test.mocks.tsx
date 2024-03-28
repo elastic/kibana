@@ -16,7 +16,7 @@ jest.mock('../../hooks', () => {
     useFleetServerStandalone: jest.fn(),
     useAgentEnrollmentFlyoutData: jest.fn(),
     useAgentVersion: jest.fn().mockReturnValue('8.1.0'),
-    sendAllFleetServerAgents: jest.fn().mockResolvedValue({
+    sendGetAllFleetServerAgents: jest.fn().mockResolvedValue({
       fleetServerAgentsCount: 1,
     }),
   };

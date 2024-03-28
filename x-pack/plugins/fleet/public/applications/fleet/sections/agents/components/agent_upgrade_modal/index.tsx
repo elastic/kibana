@@ -50,7 +50,7 @@ import {
   useConfig,
   sendGetAgentStatus,
   useAgentVersion,
-  sendAllFleetServerAgents,
+  sendGetAllFleetServerAgents,
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
@@ -166,7 +166,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   useEffect(() => {
     const fetchFleetServerAgents = async () => {
       try {
-        const { allFleetServerAgents } = await sendAllFleetServerAgents();
+        const { allFleetServerAgents } = await sendGetAllFleetServerAgents();
         setFleetServerAgents(allFleetServerAgents);
       } catch (error) {
         return;

@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useFleetStatus, useFleetServerStandalone, sendAllFleetServerAgents } from '../../hooks';
+import { useFleetStatus, useFleetServerStandalone, sendGetAllFleetServerAgents } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
@@ -42,7 +42,7 @@ export const Instructions = (props: InstructionProps) => {
   useEffect(() => {
     const fetchFleetServerAgents = async () => {
       try {
-        const { fleetServerAgentsCount: count } = await sendAllFleetServerAgents(true);
+        const { fleetServerAgentsCount: count } = await sendGetAllFleetServerAgents(true);
         setFleetServerAgentsCount(count ?? 0);
         setIsLoadingAgents(false);
       } catch (error) {
