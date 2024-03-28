@@ -6,9 +6,5 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-text-based-editor'],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-text-based-editor/setup_tests.ts'],
-};
+// eslint-disable-next-line import/no-extraneous-dependencies
+import '@testing-library/jest-dom';
