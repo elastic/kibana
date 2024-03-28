@@ -22,7 +22,7 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
       cy.wrap(response.body.data.persistTimeline.timeline.title).as('templateTitle');
     });
-  })
+  });
 
   it('Exports a custom timeline template', function () {
     cy.intercept({

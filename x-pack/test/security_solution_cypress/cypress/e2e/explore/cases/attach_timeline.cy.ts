@@ -77,9 +77,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
       cy.location('origin').then((origin) => {
         cy.get(ADD_COMMENT_INPUT).should(
           'have.text',
-          `[${mockTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${
-            this.timelineId
-          }%27,isOpen:!t))`
+          `[${mockTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.timelineId}%27,isOpen:!t))`
         );
       });
     });
