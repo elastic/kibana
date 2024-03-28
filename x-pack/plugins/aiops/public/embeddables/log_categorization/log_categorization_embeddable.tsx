@@ -29,6 +29,7 @@ import type { Query, AggregateQuery } from '@kbn/es-query';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+// import useObservable from 'react-use/lib/useObservable';
 import type { EmbeddableLogCategorizationType } from '../../../common/constants';
 import { EMBEDDABLE_ORIGIN } from '../../../common/constants';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
@@ -150,8 +151,8 @@ export class EmbeddableLogCategorization extends AbstractEmbeddable<
     };
 
     const input = this.getInput();
-    const input$ = this.getInput$();
-    const field = input.dataView.fields.find((f) => f.name === 'message')!;
+    // const input$ = this.getInput$();
+    // const input = useObservable(input$);
 
     const aiopsAppContextValue = {
       embeddingOrigin: this.parent?.type ?? input.embeddingOrigin ?? EMBEDDABLE_ORIGIN,
@@ -166,12 +167,9 @@ export class EmbeddableLogCategorization extends AbstractEmbeddable<
               <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
                 <Suspense fallback={null}>
                   <LogCategorizationEmbeddable
-                    dataView={input.dataView}
-                    savedSearch={input.savedSearch || null}
                     onClose={() => this.destroy()}
                     embeddingOrigin={'discover-change-me'}
-                    onAddFilter={input.onAddFilter ?? (() => {})}
-                    getViewModeToggle={input.getViewModeToggle}
+                    input={input}
                   />
                   {/* <EmbeddableInputTracker
                   input$={input$}

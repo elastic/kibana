@@ -111,14 +111,14 @@ export const EmbeddableMenu: FC<Props> = ({
           label={i18n.translate(
             'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerRowLabel',
             {
-              defaultMessage: 'Wideness',
+              defaultMessage: 'Additional time',
             }
           )}
           helpText={
             <>
               {categories !== undefined ? (
                 <>
-                  Total categories in {widenessOption}: {categories.length}
+                  Total patterns in {widenessOption}: {categories.length}
                 </>
               ) : null}
             </>

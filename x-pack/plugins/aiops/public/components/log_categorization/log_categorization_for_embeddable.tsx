@@ -7,10 +7,9 @@
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter } from '@kbn/es-query';
@@ -51,6 +50,7 @@ import { EmbeddableMenu } from './embeddable_menu';
 import { useWiderTimeRange } from './use_wider_time_range';
 import type { AiOpsKey, AiOpsStorageMapped } from '../../types/storage';
 import { AIOPS_PATTERN_ANALYSIS_WIDENESS_PREFERENCE } from '../../types/storage';
+import type { EmbeddableLogCategorizationInput } from '../../embeddables/log_categorization/log_categorization_embeddable';
 
 enum SELECTED_TAB {
   BUCKET,
@@ -69,26 +69,21 @@ export const WIDENESS: Wideness = {
 };
 
 export interface LogCategorizationPageProps {
-  dataView: DataView;
-  savedSearch: SavedSearch | null;
   onClose: () => void;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin: string;
   additionalFilter?: CategorizationAdditionalFilter;
-  onAddFilter?: () => void;
-  getViewModeToggle: (patternCount: number) => React.ReactElement | undefined;
+  input: Readonly<EmbeddableLogCategorizationInput>;
+  // embeddableInput: Readonly<Observable<EmbeddableLogCategorizationInput>>;
 }
 
 const BAR_TARGET = 20;
 
 export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
-  dataView,
-  savedSearch,
   onClose,
   embeddingOrigin,
   additionalFilter,
-  onAddFilter,
-  getViewModeToggle,
+  input,
 }) => {
   const {
     notifications: { toasts },
@@ -97,6 +92,11 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     },
     uiSettings,
   } = useAiopsAppContext();
+  // console.log(lastReloadRequestTime);
+  // const input = useObservable(embeddableInput)!;
+  const { dataView, savedSearch } = input;
+  const getViewModeToggle: (patternCount: number) => React.ReactElement | undefined =
+    input.getViewModeToggle;
 
   const [widenessOption, setWidenessOption] = useStorage<
     AiOpsKey,
@@ -106,7 +106,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
     useValidateFieldRequest();
   const { getWiderTimeRange, cancelRequest: cancelWiderTimeRangeRequest } = useWiderTimeRange();
-  const { euiTheme } = useEuiTheme();
   const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
@@ -125,7 +124,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   const [selectedField, setSelectedField] = useState<DataViewField | null>(null);
   // const [wideness, setWideness] = useState<WidenessOption>('1 week');
   const [fields, setFields] = useState<DataViewField[]>([]);
-  const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
+  const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch ?? null);
   const [previousDocumentStatsHash, setPreviousDocumentStatsHash] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [eventRate, setEventRate] = useState<EventRate>([]);
@@ -138,7 +137,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
-  const [showTabs, setShowTabs] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<SELECTED_TAB>(SELECTED_TAB.FULL_TIME_RANGE);
 
   const cancelRequest = useCallback(() => {
@@ -182,7 +180,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     true
   );
 
-  const { documentStats, timefilter, earliest, latest, intervalMs } = useData(
+  const { documentStats, timefilter, earliest, latest, intervalMs, forceRefresh } = useData(
     dataView,
     'log_categorization',
     searchQuery,
@@ -264,7 +262,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         setFieldValidationResult(validationResult);
         const { categories, hasExamples } = categorizationResult;
 
-        const hasBucketCategories = categories.some((c) => c.subTimeRangeCount !== undefined);
         let categoriesInBucket: any | null = null;
         if (tempAdditionalFilter !== undefined) {
           categoriesInBucket = categorizationResult.categories
@@ -289,7 +286,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
           displayExamples: hasExamples,
         });
 
-        setShowTabs(hasBucketCategories);
         setSelectedTab(SELECTED_TAB.BUCKET);
       }
     } catch (error) {
@@ -319,19 +315,23 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     toasts,
   ]);
 
-  const onAddFilter2 = useCallback(
+  const onAddFilter = useCallback(
     (values: Filter, alias?: string) => {
+      if (input.onAddFilter === undefined) {
+        return;
+      }
+
       const filter = buildEmptyFilter(false, dataView.id);
       if (alias) {
         filter.meta.alias = alias;
       }
       filter.query = values.query;
       if (onAddFilter !== undefined) {
-        onAddFilter();
+        input.onAddFilter();
       }
       filterManager.addFilters([filter]);
     },
-    [dataView.id, filterManager, onAddFilter]
+    [dataView.id, filterManager, input]
   );
 
   useEffect(() => {
@@ -369,9 +369,16 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     selectedField,
     widenessOption,
   ]);
-  // console.log(viewModeToggle);
 
-  // const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
+  useEffect(
+    function refreshTriggeredFromButton() {
+      if (input?.lastReloadRequestTime !== undefined) {
+        forceRefresh();
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [input?.lastReloadRequestTime]
+  );
 
   return (
     <>
@@ -476,7 +483,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
                   timefilter={timefilter}
-                  onAddFilter={onAddFilter2}
+                  onAddFilter={onAddFilter}
                   onClose={onClose}
                   enableRowActions={false}
                   additionalFilter={

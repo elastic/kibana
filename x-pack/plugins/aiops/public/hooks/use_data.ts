@@ -112,13 +112,16 @@ export const useData = (
       timefilter.getAutoRefreshFetch$(),
       timefilter.getTimeUpdate$(),
       mlTimefilterRefresh$
-    ).subscribe(() => {
+    ).subscribe((done) => {
       if (onUpdate) {
         onUpdate({
           time: timefilter.getTime(),
           refreshInterval: timefilter.getRefreshInterval(),
         });
         setLastRefresh(Date.now());
+        if (typeof done === 'function') {
+          done();
+        }
       }
     });
 

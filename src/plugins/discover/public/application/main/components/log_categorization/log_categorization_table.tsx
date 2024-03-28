@@ -9,7 +9,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -63,26 +63,27 @@ export type EmbeddableLogCategorizationInput = EmbeddableInput & EmbeddableLogCa
 
 export type EmbeddableLogCategorizationOutput = EmbeddableOutput & { indexPatterns?: DataView[] };
 
-export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
-  dataView: DataView;
-  savedSearch?: SavedSearch;
-  query?: Query | AggregateQuery;
-  visibleFieldNames?: string[];
-  filters?: Filter[];
-  showPreviewByDefault?: boolean;
-  /**
-   * Callback to add a filter to filter bar
-   */
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
-  sessionId?: string;
-  fieldsToFetch?: string[];
-  totalDocuments?: number;
-  samplingOption?: SamplingOption;
-  getViewModeToggle: (patternCount: number) => React.ReactElement | undefined;
-}
-export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
-  showDistributions?: boolean;
-}
+// export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
+//   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!rename
+//   dataView: DataView;
+//   savedSearch?: SavedSearch;
+//   query?: Query | AggregateQuery;
+//   visibleFieldNames?: string[];
+//   filters?: Filter[];
+//   showPreviewByDefault?: boolean;
+//   /**
+//    * Callback to add a filter to filter bar
+//    */
+//   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+//   sessionId?: string;
+//   fieldsToFetch?: string[];
+//   totalDocuments?: number;
+//   samplingOption?: SamplingOption;
+//   getViewModeToggle: (patternCount: number) => React.ReactElement | undefined;
+// }
+// export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
+//   showDistributions?: boolean;
+// }
 
 export interface LogCategorizationTableProps {
   /**
@@ -163,12 +164,12 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
   );
 
   useEffect(() => {
-    const availableFields$ = stateContainer?.dataState.data$.availableFields$;
-    const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
-      if (output.showDistributions !== undefined && stateContainer) {
-        stateContainer.appState.update({ hideAggregatedPreview: !output.showDistributions });
-      }
-    });
+    // const availableFields$ = stateContainer?.dataState.data$.availableFields$;
+    // const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
+    //   if (output.showDistributions !== undefined && stateContainer) {
+    //     stateContainer.appState.update({ hideAggregatedPreview: !output.showDistributions });
+    //   }
+    // });
 
     const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
       if (embeddable && !isErrorEmbeddable(embeddable)) {
@@ -183,7 +184,7 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
     // });
 
     return () => {
-      sub?.unsubscribe();
+      // sub?.unsubscribe();
       refetch?.unsubscribe();
       // fields?.unsubscribe();
     };

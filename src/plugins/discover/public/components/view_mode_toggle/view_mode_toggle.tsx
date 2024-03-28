@@ -83,16 +83,7 @@ export const DocumentViewModeToggle = ({
               <FormattedMessage id="discover.viewModes.document.label" defaultMessage="Documents" />
               <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
             </EuiTab>
-            <EuiTab
-              isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
-              onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
-              data-test-subj="dscViewModeFieldStatsButton"
-            >
-              <FormattedMessage
-                id="discover.viewModes.fieldStatistics.label"
-                defaultMessage="Field statistics"
-              />
-            </EuiTab>
+
             <EuiTab
               isSelected={viewMode === VIEW_MODE.PATTERN_LEVEL}
               onClick={() => setDiscoverViewMode(VIEW_MODE.PATTERN_LEVEL)}
@@ -102,6 +93,17 @@ export const DocumentViewModeToggle = ({
                 id="discover.viewModes.patternAnalysis.label"
                 defaultMessage="Patterns {patternCount}"
                 values={{ patternCount: patternCount ? ` (${patternCount})` : '' }}
+              />
+            </EuiTab>
+
+            <EuiTab
+              isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
+              onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
+              data-test-subj="dscViewModeFieldStatsButton"
+            >
+              <FormattedMessage
+                id="discover.viewModes.fieldStatistics.label"
+                defaultMessage="Field statistics"
               />
             </EuiTab>
           </EuiTabs>
