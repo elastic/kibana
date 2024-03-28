@@ -14,7 +14,7 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type {
   EmbeddableChangePointType,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-} from '@kbn/aiops-log-rate-analysis/constants';
+} from '@kbn/aiops-change-point-detection/constants';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import { EmbeddableChangePointChart } from './embeddable_change_point_chart';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';

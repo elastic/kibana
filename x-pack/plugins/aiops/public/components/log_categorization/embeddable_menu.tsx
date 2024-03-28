@@ -19,7 +19,8 @@ import type { FC } from 'react';
 import React, { useState, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { Category } from '../../../common/api/log_categorization/types';
+
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { RandomSampler } from './sampling_menu';
 import { SamplingPanel } from './sampling_menu/sampling_panel';
 import type { WidenessOption } from './log_categorization_for_embeddable';

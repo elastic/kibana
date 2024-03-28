@@ -24,8 +24,8 @@ import { useStorage } from '@kbn/ml-local-storage';
 
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-log-rate-analysis/constants';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
