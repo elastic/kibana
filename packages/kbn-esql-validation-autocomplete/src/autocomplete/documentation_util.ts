@@ -41,10 +41,10 @@ ${signatures
 `
   )
   .join('\n\n')}
+  ${
+    signatures.some(({ examples }) => examples?.length)
+      ? `\
 ---
-${
-  signatures.some((examples) => examples)
-    ? `\
 ***${examplesLabel}***
 \
 ${signatures
@@ -54,15 +54,15 @@ ${signatures
   ${examples!
     .map(
       (i) => `
-  - \`\`${i}\`\`)
+  - \`\`${i}\`\`
 `
     )
     .join('')}
   
 `
   )}`
-    : ''
-}`;
+      : ''
+  }`;
 
 /** @internal **/
 export const buildDocumentation = (declaration: string, examples?: string[]) => `
