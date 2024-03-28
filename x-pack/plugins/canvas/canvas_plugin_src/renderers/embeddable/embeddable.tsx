@@ -23,9 +23,7 @@ import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
-import { CanvasContainer } from '../../../public/components/hooks/use_canvas_api';
-import { updateEmbeddableExpression } from '../../../public/state/actions/embeddable';
-import { EmbeddableInput, RendererFactory } from '../../../types';
+import { CanvasContainerApi, EmbeddableInput, RendererFactory } from '../../../types';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
@@ -41,13 +39,13 @@ const renderReactEmbeddable = (
   type: string,
   uuid: string,
   input: EmbeddableInput,
-  container: CanvasContainer
+  container: CanvasContainerApi
 ) => {
   return (
     <ReactEmbeddableRenderer
       type={type}
       maybeId={uuid}
-      parentApi={container as PresentationContainer}
+      parentApi={container as unknown as PresentationContainer}
       key={`${type}_${uuid}`}
       state={{ rawState: input }}
       onAnyStateChange={(newState) =>

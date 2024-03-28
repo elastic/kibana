@@ -12,11 +12,7 @@ import {
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import {
-  ComparatorDefinition,
-  PublishingSubject,
-  StateComparators,
-} from '@kbn/presentation-publishing';
+import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { combineLatest } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';

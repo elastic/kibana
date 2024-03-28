@@ -7,8 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { EmbeddableApiContext, apiPublishesViewMode } from '@kbn/presentation-publishing';
+import { EmbeddableApiContext, apiCanAddNewPanel } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
 
@@ -20,18 +19,12 @@ export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_EUI_MARKDOWN_ACTION_ID,
     getIconType: () => 'editorCodeBlock',
-    isCompatible: async ({ embeddable }) => {
-      if (
-        apiIsPresentationContainer(embeddable) ||
-        (apiPublishesViewMode(embeddable) && (embeddable as PresentationContainer).addNewPanel) // handles Canvas
-      ) {
-        return true;
-      }
-      return false;
+    isCompatible: async ({ embeddable: parentApi }) => {
+      return apiCanAddNewPanel(parentApi);
     },
-    execute: async ({ embeddable }) => {
-      // if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-      embeddable.addNewPanel(
+    execute: async ({ embeddable: parentApi }) => {
+      if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
+      parentApi.addNewPanel(
         {
           panelType: EUI_MARKDOWN_ID,
           initialState: { content: '# hello world!' },

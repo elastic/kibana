@@ -9,21 +9,17 @@ import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 
-import { PresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
 
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
+import { CanvasContainerApi } from '../../../types';
 // @ts-expect-error unconverted file
 import { addElement } from '../../state/actions/elements';
-import { getSelectedPage } from '../../state/selectors/workpad';
 import { updateEmbeddableExpression } from '../../state/actions/embeddable';
+import { getSelectedPage } from '../../state/selectors/workpad';
 
-export type CanvasContainer = Pick<PresentationContainer, 'viewMode' | 'addNewPanel'> & {
-  onEdit: (id: string, type: string, newState: EmbeddableInput) => void;
-};
-
-export const useCanvasApi: () => CanvasContainer = () => {
+export const useCanvasApi: () => CanvasContainerApi = () => {
   const selectedPageId = useSelector(getSelectedPage);
   const dispatch = useDispatch();
 
@@ -42,7 +38,7 @@ export const useCanvasApi: () => CanvasContainer = () => {
 
   const getCanvasApi = useCallback(() => {
     return {
-      viewMode: new BehaviorSubject<ViewMode>(ViewMode.EDIT),
+      viewMode: new BehaviorSubject<ViewMode>(ViewMode.EDIT), // always in edit mode
       addNewPanel: async ({
         panelType,
         initialState,
@@ -61,12 +57,7 @@ export const useCanvasApi: () => CanvasContainer = () => {
           })
         );
       },
-      // registerPanelApi: () => {},
-      // removePanel: () => {},
-      // replacePanel: () => {},
-      // getChildIds: () => {},
-      // getChild: () => {},
-    } as CanvasContainer;
+    } as CanvasContainerApi;
   }, [createNewEmbeddable, dispatch]);
 
   return useMemo(() => getCanvasApi(), [getCanvasApi]);
