@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { MAJOR_VERSION } from './plugin';
-export { API_BASE_PATH, KIBANA_API_PREFIX } from './api';
-export { DEFAULT_VARIABLES } from './variables';
-export {
-  AUTOCOMPLETE_DEFINITIONS_FOLDER,
-  GENERATED_SUBFOLDER,
-  OVERRIDES_SUBFOLDER,
-  MANUAL_SUBFOLDER,
-} from './autocomplete_definitions';
-export { DEFAULT_INPUT_VALUE } from './editor_input';
+export const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
+GET \${exampleVariable1} // _search
+{
+  "query": {
+    "\${exampleVariable2}": {} // match_all
+  }
+}`;
