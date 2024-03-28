@@ -325,7 +325,6 @@ export const reducer = (state: State, action: Action): State => {
 
       // Add root field to state and update fieldToAddFieldTo
       let updatedState = addFieldToState(addRootFieldActionValue, state);
-      updatedState.documentFields.fieldToAddFieldTo = undefined;
 
       const addSemanticTextFieldActionValue: Field = {
         name: action.value.name as string,
