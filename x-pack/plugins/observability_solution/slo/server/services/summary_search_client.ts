@@ -164,7 +164,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     }
   }
 
-  async deleteOutdatedSummaries(summarySloIds: string[]) {
+  private async deleteOutdatedSummaries(summarySloIds: string[]) {
     // Always attempt to delete temporary summary documents with an existing non-temp summary document
     // The temp summary documents are _eventually_ removed as we get through the real summary documents
 

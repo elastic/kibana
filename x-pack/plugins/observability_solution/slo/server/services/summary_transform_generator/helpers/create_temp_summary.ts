@@ -8,7 +8,6 @@
 import {
   ALL_VALUE,
   BudgetingMethod,
-  Indicator,
   IndicatorType,
   Objective,
   timeWindowSchema,
