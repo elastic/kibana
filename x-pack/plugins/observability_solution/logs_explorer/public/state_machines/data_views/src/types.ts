@@ -18,17 +18,12 @@ export interface DataViewsFilterParams {
   dataType?: Extract<DataViewDescriptor['dataType'], 'logs' | undefined>; // only allow logs data type or no filter for now
 }
 
-export interface DataViewsSearchCriteria {
-  filter?: DataViewsFilterParams;
-  search?: DataViewsSearchParams;
-}
-
 export interface WithCache {
-  cache: IHashedCache<DataViewsSearchCriteria, DataViewDescriptor[]>;
+  cache: IHashedCache<WithSearch & WithFilter, DataViewDescriptor[]>;
 }
 
-export interface WithSearchCriteria {
-  searchCriteria: DataViewsSearchCriteria;
+export interface WithSearch {
+  search: DataViewsSearchParams;
 }
 
 export interface WithFilter {
@@ -55,7 +50,7 @@ export interface WithNullishError {
 
 export type DefaultDataViewsContext = WithCache &
   WithNullishDataViews &
-  WithSearchCriteria &
+  WithSearch &
   WithFilter &
   WithNullishError;
 
@@ -63,13 +58,13 @@ type LoadingDataViewsContext = DefaultDataViewsContext;
 
 type LoadedDataViewsContext = WithCache &
   WithDataViews &
-  WithSearchCriteria &
+  WithSearch &
   WithFilter &
   WithNullishError;
 
 type LoadingFailedDataViewsContext = WithCache &
   WithNullishDataViews &
-  WithSearchCriteria &
+  WithSearch &
   WithFilter &
   WithError;
 

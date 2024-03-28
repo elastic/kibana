@@ -13,7 +13,7 @@ export const createDefaultContext = (): DefaultDataViewsContext => ({
   dataViewsSource: null,
   dataViews: null,
   error: null,
-  searchCriteria: {
+  search: {
     name: '',
     sortOrder: 'asc',
   },
