@@ -16,7 +16,7 @@ spec:
       description: "[ESS] Executes Cypress tests against ESS deployment"
     spec:
       repository: elastic/kibana
-      pipeline_file: .buildkite/scripts/pipelines/security_solution_ess/pipeline.sh
+      pipeline_file: .buildkite/pipelines/security_solution/ess_cypress.yml
       provider_settings:
         build_branches: false
         build_pull_requests: false
