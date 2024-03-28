@@ -22,7 +22,7 @@ import {
 import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 const ACTION_COLUMN_WIDTH = '24px';
 const defaultSorting = {
@@ -81,25 +81,24 @@ export const FieldsSelectorTable = ({
   onFilterSelectedChange,
 }: FieldsSelectorTableProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string | undefined>();
 
   const dataViewFields = useMemo<Field[]>(() => getDataViewFields(dataView), [dataView]);
-
-  const [fields, setFields] = useState(
-    !isFilterSelectedEnabled
-      ? dataViewFields
-      : dataViewFields.filter((field) => columns.includes(field.id))
+  const visibleFields = useMemo<Field[]>(
+    () =>
+      !isFilterSelectedEnabled
+        ? dataViewFields
+        : dataViewFields.filter((field) => columns.includes(field.id)),
+    [columns, dataViewFields, isFilterSelectedEnabled]
   );
 
-  // useEffect(() => {
-  //   if (isFilterSelectedEnabled) {
-  //     const filteredItems = dataViewFields.filter((field) => {
-  //       return columns.includes(field.id);
-  //     });
-  //     setFields(filteredItems);
-  //   } else {
-  //     setFields(dataViewFields);
-  //   }
-  // }, [columns, dataViewFields, isFilterSelectedEnabled]);
+  const fields = !searchQuery
+    ? visibleFields
+    : visibleFields.filter((field) => {
+        const normalizedName = `${field.name} ${field.displayName}`.toLowerCase();
+        const normalizedQuery = searchQuery.toLowerCase() || '';
+        return normalizedName.indexOf(normalizedQuery) !== -1;
+      });
 
   const togglePopover = useCallback(() => {
     setIsPopoverOpen((open) => !open);
@@ -107,19 +106,14 @@ export const FieldsSelectorTable = ({
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
   }, []);
+
   let debounceTimeoutId: ReturnType<typeof setTimeout>;
 
   const onQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
     clearTimeout(debounceTimeoutId);
 
     debounceTimeoutId = setTimeout(() => {
-      const filteredItems = dataViewFields.filter((field) => {
-        const normalizedName = `${field.name} ${field.displayName}`.toLowerCase();
-        const normalizedQuery = query?.text.toLowerCase() || '';
-        return normalizedName.indexOf(normalizedQuery) !== -1;
-      });
-
-      setFields(filteredItems);
+      setSearchQuery(query?.text);
     }, 300);
   };
 
