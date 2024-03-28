@@ -11,7 +11,7 @@ import type {
   SavedObjectsMappingProperties,
 } from '@kbn/core-saved-objects-server';
 import {
-  IndexMapping,
+  type IndexMapping,
   getVirtualVersionsFromMappingMeta,
   getVirtualVersionMap,
   getModelVersionDelta,

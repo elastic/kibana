@@ -176,7 +176,7 @@ describe('generateAdditiveMappingDiff', () => {
     );
   });
 
-  it('includes the root fields that were modified', () => {
+  it('includes the root fields that were added', () => {
     const { foo, bar } = getTypes();
     const types = [foo, bar];
     const meta: IndexMappingMeta = {
@@ -202,6 +202,63 @@ describe('generateAdditiveMappingDiff', () => {
 
     expect(addedMappings).toEqual({
       rootA: { type: 'keyword' },
+    });
+  });
+
+  it('includes the root fields that were modified', () => {
+    const { foo, bar } = getTypes();
+    const types = [foo, bar];
+    const meta: IndexMappingMeta = {
+      mappingVersions: {
+        foo: '10.2.0',
+        bar: '8.5.0',
+      },
+    };
+
+    getBaseMappingsMock.mockReturnValue({
+      properties: {
+        rootA: { type: 'keyword' },
+        rootB: { type: 'keyword' },
+        references: {
+          type: 'nested',
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            type: {
+              type: 'keyword',
+            },
+            id: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    });
+    getUpdatedRootFieldsMock.mockReturnValue(['rootA', 'references']);
+
+    const addedMappings = generateAdditiveMappingDiff({
+      types,
+      mapping: mappingFromMeta(meta),
+      deletedTypes,
+    });
+
+    expect(addedMappings).toEqual({
+      rootA: { type: 'keyword' },
+      references: {
+        type: 'nested',
+        properties: {
+          name: {
+            type: 'keyword',
+          },
+          type: {
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+          },
+        },
+      },
     });
   });
 
