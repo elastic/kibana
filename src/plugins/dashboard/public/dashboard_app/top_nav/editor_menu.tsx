@@ -23,7 +23,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { ADD_PANEL_TRIGGER } from '../../triggers';
@@ -46,7 +46,7 @@ export const EditorMenu = ({
   isDisabled,
   api,
 }: {
-  api: PresentationContainer<DefaultEmbeddableApi>;
+  api: PresentationContainer;
   isDisabled?: boolean;
   /** Handler for creating new visualization of a specified type */
   createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;

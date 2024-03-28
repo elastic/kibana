@@ -11,7 +11,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { listenForCompatibleApi, PresentationContainer } from '@kbn/presentation-containers';
+import { listenForCompatibleApi } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
   apiPublishesUnifiedSearch,
@@ -26,7 +26,7 @@ import { DataTableQueryState } from './types';
 
 export const initializeDataTableQueries = async (
   services: EmbeddableExamplesStartDependencies,
-  parentApi: PresentationContainer | undefined,
+  parentApi: unknown,
   appliedTimeRange$: PublishingSubject<DataTableQueryState['timeRange']>
 ) => {
   // initialize services

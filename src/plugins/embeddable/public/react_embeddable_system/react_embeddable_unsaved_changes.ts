@@ -8,7 +8,6 @@
 
 import {
   getLastSavedStateSubjectForChild,
-  PresentationContainer,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import {
@@ -19,7 +18,6 @@ import {
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { combineLatestWith, debounceTime, map } from 'rxjs/operators';
-import { DefaultEmbeddableApi } from './types';
 
 const getDefaultDiffingApi = () => {
   return {
@@ -31,7 +29,7 @@ const getDefaultDiffingApi = () => {
 
 export const startTrackingEmbeddableUnsavedChanges = <StateType extends object = object>(
   uuid: string,
-  parentApi: PresentationContainer<DefaultEmbeddableApi> | undefined,
+  parentApi: unknown,
   comparators: StateComparators<StateType>,
   deserializeState: (state: SerializedPanelState<object>) => StateType
 ) => {

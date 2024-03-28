@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
@@ -34,7 +34,7 @@ export const ReactEmbeddableRenderer = <
   maybeId?: string;
   type: string;
   state: SerializedPanelState<StateType>;
-  parentApi?: PresentationContainer<DefaultEmbeddableApi>;
+  parentApi?: unknown;
   onApiAvailable?: (api: ApiType) => void;
   panelProps?: Pick<
     PresentationPanelProps<ApiType>,

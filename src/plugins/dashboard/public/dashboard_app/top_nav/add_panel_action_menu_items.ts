@@ -7,7 +7,6 @@
  */
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { addPanelMenuTrigger } from '../../triggers';
 
 const onAddPanelActionClick =
@@ -28,7 +27,7 @@ const onAddPanelActionClick =
   };
 
 export const getAddPanelActionMenuItems = (
-  api: PresentationContainer<DefaultEmbeddableApi>,
+  api: PresentationContainer,
   actions: Array<Action<object>> | undefined,
   closePopover: () => void
 ) => {

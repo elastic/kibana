@@ -18,9 +18,8 @@ export interface PanelPackage {
   initialState?: object;
 }
 
-export interface PresentationContainer<GenericChildType = unknown>
-  extends Partial<PublishesViewMode> {
-  addNewPanel: <ApiType extends GenericChildType = GenericChildType>(
+export interface PresentationContainer extends Partial<PublishesViewMode> {
+  addNewPanel: <ApiType extends unknown = unknown>(
     panel: PanelPackage,
     displaySuccessMessage?: boolean
   ) => Promise<ApiType | undefined>;
@@ -28,7 +27,7 @@ export interface PresentationContainer<GenericChildType = unknown>
   canRemovePanels?: () => boolean;
   replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
 
-  children$: PublishingSubject<{ [key: string]: GenericChildType }>;
+  children$: PublishingSubject<{ [key: string]: unknown }>;
 }
 
 export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {

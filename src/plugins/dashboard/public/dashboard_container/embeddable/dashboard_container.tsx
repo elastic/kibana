@@ -12,6 +12,7 @@ import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import {
   apiHasForceRefresh,
+  apiPublishesPanelTitle,
   apiPublishesUnsavedChanges,
   getPanelTitle,
 } from '@kbn/presentation-publishing';
@@ -34,7 +35,7 @@ import {
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { PanelPackage } from '@kbn/presentation-containers';
+import { apiHasSerializableState, PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
@@ -505,7 +506,7 @@ export class DashboardContainer
     if (reactEmbeddableRegistryHasKey(panel.type)) {
       const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
-      const serialized = child.serializeState();
+      const serialized = apiHasSerializableState(child) ? child.serializeState() : { rawState: {} };
       return {
         type: panel.type,
         explicitInput: { ...panel.explicitInput, ...serialized.rawState },
@@ -683,7 +684,8 @@ export class DashboardContainer
     for (const [id, panel] of Object.entries(this.getInput().panels)) {
       const title = await (async () => {
         if (reactEmbeddableRegistryHasKey(panel.type)) {
-          return getPanelTitle(this.children$.value[id]);
+          const child = this.children$.value[id];
+          return apiPublishesPanelTitle(child) ? getPanelTitle(child) : '';
         }
         await this.untilEmbeddableLoaded(id);
         const child: IEmbeddable<EmbeddableInput, EmbeddableOutput> = this.getChild(id);
