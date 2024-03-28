@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import {
-  ALERT_RISK_SCORE,
-  ALERT_RULE_NAME,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { RiskCategories, RiskLevels } from '../../../../common/entity_analytics/risk_engine';
 import type { RiskScore } from '../../../../common/entity_analytics/risk_engine';
 import type {
@@ -28,34 +24,7 @@ const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): Ris
         notes: [],
         category_1_score: 30,
         category_1_count: 1,
-      },
-    },
-    inputs: {
-      took: 17,
-      timed_out: false,
-      _shards: {
-        total: 1,
-        successful: 1,
-        skipped: 0,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: 1,
-          relation: 'eq',
-        },
-        hits: [
-          {
-            _id: '_id',
-            _index: '_index',
-            fields: {
-              '@timestamp': ['2023-07-20T20:31:24.896Z'],
-              [ALERT_RISK_SCORE]: [21],
-              [ALERT_RULE_NAME]: ['Rule Name'],
-            },
-            sort: [21],
-          },
-        ],
+        risk_inputs: [],
       },
     },
     doc_count: 2,
@@ -108,6 +77,7 @@ const buildResponseMock = (
             description: 'Alert from Rule: My rule',
             risk_score: 30,
             timestamp: '2021-08-19T18:55:59.000Z',
+            contribution_score: 20,
           },
         ],
       },
