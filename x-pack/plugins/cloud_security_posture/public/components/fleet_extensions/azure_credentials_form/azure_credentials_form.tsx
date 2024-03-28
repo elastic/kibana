@@ -21,11 +21,10 @@ import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { PackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
-// import { PackagePolicyInputVarField } from '../package_policy_input_var_field';
+import { PackagePolicyInputVarField } from '../package_policy_input_var_field';
 import {
   AzureOptions,
   getAzureCredentialsFormManualOptions,

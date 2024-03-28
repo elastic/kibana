@@ -71,5 +71,3 @@ export type { DataStream, RegistryVarsEntry } from './types';
 export { DATASET_VAR_NAME } from '../common/constants';
 export { ExperimentalFeaturesService } from './services';
 export { useStartServices } from './hooks';
-
-export { PackagePolicyInputVarField } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field';
