@@ -156,7 +156,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiLink href={docLinks.connectorsMappings} target="_blank" external>
               {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.docLink', {
-                defaultMessage: 'Learn more',
+                defaultMessage: 'Learn how to customize index mappings and settings ',
               })}
             </EuiLink>
           </EuiPanel>
