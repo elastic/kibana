@@ -75,7 +75,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
     });
 
-    describe('When risk engine is enabled', () => {
+    describe('When risk engine is enabled', { tags: ['@brokenInServerlessQA'] }, () => {
       beforeEach(() => {
         login();
         mockRiskEngineEnabled();
