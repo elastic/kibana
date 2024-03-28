@@ -7,10 +7,6 @@
 
 import expect from '@kbn/expect';
 
-import {
-  DETECTION_ENGINE_RULES_BULK_UPDATE,
-  DETECTION_ENGINE_RULES_URL,
-} from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRuleOutput,
@@ -30,6 +26,7 @@ import {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
   const config = getService('config');
@@ -53,11 +50,8 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.name = 'some other name';
 
         // update a simple rule's name
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
@@ -73,12 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // create a second simple rule
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(getSimpleRuleUpdate('rule-2'))
-          .expect(200);
+        await securitySolutionApi.createRule({ body: getSimpleRule('rule-2') }).expect(200);
 
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
@@ -87,11 +76,8 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.name = 'some other name';
 
         // update both rule names
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1, updatedRule2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
         const outputRule1 = getSimpleRuleOutput();
@@ -119,11 +105,8 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.name = 'some other name';
         delete updatedRule1.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
@@ -150,11 +133,8 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.name = 'some other name';
         delete updatedRule2.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1, updatedRule2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
         const outputRule1 = getSimpleRuleOutputWithoutRuleId('rule-1');
@@ -182,11 +162,8 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.name = 'some other name';
         delete updatedRule1.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
@@ -206,11 +183,8 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.severity = 'low';
         updatedRule1.enabled = false;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
@@ -231,22 +205,14 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.timeline_title = 'some title';
         ruleUpdate.timeline_id = 'some id';
 
-        await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate])
-          .expect(200);
+        await securitySolutionApi.bulkUpdateRules({ body: [ruleUpdate] }).expect(200);
 
         // update a simple rule's name
         const ruleUpdate2 = getSimpleRuleUpdate('rule-1');
         ruleUpdate2.name = 'some other name';
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate2] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
@@ -263,11 +229,8 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.id = '1fd52120-d3a9-4e7a-b23c-96c0e1a74ae5';
         delete ruleUpdate.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate] })
           .expect(200);
 
         expect(body).to.eql([
@@ -286,11 +249,8 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.rule_id = 'fake_id';
         delete ruleUpdate.id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate] })
           .expect(200);
 
         expect(body).to.eql([
@@ -313,11 +273,8 @@ export default ({ getService }: FtrProviderContext) => {
         delete ruleUpdate.id;
 
         // update one rule name and give a fake id for the second
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate, ruleUpdate2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate, ruleUpdate2] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
@@ -352,11 +309,8 @@ export default ({ getService }: FtrProviderContext) => {
         rule2.id = 'b3aa019a-656c-4311-b13b-4d9852e24347';
         rule2.name = 'some other name';
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([rule1, rule2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [rule1, rule2] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();

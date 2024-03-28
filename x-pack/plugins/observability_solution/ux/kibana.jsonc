@@ -29,7 +29,8 @@
       "security",
       "maps",
       "lens",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "spaces"
     ],
     "requiredBundles": [
       "kibanaReact",
