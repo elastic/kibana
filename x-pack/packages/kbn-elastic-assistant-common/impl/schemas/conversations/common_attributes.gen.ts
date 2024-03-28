@@ -146,8 +146,7 @@ export const ApiConfig = z.object({
    */
   connectorId: z.string(),
   /**
-   * action type Idfcx
-   * \]=m j
+   * action type Id
    */
   actionTypeId: z.string(),
   /**
