@@ -170,5 +170,6 @@
     "@kbn/aiops-test-utils",
     "@kbn/observability-ai-assistant-app-plugin",
     "@kbn/aiops-log-rate-analysis",
+    "@kbn/apm-data-view",
   ]
 }

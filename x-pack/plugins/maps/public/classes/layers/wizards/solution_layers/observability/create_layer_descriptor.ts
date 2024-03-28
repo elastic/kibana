@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import {
   AggDescriptor,
   ColorDynamicOptions,
@@ -36,10 +37,7 @@ import { ESGeoGridSource } from '../../../../sources/es_geo_grid_source';
 import { GeoJsonVectorLayer } from '../../../vector_layer';
 import { HeatmapLayer } from '../../../heatmap_layer';
 import { getDefaultDynamicProperties } from '../../../../styles/vector/vector_style_defaults';
-
-// redefining APM constant to avoid making maps app depend on APM plugin
-export const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
-export const APM_INDEX_PATTERN_TITLE = 'traces-apm*,logs-apm*,metrics-apm*,apm-*';
+import { getSpaceId } from '../../../../../kibana_services';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
@@ -152,10 +150,10 @@ export function createLayerDescriptor({
   if (!layer || !metric || !display) {
     return null;
   }
-
   const apmSourceQuery = createAmpSourceQuery(layer);
   const label = createLayerLabel(layer, metric);
   const metricsDescriptor = createAggDescriptor(metric);
+  const apmDataViewId = getStaticDataViewId(getSpaceId());
 
   if (display === DISPLAY.CHOROPLETH) {
     const joinId = uuidv4();
@@ -172,7 +170,7 @@ export function createLayerDescriptor({
           right: {
             type: SOURCE_TYPES.ES_TERM_SOURCE,
             id: joinId,
-            indexPatternId: APM_INDEX_PATTERN_ID,
+            indexPatternId: apmDataViewId,
             term: 'client.geo.country_iso_code',
             metrics: [metricsDescriptor],
             whereQuery: apmSourceQuery,
@@ -202,7 +200,7 @@ export function createLayerDescriptor({
   }
 
   const geoGridSourceDescriptor = ESGeoGridSource.createDescriptor({
-    indexPatternId: APM_INDEX_PATTERN_ID,
+    indexPatternId: apmDataViewId,
     geoField: 'client.geo.location',
     metrics: [metricsDescriptor],
     requestType: getGeoGridRequestType(display),

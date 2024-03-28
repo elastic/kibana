@@ -3210,6 +3210,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-data-view@link:packages/kbn-apm-data-view":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-plugin@link:x-pack/plugins/observability_solution/apm":
   version "0.0.0"
   uid ""
@@ -5507,10 +5511,6 @@
   uid ""
 
 "@kbn/presentation-containers@link:packages/presentation/presentation_containers":
-  version "0.0.0"
-  uid ""
-
-"@kbn/presentation-library@link:packages/presentation/presentation_library":
   version "0.0.0"
   uid ""
 
