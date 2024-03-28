@@ -617,6 +617,18 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           expect(rawActions[0][Object.keys(propertyToAdd)[0]]).to.be(undefined);
         }
       });
+
+      it('should throw 400 when using the same system action twice', async () => {
+        await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [systemAction, systemAction],
+            })
+          )
+          .expect(400);
+      });
     });
 
     describe('legacy', () => {

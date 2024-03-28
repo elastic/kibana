@@ -4270,9 +4270,9 @@ describe('create()', () => {
         actionTypeId: '.test',
       };
 
-      const data = getMockData({ actions: [], systemAction: [systemAction] });
+      const data = getMockData({ actions: [], systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemAction]: definition for this key is missing]`
+        `[Error: Action fake-system-action is not a system action]`
       );
     });
 
@@ -4337,6 +4337,20 @@ describe('create()', () => {
       const data = getMockData({ actions: [action] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
         `[Error: Error validating create data - [actions.0.group]: expected value of type [string] but got [undefined]]`
+      );
+    });
+
+    test('should throw an error if the same system action is used twice', async () => {
+      const systemAction: RuleSystemAction = {
+        id: 'system_action-id',
+        uuid: '123',
+        params: { foo: 'test' },
+        actionTypeId: '.test',
+      };
+
+      const data = getMockData({ actions: [], systemActions: [systemAction, systemAction] });
+      await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
+        `[Error: Cannot use the same system action twice]`
       );
     });
   });

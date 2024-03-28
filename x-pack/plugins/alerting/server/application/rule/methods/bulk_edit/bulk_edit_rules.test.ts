@@ -1497,6 +1497,54 @@ describe('bulkEdit()', () => {
       });
     });
 
+    it('should throw an error if the same system action is used twice', async () => {
+      const action = {
+        id: 'system_action-id',
+        uuid: '123',
+        params: {},
+      };
+
+      actionsClient.isSystemAction.mockReturnValue(true);
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      const res = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [action, action],
+          },
+        ],
+      });
+
+      expect(res).toEqual({
+        errors: [
+          {
+            message: 'Cannot use the same system action twice',
+            rule: {
+              id: '1',
+              name: 'my rule name',
+            },
+          },
+        ],
+        rules: [],
+        skipped: [],
+        total: 1,
+      });
+    });
+
     it('should throw an error if the default action does not contain the group', async () => {
       const action = {
         id: '1',

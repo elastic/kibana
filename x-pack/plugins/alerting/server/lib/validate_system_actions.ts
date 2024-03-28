@@ -33,9 +33,17 @@ export const validateSystemActions = async ({
    * The actionTypeId is needed to get the schema of
    * the action params using the connector adapter registry
    */
-  const actionIds: string[] = systemActions.map((action) => action.id);
+  const actionIds: Set<string> = new Set(systemActions.map((action) => action.id));
 
-  const actionResults = await actionsClient.getBulk({ ids: actionIds, throwIfSystemAction: false });
+  if (actionIds.size !== systemActions.length) {
+    throw Boom.badRequest('Cannot use the same system action twice');
+  }
+
+  const actionResults = await actionsClient.getBulk({
+    ids: Array.from(actionIds),
+    throwIfSystemAction: false,
+  });
+
   const systemActionsWithActionTypeId: RuleSystemAction[] = [];
 
   for (const systemAction of systemActions) {

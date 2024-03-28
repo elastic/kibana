@@ -124,6 +124,35 @@ describe('validateSystemActionsWithoutRuleTypeId', () => {
     );
   });
 
+  it('should throw an error if the same system action is being used', async () => {
+    const systemActions: RuleSystemAction[] = [
+      {
+        id: 'system_action-id',
+        uuid: '123',
+        params: { foo: 'test' },
+        actionTypeId: '.test',
+      },
+      {
+        id: 'system_action-id',
+        uuid: '123',
+        params: { foo: 'test' },
+        actionTypeId: '.test',
+      },
+    ];
+
+    registry.register(connectorAdapter);
+
+    actionsClient.isSystemAction.mockReturnValue(false);
+
+    await expect(() =>
+      validateSystemActions({
+        connectorAdapterRegistry: registry,
+        systemActions,
+        actionsClient,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Cannot use the same system action twice"`);
+  });
+
   it('should call getBulk correctly', async () => {
     const systemActions: Array<RuleSystemAction | NormalizedSystemAction> = [
       {

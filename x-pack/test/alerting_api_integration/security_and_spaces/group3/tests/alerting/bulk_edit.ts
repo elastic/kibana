@@ -914,6 +914,44 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           expect(rawActions[0][Object.keys(propertyToAdd)[0]]).to.be(undefined);
         }
       });
+
+      it('should throw 400 when using the same system action twice', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ids: [createdRule.id],
+            operations: [
+              {
+                operation: 'add',
+                field: 'actions',
+                value: [
+                  {
+                    id: 'system-connector-test.system-action',
+                    params: {},
+                  },
+                  {
+                    id: 'system-connector-test.system-action',
+                    params: {},
+                  },
+                ],
+              },
+            ],
+          });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.errors.length).to.eql(1);
+
+        expect(response.body.errors[0].message).to.eql('Cannot use the same system action twice');
+      });
     });
   });
 }

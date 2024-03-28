@@ -3782,6 +3782,35 @@ describe('update()', () => {
       );
     });
 
+    test('should throw an error if the same system action is used twice', async () => {
+      await expect(() =>
+        rulesClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+            actions: [],
+            systemActions: [
+              {
+                id: 'system_action-id',
+                params: {},
+              },
+              {
+                id: 'system_action-id',
+                params: {},
+              },
+            ],
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Cannot use the same system action twice]`);
+    });
+
     test('should throw an error if the default action does not contain the group', async () => {
       await expect(() =>
         rulesClient.update({

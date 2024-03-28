@@ -1194,6 +1194,40 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         }
       });
 
+      it('should throw 400 when using the same system action twice', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        await supertestWithoutAuth
+          .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            actions: [
+              {
+                id: 'system-connector-test.system-action',
+                params: {},
+              },
+              {
+                id: 'system-connector-test.system-action',
+                params: {},
+              },
+            ],
+          })
+          .expect(400);
+      });
+
       it('should not allow creating a default action without group', async () => {
         const { body: createdAction } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
