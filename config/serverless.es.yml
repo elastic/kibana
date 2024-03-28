@@ -9,6 +9,7 @@ xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
+xpack.observabilityAIAssistant.enabled: false
 enterpriseSearch.enabled: false
 xpack.fleet.enabled: false
 
