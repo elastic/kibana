@@ -151,7 +151,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
           isOptional ? (
             <EuiText size="xs" color="subdued">
               <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
+                id="xpack.csp.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
                 defaultMessage="Optional"
               />
             </EuiText>
@@ -235,7 +235,7 @@ function getInputComponent({
               minimap: {
                 enabled: false,
               },
-              ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
+              ariaLabel: i18n.translate('xpack.csp.packagePolicyField.yamlCodeEditor', {
                 defaultMessage: 'YAML Code Editor',
               }),
               scrollBeyondLastLine: false,
@@ -286,7 +286,7 @@ function getInputComponent({
         value === undefined ? [] : selectOptions?.filter((option) => option.value === value);
       return (
         <EuiComboBox
-          placeholder={i18n.translate('xpack.fleet.packagePolicyField.selectPlaceholder', {
+          placeholder={i18n.translate('xpack.csp.packagePolicyField.selectPlaceholder', {
             defaultMessage: 'Select an option',
           })}
           singleSelection={{ asPlainText: true }}
@@ -328,7 +328,7 @@ const SecretFieldWrapper = ({ children }: { children: React.ReactNode }) => {
       <EuiText size="xs">
         <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
           <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.stepConfigure.secretLearnMoreText"
+            id="xpack.csp.createPackagePolicy.stepConfigure.secretLearnMoreText"
             defaultMessage="Learn more about policy secrets."
           />
         </EuiLink>
@@ -348,7 +348,7 @@ const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
           <EuiToolTip
             content={
               <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.secretLearnMorePopoverContent"
+                id="xpack.csp.createPackagePolicy.stepConfigure.secretLearnMorePopoverContent"
                 defaultMessage="This value is a secret. After you save this integration policy, you won't be able to view the value again."
               />
             }
@@ -413,7 +413,7 @@ function SecretInputField({
       <>
         <EuiText size="s" color="subdued">
           <FormattedMessage
-            id="xpack.fleet.editPackagePolicy.stepConfigure.fieldSecretValueSet"
+            id="xpack.csp.editPackagePolicy.stepConfigure.fieldSecretValueSet"
             defaultMessage="The saved {varName} is hidden. You can only replace the {varName}."
             values={{
               varName: lowercaseTitle,
@@ -429,7 +429,7 @@ function SecretInputField({
           size="xs"
         >
           <FormattedMessage
-            id="xpack.fleet.editPackagePolicy.stepConfigure.fieldSecretValueSetEditButton"
+            id="xpack.csp.editPackagePolicy.stepConfigure.fieldSecretValueSetEditButton"
             defaultMessage="Replace {varName}"
             values={{
               varName: lowercaseTitle,
@@ -454,7 +454,7 @@ function SecretInputField({
         size="xs"
       >
         <FormattedMessage
-          id="xpack.fleet.editPackagePolicy.stepConfigure.fieldSecretValueSetCancelButton"
+          id="xpack.csp.editPackagePolicy.stepConfigure.fieldSecretValueSetCancelButton"
           defaultMessage="Cancel {varName} change"
           values={{
             varName: lowercaseTitle,
