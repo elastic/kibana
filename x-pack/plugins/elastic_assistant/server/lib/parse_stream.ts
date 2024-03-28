@@ -14,17 +14,17 @@ type StreamParser = (responseStream: Readable, logger: Logger) => Promise<string
 
 export const handleStreamStorage = async ({
   responseStream,
-  llmActionType,
+  actionTypeId,
   onMessageSent,
   logger,
 }: {
   responseStream: Readable;
-  llmActionType: string;
+  actionTypeId: string;
   onMessageSent?: (content: string) => void;
   logger: Logger;
 }): Promise<void> => {
   try {
-    const parser = llmActionType === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
+    const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
     // TODO @steph add abort signal
     const parsedResponse = await parser(responseStream, logger);
     if (onMessageSent) {

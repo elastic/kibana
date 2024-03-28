@@ -209,7 +209,7 @@ export const postActionsConnectorExecuteRoute = (
               actions,
               request,
               connectorId,
-              llmActionType: connectors[0]?.actionTypeId,
+              actionTypeId: connectors[0]?.actionTypeId,
               params: {
                 subAction: request.body.subAction,
                 subActionParams: {

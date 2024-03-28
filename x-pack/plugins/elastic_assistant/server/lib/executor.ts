@@ -19,7 +19,7 @@ export interface Props {
   connectorId: string;
   params: InvokeAIActionsParams;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-  llmActionType: string;
+  actionTypeId: string;
   logger: Logger;
 }
 interface StaticResponse {
@@ -47,7 +47,7 @@ export const executeAction = async ({
   actions,
   params,
   connectorId,
-  llmActionType,
+  actionTypeId,
   request,
   logger,
 }: Props): Promise<StaticResponse | Readable> => {
@@ -83,7 +83,7 @@ export const executeAction = async ({
   // do not await, blocks stream for UI
   handleStreamStorage({
     responseStream: readable,
-    llmActionType,
+    actionTypeId,
     onMessageSent: onLlmResponse,
     logger,
   });

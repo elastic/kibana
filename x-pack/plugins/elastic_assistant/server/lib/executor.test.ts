@@ -31,7 +31,7 @@ const testProps: Omit<Props, 'actions'> = {
     subAction: 'invokeAI',
     subActionParams: { messages: [{ content: 'hello', role: 'user' }] },
   },
-  llmActionType: '.bedrock',
+  actionTypeId: '.bedrock',
   request,
   connectorId,
   onLlmResponse,

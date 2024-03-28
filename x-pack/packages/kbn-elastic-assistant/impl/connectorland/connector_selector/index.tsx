@@ -91,6 +91,9 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           const connectorTypeTitle =
             getGenAiConfig(connector)?.apiProvider ??
             getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
+          const connectorDetails = connector.isPreconfigured
+            ? i18n.PRECONFIGURED_CONNECTOR
+            : connectorTypeTitle;
           return {
             value: connector.id,
             'data-test-subj': connector.id,
@@ -98,9 +101,9 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             dropdownDisplay: (
               <React.Fragment key={connector.id}>
                 <strong>{connector.name}</strong>
-                {connectorTypeTitle && (
+                {connectorDetails && (
                   <EuiText size="xs" color="subdued">
-                    <p>{connectorTypeTitle}</p>
+                    <p>{connectorDetails}</p>
                   </EuiText>
                 )}
               </React.Fragment>
