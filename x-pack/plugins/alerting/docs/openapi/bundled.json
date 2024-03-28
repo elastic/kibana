@@ -4963,7 +4963,7 @@
       },
       "notify_when": {
         "type": "string",
-        "description": "Deprecated in 8.7.0. Use the `notify_when` property in the action `frequency` object instead. Indicates how often alerts generate actions. NOTE: You cannot specify `notify_when` at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
+        "description": "Deprecated in 8.13.0. Use the `notify_when` property in the action `frequency` object instead. Indicates how often alerts generate actions. NOTE: You cannot specify `notify_when` at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "enum": [
           "onActionGroupChange",
           "onActiveAlert",
@@ -4999,7 +4999,7 @@
           "string",
           "null"
         ],
-        "description": "Deprecated in 8.7.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
+        "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "default": null,
         "deprecated": true,
         "examples": [
