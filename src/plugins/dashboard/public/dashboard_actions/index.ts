@@ -17,12 +17,7 @@ import { CopyToDashboardAction } from './copy_to_dashboard_action';
 import { ExpandPanelAction } from './expand_panel_action';
 import { ExportCSVAction } from './export_csv_action';
 import { FiltersNotificationAction } from './filters_notification_action';
-<<<<<<< HEAD
-import { LibraryNotificationAction } from './library_notification_action';
-=======
 import { LegacyLibraryNotificationAction } from './legacy_library_notification_action';
-import { ReplacePanelAction } from './replace_panel_action';
->>>>>>> 01cf91240d137a7835a92520374bef3372f400f7
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { LegacyUnlinkFromLibraryAction } from './legacy_unlink_from_library_action';
 import { LibraryNotificationAction } from './library_notification_action';
