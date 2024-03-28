@@ -1100,7 +1100,7 @@
     "react-syntax-highlighter": "^15.3.1",
     "react-use": "^15.3.8",
     "react-virtualized": "^9.22.5",
-    "react-window": "^1.8.9",
+    "react-window": "^1.8.10",
     "reduce-reducers": "^1.0.4",
     "redux": "^4.2.1",
     "redux-actions": "^2.6.5",
