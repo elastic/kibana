@@ -75,6 +75,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
         height: isFullscreenPortrait ? 'initial' : '80vh',
         overflow: isFullscreenPortrait ? 'auto' : 'hidden',
       }}
+      data-test-subj="ruleTypeModal"
     >
       <EuiPanel paddingSize="m" style={!isFullscreenPortrait ? { maxHeight: '100%' } : {}}>
         <EuiFlexGroup direction="column" style={{ height: '100%' }}>

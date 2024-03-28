@@ -121,6 +121,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
                 </>
               }
               style={{ marginRight: '8px', flexGrow: 0 }}
+              data-test-subj={`${rule.id}-SelectOption`}
             />
             <EuiSpacer size="s" />
           </React.Fragment>
