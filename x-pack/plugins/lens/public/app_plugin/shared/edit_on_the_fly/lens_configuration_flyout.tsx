@@ -366,6 +366,8 @@ export function LensEditConfigurationFlyout({
         isSaveable={isSaveable}
       >
         <LayerConfiguration
+          // TODO: remove this once we support switching to any chart in Discover
+          onlyAllowSwitchToSubtypes
           getUserMessages={getUserMessages}
           attributes={attributes}
           coreStart={coreStart}
@@ -502,8 +504,6 @@ export function LensEditConfigurationFlyout({
             >
               <>
                 <LayerConfiguration
-                  // TODO: remove this prop once we add support for multiple layers (form-based mode)
-                  shouldDisplayChartSwitch={!!textBasedMode}
                   attributes={attributes}
                   getUserMessages={getUserMessages}
                   coreStart={coreStart}

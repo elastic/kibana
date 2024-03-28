@@ -8,6 +8,7 @@
 
 import type { IRouter } from '@kbn/core-http-server';
 import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
+import { omit } from 'lodash';
 import { CoreVersionedRoute } from './core_versioned_route';
 import type { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
 
@@ -90,7 +91,7 @@ export class CoreVersionedRouter implements VersionedRouter {
       return {
         path: route.path,
         method: route.method,
-        options: route.options,
+        options: omit(route.options, 'path'),
         handlers: route.getHandlers(),
       };
     });
