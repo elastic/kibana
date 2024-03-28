@@ -14,6 +14,9 @@ import {
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { useFilterInOut, UseFilterInValue } from './use_filter_in_out';
 import { FilterIn } from '../utils/filter';
+import { updateFiltersArray } from '../utils/filter';
+
+jest.mock('../utils/filter', () => ({ updateFiltersArray: jest.fn() }));
 
 describe('useFilterInOut()', () => {
   let hookResult: RenderHookResult<{}, UseFilterInValue, Renderer<unknown>>;
@@ -52,5 +55,29 @@ describe('useFilterInOut()', () => {
     });
 
     expect(hookResult.result.current).toHaveProperty('filterFn');
+  });
+
+  describe('calling filterFn', () => {
+    it('should call dependencies ', () => {
+      const indicator: string = '0.0.0.0';
+      const field: string = 'threat.indicator.name';
+      const filterType = FilterIn;
+
+      hookResult = renderHook(() => useFilterInOut({ indicator, field, filterType }), {
+        wrapper: TestProvidersComponent,
+      });
+
+      expect(hookResult.result.current).toHaveProperty('filterFn');
+
+      hookResult.result.current.filterFn?.();
+
+      expect(jest.mocked(updateFiltersArray)).toHaveBeenCalledWith(
+        [],
+        'threat.indicator.name',
+        '0.0.0.0',
+        undefined,
+        'security-solution-default'
+      );
+    });
   });
 });

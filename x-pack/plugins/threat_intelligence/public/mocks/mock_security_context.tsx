@@ -27,6 +27,9 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     },
   },
   sourcererDataView: {
+    sourcererDataView: {
+      id: 'security-solution-default',
+    },
     browserFields: {},
     selectedPatterns: [],
     indexPattern: { fields: [], title: '' },
