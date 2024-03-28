@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const ReferenceFieldSelects = ({ onChange, 'data-test-subj': dataTestSubj }: Props) => {
-  const { form } = useForm({ defaultValue: { main: 'body-content' } });
+  const { form } = useForm();
   const { subscribe } = form;
 
   const { search } = useLocation();
