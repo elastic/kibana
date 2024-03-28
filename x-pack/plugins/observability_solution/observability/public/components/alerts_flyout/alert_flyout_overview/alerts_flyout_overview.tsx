@@ -35,7 +35,7 @@ import {
   mapRuleParamsWithFlyout,
 } from './helpers/map_rules_params_with_flyout';
 import { ColumnIDs, overviewColumns } from './overview_columns';
-import { getGroups } from './helpers/getGroups';
+import { getSources } from './helpers/get_sources';
 
 export const Overview = memo(({ alert }: { alert: TopAlert }) => {
   const { http } = useKibana().services;
@@ -77,7 +77,7 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
         meta: {
           alertEnd,
           timeRange,
-          groups: getGroups(alert) || [],
+          groups: getSources(alert) || [],
         },
       },
       {

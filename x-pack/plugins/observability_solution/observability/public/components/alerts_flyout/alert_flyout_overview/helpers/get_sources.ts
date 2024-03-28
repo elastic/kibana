@@ -16,7 +16,7 @@ interface AlertFields {
   [key: string]: any;
 }
 
-export const getGroups = (alert: TopAlert) => {
+export const getSources = (alert: TopAlert) => {
   const groupsFromGroupFields = alert.fields[ALERT_GROUP_FIELD]?.map((field, index) => {
     const values = alert.fields[ALERT_GROUP_VALUE];
     if (values?.length && values[index]) {
