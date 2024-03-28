@@ -258,6 +258,8 @@ export class SearchInterceptor {
 
     if (combined.sessionId !== undefined) serializableOptions.sessionId = combined.sessionId;
     if (combined.isRestore !== undefined) serializableOptions.isRestore = combined.isRestore;
+    if (combined.retrieveResults !== undefined)
+      serializableOptions.retrieveResults = combined.retrieveResults;
     if (combined.legacyHitsTotal !== undefined)
       serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
@@ -480,8 +482,6 @@ export class SearchInterceptor {
    * @returns `Observable` emitting the search response or an error.
    */
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
-    let lastResponse: IKibanaSearchResponse | null = null;
-
     const searchOptions = {
       ...options,
     };
@@ -510,15 +510,16 @@ export class SearchInterceptor {
         );
 
         return response$.pipe(
-          tap((response) => {
-            lastResponse = response;
-          }),
           takeUntil(aborted$),
           catchError((e) => {
             // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
-            if (searchAbortController.isTimeout() && lastResponse) {
-              this.handleSearchError(e, request?.params?.body ?? {}, searchOptions, true);
-              return of(toPartialResponse(lastResponse));
+            if (searchAbortController.isTimeout()) {
+              return from(this.runSearch(request, { ...options, retrieveResults: true })).pipe(
+                tap(() =>
+                  this.handleSearchError(e, request?.params?.body ?? {}, searchOptions, true)
+                ),
+                map(toPartialResponse)
+              );
             }
             return throwError(
               this.handleSearchError(
