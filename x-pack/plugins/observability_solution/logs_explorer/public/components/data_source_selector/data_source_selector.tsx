@@ -13,20 +13,21 @@ import {
   INTEGRATIONS_TAB_ID,
   noDatasetsDescriptionLabel,
   noDatasetsLabel,
+  noDataViewsDescriptionLabel,
+  noDataViewsLabel,
   noIntegrationsDescriptionLabel,
   noIntegrationsLabel,
 } from './constants';
 import { useDataSourceSelector } from './state_machine/use_data_source_selector';
 import { DataViewList } from './sub_components/data_views_list';
-import { DataViewMenuItem } from './sub_components/data_view_menu_item';
 import { IntegrationsList } from './sub_components/integrations_list';
 import ListStatus from './sub_components/list_status';
 import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
 import { SelectorPopover } from './sub_components/selector_popover';
 import { DataSourceSelectorTabs } from './sub_components/selector_tabs';
-import { DataSourceSelectorProps } from './types';
-import { buildIntegrationsTree, createDataViewsStatusItem } from './utils';
+import { DataSourceSelectorProps, DataViewTreeItem } from './types';
+import { buildIntegrationsTree } from './utils';
 import { DataViewsFilter } from './sub_components/data_view_filter';
 
 export function DataSourceSelector({
@@ -121,6 +122,18 @@ export function DataSourceSelector({
     selectDataset,
   ]);
 
+  const dataViewsItems: DataViewTreeItem[] = useMemo(() => {
+    return dataViews
+      ? dataViews.map((dataView) => ({
+          'data-test-subj': getDataViewTestSubj(dataView.title),
+          name: dataView.name,
+          isAllowed: isDataViewAllowed(dataView),
+          onClick: () => selectDataView(dataView),
+          disabled: !isDataViewAvailable(dataView),
+        }))
+      : [];
+  }, [dataViews, isDataViewAllowed, isDataViewAvailable, selectDataView]);
+
   const integrationsStatusPrompt = useMemo(
     () => (
       <ListStatus
@@ -136,33 +149,20 @@ export function DataSourceSelector({
     [integrations, integrationsError, isLoadingIntegrations, onIntegrationsReload]
   );
 
-  const dataViewsItems = useMemo(() => {
-    if (!dataViews || dataViews.length === 0) {
-      return [
-        createDataViewsStatusItem({
-          data: dataViews,
-          error: dataViewsError,
-          isLoading: isLoadingDataViews,
-          onRetry: onDataViewsReload,
-        }),
-      ];
-    }
-
-    return dataViews.map((dataView) => ({
-      'data-test-subj': getDataViewTestSubj(dataView.title),
-      name: <DataViewMenuItem dataView={dataView} isAvailable={isDataViewAllowed(dataView)} />,
-      onClick: () => selectDataView(dataView),
-      disabled: !isDataViewAvailable(dataView),
-    }));
-  }, [
-    dataViews,
-    dataViewsError,
-    isDataViewAllowed,
-    isDataViewAvailable,
-    isLoadingDataViews,
-    onDataViewsReload,
-    selectDataView,
-  ]);
+  const dataViewsStatusPrompt = useMemo(
+    () => (
+      <ListStatus
+        key="dataViewsStatusItem"
+        description={noDataViewsDescriptionLabel}
+        title={noDataViewsLabel}
+        data={dataViews}
+        error={dataViewsError}
+        isLoading={isLoadingDataViews}
+        onRetry={onDataViewsReload}
+      />
+    ),
+    [dataViews, dataViewsError, isLoadingDataViews, onDataViewsReload]
+  );
 
   const handleDataViewTabClick = () => {
     onDataViewsTabClick(); // Lazy-load data views only when accessing the Data Views tab
@@ -203,12 +203,17 @@ export function DataSourceSelector({
         )}
       </IntegrationsList>
       {/* Data views tab content */}
-      <DataViewList hidden={tabId !== DATA_VIEWS_TAB_ID} items={dataViewsItems}>
+      <DataViewList
+        hidden={tabId !== DATA_VIEWS_TAB_ID}
+        dataViews={dataViewsItems}
+        onSortByName={sortByOrder}
+        search={search}
+        statusPrompt={dataViewsStatusPrompt}
+      >
         {tabId === DATA_VIEWS_TAB_ID && (
           <SearchControls
             key={DATA_VIEWS_TAB_ID}
             onSearch={searchByName}
-            onSort={sortByOrder}
             search={search}
             filterComponent={
               tabId === DATA_VIEWS_TAB_ID && (

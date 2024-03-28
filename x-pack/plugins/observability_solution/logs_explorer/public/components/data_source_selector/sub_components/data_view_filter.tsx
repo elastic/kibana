@@ -8,7 +8,8 @@
 import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiContextMenu,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -85,29 +86,24 @@ export const DataViewsFilter = ({ count, filter, onFilter }: DataViewFilterProps
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
-          <EuiContextMenu
+          <EuiContextMenuPanel
+            title={selectDataViewTypeLabel}
             size="s"
-            initialPanelId={0}
-            panels={[
-              {
-                id: 0,
-                width: 'auto',
-                title: selectDataViewTypeLabel,
-                items: [
-                  {
-                    'data-test-subj': 'logsExplorerDataSourceSelectorDataViewTypeAll',
-                    icon: !filter.dataType ? 'check' : 'empty',
-                    name: allDataViewTypesLabel,
-                    onClick: createSelectTypeFilter(undefined),
-                  },
-                  {
-                    'data-test-subj': 'logsExplorerDataSourceSelectorDataViewTypeLogs',
-                    icon: filter.dataType === logsDataViewType ? 'check' : 'empty',
-                    name: logsDataViewTypeLabel,
-                    onClick: createSelectTypeFilter(logsDataViewType),
-                  },
-                ],
-              },
+            items={[
+              <EuiContextMenuItem
+                data-test-subj="logsExplorerDataSourceSelectorDataViewTypeAll"
+                icon={!filter.dataType ? 'check' : 'empty'}
+                onClick={createSelectTypeFilter(undefined)}
+              >
+                {allDataViewTypesLabel}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                data-test-subj="logsExplorerDataSourceSelectorDataViewTypeLogs"
+                icon={filter.dataType === logsDataViewType ? 'check' : 'empty'}
+                onClick={createSelectTypeFilter(logsDataViewType)}
+              >
+                {logsDataViewTypeLabel}
+              </EuiContextMenuItem>,
             ]}
           />
         </EuiPopover>

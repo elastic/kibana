@@ -101,3 +101,11 @@ export type DatasetSelectionHandler = (dataset: Dataset) => void;
 export type DataViewSelectionHandler = (dataView: DataViewDescriptor) => void;
 
 export type DataViewFilterHandler = (params: DataViewsFilterParams) => void;
+
+export interface DataViewTreeItem {
+  'data-test-subj'?: string;
+  disabled?: boolean;
+  isAllowed?: boolean;
+  name?: string;
+  onClick: () => void;
+}

@@ -5,39 +5,86 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiIcon, EuiPanel, EuiPanelProps, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { DATA_VIEWS_PANEL_ID } from '../constants';
-import { tabContentHeight } from '../shared_styles';
+import { SelectorList, SortOrder } from './selector_list';
+import { nameColumnLabel, openDiscoverLabel } from '../constants';
+import {
+  DataSourceSelectorSearchHandler,
+  DataSourceSelectorSearchParams,
+  DataViewTreeItem,
+} from '../types';
 
-interface DataViewListProps extends React.HTMLAttributes<HTMLElement> {
-  items: EuiContextMenuPanelItemDescriptor[];
-}
+type DataViewListProps = {
+  dataViews: DataViewTreeItem[];
+  statusPrompt: React.ReactNode;
+  onSortByName: DataSourceSelectorSearchHandler;
+  search: DataSourceSelectorSearchParams;
+} & EuiPanelProps;
 
-export function DataViewList({ children, items, ...props }: DataViewListProps) {
+export function DataViewList({
+  children,
+  dataViews,
+  onSortByName,
+  search,
+  statusPrompt,
+  ...props
+}: DataViewListProps) {
+  const shouldDisplayPrompt = Boolean(!dataViews || dataViews.length === 0);
+
+  const handleNameSort = (sortOrder: SortOrder) => onSortByName({ ...search, sortOrder });
+
   return (
-    <div {...props}>
+    <EuiPanel
+      {...props}
+      data-test-subj="dataSourceSelectorIntegrationsList"
+      paddingSize="none"
+      hasShadow={false}
+    >
       {children}
-      <EuiContextMenu
-        initialPanelId={DATA_VIEWS_PANEL_ID}
-        className="eui-yScroll"
-        data-test-subj="dataViewsContextMenu"
-        size="s"
-        css={contextMenuStyle}
-        panels={[
-          {
-            id: DATA_VIEWS_PANEL_ID,
-            width: '100%',
-            items,
-          },
-        ]}
-      />
-    </div>
+      <SelectorList data-test-subj="dataSourceSelectorDataViewsList">
+        <SelectorList.Header>
+          <SelectorList.SortableColumn onSort={handleNameSort} sortOrder={search.sortOrder}>
+            <EuiText size="xs">
+              <strong>{nameColumnLabel}</strong>
+            </EuiText>
+          </SelectorList.SortableColumn>
+        </SelectorList.Header>
+        {dataViews.map((dataView) => (
+          <DataViewRow {...dataView} />
+        ))}
+        {shouldDisplayPrompt && statusPrompt}
+      </SelectorList>
+    </EuiPanel>
   );
 }
 
-const contextMenuStyle = css`
-  ${tabContentHeight}
-  transition: none !important;
-`;
+const DataViewRow = ({ name, isAllowed, disabled, ...props }: DataViewTreeItem) => {
+  return (
+    <SelectorList.Row disabled={disabled}>
+      <SelectorList.Column
+        component="button"
+        // @ts-expect-error This is an issue with EuiFlexItem not correctly inferring the props of the passed component. https://github.com/elastic/eui/issues/7612
+        disabled={disabled}
+        {...props}
+      >
+        <DataViewName name={name} isAllowed={isAllowed} />
+      </SelectorList.Column>
+    </SelectorList.Row>
+  );
+};
+
+const DataViewName = ({ name, isAllowed }: Pick<DataViewTreeItem, 'name' | 'isAllowed'>) => {
+  if (isAllowed) {
+    return <EuiText size="s">{name}</EuiText>;
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiText size="s">{name}</EuiText>
+      <EuiToolTip content={openDiscoverLabel}>
+        <EuiIcon type="popout" color="subdued" />
+      </EuiToolTip>
+    </EuiFlexGroup>
+  );
+};

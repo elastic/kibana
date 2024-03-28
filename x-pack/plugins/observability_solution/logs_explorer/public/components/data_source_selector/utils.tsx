@@ -7,14 +7,8 @@
 
 import React from 'react';
 import { Dataset, Integration } from '../../../common/datasets';
-import {
-  DATA_SOURCE_SELECTOR_WIDTH,
-  noDataViewsDescriptionLabel,
-  noDataViewsLabel,
-  uncategorizedLabel,
-} from './constants';
+import { DATA_SOURCE_SELECTOR_WIDTH, uncategorizedLabel } from './constants';
 import { DatasetSelectionHandler } from './types';
-import ListStatus, { ListStatusProps } from './sub_components/list_status';
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_SOURCE_SELECTOR_WIDTH,
@@ -78,21 +72,5 @@ export const createAllLogsItem = () => {
     'data-test-subj': 'dataSourceSelectorShowAllLogs',
     iconType: allLogs.iconType,
     name: allLogs.title,
-  };
-};
-
-export const createDataViewsStatusItem = (
-  props: Omit<ListStatusProps, 'description' | 'title'>
-) => {
-  return {
-    disabled: true,
-    name: (
-      <ListStatus
-        key="dataViewsStatusItem"
-        description={noDataViewsDescriptionLabel}
-        title={noDataViewsLabel}
-        {...props}
-      />
-    ),
   };
 };
