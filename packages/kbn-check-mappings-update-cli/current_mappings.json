@@ -1558,19 +1558,6 @@
       }
     }
   },
-  "infra-custom-dashboards": {
-    "properties": {
-      "assetType": {
-        "type": "keyword"
-      },
-      "dashboardIdList": {
-        "type": "keyword"
-      },
-      "kuery": {
-        "type": "text"
-      }
-    }
-  },
   "infrastructure-monitoring-log-view": {
     "dynamic": false,
     "properties": {

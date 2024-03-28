@@ -41,7 +41,6 @@ import {
   profilingAzureCostDiscountRate,
   enableInfrastructureProfilingIntegration,
   apmEnableTransactionProfiling,
-  enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
 } from '../common/ui_settings_keys';
 
@@ -252,24 +251,6 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.enableInfrastructureProfilingIntegrationDescription',
       {
         defaultMessage: 'Enable Universal Profiling integration in the Infrastructure app.',
-      }
-    ),
-    schema: schema.boolean(),
-  },
-  [enableInfrastructureAssetCustomDashboards]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureAssetCustomDashboards', {
-      defaultMessage: 'Custom dashboards for asset details in Infrastructure',
-    }),
-    value: false,
-    description: i18n.translate(
-      'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
-      {
-        defaultMessage:
-          '{betaLabel} Enable option to link custom dashboards in the asset details view.',
-        values: {
-          betaLabel: `<em>[${betaLabel}]</em>`,
-        },
       }
     ),
     schema: schema.boolean(),

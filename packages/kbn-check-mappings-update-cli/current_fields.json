@@ -460,11 +460,6 @@
     "title",
     "type"
   ],
-  "infra-custom-dashboards": [
-    "assetType",
-    "dashboardIdList",
-    "kuery"
-  ],
   "infrastructure-monitoring-log-view": [
     "name"
   ],
