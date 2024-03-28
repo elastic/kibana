@@ -113,6 +113,15 @@ export interface CalculateRiskScoreAggregations {
   };
 }
 
+export interface SearchHitRiskInput {
+  id: string[];
+  index: string[];
+  rule_name?: string;
+  time?: string;
+  score?: number;
+  contribution?: number;
+}
+
 export interface RiskScoreBucket {
   key: { [identifierField: string]: string };
   doc_count: number;
@@ -125,6 +134,7 @@ export interface RiskScoreBucket {
         notes: string[];
         category_1_score: number;
         category_1_count: number;
+        risk_inputs: SearchHitRiskInput[];
       };
     };
     inputs: SearchResponse;
