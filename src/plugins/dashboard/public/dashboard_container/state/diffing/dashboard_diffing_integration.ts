@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
@@ -115,9 +116,13 @@ export function startDiffingDashboardState(
     // children may change, so make sure we subscribe/unsubscribe with switchMap
     switchMap((newChildIds: string[]) => {
       if (newChildIds.length === 0) return of([]);
+      const childrenThatPublishUnsavedChanges = Object.entries(this.children$.value).filter(
+        (child) => apiPublishesUnsavedChanges(child)
+      ) as Array<[string, PublishesUnsavedChanges]>;
+
       return combineLatest(
-        newChildIds.map((childId) =>
-          this.children$.value[childId].unsavedChanges.pipe(
+        childrenThatPublishUnsavedChanges.map(([childId, child]) =>
+          child.unsavedChanges.pipe(
             map((unsavedChanges) => {
               return { childId, unsavedChanges };
             })

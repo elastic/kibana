@@ -11,6 +11,7 @@ import {
   PanelNotFoundError,
   reactEmbeddableRegistryHasKey,
 } from '@kbn/embeddable-plugin/public';
+import { apiHasSerializableState } from '@kbn/presentation-containers';
 import { apiPublishesPanelTitle, getPanelTitle } from '@kbn/presentation-publishing';
 import { filter, map, max } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -57,7 +58,7 @@ const duplicateReactEmbeddableInput = async (
   idToDuplicate: string
 ) => {
   const child = dashboard.children$.value[idToDuplicate];
-  if (!child) throw new PanelNotFoundError();
+  if (!child || !apiHasSerializableState(child)) throw new PanelNotFoundError();
 
   const lastTitle = apiPublishesPanelTitle(child) ? getPanelTitle(child) ?? '' : '';
   const newTitle = await incrementPanelTitle(dashboard, lastTitle);
