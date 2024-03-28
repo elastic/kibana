@@ -48,11 +48,12 @@ import type {
  */
 export interface MlEmbeddableBaseApi<StateType extends object = object>
   extends DefaultEmbeddableApi<StateType>,
-    PublishesDataViews {
+    PublishesDataViews,
+    PublishesUnifiedSearch {
   /**
    * Result time range based on the parent and panel time range APIs
    */
-  appliedTimeRange$: PublishingSubject<TimeRange | undefined>;
+  appliedTimeRange$: PublishingSubject<TimeRange>;
 }
 
 /** Manual input by the user */

@@ -6,7 +6,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { useEffect, useMemo, useState } from 'react';
@@ -109,8 +108,9 @@ export function useSwimlaneInputResolver(
     const subscription = combineLatest([
       selectedJobs$,
       embeddableInput$,
+      api.query$,
+      api.filters$,
       bucketInterval$,
-      (api.parentApi?.viewMode ?? of(ViewMode.VIEW)) as Observable<ViewMode>,
       refresh.pipe(startWith(null)),
     ])
       .pipe(
@@ -119,7 +119,7 @@ export function useSwimlaneInputResolver(
         tap(() => {
           reportingCallbacks.onLoading();
         }),
-        switchMap(([explorerJobs, input, bucketInterval, viewMode]) => {
+        switchMap(([explorerJobs, input, query, filters, bucketInterval]) => {
           if (!explorerJobs) {
             // couldn't load the list of jobs
             return of(undefined);
@@ -130,8 +130,6 @@ export function useSwimlaneInputResolver(
             swimlaneType: swimlaneTypeInput,
             perPage: perPageInput,
             fromPage: fromPageInput,
-            filters,
-            query,
           } = input;
 
           if (!swimlaneType) {
