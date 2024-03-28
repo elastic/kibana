@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React from 'react';
-
-const Logo = () => (
-  <svg height="32" viewBox="-50 50 800 500" width="32" xmlns="http://www.w3.org/2000/svg" />
-);
+import CrowdstrikeLogo from './logo.svg';
+const Logo = () => {
+  return <img width="32" height="32" src={CrowdstrikeLogo} alt="CrowdStrike" />;
+};
 
 // eslint-disable-next-line import/no-default-export
 export { Logo as default };
