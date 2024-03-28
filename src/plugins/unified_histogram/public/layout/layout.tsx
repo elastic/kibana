@@ -7,7 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useEffect, useState } from 'react';
+import React, { PropsWithChildren, ReactElement, useEffect, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
@@ -239,6 +239,17 @@ export const UnifiedHistogramLayout = ({
   withDefaultActions,
   abortController,
 }: UnifiedHistogramLayoutProps) => {
+  const columnsMap = useMemo(() => {
+    if (!columns?.length) {
+      return undefined;
+    }
+
+    return columns.reduce((acc, column) => {
+      acc[column.id] = column;
+      return acc;
+    }, {} as Record<string, DatatableColumn>);
+  }, [columns]);
+
   const requestParams = useRequestParams({
     services,
     query: originalQuery,
@@ -266,6 +277,7 @@ export const UnifiedHistogramLayout = ({
         timeRange: originalTimeRange,
         isPlainRecord,
         columns,
+        columnsMap,
       },
       timeInterval: originalChartTimeInterval,
       breakdownField: breakdown?.field,
@@ -282,6 +294,7 @@ export const UnifiedHistogramLayout = ({
     originalChartTimeInterval,
     isPlainRecord,
     columns,
+    columnsMap,
     breakdown,
     externalVisContext,
     onSuggestionContextChange,

@@ -59,7 +59,7 @@ export function canImportVisContext(
   );
 }
 
-export const isSuggestionAndVisContextCompatible = (
+export const isSuggestionShapeAndVisContextCompatible = (
   suggestion: Suggestion | undefined,
   externalVisContext: UnifiedHistogramVisContext | undefined
 ): boolean => {

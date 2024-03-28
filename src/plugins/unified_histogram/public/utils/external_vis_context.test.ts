@@ -11,7 +11,7 @@ import type { Suggestion } from '@kbn/lens-plugin/public';
 import {
   exportVisContext,
   canImportVisContext,
-  isSuggestionAndVisContextCompatible,
+  isSuggestionShapeAndVisContextCompatible,
 } from './external_vis_context';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
@@ -57,10 +57,10 @@ describe('external_vis_context', () => {
 
   describe('isSuggestionAndVisContextCompatible', () => {
     it('should work correctly', async () => {
-      expect(isSuggestionAndVisContextCompatible(undefined, undefined)).toBe(true);
+      expect(isSuggestionShapeAndVisContextCompatible(undefined, undefined)).toBe(true);
 
       expect(
-        isSuggestionAndVisContextCompatible(
+        isSuggestionShapeAndVisContextCompatible(
           { visualizationId: 'lnsPie', visualizationState: { shape: 'donut' } } as Suggestion,
           {
             attributes: {
@@ -72,7 +72,7 @@ describe('external_vis_context', () => {
       ).toBe(true);
 
       expect(
-        isSuggestionAndVisContextCompatible(
+        isSuggestionShapeAndVisContextCompatible(
           { visualizationId: 'lnsPie', visualizationState: { shape: 'donut' } } as Suggestion,
           {
             attributes: {
@@ -84,7 +84,7 @@ describe('external_vis_context', () => {
       ).toBe(false);
 
       expect(
-        isSuggestionAndVisContextCompatible(
+        isSuggestionShapeAndVisContextCompatible(
           { visualizationId: 'lnsPie', visualizationState: { shape: 'donut' } } as Suggestion,
           {
             attributes: {
