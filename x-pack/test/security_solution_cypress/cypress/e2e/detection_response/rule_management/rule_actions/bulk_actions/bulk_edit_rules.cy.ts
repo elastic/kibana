@@ -100,7 +100,6 @@ import {
 import { setRowsPerPageTo, sortByTableColumn } from '../../../../../tasks/table_pagination';
 
 const RULE_NAME = 'Custom rule for bulk actions';
-const EUI_SELECTABLE_LIST_ITEM_SR_TEXT = '. To check this option, press Enter.';
 
 const prePopulatedIndexPatterns = ['index-1-*', 'index-2-*'];
 const prePopulatedTags = ['test-default-tag-1', 'test-default-tag-2'];
