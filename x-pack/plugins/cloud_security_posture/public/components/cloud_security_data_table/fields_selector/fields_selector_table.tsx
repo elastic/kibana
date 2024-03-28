@@ -60,6 +60,17 @@ export interface FieldsSelectorTableProps {
   isFilterSelectedEnabled: boolean;
 }
 
+function getDataViewFields(dataView: DataView) {
+  return dataView.fields
+    .getAll()
+    .filter((field) => field.name !== '_index' && field.visualizable)
+    .map((field) => ({
+      id: field.name,
+      name: field.name,
+      displayName: field.customLabel || '',
+    }));
+}
+
 export const FieldsSelectorTable = ({
   title,
   dataView,
@@ -69,33 +80,26 @@ export const FieldsSelectorTable = ({
   isFilterSelectedEnabled,
   onFilterSelectedChange,
 }: FieldsSelectorTableProps) => {
-  const dataViewFields = useMemo<Field[]>(() => {
-    return dataView.fields
-      .getAll()
-      .filter((field) => {
-        return field.name !== '_index' && field.visualizable;
-      })
-      .map((field) => ({
-        id: field.name,
-        name: field.name,
-        displayName: field.customLabel || '',
-      }));
-  }, [dataView.fields]);
-
-  const [fields, setFields] = useState(dataViewFields);
-
-  useEffect(() => {
-    if (isFilterSelectedEnabled) {
-      const filteredItems = dataViewFields.filter((field) => {
-        return columns.includes(field.id);
-      });
-      setFields(filteredItems);
-    } else {
-      setFields(dataViewFields);
-    }
-  }, [columns, dataViewFields, isFilterSelectedEnabled]);
-
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const dataViewFields = useMemo<Field[]>(() => getDataViewFields(dataView), [dataView]);
+
+  const [fields, setFields] = useState(
+    !isFilterSelectedEnabled
+      ? dataViewFields
+      : dataViewFields.filter((field) => columns.includes(field.id))
+  );
+
+  // useEffect(() => {
+  //   if (isFilterSelectedEnabled) {
+  //     const filteredItems = dataViewFields.filter((field) => {
+  //       return columns.includes(field.id);
+  //     });
+  //     setFields(filteredItems);
+  //   } else {
+  //     setFields(dataViewFields);
+  //   }
+  // }, [columns, dataViewFields, isFilterSelectedEnabled]);
 
   const togglePopover = useCallback(() => {
     setIsPopoverOpen((open) => !open);
