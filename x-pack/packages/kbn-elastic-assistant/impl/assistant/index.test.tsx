@@ -255,12 +255,12 @@ describe('Assistant', () => {
       expect(setConversationTitle).toHaveBeenLastCalledWith('electric sheep');
     });
     it('should fetch current conversation when id has value', async () => {
-      const chatSendSpy = jest.spyOn(all, 'useChatSend');
+      const getConversation = jest
+        .fn()
+        .mockResolvedValue({ ...mockData['electric sheep'], title: 'updated title' });
       (useConversation as jest.Mock).mockReturnValue({
         ...mockUseConversation,
-        getConversation: jest
-          .fn()
-          .mockResolvedValue({ ...mockData['electric sheep'], title: 'updated title' }),
+        getConversation,
       });
       renderAssistant();
 
@@ -269,14 +269,7 @@ describe('Assistant', () => {
         fireEvent.click(previousConversationButton);
       });
 
-      expect(chatSendSpy).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          currentConversation: {
-            ...mockData['electric sheep'],
-            title: 'updated title',
-          },
-        })
-      );
+      expect(getConversation).toHaveBeenCalledWith('electric sheep id');
 
       expect(persistToLocalStorage).toHaveBeenLastCalledWith('updated title');
     });
