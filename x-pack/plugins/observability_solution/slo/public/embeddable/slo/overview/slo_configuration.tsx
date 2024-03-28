@@ -133,6 +133,7 @@ function GroupSloConfiguration({ overviewMode, onCreate, onCancel }: GroupConfig
     groupBy: 'tags',
     groups: [],
   });
+  const [hasError, setHasError] = useState(false);
 
   const onConfirmClick = () =>
     onCreate({
@@ -149,6 +150,7 @@ function GroupSloConfiguration({ overviewMode, onCreate, onCancel }: GroupConfig
               <EuiFlexItem>
                 <SloGroupFilters
                   onSelected={(prop, value) => {
+                    setHasError(value === undefined);
                     setSelectedGroupFilters((prevState) => ({ ...prevState, [prop]: value }));
                   }}
                 />
@@ -167,7 +169,7 @@ function GroupSloConfiguration({ overviewMode, onCreate, onCancel }: GroupConfig
 
         <EuiButton
           data-test-subj="sloConfirmButton"
-          // isDisabled={!selectedSlo || hasError}
+          isDisabled={selectedGroupFilters.groups?.length === 0 || hasError}
           onClick={onConfirmClick}
           fill
         >
