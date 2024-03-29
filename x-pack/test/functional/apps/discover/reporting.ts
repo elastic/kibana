@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // close any open notification toasts
     await toasts.dismissAll();
 
-    await PageObjects.reporting.openCsvReportingPanel();
+    await PageObjects.reporting.openExportTab();
     await PageObjects.reporting.clickGenerateReportButton();
 
     const url = await PageObjects.reporting.getReportURL(60000);
@@ -66,14 +66,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.emptyKibanaIndex();
       });
 
+      afterEach(async () => {
+        await PageObjects.share.closeShareModal();
+      });
+
       it('is available if new', async () => {
-        await PageObjects.reporting.openCsvReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('becomes available when saved', async () => {
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
-        await PageObjects.reporting.openCsvReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
@@ -97,6 +101,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.emptyKibanaIndex();
       });
 
+      afterEach(async () => {
+        await PageObjects.share.closeShareModal();
+      });
+
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
@@ -112,10 +120,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();
-        await PageObjects.reporting.openCsvReportingPanel();
-        const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
-        await advOpt.click();
-        const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
+        await PageObjects.reporting.openExportTab();
+        const postUrl = await find.byXPath(`//button[descendant::*[text()='Post URL']]`);
         await postUrl.click();
 
         // get clipboard value using field search input, since
@@ -268,6 +274,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reset();
       });
 
+      afterEach(async () => {
+        await PageObjects.share.closeShareModal();
+      });
+
       beforeEach(async () => {
         const fromTime = 'Jan 10, 2005 @ 00:00:00.000';
         const toTime = 'Dec 23, 2006 @ 00:00:00.000';
@@ -310,6 +320,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         await PageObjects.reporting.checkForReportingToasts();
+        await PageObjects.share.closeShareModal();
       });
 
       it('generates a report with data', async () => {

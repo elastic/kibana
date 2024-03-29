@@ -119,13 +119,6 @@ export default function (ctx: FtrProviderContext) {
         await globalNav.badgeMissingOrFail();
       });
 
-      it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
-      });
-
       it('shows CSV reports', async () => {
         await PageObjects.share.clickShareTopNavButton();
         await testSubjects.existOrFail('sharePanel-CSVReports');
@@ -263,13 +256,6 @@ export default function (ctx: FtrProviderContext) {
         await setDiscoverTimeRange();
         await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
         await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
-      });
-
-      it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
       });
 
       savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();

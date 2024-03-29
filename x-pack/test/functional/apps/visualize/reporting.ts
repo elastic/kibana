@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'visualize',
     'visEditor',
+    'share',
   ]);
 
   describe('Visualize Reporting Screenshots', function () {
@@ -41,7 +42,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         body: { query: { match_all: {} } },
       });
     });
-
+    afterEach(async () => {
+      await PageObjects.share.closeShareModal();
+    });
     describe('Print PDF button', () => {
       const ecommerceSOPath =
         'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
@@ -113,6 +116,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      afterEach(async () => {
+        await PageObjects.share.closeShareModal();
+      });
       it('TSVB Gauge: PNG file matches the baseline image', async function () {
         log.debug('load saved visualization');
         await PageObjects.visualize.loadSavedVisualization(
