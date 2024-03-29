@@ -65,21 +65,27 @@ export const HeaderHelpCenterTrigger = ({ helpExtension$ }: IHeaderHelpCenterTri
         })}
         onClick={togglePortal}
       >
-        <EuiIcon type={'questionInCircle'} size="m" />
+        <EuiIcon type={'questionInCircle'} size="l" />
       </EuiHeaderSectionItemButton>
       {portal}
     </div>
   );
 };
 
+type IHelpCenterPosition = Pick<CSSObject, 'top' | 'left'> | Pick<CSSObject, 'top' | 'right'>;
+
 interface IHeaderHelpCenter {
   onClose: () => void;
+  defaultPosition?: IHelpCenterPosition;
   helpExtension: ChromeHelpExtension;
 }
 
-const HeaderHelpCenter = ({ onClose, helpExtension }: IHeaderHelpCenter) => {
+const HeaderHelpCenter = ({
+  onClose,
+  helpExtension,
+  defaultPosition = { top: 'var(--kbnHeaderOffset)', right: '0%' },
+}: IHeaderHelpCenter) => {
   const positionPersistenceKey = useRef('help_center_position');
-  // TODO: add fallback for when there's no persisted position
   const persistedPosition = JSON.parse(
     localStorage.getItem(positionPersistenceKey.current) || '{}'
   );
@@ -88,10 +94,10 @@ const HeaderHelpCenter = ({ onClose, helpExtension }: IHeaderHelpCenter) => {
     width: 654,
     position: 'fixed',
     zIndex: 9999999, // TODO: confirm if there's a global zIndex
-    ...persistedPosition,
+    ...(Object.keys(persistedPosition).length ? persistedPosition : defaultPosition),
   });
 
-  const dragEndPosition = useRef<Rx.Observable<{ position: { left: number; top: number } }>>();
+  const dragEndPosition = useRef<Rx.Observable<{ position: IHelpCenterPosition }>>();
 
   useEffect(() => {
     if (helpCenterElm) {
@@ -128,7 +134,7 @@ const HeaderHelpCenter = ({ onClose, helpExtension }: IHeaderHelpCenter) => {
               }),
               Rx.map(function (data) {
                 requestAnimationFrame(() => {
-                  setHelpCenterStyling((prevElmStyling) => ({
+                  setHelpCenterStyling(({ right, ...prevElmStyling }) => ({
                     ...prevElmStyling,
                     top: data.position.top,
                     left: data.position.left,
