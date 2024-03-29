@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BulletSubtype } from '@elastic/charts';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -37,21 +38,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await visualize.hasNavigateToLensButton()).to.eql(true);
     });
 
-    it('should convert to Lens', async () => {
+    it('should convert to Lens - nick', async () => {
       await visualize.navigateToLensFromAnotherVisualization();
-      await lens.waitForVisualization('mtrVis');
-      const data = await lens.getMetricVisualizationData();
-      expect(data.length).to.be.equal(1);
-      expect(data).to.eql([
+      const { bullet } = await lens.getCurrentChartDebugStateForVizType('gaugeChart');
+      expect(bullet?.rows.length).to.be.equal(1);
+      expect(bullet?.rows[0].length).to.be.equal(1);
+      expect(bullet?.rows[0]).to.eql([
         {
           title: 'Count',
-          subtitle: undefined,
-          extraText: '',
-          value: '140.05%',
-          color: 'rgba(255, 255, 255, 1)',
-          trendlineColor: undefined,
-          showingBar: true,
-          showingTrendline: false,
+          subtype: BulletSubtype.twoThirdsCircle,
+          value: 1.4005,
+          colorBands: ['#2f7e54'],
+          ticks: [0, 1],
+          domain: [0, 1],
         },
       ]);
     });
