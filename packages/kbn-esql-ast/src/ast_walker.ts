@@ -294,7 +294,7 @@ function getBooleanValue(ctx: BooleanLiteralContext | BooleanValueContext) {
 
 function getConstant(ctx: ConstantContext | undefined): ESQLAstItem | undefined {
   if (ctx instanceof NullLiteralContext) {
-    return createLiteral('string', ctx.NULL());
+    return createLiteral('null', ctx.NULL());
   }
   if (ctx instanceof QualifiedIntegerLiteralContext) {
     // despite the generic name, this is a date unit constant:

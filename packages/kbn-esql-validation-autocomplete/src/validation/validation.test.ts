@@ -508,6 +508,15 @@ describe('validation logic', () => {
         'Argument of [not_in] must be [number[]], found value [(1, 2, 3, "a")] type [(number, number, number, string)]',
       ]);
 
+      // test that "and" and "or" accept null... not sure if this is the best place or not...
+      for (const op of ['and', 'or']) {
+        for (const firstParam of ['true', 'null']) {
+          for (const secondParam of ['false', 'null']) {
+            testErrorsAndWarnings(`row bool_var = ${firstParam} ${op} ${secondParam}`, []);
+          }
+        }
+      }
+
       function tweakSignatureForRowCommand(signature: string) {
         /**
          * row has no access to any field, so replace it with literal
@@ -1741,6 +1750,9 @@ describe('validation logic', () => {
         'STATS BY does not support function percentile',
       ]);
       testErrorsAndWarnings('from a_index | stats count(`numberField`)', []);
+
+      // this is a scenario that was failing because "or" didn't accept "null"
+      testErrorsAndWarnings('from a_index | stats count(stringField == "a" or null)', []);
 
       for (const subCommand of ['keep', 'drop', 'eval']) {
         testErrorsAndWarnings(
