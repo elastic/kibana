@@ -27,13 +27,12 @@ export const getEmptyFindResult = (): FindResponse<EsConversationSchema> => ({
   data: getBasicEmptySearchResponse(),
 });
 
-export const getFindConversationsResultWithSingleHit =
-  (): FindResponse<EsConversationSchema> => ({
-    page: 1,
-    perPage: 1,
-    total: 1,
-    data: getConversationSearchEsMock(),
-  });
+export const getFindConversationsResultWithSingleHit = (): FindResponse<EsConversationSchema> => ({
+  page: 1,
+  perPage: 1,
+  total: 1,
+  data: getConversationSearchEsMock(),
+});
 
 export const getFindPromptsResultWithSingleHit = (): FindResponse<SearchEsPromptsSchema> => ({
   page: 1,
@@ -50,17 +49,16 @@ export const getFindAnonymizationFieldsResultWithSingleHit =
     data: getAnonymizationFieldsSearchEsMock(),
   });
 
-export const getBasicEmptySearchResponse =
-  (): estypes.SearchResponse<EsConversationSchema> => ({
-    took: 1,
-    timed_out: false,
-    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-    hits: {
-      hits: [],
-      total: { relation: 'eq', value: 0 },
-      max_score: 0,
-    },
-  });
+export const getBasicEmptySearchResponse = (): estypes.SearchResponse<EsConversationSchema> => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: {
+    hits: [],
+    total: { relation: 'eq', value: 0 },
+    max_score: 0,
+  },
+});
 
 export const getConversationResponseMock = (
   timestamp: string = new Date().toISOString()
