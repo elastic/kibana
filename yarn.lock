@@ -3082,7 +3082,23 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aiops-change-point-detection@link:x-pack/packages/ml/aiops_change_point_detection":
+  version "0.0.0"
+  uid ""
+
+"@kbn/aiops-common@link:x-pack/packages/ml/aiops_common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-components@link:x-pack/packages/ml/aiops_components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/aiops-log-pattern-analysis@link:x-pack/packages/ml/aiops_log_pattern_analysis":
+  version "0.0.0"
+  uid ""
+
+"@kbn/aiops-log-rate-analysis@link:x-pack/packages/ml/aiops_log_rate_analysis":
   version "0.0.0"
   uid ""
 
@@ -3091,10 +3107,6 @@
   uid ""
 
 "@kbn/aiops-test-utils@link:x-pack/packages/ml/aiops_test_utils":
-  version "0.0.0"
-  uid ""
-
-"@kbn/aiops-utils@link:x-pack/packages/ml/aiops_utils":
   version "0.0.0"
   uid ""
 
@@ -3195,6 +3207,10 @@
   uid ""
 
 "@kbn/apm-data-access-plugin@link:x-pack/plugins/observability_solution/apm_data_access":
+  version "0.0.0"
+  uid ""
+
+"@kbn/apm-data-view@link:packages/kbn-apm-data-view":
   version "0.0.0"
   uid ""
 

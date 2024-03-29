@@ -24,7 +24,7 @@ import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
   type WindowParameters,
-} from '@kbn/aiops-utils';
+} from '@kbn/aiops-log-rate-analysis';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import { useData } from '../../../hooks/use_data';
