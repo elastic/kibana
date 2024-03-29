@@ -10,6 +10,8 @@ import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import { Type, TypeOptions, convertValidationFunction } from './type';
 
+import { META_FIELD_X_OAS_MIN_LENGTH, META_FIELD_X_OAS_MAX_LENGTH } from '../oas_meta_fields';
+
 export type StringOptions = TypeOptions<string> & {
   minLength?: number;
   maxLength?: number;
@@ -37,8 +39,9 @@ export class StringType extends Type<string> {
             }
             return value;
           });
+
     if (options.minLength !== undefined) {
-      schema = schema.custom(
+      schema = schema.meta({ [META_FIELD_X_OAS_MIN_LENGTH]: options.minLength }).custom(
         convertValidationFunction((value) => {
           if (value.length < options.minLength!) {
             return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
@@ -48,7 +51,7 @@ export class StringType extends Type<string> {
     }
 
     if (options.maxLength !== undefined) {
-      schema = schema.custom(
+      schema = schema.meta({ [META_FIELD_X_OAS_MAX_LENGTH]: options.maxLength }).custom(
         convertValidationFunction((value) => {
           if (value.length > options.maxLength!) {
             return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
