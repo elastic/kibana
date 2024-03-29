@@ -55,6 +55,7 @@ import { SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
 import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
+import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
@@ -99,6 +100,7 @@ import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -1115,9 +1117,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </IntendedRuleTypeEuiFormRow>
           </>
 
-          <RuleTypeEuiFormRow label={i18n.RELATED_INTEGRATIONS} $isVisible fullWidth>
-            <UseField path="relatedIntegrations" component={RelatedIntegrations} />
-          </RuleTypeEuiFormRow>
+          <RelatedIntegrations path="relatedIntegrations" />
 
           <UseField
             path="timeline"
