@@ -199,6 +199,7 @@ function InternalAlertsPage() {
               {...alertSearchBarStateProps}
               appName={ALERTS_SEARCH_BAR_ID}
               onEsQueryChange={setEsQuery}
+              showFilterBar
               services={{ timeFilterService, AlertsSearchBar, useToasts, uiSettings }}
             />
           </EuiFlexItem>

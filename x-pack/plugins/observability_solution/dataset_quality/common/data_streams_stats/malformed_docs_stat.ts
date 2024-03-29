@@ -10,10 +10,12 @@ import { DegradedDocsStatType } from './types';
 export class DegradedDocsStat {
   dataset: DegradedDocsStatType['dataset'];
   percentage: DegradedDocsStatType['percentage'];
+  count: DegradedDocsStatType['count'];
 
   private constructor(degradedDocsStat: DegradedDocsStat) {
     this.dataset = degradedDocsStat.dataset;
     this.percentage = degradedDocsStat.percentage;
+    this.count = degradedDocsStat.count;
   }
 
   public static create(degradedDocsStat: DegradedDocsStatType) {

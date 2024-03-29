@@ -102,4 +102,5 @@ export interface LayerConfigurationProps {
   hasPadding?: boolean;
   setIsInlineFlyoutVisible: (flag: boolean) => void;
   getUserMessages: UserMessagesGetter;
+  onlyAllowSwitchToSubtypes?: boolean;
 }

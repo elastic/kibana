@@ -11,6 +11,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { EMPTY_STAT } from '../../../helpers';
 
 import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
+import { mockPartitionedFieldMetadataWithSameFamily } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
 import { PartitionedFieldMetadata } from '../../../types';
 import {
   ALL_TAB_ID,
@@ -38,10 +39,11 @@ import {
 describe('helpers', () => {
   describe('getSummaryData', () => {
     test('it returns the expected `SummaryData`', () => {
-      expect(getSummaryData(mockPartitionedFieldMetadata)).toEqual([
+      expect(getSummaryData(mockPartitionedFieldMetadataWithSameFamily)).toEqual([
         { categoryId: 'incompatible', mappings: 3 },
         { categoryId: 'custom', mappings: 4 },
         { categoryId: 'ecs-compliant', mappings: 2 },
+        { categoryId: 'same-family', mappings: 1 },
       ]);
     });
   });

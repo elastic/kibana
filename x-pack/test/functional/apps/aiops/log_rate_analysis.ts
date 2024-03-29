@@ -69,8 +69,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await aiops.logRateAnalysisPage.assertSearchPanelExists();
 
-      await ml.testExecution.logTestStep('displays empty prompt');
-      await aiops.logRateAnalysisPage.assertNoWindowParametersEmptyPromptExists();
+      await ml.testExecution.logTestStep('displays prompt');
+      if (testData.expected.prompt === 'empty') {
+        await aiops.logRateAnalysisPage.assertNoWindowParametersEmptyPromptExists();
+      } else if (testData.expected.prompt === 'change-point') {
+        await aiops.logRateAnalysisPage.assertChangePointDetectedPromptExists();
+      } else {
+        throw new Error('Invalid prompt');
+      }
 
       await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
       await aiops.logRateAnalysisPage.clickDocumentCountChart(testData.chartClickCoordinates);
@@ -161,6 +167,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.logRateAnalysisPage.assertAnalysisComplete(
         testData.analysisType,
         testData.dataGenerator
+      );
+
+      await aiops.logRateAnalysisPage.assertUrlState(
+        testData.expected.globalState,
+        testData.expected.appState
       );
 
       // The group switch should be disabled by default
@@ -291,6 +302,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         after(async () => {
           await elasticChart.setNewChartUiDebugFlag(false);
+          await ml.testResources.deleteDataViewByTitle(testData.sourceIndexOrSavedSearch);
           await aiops.logRateAnalysisDataGenerator.removeGeneratedData(testData.dataGenerator);
         });
 

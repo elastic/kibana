@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
 import type { TestData } from '../../types';
 
@@ -43,5 +43,150 @@ export const farequoteDataViewTestDataWithQuery: TestData = {
       },
     ],
     fieldSelectorPopover: ['airline', 'custom_field.keyword'],
+    globalState: {
+      refreshInterval: { pause: true, value: 60000 },
+      time: { from: '2016-02-07T00:00:00.000Z', to: '2016-02-11T23:59:54.000Z' },
+    },
+    appState: {
+      logRateAnalysis: {
+        filters: [],
+        searchQuery: {
+          bool: {
+            filter: [],
+            must_not: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            term: {
+                              airline: {
+                                value: 'SWR',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            term: {
+                              airline: {
+                                value: 'ACA',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            term: {
+                              airline: {
+                                value: 'AWE',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            term: {
+                              airline: {
+                                value: 'BAW',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            term: {
+                              airline: {
+                                value: 'JAL',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            term: {
+                              airline: {
+                                value: 'JBU',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            term: {
+                              airline: {
+                                value: 'JZA',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            term: {
+                              airline: {
+                                value: 'KLM',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        searchQueryLanguage: 'kuery',
+        searchString:
+          'NOT airline:("SWR" OR "ACA" OR "AWE" OR "BAW" OR "JAL" OR "JBU" OR "JZA" OR "KLM")',
+        wp: {
+          bMax: 1454940000000,
+          bMin: 1454817600000,
+          dMax: 1455040800000,
+          dMin: 1455033600000,
+        },
+      },
+    },
+    prompt: 'change-point',
   },
 };

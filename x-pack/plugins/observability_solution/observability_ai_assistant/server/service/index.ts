@@ -13,7 +13,10 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
-import { KnowledgeBaseEntryRole, ObservabilityAIAssistantScreenContext } from '../../common/types';
+import {
+  KnowledgeBaseEntryRole,
+  ObservabilityAIAssistantScreenContextRequest,
+} from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
@@ -21,7 +24,7 @@ import { conversationComponentTemplate } from './conversation_component_template
 import { kbComponentTemplate } from './kb_component_template';
 import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
 import type {
-  ChatRegistrationFunction,
+  RegistrationCallback,
   ObservabilityAIAssistantResourceNames,
   RespondFunctionResources,
 } from './types';
@@ -76,7 +79,7 @@ export class ObservabilityAIAssistantService {
 
   private readonly resourceNames: ObservabilityAIAssistantResourceNames = createResourceNamesMap();
 
-  private readonly registrations: ChatRegistrationFunction[] = [];
+  private readonly registrations: RegistrationCallback[] = [];
 
   constructor({
     logger,
@@ -92,6 +95,8 @@ export class ObservabilityAIAssistantService {
     this.core = core;
     this.logger = logger;
     this.getModelId = getModelId;
+
+    this.allowInit();
 
     taskManager.registerTaskDefinitions({
       [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
@@ -119,7 +124,18 @@ export class ObservabilityAIAssistantService {
     });
   }
 
-  init = once(async () => {
+  init = async () => {};
+
+  private allowInit = () => {
+    this.init = once(async () => {
+      return this.doInit().catch((error) => {
+        this.allowInit();
+        throw error;
+      });
+    });
+  };
+
+  private doInit = async () => {
     try {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
@@ -239,7 +255,7 @@ export class ObservabilityAIAssistantService {
       this.logger.debug(error);
       throw error;
     }
-  });
+  };
 
   async getClient({
     request,
@@ -291,7 +307,7 @@ export class ObservabilityAIAssistantService {
     resources,
     client,
   }: {
-    screenContexts: ObservabilityAIAssistantScreenContext[];
+    screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     signal: AbortSignal;
     resources: RespondFunctionResources;
     client: ObservabilityAIAssistantClient;
@@ -300,9 +316,7 @@ export class ObservabilityAIAssistantService {
 
     const params = {
       signal,
-      registerContext: fnClient.registerContext.bind(fnClient),
-      registerFunction: fnClient.registerFunction.bind(fnClient),
-      hasFunction: fnClient.hasFunction.bind(fnClient),
+      functions: fnClient,
       resources,
       client,
     };
@@ -373,7 +387,7 @@ export class ObservabilityAIAssistantService {
     );
   }
 
-  register(fn: ChatRegistrationFunction) {
-    this.registrations.push(fn);
+  register(cb: RegistrationCallback) {
+    this.registrations.push(cb);
   }
 }

@@ -37,6 +37,7 @@ export interface PresentationPanelInternalProps<
   componentProps?: Omit<React.ComponentProps<PanelCompatibleComponent<ApiType, PropsType>>, 'ref'>;
 
   showShadow?: boolean;
+  showBorder?: boolean;
   showBadges?: boolean;
   showNotifications?: boolean;
 
@@ -60,22 +61,23 @@ export interface PresentationPanelInternalProps<
  * The API that any component passed to the `Component` prop of `PresentationPanel` should implement.
  * Everything in this API is Partial because it is valid for a component to implement none of these methods.
  */
-export type DefaultPresentationPanelApi = Partial<
-  HasUniqueId &
-    PublishesPanelTitle &
-    PublishesDataLoading &
-    PublishesBlockingError &
-    PublishesPanelDescription &
-    PublishesDisabledActionIds &
-    HasParentApi<
-      PresentationContainer &
-        Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode>
-    >
->;
+export interface DefaultPresentationPanelApi
+  extends HasUniqueId,
+    Partial<
+      PublishesPanelTitle &
+        PublishesDataLoading &
+        PublishesBlockingError &
+        PublishesPanelDescription &
+        PublishesDisabledActionIds &
+        HasParentApi<
+          PresentationContainer &
+            Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode>
+        >
+    > {}
 
 export type PresentationPanelProps<
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   PropsType extends {} = {}
 > = Omit<PresentationPanelInternalProps<ApiType, PropsType>, 'Component'> & {
-  Component: MaybePromise<PanelCompatibleComponent<ApiType, PropsType>>;
+  Component: MaybePromise<PanelCompatibleComponent<ApiType, PropsType> | null>;
 };

@@ -11,7 +11,6 @@ import { BehaviorSubject, of } from 'rxjs';
 import { EuiPageSidebar } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout } from './discover_layout';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -45,8 +44,6 @@ jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
 }));
-
-setHeaderActionMenuMounter(jest.fn());
 
 async function mountComponent(
   dataView: DataView,

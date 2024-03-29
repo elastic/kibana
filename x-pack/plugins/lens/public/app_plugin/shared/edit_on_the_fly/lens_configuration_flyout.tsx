@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiAccordion,
   useEuiTheme,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
@@ -81,6 +82,7 @@ export function LensEditConfigurationFlyout({
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
+  const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
 
@@ -295,6 +297,7 @@ export function LensEditConfigurationFlyout({
         setErrors([]);
         updateSuggestion?.(attrs);
       }
+      setIsVisualizationLoading(false);
     },
     [
       startDependencies,
@@ -360,11 +363,13 @@ export function LensEditConfigurationFlyout({
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
-        isScrollable={true}
+        isScrollable
         isNewPanel={isNewPanel}
         isSaveable={isSaveable}
       >
         <LayerConfiguration
+          // TODO: remove this once we support switching to any chart in Discover
+          onlyAllowSwitchToSubtypes
           getUserMessages={getUserMessages}
           attributes={attributes}
           coreStart={coreStart}
@@ -372,7 +377,7 @@ export function LensEditConfigurationFlyout({
           visualizationMap={visualizationMap}
           datasourceMap={datasourceMap}
           datasourceId={datasourceId}
-          hasPadding={true}
+          hasPadding
           framePublicAPI={framePublicAPI}
           setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
         />
@@ -412,6 +417,7 @@ export function LensEditConfigurationFlyout({
               ${euiScrollBarStyles(euiTheme)}
               padding-left: ${euiThemeVars.euiFormMaxWidth};
               margin-left: -${euiThemeVars.euiFormMaxWidth};
+
               .euiAccordion-isOpen & {
                 block-size: auto !important;
                 flex: 1;
@@ -447,19 +453,19 @@ export function LensEditConfigurationFlyout({
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
                   if (q) {
+                    setIsVisualizationLoading(true);
                     await runQuery(q, a);
                   }
                 }}
                 isDisabled={false}
-                allowQueryCancellation={true}
+                allowQueryCancellation
+                isLoading={isVisualizationLoading}
               />
             </EuiFlexItem>
           )}
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
-                padding-left: ${euiThemeVars.euiSize};
-                padding-right: ${euiThemeVars.euiSize};
                 .euiAccordion__childWrapper {
                   flex: ${isLayerAccordionOpen ? 1 : 'none'}
                 }
@@ -467,6 +473,11 @@ export function LensEditConfigurationFlyout({
             `}
           >
             <EuiAccordion
+              css={css`
+                .euiAccordion__triggerWrapper {
+                  padding: 0 ${euiThemeVars.euiSize};
+                }
+              `}
               id="layer-configuration"
               buttonContent={
                 <EuiTitle
@@ -477,8 +488,8 @@ export function LensEditConfigurationFlyout({
             `}
                 >
                   <h5>
-                    {i18n.translate('xpack.lens.config.layerConfigurationLabel', {
-                      defaultMessage: 'Layer configuration',
+                    {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
+                      defaultMessage: 'Visualization configuration',
                     })}
                   </h5>
                 </EuiTitle>
@@ -495,17 +506,20 @@ export function LensEditConfigurationFlyout({
                 setIsLayerAccordionOpen(!isLayerAccordionOpen);
               }}
             >
-              <LayerConfiguration
-                attributes={attributes}
-                getUserMessages={getUserMessages}
-                coreStart={coreStart}
-                startDependencies={startDependencies}
-                visualizationMap={visualizationMap}
-                datasourceMap={datasourceMap}
-                datasourceId={datasourceId}
-                framePublicAPI={framePublicAPI}
-                setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-              />
+              <>
+                <LayerConfiguration
+                  attributes={attributes}
+                  getUserMessages={getUserMessages}
+                  coreStart={coreStart}
+                  startDependencies={startDependencies}
+                  visualizationMap={visualizationMap}
+                  datasourceMap={datasourceMap}
+                  datasourceId={datasourceId}
+                  framePublicAPI={framePublicAPI}
+                  setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+                />
+                <EuiSpacer />
+              </>
             </EuiAccordion>
           </EuiFlexItem>
 

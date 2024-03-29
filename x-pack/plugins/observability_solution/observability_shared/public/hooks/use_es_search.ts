@@ -18,7 +18,11 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
   params: TParams,
   fnDeps: any[],
   options: { inspector?: IInspectorInfo; name: string }
-) => {
+): {
+  data: ESSearchResponse<DocumentSource, TParams, { restTotalHitsAsInt: false }>;
+  loading: boolean;
+  error?: Error;
+} => {
   const {
     services: { data },
   } = useKibana<{ data: DataPublicPluginStart }>();
@@ -27,10 +31,14 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
 
   const { addInspectorRequest } = useInspectorContext();
 
-  const { data: response = {}, loading } = useFetcher(() => {
+  const {
+    data: response = {},
+    loading,
+    error,
+  } = useFetcher(() => {
     if (params.index) {
       const startTime = Date.now();
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         const search$ = data.search
           .search(
             {
@@ -97,6 +105,7 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
                   status: FETCH_STATUS.SUCCESS,
                 });
               }
+              reject(err);
             },
           });
       });
@@ -108,6 +117,7 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
   return {
     data: rawResponse as ESSearchResponse<DocumentSource, TParams, { restTotalHitsAsInt: false }>,
     loading: Boolean(loading),
+    error,
   };
 };
 

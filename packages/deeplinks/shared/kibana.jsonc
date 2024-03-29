@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/deeplinks-shared",
+  "owner": "@elastic/appex-sharedux"
+}
