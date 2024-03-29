@@ -4769,7 +4769,7 @@
           }
         }
       },
-      "notify_when": {
+      "notify_when_action": {
         "type": "string",
         "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "enum": [
@@ -4781,7 +4781,7 @@
           "onActiveAlert"
         ]
       },
-      "throttle": {
+      "throttle_action": {
         "type": [
           "string",
           "null"
@@ -4895,14 +4895,14 @@
               ],
               "properties": {
                 "notify_when": {
-                  "$ref": "#/components/schemas/notify_when"
+                  "$ref": "#/components/schemas/notify_when_action"
                 },
                 "summary": {
                   "type": "boolean",
                   "description": "Indicates whether the action is a summary."
                 },
                 "throttle": {
-                  "$ref": "#/components/schemas/throttle"
+                  "$ref": "#/components/schemas/throttle_action"
                 }
               }
             },
@@ -4961,6 +4961,19 @@
         "type": "string",
         "description": "The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.\n"
       },
+      "notify_when": {
+        "type": "string",
+        "description": "Deprecated in 8.13.0. Use the `notify_when` property in the action `frequency` object instead. Indicates how often alerts generate actions. NOTE: You cannot specify `notify_when` at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
+        "enum": [
+          "onActionGroupChange",
+          "onActiveAlert",
+          "onThrottleInterval"
+        ],
+        "deprecated": true,
+        "examples": [
+          "onActiveAlert"
+        ]
+      },
       "schedule": {
         "type": "object",
         "description": "The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.",
@@ -4980,6 +4993,18 @@
           "type": "string"
         },
         "default": []
+      },
+      "throttle": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
+        "default": null,
+        "deprecated": true,
+        "examples": [
+          "10m"
+        ]
       },
       "params_property_apm_anomaly": {
         "required": [
@@ -7818,7 +7843,7 @@
             "aggField": "sheet.version",
             "aggType": "avg",
             "index": [
-              ".test-index"
+              ".updated-index"
             ],
             "groupBy": "top",
             "termField": "name.keyword",
@@ -7835,8 +7860,7 @@
           "schedule": {
             "interval": "1m"
           },
-          "tags": [],
-          "throttle": null
+          "tags": []
         }
       },
       "update_rule_response": {
@@ -7851,7 +7875,7 @@
           "revision": 1,
           "running": false,
           "schedule": {
-            "interval": "10m"
+            "interval": "1m"
           },
           "params": {
             "index": [
@@ -7875,13 +7899,13 @@
           "updated_by": "elastic",
           "rule_type_id": ".index-threshold",
           "scheduled_task_id": "4c5eda00-e74f-11ec-b72f-5b18752ff9ea",
-          "created_at": "2023-01-31T23:03:33.127Z",
-          "updated_at": "2023-01-31T23:55:27.314Z",
+          "created_at": "2024-03-26T23:13:20.985Z",
+          "updated_at": "2024-03-26T23:22:59.949Z",
           "mute_all": false,
           "muted_alert_ids": [],
           "execution_status": {
             "status": "ok",
-            "last_execution_date": "2023-01-31T23:48:42.499Z",
+            "last_execution_date": "2024-03-26T23:22:51.390Z",
             "last_duration": 52
           },
           "actions": [
@@ -7912,7 +7936,7 @@
             "warning": null,
             "outcome": "succeeded"
           },
-          "next_run": "2023-01-31T23:49:42.432Z",
+          "next_run": "2024-03-26T23:23:51.316Z",
           "api_key_created_by_user": false
         }
       },

@@ -12,8 +12,8 @@ import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import {
   updateLoadingStateAction,
   type AiopsLogRateAnalysisApiAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/actions';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 
 /**
  * Helper function that will push a message to the stream that it's done and

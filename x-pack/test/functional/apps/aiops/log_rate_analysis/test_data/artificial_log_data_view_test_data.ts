@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type LogRateAnalysisType, LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { type LogRateAnalysisType, LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
 import type { TestData } from '../../types';
 
