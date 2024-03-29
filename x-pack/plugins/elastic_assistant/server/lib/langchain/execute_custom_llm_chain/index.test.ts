@@ -32,11 +32,16 @@ jest.mock('langchain/chains', () => ({
   },
 }));
 
-const mockCall = jest.fn();
+const mockCall = jest.fn().mockImplementation(() =>
+  Promise.resolve({
+    output: mockActionResponse,
+  })
+);
 const mockInvoke = jest.fn().mockImplementation(() => Promise.resolve());
 jest.mock('langchain/agents', () => ({
-  initializeAgentExecutorWithOptions: jest.fn().mockImplementation(() => ({
-    call: mockCall.mockReturnValueOnce({ output: mockActionResponse.message }),
+  initializeAgentExecutorWithOptions: jest.fn().mockImplementation((_a, _b, { agentType }) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    call: (props: any) => mockCall({ ...props, agentType }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     invoke: (props: any) => mockInvoke({ ...props, agentType }),
   })),
@@ -68,6 +73,7 @@ const defaultProps = {
   isEnabledKnowledgeBase: true,
   connectorId: mockConnectorId,
   esClient: esClientMock,
+  llmType: 'openai',
   langChainMessages,
   logger: mockLogger,
   onNewReplacements: jest.fn(),
@@ -81,34 +87,27 @@ describe('callAgentExecutor', () => {
     jest.clearAllMocks();
   });
 
-  it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
-    await callAgentExecutor(defaultProps);
-
-describe('callAgentExecutor', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    ActionsClientLlm.prototype.getActionResultData = jest
-      .fn()
-      .mockReturnValueOnce(mockActionResponse);
-  });
-
-  it('kicks off the chain with (only) the last message', async () => {
-    await callAgentExecutor(defaultProps);
-
-    expect(mockCall.mock.calls[0][0].input).toEqual('\n\nDo you know my name?');
-  });
-
-  it('kicks off the chain with the expected message when langChainMessages has only one entry', async () => {
-    const onlyOneMessage = [langChainMessages[0]];
-
-    await callAgentExecutor({
-      ...defaultProps,
-      langChainMessages: onlyOneMessage,
+  describe('callAgentExecutor', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
-    expect(mockCall.mock.calls[0][0].input).toEqual('What is my name?');
-  });
 
+    it('kicks off the chain with (only) the last message', async () => {
+      await callAgentExecutor(defaultProps);
+
+      expect(mockCall.mock.calls[0][0].input).toEqual('\n\nDo you know my name?');
+    });
+
+    it('kicks off the chain with the expected message when langChainMessages has only one entry', async () => {
+      const onlyOneMessage = [langChainMessages[0]];
+
+      await callAgentExecutor({
+        ...defaultProps,
+        langChainMessages: onlyOneMessage,
+      });
+      expect(mockCall.mock.calls[0][0].input).toEqual('What is my name?');
+    });
+  });
   describe('when the agent is not streaming', () => {
     it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
       await callAgentExecutor(defaultProps);
@@ -138,6 +137,8 @@ describe('callAgentExecutor', () => {
           connector_id: 'mock-connector-id',
           data: mockActionResponse,
           status: 'ok',
+          replacements: [],
+          trace_data: undefined,
         },
         headers: {
           'content-type': 'application/json',

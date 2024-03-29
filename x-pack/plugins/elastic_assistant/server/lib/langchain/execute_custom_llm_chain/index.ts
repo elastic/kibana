@@ -8,7 +8,6 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { Tool } from '@langchain/core/tools';
-
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';

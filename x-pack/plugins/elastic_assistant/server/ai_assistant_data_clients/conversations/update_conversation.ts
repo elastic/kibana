@@ -66,9 +66,7 @@ export const updateConversation = async ({
   user,
 }: UpdateConversationParams): Promise<ConversationResponse | null> => {
   const updatedAt = new Date().toISOString();
-  console.log('conversationUpdateProps', conversationUpdateProps);
   const params = transformToUpdateScheme(updatedAt, conversationUpdateProps);
-  console.log('params', params);
   try {
     const response = await esClient.updateByQuery({
       conflicts: 'proceed',

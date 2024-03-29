@@ -269,7 +269,7 @@ export const postActionsConnectorExecuteRoute = (
             isStream:
               // TODO implement llmClass for bedrock streaming
               // tracked here: https://github.com/elastic/security-team/issues/7363
-              request.body.params.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
+              request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
             llmType: actionTypeId,
             kbResource: ESQL_RESOURCE,
             langChainMessages,
@@ -288,27 +288,21 @@ export const postActionsConnectorExecuteRoute = (
           let result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
             langChainResponse;
           if (Object.hasOwn(langChainResponse.body, 'data')) {
-            // update replacements on static response
+            // the check above ensures that langChainResponse is a StaticReturnType
             const staticResponse = langChainResponse as StaticReturnType;
             if (conversationId) {
               // if conversationId is defined, onLlmResponse will be too. the ? is to satisfy TS
               await onLlmResponse?.(
-                staticResponse.data,
-                staticResponse.trace_data
+                staticResponse.body.data,
+                staticResponse.body.trace_data
                   ? {
-                      traceId: staticResponse.trace_data.trace_id,
-                      transactionId: staticResponse.trace_data.transaction_id,
+                      traceId: staticResponse.body.trace_data.trace_id,
+                      transactionId: staticResponse.body.trace_data.transaction_id,
                     }
                   : {}
               );
             }
-            result = {
-              ...staticResponse,
-              body: {
-                ...staticResponse.body,
-                replacements: latestReplacements,
-              },
-            };
+            result = staticResponse;
           }
 
           return response.ok<

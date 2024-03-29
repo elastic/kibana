@@ -56,7 +56,6 @@ export const executeAction = async ({
 }: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const genericParams = convertToGenericType(params);
-  console.log('genericParams', genericParams);
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
     params: {

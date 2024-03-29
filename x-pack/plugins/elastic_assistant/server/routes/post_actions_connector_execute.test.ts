@@ -8,7 +8,7 @@
 import { ElasticsearchClient, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { BaseMessage } from '@langchain/core/messages';
-
+import { NEVER } from 'rxjs';
 import { mockActionResponse } from '../__mocks__/action_result_data';
 import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 import { ElasticAssistantRequestHandlerContext } from '../types';
@@ -122,28 +122,14 @@ const mockContext = {
 const mockRequest = {
   params: { connectorId: 'mock-connector-id' },
   body: {
-    params: {
-      subActionParams: {
-        messages: [
-          { role: 'user', content: '\\n\\n\\n\\nWhat is my name?' },
-          {
-            role: 'assistant',
-            content:
-              "I'm sorry, but I don't have the information about your name. You can tell me your name if you'd like, and we can continue our conversation from there.",
-          },
-          { role: 'user', content: '\\n\\nMy name is Andrew' },
-          {
-            role: 'assistant',
-            content:
-              "Hello, Andrew! It's nice to meet you. What would you like to talk about today?",
-          },
-          { role: 'user', content: '\\n\\nDo you know my name?' },
-        ],
-      },
-      subAction: 'invokeAI',
-    },
+    subAction: 'invokeAI',
+    message: 'Do you know my name?',
+    actionTypeId: '.gen-ai',
     isEnabledKnowledgeBase: true,
     isEnabledRAGAlerts: false,
+  },
+  events: {
+    aborted$: NEVER,
   },
 };
 
@@ -220,15 +206,18 @@ describe('postActionsConnectorExecuteRoute', () => {
             addVersion: jest.fn().mockImplementation(async (_, handler) => {
               const result = await handler(mockContext, mockRequest, mockResponse);
 
-        expect(result).toEqual({
-          body: {
-            connector_id: 'mock-connector-id',
-            data: mockActionResponse,
-            status: 'ok',
-          },
-          headers: { 'content-type': 'application/json' },
-        });
-      }),
+              expect(result).toEqual({
+                body: {
+                  connector_id: 'mock-connector-id',
+                  data: mockActionResponse,
+                  status: 'ok',
+                },
+                headers: { 'content-type': 'application/json' },
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(
@@ -529,36 +518,39 @@ describe('postActionsConnectorExecuteRoute', () => {
     );
   });
 
-  it('returns the expected response when subAction=invokeStream and llmType=openai', async () => {
+  it('returns the expected response when subAction=invokeStream and actionTypeId=.gen-ai', async () => {
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        const result = await handler(
-          mockContext,
-          {
-            ...mockRequest,
-            body: {
-              ...mockRequest.body,
-              params: {
-                ...mockRequest.body.params,
-                subAction: 'invokeStream',
-              },
-              llmType: 'openai',
-            },
-          },
-          mockResponse
-        );
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeStream',
+                    actionTypeId: '.gen-ai',
+                  },
+                },
+                mockResponse
+              );
 
-        expect(result).toEqual({
-          body: mockStream,
-          headers: {
-            'Cache-Control': 'no-cache',
-            Connection: 'keep-alive',
-            'Transfer-Encoding': 'chunked',
-            'X-Accel-Buffering': 'no',
-            'X-Content-Type-Options': 'nosniff',
-          },
-        });
-      }),
+              expect(result).toEqual({
+                body: mockStream,
+                headers: {
+                  'Cache-Control': 'no-cache',
+                  Connection: 'keep-alive',
+                  'Transfer-Encoding': 'chunked',
+                  'X-Accel-Buffering': 'no',
+                  'X-Content-Type-Options': 'nosniff',
+                },
+              });
+            }),
+          };
+        }),
+      },
     };
 
     await postActionsConnectorExecuteRoute(
@@ -567,39 +559,40 @@ describe('postActionsConnectorExecuteRoute', () => {
     );
   });
 
-  it('returns the expected response when subAction=invokeStream and llmType=bedrock', async () => {
+  it('returns the expected response when subAction=invokeStream and actionTypeId=.bedrock', async () => {
     const mockRouter = {
-      post: jest.fn().mockImplementation(async (_, handler) => {
-        const result = await handler(
-          mockContext,
-          {
-            ...mockRequest,
-            body: {
-              ...mockRequest.body,
-              params: {
-                ...mockRequest.body.params,
-                subAction: 'invokeStream',
-              },
-              llmType: 'bedrock',
-            },
-          },
-          mockResponse
-        );
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeStream',
+                    actionTypeId: '.bedrock',
+                  },
+                },
+                mockResponse
+              );
 
-        expect(result).toEqual({
-          body: {
-            connector_id: 'mock-connector-id',
-            data: mockActionResponse,
-            replacements: {},
-            status: 'ok',
-          },
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
-      }),
+              expect(result).toEqual({
+                body: {
+                  connector_id: 'mock-connector-id',
+                  data: mockActionResponse,
+                  status: 'ok',
+                },
+                headers: {
+                  'content-type': 'application/json',
+                },
+              });
+            }),
+          };
+        }),
+      },
     };
-
     await postActionsConnectorExecuteRoute(
       mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
       mockGetElser

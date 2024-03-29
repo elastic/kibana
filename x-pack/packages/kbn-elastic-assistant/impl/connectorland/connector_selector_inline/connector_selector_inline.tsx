@@ -74,7 +74,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     const { data: aiConnectors } = useLoadConnectors({
       http,
     });
-    console.log('aiConnectors', aiConnectors);
 
     const selectedConnectorName =
       (aiConnectors ?? []).find((c) => c.id === selectedConnectorId)?.name ??
