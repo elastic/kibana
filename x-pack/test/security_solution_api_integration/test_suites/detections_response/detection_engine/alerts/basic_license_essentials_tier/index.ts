@@ -7,9 +7,11 @@
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Alerts APIs - Basic License/Essentials Tier', function () {
-    loadTestFile(require.resolve('./open_close_alerts'));
-    loadTestFile(require.resolve('./query_alerts_backword_compatibility'));
+  describe('Alerts and alerts index related logic - Basic License/Essentials Tier', function () {
+    loadTestFile(require.resolve('./ess_specific_index_logic'));
+    loadTestFile(require.resolve('./alert_status'));
+    loadTestFile(require.resolve('./field_aliases'));
     loadTestFile(require.resolve('./query_alerts'));
+    loadTestFile(require.resolve('./set_alert_tags'));
   });
 }

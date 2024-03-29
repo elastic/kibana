@@ -15,7 +15,7 @@ import type {
   RequestHandler,
   IKibanaResponse,
   RouteConfigOptions,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   RequestHandlerContextBase,
   RouteValidationFunction,
 } from '../..';
@@ -186,7 +186,7 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 }
 
 /** @public */
-export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
+export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B>;
 
 /** @public */
 export interface VersionedRouteResponseValidation {
