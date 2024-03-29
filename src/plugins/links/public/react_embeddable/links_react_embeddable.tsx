@@ -8,13 +8,9 @@
 
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 import fastIsEqual from 'fast-deep-equal';
-import {
-  initializeReactEmbeddableTitles,
-  ReactEmbeddableFactory,
-  registerReactEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useStateFromPublishingSubject, initializeTitles } from '@kbn/presentation-publishing';
 import { cloneDeep } from 'lodash';
 import React, { createContext, useMemo } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
@@ -36,10 +32,13 @@ import { ExternalLinkComponent } from '../components/external_link/external_link
 import { memoizedGetOrderedLinkList } from '../editor/links_editor_tools';
 import { LinksApi, LinksSerializableState } from './types';
 import { resolveLinkInfo } from './utils';
+import { APP_NAME } from '../../common';
+import { openEditorFlyout } from '../editor/open_editor_flyout';
+import { LinksByValueInput } from '../embeddable/types';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
-export const registerLinksEmbeddableFactory = () => {
+export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: ReactEmbeddableFactory<LinksSerializableState, LinksApi> = {
     type: CONTENT_ID,
     deserializeState: (state) => {
@@ -48,8 +47,7 @@ export const registerLinksEmbeddableFactory = () => {
       return inject(serializedState, state.references ?? []) as unknown as LinksSerializableState;
     },
     buildEmbeddable: async (state, buildApi) => {
-      const { titlesApi, titleComparators, serializeTitles } =
-        initializeReactEmbeddableTitles(state);
+      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
       const links$ = new BehaviorSubject(state.attributes?.links);
       const layout$ = new BehaviorSubject(state.attributes?.layout);
 
@@ -82,6 +80,25 @@ export const registerLinksEmbeddableFactory = () => {
           canUnlinkFromLibrary: async () => true,
           unlinkFromLibrary: async () => {},
           blockingError: error$,
+          onEdit: async () => {
+            try {
+              const { newInput } = await openEditorFlyout(
+                {
+                  attributes: {
+                    links: links$.getValue() ?? [],
+                    layout: layout$.getValue() ?? LINKS_VERTICAL_LAYOUT,
+                  },
+                },
+                linksApi.parentApi
+              );
+              links$.next((newInput as LinksByValueInput).attributes.links);
+              layout$.next((newInput as LinksByValueInput).attributes.layout);
+            } catch {
+              // do nothing, user cancelled
+            }
+          },
+          isEditingEnabled: () => true,
+          getTypeDisplayName: () => APP_NAME,
           serializeState: () => {
             const { state: rawState, references } = extract({
               ...state,
@@ -159,6 +176,5 @@ export const registerLinksEmbeddableFactory = () => {
       };
     },
   };
-
-  registerReactEmbeddableFactory(linksEmbeddableFactory);
+  return linksEmbeddableFactory;
 };

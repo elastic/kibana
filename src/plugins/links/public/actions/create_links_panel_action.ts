@@ -10,7 +10,7 @@ import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openEditorFlyout } from '../editor/open_editor_flyout';
-import { APP_NAME } from '../../common';
+import { APP_ICON, APP_NAME } from '../../common';
 import { uiActions } from '../services/kibana_services';
 import { LinksInput } from '../embeddable/types';
 import { LINKS_VERTICAL_LAYOUT } from '../../common/content_management';
@@ -32,7 +32,7 @@ const getDefaultLinksConfig = (): LinksInput => ({
 export const registerCreateLinksPanelAction = () => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_LINKS_PANEL_ACTION_ID,
-    getIconType: () => 'link',
+    getIconType: () => APP_ICON,
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },
@@ -44,7 +44,7 @@ export const registerCreateLinksPanelAction = () => {
 
       embeddable.addNewPanel({
         panelType: 'links',
-        initialState: { linksConfig },
+        initialState: linksConfig,
       });
     },
     getDisplayName: () => APP_NAME,

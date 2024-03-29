@@ -12,20 +12,24 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  registerReactEmbeddableFactory,
+} from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
+import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
 import { LinksStrings } from './components/links_strings';
 import { getLinksClient } from './content_management/links_content_management_client';
-import { LinksFactoryDefinition } from './embeddable';
+import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { registerLinksEmbeddableFactory } from './react_embeddable/links_react_embeddable';
 import { LinksByReferenceInput } from './embeddable/types';
-import { setKibanaServices } from './services/kibana_services';
-import { registerLinksEmbeddable } from './react_embeddable/links_react_embeddable';
+import { registerCreateLinksPanelAction } from './actions/create_links_panel_action';
 
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -38,6 +42,7 @@ export interface LinksStartDependencies {
   dashboard: DashboardStart;
   presentationUtil: PresentationUtilPluginStart;
   contentManagement: ContentManagementPublicStart;
+  uiActions: UiActionsPublicStart;
   usageCollection?: UsageCollectionStart;
 }
 
@@ -48,8 +53,6 @@ export class LinksPlugin
 
   public setup(core: CoreSetup<LinksStartDependencies>, plugins: LinksSetupDependencies) {
     core.getStartServices().then(([_, deps]) => {
-      const linksFactory = new LinksFactoryDefinition();
-
       plugins.contentManagement.registry.register({
         id: CONTENT_ID,
         version: {
@@ -57,21 +60,6 @@ export class LinksPlugin
         },
         name: APP_NAME,
       });
-
-      const getExplicitInput = async ({
-        savedObjectId,
-        parent,
-      }: {
-        savedObjectId?: string;
-        parent?: DashboardContainer;
-      }) => {
-        try {
-          await linksFactory.getExplicitInput({ savedObjectId } as LinksByReferenceInput, parent);
-        } catch {
-          // swallow any errors - this just means that the user cancelled editing
-        }
-        return;
-      };
 
       plugins.visualizations.registerAlias({
         disableCreate: true, // do not allow creation through visualization listing page
@@ -92,7 +80,11 @@ export class LinksPlugin
               return {
                 id,
                 title,
-                editor: { onEdit: (savedObjectId: string) => getExplicitInput({ savedObjectId }) },
+                editor: {
+                  onEdit: (savedObjectId: string) =>
+                    // TODO: create ui action to edit inline items like links
+                    Promise.resolve(console.log(`Click on Links library item ${savedObjectId}`)),
+                },
                 description,
                 updatedAt,
                 icon: APP_ICON,
@@ -109,7 +101,16 @@ export class LinksPlugin
 
   public start(core: CoreStart, plugins: LinksStartDependencies) {
     setKibanaServices(core, plugins);
-    registerLinksEmbeddable();
+    untilPluginStartServicesReady().then(() => {
+      registerCreateLinksPanelAction();
+      registerReactEmbeddableFactory(CONTENT_ID, async () => {
+        const { getLinksEmbeddableFactory } = await import(
+          './react_embeddable/links_react_embeddable'
+        );
+        return getLinksEmbeddableFactory();
+      });
+    });
+
     return {};
   }
 

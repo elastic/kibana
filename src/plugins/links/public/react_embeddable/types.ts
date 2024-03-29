@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { apiIsOfType, HasType } from '@kbn/presentation-publishing';
 import {
-  DefaultEmbeddableApi,
-  SerializedReactEmbeddableTitles,
-} from '@kbn/embeddable-plugin/public';
+  apiIsOfType,
+  HasEditCapabilities,
+  HasType,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   apiCanLinkToLibrary,
   apiCanUnlinkFromLibrary,
@@ -22,6 +24,7 @@ import { LinksAttributes } from '../../common/content_management';
 
 export type LinksApi = HasType<typeof CONTENT_ID> &
   DefaultEmbeddableApi &
+  HasEditCapabilities &
   CanLinkToLibrary &
   CanUnlinkFromLibrary;
 
@@ -31,8 +34,6 @@ export const isLinksApi = (api: unknown): api is LinksApi => {
   );
 };
 
-export interface LinksSerializableState
-  extends SerializedReactEmbeddableTitles,
-    Partial<LinksAttributes> {
+export interface LinksSerializableState extends SerializedTitles, Partial<LinksAttributes> {
   attributes?: LinksAttributes;
 }

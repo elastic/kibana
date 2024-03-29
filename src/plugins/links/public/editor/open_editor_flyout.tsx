@@ -17,10 +17,15 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { tracksOverlays } from '@kbn/presentation-containers';
+import { isSavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { Link, LinksLayoutType } from '../../common/content_management';
 import { runSaveToLibrary } from '../content_management/save_to_library';
-import { LinksByReferenceInput, LinksEditorFlyoutReturn, LinksInput } from '../embeddable/types';
-import { getLinksAttributeService } from '../services/attribute_service';
+import {
+  LinksByReferenceInput,
+  LinksByValueInput,
+  LinksEditorFlyoutReturn,
+  LinksInput,
+} from '../embeddable/types';
 import { coreServices } from '../services/kibana_services';
 
 const LazyLinksEditor = React.lazy(() => import('../components/editor/links_editor'));
@@ -39,14 +44,19 @@ export async function openEditorFlyout(
   initialInput: LinksInput,
   parentDashboard?: DashboardContainer
 ): Promise<LinksEditorFlyoutReturn> {
-  const attributeService = getLinksAttributeService();
-  const { attributes } = await attributeService.unwrapAttributes(initialInput);
-  const isByReference = attributeService.inputIsRefType(initialInput);
-  const initialLinks = attributes?.links;
+  // TODO Uncomment when attributeService supports new react embeddables
+  // const attributeService = getLinksAttributeService();
+  // const { attributes } = await attributeService.unwrapAttributes(initialInput);
+  // const isByReference = attributeService.inputIsRefType(initialInput);
+  // const initialLinks = attributes?.links;
+
+  const isByReference = isSavedObjectEmbeddableInput(initialInput);
+
+  const { attributes } = initialInput as LinksByValueInput;
   const overlayTracker =
     parentDashboard && tracksOverlays(parentDashboard) ? parentDashboard : undefined;
 
-  if (!initialLinks) {
+  if (!attributes.links) {
     /**
      * When creating a new links panel, the tooltip from the "Add panel" popover interacts badly with the flyout
      * and can cause a "double opening" animation if the flyout opens before the tooltip has time to unmount; so,
@@ -78,28 +88,30 @@ export async function openEditorFlyout(
     });
 
     const onSaveToLibrary = async (newLinks: Link[], newLayout: LinksLayoutType) => {
-      const newAttributes = {
-        ...attributes,
-        links: newLinks,
-        layout: newLayout,
-      };
-      const updatedInput = (initialInput as LinksByReferenceInput).savedObjectId
-        ? await attributeService.wrapAttributes(newAttributes, true, initialInput)
-        : await runSaveToLibrary(newAttributes, initialInput);
-      if (!updatedInput) {
-        return;
-      }
-      resolve({
-        newInput: updatedInput,
+      resolve(console.log('onSaveToLibrary'));
+      // const newAttributes = {
+      //   ...attributes,
+      //   links: newLinks,
+      //   layout: newLayout,
+      // };
+      // const updatedInput = (initialInput as LinksByReferenceInput).savedObjectId
+      //   ? await attributeService.wrapAttributes(newAttributes, true, initialInput)
+      //   : await runSaveToLibrary(newAttributes, initialInput);
+      // if (!updatedInput) {
+      //   return;
+      // }
+      // resolve({
+      //   newInput: updatedInput,
 
-        // pass attributes via attributes so that the Dashboard can choose the right panel size.
-        attributes: newAttributes,
-      });
-      parentDashboard?.reload();
+      //   // pass attributes via attributes so that the Dashboard can choose the right panel size.
+      //   attributes: newAttributes,
+      // });
+      // parentDashboard?.reload();
       closeEditorFlyout(editorFlyout);
     };
 
     const onAddToDashboard = (newLinks: Link[], newLayout: LinksLayoutType) => {
+      debugger;
       const newAttributes = {
         ...attributes,
         links: newLinks,
@@ -128,7 +140,7 @@ export async function openEditorFlyout(
       toMountPoint(
         <LinksEditor
           flyoutId={flyoutId}
-          initialLinks={initialLinks}
+          initialLinks={attributes?.links}
           initialLayout={attributes?.layout}
           onClose={onCancel}
           onSaveToLibrary={onSaveToLibrary}
