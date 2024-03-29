@@ -107,7 +107,7 @@ export function createScenarios(
     await testSubjects.existOrFail('csvReportStarted'); /* validate toast panel */
   };
   const tryDiscoverCsvFail = async () => {
-    await PageObjects.reporting.openCsvReportingPanel();
+    await PageObjects.reporting.openExportTab();
     await PageObjects.reporting.clickGenerateReportButton();
     const queueReportError = await PageObjects.reporting.getQueueReportError();
     expect(queueReportError).to.be(true);
@@ -117,11 +117,11 @@ export function createScenarios(
     await testSubjects.missingOrFail('sharePanel-CSVReports');
   };
   const tryDiscoverCsvSuccess = async () => {
-    await PageObjects.reporting.openCsvReportingPanel();
+    await PageObjects.reporting.openExportTab();
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePdfFail = async () => {
-    await PageObjects.reporting.openPdfReportingPanel();
+    await PageObjects.reporting.openExportTab();
     await PageObjects.reporting.clickGenerateReportButton();
     const queueReportError = await PageObjects.reporting.getQueueReportError();
     expect(queueReportError).to.be(true);
@@ -131,11 +131,11 @@ export function createScenarios(
     await testSubjects.missingOrFail(`sharePanel-PDFReports`);
   };
   const tryGeneratePdfSuccess = async () => {
-    await PageObjects.reporting.openPdfReportingPanel();
+    await PageObjects.reporting.openExportTab();
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePngSuccess = async () => {
-    await PageObjects.reporting.openPngReportingPanel();
+    await PageObjects.reporting.openExportTab();
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryReportsNotAvailable = async () => {
