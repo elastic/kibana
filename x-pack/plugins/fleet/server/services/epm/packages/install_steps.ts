@@ -149,6 +149,10 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
       assetTags: packageInfo?.asset_tags,
     })
   );
+  // Necessary to avoid async promise rejection warning
+  // See https://stackoverflow.com/questions/40920179/should-i-refrain-from-handling-promise-rejection-asynchronously
+  kibanaAssetPromise.catch(() => {});
+
   return { kibanaAssetPromise };
 }
 

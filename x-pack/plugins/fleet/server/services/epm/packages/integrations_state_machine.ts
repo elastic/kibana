@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { appContextService } from '../../app_context';
-import type { StateContext } from '../../../../common/types';
+import type { StateContext, LatestExecutedState } from '../../../../common/types';
 export interface State {
   onTransition: any;
   nextState?: string;
@@ -38,7 +38,7 @@ export async function handleState(
     try {
       // inject information about the state into context
       const startedAt = new Date(Date.now()).toISOString();
-      const latestExecutedState = {
+      const latestExecutedState: LatestExecutedState<string> = {
         name: currentStateName,
         started_at: startedAt,
       };
@@ -62,9 +62,15 @@ export async function handleState(
     } catch (error) {
       currentStatus = 'failed';
       const errorMessage = `Error during execution of state "${currentStateName}" with status "${currentStatus}": ${error.message}`;
-      const latestStateWithError = { ...updatedContext.latestExecutedState, error: errorMessage };
+      const latestStateWithError = {
+        ...updatedContext.latestExecutedState,
+        error: errorMessage,
+      } as LatestExecutedState<string>;
       updatedContext = { ...updatedContext, latestExecutedState: latestStateWithError };
       logger.warn(errorMessage);
+
+      // bubble up the error
+      throw errorMessage;
     }
   } else {
     currentStatus = 'failed';

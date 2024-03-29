@@ -14,7 +14,7 @@ import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/serv
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { ConcurrentInstallOperationError, PackageSavedObjectConflictError } from '../../../errors';
+import { PackageSavedObjectConflictError } from '../../../errors';
 
 import type { Installation } from '../../../../common';
 
@@ -61,7 +61,7 @@ function sleep(millis: number) {
   return new Promise((resolve) => setTimeout(resolve, millis));
 }
 
-describe('_installPackage', () => {
+describe('_stateMachineInstallPackage', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: jest.Mocked<ElasticsearchClient>;
 
@@ -88,7 +88,8 @@ describe('_installPackage', () => {
     });
     jest.mocked(restartInstallation).mockReset();
   });
-  it('handles errors from  installKibanaAssets', async () => {
+
+  it('handles errors from installKibanaAssets', async () => {
     // force errors from this function
     mockedInstallKibanaAssetsAndReferences.mockImplementation(async () => {
       throw new Error('mocked async error A: should be caught');
@@ -102,37 +103,42 @@ describe('_installPackage', () => {
       installedTemplates: [],
       esReferences: [],
     });
-    const installationPromise = _stateMachineInstallPackage({
-      savedObjectsClient: soClient,
-      // @ts-ignore
-      savedObjectsImporter: jest.fn(),
-      esClient,
-      logger: loggerMock.create(),
-      packageInstallContext: {
-        assetsMap: new Map(),
-        paths: [],
-        packageInfo: {
-          title: 'title',
-          name: 'xyz',
-          version: '4.5.6',
-          description: 'test',
-          type: 'integration',
-          categories: ['cloud', 'custom'],
-          format_version: 'string',
-          release: 'experimental',
-          conditions: { kibana: { version: 'x.y.z' } },
-          owner: { github: 'elastic/fleet' },
-        },
-      },
-      installType: 'install',
-      installSource: 'registry',
-      spaceId: DEFAULT_SPACE_ID,
-    });
 
-    // if we have a .catch this will fail nicely (test pass)
-    // otherwise the test will fail with either of the mocked errors
-    await expect(installationPromise).rejects.toThrow('mocked');
-    await expect(installationPromise).rejects.toThrow('should be caught');
+    // use this workaround to test the error; toThrow/toThrowError doesn't match correctly
+    let thrownError;
+    try {
+      await _stateMachineInstallPackage({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger: loggerMock.create(),
+        packageInstallContext: {
+          assetsMap: new Map(),
+          paths: [],
+          packageInfo: {
+            title: 'title',
+            name: 'xyz',
+            version: '4.5.6',
+            description: 'test',
+            type: 'integration',
+            categories: ['cloud', 'custom'],
+            format_version: 'string',
+            release: 'experimental',
+            conditions: { kibana: { version: 'x.y.z' } },
+            owner: { github: 'elastic/fleet' },
+          },
+        },
+        installType: 'install',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+      });
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).toEqual(
+      `Error during execution of state \"save_archive_entries_from_assets_map\" with status \"failed\": mocked async error A: should be caught`
+    );
   });
 
   it('do not install ILM policies if disabled in config', async () => {
@@ -190,10 +196,6 @@ describe('_installPackage', () => {
 
     expect(installILMPolicy).not.toBeCalled();
     expect(installIlmForDataStream).not.toBeCalled();
-    // if we have a .catch this will fail nicely (test pass)
-    // otherwise the test will fail with either of the mocked errors
-    // await expect(installationPromise).rejects.toThrow('mocked');
-    // await expect(installationPromise).rejects.toThrow('should be caught');
   });
 
   it('install ILM policies if not disabled in config', async () => {
@@ -322,11 +324,13 @@ describe('_installPackage', () => {
       });
     });
 
-    describe('timeout not reached', () => {
-      describe('force flag not provided', () => {
+    describe('Timeout not reached', () => {
+      describe('Force flag not provided', () => {
         it('throws concurrent installation error if force flag is not provided', async () => {
-          expect(
-            _stateMachineInstallPackage({
+          // use this workaround to test the error; toThrow/toThrowError doesn't match correctly
+          let thrownError;
+          try {
+            await _stateMachineInstallPackage({
               savedObjectsClient: soClient,
               // @ts-ignore
               savedObjectsImporter: jest.fn(),
@@ -348,8 +352,13 @@ describe('_installPackage', () => {
                   install_started_at: new Date(Date.now() - 1000).toISOString(),
                 },
               },
-            })
-          ).rejects.toThrowError(ConcurrentInstallOperationError);
+            });
+          } catch (error) {
+            thrownError = error;
+          }
+          expect(thrownError).toEqual(
+            `Error during execution of state \"create_restart_installation\" with status \"failed\": Concurrent installation or upgrade of test-package-1.0.0 detected, aborting.`
+          );
         });
       });
 
@@ -386,7 +395,7 @@ describe('_installPackage', () => {
     });
   });
 
-  it('surfaces saved object conflicts error', () => {
+  it('surfaces saved object conflicts error', async () => {
     appContextService.start(
       createAppContextStartContractMock({
         internal: {
@@ -406,9 +415,10 @@ describe('_installPackage', () => {
     mockedInstallKibanaAssetsAndReferences.mockRejectedValueOnce(
       new PackageSavedObjectConflictError('test')
     );
-
-    expect(
-      _stateMachineInstallPackage({
+    let thrownError;
+    // use this workaround to test the error; toThrow/toThrowError doesn't match correctly
+    try {
+      await _stateMachineInstallPackage({
         savedObjectsClient: soClient,
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
@@ -433,7 +443,12 @@ describe('_installPackage', () => {
         installType: 'install',
         installSource: 'registry',
         spaceId: DEFAULT_SPACE_ID,
-      })
-    ).rejects.toThrowError(PackageSavedObjectConflictError);
+      });
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).toEqual(
+      `Error during execution of state "save_archive_entries_from_assets_map" with status "failed": test`
+    );
   });
 });

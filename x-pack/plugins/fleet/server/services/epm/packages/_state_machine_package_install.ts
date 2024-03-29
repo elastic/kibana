@@ -11,8 +11,11 @@ import type {
   SavedObjectsClientContract,
   ISavedObjectsImporter,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
+
+import { PackageSavedObjectConflictError } from '../../../errors';
 
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import type { PackageInstallContext, StateNames, StateContext } from '../../../../common/types';
@@ -134,20 +137,37 @@ export async function _stateMachineInstallPackage(
       },
     },
   };
-  const { installedKibanaAssetsRefs, esReferences } = await handleState(
-    'create_restart_installation',
-    installStates,
-    installStates.context
-  );
-  if (
-    installedKibanaAssetsRefs &&
-    installedKibanaAssetsRefs.length &&
-    esReferences &&
-    esReferences.length
-  )
-    return [
-      ...(installedKibanaAssetsRefs as KibanaAssetReference[]),
-      ...(esReferences as EsAssetReference[]),
-    ];
-  return [];
+  try {
+    const { installedKibanaAssetsRefs, esReferences } = await handleState(
+      'create_restart_installation',
+      installStates,
+      installStates.context
+    );
+    if (
+      installedKibanaAssetsRefs &&
+      installedKibanaAssetsRefs.length &&
+      esReferences &&
+      esReferences.length
+    )
+      return [
+        ...(installedKibanaAssetsRefs as KibanaAssetReference[]),
+        ...(esReferences as EsAssetReference[]),
+      ];
+    return [];
+  } catch (err) {
+    const { packageInfo } = installStates.context.packageInstallContext;
+    const { name: pkgName, version: pkgVersion } = packageInfo;
+
+    if (SavedObjectsErrorHelpers.isConflictError(err)) {
+      throw new PackageSavedObjectConflictError(
+        `Saved Object conflict encountered while installing ${pkgName || 'unknown'}-${
+          pkgVersion || 'unknown'
+        }. There may be a conflicting Saved Object saved to another Space. Original error: ${
+          err.message
+        }`
+      );
+    } else {
+      throw err;
+    }
+  }
 }
