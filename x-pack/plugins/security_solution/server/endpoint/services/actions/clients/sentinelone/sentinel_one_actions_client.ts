@@ -98,9 +98,16 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = SentinelOneActionRequestCommonMeta
+    TMeta extends SentinelOneActionRequestCommonMeta = SentinelOneActionRequestCommonMeta
   >(
-    actionRequest: Omit<ResponseActionsClientWriteActionRequestToEndpointIndexOptions, 'hosts'>
+    actionRequest: Omit<
+      ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+        TParameters,
+        TOutputContent,
+        TMeta
+      >,
+      'hosts'
+    >
   ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
     const agentUUID = actionRequest.endpoint_ids[0];
     const agentDetails = await this.getAgentDetails(agentUUID);
@@ -379,8 +386,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     } = {};
     const warnings: string[] = [];
 
-    // TODO:PT need to ensure that we ignore when the index does not exist
-
     // Create the `OR` clause that filters for each agent id and an updated date of greater than the date when
     // the isolate request was created
     const agentListQuery: QueryDslQueryContainer[] = actionRequests.reduce((acc, action) => {
@@ -471,6 +476,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       const searchResults = await this.options.esClient
         .search<SentinelOneActivityEsDoc>({
           index: SENTINEL_ONE_ACTIVITY_INDEX,
+          ignore_unavailable: true,
           query,
           // There may be many documents for each host/agent, so we collapse it and only get back the
           // first one that came in after the isolate request was sent

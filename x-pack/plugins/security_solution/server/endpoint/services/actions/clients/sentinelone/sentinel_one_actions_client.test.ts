@@ -404,6 +404,7 @@ describe('SentinelOneActionsClient class', () => {
             },
           },
           index: SENTINEL_ONE_ACTIVITY_INDEX,
+          ignore_unavailable: true,
           query: {
             bool: {
               minimum_should_match: 1,
@@ -444,6 +445,7 @@ describe('SentinelOneActionsClient class', () => {
             },
           },
           index: SENTINEL_ONE_ACTIVITY_INDEX,
+          ignore_unavailable: true,
           query: {
             bool: {
               minimum_should_match: 1,
