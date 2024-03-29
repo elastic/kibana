@@ -633,6 +633,24 @@ export class ObservabilityAIAssistantClient {
 
       const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
 
+      response$
+        .pipe(rejectTokenCountEvents(), concatenateChatCompletionChunks(), lastOperator())
+        .subscribe({
+          error: (error) => {
+            this.dependencies.logger.debug('Error in chat response');
+            this.dependencies.logger.debug(error);
+            span?.setOutcome('failure');
+            span?.end();
+          },
+          next: (message) => {
+            this.dependencies.logger.debug(`Received message:\n${JSON.stringify(message)}`);
+          },
+          complete: () => {
+            span?.setOutcome('success');
+            span?.end();
+          },
+        });
+
       response$.subscribe({
         next: (event) => {
           if (event.type === StreamingChatResponseEventType.TokenCount) {
@@ -643,29 +661,8 @@ export class ObservabilityAIAssistantClient {
             });
           }
         },
+        error: () => {},
       });
-      response$
-        .pipe(rejectTokenCountEvents(), concatenateChatCompletionChunks(), lastOperator())
-        .subscribe({
-          error: (error) => {
-            this.dependencies.logger.debug('Error in chat response');
-            this.dependencies.logger.debug(error);
-          },
-          next: (message) => {
-            this.dependencies.logger.debug(`Received message:\n${JSON.stringify(message)}`);
-          },
-        });
-
-      lastValueFrom(response$)
-        .then(() => {
-          span?.setOutcome('success');
-        })
-        .catch(() => {
-          span?.setOutcome('failure');
-        })
-        .finally(() => {
-          span?.end();
-        });
 
       return response$;
     } catch (error) {
