@@ -6,7 +6,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -81,6 +81,48 @@ export const CreateField = React.memo(function CreateFieldComponent({
       dispatch({ type: 'documentField.changeStatus', value: 'idle' });
     }
   };
+
+  const [referenceFieldComboValue, setReferenceFieldComboValue] = useState<any>();
+  const [nameValue, setNameValue] = useState<any>();
+  const [inferenceIdComboValue, setInferenceIdComboValue] = useState<any>();
+  const [semanticFieldType, setSemanticTextFieldType] = useState<any>(null);
+
+  const referenceFieldValue = form.getFields()?.referenceField?.value;
+  useEffect(() => {
+    const referenceField = form.getFields()?.referenceField?.value;
+    if (referenceField !== undefined) {
+      setReferenceFieldComboValue(referenceField);
+    }
+  }, [form, referenceFieldValue]);
+
+  const inferenceIdValue = form.getFields()?.inferenceId?.value;
+  useEffect(() => {
+    const inferenceId = form.getFields()?.inferenceId?.value;
+    if (inferenceId !== undefined) {
+      setInferenceIdComboValue(inferenceId);
+    }
+  }, [form, inferenceIdValue]);
+
+  const fieldNameValue = form.getFields()?.name?.value;
+  useEffect(() => {
+    const name = form.getFields()?.name?.value;
+    if (name !== undefined) {
+      setNameValue(name);
+    }
+  }, [form, fieldNameValue]);
+
+  const fieldTypeValue = form.getFields()?.type?.value;
+  useEffect(() => {
+    const type = form.getFields()?.type?.value as [];
+
+    if (type === undefined || type.length === 0) {
+      return;
+    }
+
+    if (type[0].value === 'semantic_text') {
+      setSemanticTextFieldType(type[0].value);
+    }
+  }, [form, fieldTypeValue]);
 
   const submitForm = async (e?: React.FormEvent, exitAfter: boolean = false) => {
     if (e) {
@@ -174,6 +216,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onClick={submitForm}
           type="submit"
           data-test-subj="addButton"
+          isDisabled={
+            semanticFieldType && (!referenceFieldComboValue || !nameValue || !inferenceIdComboValue)
+          }
         >
           {isMultiField
             ? i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel', {
