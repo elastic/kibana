@@ -122,7 +122,7 @@ function registerDepsInES(dictionary) {
 }
 
 var dependenciesMap = {};
-walk('.', dependenciesMap).then(function (dictionary) {
+walk(info.REPO_ROOT, dependenciesMap).then(function (dictionary) {
   console.log('Dependency map created');
   return registerDepsInES(dictionary);
 });
