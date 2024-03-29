@@ -471,7 +471,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
-                errorSource: TaskErrorSource.USER,
+                errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create case. Error: JSON Error: Create case JSON body must be valid JSON.  ',
               });
