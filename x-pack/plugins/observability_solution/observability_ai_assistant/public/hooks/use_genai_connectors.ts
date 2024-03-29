@@ -29,12 +29,6 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
   return useGenAIConnectorsWithoutContext(assistant, services);
 }
 
-export function fetchConnectors(assistant: ObservabilityAIAssistantService) {
-  return assistant.callApi('GET /internal/observability_ai_assistant/connectors', {
-    signal: null,
-  });
-}
-
 export function useGenAIConnectorsWithoutContext(
   assistant: ObservabilityAIAssistantService,
   coreStart: CoreStart
@@ -52,7 +46,11 @@ export function useGenAIConnectorsWithoutContext(
     setLoading(true);
 
     try {
-      const results = await fetchConnectors(assistant);
+      const results = await assistant.callApi(
+        'GET /internal/observability_ai_assistant/connectors',
+        { signal: null }
+      );
+
       setConnectors(results);
 
       if (!selectedConnector) {

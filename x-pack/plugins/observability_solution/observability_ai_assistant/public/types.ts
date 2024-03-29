@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FindActionResult } from '@kbn/actions-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -126,7 +125,6 @@ export interface ObservabilityAIAssistantPublicStart {
   ObservabilityAIAssistantChatServiceContext: typeof ObservabilityAIAssistantChatServiceContext;
   useObservabilityAIAssistantChatService: typeof useObservabilityAIAssistantChatService;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
-  fetchAiConnectors: () => Promise<FindActionResult[]>;
   useChat: typeof useChat;
   useUserPreferredLanguage: () => UseUserPreferredLanguageResult;
   getContextualInsightMessages: ({}: { message: string; instructions: string }) => Message[];

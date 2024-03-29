@@ -15,7 +15,7 @@ import { ObservabilityAIAssistantChatServiceContext } from './context/observabil
 import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
 import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 import { createUseChat } from './hooks/use_chat';
-import { fetchConnectors, useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
+import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
 import { createService } from './service/create_service';
 import type {
@@ -90,7 +90,6 @@ export class ObservabilityAIAssistantPlugin
     return {
       service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service, coreStart),
-      fetchAiConnectors: () => fetchConnectors(service),
       useChat: createUseChat({
         notifications: coreStart.notifications,
       }),
