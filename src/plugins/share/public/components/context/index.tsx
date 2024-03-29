@@ -19,7 +19,8 @@ import type {
 export interface IShareContext extends ShareContext {
   allowEmbed: boolean;
   allowShortUrl: boolean;
-  shareMenuItems: ShareMenuItem[];
+  // lens can return null when the licensing is less than gold
+  shareMenuItems: Array<ShareMenuItem | null>;
   embedUrlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   urlService: BrowserUrlService;

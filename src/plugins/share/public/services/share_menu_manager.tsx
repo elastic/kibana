@@ -94,7 +94,7 @@ export class ShareMenuManager {
     newVersionEnabled,
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
-    menuItems: ShareMenuItem[];
+    menuItems: Array<ShareMenuItem | null>;
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
     theme: ThemeServiceStart;
