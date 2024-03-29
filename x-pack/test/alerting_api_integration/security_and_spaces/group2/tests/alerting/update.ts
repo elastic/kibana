@@ -1109,7 +1109,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .send(getTestRuleData())
           .expect(200);
 
-        objectRemover.add(space.id, createdRule.body.id, 'rule', 'alerting');
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
         await supertestWithoutAuth
           .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
