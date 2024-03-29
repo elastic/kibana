@@ -22,7 +22,7 @@ export function initializeLibraryTransforms(
       const { maps } = getCore().application.capabilities;
       return maps.save && savedMap.getSavedObjectId() === undefined;
     },
-    saveStateToSavedObject: async (title: string) => {
+    saveToLibrary: async (title: string) => {
       const state = serializeState();
       const {
         item: { id: savedObjectId },
@@ -33,13 +33,14 @@ export function initializeLibraryTransforms(
         },
         options: { references: state.references ?? [] },
       });
+      return savedObjectId;
+    },
+    getByReferenceState: (libraryId: string) => {
+      const state = serializeState();
       const { attributes, ...byRefState } = state.rawState ?? {};
       return {
-        state: {
-          ...byRefState,
-          savedObjectId,
-        },
-        savedObjectId,
+        ...byRefState,
+        savedObjectId: libraryId,
       };
     },
     checkForDuplicateTitle: async (
@@ -47,7 +48,7 @@ export function initializeLibraryTransforms(
       isTitleDuplicateConfirmed: boolean,
       onTitleDuplicate: () => void
     ) => {
-      checkForDuplicateTitle(
+      await checkForDuplicateTitle(
         {
           title: newTitle,
           copyOnSave: false,
@@ -64,7 +65,7 @@ export function initializeLibraryTransforms(
     canUnlinkFromLibrary: async () => {
       return savedMap.getSavedObjectId() !== undefined;
     },
-    savedObjectAttributesToState: () => {
+    getByValueState: () => {
       const { savedObjectId, ...byValueState } = serializeState().rawState ?? {};
       return {
         ...byValueState,
