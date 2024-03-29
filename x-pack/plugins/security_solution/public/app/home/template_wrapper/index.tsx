@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, type ReactNode } from 'react';
 import styled from 'styled-components';
 import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
@@ -46,7 +46,14 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   }
 `;
 
-export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplateProps, 'ref'>> =
+export type SecuritySolutionTemplateWrapperProps = Omit<KibanaPageTemplateProps, 'ref'> & {
+  /**
+   * Combined with isEmptyState, this prop allows complete override of the empty page
+   */
+  emptyPageBody?: ReactNode;
+};
+
+export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateWrapperProps> =
   React.memo(({ children, ...rest }) => {
     const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
