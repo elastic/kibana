@@ -13,6 +13,7 @@ import { type ChromeHelpExtension } from '@kbn/core-chrome-browser';
 import {
   EuiText,
   EuiTitle,
+  EuiLink,
   EuiIcon,
   EuiPortal,
   EuiSplitPanel,
@@ -75,12 +76,16 @@ export const HeaderHelpCenterTrigger = ({ helpExtension$ }: IHeaderHelpCenterTri
 type IHelpCenterPosition = Pick<CSSObject, 'top' | 'left'> | Pick<CSSObject, 'top' | 'right'>;
 
 interface IHeaderHelpCenter {
+  width?: CSSObject['width'];
+  height?: CSSObject['height'];
   onClose: () => void;
   defaultPosition?: IHelpCenterPosition;
   helpExtension: ChromeHelpExtension;
 }
 
 const HeaderHelpCenter = ({
+  width = 654,
+  height = 800,
   onClose,
   helpExtension,
   defaultPosition = { top: 'var(--kbnHeaderOffset)', right: '0%' },
@@ -91,7 +96,7 @@ const HeaderHelpCenter = ({
   );
   const [helpCenterElm, setHelpCenterElm] = useState<HTMLElement | null>(null);
   const [helpCenterStyling, setHelpCenterStyling] = useState<CSSObject>({
-    width: 654,
+    width,
     position: 'fixed',
     zIndex: 9999999, // TODO: confirm if there's a global zIndex
     ...(Object.keys(persistedPosition).length ? persistedPosition : defaultPosition),
@@ -167,8 +172,8 @@ const HeaderHelpCenter = ({
   return (
     <EuiFlexGroup ref={setHelpCenterElm} css={helpCenterStyling}>
       <EuiFlexItem>
-        <EuiSplitPanel.Outer>
-          <EuiSplitPanel.Inner>
+        <EuiSplitPanel.Outer css={{ height }}>
+          <EuiSplitPanel.Inner grow={false}>
             <EuiFlexGroup
               justifyContent="spaceBetween"
               alignItems="center"
@@ -202,10 +207,29 @@ const HeaderHelpCenter = ({
               <p>{content}</p>
             </EuiText>
           </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner grow={false}>
-            <EuiText>
-              <p>Footer</p>
-            </EuiText>
+          <EuiSplitPanel.Inner grow={false} css={{ position: 'relative' }}>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiLink href="http://www.elastic.co" target="_blank">
+                  Support
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink href="http://www.elastic.co" target="_blank">
+                  Give Feedback
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink href="http://www.elastic.co" target="_blank">
+                  Browse all the docs
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiIcon
+              type="scale"
+              size="xxl"
+              css={{ position: 'absolute', right: 0, bottom: 0, cursor: 'nwse-resize' }}
+            />
           </EuiSplitPanel.Inner>
         </EuiSplitPanel.Outer>
       </EuiFlexItem>
