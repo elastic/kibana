@@ -9,7 +9,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-type TestingModes = 'snapshot' | 'savedObject';
 type AppState = string | undefined;
 interface UrlState {
   globalState: string;
@@ -44,43 +43,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const PageObjects = getPageObjects(['dashboard', 'common', 'share', 'timePicker']);
 
-  const getSharedUrl = async (mode: TestingModes): Promise<string> => {
+  const getSharedUrl = async (): Promise<string> => {
     await retry.waitFor('share menu to open', async () => {
       await PageObjects.share.clickShareTopNavButton();
       return await PageObjects.share.isShareMenuOpen();
     });
-    if (mode === 'savedObject') {
-      await PageObjects.share.exportAsSavedObject();
-    }
     const sharedUrl = await PageObjects.share.getSharedUrl();
     return sharedUrl;
   };
 
   describe('share dashboard', () => {
-    const testFilterState = async (mode: TestingModes) => {
+    const testFilterState = async () => {
       it('should not have "filters" state in either app or global state when no filters', async () => {
-        expect(await getSharedUrl(mode)).to.not.contain('filters');
+        expect(await getSharedUrl()).to.not.contain('filters');
       });
 
       it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
         await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'AE' });
         await PageObjects.dashboard.waitForRenderComplete();
 
-        const sharedUrl = await getSharedUrl(mode);
-        const { globalState, appState } = getStateFromUrl(sharedUrl);
+        const sharedUrl = await getSharedUrl();
+        const { globalState } = getStateFromUrl(sharedUrl);
         expect(globalState).to.not.contain('filters');
-        if (mode === 'snapshot') {
-          expect(appState).to.contain('filters');
-        } else {
-          expect(sharedUrl).to.not.contain('appState');
-        }
       });
 
       it('unpinned filters should be removed from app state when dashboard is saved', async () => {
         await PageObjects.dashboard.clickQuickSave();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        const sharedUrl = await getSharedUrl(mode);
+        const sharedUrl = await getSharedUrl();
         expect(sharedUrl).to.not.contain('appState');
       });
 
@@ -89,12 +80,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.clickQuickSave();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        const sharedUrl = await getSharedUrl(mode);
-        const { globalState, appState } = getStateFromUrl(sharedUrl);
+        const sharedUrl = await getSharedUrl();
+        const { globalState } = getStateFromUrl(sharedUrl);
         expect(globalState).to.contain('filters');
-        if (mode === 'snapshot') {
-          expect(appState).to.not.contain('filters');
-        }
       });
     };
 
@@ -125,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('test local state', async () => {
         it('should not have "panels" state when not in unsaved changes state', async () => {
           await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
-          expect(await getSharedUrl('snapshot')).to.not.contain('panels');
+          expect(await getSharedUrl()).to.not.contain('panels');
         });
 
         it('should have "panels" in app state when a panel has been modified', async () => {
@@ -135,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.dashboard.waitForRenderComplete();
           await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
 
-          const sharedUrl = await getSharedUrl('snapshot');
+          const sharedUrl = await getSharedUrl();
           const { appState } = getStateFromUrl(sharedUrl);
           expect(appState).to.contain('panels');
         });
@@ -144,12 +132,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.dashboard.clickQuickSave();
           await PageObjects.dashboard.waitForRenderComplete();
           await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
-          expect(await getSharedUrl('snapshot')).to.not.contain('panels');
+          expect(await getSharedUrl()).to.not.contain('panels');
         });
       });
 
       describe('test filter state', async () => {
-        await testFilterState('snapshot');
+        await testFilterState();
       });
 
       after(async () => {
@@ -161,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('saved object share', async () => {
       describe('test filter state', async () => {
-        await testFilterState('savedObject');
+        await testFilterState();
       });
     });
   });
