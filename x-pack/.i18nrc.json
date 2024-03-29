@@ -4,6 +4,7 @@
     "xpack.actions": "plugins/actions",
     "xpack.aiops": [
       "packages/ml/aiops_components",
+      "packages/ml/aiops_log_pattern_analysis",
       "plugins/aiops"
     ],
     "xpack.alerting": "plugins/alerting",
