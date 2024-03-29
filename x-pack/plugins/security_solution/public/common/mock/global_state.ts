@@ -381,7 +381,6 @@ export const mockGlobalState: State = {
         isSaving: false,
         itemsPerPageOptions: [10, 25, 50, 100],
         savedSearchId: null,
-        isDiscoverSavedSearchLoaded: false,
         savedSearch: null,
         isDataProviderVisible: true,
       },
