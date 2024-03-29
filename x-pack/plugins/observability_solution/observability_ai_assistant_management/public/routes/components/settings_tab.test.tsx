@@ -22,6 +22,7 @@ describe('SettingsTab', () => {
   beforeEach(() => {
     useAppContextMock.mockReturnValue({
       application: { navigateToApp: navigateToAppMock },
+      buildFlavor: 'traditional',
       observabilityAIAssistant: {
         useGenAIConnectors: () => ({
           connectors: [
@@ -67,5 +68,34 @@ describe('SettingsTab', () => {
     });
 
     expect(selectConnectorMock).toBeCalledWith('bedrock');
+  });
+
+  describe('when running serverless', () => {
+    it('should not render the link to the Spaces feature', () => {
+      useAppContextMock.mockReturnValue({
+        application: { navigateToApp: navigateToAppMock },
+        buildFlavor: 'serverless',
+        observabilityAIAssistant: {
+          useGenAIConnectors: () => ({
+            connectors: [
+              { name: 'openAi', id: 'openAi' },
+              { name: 'azureOpenAi', id: 'azureOpenAi' },
+              { name: 'bedrock', id: 'bedrock' },
+            ],
+            selectConnector: selectConnectorMock,
+          }),
+          useUserPreferredLanguage: () => ({
+            LANGUAGE_OPTIONS: [{ label: 'English' }],
+            selectedLanguage: 'English',
+            setSelectedLanguage: () => {},
+            getPreferredLanguage: () => 'English',
+          }),
+        },
+      });
+
+      const { queryByTestId } = render(<SettingsTab />);
+
+      expect(queryByTestId('settingsTabGoToSpacesButton')).toBeNull();
+    });
   });
 });

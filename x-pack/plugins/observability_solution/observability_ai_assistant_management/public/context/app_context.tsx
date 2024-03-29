@@ -8,10 +8,12 @@
 import React, { createContext } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
+import type { BuildFlavor } from '@kbn/config';
 import type { StartDependencies } from '../plugin';
 
 export interface ContextValue extends StartDependencies {
   application: CoreStart['application'];
+  buildFlavor: BuildFlavor;
   http: HttpSetup;
   notifications: CoreStart['notifications'];
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;

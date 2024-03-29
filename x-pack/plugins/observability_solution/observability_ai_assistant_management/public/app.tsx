@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { BuildFlavor } from '@kbn/config';
 import { StartDependencies, AiAssistantManagementObservabilityPluginStart } from './plugin';
 import { aIAssistantManagementObservabilityRouter } from './routes/config';
 import { RedirectToHomeIfUnauthorized } from './routes/components/redirect_to_home_if_unauthorized';
@@ -22,9 +23,10 @@ import { AppContextProvider } from './context/app_context';
 interface MountParams {
   core: CoreSetup<StartDependencies, AiAssistantManagementObservabilityPluginStart>;
   mountParams: ManagementAppMountParams;
+  buildFlavor: BuildFlavor;
 }
 
-export const mountManagementSection = async ({ core, mountParams }: MountParams) => {
+export const mountManagementSection = async ({ core, mountParams, buildFlavor }: MountParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
 
   if (!startDeps.observabilityAIAssistant) return () => {};
@@ -48,6 +50,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
             value={{
               ...startDeps,
               application: coreStart.application,
+              buildFlavor,
               http: coreStart.http,
               notifications: coreStart.notifications,
               uiSettings: coreStart.uiSettings,
