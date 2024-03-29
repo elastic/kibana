@@ -50,6 +50,7 @@ import {
   useConfig,
   sendGetAgentStatus,
   useAgentVersion,
+  sendGetAllFleetServerAgents,
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
@@ -64,7 +65,7 @@ import {
   MAINTENANCE_VALUES,
   ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION,
 } from './constants';
-import { useScheduleDateTime, sendAllFleetServerAgents } from './hooks';
+import { useScheduleDateTime } from './hooks';
 
 export interface AgentUpgradeAgentModalProps {
   onClose: () => void;
@@ -165,7 +166,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   useEffect(() => {
     const fetchFleetServerAgents = async () => {
       try {
-        const { allFleetServerAgents } = await sendAllFleetServerAgents();
+        const { allFleetServerAgents } = await sendGetAllFleetServerAgents();
         setFleetServerAgents(allFleetServerAgents);
       } catch (error) {
         return;

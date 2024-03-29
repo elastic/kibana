@@ -30,6 +30,7 @@
     "@kbn/code-editor",
     "@kbn/monaco",
     "@kbn/cloud-plugin",
+    "@kbn/core-notifications-browser",
     "@kbn/react-kibana-context-render"
   ],
   "exclude": [
