@@ -10,7 +10,7 @@ import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { StateComparators } from '@kbn/presentation-publishing';
+import { getPanelTitle, StateComparators } from '@kbn/presentation-publishing';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import { SavedMap } from '../routes/map_page';
 import { mapEmbeddablesSingleton } from '../embeddable/map_embeddables_singleton';
@@ -27,19 +27,20 @@ import { setGotoWithCenter, setMapSettings } from '../actions';
 import { MapExtent } from '../../common/descriptor_types';
 import { getUiActions } from '../kibana_services';
 import { getGeoFieldsLabel } from '../embeddable/get_geo_fields_label';
-import { MapSerializeState } from './types';
+import { MapApi, MapSerializeState } from './types';
+import { setOnMapMove } from '../reducers/non_serializable_instances';
 
 export function initializeCrossPanelActions({
   controlledBy,
   getActionContext,
-  getTitle,
+  getApi,
   savedMap,
   state,
   uuid,
 }: {
   controlledBy: string;
   getActionContext: () => ActionExecutionContext;
-  getTitle: () => string;
+  getApi: () => MapApi | undefined;
   savedMap: SavedMap;
   state: MapSerializeState;
   uuid: string;
@@ -147,7 +148,15 @@ export function initializeCrossPanelActions({
   }
 
   mapEmbeddablesSingleton.register(uuid, {
-    getTitle,
+    getTitle: () => {
+      const mapApi = getApi();
+      const title = mapApi ? getPanelTitle(mapApi) : undefined;
+      return title
+        ? title
+        : i18n.translate('xpack.maps.embeddable.untitleMap', {
+            defaultMessage: 'Untitled map',
+          });
+    },
     onLocationChange: mapSyncHandler,
     getIsMovementSynchronized,
     setIsMovementSynchronized: (isMovementSynchronized: boolean) => {
@@ -177,6 +186,13 @@ export function initializeCrossPanelActions({
     gotoSynchronizedLocation();
   }
 
+  // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
+  savedMap.getStore().dispatch(setOnMapMove((lat: number, lon: number, zoom: number) => {
+    if (getIsMovementSynchronized()) {
+      mapEmbeddablesSingleton.setLocation(uuid, lat, lon, zoom);
+    }
+  }))
+  
   const unsubscribeFromStore = savedMap.getStore().subscribe(() => {
     if (!getMapReady(savedMap.getStore().getState())) {
       return;

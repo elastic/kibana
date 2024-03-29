@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { getPanelTitle, initializeTitles } from '@kbn/presentation-publishing';
+import { initializeTitles } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { inject } from '../../common/embeddable';
@@ -47,6 +47,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
     await savedMap.whenReady();
 
     let api: MapApi | undefined;
+    const getApi = () => api;
     const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
     const spaces = getSpacesApi();
     const controlledBy = getControlledBy(uuid);
@@ -55,11 +56,11 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       savedMap.getAttributes().title
     );
     const reduxSync = initializeReduxSync(savedMap.getStore(), state);
-    const actionHandlers = initializeActionHandlers(() => api);
+    const actionHandlers = initializeActionHandlers(getApi);
     const crossPanelActions = initializeCrossPanelActions({
       controlledBy,
       getActionContext: actionHandlers.getActionContext,
-      getTitle: () => getPanelTitle(api) ?? uuid,
+      getApi,
       state,
       savedMap,
       uuid,
