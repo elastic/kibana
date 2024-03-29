@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import styled from 'styled-components';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
@@ -26,15 +18,13 @@ import { DataLoadingState } from '@kbn/unified-data-table';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { timelineActions, timelineSelectors } from '../../../../store';
-import type { CellValueElementProps } from '../../cell_rendering';
-import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
 import { defaultHeaders } from '../../body/column_headers/default_headers';
 import { StatefulBody } from '../../body';
 import { Footer, footerHeight } from '../../footer';
 import { calculateTotalPages } from '../../helpers';
 import { TimelineRefetch } from '../../refetch_timeline';
-import type { RowRenderer, ToggleDetailPanel } from '../../../../../../common/types/timeline';
+import type { ToggleDetailPanel } from '../../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
@@ -56,89 +46,20 @@ import type { Sort } from '../../body/sort';
 import { Sourcerer } from '../../../../../common/components/sourcerer';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
+import {
+  EventsCountBadge,
+  FullWidthFlexGroup,
+  ScrollableFlexItem,
+  StyledEuiFlyoutHeader,
+  StyledEuiFlyoutBody,
+  StyledEuiFlyoutFooter,
+  VerticalRule,
+  TabHeaderContainer,
+} from '../shared/layout';
+import { EMPTY_EVENTS, isTimerangeSame } from '../shared/utils';
+import { TimelineTabCommonProps } from '../shared/types';
 
-const EqlTabHeaderContainer = styled.div`
-  margin-top: ${(props) => props.theme.eui.euiSizeS};
-  width: 100%;
-`;
-
-EqlTabHeaderContainer.displayName = 'EqlTabHeaderContainer';
-
-const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
-  align-items: stretch;
-  box-shadow: none;
-  display: flex;
-  flex-direction: column;
-  margin-top: ${({ theme }) => theme.eui.euiSizeM}
-  padding: 0;
-
-  &.euiFlyoutHeader {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
-  }
-`;
-
-const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  overflow-y: hidden;
-  flex: 1;
-
-  .euiFlyoutBody__overflow {
-    overflow: hidden;
-    mask-image: none;
-  }
-
-  .euiFlyoutBody__overflowContent {
-    padding: 0;
-    height: 100%;
-    display: flex;
-  }
-`;
-
-const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
-  background: none;
-  padding: 0;
-
-  &.euiFlyoutFooter {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
-  }
-`;
-
-const FullWidthFlexGroup = styled(EuiFlexGroup)`
-  margin: 0;
-  width: 100%;
-  overflow: hidden;
-`;
-
-const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
-  overflow: hidden;
-`;
-
-const VerticalRule = styled.div`
-  width: 2px;
-  height: 100%;
-  background: ${({ theme }) => theme.eui.euiColorLightShade};
-`;
-
-VerticalRule.displayName = 'VerticalRule';
-
-const EventsCountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
-const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
-  prevProps.end === nextProps.end &&
-  prevProps.start === nextProps.start &&
-  prevProps.timerangeKind === nextProps.timerangeKind;
-
-interface OwnProps {
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
-  timelineId: string;
-}
-
-const EMPTY_EVENTS: TimelineItem[] = [];
-
-export type Props = OwnProps & PropsFromRedux;
+export type Props = TimelineTabCommonProps & PropsFromRedux;
 
 const NO_SORTING: Sort[] = [];
 
@@ -284,9 +205,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </StyledEuiFlyoutHeader>
-          <EqlTabHeaderContainer data-test-subj="timelineHeader">
+          <TabHeaderContainer data-test-subj="timelineHeader">
             <EqlQueryBarTimeline timelineId={timelineId} />
-          </EqlTabHeaderContainer>
+          </TabHeaderContainer>
 
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
@@ -357,7 +278,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
-  const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
+  const mapStateToProps = (state: State, { timelineId }: TimelineTabCommonProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const { activeTab, columns, eqlOptions, expandedDetail, itemsPerPage, itemsPerPageOptions } =

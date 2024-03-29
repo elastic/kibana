@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
@@ -17,7 +16,6 @@ import deepEqual from 'fast-deep-equal';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../../store';
-import type { CellValueElementProps } from '../../cell_rendering';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
 import { defaultHeaders } from '../../body/column_headers/default_headers';
@@ -32,67 +30,19 @@ import { useTimelineFullScreen } from '../../../../../common/containers/use_full
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
 import { calculateTotalPages } from '../../helpers';
-import type { RowRenderer, ToggleDetailPanel } from '../../../../../../common/types/timeline';
+import type { ToggleDetailPanel } from '../../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DetailsPanel } from '../../../side_panel';
 import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
 import { getDefaultControlColumn } from '../../body/control_columns';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
-
-const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  overflow-y: hidden;
-  flex: 1;
-
-  .euiFlyoutBody__overflow {
-    overflow: hidden;
-    mask-image: none;
-  }
-
-  .euiFlyoutBody__overflowContent {
-    padding: 0;
-    height: 100%;
-    display: flex;
-  }
-`;
-
-const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
-  background: none;
-  padding: 0;
-
-  &.euiFlyoutFooter {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
-  }
-`;
+import { FullWidthFlexGroup, ScrollableFlexItem, StyledEuiFlyoutBody, StyledEuiFlyoutFooter, VerticalRule } from '../shared/layout';
+import { TimelineTabCommonProps } from '../shared/types';
 
 const ExitFullScreenContainer = styled.div`
   width: 180px;
 `;
-
-const FullWidthFlexGroup = styled(EuiFlexGroup)`
-  margin: 0;
-  width: 100%;
-  overflow: hidden;
-`;
-
-const ScrollableFlexItem = styled(EuiFlexItem)`
-  overflow: hidden;
-`;
-
-const VerticalRule = styled.div`
-  width: 2px;
-  height: 100%;
-  background: ${({ theme }) => theme.eui.euiColorLightShade};
-`;
-
-VerticalRule.displayName = 'VerticalRule';
-
-interface OwnProps {
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
-  timelineId: string;
-}
-
 interface PinnedFilter {
   bool: {
     should: Array<{ match_phrase: { _id: string } }>;
@@ -100,7 +50,7 @@ interface PinnedFilter {
   };
 }
 
-export type Props = OwnProps & PropsFromRedux;
+export type Props = TimelineTabCommonProps & PropsFromRedux;
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
@@ -294,7 +244,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
+  const mapStateToProps = (state: State, { timelineId }: TimelineTabCommonProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const { columns, expandedDetail, itemsPerPage, itemsPerPageOptions, pinnedEventIds, sort } =
       timeline;
@@ -313,7 +263,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
+const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: TimelineTabCommonProps) => ({
   onEventClosed: (args: ToggleDetailPanel) => {
     dispatch(timelineActions.toggleDetailPanel(args));
   },

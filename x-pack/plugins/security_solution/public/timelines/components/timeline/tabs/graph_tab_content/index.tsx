@@ -6,28 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 import { timelineSelectors } from '../../../../store';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import type { TimelineId } from '../../../../../../common/types/timeline';
 import { GraphOverlay } from '../../../graph_overlay';
 import { useSessionViewNavigation, useSessionView } from '../session_tab_content/use_session_view';
+import { ScrollableFlexItem, VerticalRule } from '../shared/layout';
 
 interface GraphTabContentProps {
   timelineId: TimelineId;
 }
-
-const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
-  overflow: hidden;
-`;
-
-const VerticalRule = styled.div`
-  width: 2px;
-  height: 100%;
-  background: ${({ theme }) => theme.eui.euiColorLightShade};
-`;
 
 const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);

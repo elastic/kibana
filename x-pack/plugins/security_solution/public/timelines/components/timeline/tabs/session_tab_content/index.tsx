@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import styled from 'styled-components';
 import type { TimelineId } from '../../../../../../common/types/timeline';
 import { useSessionViewNavigation, useSessionView } from './use_session_view';
+import { VerticalRule } from '../shared/layout';
 
 const MaxWidthFlexItem = styled(EuiFlexItem)`
   width: 100%;
@@ -21,12 +22,6 @@ const SessionViewWrapper = styled.div`
 const MaxWidthPageFlexGroup = styled(EuiFlexGroup)`
   max-width: 100%;
   box-sizing: border-box;
-`;
-
-const VerticalRule = styled.div`
-  width: 2px;
-  height: 100%;
-  background: ${({ theme }) => theme.eui.euiColorLightShade};
 `;
 
 const StyledFlexItem = styled(EuiFlexItem)`

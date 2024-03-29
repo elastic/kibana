@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useEffect, useCallback } from 'react';
-import styled from 'styled-components';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
@@ -32,8 +24,7 @@ import type { ControlColumnProps } from '../../../../../../common/types';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../../store';
-import type { CellValueElementProps } from '../../cell_rendering';
-import type { Direction, TimelineItem } from '../../../../../../common/search_strategy';
+import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { defaultHeaders } from '../../body/column_headers/default_headers';
@@ -45,7 +36,6 @@ import { combineQueries } from '../../../../../common/lib/kuery';
 import { TimelineRefetch } from '../../refetch_timeline';
 import type {
   KueryFilterQueryKind,
-  RowRenderer,
   ToggleDetailPanel,
 } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
@@ -67,6 +57,18 @@ import { HeaderActions } from '../../../../../common/components/header_actions/h
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
+import {
+  StyledEuiFlyoutHeader,
+  EventsCountBadge,
+  FullWidthFlexGroup,
+  ScrollableFlexItem,
+  StyledEuiFlyoutBody,
+  StyledEuiFlyoutFooter,
+  VerticalRule,
+  TabHeaderContainer,
+} from '../shared/layout';
+import { EMPTY_EVENTS, isTimerangeSame } from '../shared/utils';
+import { TimelineTabCommonProps } from '../shared/types';
 
 const memoizedGetColumnHeaders: (
   headers: ColumnHeaderOptions[],
@@ -74,94 +76,12 @@ const memoizedGetColumnHeaders: (
   isEventRenderedView: boolean
 ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
-const QueryTabHeaderContainer = styled.div`
-  width: 100%;
-`;
-
-QueryTabHeaderContainer.displayName = 'TimelineHeaderContainer';
-
-const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
-  align-items: stretch;
-  box-shadow: none;
-  display: flex;
-  flex-direction: column;
-
-  &.euiFlyoutHeader {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
-  }
-`;
-
-const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  overflow-y: hidden;
-  flex: 1;
-
-  .euiFlyoutBody__overflow {
-    overflow: hidden;
-    mask-image: none;
-  }
-
-  .euiFlyoutBody__overflowContent {
-    padding: 0;
-    height: 100%;
-    display: flex;
-  }
-`;
-
-const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
-  background: none;
-  &.euiFlyoutFooter {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0;`}
-  }
-`;
-
-const FullWidthFlexGroup = styled(EuiFlexGroup)`
-  margin: 0;
-  width: 100%;
-  overflow: hidden;
-`;
-
-const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
-  overflow: hidden;
-`;
-
-const SourcererFlex = styled(EuiFlexItem)`
-  align-items: flex-end;
-`;
-
-SourcererFlex.displayName = 'SourcererFlex';
-
-const VerticalRule = styled.div`
-  width: 2px;
-  height: 100%;
-  background: ${({ theme }) => theme.eui.euiColorLightShade};
-`;
-
-VerticalRule.displayName = 'VerticalRule';
-
-const EventsCountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
-const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
-  prevProps.end === nextProps.end &&
-  prevProps.start === nextProps.start &&
-  prevProps.timerangeKind === nextProps.timerangeKind;
-
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
   prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
   deepEqual(prevProps.filters, nextProps.filters);
 
-interface OwnProps {
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
-  timelineId: string;
-}
-
-const EMPTY_EVENTS: TimelineItem[] = [];
-
-export type Props = OwnProps & PropsFromRedux;
+export type Props = TimelineTabCommonProps & PropsFromRedux;
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
@@ -370,7 +290,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               </EuiFlexItem>
             )}
           <EuiFlexItem data-test-subj="timeline-date-picker-container">
-            <QueryTabHeaderContainer data-test-subj="timelineHeader">
+            <TabHeaderContainer data-test-subj="timelineHeader">
               <QueryTabHeader
                 filterManager={timelineFilterManager}
                 show={show && activeTab === TimelineTabs.query}
@@ -378,7 +298,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 status={status}
                 timelineId={timelineId}
               />
-            </QueryTabHeaderContainer>
+            </TabHeaderContainer>
           </EuiFlexItem>
           {/* TODO: This is a temporary solution to hide the KPIs until lens components play nicely with timelines */}
           {/* https://github.com/elastic/kibana/issues/17156 */}
@@ -514,7 +434,7 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterKuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
-  const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
+  const mapStateToProps = (state: State, { timelineId }: TimelineTabCommonProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
@@ -575,7 +495,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
+const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: TimelineTabCommonProps) => ({
   onEventClosed: (args: ToggleDetailPanel) => {
     dispatch(timelineActions.toggleDetailPanel(args));
   },

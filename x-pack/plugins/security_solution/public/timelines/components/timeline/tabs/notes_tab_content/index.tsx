@@ -42,24 +42,13 @@ import { DetailsPanel } from '../../../side_panel';
 import { getScrollToTopSelector } from '../../tabs_content/selectors';
 import { useScrollToTop } from '../../../../../common/components/scroll_to_top';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-
-const FullWidthFlexGroup = styled(EuiFlexGroup)`
-  width: 100%;
-  margin: 0;
-  overflow: hidden;
-`;
+import { FullWidthFlexGroup, VerticalRule } from '../shared/layout';
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow-x: hidden;
   overflow-y: auto;
   padding-inline: ${({ theme }) => (theme as EuiTheme).eui.euiSizeM};
   padding-block: ${({ theme }) => (theme as EuiTheme).eui.euiSizeS};
-`;
-
-const VerticalRule = styled.div`
-  width: 2px;
-  height: 100%;
-  background: ${({ theme }) => theme.eui.euiColorLightShade};
 `;
 
 const StyledPanel = styled(EuiPanel)`
