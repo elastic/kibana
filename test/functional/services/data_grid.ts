@@ -370,9 +370,16 @@ export class DataGridService extends FtrService {
     const buttonGroup = await this.testSubjects.find(
       'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
     );
-    return (
-      await buttonGroup.findByCssSelector('.euiButtonGroupButton-isSelected')
-    ).getVisibleText();
+    let value = '';
+    await this.retry.waitFor('row height value not to be empty', async () => {
+      // to prevent flakiness
+      const selectedButton = await buttonGroup.findByCssSelector(
+        '.euiButtonGroupButton-isSelected'
+      );
+      value = await selectedButton.getVisibleText();
+      return value !== '';
+    });
+    return value;
   }
 
   public async changeRowHeightValue(newValue: string) {

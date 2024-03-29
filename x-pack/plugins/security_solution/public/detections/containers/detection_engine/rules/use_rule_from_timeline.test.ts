@@ -21,6 +21,7 @@ jest.mock('../../../../common/utils/global_query_string/helpers');
 jest.mock('../../../../timelines/containers/api');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../../../common/components/link_to');
   return {
