@@ -57,7 +57,7 @@ describe('AlertDetailsRedirect', () => {
       expect(historyMock.replace).toHaveBeenCalledWith({
         hash: '',
         pathname: ALERTS_PATH,
-        search: `?query=%28language%3Akuery%2Cquery%3A%27_id%3A+test-alert-id%27%29&timerange=%28global%3A%28linkTo%3A%21%28timeline%2CsocTrends%29%2Ctimerange%3A%28from%3A%272023-04-20T12%3A00%3A00.000Z%27%2Ckind%3Aabsolute%2Cto%3A%272023-04-20T12%3A05%3A00.000Z%27%29%29%2Ctimeline%3A%28linkTo%3A%21%28global%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2CfromStr%3Anow%2Fd%2Ckind%3Arelative%2Cto%3A%272020-07-08T08%3A20%3A18.966Z%27%2CtoStr%3Anow%2Fd%29%29%29&pageFilters=%21%28%28exclude%3A%21f%2CexistsSelected%3A%21f%2CfieldName%3Akibana.alert.workflow_status%2CselectedOptions%3A%21%28%29%2Ctitle%3AStatus%29%29&eventFlyout=%28panelView%3AeventDetail%2Cparams%3A%28eventId%3Atest-alert-id%2CindexName%3A.someTestIndex%29%29`,
+        search: `?query=%28language%3Akuery%2Cquery%3A%27_id%3A+test-alert-id%27%29&timerange=%28global%3A%28linkTo%3A%21%28timeline%2CsocTrends%29%2Ctimerange%3A%28from%3A%272023-04-20T12%3A00%3A00.000Z%27%2Ckind%3Aabsolute%2Cto%3A%272023-04-20T12%3A05%3A00.000Z%27%29%29%2Ctimeline%3A%28linkTo%3A%21%28global%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2CfromStr%3Anow%2Fd%2Ckind%3Arelative%2Cto%3A%272020-07-08T08%3A20%3A18.966Z%27%2CtoStr%3Anow%2Fd%29%29%29&pageFilters=%21%28%28exclude%3A%21f%2CexistsSelected%3A%21f%2CfieldName%3Akibana.alert.workflow_status%2CselectedOptions%3A%21%28%29%2Ctitle%3AStatus%29%29&flyout=%28panelView%3AeventDetail%2Cparams%3A%28eventId%3Atest-alert-id%2CindexName%3A.someTestIndex%29%29`,
         state: undefined,
       });
     });
@@ -86,7 +86,7 @@ describe('AlertDetailsRedirect', () => {
       expect(historyMock.replace).toHaveBeenCalledWith({
         hash: '',
         pathname: ALERTS_PATH,
-        search: `?query=%28language%3Akuery%2Cquery%3A%27_id%3A+test-alert-id%27%29&timerange=%28global%3A%28linkTo%3A%21%28timeline%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2Ckind%3Aabsolute%2Cto%3A%272020-07-08T08%3A25%3A18.966Z%27%29%29%2Ctimeline%3A%28linkTo%3A%21%28global%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2CfromStr%3Anow%2Fd%2Ckind%3Arelative%2Cto%3A%272020-07-08T08%3A20%3A18.966Z%27%2CtoStr%3Anow%2Fd%29%29%29&pageFilters=%21%28%28exclude%3A%21f%2CexistsSelected%3A%21f%2CfieldName%3Akibana.alert.workflow_status%2CselectedOptions%3A%21%28%29%2Ctitle%3AStatus%29%29&eventFlyout=%28panelView%3AeventDetail%2Cparams%3A%28eventId%3Atest-alert-id%2CindexName%3A.someTestIndex%29%29`,
+        search: `?query=%28language%3Akuery%2Cquery%3A%27_id%3A+test-alert-id%27%29&timerange=%28global%3A%28linkTo%3A%21%28timeline%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2Ckind%3Aabsolute%2Cto%3A%272020-07-08T08%3A25%3A18.966Z%27%29%29%2Ctimeline%3A%28linkTo%3A%21%28global%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2CfromStr%3Anow%2Fd%2Ckind%3Arelative%2Cto%3A%272020-07-08T08%3A20%3A18.966Z%27%2CtoStr%3Anow%2Fd%29%29%29&pageFilters=%21%28%28exclude%3A%21f%2CexistsSelected%3A%21f%2CfieldName%3Akibana.alert.workflow_status%2CselectedOptions%3A%21%28%29%2Ctitle%3AStatus%29%29&flyout=%28panelView%3AeventDetail%2Cparams%3A%28eventId%3Atest-alert-id%2CindexName%3A.someTestIndex%29%29`,
         state: undefined,
       });
     });
@@ -114,7 +114,7 @@ describe('AlertDetailsRedirect', () => {
       expect(historyMock.replace).toHaveBeenCalledWith({
         hash: '',
         pathname: ALERTS_PATH,
-        search: `?query=%28language%3Akuery%2Cquery%3A%27_id%3A+test-alert-id%27%29&timerange=%28global%3A%28linkTo%3A%21%28timeline%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2Ckind%3Aabsolute%2Cto%3A%272020-07-08T08%3A25%3A18.966Z%27%29%29%2Ctimeline%3A%28linkTo%3A%21%28global%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2CfromStr%3Anow%2Fd%2Ckind%3Arelative%2Cto%3A%272020-07-08T08%3A20%3A18.966Z%27%2CtoStr%3Anow%2Fd%29%29%29&pageFilters=%21%28%28exclude%3A%21f%2CexistsSelected%3A%21f%2CfieldName%3Akibana.alert.workflow_status%2CselectedOptions%3A%21%28%29%2Ctitle%3AStatus%29%29&eventFlyout=%28panelView%3AeventDetail%2Cparams%3A%28eventId%3Atest-alert-id%2CindexName%3A.internal.alerts-security.alerts-default%29%29`,
+        search: `?query=%28language%3Akuery%2Cquery%3A%27_id%3A+test-alert-id%27%29&timerange=%28global%3A%28linkTo%3A%21%28timeline%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2Ckind%3Aabsolute%2Cto%3A%272020-07-08T08%3A25%3A18.966Z%27%29%29%2Ctimeline%3A%28linkTo%3A%21%28global%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2CfromStr%3Anow%2Fd%2Ckind%3Arelative%2Cto%3A%272020-07-08T08%3A20%3A18.966Z%27%2CtoStr%3Anow%2Fd%29%29%29&pageFilters=%21%28%28exclude%3A%21f%2CexistsSelected%3A%21f%2CfieldName%3Akibana.alert.workflow_status%2CselectedOptions%3A%21%28%29%2Ctitle%3AStatus%29%29&flyout=%28panelView%3AeventDetail%2Cparams%3A%28eventId%3Atest-alert-id%2CindexName%3A.internal.alerts-security.alerts-default%29%29`,
         state: undefined,
       });
     });
@@ -125,7 +125,7 @@ describe('AlertDetailsRedirect', () => {
       jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
     });
 
-    describe('when eventFlyout is not in the query', () => {
+    describe('when eventFlyout or flyout are not in the query', () => {
       it('redirects to the expected path with the correct query parameters', () => {
         const testSearch = `?index=${testIndex}&timestamp=${testTimestamp}`;
         const historyMock = {
@@ -147,7 +147,7 @@ describe('AlertDetailsRedirect', () => {
 
         const [{ search, pathname }] = historyMock.replace.mock.lastCall;
 
-        expect(search as string).toMatch(/eventFlyout.*/);
+        expect(search as string).toMatch(/flyout.*/);
         expect(pathname).toEqual(ALERTS_PATH);
       });
     });

@@ -74,5 +74,5 @@ export const useQueryTimelineByIdOnUrlChange = () => {
   }, [timelineIdFromReduxStore, oldId, newId, activeTab, graphEventId, queryTimelineById]);
 };
 
-const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
+export const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
   getParamFromQueryString(getQueryStringFromLocation(search), urlKey);
