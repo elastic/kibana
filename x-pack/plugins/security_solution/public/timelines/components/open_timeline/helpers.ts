@@ -374,7 +374,7 @@ export const useQueryTimelineById = () => {
             timelineToOpen,
             duplicate,
             timelineType,
-            unifiedComponentsInTimelineEnabled,
+            unifiedComponentsInTimelineEnabled
           );
 
           if (onOpenTimeline != null) {
