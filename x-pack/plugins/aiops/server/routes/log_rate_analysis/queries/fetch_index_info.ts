@@ -52,8 +52,6 @@ export const fetchIndexInfo = async (
 
   const allFieldNames: string[] = [];
 
-  const finalFieldCandidates: Set<string> = new Set([]);
-  const finalTextFieldCandidates: Set<string> = new Set([]);
   const acceptableFields: Set<string> = new Set();
   const acceptableTextFields: Set<string> = new Set();
 
