@@ -90,8 +90,6 @@ FORMATTED_KB_URL="${KB_URL/https:\/\//}"
 # This is used in order to wait for the environment to be ready.
 sleep 150
 
-echo "uername: $USERNAME"
-
 TEST_CLOUD=1 TEST_ES_URL="https://$USERNAME:$PASSWORD@$FORMATTED_ES_URL:443" TEST_KIBANA_URL="https://$USERNAME:$PASSWORD@$FORMATTED_KB_URL:443" yarn run $1
 cmd_status=$?
 echo "Exit code with status: $cmd_status"

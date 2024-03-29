@@ -43,7 +43,6 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   describe('@ess create rule exception routes, ESS specific logic', () => {
     before(async () => {
