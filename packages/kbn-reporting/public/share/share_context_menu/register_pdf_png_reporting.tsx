@@ -8,9 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { ShareContext, ShareMenuProvider, downloadCSVs } from '@kbn/share-plugin/public';
 import { TableInspectorAdapter } from '@kbn/lens-plugin/public/editor_frame_service/types';
-import { downloadCSVs } from '@kbn/lens-plugin/public';
 import { checkLicense } from '../../license_check';
 import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { ReportingModalContent } from './reporting_panel_content_lazy';

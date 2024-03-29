@@ -6,4 +6,3 @@
  */
 
 export * from './app';
-export { downloadCSVs } from './csv_download_provider';
