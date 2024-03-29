@@ -26,6 +26,9 @@ import {
   REMOVED_SEGMENT_CLASS,
   SEGMENT_CLASS,
 } from './use_comparison_css';
+import * as CalculateDiff from './calculate_diff';
+
+const calculateDiff = jest.spyOn(CalculateDiff, 'calculateDiff');
 
 const docs = generateEsHits(dataViewWithTimefieldMock, 3).map((hit, i) => {
   switch (i) {
@@ -48,21 +51,27 @@ const getDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
 const fieldColumnId = 'fieldColumnId';
 
 const renderComparisonCellValue = (props: Partial<UseComparisonCellValueProps> = {}) => {
-  const {
-    result: { current: renderCellValue },
-  } = renderHook(() =>
-    useComparisonCellValue({
-      dataView: dataViewWithTimefieldMock,
-      comparisonFields: ['message', 'extension', 'bytes'],
-      fieldColumnId,
-      selectedDocs: ['0', '1', '2'],
-      diffMode: null,
-      fieldFormats: fieldFormatsMock,
-      getDocById,
-      ...props,
-    })
-  );
-  return renderCellValue;
+  const defaultProps: UseComparisonCellValueProps = {
+    dataView: dataViewWithTimefieldMock,
+    comparisonFields: ['message', 'extension', 'bytes'],
+    fieldColumnId,
+    selectedDocs: ['0', '1', '2'],
+    diffMode: null,
+    fieldFormats: fieldFormatsMock,
+    getDocById,
+    ...props,
+  };
+  const hook = renderHook((currentProps) => useComparisonCellValue(currentProps), {
+    initialProps: defaultProps,
+  });
+  return {
+    rerender: (newProps: Partial<UseComparisonCellValueProps>) => {
+      hook.rerender({ ...defaultProps, ...newProps });
+    },
+    renderCellValue: (cellValueProps: EuiDataGridCellValueElementProps) => {
+      return hook.result.current(cellValueProps);
+    },
+  };
 };
 
 const ComparisonCell = ({
@@ -118,7 +127,7 @@ const renderComparisonCell = ({
 
 describe('useComparisonCellValue', () => {
   it('should render field cells', () => {
-    const renderCellValue = renderComparisonCellValue();
+    const { renderCellValue } = renderComparisonCellValue();
     const messageCell = renderComparisonCell({
       columnId: fieldColumnId,
       colIndex: 0,
@@ -152,7 +161,7 @@ describe('useComparisonCellValue', () => {
   });
 
   it('should render exmpty cell if doc is not found', () => {
-    const renderCellValue = renderComparisonCellValue();
+    const { renderCellValue } = renderComparisonCellValue();
     const emptyCell = renderComparisonCell({
       columnId: 'unknown',
       colIndex: 1,
@@ -164,7 +173,7 @@ describe('useComparisonCellValue', () => {
   });
 
   it('should render cells with diff mode "None"', () => {
-    const renderCellValue = renderComparisonCellValue();
+    const { renderCellValue } = renderComparisonCellValue();
     const baseCell = renderComparisonCell({
       columnId: '0',
       colIndex: 1,
@@ -204,7 +213,7 @@ describe('useComparisonCellValue', () => {
   });
 
   it('should render cells with diff mode "Full value"', () => {
-    const renderCellValue = renderComparisonCellValue({ diffMode: 'basic' });
+    const { renderCellValue } = renderComparisonCellValue({ diffMode: 'basic' });
     const baseCell = renderComparisonCell({
       columnId: '0',
       colIndex: 1,
@@ -244,7 +253,7 @@ describe('useComparisonCellValue', () => {
   });
 
   it('should render cells with diff mode "Chars"', () => {
-    const renderCellValue = renderComparisonCellValue({ diffMode: 'chars' });
+    const { renderCellValue } = renderComparisonCellValue({ diffMode: 'chars' });
     const baseCell = renderComparisonCell({
       columnId: '0',
       colIndex: 1,
@@ -288,7 +297,7 @@ describe('useComparisonCellValue', () => {
   });
 
   it('should render cells with diff mode "Words"', () => {
-    const renderCellValue = renderComparisonCellValue({ diffMode: 'words' });
+    const { renderCellValue } = renderComparisonCellValue({ diffMode: 'words' });
     const baseCell = renderComparisonCell({
       columnId: '0',
       colIndex: 1,
@@ -332,7 +341,7 @@ describe('useComparisonCellValue', () => {
   });
 
   it('should render cells with diff mode "Lines"', () => {
-    const renderCellValue = renderComparisonCellValue({ diffMode: 'lines' });
+    const { renderCellValue } = renderComparisonCellValue({ diffMode: 'lines' });
     const baseCell = renderComparisonCell({
       columnId: '0',
       colIndex: 1,
@@ -373,5 +382,65 @@ describe('useComparisonCellValue', () => {
     expect(comparisonCell2.getAddedSegments()).toHaveLength(0);
     expect(comparisonCell2.getRemovedSegments()).toHaveLength(0);
     expect(comparisonCell2.getCell()).toMatchSnapshot();
+  });
+
+  it('should not recalculate diffs for advanced modes when remounting the same cell', () => {
+    calculateDiff.mockClear();
+    expect(calculateDiff).not.toHaveBeenCalled();
+    const { rerender, renderCellValue } = renderComparisonCellValue({ diffMode: 'chars' });
+    const cellProps1 = {
+      columnId: '1',
+      colIndex: 2,
+      rowIndex: 1,
+      renderCellValue,
+    };
+    const cellProps2 = {
+      columnId: '2',
+      colIndex: 3,
+      rowIndex: 1,
+      renderCellValue,
+    };
+    renderComparisonCell(cellProps1);
+    expect(calculateDiff).toHaveBeenCalledTimes(1);
+    renderComparisonCell(cellProps2);
+    expect(calculateDiff).toHaveBeenCalledTimes(2);
+    renderComparisonCell(cellProps1);
+    expect(calculateDiff).toHaveBeenCalledTimes(2);
+    renderComparisonCell(cellProps2);
+    expect(calculateDiff).toHaveBeenCalledTimes(2);
+    rerender({ diffMode: 'words', selectedDocs: ['1', '2', '0'] });
+    const cellProps3 = {
+      ...cellProps1,
+      columnId: '2',
+    };
+    const cellProps4 = {
+      ...cellProps2,
+      columnId: '0',
+    };
+    renderComparisonCell(cellProps3);
+    expect(calculateDiff).toHaveBeenCalledTimes(3);
+    renderComparisonCell(cellProps4);
+    expect(calculateDiff).toHaveBeenCalledTimes(4);
+    renderComparisonCell(cellProps3);
+    expect(calculateDiff).toHaveBeenCalledTimes(4);
+    renderComparisonCell(cellProps4);
+    expect(calculateDiff).toHaveBeenCalledTimes(4);
+    rerender({ diffMode: 'lines', selectedDocs: ['2', '0', '1'] });
+    const cellProps5 = {
+      ...cellProps1,
+      columnId: '0',
+    };
+    const cellProps6 = {
+      ...cellProps2,
+      columnId: '1',
+    };
+    renderComparisonCell(cellProps5);
+    expect(calculateDiff).toHaveBeenCalledTimes(5);
+    renderComparisonCell(cellProps6);
+    expect(calculateDiff).toHaveBeenCalledTimes(6);
+    renderComparisonCell(cellProps5);
+    expect(calculateDiff).toHaveBeenCalledTimes(6);
+    renderComparisonCell(cellProps6);
+    expect(calculateDiff).toHaveBeenCalledTimes(6);
   });
 });

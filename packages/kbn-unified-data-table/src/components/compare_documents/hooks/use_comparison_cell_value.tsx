@@ -14,11 +14,11 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldTypeName } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
-import { diffChars, diffJson, diffLines, diffWords } from 'diff';
-import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { isEqual, memoize } from 'lodash';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
+import { calculateDiff, CalculateDiffProps, formatDiffValue } from './calculate_diff';
 import {
   ADDED_SEGMENT_CLASS,
   BASE_CELL_CLASS,
@@ -50,24 +50,28 @@ export const useComparisonCellValue = ({
 }: UseComparisonCellValueProps) => {
   const baseDocId = selectedDocs[0];
   const baseDoc = useMemo(() => getDocById(baseDocId)?.flattened, [baseDocId, getDocById]);
+  const [calculateDiffMemoized] = useState(() => createCalculateDiffMemoized());
 
   return useCallback(
     (props: EuiDataGridCellValueElementProps) => (
-      <CellValue
-        dataView={dataView}
-        comparisonFields={comparisonFields}
-        fieldColumnId={fieldColumnId}
-        baseDocId={baseDocId}
-        baseDoc={baseDoc}
-        diffMode={diffMode}
-        fieldFormats={fieldFormats}
-        getDocById={getDocById}
-        {...props}
-      />
+      <DiffProvider value={calculateDiffMemoized}>
+        <CellValue
+          dataView={dataView}
+          comparisonFields={comparisonFields}
+          fieldColumnId={fieldColumnId}
+          baseDocId={baseDocId}
+          baseDoc={baseDoc}
+          diffMode={diffMode}
+          fieldFormats={fieldFormats}
+          getDocById={getDocById}
+          {...props}
+        />
+      </DiffProvider>
     ),
     [
       baseDoc,
       baseDocId,
+      calculateDiffMemoized,
       comparisonFields,
       dataView,
       diffMode,
@@ -198,18 +202,8 @@ const DiffCellValue = ({
   );
 };
 
-interface DiffCellValueAdvancedProps {
-  baseValue: unknown;
-  comparisonValue: unknown;
-  diffMode: Exclude<DocumentDiffMode, 'basic' | null>;
-}
-
-const DiffCellValueAdvanced = ({
-  baseValue,
-  comparisonValue,
-  diffMode,
-}: DiffCellValueAdvancedProps) => {
-  const diff = useDiff({ baseValue, comparisonValue, diffMode });
+const DiffCellValueAdvanced = ({ diffMode, ...props }: CalculateDiffProps) => {
+  const diff = useDiff({ diffMode, ...props });
   const SegmentTag = diffMode === 'lines' ? 'div' : 'span';
 
   return (
@@ -229,48 +223,27 @@ const DiffCellValueAdvanced = ({
   );
 };
 
-const useDiff = ({ baseValue, comparisonValue, diffMode }: DiffCellValueAdvancedProps) => {
-  return useMemo(() => {
-    const forceJson =
-      baseValue != null &&
-      comparisonValue != null &&
-      ((hasLengthOne(baseValue) && !hasLengthOne(comparisonValue)) ||
-        (!hasLengthOne(baseValue) && hasLengthOne(comparisonValue)));
+// EuiDataGrid remounts cells often due to virtualization, e.g. on init to calculate cell sizes
+// and while scrolling, so React memoization is not effective here. Instead we memoize the diff
+// results in the comparison to avoid recalculating them frequently.
+const createCalculateDiffMemoized = (): typeof calculateDiff => {
+  const calculateDiffMemoized = memoize((diffMode: CalculateDiffProps['diffMode']) => {
+    return memoize((baseValue: CalculateDiffProps['baseValue']) => {
+      return memoize((comparisonValue: CalculateDiffProps['comparisonValue']) => {
+        return calculateDiff({ diffMode, baseValue, comparisonValue });
+      });
+    });
+  });
 
-    const { value: formattedBaseValue, isJson: baseValueIsJson } = formatDiffValue(
-      baseValue,
-      forceJson
-    );
-
-    const { value: formattedComparisonValue, isJson: comparisonValueIsJson } = formatDiffValue(
-      comparisonValue,
-      forceJson
-    );
-
-    if (diffMode === 'chars') {
-      return diffChars(formattedBaseValue, formattedComparisonValue);
-    }
-
-    if (diffMode === 'words') {
-      return diffWords(formattedBaseValue, formattedComparisonValue, { ignoreWhitespace: false });
-    }
-
-    return baseValueIsJson && comparisonValueIsJson
-      ? diffJson(formattedBaseValue, formattedComparisonValue, { ignoreWhitespace: false })
-      : diffLines(formattedBaseValue, formattedComparisonValue, { ignoreWhitespace: false });
-  }, [baseValue, comparisonValue, diffMode]);
+  return ({ diffMode, baseValue, comparisonValue }: CalculateDiffProps) => {
+    return calculateDiffMemoized(diffMode)(baseValue)(comparisonValue);
+  };
 };
 
-const hasLengthOne = (value: unknown): value is unknown[] => {
-  return Array.isArray(value) && value.length === 1;
-};
+const DiffContext = createContext(calculateDiff);
+const DiffProvider = DiffContext.Provider;
 
-const formatDiffValue = (value: unknown, forceJson: boolean) => {
-  const extractedValue = !forceJson && hasLengthOne(value) ? value[0] : value;
-
-  if (value != null && (forceJson || typeof extractedValue === 'object')) {
-    return { value: JSON.stringify(extractedValue, null, 2), isJson: true };
-  }
-
-  return { value: String(extractedValue ?? ''), isJson: false };
+const useDiff = (props: CalculateDiffProps) => {
+  const calculateDiffMemoized = useContext(DiffContext);
+  return calculateDiffMemoized(props);
 };
