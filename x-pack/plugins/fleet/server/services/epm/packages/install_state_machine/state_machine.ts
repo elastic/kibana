@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { appContextService } from '../../app_context';
-import type { StateContext, LatestExecutedState } from '../../../../common/types';
+import { appContextService } from '../../../app_context';
+import type { StateContext, LatestExecutedState } from '../../../../../common/types';
 export interface State {
   onTransition: any;
   nextState?: string;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createAppContextStartContractMock } from '../../../mocks';
-import { appContextService } from '../..';
+import { createAppContextStartContractMock } from '../../../../mocks';
+import { appContextService } from '../../..';
 
-import { handleState } from './integrations_state_machine';
+import { handleState } from './state_machine';
 
 const getTestDefinition = (
   mockOnTransition1: any,

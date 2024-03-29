@@ -15,11 +15,11 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
-import { PackageSavedObjectConflictError } from '../../../errors';
+import { PackageSavedObjectConflictError } from '../../../../errors';
 
-import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
-import type { PackageInstallContext, StateNames, StateContext } from '../../../../common/types';
-import type { PackageAssetReference } from '../../../types';
+import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
+import type { PackageInstallContext, StateNames, StateContext } from '../../../../../common/types';
+import type { PackageAssetReference } from '../../../../types';
 
 import type {
   Installation,
@@ -30,7 +30,7 @@ import type {
   KibanaAssetReference,
   IndexTemplateEntry,
   AssetReference,
-} from '../../../types';
+} from '../../../../types';
 
 import {
   stepCreateRestartInstallation,
@@ -45,9 +45,9 @@ import {
   stepSaveArchiveEntries,
   stepSaveSystemObject,
   updateLatestExecutedState,
-} from './install_steps';
-import type { StateMachineDefinition } from './integrations_state_machine';
-import { handleState } from './integrations_state_machine';
+} from './steps';
+import type { StateMachineDefinition } from './state_machine';
+import { handleState } from './state_machine';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;

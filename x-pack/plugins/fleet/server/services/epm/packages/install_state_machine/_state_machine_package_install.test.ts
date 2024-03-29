@@ -14,36 +14,36 @@ import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/serv
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { PackageSavedObjectConflictError } from '../../../errors';
+import { PackageSavedObjectConflictError } from '../../../../errors';
 
-import type { Installation } from '../../../../common';
+import type { Installation } from '../../../../../common';
 
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 
-import { appContextService } from '../../app_context';
-import { createAppContextStartContractMock } from '../../../mocks';
-import { saveArchiveEntriesFromAssetsMap } from '../archive/storage';
-import { installILMPolicy } from '../elasticsearch/ilm/install';
-import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
+import { appContextService } from '../../../app_context';
+import { createAppContextStartContractMock } from '../../../../mocks';
+import { saveArchiveEntriesFromAssetsMap } from '../../archive/storage';
+import { installILMPolicy } from '../../elasticsearch/ilm/install';
+import { installIlmForDataStream } from '../../elasticsearch/datastream_ilm/install';
 
-jest.mock('../elasticsearch/template/template');
-jest.mock('../kibana/assets/install');
-jest.mock('../kibana/index_pattern/install');
-jest.mock('./install');
-jest.mock('./get');
-jest.mock('./install_index_template_pipeline');
+jest.mock('../../elasticsearch/template/template');
+jest.mock('../../kibana/assets/install');
+jest.mock('../../kibana/index_pattern/install');
+jest.mock('../install');
+jest.mock('../get');
+jest.mock('../install_index_template_pipeline');
 
-jest.mock('../archive/storage');
-jest.mock('../elasticsearch/ilm/install');
-jest.mock('../elasticsearch/datastream_ilm/install');
+jest.mock('../../archive/storage');
+jest.mock('../../elasticsearch/ilm/install');
+jest.mock('../../elasticsearch/datastream_ilm/install');
 
-import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
+import { updateCurrentWriteIndices } from '../../elasticsearch/template/template';
+import { installKibanaAssetsAndReferences } from '../../kibana/assets/install';
 
-import { MAX_TIME_COMPLETE_INSTALL } from '../../../../common/constants';
+import { MAX_TIME_COMPLETE_INSTALL } from '../../../../../common/constants';
 
-import { restartInstallation } from './install';
-import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
+import { restartInstallation } from '../install';
+import { installIndexTemplatesAndPipelines } from '../install_index_template_pipeline';
 
 import { _stateMachineInstallPackage } from './_state_machine_package_install';
 

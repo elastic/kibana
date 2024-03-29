@@ -29,7 +29,7 @@ import {
   isPackageVersionOrLaterInstalled,
 } from './install';
 import * as install from './_install_package';
-import * as installStateMachine from './_state_machine_package_install';
+import * as installStateMachine from './install_state_machine/_state_machine_package_install';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 
 import { getInstalledPackageWithAssets, getInstallationObject } from './get';
@@ -81,7 +81,7 @@ jest.mock('./_install_package', () => {
     _installPackage: jest.fn(() => Promise.resolve()),
   };
 });
-jest.mock('./_state_machine_package_install', () => {
+jest.mock('./install_state_machine/_state_machine_package_install', () => {
   return {
     _stateMachineInstallPackage: jest.fn(() => Promise.resolve()),
   };
