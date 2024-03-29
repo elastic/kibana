@@ -20,10 +20,6 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/react-kibana-mount",
     "@kbn/shared-ux-tabbed-modal",
-    "@kbn/data-plugin",
-    "@kbn/lens-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/core-ui-settings-browser",
   ],
   "exclude": [
     "target/**/*",
