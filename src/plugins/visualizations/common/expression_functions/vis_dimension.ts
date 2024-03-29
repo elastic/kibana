@@ -25,7 +25,7 @@ export type ExpressionValueVisDimension = ExpressionValueBoxed<
   'vis_dimension',
   {
     accessor: number | DatatableColumn;
-    format?: {
+    format: {
       id?: string;
       params?: Record<string, any>;
     };
