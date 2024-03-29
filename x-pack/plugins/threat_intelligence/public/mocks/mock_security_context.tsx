@@ -22,6 +22,10 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
       return true;
     },
   },
+  getPageWrapper:
+    () =>
+    ({ children }) =>
+      <div>{children}</div>,
   sourcererDataView: {
     browserFields: {},
     selectedPatterns: [],
