@@ -8,11 +8,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Chars" 1`] =
   <span
     class="unifiedDataTable__cellValue"
   >
-    <span
-      class="unifiedDataTable__comparisonSegment"
-    >
-      This is a message val
-    </span>
+    This is a message val
   </span>
 </div>
 `;
@@ -151,11 +147,10 @@ exports[`useComparisonCellValue should render cells with diff mode "Lines" 1`] =
   <span
     class="unifiedDataTable__cellValue"
   >
-    <div
-      class="unifiedDataTable__comparisonSegment"
-    >
-      png
-    </div>
+    [
+  "gif",
+  "png"
+]
   </span>
 </div>
 `;
@@ -176,14 +171,19 @@ exports[`useComparisonCellValue should render cells with diff mode "Lines" 2`] =
     <div
       class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonRemovedSegment"
     >
-        "png"
+        "gif",
+
+    </div>
+    <div
+      class="unifiedDataTable__comparisonSegment"
+    >
+        "png",
 
     </div>
     <div
       class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment"
     >
-        "png",
-  "jpg"
+        "jpg"
 
     </div>
     <div
@@ -205,7 +205,10 @@ exports[`useComparisonCellValue should render cells with diff mode "Lines" 3`] =
     <div
       class="unifiedDataTable__comparisonSegment"
     >
-      png
+      [
+  "gif",
+  "png"
+]
     </div>
   </span>
 </div>
@@ -256,11 +259,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Words" 1`] =
   <span
     class="unifiedDataTable__cellValue"
   >
-    <span
-      class="unifiedDataTable__comparisonSegment"
-    >
-      This is a message val
-    </span>
+    This is a message val
   </span>
 </div>
 `;

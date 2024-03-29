@@ -32,7 +32,7 @@ const docs = generateEsHits(dataViewWithTimefieldMock, 3).map((hit, i) => {
     case 0:
     case 2:
       hit.fields!.message = ['This is a message val'];
-      hit.fields!.extension = ['png'];
+      hit.fields!.extension = ['gif', 'png'];
       break;
     case 1:
       hit.fields!.message = ['This one is a different msg value'];
@@ -255,9 +255,7 @@ describe('useComparisonCellValue', () => {
     expect(baseCell.getCell()).toHaveClass(BASE_CELL_CLASS);
     expect(baseCell.getCell()).not.toHaveClass(MATCH_CELL_CLASS);
     expect(baseCell.getCell()).not.toHaveClass(DIFF_CELL_CLASS);
-    expect(baseCell.getAllSegments()).toHaveLength(1);
-    expect(baseCell.getAddedSegments()).toHaveLength(0);
-    expect(baseCell.getRemovedSegments()).toHaveLength(0);
+    expect(baseCell.getAllSegments()).toHaveLength(0);
     expect(baseCell.getCell()).toMatchSnapshot();
     const comparisonCell1 = renderComparisonCell({
       columnId: '1',
@@ -301,9 +299,7 @@ describe('useComparisonCellValue', () => {
     expect(baseCell.getCell()).toHaveClass(BASE_CELL_CLASS);
     expect(baseCell.getCell()).not.toHaveClass(MATCH_CELL_CLASS);
     expect(baseCell.getCell()).not.toHaveClass(DIFF_CELL_CLASS);
-    expect(baseCell.getAllSegments()).toHaveLength(1);
-    expect(baseCell.getAddedSegments()).toHaveLength(0);
-    expect(baseCell.getRemovedSegments()).toHaveLength(0);
+    expect(baseCell.getAllSegments()).toHaveLength(0);
     expect(baseCell.getCell()).toMatchSnapshot();
     const comparisonCell1 = renderComparisonCell({
       columnId: '1',
@@ -347,9 +343,7 @@ describe('useComparisonCellValue', () => {
     expect(baseCell.getCell()).toHaveClass(BASE_CELL_CLASS);
     expect(baseCell.getCell()).not.toHaveClass(MATCH_CELL_CLASS);
     expect(baseCell.getCell()).not.toHaveClass(DIFF_CELL_CLASS);
-    expect(baseCell.getAllSegments()).toHaveLength(1);
-    expect(baseCell.getAddedSegments()).toHaveLength(0);
-    expect(baseCell.getRemovedSegments()).toHaveLength(0);
+    expect(baseCell.getAllSegments()).toHaveLength(0);
     expect(baseCell.getCell()).toMatchSnapshot();
     const comparisonCell1 = renderComparisonCell({
       columnId: '1',
@@ -361,7 +355,7 @@ describe('useComparisonCellValue', () => {
     expect(comparisonCell1.getCell()).not.toHaveClass(BASE_CELL_CLASS);
     expect(comparisonCell1.getCell()).not.toHaveClass(MATCH_CELL_CLASS);
     expect(comparisonCell1.getCell()).not.toHaveClass(DIFF_CELL_CLASS);
-    expect(comparisonCell1.getAllSegments()).toHaveLength(4);
+    expect(comparisonCell1.getAllSegments()).toHaveLength(5);
     expect(comparisonCell1.getAddedSegments()).toHaveLength(1);
     expect(comparisonCell1.getRemovedSegments()).toHaveLength(1);
     expect(comparisonCell1.getCell()).toMatchSnapshot();
