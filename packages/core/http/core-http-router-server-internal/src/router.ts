@@ -25,8 +25,6 @@ import type {
   RequestHandler,
   VersionedRouter,
   RouteRegistrar,
-  RouteValidatorFullConfigContainer,
-  RouteValidatorFullConfig,
 } from '@kbn/core-http-server';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
@@ -50,18 +48,6 @@ function getRouteFullPath(routerPath: string, routePath: string) {
   // we should omit one of them to have a valid concatenated path.
   const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
   return `${routerPath}${routePath.slice(routePathStartIndex)}`;
-}
-
-function isValidatorContainer(
-  value: RouteValidatorContainer<unknown, unknown, unknown>
-): value is RouteValidatorFullConfigContainer<unknown, unknown, unknown> {
-  return 'request' in value;
-}
-
-function getRequestValidation(
-  value: RouteValidatorContainer<unknown, unknown, unknown>
-): RouteValidatorFullConfig<unknown, unknown, unknown> {
-  return isValidatorContainer(value) ? value.request : value;
 }
 
 /**
