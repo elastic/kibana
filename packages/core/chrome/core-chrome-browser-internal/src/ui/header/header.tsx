@@ -161,7 +161,12 @@ export function Header({
                     kibanaVersion={kibanaVersion}
                     navigateToUrl={application.navigateToUrl}
                   />,
-                  <HeaderHelpCenterTrigger helpExtension$={observables.helpExtension$} />,
+                  <HeaderHelpCenterTrigger
+                    docLinks={docLinks}
+                    breadCrumbs$={observables.breadcrumbs$}
+                    helpExtension$={observables.helpExtension$}
+                    helpSupportUrl$={observables.helpSupportUrl$}
+                  />,
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
                 ],
               },

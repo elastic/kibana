@@ -9,7 +9,8 @@
 import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
-import { type ChromeHelpExtension } from '@kbn/core-chrome-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { type ChromeHelpExtension, type ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import {
   EuiText,
   EuiTitle,
@@ -25,18 +26,14 @@ import {
 import type { CSSObject } from '@emotion/serialize';
 
 interface IHeaderHelpCenterTriggerProps {
+  docLinks: DocLinksStart;
+  breadCrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
   helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
+  helpSupportUrl$: Rx.Observable<string>;
 }
 
-export const HeaderHelpCenterTrigger = ({ helpExtension$ }: IHeaderHelpCenterTriggerProps) => {
+export const HeaderHelpCenterTrigger = (props: IHeaderHelpCenterTriggerProps) => {
   const [isPortalVisible, setIsPortalVisible] = useState(false);
-  const [helpExtension, setHelpExtension] = useState<ChromeHelpExtension>();
-
-  useEffect(() => {
-    const subscription = helpExtension$.subscribe(setHelpExtension);
-
-    return () => subscription.unsubscribe();
-  }, [helpExtension$]);
 
   const togglePortal = () => {
     setIsPortalVisible(!isPortalVisible);
@@ -48,10 +45,10 @@ export const HeaderHelpCenterTrigger = ({ helpExtension$ }: IHeaderHelpCenterTri
 
   let portal;
 
-  if (isPortalVisible && helpExtension) {
+  if (isPortalVisible) {
     portal = (
       <EuiPortal>
-        <HeaderHelpCenter helpExtension={helpExtension} onClose={closePortal} />
+        <HeaderHelpCenter {...props} onClose={closePortal} />
       </EuiPortal>
     );
   }
@@ -75,19 +72,21 @@ export const HeaderHelpCenterTrigger = ({ helpExtension$ }: IHeaderHelpCenterTri
 
 type IHelpCenterPosition = Pick<CSSObject, 'top' | 'left'> | Pick<CSSObject, 'top' | 'right'>;
 
-interface IHeaderHelpCenter {
+type IHeaderHelpCenter = IHeaderHelpCenterTriggerProps & {
   width?: CSSObject['width'];
   height?: CSSObject['height'];
   onClose: () => void;
   defaultPosition?: IHelpCenterPosition;
-  helpExtension: ChromeHelpExtension;
-}
+};
 
 const HeaderHelpCenter = ({
   width = 654,
   height = 800,
   onClose,
-  helpExtension,
+  docLinks,
+  helpSupportUrl$,
+  breadCrumbs$,
+  helpExtension$,
   defaultPosition = { top: 'var(--kbnHeaderOffset)', right: '0%' },
 }: IHeaderHelpCenter) => {
   const positionPersistenceKey = useRef('help_center_position');
@@ -101,6 +100,28 @@ const HeaderHelpCenter = ({
     zIndex: 9999999, // TODO: confirm if there's a global zIndex
     ...(Object.keys(persistedPosition).length ? persistedPosition : defaultPosition),
   });
+
+  const [helpConfig, setHelpConfig] = useState<{
+    breadCrumbs?: ChromeBreadcrumb[];
+    helpExtension?: ChromeHelpExtension;
+    supportUrl: string;
+  }>();
+
+  useEffect(() => {
+    const subscription = Rx.combineLatest([
+      helpExtension$,
+      helpSupportUrl$,
+      breadCrumbs$,
+    ]).subscribe(([helpExtension, supportUrl, breadCrumbs]) => {
+      setHelpConfig({
+        breadCrumbs,
+        supportUrl,
+        helpExtension,
+      });
+    });
+
+    return () => subscription.unsubscribe();
+  }, [breadCrumbs$, helpExtension$, helpSupportUrl$]);
 
   const dragEndPosition = useRef<Rx.Observable<{ position: IHelpCenterPosition }>>();
 
@@ -167,7 +188,7 @@ const HeaderHelpCenter = ({
     }
   }, [helpCenterElm]);
 
-  const { appName, links, content } = helpExtension;
+  const { appName, links, content } = helpConfig?.helpExtension || {};
 
   return (
     <EuiFlexGroup ref={setHelpCenterElm} css={helpCenterStyling}>
@@ -210,18 +231,30 @@ const HeaderHelpCenter = ({
           <EuiSplitPanel.Inner grow={false} css={{ position: 'relative' }}>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiLink href="http://www.elastic.co" target="_blank">
-                  Support
+                <EuiLink href={helpConfig?.supportUrl} target="_blank">
+                  {i18n.translate(
+                    'core.ui.chrome.headerGlobalNav.helpCenterFooterSupportLinkText',
+                    {
+                      defaultMessage: 'Support',
+                    }
+                  )}
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiLink href="http://www.elastic.co" target="_blank">
-                  Give Feedback
+                  {i18n.translate(
+                    'core.ui.chrome.headerGlobalNav.helpCenterFooterFeedbackLinkText',
+                    {
+                      defaultMessage: 'Give Feedback',
+                    }
+                  )}
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiLink href="http://www.elastic.co" target="_blank">
-                  Browse all the docs
+                  {i18n.translate('core.ui.chrome.headerGlobalNav.helpCenterFooterDocLinkText', {
+                    defaultMessage: 'Browse all the docs',
+                  })}
                 </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
