@@ -7,6 +7,7 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { useMemo } from 'react';
@@ -34,25 +35,27 @@ export function SharedProviders({
 
   return (
     <EuiErrorBoundary>
-      <KibanaThemeProvider theme={theme}>
-        <KibanaContextProvider
-          services={{
-            ...coreStart,
-            ...pluginsStart,
-            plugins: {
-              start: pluginsStart,
-            },
-          }}
-        >
-          <RedirectAppLinks coreStart={coreStart}>
-            <coreStart.i18n.Context>
-              <ObservabilityAIAssistantAppServiceProvider value={service}>
-                {children}
-              </ObservabilityAIAssistantAppServiceProvider>
-            </coreStart.i18n.Context>
-          </RedirectAppLinks>
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
+      <KibanaRenderContextProvider i18n={coreStart.i18n} theme={theme}>
+        <KibanaThemeProvider theme={theme}>
+          <KibanaContextProvider
+            services={{
+              ...coreStart,
+              ...pluginsStart,
+              plugins: {
+                start: pluginsStart,
+              },
+            }}
+          >
+            <RedirectAppLinks coreStart={coreStart}>
+              <coreStart.i18n.Context>
+                <ObservabilityAIAssistantAppServiceProvider value={service}>
+                  {children}
+                </ObservabilityAIAssistantAppServiceProvider>
+              </coreStart.i18n.Context>
+            </RedirectAppLinks>
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
+      </KibanaRenderContextProvider>
     </EuiErrorBoundary>
   );
 }

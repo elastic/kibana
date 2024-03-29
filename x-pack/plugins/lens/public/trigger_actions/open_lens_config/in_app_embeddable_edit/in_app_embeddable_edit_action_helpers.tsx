@@ -10,6 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { EuiThemeProvider } from '@elastic/eui';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { extractReferencesFromState } from '../../../utils';
@@ -104,52 +105,55 @@ export async function executeEditEmbeddableAction({
     };
     onUpdate(newAttributes);
   };
-
-  const Component = await getEditLensConfiguration(core, deps, visualizationMap, datasourceMap);
-  const ConfigPanel = (
-    <Component
-      attributes={attributes}
-      updatePanelState={onUpdatePanelState}
-      lensAdapters={lensEvent?.adapters}
-      output$={lensEvent?.embeddableOutput$}
-      displayFlyoutHeader
-      datasourceId={activeDatasourceId}
-      onApplyCb={onApply}
-      onCancelCb={onCancel}
-      canEditTextBasedQuery={activeDatasourceId === 'textBased'}
-      updateSuggestion={onUpdateSuggestion}
-      hideTimeFilterInfo={true}
-    />
-  );
-
-  // in case an element is given render the component in the container,
-  // otherwise a flyout will open
-  if (container) {
-    ReactDOM.render(ConfigPanel, container);
-  } else {
-    const handle = core.overlays.openFlyout(
-      toMountPoint(
-        React.cloneElement(ConfigPanel, {
-          closeFlyout: () => {
-            handle.close();
-          },
-        }),
-        {
-          theme$: core.theme.theme$,
-        }
-      ),
-      {
-        className: 'lnsConfigPanel__overlay',
-        size: 's',
-        'data-test-subj': 'customizeLens',
-        type: 'push',
-        paddingSize: 'm',
-        hideCloseButton: true,
-        onClose: (overlayRef) => {
-          overlayRef.close();
-        },
-        outsideClickCloses: true,
-      }
+  core.theme.theme$.subscribe(async (theme) => {
+    const Component = await getEditLensConfiguration(core, deps, visualizationMap, datasourceMap);
+    const ConfigPanel = (
+      <EuiThemeProvider colorMode={theme.darkMode ? 'dark' : 'light'}>
+        <Component
+          attributes={attributes}
+          updatePanelState={onUpdatePanelState}
+          lensAdapters={lensEvent?.adapters}
+          output$={lensEvent?.embeddableOutput$}
+          displayFlyoutHeader
+          datasourceId={activeDatasourceId}
+          onApplyCb={onApply}
+          onCancelCb={onCancel}
+          canEditTextBasedQuery={activeDatasourceId === 'textBased'}
+          updateSuggestion={onUpdateSuggestion}
+          hideTimeFilterInfo={true}
+        />
+      </EuiThemeProvider>
     );
-  }
+
+    // in case an element is given render the component in the container,
+    // otherwise a flyout will open
+    if (container) {
+      ReactDOM.render(ConfigPanel, container);
+    } else {
+      const handle = core.overlays.openFlyout(
+        toMountPoint(
+          React.cloneElement(ConfigPanel, {
+            closeFlyout: () => {
+              handle.close();
+            },
+          }),
+          {
+            theme$: core.theme.theme$,
+          }
+        ),
+        {
+          className: 'lnsConfigPanel__overlay',
+          size: 's',
+          'data-test-subj': 'customizeLens',
+          type: 'push',
+          paddingSize: 'm',
+          hideCloseButton: true,
+          onClose: (overlayRef) => {
+            overlayRef.close();
+          },
+          outsideClickCloses: true,
+        }
+      );
+    }
+  });
 }
