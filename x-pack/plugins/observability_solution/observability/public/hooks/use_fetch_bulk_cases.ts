@@ -5,38 +5,9 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '@kbn/cases-components';
+import type { Cases } from '@kbn/cases-plugin/common';
 import { useEffect, useState } from 'react';
 import { useKibana } from '../utils/kibana_react';
-const INTERNAL_BULK_GET_CASES_URL = '/internal/cases/_bulk_get';
-
-export interface Case {
-  title: string;
-  description: string;
-  status: CaseStatuses;
-  totalComment: number;
-  created_at: string;
-  created_by: {
-    email: string | null | undefined;
-    full_name: string | null | undefined;
-    username: string | null | undefined;
-  };
-  id: string;
-  owner: string;
-  version: string;
-}
-
-export type Cases = Case[];
-
-export interface CasesBulkGetResponse {
-  cases: Cases;
-  errors: Array<{
-    caseId: string;
-    error: string;
-    message: string;
-    status?: number;
-  }>;
-}
 
 export const useFetchBulkCases = ({
   ids = [],
@@ -46,13 +17,11 @@ export const useFetchBulkCases = ({
   const [cases, setCases] = useState<Cases>([]);
   const [error, setError] = useState();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { http } = useKibana().services;
+  const { cases: casesService } = useKibana().services;
 
   useEffect(() => {
     const getBulkCasesByIds = async () => {
-      return http.post<CasesBulkGetResponse>(INTERNAL_BULK_GET_CASES_URL, {
-        body: JSON.stringify({ ids }),
-      });
+      return casesService.api.cases.bulkGet({ ids });
     };
     if (ids.length) {
       setIsLoading(true);
@@ -61,7 +30,7 @@ export const useFetchBulkCases = ({
         .catch((resError) => setError(resError))
         .finally(() => setIsLoading(false));
     }
-  }, [http, ids]);
+  }, [casesService.api.cases, ids]);
 
   return { cases, isLoading, error };
 };

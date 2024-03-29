@@ -6,29 +6,26 @@
  */
 
 import { useFetchBulkCases } from './use_fetch_bulk_cases';
-import { coreMock } from '@kbn/core/public/mocks';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { kibanaStartMock } from '../utils/kibana_react.mock';
 
-describe('Bulk Get Cases API', () => {
-  const abortCtrl = new AbortController();
-  const mockCoreSetup = coreMock.createSetup();
-  const http = mockCoreSetup.http;
+const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    http.post.mockResolvedValue({ cases: [], errors: [] });
-  });
+jest.mock('../utils/kibana_react', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+}));
 
-  it('fetch cases correctly', async () => {
-    const res = await useFetchBulkCases({ ids: ['test-id'] });
-    expect(res).toEqual({ cases: [], errors: [] });
-  });
+describe('Bulk Get Cases API hook', () => {
+  it('initially is not loading and does not have data', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useFetchBulkCases({ ids: [] }));
 
-  it('should call http with correct arguments', async () => {
-    await useFetchBulkCases({ ids: ['test-id'] });
+      await waitForNextUpdate();
 
-    expect(http.post).toHaveBeenCalledWith('/internal/cases/_bulk_get', {
-      body: '{"ids":["test-id"]}',
-      signal: abortCtrl.signal,
+      expect(result.current.cases).toEqual([]);
+      expect(result.current.error).toEqual(undefined);
+      expect(result.current.isLoading).toEqual(false);
     });
   });
 });

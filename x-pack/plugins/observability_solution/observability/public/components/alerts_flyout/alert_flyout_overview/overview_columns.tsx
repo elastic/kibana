@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiCallOut, EuiLink, EuiSkeletonText, EuiText } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import { Cases } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -140,35 +140,24 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
 
         case ColumnIDs.CASES:
           const cases = meta?.cases as Cases;
-          const isLoading = meta?.isLoading as boolean;
+          const isLoading = meta?.isLoading;
+          if (isLoading) return <EuiLoadingSpinner size="m" />;
+          if (!cases || !cases.length) return <>{'-'}</>;
           const navigateToCaseView = meta?.navigateToCaseView as NavigateToCaseView;
-          return (
-            <EuiSkeletonText
-              isLoading={isLoading}
-              lines={1}
-              size="s"
-              data-test-subj="cases-cell-loading"
-            >
-              {cases.length ? (
-                cases.map((caseInfo, index) => {
-                  return [
-                    index > 0 && index < cases.length && ', ',
-                    <CaseTooltip loading={false} content={formatCase(caseInfo)} key={caseInfo.id}>
-                      <EuiLink
-                        key={caseInfo.id}
-                        onClick={() => navigateToCaseView({ caseId: caseInfo.id })}
-                        data-test-subj="o11yAlertFlyoutOverviewTabCasesLink"
-                      >
-                        {caseInfo.title}
-                      </EuiLink>
-                    </CaseTooltip>,
-                  ];
-                })
-              ) : (
-                <>{'-'}</>
-              )}
-            </EuiSkeletonText>
-          );
+          return cases.map((caseInfo, index) => {
+            return [
+              index > 0 && index < cases.length && ', ',
+              <CaseTooltip loading={false} content={formatCase(caseInfo)} key={caseInfo.id}>
+                <EuiLink
+                  key={caseInfo.id}
+                  onClick={() => navigateToCaseView({ caseId: caseInfo.id })}
+                  data-test-subj="o11yAlertFlyoutOverviewTabCasesLink"
+                >
+                  {caseInfo.title}
+                </EuiLink>
+              </CaseTooltip>,
+            ];
+          });
         default:
           return <>{'-'}</>;
       }
