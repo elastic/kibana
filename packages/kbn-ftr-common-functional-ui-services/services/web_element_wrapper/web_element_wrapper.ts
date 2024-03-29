@@ -231,7 +231,7 @@ export class WebElementWrapper {
    * @return {Promise<boolean>}
    */
   public async elementHasClass(className: string): Promise<boolean> {
-    const classes: string = await this._webElement.getAttribute('class');
+    const classes = (await this._webElement.getAttribute('class')) ?? '';
 
     return classes.includes(className);
   }
@@ -344,10 +344,11 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getAttribute
    *
    * @param {string} name
+   * @return {Promise<string>}
    */
-  public async getAttribute(name: string) {
+  public async getAttribute(name: string): Promise<string> {
     return await this.retryCall(async function getAttribute(wrapper) {
-      return await wrapper._webElement.getAttribute(name);
+      return (await wrapper._webElement.getAttribute(name)) ?? ''; // this returns null if not found
     });
   }
 
