@@ -112,8 +112,8 @@ export const fetchIndexInfo = async (
     .value;
 
   return {
-    fieldCandidates,
-    textFieldCandidates,
+    fieldCandidates: fieldCandidates.sort(),
+    textFieldCandidates: textFieldCandidates.sort(),
     baselineTotalDocCount,
     deviationTotalDocCount,
     zeroDocsFallback: baselineTotalDocCount === 0 || deviationTotalDocCount === 0,
