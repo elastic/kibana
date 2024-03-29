@@ -10,12 +10,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Headers, KibanaRequestEvents } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 
-import { type AiopsLogRateAnalysisApiAction } from '../../../common/api/log_rate_analysis/actions';
+import { type AiopsLogRateAnalysisApiAction } from '@kbn/aiops-log-rate-analysis/api/actions';
 
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
 
 import { indexInfoHandlerFactory } from './analysis_handlers/index_info_handler';
 import { groupingHandlerFactory } from './analysis_handlers/grouping_handler';

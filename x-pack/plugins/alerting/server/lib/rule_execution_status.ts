@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/core/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { RuleResultService } from '../monitoring/rule_result_service';
 import {
   RuleExecutionStatus,
   RuleExecutionStatusValues,
@@ -14,6 +15,7 @@ import {
   RawRuleExecutionStatus,
   RawRule,
   Rule,
+  RuleExecutionStatusErrorReasons,
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
@@ -27,10 +29,15 @@ export interface IExecutionStatusAndMetrics {
   metrics: RuleRunMetrics | null;
 }
 
-export function executionStatusFromState(
-  stateWithMetrics: RuleTaskStateAndMetrics,
-  lastExecutionDate?: Date
-): IExecutionStatusAndMetrics {
+export function executionStatusFromState({
+  stateWithMetrics,
+  ruleResultService,
+  lastExecutionDate,
+}: {
+  stateWithMetrics: RuleTaskStateAndMetrics;
+  ruleResultService: RuleResultService;
+  lastExecutionDate?: Date;
+}): IExecutionStatusAndMetrics {
   const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
 
   let status: RuleExecutionStatuses =
@@ -38,6 +45,8 @@ export function executionStatusFromState(
 
   // Check for warning states
   let warning = null;
+  let error = null;
+
   // We only have a single warning field so prioritizing the alert circuit breaker over the actions circuit breaker
   if (stateWithMetrics.metrics.hasReachedAlertLimit) {
     status = RuleExecutionStatusValues[5];
@@ -60,11 +69,23 @@ export function executionStatusFromState(
     }
   }
 
+  // Overwrite status to be error if last run reported any errors
+  const { errors: errorsFromLastRun } = ruleResultService.getLastRunResults();
+  if (errorsFromLastRun.length > 0) {
+    status = RuleExecutionStatusValues[2];
+    // These errors are reported by ruleResultService.addLastRunError, therefore they are landed in successful execution map
+    error = {
+      reason: RuleExecutionStatusErrorReasons.Unknown,
+      message: errorsFromLastRun.join(','),
+    };
+  }
+
   return {
     status: {
       lastExecutionDate: lastExecutionDate ?? new Date(),
       status,
       ...(warning ? { warning } : {}),
+      ...(error ? { error } : {}),
     },
     metrics: stateWithMetrics.metrics,
   };
