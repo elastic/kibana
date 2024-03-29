@@ -26,7 +26,28 @@ const createVersionedRouter = (args: {
 };
 
 describe('generateOpenApiDocument', () => {
-  describe('happy path', () => {
+  describe('happy path for @kbn/config-schema', () => {
+    const testSchema = schema.object({
+      string: schema.string({ maxLength: 10, minLength: 1 }),
+      maybeNumber: schema.maybe(schema.number({ max: 1000, min: 1 })),
+      booleanDefault: schema.boolean({
+        defaultValue: true,
+        description: 'defaults to to true',
+      }),
+      ipType: schema.ip({ versions: ['ipv4'] }),
+      literalType: schema.literal('literallythis'),
+      neverType: schema.never(),
+      map: schema.mapOf(schema.string(), schema.string()), // not really gonna go well...
+      record: schema.recordOf(schema.string(), schema.string()), // not really gonna go well...
+      union: schema.oneOf([
+        schema.string({ maxLength: 1, description: 'Union string' }),
+        schema.number({ min: 0, description: 'Union number' }),
+      ]),
+      uri: schema.uri({
+        scheme: ['prototest'],
+        defaultValue: () => 'prototest://something',
+      }),
+    });
     it('generates the expected OpenAPI document', () => {
       expect(
         generateOpenApiDocument(
@@ -36,19 +57,21 @@ describe('generateOpenApiDocument', () => {
                 routes: [
                   {
                     isVersioned: false,
-                    path: '/foo',
+                    path: '/foo/{id}',
                     method: 'get',
                     validationSchemas: {
-                      body: schema.object({ foo: schema.string() }),
-                    },
-                    options: {
-                      tags: ['foo'],
-                      responses: {
+                      request: {
+                        params: schema.object({ id: schema.string({ maxLength: 36 }) }),
+                        query: schema.object({ page: schema.number({ max: 999, min: 1 }) }),
+                        body: testSchema,
+                      },
+                      response: {
                         200: {
-                          body: schema.object({ fooResponse: schema.string() }),
+                          body: schema.string({ maxLength: 10, minLength: 1 }),
                         },
                       },
                     },
+                    options: { tags: ['foo'] },
                     handler: jest.fn(),
                   },
                 ],
