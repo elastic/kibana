@@ -337,7 +337,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
     TMeta extends {} = {}
   >(
-    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >
   ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
     let errorMsg = String(actionRequest.error ?? '').trim();
 

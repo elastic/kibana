@@ -482,6 +482,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               sort: [{ 'sentinel_one.activity.updated_at': 'asc' }],
             },
           },
+          // we don't need the source. The document will be stored in `inner_hits.first_found`
+          // due to use of `collapse
           _source: false,
           sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
           size: 1000,

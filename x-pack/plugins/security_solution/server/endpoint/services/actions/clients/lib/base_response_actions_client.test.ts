@@ -677,10 +677,20 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     return super.fetchActionDetails(actionId);
   }
 
-  public async writeActionRequestToEndpointIndex(
-    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
-  ): Promise<LogsEndpointAction> {
-    return super.writeActionRequestToEndpointIndex(actionRequest);
+  public async writeActionRequestToEndpointIndex<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >
+  ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    return super.writeActionRequestToEndpointIndex<TParameters, TOutputContent, TMeta>(
+      actionRequest
+    );
   }
 
   public async writeActionResponseToEndpointIndex<
