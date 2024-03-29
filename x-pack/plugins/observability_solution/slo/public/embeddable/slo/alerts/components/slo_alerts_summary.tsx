@@ -34,7 +34,6 @@ export function SloAlertsSummary({
   showAllGroupByInstances,
 }: Props) {
   const {
-    charts,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
   } = deps;
 
