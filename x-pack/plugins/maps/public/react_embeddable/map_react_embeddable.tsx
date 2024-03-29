@@ -42,8 +42,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
     await savedMap.whenReady();
 
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-
-    const { cleanupReduxSync, reduxApi, reduxComparators, serializeRedux } = initializeReduxSync(
+    const reduxSync = initializeReduxSync(
       savedMap.getStore(),
       state
     );
@@ -52,7 +51,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       const { state: rawState, references } = extract({
         ...state,
         ...serializeTitles(),
-        ...serializeRedux(),
+        ...reduxSync.serialize(),
       } as unknown as MapEmbeddablePersistableState);
       return {
         rawState: rawState as unknown as MapSerializeState,
@@ -64,13 +63,13 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       {
         defaultPanelTitle: new BehaviorSubject<string | undefined>(savedMap.getAttributes().title),
         ...titlesApi,
-        ...reduxApi,
+        ...reduxSync.api,
         ...initializeLibraryTransforms(savedMap, serializeState),
         serializeState,
       },
       {
         ...titleComparators,
-        ...reduxComparators,
+        ...reduxSync.comparators,
       }
     );
 
@@ -83,7 +82,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       Component: () => {
         useEffect(() => {
           return () => {
-            cleanupReduxSync();
+            reduxSync.cleanup();
           };
         }, []);
 

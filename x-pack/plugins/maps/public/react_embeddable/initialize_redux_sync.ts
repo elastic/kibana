@@ -90,8 +90,8 @@ export function initializeReduxSync(store: MapStore, state: MapSerializeState) {
   });
 
   return {
-    cleanupReduxSync: unsubscribeFromStore,
-    reduxApi: {
+    cleanup: unsubscribeFromStore,
+    api: {
       dataLoading: dataLoading$,
       onRenderComplete$: dataLoading$.pipe(
         filter((isDataLoading) => typeof isDataLoading === 'boolean' && !isDataLoading),
@@ -106,7 +106,7 @@ export function initializeReduxSync(store: MapStore, state: MapSerializeState) {
         store.dispatch<any>(updateLayerById(layerDescriptor));
       },
     },
-    reduxComparators: {
+    comparators: {
       // mapBuffer comparator intentionally omitted and is not part of unsaved changes check
       hiddenLayers: [
         hiddenLayers$,
@@ -136,7 +136,7 @@ export function initializeReduxSync(store: MapStore, state: MapSerializeState) {
         fastIsEqual,
       ],
     } as StateComparators<MapSerializeState>,
-    serializeRedux: () => {
+    serialize: () => {
       return {
         hiddenLayers: getHiddenLayerIds(store.getState()),
         isLayerTOCOpen: getIsLayerTOCOpen(store.getState()),
