@@ -8,13 +8,14 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Detection Engine - Exception workflows APIs', function () {
-    loadTestFile(require.resolve('./add_edit_comments_ess'));
-    loadTestFile(require.resolve('./add_edit_comments_serverless'));
+    loadTestFile(require.resolve('./exception_comments_ess'));
+    loadTestFile(require.resolve('./exception_comments_serverless'));
     loadTestFile(require.resolve('./create_endpoint_exceptions'));
     loadTestFile(require.resolve('./create_rule_exceptions_ess'));
     loadTestFile(require.resolve('./create_rule_exceptions'));
     loadTestFile(require.resolve('./exceptions_data_integrity'));
     loadTestFile(require.resolve('./find_rule_exception_references'));
-    loadTestFile(require.resolve('./role_based_rule_exceptions_workflows'));
+    loadTestFile(require.resolve('./rule_exceptions_execution'));
+    loadTestFile(require.resolve('./prebuilt_rules'));
   });
 }

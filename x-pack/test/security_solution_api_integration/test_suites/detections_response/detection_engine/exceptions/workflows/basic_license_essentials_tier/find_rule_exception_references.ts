@@ -36,19 +36,18 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  // @skipInQA purposefully - only running tests in MKI whose failure should block release
-  describe('@serverless @ess @skipInQA find_rule_exception_references', () => {
+  describe('@serverless @ess find_rule_exception_references', () => {
     before(async () => {
       await createAlertsIndex(supertest, log);
     });
 
     after(async () => {
       await deleteAllAlerts(supertest, log, es);
-      await deleteAllRules(supertest, log);
     });
 
     afterEach(async () => {
       await deleteAllExceptions(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     it('returns empty array per list_id if no references are found', async () => {
@@ -68,6 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
         .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '1')
+        .set('X-Elastic-Internal-Origin', 'Kibana')
         .query({
           ids: `${exceptionList.id}`,
           list_ids: `${exceptionList.list_id}`,
@@ -122,6 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
         .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '1')
+        .set('X-Elastic-Internal-Origin', 'Kibana')
         .query({
           ids: `1234`,
           list_ids: `i_dont_exist`,
@@ -169,6 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
         .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '1')
+        .set('X-Elastic-Internal-Origin', 'Kibana')
         .query({
           ids: `${exceptionList.id},${exceptionList2.id}`,
           list_ids: `${exceptionList.list_id},${exceptionList2.list_id}`,
@@ -218,6 +220,7 @@ export default ({ getService }: FtrProviderContext) => {
         .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '1')
+        .set('X-Elastic-Internal-Origin', 'Kibana')
         .query({
           namespace_types: 'single,agnostic',
         })

@@ -104,6 +104,7 @@
             "logs-*",
             "packetbeat-*",
             "winlogbeat-*",
+            "logstash-*",
             ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
@@ -117,7 +118,7 @@
           "privileges": ["read", "write"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*", "risk-score.risk-score-*"],
           "privileges": ["read"]
         }
       ],
@@ -143,9 +144,14 @@
             "file_operations_all"
           ],
           "securitySolutionCases": ["all"],
+          "securitySolutionAssistant": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
-          "osquery": ["all"]
+          "osquery": ["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
         },
         "spaces": ["*"],
         "base": []

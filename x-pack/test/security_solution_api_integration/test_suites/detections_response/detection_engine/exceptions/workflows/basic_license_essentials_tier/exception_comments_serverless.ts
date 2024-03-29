@@ -19,10 +19,6 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getUpdateMinimalExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_item_schema.mock';
 import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-} from '../../../../../../../common/services/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -31,50 +27,37 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   // @skipInQA purposefully - only running tests in MKI whose failure should block release
-  describe('@serverless @skipInQA role_based_add_edit_comments', () => {
-    const socManager = ROLES.detections_admin;
-    const detectionAdmin = ROLES.t3_analyst;
-
+  describe('@serverless @skipInQA exception item comments - serverless specific behavior', () => {
     describe('Rule Exceptions', () => {
-      beforeEach(async () => {
-        await createUserAndRole(getService, detectionAdmin);
-        await createUserAndRole(getService, socManager);
-      });
-
       afterEach(async () => {
-        await deleteUserAndRole(getService, detectionAdmin);
-        await deleteUserAndRole(getService, socManager);
         await deleteAllExceptions(supertest, log);
       });
 
       it('Add comment on a new exception, add another comment has unicode from a different user', async () => {
-        await supertestWithoutAuth
+        await supertest
           .post(EXCEPTION_LIST_URL)
-          .auth(detectionAdmin, 'changeme')
           .set('kbn-xsrf', 'true')
           .send(getCreateExceptionListDetectionSchemaMock())
           .expect(200);
 
         const { os_types, ...ruleException } = getCreateExceptionListItemMinimalSchemaMock();
 
-        // Add comment by the Detection Admin
+        // Add comment by another user
         await supertestWithoutAuth
           .post(EXCEPTION_LIST_ITEM_URL)
-          .auth(detectionAdmin, 'changeme')
+          .auth(ROLES.t3_analyst, 'changeme')
           .set('kbn-xsrf', 'true')
           .send({
             ...ruleException,
-            comments: [{ comment: 'Comment by user@detections_admin' }],
+            comments: [{ comment: 'Comment by user@t3_analyst' }],
           })
           .expect(200);
-
-        const { body: items } = await supertestWithoutAuth
+        const { body: items } = await supertest
           .get(
             `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
               getCreateExceptionListMinimalSchemaMock().list_id
             }`
           )
-          .auth(detectionAdmin, 'changeme')
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -82,19 +65,19 @@ export default ({ getService }: FtrProviderContext) => {
         // Validate the first user comment
         expect(items.total).toEqual(1);
         const [item] = items.data;
-        const detectionAdminComments = item.comments;
-        expect(detectionAdminComments.length).toEqual(1);
+        const t3AnalystComments = item.comments;
+        expect(t3AnalystComments.length).toEqual(1);
 
-        expect(detectionAdminComments[0]).toEqual(
+        expect(t3AnalystComments[0]).toEqual(
           expect.objectContaining({
-            created_by: 'detections_admin',
-            comment: 'Comment by user@detections_admin',
+            created_by: 't3_analyst',
+            comment: 'Comment by user@t3_analyst',
           })
         );
 
         const expectedId = item.id;
 
-        // Update exception comment by different user Soc-manager
+        // Update exception comment by different user
         const { item_id: _, ...updateItemWithoutItemId } =
           getUpdateMinimalExceptionListItemSchemaMock();
 
@@ -102,13 +85,12 @@ export default ({ getService }: FtrProviderContext) => {
           ...updateItemWithoutItemId,
           comments: [
             ...(updateItemWithoutItemId.comments || []),
-            { comment: 'Comment by user@soc_manager' },
+            { comment: 'Comment by elastic_serverless' },
           ],
           id: expectedId,
         };
-        await supertestWithoutAuth
+        await supertest
           .put(EXCEPTION_LIST_ITEM_URL)
-          .auth(socManager, 'changeme')
           .set('kbn-xsrf', 'true')
           .send(updatePayload)
           .expect(200);
@@ -119,67 +101,58 @@ export default ({ getService }: FtrProviderContext) => {
               getCreateExceptionListMinimalSchemaMock().list_id
             }`
           )
-          .auth(socManager, 'changeme')
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
+
         const [itemAfterUpdate] = itemsAfterUpdate.data;
-        const detectionAdminAndSocManagerComments = itemAfterUpdate.comments;
+        const comments = itemAfterUpdate.comments;
 
-        expect(detectionAdminAndSocManagerComments.length).toEqual(2);
+        expect(comments.length).toEqual(2);
 
-        expect(detectionAdminAndSocManagerComments).toEqual(
+        expect(comments).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              created_by: 'detections_admin',
-              comment: 'Comment by user@detections_admin',
+              created_by: 't3_analyst',
+              comment: 'Comment by user@t3_analyst',
             }),
             expect.objectContaining({
-              created_by: 'soc_manager',
-              comment: 'Comment by user@soc_manager',
+              created_by: 'elastic_serverless',
+              comment: 'Comment by elastic_serverless',
             }),
           ])
         );
       });
     });
     describe('Endpoint Exceptions', () => {
-      beforeEach(async () => {
-        await createUserAndRole(getService, detectionAdmin);
-        await createUserAndRole(getService, socManager);
-      });
-
       afterEach(async () => {
-        await deleteUserAndRole(getService, detectionAdmin);
-        await deleteUserAndRole(getService, socManager);
         await deleteAllExceptions(supertest, log);
       });
 
       it('Add comment on a new exception, add another comment has unicode from a different user', async () => {
-        await supertestWithoutAuth
+        await supertest
           .post(EXCEPTION_LIST_URL)
-          .auth(detectionAdmin, 'changeme')
           .set('kbn-xsrf', 'true')
           .send(getCreateExceptionListMinimalSchemaMock())
           .expect(200);
 
-        // Add comment by the Detection Admin
+        // Add comment by the t3 analyst
         await supertestWithoutAuth
           .post(EXCEPTION_LIST_ITEM_URL)
-          .auth(detectionAdmin, 'changeme')
+          .auth(ROLES.t3_analyst, 'changeme')
           .set('kbn-xsrf', 'true')
           .send({
             ...getCreateExceptionListItemMinimalSchemaMock(),
-            comments: [{ comment: 'Comment by user@detections_admin' }],
+            comments: [{ comment: 'Comment by user@t3_analyst' }],
           })
           .expect(200);
 
-        const { body: items } = await supertestWithoutAuth
+        const { body: items } = await supertest
           .get(
             `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
               getCreateExceptionListMinimalSchemaMock().list_id
             }`
           )
-          .auth(detectionAdmin, 'changeme')
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -187,19 +160,19 @@ export default ({ getService }: FtrProviderContext) => {
         // Validate the first user comment
         expect(items.total).toEqual(1);
         const [item] = items.data;
-        const detectionAdminComments = item.comments;
-        expect(detectionAdminComments.length).toEqual(1);
+        const t3AnalystComments = item.comments;
+        expect(t3AnalystComments.length).toEqual(1);
 
-        expect(detectionAdminComments[0]).toEqual(
+        expect(t3AnalystComments[0]).toEqual(
           expect.objectContaining({
-            created_by: 'detections_admin',
-            comment: 'Comment by user@detections_admin',
+            created_by: 't3_analyst',
+            comment: 'Comment by user@t3_analyst',
           })
         );
 
         const expectedId = item.id;
 
-        // Update exception comment by different user Soc-manager
+        // Update exception comment by different user
         const { item_id: _, ...updateItemWithoutItemId } =
           getUpdateMinimalExceptionListItemSchemaMock();
 
@@ -207,13 +180,12 @@ export default ({ getService }: FtrProviderContext) => {
           ...updateItemWithoutItemId,
           comments: [
             ...(updateItemWithoutItemId.comments || []),
-            { comment: 'Comment by user@soc_manager' },
+            { comment: 'Comment by elastic_serverless' },
           ],
           id: expectedId,
         };
-        await supertestWithoutAuth
+        await supertest
           .put(EXCEPTION_LIST_ITEM_URL)
-          .auth(socManager, 'changeme')
           .set('kbn-xsrf', 'true')
           .send(updatePayload)
           .expect(200);
@@ -224,24 +196,23 @@ export default ({ getService }: FtrProviderContext) => {
               getCreateExceptionListMinimalSchemaMock().list_id
             }`
           )
-          .auth(socManager, 'changeme')
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
         const [itemAfterUpdate] = itemsAfterUpdate.data;
-        const detectionAdminAndSocManagerComments = itemAfterUpdate.comments;
+        const comments = itemAfterUpdate.comments;
 
-        expect(detectionAdminAndSocManagerComments.length).toEqual(2);
+        expect(comments.length).toEqual(2);
 
-        expect(detectionAdminAndSocManagerComments).toEqual(
+        expect(comments).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              created_by: 'detections_admin',
-              comment: 'Comment by user@detections_admin',
+              created_by: 't3_analyst',
+              comment: 'Comment by user@t3_analyst',
             }),
             expect.objectContaining({
-              created_by: 'soc_manager',
-              comment: 'Comment by user@soc_manager',
+              created_by: 'elastic_serverless',
+              comment: 'Comment by elastic_serverless',
             }),
           ])
         );

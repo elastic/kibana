@@ -48,8 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
-  // @skipInQA purposefully - only running tests in MKI whose failure should block release
-  describe('@serverless @ess @skipInQA create_rule_exception_route', () => {
+  describe('@serverless @ess create "rule_default" exceptions', () => {
     before(async () => {
       await createAlertsIndex(supertest, log);
     });
