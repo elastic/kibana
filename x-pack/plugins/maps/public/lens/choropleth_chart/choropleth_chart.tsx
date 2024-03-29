@@ -126,12 +126,7 @@ export function ChoroplethChart({
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
-  return (
-    <PassiveMap
-      passiveLayer={choroplethLayer}
-      onRenderComplete={onRenderComplete}
-    />
-  );
+  return <PassiveMap passiveLayer={choroplethLayer} onRenderComplete={onRenderComplete} />;
 }
 
 function getAccessorLabel(table: Datatable, accessor: string) {

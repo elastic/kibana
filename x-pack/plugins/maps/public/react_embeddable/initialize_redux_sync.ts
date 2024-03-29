@@ -84,7 +84,7 @@ export function initializeReduxSync(store: MapStore, state: MapSerializeState) {
     }
 
     const nextIsMapLoading = isMapLoading(store.getState());
-    if (nextIsMapLoading != dataLoading$.value) {
+    if (nextIsMapLoading !== dataLoading$.value) {
       dataLoading$.next(nextIsMapLoading);
     }
   });
@@ -94,7 +94,7 @@ export function initializeReduxSync(store: MapStore, state: MapSerializeState) {
     reduxApi: {
       dataLoading: dataLoading$,
       onRenderComplete$: dataLoading$.pipe(
-        filter(isDataLoading => typeof isDataLoading === 'boolean' && !isDataLoading),
+        filter((isDataLoading) => typeof isDataLoading === 'boolean' && !isDataLoading),
         debounceTime(RENDER_TIMEOUT),
         map(() => {
           // Observable notifies subscriber when rendering is complete

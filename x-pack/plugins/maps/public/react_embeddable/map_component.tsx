@@ -10,12 +10,12 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { first } from 'rxjs/operators';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import type { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { MapApi, MapSerializeState } from './types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { BehaviorSubject } from 'rxjs';
 
 interface Props {
   title: string;
@@ -48,25 +48,29 @@ export function MapComponent(props: Props) {
       },
       references: [],
     };
+    // only run onMount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   const parentApi = useMemo(() => {
     return {
       filters$: new BehaviorSubject(props.filters),
       query$: new BehaviorSubject(props.query),
       timeRange$: new BehaviorSubject(props.timeRange),
     };
+    // only run onMount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     parentApi.filters$.next(props.filters);
-  }, [props.filters]);
+  }, [props.filters, parentApi.filters$]);
   useEffect(() => {
     parentApi.query$.next(props.query);
-  }, [props.query]);
+  }, [props.query, parentApi.query$]);
   useEffect(() => {
     parentApi.timeRange$.next(props.timeRange);
-  }, [props.timeRange]);
-  
+  }, [props.timeRange, parentApi.timeRange$]);
+
   return (
     <div className="mapEmbeddableContainer">
       <ReactEmbeddableRenderer<MapSerializeState, MapApi>
@@ -75,9 +79,7 @@ export function MapComponent(props: Props) {
         parentApi={parentApi}
         onApiAvailable={(api) => {
           if (props.onInitialRenderComplete) {
-            api.onRenderComplete$.pipe(
-              first(),
-            ).subscribe(() => {
+            api.onRenderComplete$.pipe(first()).subscribe(() => {
               if (props.onInitialRenderComplete && isMounted()) {
                 props.onInitialRenderComplete();
               }

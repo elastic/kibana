@@ -43,8 +43,10 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
 
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
-    const { cleanupReduxSync, reduxApi, reduxComparators, serializeRedux } =
-      initializeReduxSync(savedMap.getStore(), state);
+    const { cleanupReduxSync, reduxApi, reduxComparators, serializeRedux } = initializeReduxSync(
+      savedMap.getStore(),
+      state
+    );
 
     function serializeState() {
       const { state: rawState, references } = extract({

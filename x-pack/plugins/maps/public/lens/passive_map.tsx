@@ -56,6 +56,8 @@ export function PassiveMap(props: Props) {
       },
       references: [],
     };
+    // only run onMount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export function PassiveMap(props: Props) {
       if (onRenderCompleteSubscriptionRef.current) {
         onRenderCompleteSubscriptionRef.current.unsubscribe();
       }
-    }
+    };
   }, []);
 
   return (
