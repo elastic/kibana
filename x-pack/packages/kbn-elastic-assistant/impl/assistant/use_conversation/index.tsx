@@ -21,7 +21,7 @@ import {
 import { WELCOME_CONVERSATION } from './sample_conversations';
 
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
-  id: i18n.DEFAULT_CONVERSATION_TITLE,
+  id: '',
   messages: [],
   replacements: [],
   category: 'assistant',
