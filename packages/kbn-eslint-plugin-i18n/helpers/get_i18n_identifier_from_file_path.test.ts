@@ -24,7 +24,7 @@ const testMap = [
     'x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/alerts/toggle_alert_flyout_button.tsx',
     'xpack.synthetics',
   ],
-  ['src/plugins/vis_types/gauge/public/editor/collections.ts', 'visTypeGauge'],
+  ['src/platform/internal/vis_types/gauge/public/editor/collections.ts', 'visTypeGauge'],
   ['packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx', 'alertsUIShared'],
 ];
 

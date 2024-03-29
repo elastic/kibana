@@ -27,7 +27,7 @@ it('getFileName', () => {
 
 it('test getPluginForPath', () => {
   const plugins = findPlugins();
-  const path = Path.resolve(REPO_ROOT, 'src/plugins/embeddable/public/service/file.ts');
+  const path = Path.resolve(REPO_ROOT, 'src/platform/embeddable/public/service/file.ts');
   expect(getPluginForPath(path, plugins)).toBeDefined();
 });
 

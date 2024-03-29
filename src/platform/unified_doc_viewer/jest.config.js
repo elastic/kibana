@@ -9,10 +9,10 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/unified_doc_viewer'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/unified_doc_viewer',
+  roots: ['<rootDir>/src/platform/unified_doc_viewer'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/unified_doc_viewer',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/unified_doc_viewer/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/platform/unified_doc_viewer/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

@@ -9,11 +9,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/text_based_languages'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/text_based_languages',
+  roots: ['<rootDir>/src/platform/text_based_languages'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/text_based_languages',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/text_based_languages/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/src/platform/text_based_languages/{common,public,server}/**/*.{js,ts,tsx}',
   ],
   setupFiles: ['jest-canvas-mock'],
 };

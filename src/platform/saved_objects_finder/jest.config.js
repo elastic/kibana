@@ -9,10 +9,10 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/saved_objects_finder'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/saved_objects_finder',
+  roots: ['<rootDir>/src/platform/saved_objects_finder'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/saved_objects_finder',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/saved_objects_finder/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/platform/saved_objects_finder/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

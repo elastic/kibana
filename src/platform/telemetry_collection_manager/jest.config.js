@@ -9,11 +9,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/telemetry_collection_manager'],
+  roots: ['<rootDir>/src/platform/telemetry_collection_manager'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/plugins/telemetry_collection_manager',
+    '<rootDir>/target/kibana-coverage/jest/src/platform/telemetry_collection_manager',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/telemetry_collection_manager/{common,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/platform/telemetry_collection_manager/{common,server}/**/*.{ts,tsx}',
   ],
 };

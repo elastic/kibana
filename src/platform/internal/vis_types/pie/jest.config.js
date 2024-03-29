@@ -8,9 +8,11 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/src/plugins/vis_types/pie'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_types/pie',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/internal/vis_types/pie'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/internal/vis_types/pie',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/vis_types/pie/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/internal/vis_types/pie/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };

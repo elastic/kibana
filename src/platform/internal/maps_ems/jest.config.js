@@ -8,9 +8,11 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/maps_ems'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/maps_ems',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/platform/internal/maps_ems'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/internal/maps_ems',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/maps_ems/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/internal/maps_ems/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };

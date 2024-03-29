@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/usage_collection'],
+  roots: ['<rootDir>/src/platform/usage_collection'],
 };
