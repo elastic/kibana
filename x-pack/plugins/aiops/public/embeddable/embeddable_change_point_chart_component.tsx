@@ -11,10 +11,10 @@ import React from 'react';
 import type { EmbeddableFactory, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { EmbeddableRoot, useEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
-import {
-  type ChangePointDetectionViewType,
-  type EmbeddableChangePointType,
-} from '../../common/constants';
+import type {
+  ChangePointDetectionViewType,
+  EmbeddableChangePointType,
+} from '@kbn/aiops-change-point-detection/constants';
 import type { AiopsPluginStartDeps } from '../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import type { ChangePointAnnotation } from '../components/change_point_detection/change_point_detection_context';

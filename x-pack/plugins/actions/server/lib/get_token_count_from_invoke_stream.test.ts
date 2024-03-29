@@ -101,7 +101,32 @@ describe('getTokenCountFromInvokeStream', () => {
       stream.write(encodeBedrockResponse('Simple.'));
     });
 
-    it('counts the prompt + completion tokens for OpenAI response', async () => {
+    it('calculates from the usage object when latest api is used', async () => {
+      stream = createStreamMock();
+      stream.write(
+        encodeBedrockResponse({
+          type: 'message_stop',
+          'amazon-bedrock-invocationMetrics': {
+            inputTokenCount: 133,
+            outputTokenCount: 120,
+            invocationLatency: 3464,
+            firstByteLatency: 513,
+          },
+        })
+      );
+      stream.complete();
+      const tokens = await getTokenCountFromInvokeStream({
+        responseStream: stream.transform,
+        body,
+        logger,
+        actionTypeId: '.bedrock',
+      });
+      expect(tokens.prompt).toBe(133);
+      expect(tokens.completion).toBe(120);
+      expect(tokens.total).toBe(133 + 120);
+    });
+
+    it('counts the prompt + completion tokens from response when deprecated API is used', async () => {
       stream.complete();
       const tokens = await getTokenCountFromInvokeStream({
         responseStream: stream.transform,
@@ -133,13 +158,15 @@ describe('getTokenCountFromInvokeStream', () => {
   });
 });
 
-function encodeBedrockResponse(completion: string) {
+function encodeBedrockResponse(completion: string | Record<string, unknown>) {
   return new EventStreamCodec(toUtf8, fromUtf8).encode({
     headers: {},
     body: Uint8Array.from(
       Buffer.from(
         JSON.stringify({
-          bytes: Buffer.from(JSON.stringify({ completion })).toString('base64'),
+          bytes: Buffer.from(
+            JSON.stringify(typeof completion === 'string' ? { completion } : completion)
+          ).toString('base64'),
         })
       )
     ),

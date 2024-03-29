@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
+import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { useQueryTimelineByIdOnUrlChange } from './use_query_timeline_by_id_on_url_change';
 import { renderHook } from '@testing-library/react-hooks';
 import { timelineDefaults } from '../../../timelines/store/defaults';
@@ -45,7 +45,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
   const mockQueryTimelineById = jest.fn();
 
   beforeEach(() => {
-    (queryTimelineById as jest.Mock).mockImplementation(mockQueryTimelineById);
+    (useQueryTimelineById as jest.Mock).mockImplementation(() => mockQueryTimelineById);
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -60,7 +60,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       jest.clearAllMocks();
       rerender();
 
-      expect(queryTimelineById).toHaveBeenCalledWith(
+      expect(mockQueryTimelineById).toHaveBeenCalledWith(
         expect.objectContaining({
           activeTimelineTab: 'query',
           duplicate: false,
@@ -84,7 +84,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       jest.clearAllMocks();
       rerender();
 
-      expect(queryTimelineById).not.toBeCalled();
+      expect(mockQueryTimelineById).not.toBeCalled();
     });
   });
 
@@ -97,7 +97,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
 
       rerender();
 
-      expect(queryTimelineById).not.toBeCalled();
+      expect(mockQueryTimelineById).not.toBeCalled();
     });
   });
 
@@ -109,7 +109,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       jest.clearAllMocks();
       rerender();
 
-      expect(queryTimelineById).not.toBeCalled();
+      expect(mockQueryTimelineById).not.toBeCalled();
     });
   });
 
@@ -122,7 +122,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       jest.clearAllMocks();
       rerender();
 
-      expect(queryTimelineById).not.toBeCalled();
+      expect(mockQueryTimelineById).not.toBeCalled();
     });
   });
 
@@ -136,7 +136,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       jest.clearAllMocks();
       rerender();
 
-      expect(queryTimelineById).not.toBeCalled();
+      expect(mockQueryTimelineById).not.toBeCalled();
     });
   });
 });
