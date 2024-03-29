@@ -82,6 +82,7 @@ const isSchemaRequired = (schema: joi.Schema | joi.Description): boolean => {
 const arrayContainers: Array<keyof OpenAPIV3.SchemaObject> = ['allOf', 'oneOf', 'anyOf'];
 
 const walkSchema = (schema: OpenAPIV3.SchemaObject): void => {
+  mutations.processAny(schema);
   if (schema.type === 'array') {
     walkSchema(schema.items as OpenAPIV3.SchemaObject);
   } else if (schema.type === 'object') {
@@ -90,7 +91,11 @@ const walkSchema = (schema: OpenAPIV3.SchemaObject): void => {
       Object.values(schema.properties!).forEach((obj) => walkSchema(obj as OpenAPIV3.SchemaObject));
     }
   } else if ((schema.type as string) === 'record') {
-    mutations.replaceRecordType(schema);
+    mutations.processRecord(schema);
+  } else if ((schema.type as string) === 'map') {
+    mutations.processMap(schema);
+  } else if (schema.type === 'string') {
+    mutations.processString(schema);
   } else if (schema.type) {
     // Do nothing
   } else {
@@ -138,6 +143,9 @@ const convertObjectMembersToParameterObjects = (
       );
     }
     const { description, ...openApiSchemaObject } = schemaObject;
+    if (!knownParameters[schemaKey] && isPathParameter) {
+      throw createError(`Unknown parameter: ${schemaKey}, are you sure this is in your path?`);
+    }
     return {
       name: schemaKey,
       in: isPathParameter ? 'path' : 'query',
