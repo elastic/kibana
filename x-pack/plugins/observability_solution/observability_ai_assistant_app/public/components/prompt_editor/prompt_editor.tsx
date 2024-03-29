@@ -17,6 +17,7 @@ import {
 import { FunctionListPopover } from '../chat/function_list_popover';
 import { PromptEditorFunction } from './prompt_editor_function';
 import { PromptEditorNaturalLanguage } from './prompt_editor_natural_language';
+import { usePreviousPrompts } from '../../hooks/use_previous_prompts';
 
 export interface PromptEditorProps {
   disabled: boolean;
@@ -48,6 +49,8 @@ export function PromptEditor({
   );
 
   const [hasFocus, setHasFocus] = useState(false);
+
+  const { previousPrompts, addPrompt } = usePreviousPrompts();
 
   const initialInnerMessage = initialRole
     ? {
@@ -102,6 +105,10 @@ export function PromptEditor({
       return;
     }
 
+    if (innerMessage.content) {
+      addPrompt(innerMessage.content);
+    }
+
     const oldMessage = innerMessage;
 
     try {
@@ -123,7 +130,7 @@ export function PromptEditor({
       setInnerMessage(oldMessage);
       setMode(oldMessage.function_call?.name ? 'function' : 'prompt');
     }
-  }, [innerMessage, loading, onSendTelemetry, onSubmit]);
+  }, [addPrompt, innerMessage, loading, onSendTelemetry, onSubmit]);
 
   // Submit on Enter
   useEffect(() => {
@@ -174,6 +181,7 @@ export function PromptEditor({
           <PromptEditorNaturalLanguage
             disabled={disabled}
             prompt={innerMessage?.content}
+            previousPrompts={previousPrompts}
             onChange={handleChangeMessageInner}
             onChangeHeight={onChangeHeight}
             onFocus={() => setHasFocus(true)}
