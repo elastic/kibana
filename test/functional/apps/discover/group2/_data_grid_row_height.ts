@@ -19,8 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = { defaultIndex: 'logstash-*' };
   const security = getService('security');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/179300
-  describe.skip('discover data grid row height', function describeIndexTests() {
+  describe('discover data grid row height', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await browser.setWindowSize(1200, 2000);
