@@ -89,6 +89,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
     <EuiModal
       onClose={onClose}
       style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
+      data-test-subj="shareContextModal"
       maxWidth={true}
     >
       <EuiModalHeader>

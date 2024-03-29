@@ -84,19 +84,9 @@ export class ReportingPageObject extends FtrService {
     return response.body as Buffer;
   }
 
-  async openCsvReportingPanel() {
-    this.log.debug('openCsvReportingPanel');
-    await this.share.openShareMenuItem('CSV Reports');
-  }
-
-  async openPdfReportingPanel() {
-    this.log.debug('openPdfReportingPanel');
-    await this.share.openShareMenuItem('PDF Reports');
-  }
-
-  async openPngReportingPanel() {
-    this.log.debug('openPngReportingPanel');
-    await this.share.openShareMenuItem('PNG Reports');
+  async openExportTab() {
+    this.log.debug('open export modal');
+    await this.share.clickTab('Export');
   }
 
   async getQueueReportError() {

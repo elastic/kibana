@@ -21,6 +21,13 @@ export class SharePageObject extends FtrService {
     }
   }
 
+  async clickTab(content: string) {
+    if (!(await this.isShareModalOpen())) {
+      await this.clickShareTopNavButton();
+    }
+    await (await this.find.byButtonText(content)).click();
+  }
+
   async isShareMenuOpen() {
     return await this.testSubjects.exists('shareContextMenu');
   }
