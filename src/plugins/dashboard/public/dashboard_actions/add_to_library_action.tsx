@@ -95,11 +95,9 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
             props.onTitleDuplicate
           );
           try {
-            const { state, savedObjectId } = await embeddable.saveStateToSavedObject(
-              props.newTitle
-            );
-            resolve({ ...state, title: props.newTitle });
-            return { id: savedObjectId };
+            const libraryId = await embeddable.saveToLibrary(props.newTitle);
+            resolve({ ...embeddable.getByReferenceState(libraryId), title: props.newTitle });
+            return { id: libraryId };
           } catch (error) {
             reject(error);
             return { error };

@@ -59,15 +59,15 @@ export const InvestigateInTimelineButton: React.FunctionComponent<
     timelineType: hasTemplateProviders ? TimelineType.template : TimelineType.default,
   });
 
-  const configureAndOpenTimeline = useCallback(() => {
+  const configureAndOpenTimeline = useCallback(async () => {
     if (dataProviders || filters) {
       // Reset the current timeline
       if (timeRange) {
-        clearTimeline({
+        await clearTimeline({
           timeRange,
         });
       } else {
-        clearTimeline();
+        await clearTimeline();
       }
       if (dataProviders) {
         // Update the timeline's providers to match the current prevalence field query

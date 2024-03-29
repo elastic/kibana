@@ -2215,7 +2215,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     templateTimelineId: null,
     version: null,
     savedSearchId: null,
-    isDiscoverSavedSearchLoaded: false,
     savedSearch: null,
     isDataProviderVisible: false,
     sampleSize: 500,

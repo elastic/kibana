@@ -18,7 +18,7 @@ import { Axis, HistogramBarSeries, Chart, Position, ScaleType, Settings } from '
 import moment from 'moment';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import type { LogRateHistogramItem } from '@kbn/aiops-utils';
+import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
 
 import { EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { useDataVisualizerKibana } from '../../../../kibana_context';

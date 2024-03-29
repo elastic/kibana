@@ -37,7 +37,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildDestination(),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
-      this.buildSettings(slo, 'event.ingested')
+      this.buildSettings(slo, 'event.ingested'),
+      slo
     );
   }
 
