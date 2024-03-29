@@ -7,7 +7,7 @@
 
 import semver from 'semver';
 import { isEmpty, isEqual, keyBy } from 'lodash';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -15,6 +15,7 @@ import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import { UnifiedManifestClient } from '../unified_manifest_client';
 import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
@@ -35,9 +36,14 @@ import {
   Manifest,
 } from '../../../lib/artifacts';
 
+import type {
+  InternalUnifiedManifestBaseSchema,
+  InternalUnifiedManifestUpdateSchema,
+} from '../../../schemas/artifacts';
 import {
   internalArtifactCompleteSchema,
   type InternalArtifactCompleteSchema,
+  type InternalManifestSchema,
   type WrappedTranslatedExceptionList,
 } from '../../../schemas/artifacts';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
@@ -127,6 +133,10 @@ export class ManifestManager {
    */
   protected getManifestClient(): ManifestClient {
     return new ManifestClient(this.savedObjectsClient, this.schemaVersion);
+  }
+
+  protected getUnifiedManifestClient(): UnifiedManifestClient {
+    return new UnifiedManifestClient(this.savedObjectsClient);
   }
 
   /**
@@ -513,7 +523,51 @@ export class ManifestManager {
    */
   public async getLastComputedManifest(): Promise<Manifest | null> {
     try {
-      const manifestSo = await this.getManifestClient().getManifest();
+      // const legacyManifestSo = await this.getManifestClient().getManifest();
+      const unifiedManifestsSo = await this.getUnifiedManifestClient().getAllUnifiedManifests();
+      // TODO: strip
+      const manifestSo: SavedObject<InternalManifestSchema> = {
+        id: 'endpoint-manifest-v1',
+        type: 'endpoint:user-artifact-manifest',
+        namespaces: [],
+        updated_at: '2024-03-29T14:00:09.111Z',
+        created_at: '2024-03-29T13:57:14.300Z',
+        version: 'WzQ3NzAsMV0=',
+        attributes: {
+          artifacts: [
+            ...(unifiedManifestsSo
+              .find((a) => a.policyId === '.global')
+              ?.artifactIds.map((artifactId) => ({
+                artifactId,
+                policyId: undefined,
+              })) ?? []),
+            ...unifiedManifestsSo.reduce(
+              (acc: Array<{ artifactId: string; policyId: string }>, unifiedManifest) => {
+                if (unifiedManifest.policyId === '.global') {
+                  return acc;
+                }
+                return [
+                  ...acc,
+                  ...unifiedManifest.artifactIds.map((artifactId) => ({
+                    policyId: unifiedManifest.policyId,
+                    artifactId,
+                  })),
+                ];
+              },
+              []
+            ),
+          ],
+          schemaVersion: 'v1',
+          semanticVersion: '1.0.2',
+        },
+        references: [],
+        managed: false,
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '7.12.0',
+      };
+
+      // this.logger.info(`asdadasdd ${JSON.stringify(manifestSo, null, 2)}`);
+      // this.logger.info(`asdadasdd ${JSON.stringify(legacyManifestSo, null, 2)}`);
 
       if (manifestSo.version === undefined) {
         throw new InvalidInternalManifestError(
@@ -714,6 +768,112 @@ export class ManifestManager {
     return errors;
   }
 
+  public async commitUnified(manifestSo: InternalManifestSchema) {
+    const existingUnifiedManifestsSo =
+      await this.getUnifiedManifestClient().getAllUnifiedManifests();
+
+    const setNewSemanticVersion = (semanticVersion: string) => {
+      const newSemanticVersion = semver.inc(semanticVersion, 'patch');
+      if (!semver.valid(newSemanticVersion)) {
+        throw new Error(`Invalid semver: ${newSemanticVersion}`);
+      }
+      return newSemanticVersion;
+    };
+
+    const unifiedManifestSO = manifestSo.artifacts.reduce(
+      (
+        acc: Array<InternalUnifiedManifestBaseSchema & { id?: string }>,
+        { artifactId, policyId = '.global' }
+      ) => {
+        const existingPolicy = acc.find((item) => item.policyId === policyId);
+        if (existingPolicy) {
+          existingPolicy.artifactIds.push(artifactId);
+        } else {
+          const existingUnifiedManifestSo = existingUnifiedManifestsSo.find(
+            (item) => item.policyId === policyId
+          );
+          acc.push({
+            policyId,
+            artifactIds: [artifactId],
+            semanticVersion: existingUnifiedManifestSo?.semanticVersion ?? '1.0.0',
+            id: existingUnifiedManifestSo?.id,
+          });
+        }
+        return acc;
+      },
+      []
+    );
+
+    const { unifiedManifestsToUpdate, unifiedManifestsToCreate } = unifiedManifestSO.reduce(
+      (
+        acc: {
+          unifiedManifestsToUpdate: InternalUnifiedManifestUpdateSchema[];
+          unifiedManifestsToCreate: InternalUnifiedManifestBaseSchema[];
+        },
+        unifiedManifest
+      ) => {
+        if (unifiedManifest.id !== undefined) {
+          const existingUnifiedManifest = existingUnifiedManifestsSo.find(
+            (item) => item.id === unifiedManifest.id
+          );
+          if (
+            !existingUnifiedManifest ||
+            !isEqual(existingUnifiedManifest.artifactIds, unifiedManifest.artifactIds)
+          ) {
+            acc.unifiedManifestsToUpdate.push({
+              ...unifiedManifest,
+              semanticVersion: setNewSemanticVersion(unifiedManifest.semanticVersion),
+            } as InternalUnifiedManifestUpdateSchema);
+          }
+        } else {
+          acc.unifiedManifestsToCreate.push(unifiedManifest);
+        }
+
+        return acc;
+      },
+      { unifiedManifestsToUpdate: [], unifiedManifestsToCreate: [] }
+    );
+
+    const unifiedManifestsToDelete = existingUnifiedManifestsSo.reduce(
+      (acc: string[], { policyId, id }) => {
+        const existingPolicy = unifiedManifestSO.find((item) => item.policyId === policyId);
+        if (!existingPolicy) {
+          return [...acc, id];
+        }
+        return acc;
+      },
+      []
+    );
+
+    this.logger.info(
+      `unifiedManifestsToCreate ${JSON.stringify(unifiedManifestsToCreate, null, 2)}`
+    );
+    this.logger.info(
+      `unifiedManifestsToUpdate ${JSON.stringify(unifiedManifestsToUpdate, null, 2)}`
+    );
+    // this.logger.info(
+    //   `changedUnifiedManifestsToUpdate ${JSON.stringify(changedUnifiedManifestsToUpdate, null, 2)}`
+    // );
+    this.logger.info(
+      `unifiedManifestsToDelete ${JSON.stringify(unifiedManifestsToDelete, null, 2)}`
+    );
+    // TODO: Batch, promiseall?
+    if (unifiedManifestsToCreate.length) {
+      await this.getUnifiedManifestClient().createUnifiedManifests(unifiedManifestsToCreate);
+      this.logger.info(`Created ${unifiedManifestsToCreate.length} unified manifests`);
+    }
+
+    if (unifiedManifestsToUpdate.length) {
+      await this.getUnifiedManifestClient().updateUnifiedManifests(unifiedManifestsToUpdate);
+      this.logger.info(`Updated ${unifiedManifestsToUpdate.length} unified manifests`);
+    }
+
+    if (unifiedManifestsToDelete.length) {
+      await this.getUnifiedManifestClient().deleteUnifiedManifestByIds(unifiedManifestsToDelete);
+      this.logger.info(`Deleted ${unifiedManifestsToDelete.length} unified manifests`);
+    }
+  }
+
   /**
    * Commits a manifest to indicate that a new version has been computed.
    *
@@ -721,21 +881,22 @@ export class ManifestManager {
    * @returns {Promise<Error | null>} An error, if encountered, or null.
    */
   public async commit(manifest: Manifest) {
-    const manifestClient = this.getManifestClient();
+    // const manifestClient = this.getManifestClient();
 
     // Commit the new manifest
     const manifestSo = manifest.toSavedObject();
-    const version = manifest.getSavedObjectVersion();
-
-    if (version == null) {
-      await manifestClient.createManifest(manifestSo);
-    } else {
-      await manifestClient.updateManifest(manifestSo, {
-        version,
-      });
-    }
-
-    this.logger.debug(`Committed manifest ${manifest.getSemanticVersion()}`);
+    await this.commitUnified(manifestSo);
+    // const version = manifest.getSavedObjectVersion();
+    //
+    // if (version == null) {
+    //   await manifestClient.createManifest(manifestSo);
+    // } else {
+    //   await manifestClient.updateManifest(manifestSo, {
+    //     version,
+    //   });
+    // }
+    //
+    // this.logger.debug(`Committed manifest ${manifest.getSemanticVersion()}`);
   }
 
   private fetchAllPolicies(): AsyncIterable<PackagePolicy[]> {

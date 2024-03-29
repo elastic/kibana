@@ -916,6 +916,20 @@
       }
     }
   },
+  "endpoint:unified-user-artifact-manifest": {
+    "dynamic": false,
+    "properties": {
+      "artifactIds": {
+        "type": "text"
+      },
+      "policyId": {
+        "type": "keyword"
+      },
+      "semanticVersion": {
+        "type": "text"
+      }
+    }
+  },
   "endpoint:user-artifact-manifest": {
     "dynamic": false,
     "properties": {
