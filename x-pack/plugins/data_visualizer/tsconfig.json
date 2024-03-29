@@ -14,7 +14,6 @@
   "kbn_references": [
     "@kbn/ace",
     "@kbn/aiops-components",
-    "@kbn/aiops-utils",
     "@kbn/charts-plugin",
     "@kbn/cloud-plugin",
     "@kbn/code-editor",
@@ -77,7 +76,8 @@
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
     "@kbn/visualization-utils",
-    "@kbn/ml-time-buckets"
+    "@kbn/ml-time-buckets",
+    "@kbn/aiops-log-rate-analysis"
   ],
   "exclude": [
     "target/**/*",

@@ -20,13 +20,13 @@
   ],
   "kbn_references": [
     "@kbn/i18n-react",
-    "@kbn/aiops-utils",
     "@kbn/i18n",
     "@kbn/core",
     "@kbn/charts-plugin",
     "@kbn/data-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/visualization-utils",
+    "@kbn/aiops-log-rate-analysis",
   ],
   "exclude": [
     "target/**/*",

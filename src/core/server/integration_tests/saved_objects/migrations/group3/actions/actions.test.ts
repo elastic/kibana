@@ -14,6 +14,7 @@ import type { TaskEither } from 'fp-ts/lib/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { MIGRATION_CLIENT_OPTIONS } from '@kbn/core-saved-objects-server-internal';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   bulkOverwriteTransformedDocuments,
@@ -42,7 +43,6 @@ import {
   cloneIndex,
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
-  MIGRATION_CLIENT_OPTIONS,
   createBulkIndexOperationTuple,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
@@ -64,7 +64,8 @@ describe('migration actions', () => {
 
   beforeAll(async () => {
     esServer = await startES();
-    client = esServer.es.getClient().child(MIGRATION_CLIENT_OPTIONS);
+    // we don't need a long timeout for testing purposes
+    client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 5500 });
     esCapabilities = elasticsearchServiceMock.createCapabilities();
 
     // Create test fixture data:
@@ -400,22 +401,19 @@ describe('migration actions', () => {
     });
     it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
       // Create a red index
-      await client.indices.create(
-        {
-          index: 'red_then_yellow_index',
-          timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
-              // Disable all shard allocation so that the index status is red
-              routing: { allocation: { enable: 'none' } },
-            },
+      await client.indices.create({
+        index: 'red_then_yellow_index',
+        timeout: '5s',
+        body: {
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index stays yellow
+            number_of_replicas: '1',
+            // Disable all shard allocation so that the index status is red
+            routing: { allocation: { enable: 'none' } },
           },
         },
-        { maxRetries: 0 /** handle retry ourselves for now */ }
-      );
+      });
 
       // Start tracking the index status
       const indexStatusPromise = waitForIndexStatus({
@@ -1817,32 +1815,32 @@ describe('migration actions', () => {
       expect.assertions(2);
       // Create a red index
       await client.indices
-        .create(
-          {
-            index: 'red_then_yellow_index',
-            timeout: '5s',
-            body: {
-              mappings: { properties: {} },
-              settings: {
-                // Allocate 1 replica so that this index stays yellow
-                number_of_replicas: '1',
-                // Disable all shard allocation so that the index status starts as red
-                index: { routing: { allocation: { enable: 'none' } } },
-              },
+        .create({
+          index: 'red_then_yellow_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status starts as red
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
-          { maxRetries: 0 /** handle retry ourselves for now */ }
-        )
+        })
         .catch((e) => {
           /** ignore */
         });
 
       // Call createIndex even though the index already exists
       const createIndexPromise = createIndex({
-        client,
+        // make sure this request does not timeout
+        client: client.child({ requestTimeout: 30_000 }),
         indexName: 'red_then_yellow_index',
         mappings: undefined as any,
         esCapabilities,
+        timeout: '30s',
+        waitForIndexStatusTimeout: '2s',
       })();
       let indexYellow = false;
 
