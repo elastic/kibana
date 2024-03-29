@@ -11,6 +11,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 import { useConnector } from '../../../hooks/api/use_connector';
 import { useEditConnectorConfiguration } from '../../../hooks/api/use_connector_configuration';
+import { ApiKeyPanel } from './api_key_panel';
+import { ConnectionDetails } from './connection_details_panel';
 import { ConnectorIndexnamePanel } from './connector_index_name_panel';
 
 interface ConnectorConfigurationPanels {
@@ -46,6 +48,15 @@ export const ConnectorConfigurationPanels: React.FC<ConnectorConfigurationPanels
       <EuiPanel hasBorder>
         <ConnectorIndexnamePanel connector={connector} />
       </EuiPanel>
+      <EuiSpacer />
+      <ConnectionDetails
+        connectorId={connector.id}
+        serviceType={connector.service_type}
+        status={connector.status}
+      />
+      <EuiSpacer />
+      <ApiKeyPanel connector={connector} />
+      <EuiSpacer />
     </>
   );
 };

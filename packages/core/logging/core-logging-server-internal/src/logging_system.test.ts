@@ -17,7 +17,7 @@ import { createWriteStream } from 'fs';
 const mockCreateWriteStream = createWriteStream as unknown as jest.Mock<typeof createWriteStream>;
 
 import { LoggingSystem, config } from '..';
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 import { unsafeConsole } from '@kbn/security-hardening';
 
 let system: LoggingSystem;

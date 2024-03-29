@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, FC, useMemo, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -20,16 +21,16 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { Filter, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { DataSeriesDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
 import { useStorage } from '@kbn/ml-local-storage';
+import type { FullTimeRangeSelectorProps } from '@kbn/ml-date-picker';
 import {
   DatePickerWrapper,
   FROZEN_TIER_PREFERENCE,
   FullTimeRangeSelector,
-  FullTimeRangeSelectorProps,
   useTimefilter,
 } from '@kbn/ml-date-picker';
 import moment from 'moment';
@@ -41,13 +42,11 @@ import type { SingleBrushWindowParameters } from './document_count_chart_single_
 import type { InitialSettings } from './use_data_drift_result';
 import { useDataDriftStateManagerContext } from './use_state_manager';
 import { useData } from '../common/hooks/use_data';
-import {
-  DV_FROZEN_TIER_PREFERENCE,
-  DVKey,
-  DVStorageMapped,
-} from '../index_data_visualizer/types/storage';
+import type { DVKey, DVStorageMapped } from '../index_data_visualizer/types/storage';
+import { DV_FROZEN_TIER_PREFERENCE } from '../index_data_visualizer/types/storage';
 import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
-import { DataComparisonFullAppState, getDefaultDataComparisonState } from './types';
+import type { DataComparisonFullAppState } from './types';
+import { getDefaultDataComparisonState } from './types';
 import { useDataSource } from '../common/hooks/data_source_context';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DataDriftView } from './data_drift_view';

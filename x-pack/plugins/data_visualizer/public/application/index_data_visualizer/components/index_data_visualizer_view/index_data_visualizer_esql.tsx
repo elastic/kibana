@@ -7,7 +7,8 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 import { css } from '@emotion/react';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 
 import { FullTimeRangeSelector, DatePickerWrapper } from '@kbn/ml-date-picker';
@@ -31,7 +32,7 @@ import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme'
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { GetAdditionalLinks } from '../../../common/components/results_links';
+import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
@@ -45,7 +46,8 @@ import type {
   ESQLDataVisualizerIndexBasedPageUrlState,
   ESQLDefaultLimitSizeOption,
 } from '../../embeddables/grid_embeddable/types';
-import { ESQLQuery, isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 
 export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;
@@ -254,6 +256,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           detectTimestamp={true}
           hideMinimizeButton={true}
           hideRunQueryText={false}
+          hideQueryHistory
         />
 
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>

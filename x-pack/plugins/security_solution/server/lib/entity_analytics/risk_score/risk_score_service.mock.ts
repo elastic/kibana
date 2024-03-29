@@ -20,7 +20,7 @@ const createRiskScoreMock = (overrides: Partial<RiskScore> = {}): RiskScore => (
   category_1_count: 12,
   category_2_count: 0,
   category_2_score: 0,
-  criticality_level: 'very_important',
+  criticality_level: 'high_impact',
   criticality_modifier: 2,
   notes: [],
   inputs: [],
@@ -30,7 +30,7 @@ const createRiskScoreMock = (overrides: Partial<RiskScore> = {}): RiskScore => (
 const createRiskScoreServiceMock = (): jest.Mocked<RiskScoreService> => ({
   calculateScores: jest.fn(),
   calculateAndPersistScores: jest.fn(),
-  getConfiguration: jest.fn(),
+  getConfigurationWithDefaults: jest.fn(),
   getRiskInputsIndex: jest.fn(),
   scheduleLatestTransformNow: jest.fn(),
 });

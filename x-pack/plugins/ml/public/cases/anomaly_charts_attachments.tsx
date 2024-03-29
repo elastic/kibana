@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { memoize } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 

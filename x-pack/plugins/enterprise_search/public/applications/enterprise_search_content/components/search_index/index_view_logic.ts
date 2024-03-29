@@ -9,7 +9,14 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector, FeatureName, IngestPipelineParams, SyncStatus } from '@kbn/search-connectors';
+import {
+  Connector,
+  FeatureName,
+  IngestPipelineParams,
+  SyncStatus,
+  IngestionStatus,
+  IngestionMethod,
+} from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
@@ -35,7 +42,7 @@ import {
 } from '../../api/index/cached_fetch_index_api_logic';
 
 import { FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
-import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
+import { ElasticsearchViewIndex } from '../../types';
 import {
   getIngestionMethod,
   getIngestionStatus,

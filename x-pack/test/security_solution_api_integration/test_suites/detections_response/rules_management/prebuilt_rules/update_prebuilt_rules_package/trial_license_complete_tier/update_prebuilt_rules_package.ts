@@ -15,7 +15,6 @@ import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
-  deleteAllRules,
   getInstalledRules,
   getPrebuiltRulesStatus,
   installPrebuiltRules,
@@ -24,6 +23,7 @@ import {
   reviewPrebuiltRulesToInstall,
   reviewPrebuiltRulesToUpgrade,
 } from '../../../../utils';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -107,8 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
         es,
         supertest,
         previousVersion,
-        retry,
-        log
+        retry
       );
 
       expect(installPreviousPackageResponse._meta.install_source).toBe('registry');
@@ -161,8 +160,7 @@ export default ({ getService }: FtrProviderContext): void => {
         es,
         supertest,
         currentVersion,
-        retry,
-        log
+        retry
       );
       expect(installLatestPackageResponse.items.length).toBeGreaterThanOrEqual(0);
 

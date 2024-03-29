@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../common/alert_config';
+import { ALERT_TABLE_GENERIC_CONFIG_ID } from './constants';
 import {
   AlertsTableConfigurationRegistry,
   AlertsTableConfigurationRegistryWithActions,

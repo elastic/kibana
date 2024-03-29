@@ -69,7 +69,7 @@ describe('OnboardingComponent', () => {
     const pageTitle = getByText('Hi Unknown!');
     const subtitle = getByText(`Get started with Security`);
     const description = getByText(
-      `This area shows you everything you need to know. Feel free to explore all content. You can always come back later at any time.`
+      `This area shows you everything you need to know. Feel free to explore all content. You can always come back here at any time.`
     );
 
     expect(pageTitle).toBeInTheDocument();

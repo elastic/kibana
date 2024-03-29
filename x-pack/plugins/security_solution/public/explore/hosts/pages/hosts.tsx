@@ -53,7 +53,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
-import { LandingPageComponent } from '../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useHasSecurityCapability } from '../../../helper_hooks';
@@ -239,7 +239,7 @@ const HostsComponent = () => {
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />

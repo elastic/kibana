@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { LogRateHistogramItem } from '@kbn/aiops-utils';
-import React, { FC } from 'react';
+import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { BrushSettings } from '@kbn/aiops-components';
-import { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import type { Filter } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs/operators';

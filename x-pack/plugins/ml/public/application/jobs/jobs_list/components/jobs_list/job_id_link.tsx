@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useMlLocator } from '../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
-import { AnomalyDetectionQueryState } from '../../../../../../common/types/locator';
+import type { AnomalyDetectionQueryState } from '../../../../../../common/types/locator';
 // @ts-ignore
 import { JobGroup } from '../job_group';
 
@@ -68,7 +68,7 @@ export const AnomalyDetectionJobIdLink = (props: AnomalyDetectionJobIdLinkProps)
       <EuiLink
         key={props.id}
         href={href}
-        css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }}
+        css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
         title={props.id}
       >
         {props.id}

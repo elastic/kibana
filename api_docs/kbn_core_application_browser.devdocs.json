@@ -122,38 +122,25 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.navLinkStatus",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "navLinkStatus",
+            "id": "def-common.App.visibleIn",
+            "type": "Array",
+            "tags": [
+              "default",
+              "note"
+            ],
+            "label": "visibleIn",
             "description": [
-              "\nThe initial status of the application's navLink.\nDefaulting to `visible` if `status` is `accessible` and `hidden` if status is `inaccessible`\nSee {@link AppNavLinkStatus}"
+              "\nOptional list of locations where the app is visible.\n\nAccepts the following values:\n- \"globalSearch\": the link will appear in the global search bar\n- \"home\": the link will appear on the Kibana home page\n- \"kibanaOverview\": the link will appear in the Kibana overview page\n- \"sideNav\": the link will appear in the side navigation.\n  Note: \"sideNav\" will be deprecated when we change the navigation to \"solutions\" style.\n"
             ],
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppNavLinkStatus",
-                "text": "AppNavLinkStatus"
+                "section": "def-common.AppDeepLinkLocations",
+                "text": "AppDeepLinkLocations"
               },
-              " | undefined"
-            ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.searchable",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "searchable",
-            "description": [
-              "\nThe initial flag to determine if the application is searchable in the global search.\nDefaulting to `true` if `navLinkStatus` is `visible` or omitted."
-            ],
-            "signature": [
-              "boolean | undefined"
+              "[] | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
@@ -1196,6 +1183,10 @@
                 "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx"
               },
               {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/public/application.tsx"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
               },
@@ -1744,20 +1735,6 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppNavLinkStatus",
-        "type": "Enum",
-        "tags": [],
-        "label": "AppNavLinkStatus",
-        "description": [
-          "\nStatus of the application's navLink.\n"
-        ],
-        "path": "packages/core/application/core-application-browser/src/application.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-application-browser",
         "id": "def-common.AppStatus",
         "type": "Enum",
         "tags": [],
@@ -1782,15 +1759,15 @@
           "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible."
         ],
         "signature": [
-          "{ id: Id; title: string; keywords?: string[] | undefined; navLinkStatus?: ",
+          "{ id: Id; title: string; keywords?: string[] | undefined; visibleIn?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppNavLinkStatus",
-            "text": "AppNavLinkStatus"
+            "section": "def-common.AppDeepLinkLocations",
+            "text": "AppDeepLinkLocations"
           },
-          " | undefined; searchable?: boolean | undefined; category?: ",
+          "[] | undefined; category?: ",
           {
             "pluginId": "@kbn/core-application-common",
             "scope": "common",
@@ -1823,6 +1800,23 @@
             "text": "AppDeepLink"
           },
           "<Id>[]; })"
+        ],
+        "path": "packages/core/application/core-application-browser/src/application.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-application-browser",
+        "id": "def-common.AppDeepLinkLocations",
+        "type": "Type",
+        "tags": [],
+        "label": "AppDeepLinkLocations",
+        "description": [
+          "The places in the UI where a deepLink can be shown"
+        ],
+        "signature": [
+          "\"home\" | \"kibanaOverview\" | \"globalSearch\" | \"sideNav\""
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
@@ -2035,15 +2029,15 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; navLinkStatus?: ",
+          " | undefined; visibleIn?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppNavLinkStatus",
-            "text": "AppNavLinkStatus"
+            "section": "def-common.AppDeepLinkLocations",
+            "text": "AppDeepLinkLocations"
           },
-          " | undefined; searchable?: boolean | undefined; tooltip?: string | undefined; deepLinks?: ",
+          "[] | undefined; tooltip?: string | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2133,7 +2127,7 @@
             "section": "def-common.AppDeepLink",
             "text": "AppDeepLink"
           },
-          "<string>, \"keywords\" | \"navLinkStatus\" | \"searchable\" | \"deepLinks\"> & { deepLinks: ",
+          "<string>, \"keywords\" | \"visibleIn\" | \"deepLinks\"> & { deepLinks: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2141,15 +2135,15 @@
             "section": "def-common.PublicAppDeepLinkInfo",
             "text": "PublicAppDeepLinkInfo"
           },
-          "[]; keywords: string[]; navLinkStatus: ",
+          "[]; keywords: string[]; visibleIn: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppNavLinkStatus",
-            "text": "AppNavLinkStatus"
+            "section": "def-common.AppDeepLinkLocations",
+            "text": "AppDeepLinkLocations"
           },
-          "; searchable: boolean; }"
+          "[]; }"
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
@@ -2174,21 +2168,13 @@
             "section": "def-common.App",
             "text": "App"
           },
-          "<unknown>, \"keywords\" | \"searchable\" | \"deepLinks\" | \"mount\" | \"updater$\"> & { status: ",
+          "<unknown>, \"keywords\" | \"visibleIn\" | \"deepLinks\" | \"mount\" | \"updater$\"> & { status: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
             "section": "def-common.AppStatus",
             "text": "AppStatus"
-          },
-          "; navLinkStatus: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppNavLinkStatus",
-            "text": "AppNavLinkStatus"
           },
           "; appRoute: string; keywords: string[]; deepLinks: ",
           {
@@ -2198,7 +2184,15 @@
             "section": "def-common.PublicAppDeepLinkInfo",
             "text": "PublicAppDeepLinkInfo"
           },
-          "[]; searchable: boolean; }"
+          "[]; visibleIn: ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.AppDeepLinkLocations",
+            "text": "AppDeepLinkLocations"
+          },
+          "[]; }"
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,

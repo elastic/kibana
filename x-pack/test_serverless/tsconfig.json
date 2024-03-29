@@ -91,5 +91,11 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/es",
     "@kbn/infra-forge",
+    "@kbn/reporting-common",
+    "@kbn/es-query",
+    "@kbn/slo-plugin",
+    "@kbn/share-plugin",
+    "@kbn/es-query",
+    "@kbn/utility-types",
   ]
 }

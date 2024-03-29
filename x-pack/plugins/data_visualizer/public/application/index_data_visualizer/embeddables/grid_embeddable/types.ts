@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import type { Query } from '@kbn/es-query';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
-import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
-import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
+import type { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
+import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 
 export interface DataVisualizerGridInput<T = Query> {
@@ -47,7 +47,7 @@ export type ESQLDataVisualizerGridEmbeddableInput = DataVisualizerGridInput<ESQL
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
-export type ESQLDefaultLimitSizeOption = '5000' | '10000' | '100000' | '1000000' | 'none';
+export type ESQLDefaultLimitSizeOption = '5000' | '10000' | '100000';
 
 export interface ESQLDataVisualizerIndexBasedAppState extends DataVisualizerIndexBasedAppState {
   limitSize: ESQLDefaultLimitSizeOption;

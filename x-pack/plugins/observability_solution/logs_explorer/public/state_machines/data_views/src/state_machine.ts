@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import { DataViewListItem, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { isError } from 'lodash';
 import { assign, createMachine } from 'xstate';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { parseDataViewListItem } from '../../../utils/parse_data_view_list_item';
-import { createComparatorByField } from '../../../utils/comparator_by_field';
 import { createDefaultContext } from './defaults';
 import type {
   DataViewsContext,
   DataViewsEvent,
-  DataViewsSearchParams,
   DataViewsTypestate,
   DefaultDataViewsContext,
 } from './types';
+import { loadDataViews, searchDataViews } from './services/data_views_service';
+
+export function getSearchCacheKey(context: DataViewsContext) {
+  return { search: context.search, filter: context.filter };
+}
 
 export const createPureDataViewsStateMachine = (
   initialContext: DefaultDataViewsContext = createDefaultContext()
 ) =>
   createMachine<DataViewsContext, DataViewsEvent, DataViewsTypestate>(
     {
-      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVA1AlmA7rAHQCuAdjhejqgDY4BekAxADIDyAgsgPrKcAVTjywBJAKIB1AMoBtAAwBdRKAAOAe1g5q6sipAAPRABYAzKaIB2a6bOWArABoQAT0QBaAJzyi9y8YAmAEYADgcAX3DnNExcAmJadVQISihmCF0wIkoAN3UAayyY7DxCIkTk1IRc9QBjDBxdBUVm-Q0tHT0kQxNjSyJPP3lTIICnV0RLTyJ5eUsQ0ftI6IwS+PKklLI0sAAnXfVdolVaDAAzQ4BbImK4soqtqGqyPPrO5tbu9u1GrtAjBAANgcRFMDmcbgQIPsIQCw0WyxAt1KCU2kGyEFoYGY0nEnAASgBhAASfEEwjEUjkSjamh+un0AOsgN8nksgPsgLGEJMHKIgNCgRC9mMC2siOR6we6JwmOx0nY+IEZKEIgkMk+ajpnUZJk8ISIAQCHK540hpgCBoWgOM8lNEtWd1RyRlcpx4lY4kJyv4qspkk1IG+Ou6AMB8gNfkCoXBEwQ9gtM1GgzZ+qC4qiSMdKI2LogRAgYAARupyLUwNIwKhdrUABapSWEd0Ekkqinq6nKL7a366hBBeT2ez8zncuMJ6ZzEX2VNiywO2I56X5wslssVqs1+vbRuwZgGWCYdBZVBnY+7AAUplmAEpmLvc4WV8XS2Ry5Xq3WG9n4oHg73Q0mEIDXDYwwLMexLUBMEeQQcwLE8II0wCYxARCcMpwXNZ7k2VIADFUBwLEIGYfEPS4XhfXbKk-x7BlAKBaDfACSxbDBM0PACUFPGMBMEURMh1ELeBul3WkOgA-5EFMYUrBsOwOIQdwUK4oYRjGLCnVICgqBoegmAgcT6T+HoEDAlkxnmRZYPcIIhxmSx4Q0zMHweVIjJDKSzNtIgQlmKyx0hZThxCHi+OclZFylNFDO7CT6K83ifCNE1AsQFCglBIIbTtCKsyinC8wxLEPMk0zARtUF7Ds01YN44dAj8OFglFBTNKXGKCxfdcPy3b8CpErV4pMgEBztUEVJjRSzEyzxLOaoJWvY9rosqbYCKIyBSoS0y5q4nLarjZT+j8BZnMiIA */
+      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVA1AlmA7rAHQCuAdjhejqgDY4BekAxADIDyAgsgPrKcAVTjywBJAKIB1AMoBtAAwBdRKAAOAe1g5q6sipAAPRACYALMaIA2AIwB2awA5bAVgA0IAJ6JrzgMxFfeQdnAE5fFwBfCPc0TFwCYlp1VAhKKGYIXTAiSgA3dQBrbNjsPEIiJJS0hDz1AGMMHF0FRRb9DS0dPSRDRFNneSJnY1tfU3C3T29jEKJ5AdsHa2NnKJiMUoSK5NSydLAAJwP1A6JVWgwAMxOAWyIS+PLK3agasnyGrpa2no7tJu6oCMCDMzjmIzGE3cXgQYwcREcvlCEzWIAeZUSO0gOQgtDAzGk4k4ACUAMIACT4gmEYikciU7U0-10+mBIUWCPkPksK2hiF8jiIDmF8mMQV8EsltlR6K2z2xOFx+Ok7GJAipQhEEhkPzUTK6rMQliWRFsIWNLj5IIcFnGpgcIWcDklUplG0emJSCqVBPErHEpPV-E1tMkupAfwNPWBtntRBC5vkYUtUwQ1iTCNM1hCI3FLul0TR7ox2y9ECIEDAACN1OQ6mBpGBUAc6gALNKywi+kkUjU07X05S-fUAw1piGmxwpmG+EZWZzprOWZcryy+N1xEvy8uVmt1htNlvtvad2DMAywTDobKoS7Xg4ACkC8gAlMxT6XKzvq7WyPXG82bYdsWCThpGo7RogITCkKITyDykwwsY1j+KMljsiE1irsu66Fh+zxpAAYqgOB4hAzDEn6XC8MG-Z0mBI4spBCDjNYRArL4cEIVapguPGLjGJY8hLiuBaFmQ6iVvAPSnoynQQUC3g2kK4zTogAC0lhgsEDjyLYMxYauuHrJuWzkJQ-x0IwkBycygK9CCQmmksvKpsEQwbpsTw7GktlRopIKBCpUKpsYxj+OmopCSJK4hJ5HqfjZw7yUxAVrqh5pOIhJhsZYWY5rYeaunhIHeWWOJ4n5CkOcEpimuhfjLNlIJzpx2a5s6+bxVuWLfnuf4HoBx5QLJyV2WO1iIqaphCcmzXIWx9hIjFRndXKPl7MRpFJXqKX2cCZh1YJzjcam5i2EQ9qqasUQREAA */
       context: initialContext,
       preserveActionOrder: true,
       predictableActionArguments: true,
@@ -57,6 +58,9 @@ export const createPureDataViewsStateMachine = (
                 SEARCH_DATA_VIEWS: 'debounceSearchingDataViews',
                 SORT_DATA_VIEWS: {
                   actions: ['storeSearch', 'searchDataViews'],
+                },
+                FILTER_DATA_VIEWS: {
+                  actions: ['storeFilter', 'searchDataViews'],
                 },
                 SELECT_DATA_VIEW: {
                   actions: ['navigateToDiscoverDataView'],
@@ -92,6 +96,9 @@ export const createPureDataViewsStateMachine = (
           // Store search from search event
           ...('search' in event && { search: event.search }),
         })),
+        storeFilter: assign((_context, event) => ({
+          ...('filter' in event && { filter: event.filter }),
+        })),
         storeDataViews: assign((_context, event) =>
           'data' in event && !isError(event.data)
             ? { dataViewsSource: event.data, dataViews: event.data }
@@ -100,14 +107,17 @@ export const createPureDataViewsStateMachine = (
         searchDataViews: assign((context) => {
           if (context.dataViewsSource !== null) {
             return {
-              dataViews: searchDataViews(context.dataViewsSource, context.search),
+              dataViews: searchDataViews(context.dataViewsSource, {
+                search: context.search,
+                filter: context.filter,
+              }),
             };
           }
           return {};
         }),
         storeInCache: (context, event) => {
           if ('data' in event && !isError(event.data)) {
-            context.cache.set(context.search, event.data);
+            context.cache.set(getSearchCacheKey(context), event.data);
           }
         },
         storeError: assign((_context, event) =>
@@ -125,39 +135,14 @@ export const createPureDataViewsStateMachine = (
 export interface DataViewsStateMachineDependencies {
   initialContext?: DefaultDataViewsContext;
   dataViews: DataViewsPublicPluginStart;
-  discover: DiscoverStart;
 }
 
 export const createDataViewsStateMachine = ({
   initialContext,
   dataViews,
-  discover,
 }: DataViewsStateMachineDependencies) =>
   createPureDataViewsStateMachine(initialContext).withConfig({
-    actions: {
-      navigateToDiscoverDataView: (_context, event) => {
-        if (event.type === 'SELECT_DATA_VIEW' && 'dataView' in event) {
-          discover.locator?.navigate({ dataViewId: event.dataView.id });
-        }
-      },
-    },
     services: {
-      loadDataViews: (context) => {
-        const searchParams = context.search;
-        return context.cache.has(searchParams)
-          ? Promise.resolve(context.cache.get(searchParams))
-          : dataViews
-              .getIdsWithTitle()
-              .then((views) => views.map(parseDataViewListItem))
-              .then((views) => searchDataViews(views, searchParams));
-      },
+      loadDataViews: loadDataViews({ dataViews }),
     },
   });
-
-const searchDataViews = (dataViews: DataViewListItem[], search: DataViewsSearchParams) => {
-  const { name, sortOrder } = search;
-
-  return dataViews
-    .filter((dataView) => Boolean(dataView.name?.includes(name ?? '')))
-    .sort(createComparatorByField<DataViewListItem>('name', sortOrder));
-};

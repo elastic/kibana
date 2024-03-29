@@ -45,6 +45,8 @@
     "@kbn/data-views-plugin",
     "@kbn/data-view-editor-plugin",
     "@kbn/lens-plugin",
+    "@kbn/shared-ux-prompt-not-found",
+    "@kbn/slo-plugin",
   ],
   "exclude": [
     "target/**/*"

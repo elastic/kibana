@@ -79,6 +79,7 @@ describe('getMlModelTypesForModelConfig lib function', () => {
 });
 
 describe('generateMlInferencePipelineBody lib function', () => {
+  // @ts-expect-error pipeline._meta defined as mandatory
   const expected: MlInferencePipeline = {
     description: 'my-description',
     processors: [
@@ -201,6 +202,7 @@ describe('generateMlInferencePipelineBody lib function', () => {
 describe('parseMlInferenceParametersFromPipeline', () => {
   it('returns pipeline parameters from ingest pipeline', () => {
     expect(
+      // @ts-expect-error pipeline._meta defined as mandatory
       parseMlInferenceParametersFromPipeline('unit-test', {
         processors: [
           {
@@ -228,6 +230,7 @@ describe('parseMlInferenceParametersFromPipeline', () => {
   });
   it('returns pipeline parameters from ingest pipeline with multiple inference processors', () => {
     expect(
+      // @ts-expect-error pipeline._meta defined as mandatory
       parseMlInferenceParametersFromPipeline('unit-test', {
         processors: [
           {
@@ -267,10 +270,12 @@ describe('parseMlInferenceParametersFromPipeline', () => {
     });
   });
   it('return null if pipeline is missing inference processor', () => {
+    // @ts-expect-error pipeline._meta defined as mandatory
     expect(parseMlInferenceParametersFromPipeline('unit-test', { processors: [] })).toBeNull();
   });
   it('return null if pipeline is missing field_map', () => {
     expect(
+      // @ts-expect-error pipeline._meta defined as mandatory
       parseMlInferenceParametersFromPipeline('unit-test', {
         processors: [
           {

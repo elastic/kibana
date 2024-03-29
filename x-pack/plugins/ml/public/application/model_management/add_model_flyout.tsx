@@ -34,7 +34,7 @@ import React, { type FC, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
-import { ModelItem } from './models_list';
+import type { ModelItem } from './models_list';
 
 export interface AddModelFlyoutProps {
   modelDownloads: ModelItem[];
@@ -42,7 +42,7 @@ export interface AddModelFlyoutProps {
   onSubmit: (modelId: string) => void;
 }
 
-type FlyoutTabId = 'clickToDownload' | 'manualDownload';
+export type AddModelFlyoutTabId = 'clickToDownload' | 'manualDownload';
 
 /**
  * Flyout for downloading elastic curated models and showing instructions for importing third-party models.
@@ -51,7 +51,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
   const canCreateTrainedModels = usePermissionCheck('canCreateTrainedModels');
   const isClickToDownloadTabVisible = canCreateTrainedModels && modelDownloads.length > 0;
 
-  const [selectedTabId, setSelectedTabId] = useState<FlyoutTabId>(
+  const [selectedTabId, setSelectedTabId] = useState<AddModelFlyoutTabId>(
     isClickToDownloadTabVisible ? 'clickToDownload' : 'manualDownload'
   );
 
@@ -94,7 +94,12 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
   }, [selectedTabId, tabs]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={'addTrainedModelFlyout'}>
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      aria-labelledby={'addTrainedModelFlyout'}
+      data-test-subj={'mlAddTrainedModelFlyout'}
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id={'addTrainedModelFlyout'}>
@@ -110,6 +115,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
               key={tab.id}
               isSelected={selectedTabId === tab.id}
               onClick={setSelectedTabId.bind(null, tab.id)}
+              data-test-subj={`mlAddTrainedModelFlyoutTab ${tab.id}`}
             >
               {tab.name}
             </EuiTab>
@@ -177,7 +183,11 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
                 <p>
-                  <EuiText color={'subdued'} size={'s'}>
+                  <EuiText
+                    color={'subdued'}
+                    size={'s'}
+                    data-test-subj="mlAddTrainedModelFlyoutElserModelHeaderCopy"
+                  >
                     <FormattedMessage
                       id="xpack.ml.trainedModels.addModelFlyout.elserDescription"
                       defaultMessage="ELSER is Elastic's NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform."
@@ -251,21 +261,30 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                           gutterSize={'s'}
                           alignItems={'center'}
                           justifyContent={'spaceBetween'}
+                          data-test-subj="mlAddTrainedModelFlyoutChooseModelPanels"
                         >
                           <EuiFlexItem grow={false}>
                             <header>
                               <EuiText size={'s'}>
                                 <b>
                                   {model.os === 'Linux' && model.arch === 'amd64' ? (
-                                    <FormattedMessage
-                                      id="xpack.ml.trainedModels.addModelFlyout.intelLinuxLabel"
-                                      defaultMessage="Intel and Linux optimized"
-                                    />
+                                    <div
+                                      data-test-subj={`mlAddTrainedModelFlyoutModelPanel-${modelName}-${model.model_id}`}
+                                    >
+                                      <FormattedMessage
+                                        id="xpack.ml.trainedModels.addModelFlyout.intelLinuxLabel"
+                                        defaultMessage="Intel and Linux optimized"
+                                      />
+                                    </div>
                                   ) : (
-                                    <FormattedMessage
-                                      id="xpack.ml.trainedModels.addModelFlyout.crossPlatformLabel"
-                                      defaultMessage="Cross platform"
-                                    />
+                                    <div
+                                      data-test-subj={`mlAddTrainedModelFlyoutModelPanel-${modelName}-${model.model_id}`}
+                                    >
+                                      <FormattedMessage
+                                        id="xpack.ml.trainedModels.addModelFlyout.crossPlatformLabel"
+                                        defaultMessage="Cross platform"
+                                      />
+                                    </div>
                                   )}
                                 </b>
                               </EuiText>
@@ -333,6 +352,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
         onClick={onModelDownload.bind(null, selectedModelId!)}
         fill
         disabled={!selectedModelId}
+        data-test-subj="mlAddTrainedModelFlyoutDownloadButton"
       >
         <FormattedMessage
           id="xpack.ml.trainedModels.addModelFlyout.downloadButtonLabel"
@@ -387,7 +407,12 @@ const ManualDownloadTabContent: FC = () => {
                   </EuiText>
                 </p>
                 <p>
-                  <EuiCodeBlock isCopyable language="shell" fontSize={'m'}>
+                  <EuiCodeBlock
+                    isCopyable
+                    language="shell"
+                    fontSize={'m'}
+                    data-test-subj={'mlElandPipInstallCodeBlock'}
+                  >
                     $ python -m pip install eland
                   </EuiCodeBlock>
                 </p>
@@ -412,7 +437,12 @@ const ManualDownloadTabContent: FC = () => {
                   </EuiText>
                 </p>
                 <p>
-                  <EuiCodeBlock isCopyable language="shell" fontSize={'m'}>
+                  <EuiCodeBlock
+                    isCopyable
+                    language="shell"
+                    fontSize={'m'}
+                    data-test-subj={'mlElandCondaInstallCodeBlock'}
+                  >
                     $ conda install -c conda-forge eland
                   </EuiCodeBlock>
                 </p>
@@ -442,7 +472,12 @@ const ManualDownloadTabContent: FC = () => {
                     />
                   </b>
 
-                  <EuiCodeBlock isCopyable language="shell" fontSize={'m'}>
+                  <EuiCodeBlock
+                    isCopyable
+                    language="shell"
+                    fontSize={'m'}
+                    data-test-subj={'mlElandExampleImportCodeBlock'}
+                  >
                     eland_import_hub_model <br />
                     --cloud-id &lt;cloud-id&gt; \ <br />
                     -u &lt;username&gt; -p &lt;password&gt; \ <br />

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, FC } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useRef } from 'react';
 import d3 from 'd3';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';

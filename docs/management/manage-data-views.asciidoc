@@ -240,6 +240,8 @@ To customize how {kib} displays data fields, use the formatting options.
 
 . Select *Set format*, then enter the *Format* for the field.
 
+NOTE: For numeric fields the default field formatters are based on the `meta.unit` field. The unit is associated with a {ref}/api-conventions.html#time-units[time unit], percent, or  byte. The convention for percents is to use value 1 to mean 100%.  
+
 [float]
 [[string-field-formatters]]
 ==== String field formatters
@@ -278,7 +280,7 @@ include::field-formatters/string-formatter.asciidoc[]
 Numeric fields support *Bytes*, *Color*, *Duration*, *Histogram*, *Number*, *Percentage*, *String*, and *Url* formatters.
 
 The *Bytes*, *Number*, and *Percentage* formatters enable you to choose the display formats of numbers in the field using
-the <<numeral, Elastic numeral pattern>> syntax that {kib} maintains.
+the <<numeral, Elastic numeral pattern>> syntax that {kib} maintains. 
 
 The *Histogram* formatter is used only for the {ref}/histogram.html[histogram field type]. When you use the *Histogram* formatter,
 you can apply the *Bytes*, *Number*, or *Percentage* format to aggregated data.

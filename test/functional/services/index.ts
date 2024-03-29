@@ -17,6 +17,7 @@ import {
   SnapshotsService,
 } from './common';
 import { ComboBoxService } from './combo_box';
+import { SelectableService } from './selectable';
 import {
   DashboardAddPanelService,
   DashboardReplacePanelService,
@@ -38,7 +39,6 @@ import { FieldEditorService } from './field_editor';
 import { ManagementMenuService } from './management';
 import { QueryBarService } from './query_bar';
 import { RenderableService } from './renderable';
-import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
 import {
   PieChartService,
@@ -53,6 +53,7 @@ import { MonacoEditorService } from './monaco_editor';
 import { UsageCollectionService } from './usage_collection';
 import { SavedObjectsFinderService } from './saved_objects_finder';
 import { DashboardSettingsProvider } from './dashboard/dashboard_settings';
+import { ESQLService } from './esql';
 
 export const services = {
   ...commonServiceProviders,
@@ -77,6 +78,7 @@ export const services = {
   dashboardSettings: DashboardSettingsProvider,
   flyout: FlyoutService,
   comboBox: ComboBoxService,
+  selectable: SelectableService,
   dataGrid: DataGridService,
   embedding: EmbeddingService,
   renderable: RenderableService,
@@ -86,7 +88,6 @@ export const services = {
   vegaDebugInspector: VegaDebugInspectorViewService,
   appsMenu: AppsMenuService,
   globalNav: GlobalNavService,
-  toasts: ToastsService,
   savedQueryManagementComponent: SavedQueryManagementComponentService,
   elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
@@ -95,4 +96,5 @@ export const services = {
   menuToggle: MenuToggleService,
   usageCollection: UsageCollectionService,
   savedObjectsFinder: SavedObjectsFinderService,
+  esql: ESQLService,
 };

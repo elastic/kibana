@@ -19,13 +19,18 @@ import {
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SavedSearchEmbeddableBase } from '../../embeddable/saved_search_embeddable_base';
 
-export interface DocTableEmbeddableProps extends DocTableProps {
+export interface DocTableEmbeddableProps extends Omit<DocTableProps, 'dataTestSubj'> {
   totalHitCount?: number;
   rowsPerPageState?: number;
   sampleSizeState: number;
   interceptedWarnings?: SearchResponseWarning[];
   onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
 }
+
+export type DocTableEmbeddableSearchProps = Omit<
+  DocTableEmbeddableProps,
+  'sampleSizeState' | 'isPlainRecord'
+>;
 
 const DocTableWrapperMemoized = memo(DocTableWrapper);
 
@@ -124,7 +129,12 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
         ) : undefined
       }
     >
-      <DocTableWrapperMemoized ref={tableWrapperRef} {...props} render={renderDocTable} />
+      <DocTableWrapperMemoized
+        ref={tableWrapperRef}
+        {...props}
+        dataTestSubj="embeddedSavedSearchDocTable"
+        render={renderDocTable}
+      />
     </SavedSearchEmbeddableBase>
   );
 };

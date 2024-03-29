@@ -12,7 +12,8 @@ import {
   type PresentationContainer,
 } from '@kbn/presentation-containers';
 import {
-  PublishesPanelTitle,
+  getPanelTitle,
+  type PublishesPanelTitle,
   type HasUniqueId,
   type HasParentApi,
 } from '@kbn/presentation-publishing';
@@ -63,7 +64,7 @@ export const createDrilldownTemplatesFromSiblings = (
         id: event.eventId,
         name: event.action.name,
         icon: 'dashboardApp',
-        description: child.panelTitle?.value ?? child.uuid ?? '',
+        description: getPanelTitle(child) ?? child.uuid ?? '',
         config: event.action.config,
         factoryId: event.action.factoryId,
         triggers: event.triggers,

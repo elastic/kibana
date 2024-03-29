@@ -5,25 +5,31 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
-import React from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandSection } from '../hooks/use_expand_section';
 import { ExpandableSection } from './expandable_section';
 import { HighlightedFields } from './highlighted_fields';
 import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
 import { InvestigationGuide } from './investigation_guide';
-export interface DescriptionSectionProps {
-  /**
-   * Boolean to allow the component to be expanded or collapsed on first render
-   */
-  expanded?: boolean;
-}
+import { getField } from '../../shared/utils';
+import { EventKind } from '../../shared/constants/event_kinds';
+import { useRightPanelContext } from '../context';
+
+const KEY = 'investigation';
 
 /**
- * Most top section of the overview tab. It contains the description, reason and mitre attack information (for a document of type alert).
+ * Second section of the overview tab in details flyout.
+ * It contains investigation guide (alerts only) and highlighted fields
  */
-export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = true }) => {
+export const InvestigationSection: FC = memo(() => {
+  const { getFieldsData } = useRightPanelContext();
+  const eventKind = getField(getFieldsData('event.kind'));
+
+  const expanded = useExpandSection({ title: KEY, defaultValue: true });
+
   return (
     <ExpandableSection
       expanded={expanded}
@@ -33,13 +39,19 @@ export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = 
           defaultMessage="Investigation"
         />
       }
+      localStorageKey={KEY}
+      gutterSize="s"
       data-test-subj={INVESTIGATION_SECTION_TEST_ID}
     >
-      <InvestigationGuide />
-      <EuiSpacer size="m" />
+      {eventKind === EventKind.signal && (
+        <>
+          <InvestigationGuide />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <HighlightedFields />
     </ExpandableSection>
   );
-};
+});
 
 InvestigationSection.displayName = 'InvestigationSection';

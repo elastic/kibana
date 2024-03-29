@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView, DataViewField, RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField, DataViewType, RuntimeField } from '@kbn/data-views-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -170,7 +170,7 @@ export const EditIndexPattern = withRouter(
     });
 
     const isRollup =
-      new URLSearchParams(useLocation().search).get('type') === 'rollup' &&
+      new URLSearchParams(useLocation().search).get('type') === DataViewType.ROLLUP &&
       dataViews.getRollupsEnabled();
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor

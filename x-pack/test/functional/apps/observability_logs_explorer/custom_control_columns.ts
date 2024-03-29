@@ -59,21 +59,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should render the malformed icon in the last control column if malformed doc exists', async () => {
+      it('should render the degraded icon in the last control column if degraded doc exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(1, 4);
-          const malformedButton = await cellElement.findByTestSubject('docTableMalformedDocExist');
-          expect(malformedButton).to.not.be.empty();
+          const degradedButton = await cellElement.findByTestSubject('docTableDegradedDocExist');
+          expect(degradedButton).to.not.be.empty();
         });
       });
 
-      it('should render the disabled malformed icon in the last control column when malformed doc does not exists', async () => {
+      it('should render the disabled degraded icon in the last control column when degraded doc does not exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(0, 4);
-          const malformedDisableButton = await cellElement.findByTestSubject(
-            'docTableMalformedDocDoesNotExist'
+          const degradedDisableButton = await cellElement.findByTestSubject(
+            'docTableDegradedDocDoesNotExist'
           );
-          expect(malformedDisableButton).to.not.be.empty();
+          expect(degradedDisableButton).to.not.be.empty();
         });
       });
 
@@ -115,10 +115,7 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
         })
     );
 
-  const malformedDocs = timerange(
-    moment(to).subtract(2, 'second'),
-    moment(to).subtract(1, 'second')
-  )
+  const degradedDocs = timerange(moment(to).subtract(2, 'second'), moment(to).subtract(1, 'second'))
     .interval('1m')
     .rate(1)
     .generator((timestamp) =>
@@ -127,7 +124,7 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
         .map(() => {
           return log
             .create()
-            .message('A malformed doc')
+            .message('A degraded doc')
             .logLevel(MORE_THAN_1024_CHARS)
             .timestamp(timestamp)
             .defaults({ 'service.name': 'synth-service' });
@@ -185,5 +182,5 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
         })
     );
 
-  return [logs, malformedDocs, logsWithErrorMessage, logsWithErrorException, logsWithErrorInLog];
+  return [logs, degradedDocs, logsWithErrorMessage, logsWithErrorException, logsWithErrorInLog];
 }

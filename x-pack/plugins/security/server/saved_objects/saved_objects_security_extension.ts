@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EcsEvent } from '@elastic/ecs';
+
 import type {
   SavedObjectReferenceWithContext,
   SavedObjectsFindResult,
@@ -41,7 +43,6 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type { EcsEvent } from '@kbn/ecs';
 import type {
   Actions,
   AuditLogger,
@@ -119,7 +120,7 @@ export interface AddAuditEventParams {
    * Relevant saved object information
    * object containing type & id strings
    */
-  savedObject?: { type: string; id: string };
+  savedObject?: { type: string; id: string; name?: string };
   /**
    * Array of spaces being added. For
    * UPDATE_OBJECTS_SPACES action only

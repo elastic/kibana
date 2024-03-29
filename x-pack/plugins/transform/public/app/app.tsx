@@ -12,16 +12,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { EuiErrorBoundary } from '@elastic/eui';
 
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
+import type { ExperimentalFeatures } from '../../common/config';
 import { SECTION_SLUG } from './common/constants';
-import { AppDependencies } from './app_dependencies';
+import type { AppDependencies } from './app_dependencies';
 import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
 import {
   EnabledFeaturesContextProvider,
+  ExperimentalFeaturesContextProvider,
   type TransformEnabledFeatures,
 } from './serverless_context';
 
@@ -44,7 +46,8 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
 export const renderApp = (
   element: HTMLElement,
   appDependencies: AppDependencies,
-  enabledFeatures: TransformEnabledFeatures
+  enabledFeatures: TransformEnabledFeatures,
+  experimentalFeatures: ExperimentalFeatures
 ) => {
   const I18nContext = appDependencies.i18n.Context;
 
@@ -64,7 +67,9 @@ export const renderApp = (
           <KibanaContextProvider services={appDependencies}>
             <I18nContext>
               <EnabledFeaturesContextProvider enabledFeatures={enabledFeatures}>
-                <App history={appDependencies.history} />
+                <ExperimentalFeaturesContextProvider experimentalFeatures={experimentalFeatures}>
+                  <App history={appDependencies.history} />
+                </ExperimentalFeaturesContextProvider>
               </EnabledFeaturesContextProvider>
             </I18nContext>
           </KibanaContextProvider>

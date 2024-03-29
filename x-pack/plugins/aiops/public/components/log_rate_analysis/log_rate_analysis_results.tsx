@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { isEqual, uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -21,6 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/ml-response-stream/client';
@@ -28,16 +30,16 @@ import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
   type WindowParameters,
-} from '@kbn/aiops-utils';
+} from '@kbn/aiops-log-rate-analysis';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { initialState, streamReducer } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
+import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { initialState, streamReducer } from '../../../common/api/stream_reducer';
-import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis/schema';
-import type { AiopsLogRateAnalysisSchemaSignificantItem } from '../../../common/api/log_rate_analysis/schema_v2';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
   getGroupTableItems,
   LogRateAnalysisResultsTable,
@@ -136,7 +138,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   onAnalysisCompleted,
   embeddingOrigin,
 }) => {
-  const { http } = useAiopsAppContext();
+  const { analytics, http } = useAiopsAppContext();
+
+  // Store the performance metric's start time using a ref
+  // to be able to track it across rerenders.
+  const analysisStartTime = useRef<number | undefined>(window.performance.now());
 
   const { clearAllRowState } = useLogRateAnalysisResultsTableRowContext();
 
@@ -231,13 +237,29 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           remainingFieldCandidates,
           significantItems: data.significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
         });
-      } else {
+      } else if (loaded > 0) {
+        // Reset all overrides.
         setOverrides(undefined);
+
+        // If provided call the `onAnalysisCompleted` callback with the analysis results.
         if (onAnalysisCompleted) {
           onAnalysisCompleted({
             analysisType,
             significantItems: data.significantItems,
             significantItemsGroups: data.significantItemsGroups,
+          });
+        }
+
+        // Track performance metric
+        if (analysisStartTime.current !== undefined) {
+          const analysisDuration = window.performance.now() - analysisStartTime.current;
+
+          // Set this to undefined so reporting the metric gets triggered only once.
+          analysisStartTime.current = undefined;
+
+          reportPerformanceMetricEvent(analytics, {
+            eventName: 'aiopsLogRateAnalysisCompleted',
+            duration: analysisDuration,
           });
         }
       }

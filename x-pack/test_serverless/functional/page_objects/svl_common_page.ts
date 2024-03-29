@@ -11,7 +11,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const config = getService('config');
-  const pageObjects = getPageObjects(['security', 'common']);
+  const pageObjects = getPageObjects(['security', 'common', 'header']);
   const retry = getService('retry');
   const deployment = getService('deployment');
   const log = getService('log');
@@ -40,7 +40,22 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       await alert.accept();
     }
     log.debug(`browser: wait for resource page to be loaded`);
-    await find.byCssSelector('body > pre', 5000);
+    // TODO: temporary solution while we don't migrate all functional tests to SAML auth
+    // On CI sometimes we are redirected to cloud login page, in this case we skip cleanup
+    const isOnBootstrap = await find.existsByDisplayedByCssSelector('body > pre', 5000);
+    if (!isOnBootstrap) {
+      const currentUrl = await browser.getCurrentUrl();
+      log.debug(`current url: ${currentUrl}`);
+      if (!currentUrl.includes(deployment.getHostPort())) {
+        log.debug('Skipping browser state cleanup');
+        return;
+      } else {
+        log.debug('browser: navigate to /bootstrap-anonymous.js #2');
+        await browser.get(noAuthRequiredUrl);
+        await find.byCssSelector('body > pre', 5000);
+      }
+    }
+
     log.debug(`browser: delete all the cookies`);
     await retry.waitForWithTimeout('Browser cookies are deleted', 10000, async () => {
       await browser.deleteAllCookies();
@@ -125,7 +140,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
 
     async forceLogout() {
       log.debug('SvlCommonPage.forceLogout');
-      if (await find.existsByDisplayedByCssSelector('.login-form', 100)) {
+      if (await find.existsByDisplayedByCssSelector('.login-form', 2000)) {
         log.debug('Already on the login page, not forcing anything');
         return;
       }
@@ -214,15 +229,22 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clickUserAvatar() {
-      testSubjects.click('userMenuAvatar');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('userMenuAvatar', 10_000);
     },
 
     async assertUserAvatarExists() {
-      await testSubjects.existOrFail('userMenuAvatar');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('userMenuAvatar', {
+        timeout: 10_000,
+      });
     },
 
     async assertUserMenuExists() {
-      await testSubjects.existOrFail('userMenu');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('userMenu', {
+        timeout: 10_000,
+      });
     },
   };
 }

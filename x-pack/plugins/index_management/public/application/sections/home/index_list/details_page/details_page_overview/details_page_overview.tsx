@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -30,7 +30,6 @@ import { StatusDetails } from './status_details';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../../services/breadcrumbs';
 import { languageDefinitions, curlDefinition } from './languages';
 import { DataStreamDetails } from './data_stream_details';
 import { StorageDetails } from './storage_details';
@@ -59,10 +58,6 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
     plugins,
     services: { extensionsService },
   } = useAppContext();
-
-  useEffect(() => {
-    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsOverview);
-  }, []);
 
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
 

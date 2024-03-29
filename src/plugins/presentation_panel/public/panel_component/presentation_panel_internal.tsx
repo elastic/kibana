@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
   apiPublishesPhaseEvents,
@@ -28,6 +28,7 @@ export const PresentationPanelInternal = <
   index,
   hideHeader,
   showShadow,
+  showBorder,
 
   showBadges,
   showNotifications,
@@ -103,6 +104,7 @@ export const PresentationPanelInternal = <
         'embPanel--editing': viewMode === 'edit',
       })}
       hasShadow={showShadow}
+      hasBorder={showBorder}
       aria-labelledby={headerId}
       data-test-embeddable-id={api?.uuid}
       data-test-subj="embeddablePanel"
@@ -134,13 +136,15 @@ export const PresentationPanelInternal = <
       )}
       {!initialLoadComplete && <PanelLoader />}
       <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
-        <Component
-          {...(componentProps as React.ComponentProps<typeof Component>)}
-          {...contentAttrs}
-          ref={(newApi) => {
-            if (newApi && !api) setApi(newApi);
-          }}
-        />
+        <EuiErrorBoundary>
+          <Component
+            {...(componentProps as React.ComponentProps<typeof Component>)}
+            {...contentAttrs}
+            ref={(newApi) => {
+              if (newApi && !api) setApi(newApi);
+            }}
+          />
+        </EuiErrorBoundary>
       </div>
     </EuiPanel>
   );

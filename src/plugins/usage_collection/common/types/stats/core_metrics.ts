@@ -94,7 +94,7 @@ export interface OpsProcessMetrics {
     /** memory allocated for array buffers. This is also included in the external value*/
     array_buffers_in_bytes: number;
   };
-  /** mean event loop delay since last collection*/
+  /** max event loop delay since last collection */
   event_loop_delay: number;
   /** node event loop delay histogram since last collection */
   event_loop_delay_histogram: IntervalHistogram;

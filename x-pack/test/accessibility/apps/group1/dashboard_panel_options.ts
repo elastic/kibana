@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('dashboardEditMode');
       await dashboardPanelActions.toggleContextMenu(header);
       await testSubjects.click('embeddablePanelAction-clonePanel');
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await a11y.testAppSnapshot();
     });
 
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('dashboard panel - save to library', async () => {
       await dashboardPanelActions.openContextMenuMorePanel(header);
-      await testSubjects.click('embeddablePanelAction-saveToLibrary');
+      await testSubjects.click('embeddablePanelAction-legacySaveToLibrary');
       await a11y.testAppSnapshot();
       await testSubjects.click('saveCancelButton');
     });

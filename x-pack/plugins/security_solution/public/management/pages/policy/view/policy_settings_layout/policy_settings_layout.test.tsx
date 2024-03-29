@@ -47,7 +47,9 @@ describe('When rendering PolicySettingsLayout', () => {
     apiMocks = allFleetHttpMocks(mockedContext.coreStart.http);
     policyData = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy();
     render = () => {
-      renderResult = mockedContext.render(<PolicySettingsLayout policy={policyData} />);
+      renderResult = mockedContext.render(
+        <PolicySettingsLayout policy={policyData} setUnsavedChanges={jest.fn()} />
+      );
       return renderResult;
     };
   });
@@ -117,9 +119,17 @@ describe('When rendering PolicySettingsLayout', () => {
       return expectedUpdates;
     };
 
-    it('should render layout with expected content', () => {
+    it('should render layout with expected content when no changes have been made', () => {
       const { getByTestId } = render();
 
+      expect(getByTestId('endpointPolicyForm'));
+      expect(getByTestId('policyDetailsCancelButton')).not.toBeDisabled();
+      expect(getByTestId('policyDetailsSaveButton')).toBeDisabled();
+    });
+
+    it('should render layout with expected content when changes have been made', () => {
+      const { getByTestId } = render();
+      makeUpdates();
       expect(getByTestId('endpointPolicyForm'));
       expect(getByTestId('policyDetailsCancelButton')).not.toBeDisabled();
       expect(getByTestId('policyDetailsSaveButton')).not.toBeDisabled();
@@ -141,6 +151,7 @@ describe('When rendering PolicySettingsLayout', () => {
       const deferred = getDeferred();
       apiMocks.responseProvider.updateEndpointPolicy.mockDelay.mockReturnValue(deferred.promise);
       const { getByTestId } = render();
+      makeUpdates();
       await clickSave(true, false);
 
       await waitFor(() => {
@@ -157,10 +168,11 @@ describe('When rendering PolicySettingsLayout', () => {
 
     it('should show success toast on update success', async () => {
       render();
+      makeUpdates();
       await clickSave();
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('policyDetailsSaveButton')).not.toBeDisabled();
+        expect(renderResult.getByTestId('policyDetailsSaveButton')).toBeDisabled();
       });
 
       expect(toasts.addSuccess).toHaveBeenCalledWith({
@@ -175,6 +187,7 @@ describe('When rendering PolicySettingsLayout', () => {
         throw new Error('oh oh!');
       });
       render();
+      makeUpdates();
       await clickSave();
 
       await waitFor(() => {

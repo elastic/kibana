@@ -20,9 +20,11 @@ import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
 import { createCustomCellRenderer } from './custom_cell_renderer';
 import { createCustomGridColumnsConfiguration } from './custom_column';
+import { smartFields } from './custom_field_list';
+import { createCustomUnifiedHistogram } from './custom_unified_histogram';
 
-const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
-const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
+const LazyCustomDataSourceFilters = dynamic(() => import('./custom_data_source_filters'));
+const LazyCustomDataSourceSelector = dynamic(() => import('./custom_data_source_selector'));
 const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'));
 
 export interface CreateLogsExplorerProfileCustomizationsDeps {
@@ -43,8 +45,7 @@ export const createLogsExplorerProfileCustomizations =
       ...plugins,
       ...discoverServices,
     };
-    const { data, dataViews, discover, navigation, unifiedSearch } = pluginsWithOverrides;
-
+    const { data, dataViews, navigation, unifiedSearch } = pluginsWithOverrides;
     service.send('RECEIVED_STATE_CONTAINER', { discoverStateContainer: stateContainer });
 
     /**
@@ -54,7 +55,7 @@ export const createLogsExplorerProfileCustomizations =
     await waitFor(service, (state) => state.matches('initialized'), { timeout: 30000 });
 
     /**
-     * Replace the DataViewPicker with a custom `DatasetSelector` to pick integrations streams
+     * Replace the DataViewPicker with a custom `DataSourceSelector` to pick integrations streams
      * Prepend the search bar with custom filter control groups depending on the selected dataset
      */
     customizations.set({
@@ -64,17 +65,18 @@ export const createLogsExplorerProfileCustomizations =
 
         return (
           <KibanaContextProviderForPlugin>
-            <LazyCustomDatasetSelector
+            <LazyCustomDataSourceSelector
+              controller={controller}
+              core={core}
               datasetsClient={controller.datasetsClient}
               dataViews={dataViews}
-              discover={discover}
               logsExplorerControllerStateService={service}
             />
           </KibanaContextProviderForPlugin>
         );
       },
       PrependFilterBar: () => (
-        <LazyCustomDatasetFilters logsExplorerControllerStateService={service} data={data} />
+        <LazyCustomDataSourceFilters logsExplorerControllerStateService={service} data={data} />
       ),
       CustomSearchBar: createCustomSearchBar({
         data,
@@ -91,6 +93,16 @@ export const createLogsExplorerProfileCustomizations =
         module.createCustomControlColumnsConfiguration(service)
       ),
     });
+
+    customizations.set({
+      id: 'field_list',
+      additionalFieldGroups: {
+        smartFields,
+      },
+    });
+
+    // Fix bug where filtering on histogram does not work
+    customizations.set(createCustomUnifiedHistogram(data));
 
     /**
      * Hide New, Open and Save settings to prevent working with saved views.

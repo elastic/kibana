@@ -13,6 +13,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { PanelHeader } from './header';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
+import { TECHNICAL_PREVIEW } from '../../../common/translations';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/utils/sentinelone_alert_check');
@@ -63,7 +64,7 @@ describe('<PanelHeader />', () => {
       const { getByTestId } = renderPanelHeader();
 
       expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Beta');
+      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent(TECHNICAL_PREVIEW);
     }
   );
 
@@ -79,7 +80,7 @@ describe('<PanelHeader />', () => {
       const { getByTestId } = renderPanelHeader();
 
       expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).not.toHaveTextContent('Beta');
+      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).not.toHaveTextContent(TECHNICAL_PREVIEW);
     }
   );
 });

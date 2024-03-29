@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineActions } from '../store';
@@ -45,11 +45,11 @@ export const useCreateTimeline = ({
   timelineId,
   timelineType,
   onClick,
-}: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => void) => {
+}: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
-  const defaultDataViewSelector = useMemo(() => sourcererSelectors.defaultDataViewSelector(), []);
-  const { id: dataViewId, patternList: selectedPatterns } =
-    useDeepEqualSelector(defaultDataViewSelector);
+  const { id: dataViewId, patternList: selectedPatterns } = useSelector(
+    sourcererSelectors.defaultDataView
+  ) ?? { id: '', patternList: [] };
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
@@ -89,14 +89,14 @@ export const useCreateTimeline = ({
         dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
       }
 
-      if (timerange.kind === 'absolute') {
+      if (timerange?.kind === 'absolute') {
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
             ...timerange,
             id: InputsModelId.timeline,
           })
         );
-      } else if (timerange.kind === 'relative') {
+      } else if (timerange?.kind === 'relative') {
         dispatch(
           inputsActions.setRelativeRangeDatePicker({
             ...timerange,
@@ -117,12 +117,12 @@ export const useCreateTimeline = ({
   );
 
   return useCallback(
-    (options?: { timeRange?: TimeRange }) => {
+    async (options?: { timeRange?: TimeRange }) => {
+      await resetDiscoverAppState();
       createTimeline({ id: timelineId, show: true, timelineType, timeRange: options?.timeRange });
       if (typeof onClick === 'function') {
         onClick();
       }
-      resetDiscoverAppState();
     },
     [createTimeline, timelineId, timelineType, onClick, resetDiscoverAppState]
   );

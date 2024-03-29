@@ -13,7 +13,7 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  */
 export const allowedExperimentalValues = Object.freeze({
   rulesListDatagrid: true,
-  internalAlertsTable: false,
+  globalAlertsPage: false,
   ruleTagFilter: true,
   ruleStatusFilter: true,
   rulesDetailLogs: true,
@@ -21,6 +21,7 @@ export const allowedExperimentalValues = Object.freeze({
   ruleKqlBar: false,
   isMustacheAutocompleteOn: false,
   showMustacheAutocompleteSwitch: false,
+  ruleFormV2: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

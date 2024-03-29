@@ -8,10 +8,10 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
-import { getDataViewId } from '@kbn/apm-plugin/common/data_view_constants';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import request from 'superagent';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SupertestReturnType, ApmApiError } from '../../common/apm_api_supertest';
 
@@ -39,14 +39,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   function deleteDataView(spaceId: string) {
     return supertest
-      .delete(`/s/${spaceId}/api/saved_objects/index-pattern/${getDataViewId(spaceId)}?force=true`)
+      .delete(
+        `/s/${spaceId}/api/saved_objects/index-pattern/${getStaticDataViewId(spaceId)}?force=true`
+      )
       .set('kbn-xsrf', 'foo');
   }
 
   function getDataView({ spaceId }: { spaceId: string }) {
     const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
     return supertest.get(
-      `${spacePrefix}/api/saved_objects/index-pattern/${getDataViewId(spaceId)}`
+      `${spacePrefix}/api/saved_objects/index-pattern/${getStaticDataViewId(spaceId)}`
     );
   }
 
@@ -81,6 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177120
   registry.when('mappings and APM data exists', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateApmData(synthtrace);

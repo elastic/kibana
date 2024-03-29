@@ -42,7 +42,9 @@
 
 .unifiedFieldListItemButton {
   width: 100%;
-
+  @include euiSlightShadow;
+  background: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
   &.kbnFieldButton {
     &:focus-within,
     &-isActive {
@@ -64,6 +66,11 @@
       opacity: 1;
     }
   }
+}
+
+.unifiedFieldList__fieldPopover__fieldPopoverPanel .unifiedFieldListItemButton {
+  box-shadow: none;
+  background: none;
 }
 
 .unifiedFieldListItemButton--missing {
@@ -96,7 +103,7 @@
 
   &:hover,
   &[class*='-isActive'],
-  .domDragDrop__keyboardHandler:focus + & {
+  .domDraggable__keyboardHandler:focus + & {
     .unifiedFieldListItemButton__fieldIcon {
       opacity: 0;
     }
