@@ -23,6 +23,7 @@ import { FileWrapper } from '../audit/file_wrapper';
 export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
+
   const config = getService('config');
   const retry = getService('retry');
 
@@ -890,6 +891,61 @@ export default function ({ getService }: FtrProviderContext) {
         expect(auditEvents[0].event.outcome).to.be('failure');
         expect(auditEvents[0].trace.id).to.be.ok();
         expect(auditEvents[0].kibana.authentication_provider).to.be('saml');
+      });
+    });
+
+    describe('Post-authentication failures', () => {
+      it('correctly handles unexpected post-authentication errors', async () => {
+        const samlAuthenticationResponse = await supertest
+          .post('/api/security/saml/callback')
+          .send({ SAMLResponse: await createSAMLResponse() })
+          .expect(302);
+
+        // User should be redirected to the base URL.
+        expect(samlAuthenticationResponse.headers.location).to.be('/');
+
+        const cookies = samlAuthenticationResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        await checkSessionCookie(parseCookie(cookies[0])!);
+
+        const sessionCookie = parseCookie(cookies[0])!.cookieString();
+        // Non-auth flow routes
+        await supertest
+          .get('/authentication/app/not_auth_flow')
+          .set('Cookie', sessionCookie)
+          .expect(200);
+
+        await supertest
+          .get('/authentication/app/not_auth_flow?statusCode=400')
+          .set('Cookie', sessionCookie)
+          .expect(400);
+
+        const { text: nonauthFlow500ResponseText } = await supertest
+          .get('/authentication/app/not_auth_flow?statusCode=500')
+          .set('Cookie', sessionCookie)
+          .expect(500);
+        expect(nonauthFlow500ResponseText).to.eql(
+          '{"statusCode":500,"error":"Internal Server Error","message":"500 response"}'
+        );
+
+        // Auth-flow routes
+        await supertest
+          .get('/authentication/app/auth_flow')
+          .set('Cookie', sessionCookie)
+          .expect(200);
+
+        const { text: authFlow401ResponseText } = await supertest
+          .get('/authentication/app/auth_flow?statusCode=401')
+          .set('Cookie', sessionCookie)
+          .expect(401);
+        expect(authFlow401ResponseText).to.contain('We hit an authentication error');
+
+        const { text: authFlow500ResponseText } = await supertest
+          .get('/authentication/app/auth_flow?statusCode=500')
+          .set('Cookie', sessionCookie)
+          .expect(500);
+        expect(authFlow500ResponseText).to.contain('We hit an authentication error');
       });
     });
   });

@@ -173,12 +173,13 @@ export function useAIAssistChat({
   );
 
   const reload = useCallback(
-    async ({ options }: ChatRequestOptions = {}) => {
+    async ({ options, data }: ChatRequestOptions = {}) => {
       if (messagesRef.current.length === 0) return null;
 
       const chatRequest: ChatRequest = {
         messages: messagesRef.current,
         options,
+        data,
       };
 
       return triggerRequest(chatRequest);
