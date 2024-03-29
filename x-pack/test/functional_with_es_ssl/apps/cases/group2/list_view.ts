@@ -27,7 +27,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const toasts = getService('toasts');
 
-  describe('cases list', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/176716
+  describe.skip('cases list', () => {
     before(async () => {
       await cases.api.deleteAllCases();
       await cases.navigation.navigateToApp();
