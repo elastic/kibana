@@ -24,6 +24,8 @@ import {
   getVersionedContentString,
 } from './util';
 
+const LATEST_SERVERLESS_VERSION = '2023-10-31';
+
 import { convert, convertPathParameters, convertQuery } from './oas_converters';
 
 export const openApiVersion = '3.0.0';
@@ -218,7 +220,7 @@ const extractResponses = (route: InternalRouterRoute): OpenAPIV3.ResponsesObject
             description: route.options.description ?? 'No description',
             content: {
               ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
-              [getJSONContentString()]: {
+              [getVersionedContentString(LATEST_SERVERLESS_VERSION)]: {
                 schema: oasSchema,
               },
             },
@@ -239,17 +241,23 @@ const processRouter = (appRouter: Router, pathStartsWith?: string): OpenAPIV3.Pa
       const pathParams = getPathParameters(route.path);
       const validationSchemas = extractValidationSchemaFromRoute(route);
 
-      let pathObjects: OpenAPIV3.ParameterObject[] = [];
-      let queryObjects: OpenAPIV3.ParameterObject[] = [];
+      let parameters: undefined | OpenAPIV3.ParameterObject[] = [];
       if (validationSchemas) {
-        const params = validationSchemas.params as unknown;
-        if (params) {
-          pathObjects = convertPathParameters(params, pathParams);
+        let pathObjects: OpenAPIV3.ParameterObject[] = [];
+        let queryObjects: OpenAPIV3.ParameterObject[] = [];
+        const reqParams = validationSchemas.params as unknown;
+        if (reqParams) {
+          pathObjects = convertPathParameters(reqParams, pathParams);
         }
-        const query = validationSchemas.query as unknown;
-        if (query) {
-          queryObjects = convertQuery(query);
+        const reqQuery = validationSchemas.query as unknown;
+        if (reqQuery) {
+          queryObjects = convertQuery(reqQuery);
         }
+        parameters = [
+          getVersionedHeaderParam(LATEST_SERVERLESS_VERSION, [LATEST_SERVERLESS_VERSION]),
+          ...pathObjects,
+          ...queryObjects,
+        ];
       }
 
       const path: OpenAPIV3.PathItemObject = {
@@ -257,14 +265,14 @@ const processRouter = (appRouter: Router, pathStartsWith?: string): OpenAPIV3.Pa
           requestBody: !!validationSchemas?.body
             ? {
                 content: {
-                  [getJSONContentString()]: {
+                  [getVersionedContentString(LATEST_SERVERLESS_VERSION)]: {
                     schema: convert(validationSchemas.body),
                   },
                 },
               }
             : undefined,
           responses: extractResponses(route),
-          parameters: pathObjects.concat(queryObjects),
+          parameters,
           operationId: getOperationId(route.path),
         },
       };
