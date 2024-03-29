@@ -32,7 +32,9 @@ export const HeaderHelpCenterTrigger = ({ helpExtension$ }: IHeaderHelpCenterTri
   const [helpExtension, setHelpExtension] = useState<ChromeHelpExtension>();
 
   useEffect(() => {
-    helpExtension$.subscribe(setHelpExtension);
+    const subscription = helpExtension$.subscribe(setHelpExtension);
+
+    return () => subscription.unsubscribe();
   }, [helpExtension$]);
 
   const togglePortal = () => {
