@@ -19,7 +19,7 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
-import { getAgentsByKuery, getLatestCompatibleAgentVersion } from '../../services/agents';
+import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../../services/agents';
 import { AGENTS_PREFIX } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
@@ -470,7 +470,7 @@ export const getK8sManifest: FleetRequestHandler<
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
 
-    const agentVersion = await getLatestCompatibleAgentVersion();
+    const agentVersion = await getLatestAvailableAgentVersion();
 
     const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
       fleetServer,
@@ -502,7 +502,7 @@ export const downloadK8sManifest: FleetRequestHandler<
   try {
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
-    const agentVersion = await getLatestCompatibleAgentVersion();
+    const agentVersion = await getLatestAvailableAgentVersion();
     const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
       fleetServer,
       token,

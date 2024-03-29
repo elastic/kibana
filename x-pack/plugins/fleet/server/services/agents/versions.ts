@@ -42,24 +42,13 @@ export const getLatestAvailableAgentVersion = async ({
   includeCurrentVersion?: boolean;
   ignoreCache?: boolean;
 } = {}): Promise<string> => {
-  const versions = await getAvailableVersions({ includeCurrentVersion, ignoreCache });
-
-  return versions[0];
-};
-
-export const getLatestCompatibleAgentVersion = async ({
-  includeCurrentVersion = false,
-  ignoreCache = false,
-}: {
-  includeCurrentVersion?: boolean;
-  ignoreCache?: boolean;
-} = {}): Promise<string> => {
   const kibanaVersion = appContextService.getKibanaVersion();
 
-  const versions = await getAvailableVersions({ includeCurrentVersion, ignoreCache });
   let latestCompatibleVersion;
 
+  const versions = await getAvailableVersions({ includeCurrentVersion, ignoreCache });
   versions.sort(semverRcompare);
+
   if (versions && versions.length > 0 && versions.indexOf(kibanaVersion) !== 0) {
     latestCompatibleVersion =
       versions.find((version) => {

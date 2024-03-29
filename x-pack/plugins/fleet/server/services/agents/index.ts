@@ -19,8 +19,4 @@ export { getAgentUploads, getAgentUploadFile } from './uploads';
 export { AgentServiceImpl } from './agent_service';
 export type { AgentClient, AgentService } from './agent_service';
 export { BulkActionsResolver } from './bulk_actions_resolver';
-export {
-  getAvailableVersions,
-  getLatestAvailableAgentVersion,
-  getLatestCompatibleAgentVersion,
-} from './versions';
+export { getAvailableVersions, getLatestAvailableAgentVersion } from './versions';
