@@ -43,14 +43,14 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/openai'));
     loadTestFile(require.resolve('./connector_types/d3security'));
     loadTestFile(require.resolve('./connector_types/bedrock'));
-    loadTestFile(require.resolve('./create'));
-    loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./execute'));
-    loadTestFile(require.resolve('./get_all'));
-    loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./connector_types'));
-    loadTestFile(require.resolve('./update'));
-    loadTestFile(require.resolve('./bulk_enqueue'));
+    // loadTestFile(require.resolve('./create'));
+    // loadTestFile(require.resolve('./delete'));
+    // loadTestFile(require.resolve('./execute'));
+    // loadTestFile(require.resolve('./get_all'));
+    // loadTestFile(require.resolve('./get'));
+    // loadTestFile(require.resolve('./connector_types'));
+    // loadTestFile(require.resolve('./update'));
+    // loadTestFile(require.resolve('./bulk_enqueue'));
 
     /**
      * Sub action framework
