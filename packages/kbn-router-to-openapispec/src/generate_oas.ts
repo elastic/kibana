@@ -18,9 +18,10 @@ import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/
 import {
   getPathParameters,
   extractValidationSchemaFromVersionedHandler,
-  getVersionedContentString,
   extractValidationSchemaFromRoute,
   getJSONContentString,
+  getVersionedHeaderParam,
+  getVersionedContentString,
 } from './util';
 
 import { convert, convertPathParameters, convertQuery } from './oas_converters';
@@ -149,24 +150,29 @@ const processVersionedRouter = (
      *       so we only take the latest version of the params and query params, we also
      *       assume at this point that we are generating for serverless.
      */
-    let pathObjects: OpenAPIV3.ParameterObject[] = [];
-    let queryObjects: OpenAPIV3.ParameterObject[] = [];
-    const version = versionHandlerResolvers.newest(
-      route.handlers.map(({ options: { version: v } }) => v)
-    );
-    const handler = route.handlers.find(({ options: { version: v } }) => v === version);
+    let parameters: OpenAPIV3.ParameterObject[] = [];
+    const versions = route.handlers.map(({ options: { version: v } }) => v).sort();
+    const newestVersion = versionHandlerResolvers.newest(versions);
+    const handler = route.handlers.find(({ options: { version: v } }) => v === newestVersion);
     const schemas = handler ? extractValidationSchemaFromVersionedHandler(handler) : undefined;
 
     try {
       if (handler && schemas) {
-        const params = schemas.request?.params as unknown;
-        if (params) {
-          pathObjects = convertPathParameters(params, pathParams);
+        const reqParams = schemas.request?.params as unknown;
+        let pathObjects: OpenAPIV3.ParameterObject[] = [];
+        let queryObjects: OpenAPIV3.ParameterObject[] = [];
+        if (reqParams) {
+          pathObjects = convertPathParameters(reqParams, pathParams);
         }
-        const query = schemas.request?.query as unknown;
-        if (query) {
-          queryObjects = convertQuery(query);
+        const reqQuery = schemas.request?.query as unknown;
+        if (reqQuery) {
+          queryObjects = convertQuery(reqQuery);
         }
+        parameters = [
+          getVersionedHeaderParam(newestVersion, versions),
+          ...pathObjects,
+          ...queryObjects,
+        ];
       }
 
       const hasBody = Boolean(
@@ -180,7 +186,7 @@ const processVersionedRouter = (
               }
             : undefined,
           responses: extractVersionedResponses(route),
-          parameters: pathObjects.concat(queryObjects),
+          parameters,
           operationId: getOperationId(route.path),
         },
       };
@@ -188,7 +194,7 @@ const processVersionedRouter = (
       assignToPathsObject(paths, route.path, path);
     } catch (e) {
       // Enrich the error message with a bit more context
-      e.message = `Error generating OpenAPI for route '${route.path}' using version '${version}': ${e.message}`;
+      e.message = `Error generating OpenAPI for route '${route.path}' using newest version '${newestVersion}': ${e.message}`;
       throw e;
     }
   }

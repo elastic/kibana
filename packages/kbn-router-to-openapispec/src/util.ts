@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { OpenAPIV3 } from 'openapi-types';
 import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
 import {
   getRequestValidation,
@@ -44,3 +45,16 @@ export const extractValidationSchemaFromRoute = (
   if (!route.validationSchemas) return undefined;
   return getRequestValidation(route.validationSchemas);
 };
+
+export const getVersionedHeaderParam = (
+  defaultVersion: undefined | string,
+  versions: string[]
+): OpenAPIV3.ParameterObject => ({
+  in: 'header',
+  name: 'elastic-api-version',
+  schema: {
+    type: 'string',
+    enum: versions,
+    default: defaultVersion,
+  },
+});

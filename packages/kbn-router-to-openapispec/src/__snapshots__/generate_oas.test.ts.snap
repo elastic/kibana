@@ -13,7 +13,20 @@ Object {
     "/bar": Object {
       "get": Object {
         "operationId": "/bar#0",
-        "parameters": Array [],
+        "parameters": Array [
+          Object {
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "oas-test-version-2",
+              "enum": Array [
+                "oas-test-version-1",
+                "oas-test-version-2",
+              ],
+              "type": "string",
+            },
+          },
+        ],
         "requestBody": Object {
           "content": Object {
             "application/json; Elastic-Api-Version=oas-test-version-1": Object {
