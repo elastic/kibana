@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useLocalStorageListener } from '@kbn/ml-local-storage';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
@@ -70,6 +71,12 @@ export const DiscoverTopNav = ({
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
+
+  const [lsIndex, saveLsIndex] = useLocalStorageListener('obs-ai-assistant-index', null);
+  const [lsIndexTimeField, saveLsIndexTimeField] = useLocalStorageListener(
+    'obs-ai-assistant-index-time-field',
+    null
+  );
 
   useEffect(() => {
     return () => {
@@ -180,6 +187,12 @@ export const DiscoverTopNav = ({
     topNavBadges,
     topNavMenu,
   ]);
+
+  useEffect(() => {
+    console.log('time field', dataView?.getTimeField()?.spec.name);
+    saveLsIndex(dataView?.getIndexPattern() || null);
+    saveLsIndexTimeField(dataView?.getTimeField()?.spec.name || null);
+  }, [dataView]);
 
   const savedSearchId = useSavedSearch().id;
   const savedSearchHasChanged = useSavedSearchHasChanged();

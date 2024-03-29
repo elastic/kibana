@@ -107,9 +107,9 @@ export function NavControl({}: {}) {
     };
   }, [service.conversations]);
 
-  if (!isVisible) {
-    return null;
-  }
+  // if (!isVisible) {
+  //   return null;
+  // }
 
   return (
     <>

@@ -26,8 +26,6 @@ import type {
 // import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsApiLicense } from '../../types';
 
-import { significantTerms } from '../../significant_terms_kibana_logs';
-
 /**
  * Log rate analysis route handler.
  */
@@ -59,7 +57,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
     // const executionContext = createExecutionContext(coreStart, AIOPS_PLUGIN_ID, request.route.path);
 
     return response.ok({
-      body: significantTerms,
+      body: [],
     });
   };
 }

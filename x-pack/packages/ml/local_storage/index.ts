@@ -6,3 +6,4 @@
  */
 
 export { StorageContextProvider, useStorage } from './src/storage_context';
+export { useLocalStorageListener } from './src/use_local_storage_listener';
