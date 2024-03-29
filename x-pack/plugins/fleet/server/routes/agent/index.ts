@@ -276,7 +276,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.REQUEST_DIAGNOSTICS_PATTERN,
       fleetAuthz: {
-        fleet: { allAgents: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -291,7 +291,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.BULK_REQUEST_DIAGNOSTICS_PATTERN,
       fleetAuthz: {
-        fleet: { allAgents: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(

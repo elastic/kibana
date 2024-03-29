@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
-import {
-  AppCounts,
-  JobTypes,
-  LayoutCounts,
-  ReportingUsageType,
-} from '@kbn/reporting-plugin/server/usage/types';
 import { services as xpackServices } from '../../functional/services';
 import { services as apiIntegrationServices } from '../../api_integration/services';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -125,78 +118,6 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
           .send({ query: { match_all: {} } })
           .expect(200);
       });
-    },
-
-    expectRecentPdfAppStats(stats: ReportingUsageType, app: keyof AppCounts, count: number) {
-      expect(stats.last7Days.printable_pdf.app[app]).to.be(count);
-    },
-
-    expectAllTimePdfAppStats(stats: ReportingUsageType, app: keyof AppCounts, count: number) {
-      expect(stats.printable_pdf.app[app]).to.be(count);
-    },
-
-    expectRecentPdfLayoutStats(
-      stats: ReportingUsageType,
-      layout: keyof LayoutCounts,
-      count: number
-    ) {
-      expect(stats.last7Days.printable_pdf.layout[layout]).to.be(count);
-    },
-
-    expectAllTimePdfLayoutStats(
-      stats: ReportingUsageType,
-      layout: keyof LayoutCounts,
-      count: number
-    ) {
-      expect(stats.printable_pdf.layout[layout]).to.be(count);
-    },
-
-    expectRecentJobTypeTotalStats(
-      stats: ReportingUsageType,
-      jobType: keyof JobTypes,
-      count: number
-    ) {
-      expect(stats.last7Days[jobType].total).to.be(count);
-    },
-
-    expectAllTimeJobTypeTotalStats(
-      stats: ReportingUsageType,
-      jobType: keyof JobTypes,
-      count: number
-    ) {
-      expect(stats[jobType].total).to.be(count);
-    },
-
-    getCompletedReportCount(stats: ReportingUsageType) {
-      return stats.status.completed;
-    },
-
-    expectCompletedReportCount(stats: ReportingUsageType, count: number) {
-      expect(this.getCompletedReportCount(stats)).to.be(count);
-    },
-
-    getRecentPdfAppStats(stats: ReportingUsageType, app: keyof AppCounts) {
-      return stats.last7Days.printable_pdf.app[app];
-    },
-
-    getAllTimePdfAppStats(stats: ReportingUsageType, app: keyof AppCounts) {
-      return stats.printable_pdf.app[app];
-    },
-
-    getRecentPdfLayoutStats(stats: ReportingUsageType, layout: keyof LayoutCounts) {
-      return stats.last7Days.printable_pdf.layout[layout];
-    },
-
-    getAllTimePdfLayoutStats(stats: ReportingUsageType, layout: keyof LayoutCounts) {
-      return stats.printable_pdf.layout[layout];
-    },
-
-    getRecentJobTypeTotalStats(stats: ReportingUsageType, jobType: keyof JobTypes) {
-      return stats.last7Days[jobType].total;
-    },
-
-    getAllTimeJobTypeTotalStats(stats: ReportingUsageType, jobType: keyof JobTypes) {
-      return stats[jobType].total;
     },
   };
 }

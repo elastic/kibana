@@ -20,7 +20,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
-import type { MlFeatures } from '../../common/constants/app';
+import type { ExperimentalFeatures, MlFeatures } from '../../common/constants/app';
 import { MlLicense } from '../../common/license';
 import { MlCapabilitiesService } from './capabilities/check_capabilities';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
@@ -49,6 +49,7 @@ interface AppProps {
   appMountParams: AppMountParameters;
   isServerless: boolean;
   mlFeatures: MlFeatures;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -91,12 +92,21 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFeatures }) => {
+const App: FC<AppProps> = ({
+  coreStart,
+  deps,
+  appMountParams,
+  isServerless,
+  mlFeatures,
+  experimentalFeatures,
+}) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
   };
+
+  const chromeStyle = useObservable(coreStart.chrome.getChromeStyle$(), 'classic');
 
   const services: StartServices = useMemo(() => {
     return {
@@ -165,7 +175,12 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
           <KibanaContextProvider services={services}>
             <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
+                <EnabledFeaturesContextProvider
+                  isServerless={isServerless}
+                  mlFeatures={mlFeatures}
+                  showMLNavMenu={chromeStyle === 'classic'}
+                  experimentalFeatures={experimentalFeatures}
+                >
                   <MlRouter pageDeps={pageDeps} />
                 </EnabledFeaturesContextProvider>
               </DatePickerContextProvider>
@@ -182,7 +197,8 @@ export const renderApp = (
   deps: MlDependencies,
   appMountParams: AppMountParameters,
   isServerless: boolean,
-  mlFeatures: MlFeatures
+  mlFeatures: MlFeatures,
+  experimentalFeatures: ExperimentalFeatures
 ) => {
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
@@ -205,6 +221,7 @@ export const renderApp = (
       appMountParams={appMountParams}
       isServerless={isServerless}
       mlFeatures={mlFeatures}
+      experimentalFeatures={experimentalFeatures}
     />,
     appMountParams.element
   );

@@ -7,11 +7,9 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-import { frequentItemSetsLargeArraysSource } from '../../apps/aiops/log_rate_analysis/test_data/__mocks__/frequent_item_sets_large_arrays';
 
 const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   KIBANA_SAMPLE_DATA_LOGS: 'kibana_sample_data_logs',
@@ -324,44 +322,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'large_arrays':
-          try {
-            await es.indices.delete({
-              index: dataGenerator,
-              ignore_unavailable: true,
-            });
-          } catch (e) {
-            log.info(`Could not delete index '${dataGenerator}' in before() callback`);
-          }
-
-          // Create index with mapping
-          await es.indices.create({
-            index: dataGenerator,
-            mappings: {
-              properties: {
-                items: { type: 'keyword' },
-                '@timestamp': { type: 'date' },
-              },
-            },
-          });
-
-          interface DocWithArray {
-            '@timestamp': number;
-            items: string[];
-          }
-
-          await es.bulk({
-            refresh: 'wait_for',
-            body: frequentItemSetsLargeArraysSource.reduce((docs, items) => {
-              if (docs === undefined) return [];
-              docs.push({ index: { _index: dataGenerator } });
-              docs.push({
-                '@timestamp': 1562254538700,
-                items,
-              });
-              return docs;
-            }, [] as estypes.BulkRequest<DocWithArray, DocWithArray>['body']),
-          });
-
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/large_arrays');
           break;
 
         default:
@@ -389,7 +350,6 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
         case 'artificial_logs_with_spike_textfield_zerodocsfallback':
         case 'artificial_logs_with_dip_zerodocsfallback':
         case 'artificial_logs_with_dip_textfield_zerodocsfallback':
-        case 'large_arrays':
           try {
             await es.indices.delete({
               index: dataGenerator,
@@ -397,6 +357,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           } catch (e) {
             log.error(`Error deleting index '${dataGenerator}' in after() callback`);
           }
+          break;
+
+        case 'large_arrays':
+          await esArchiver.unload('x-pack/test/functional/es_archives/large_arrays');
           break;
 
         default:
