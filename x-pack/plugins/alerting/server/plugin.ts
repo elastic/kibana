@@ -64,7 +64,7 @@ import { RulesClientFactory } from './rules_client_factory';
 import { RulesSettingsClientFactory } from './rules_settings_client_factory';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
-import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID, RuleAlertData } from './types';
+import { AlertingRequestHandlerContext, ALERTING_FEATURE_ID, RuleAlertData } from './types';
 import { defineRoutes } from './routes';
 import {
   AlertInstanceContext,
@@ -320,7 +320,7 @@ export class AlertingPlugin {
     }
 
     // Usage counter for telemetry
-    this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTING_FEATURE_ID);
 
     const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
       plugins.data.search.searchSource

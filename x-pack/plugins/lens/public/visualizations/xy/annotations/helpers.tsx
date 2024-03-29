@@ -21,11 +21,11 @@ import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
 import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
 import {
-  checkScaleOperation,
   getAnnotationsLayers,
   getAxisName,
   getDataLayers,
   isAnnotationsLayer,
+  isTimeChart,
 } from '../visualization_helpers';
 import { generateId } from '../../../id_generator';
 
@@ -42,19 +42,6 @@ export const defaultRangeAnnotationLabel = i18n.translate(
     defaultMessage: 'Event range',
   }
 );
-
-export const isDateHistogram = (
-  dataLayers: XYDataLayerConfig[],
-  frame?: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'> | undefined
-) =>
-  Boolean(
-    dataLayers.length &&
-      dataLayers.every(
-        (dataLayer) =>
-          dataLayer.xAccessor &&
-          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
-      )
-  );
 
 export function getStaticDate(dataLayers: XYDataLayerConfig[], frame: FramePublicAPI) {
   const dataLayersId = dataLayers.map(({ layerId }) => layerId);
@@ -98,7 +85,7 @@ export const getAnnotationsSupportedLayer = (
 ) => {
   const dataLayers = getDataLayers(state?.layers || []);
 
-  const hasDateHistogram = isDateHistogram(dataLayers, frame);
+  const hasDateHistogram = isTimeChart(dataLayers, frame);
 
   const initialDimensions =
     state && hasDateHistogram

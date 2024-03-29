@@ -85,6 +85,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   PLUGIN_ID,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
@@ -183,6 +184,7 @@ const allSavedObjectTypes = [
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -329,10 +331,10 @@ export class FleetPlugin
                     groupType: 'mutually_exclusive',
                     privileges: [
                       {
-                        id: `${PLUGIN_ID}-agents-all`,
+                        id: `agents_all`,
                         api: [`${PLUGIN_ID}-agents-read`, `${PLUGIN_ID}-agents-all`],
                         name: 'All',
-                        ui: ['read', 'all'],
+                        ui: ['agents_read', 'agents_all'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -340,10 +342,10 @@ export class FleetPlugin
                         includeIn: 'all',
                       },
                       {
-                        id: `${PLUGIN_ID}-agents-read`,
+                        id: `agents_read`,
                         api: [`${PLUGIN_ID}-agents-read`],
                         name: 'Read',
-                        ui: ['read'],
+                        ui: ['agents_read'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -363,13 +365,13 @@ export class FleetPlugin
                     groupType: 'mutually_exclusive',
                     privileges: [
                       {
-                        id: `${PLUGIN_ID}-agent-policies-all`,
+                        id: `agent_policies_all`,
                         api: [
                           `${PLUGIN_ID}-agent-policies-read`,
                           `${PLUGIN_ID}-agent-policies-all`,
                         ],
                         name: 'All',
-                        ui: ['read', 'all'],
+                        ui: ['agent_policies_read', 'agent_policies_all'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -377,10 +379,10 @@ export class FleetPlugin
                         includeIn: 'all',
                       },
                       {
-                        id: `${PLUGIN_ID}-agent-policies-read`,
+                        id: `agent_policies_read`,
                         api: [`${PLUGIN_ID}-agent-policies-read`],
                         name: 'Read',
-                        ui: ['read'],
+                        ui: ['agent_policies_read'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -400,10 +402,10 @@ export class FleetPlugin
                     groupType: 'mutually_exclusive',
                     privileges: [
                       {
-                        id: `${PLUGIN_ID}-settings-all`,
+                        id: `settings_all`,
                         api: [`${PLUGIN_ID}-settings-read`, `${PLUGIN_ID}-settings-all`],
                         name: 'All',
-                        ui: ['read', 'all'],
+                        ui: ['settings_read', 'settings_all'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -411,10 +413,10 @@ export class FleetPlugin
                         includeIn: 'all',
                       },
                       {
-                        id: `${PLUGIN_ID}-settings-read`,
+                        id: `settings_read`,
                         api: [`${PLUGIN_ID}-settings-read`],
                         name: 'Read',
-                        ui: ['read'],
+                        ui: ['settings_read'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,

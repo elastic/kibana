@@ -12,7 +12,6 @@ import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import '../index.scss';
 import { InfraPublicConfig } from '../../common/plugin_config_types';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';

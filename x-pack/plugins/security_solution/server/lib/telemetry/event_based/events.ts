@@ -10,6 +10,7 @@ export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
   taskDurationInSeconds: number;
   interval: string;
+  alertSampleSizePerShard: number;
 }> = {
   eventType: 'risk_score_execution_success',
   schema: {
@@ -31,6 +32,12 @@ export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
         description: `Configured interval for the current risk scoring task`,
       },
     },
+    alertSampleSizePerShard: {
+      type: 'long',
+      _meta: {
+        description: `Number of alerts to sample per shard for the current risk scoring task`,
+      },
+    },
   },
 };
 
@@ -43,6 +50,7 @@ export const RISK_SCORE_EXECUTION_CANCELLATION_EVENT: EventTypeOpts<{
   scoresWritten: number;
   taskDurationInSeconds: number;
   interval: string;
+  alertSampleSizePerShard: number;
 }> = {
   eventType: 'risk_score_execution_cancellation',
   schema: {
@@ -62,6 +70,12 @@ export const RISK_SCORE_EXECUTION_CANCELLATION_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: `Configured interval for the current risk scoring task`,
+      },
+    },
+    alertSampleSizePerShard: {
+      type: 'long',
+      _meta: {
+        description: `Number of alerts to sample per shard for the current risk scoring task`,
       },
     },
   },

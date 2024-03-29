@@ -56,7 +56,19 @@ describe('ConnectorsDropdown', () => {
             <EuiFlexItem
               grow={false}
             >
-              <Styled(EuiIcon)
+              <EuiIcon
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "atofe7",
+                    "next": undefined,
+                    "styles": "
+                  margin-right: 13px;
+                  margin-bottom: 0 !important;
+                ",
+                    "toString": [Function],
+                  }
+                }
                 size="m"
                 type="minusInCircle"
               />
@@ -81,7 +93,19 @@ describe('ConnectorsDropdown', () => {
             <EuiFlexItem
               grow={false}
             >
-              <Styled(EuiIcon)
+              <EuiIcon
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "13a1e3t",
+                    "next": undefined,
+                    "styles": "
+                            margin-right: 12px;
+                            margin-bottom: 0 !important;
+                          ",
+                    "toString": [Function],
+                  }
+                }
                 size="m"
                 type="logoSecurity"
               />
@@ -106,7 +130,19 @@ describe('ConnectorsDropdown', () => {
             <EuiFlexItem
               grow={false}
             >
-              <Styled(EuiIcon)
+              <EuiIcon
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "13a1e3t",
+                    "next": undefined,
+                    "styles": "
+                            margin-right: 12px;
+                            margin-bottom: 0 !important;
+                          ",
+                    "toString": [Function],
+                  }
+                }
                 size="m"
                 type="logoSecurity"
               />
@@ -131,7 +167,19 @@ describe('ConnectorsDropdown', () => {
             <EuiFlexItem
               grow={false}
             >
-              <Styled(EuiIcon)
+              <EuiIcon
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "13a1e3t",
+                    "next": undefined,
+                    "styles": "
+                            margin-right: 12px;
+                            margin-bottom: 0 !important;
+                          ",
+                    "toString": [Function],
+                  }
+                }
                 size="m"
                 type="logoSecurity"
               />
@@ -156,7 +204,19 @@ describe('ConnectorsDropdown', () => {
             <EuiFlexItem
               grow={false}
             >
-              <Styled(EuiIcon)
+              <EuiIcon
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "13a1e3t",
+                    "next": undefined,
+                    "styles": "
+                            margin-right: 12px;
+                            margin-bottom: 0 !important;
+                          ",
+                    "toString": [Function],
+                  }
+                }
                 size="m"
                 type="logoSecurity"
               />
@@ -181,7 +241,19 @@ describe('ConnectorsDropdown', () => {
             <EuiFlexItem
               grow={false}
             >
-              <Styled(EuiIcon)
+              <EuiIcon
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "13a1e3t",
+                    "next": undefined,
+                    "styles": "
+                            margin-right: 12px;
+                            margin-bottom: 0 !important;
+                          ",
+                    "toString": [Function],
+                  }
+                }
                 size="m"
                 type="logoSecurity"
               />
@@ -197,10 +269,22 @@ describe('ConnectorsDropdown', () => {
             <EuiFlexItem
               grow={false}
             >
-              <Styled(EuiIconTip)
+              <EuiIconTip
                 aria-label="This connector is deprecated. Update it, or create a new one."
                 color="warning"
                 content="This connector is deprecated. Update it, or create a new one."
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "pxiz1g",
+                    "next": undefined,
+                    "styles": "
+                              margin-left: 8px
+                              margin-bottom: 0 !important;
+                            ",
+                    "toString": [Function],
+                  }
+                }
                 size="m"
                 type="warning"
               />

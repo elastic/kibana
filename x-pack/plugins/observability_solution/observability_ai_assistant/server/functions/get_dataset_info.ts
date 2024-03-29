@@ -13,7 +13,6 @@ import { MessageRole } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 
 export function registerGetDatasetInfoFunction({
-  client,
   resources,
   functions,
 }: FunctionRegistrationParameters) {
@@ -42,7 +41,7 @@ export function registerGetDatasetInfoFunction({
         required: ['index'],
       } as const,
     },
-    async ({ arguments: { index }, messages, connectorId }, signal) => {
+    async ({ arguments: { index }, messages, connectorId, chat }, signal) => {
       const coreContext = await resources.context.core;
 
       const esClient = coreContext.elasticsearch.client.asCurrentUser;
@@ -100,7 +99,6 @@ export function registerGetDatasetInfoFunction({
           return (field.esTypes ?? [field.type]).map((type) => {
             return {
               name: field.name,
-              description: field.customLabel || '',
               type,
             };
           });
@@ -116,7 +114,7 @@ export function registerGetDatasetInfoFunction({
       const relevantFields = await Promise.all(
         chunk(fieldNames, 500).map(async (fieldsInChunk) => {
           const chunkResponse$ = (
-            await client.chat('get_relevent_dataset_names', {
+            await chat('get_relevent_dataset_names', {
               connectorId,
               signal,
               messages: [

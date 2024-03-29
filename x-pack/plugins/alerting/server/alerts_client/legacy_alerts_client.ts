@@ -21,6 +21,7 @@ import {
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
 import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   RulesSettingsFlappingProperties,
@@ -134,6 +135,10 @@ export class LegacyAlertsClient<
 
   public getAlert(id: string) {
     return this.alertFactory?.get(id);
+  }
+
+  public isTrackedAlert(id: string) {
+    return !!this.trackedAlerts.active[id];
   }
 
   public processAlerts({
@@ -265,7 +270,9 @@ export class LegacyAlertsClient<
     return null;
   }
 
-  public async persistAlerts() {}
+  public async persistAlerts(maintenanceWindows?: MaintenanceWindow[]) {
+    return null;
+  }
 
   public async setAlertStatusToUntracked() {
     return;

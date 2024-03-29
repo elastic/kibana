@@ -284,6 +284,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    security: {
+      registerSecurityApi: (api) => deps.security.registerSecurityApi(api),
+    },
   };
 }
 
@@ -359,6 +362,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     coreUsageData: deps.coreUsageData,
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+    },
+    security: {
+      authc: deps.security.authc,
     },
   };
 }

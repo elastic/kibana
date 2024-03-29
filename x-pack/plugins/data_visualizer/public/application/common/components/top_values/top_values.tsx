@@ -55,10 +55,16 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   } = useDataVisualizerKibana();
 
   if (stats === undefined || !stats.topValues) return null;
-  const { topValues, fieldName, sampleCount } = stats;
+  const { topValues: originalTopValues, fieldName, sampleCount } = stats;
 
-  if (topValues?.length === 0) return null;
+  if (originalTopValues?.length === 0) return null;
   const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
+
+  const topValues = originalTopValues.map((bucket) => ({
+    ...bucket,
+    percent:
+      typeof bucket.percent === 'number' ? bucket.percent : bucket.doc_count / totalDocuments,
+  }));
   const topValuesOtherCountPercent =
     1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);
   const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount ?? 0));

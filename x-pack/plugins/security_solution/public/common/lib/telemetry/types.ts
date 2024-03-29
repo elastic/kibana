@@ -39,6 +39,12 @@ import type {
   ReportAssistantMessageSentParams,
   ReportAssistantSettingToggledParams,
 } from './events/ai_assistant/types';
+import type {
+  DocumentDetailsTelemetryEvents,
+  ReportDocumentDetailsTelemetryEventParams,
+  ReportDetailsFlyoutOpenedParams,
+  ReportDetailsFlyoutTabClickedParams,
+} from './events/document_details/types';
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
@@ -51,6 +57,7 @@ export type {
   ReportToggleRiskSummaryClickedParams,
   ReportAddRiskInputToTimelineClickedParams,
 } from './events/entity_analytics/types';
+export * from './events/document_details/types';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -89,7 +96,8 @@ export type TelemetryEventParams =
   | ReportAnomaliesCountClickedParams
   | ReportDataQualityIndexCheckedParams
   | ReportDataQualityCheckAllCompletedParams
-  | ReportBreadcrumbClickedParams;
+  | ReportBreadcrumbClickedParams
+  | ReportDocumentDetailsTelemetryEventParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -117,6 +125,10 @@ export interface TelemetryClientStart {
   reportDataQualityIndexChecked(params: ReportDataQualityIndexCheckedParams): void;
   reportDataQualityCheckAllCompleted(params: ReportDataQualityCheckAllCompletedParams): void;
   reportBreadcrumbClicked(params: ReportBreadcrumbClickedParams): void;
+
+  // document details flyout
+  reportDetailsFlyoutOpened(params: ReportDetailsFlyoutOpenedParams): void;
+  reportDetailsFlyoutTabClicked(params: ReportDetailsFlyoutTabClickedParams): void;
 }
 
 export type TelemetryEvent =
@@ -124,6 +136,7 @@ export type TelemetryEvent =
   | AlertsGroupingTelemetryEvent
   | EntityAnalyticsTelemetryEvent
   | DataQualityTelemetryEvents
+  | DocumentDetailsTelemetryEvents
   | {
       eventType: TelemetryEventTypes.MLJobUpdate;
       schema: RootSchema<ReportMLJobUpdateParams>;

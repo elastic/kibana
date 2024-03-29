@@ -10494,16 +10494,16 @@
                 "path": "packages/core/usage-data/core-usage-data-server-internal/src/saved_objects/core_usage_stats.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
                 "plugin": "taskManager",
                 "path": "x-pack/plugins/task_manager/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "actions",
@@ -10584,10 +10584,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability_solution/observability/server/saved_objects/slo.ts"
               },
               {
                 "plugin": "savedSearch",
@@ -10676,6 +10672,10 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/observability_solution/apm/server/saved_objects/apm_service_groups.ts"
+              },
+              {
+                "plugin": "slo",
+                "path": "x-pack/plugins/observability_solution/slo/server/saved_objects/slo.ts"
               },
               {
                 "plugin": "synthetics",
@@ -10832,6 +10832,26 @@
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository_create_repository.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-base-server-internal",

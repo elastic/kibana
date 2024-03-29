@@ -13,6 +13,7 @@
       "licensing",
       "security",
       "taskManager",
+      "dataViews",
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "optionalPlugins": ["cloud", "serverless"],

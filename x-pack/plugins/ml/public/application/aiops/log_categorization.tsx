@@ -45,6 +45,7 @@ export const LogCategorizationPage: FC = () => {
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
+            'analytics',
             'application',
             'charts',
             'data',

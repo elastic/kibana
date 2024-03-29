@@ -724,30 +724,6 @@
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
           },
@@ -1016,6 +992,30 @@
             "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
           },
           {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
+          },
+          {
             "plugin": "triggersActionsUi",
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx"
           },
@@ -1050,18 +1050,6 @@
           {
             "plugin": "triggersActionsUi",
             "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
           },
           {
             "plugin": "aiops",
@@ -2541,54 +2529,6 @@
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
             "plugin": "licensing",
             "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
           },
@@ -2683,6 +2623,54 @@
           {
             "plugin": "security",
             "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
           },
           {
             "plugin": "triggersActionsUi",
@@ -4931,6 +4919,14 @@
             "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
             "section": "def-common.PluginsServiceStart",
             "text": "PluginsServiceStart"
+          },
+          " | undefined; security?: ",
+          {
+            "pluginId": "@kbn/core-security-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityBrowserPluginApi",
+            "section": "def-common.SecurityServiceStart",
+            "text": "SecurityServiceStart"
           },
           " | undefined; }"
         ],

@@ -15,6 +15,7 @@ import {
   chromeServiceMock,
   coreMock,
   docLinksServiceMock,
+  scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import {
@@ -42,6 +43,7 @@ import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { urlTrackerMock } from './url_tracker.mock';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -146,12 +148,13 @@ export function createDiscoverServicesMock(): DiscoverServices {
     core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),
     chrome: chromeServiceMock.createStartContract(),
-    history: () => ({
+    history: {
       location: {
         search: '',
       },
       listen: jest.fn(),
-    }),
+    },
+    getScopedHistory: () => scopedHistoryMock.create(),
     data: dataPlugin,
     docLinks: docLinksServiceMock.createStartContract(),
     capabilities: {
@@ -228,6 +231,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
+    urlTracker: urlTrackerMock,
+    setHeaderActionMenu: jest.fn(),
   } as unknown as DiscoverServices;
 }
 

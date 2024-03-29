@@ -36,7 +36,7 @@ describe('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'network');
+    cy.task('esArchiverUnload', { archiveName: 'network' });
   });
 
   beforeEach(() => {

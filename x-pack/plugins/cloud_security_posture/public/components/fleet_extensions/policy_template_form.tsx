@@ -425,18 +425,21 @@ const AzureAccountTypeSelect = ({
   updatePolicy,
   disabled,
   packageInfo,
+  setupTechnology,
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   disabled: boolean;
   packageInfo: PackageInfo;
+  setupTechnology: SetupTechnology;
 }) => {
   const isAzureOrganizationDisabled = isBelowMinVersion(
     packageInfo.version,
     AZURE_ORG_MINIMUM_PACKAGE_VERSION
   );
   const azureAccountTypeOptions = getAzureAccountTypeOptions(isAzureOrganizationDisabled);
+  const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
 
   useEffect(() => {
     if (!getAzureAccountType(input)) {
@@ -447,7 +450,9 @@ const AzureAccountTypeSelect = ({
             type: 'text',
           },
           'azure.credentials.type': {
-            value: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
+            value: isAgentless
+              ? 'service_principal_with_client_secret'
+              : AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
             type: 'text',
           },
         })
@@ -743,6 +748,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             updatePolicy={updatePolicy}
             packageInfo={packageInfo}
             disabled={isEditPage}
+            setupTechnology={setupTechnology}
           />
         )}
 

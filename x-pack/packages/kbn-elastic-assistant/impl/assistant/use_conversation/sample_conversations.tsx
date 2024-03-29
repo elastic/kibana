@@ -7,26 +7,12 @@
 
 import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from '../../content/prompts/welcome/translations';
-import {
-  ELASTIC_AI_ASSISTANT,
-  ELASTIC_AI_ASSISTANT_TITLE,
-  WELCOME_CONVERSATION_TITLE,
-} from './translations';
+import { WELCOME_CONVERSATION_TITLE } from './translations';
 
 export const WELCOME_CONVERSATION: Conversation = {
-  id: WELCOME_CONVERSATION_TITLE,
-  theme: {
-    title: ELASTIC_AI_ASSISTANT_TITLE,
-    titleIcon: 'logoSecurity',
-    assistant: {
-      name: ELASTIC_AI_ASSISTANT,
-      icon: 'logoSecurity',
-    },
-    system: {
-      icon: 'logoElastic',
-    },
-    user: {},
-  },
+  id: '',
+  title: WELCOME_CONVERSATION_TITLE,
+  category: 'assistant',
   messages: [
     {
       role: 'assistant',
@@ -56,7 +42,7 @@ export const WELCOME_CONVERSATION: Conversation = {
       },
     },
   ],
-  apiConfig: {},
+  replacements: [],
 };
 
 export const enterpriseMessaging: Message[] = [

@@ -8,7 +8,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
+  EuiFlyoutResizable,
   EuiPopover,
   EuiToolTip,
   useCurrentEuiBreakpoint,
@@ -35,16 +35,21 @@ const CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED = 34;
 
 const SIDEBAR_WIDTH = 400;
 
-export type FlyoutWidthMode = 'side' | 'full';
+export enum FlyoutPositionMode {
+  PUSH = 'push',
+  OVERLAY = 'overlay',
+}
 
 export function ChatFlyout({
   initialTitle,
   initialMessages,
-  onClose,
+  initialFlyoutPositionMode,
   isOpen,
+  onClose,
 }: {
   initialTitle: string;
   initialMessages: Message[];
+  initialFlyoutPositionMode?: FlyoutPositionMode;
   isOpen: boolean;
   onClose: () => void;
 }) {
@@ -59,7 +64,9 @@ export function ChatFlyout({
 
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
-  const [flyoutWidthMode, setFlyoutWidthMode] = useState<FlyoutWidthMode>('side');
+  const [flyoutPositionMode, setFlyoutPositionMode] = useState<FlyoutPositionMode>(
+    initialFlyoutPositionMode || FlyoutPositionMode.OVERLAY
+  );
 
   const [conversationsExpanded, setConversationsExpanded] = useState(false);
 
@@ -128,8 +135,8 @@ export function ChatFlyout({
     z-index: 1;
   `;
 
-  const handleToggleFlyoutWidthMode = (newFlyoutWidthMode: FlyoutWidthMode) => {
-    setFlyoutWidthMode(newFlyoutWidthMode);
+  const handleToggleFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
+    setFlyoutPositionMode(newFlyoutPositionMode);
   };
 
   return isOpen ? (
@@ -139,7 +146,7 @@ export function ChatFlyout({
         setVisibility: setIsSecondSlotVisible,
       }}
     >
-      <EuiFlyout
+      <EuiFlyoutResizable
         className={flyoutClassName}
         closeButtonProps={{
           css: {
@@ -147,13 +154,15 @@ export function ChatFlyout({
             marginTop: breakpoint === 'xs' ? euiTheme.size.xs : euiTheme.size.s,
           },
         }}
+        paddingSize="m"
+        pushAnimation
+        minWidth={SIDEBAR_WIDTH}
         size={getFlyoutWidth({
           breakpoint,
           expanded: conversationsExpanded,
-          flyoutWidthMode,
           isSecondSlotVisible,
         })}
-        paddingSize="m"
+        type={flyoutPositionMode}
         onClose={() => {
           onClose();
           setIsSecondSlotVisible(false);
@@ -247,7 +256,7 @@ export function ChatFlyout({
               key={bodyKey}
               connectors={connectors}
               currentUser={currentUser}
-              flyoutWidthMode={flyoutWidthMode}
+              flyoutPositionMode={flyoutPositionMode}
               initialTitle={initialTitle}
               initialMessages={initialMessages}
               initialConversationId={conversationId}
@@ -260,7 +269,7 @@ export function ChatFlyout({
                 setConversationId(conversation.conversation.id);
                 conversationList.conversations.refresh();
               }}
-              onToggleFlyoutWidthMode={handleToggleFlyoutWidthMode}
+              onToggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
             />
           </EuiFlexItem>
 
@@ -280,7 +289,7 @@ export function ChatFlyout({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlyout>
+      </EuiFlyoutResizable>
     </ObservabilityAIAssistantMultipaneFlyoutContext.Provider>
   ) : null;
 }
@@ -289,16 +298,11 @@ const getFlyoutWidth = ({
   breakpoint,
   expanded,
   isSecondSlotVisible,
-  flyoutWidthMode,
 }: {
   breakpoint?: string;
   expanded: boolean;
   isSecondSlotVisible: boolean;
-  flyoutWidthMode?: FlyoutWidthMode;
 }) => {
-  if (flyoutWidthMode === 'full') {
-    return '100%';
-  }
   if (breakpoint === 'xs') {
     return '90vw';
   }

@@ -22,8 +22,8 @@ export async function redirectToGeoJobWizard(
   share: SharePluginStart
 ) {
   const { query, filters, to, from } = await getJobsItemsFromEmbeddable(embeddable);
-  const embeddableQuery = embeddable.localQuery?.value;
-  const embeddableFilters = embeddable.localFilters?.value ?? [];
+  const embeddableQuery = embeddable.query$?.value;
+  const embeddableFilters = embeddable.filters$?.value ?? [];
   const locator = share.url.locators.get(ML_APP_LOCATOR);
 
   const pageState = {
@@ -55,7 +55,7 @@ export async function getJobsItemsFromEmbeddable(embeddable: MapApi) {
   const dashboardApi = apiIsOfType(embeddable.parentApi, 'dashboard')
     ? (embeddable.parentApi as DashboardAPI)
     : undefined;
-  const timeRange = embeddable.localTimeRange?.value ?? dashboardApi?.localTimeRange?.value;
+  const timeRange = embeddable.timeRange$?.value ?? dashboardApi?.timeRange$?.value;
   if (timeRange === undefined) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromGeo.createJob.error.noTimeRange', {
@@ -66,8 +66,8 @@ export async function getJobsItemsFromEmbeddable(embeddable: MapApi) {
   return {
     from: timeRange.from,
     to: timeRange.to,
-    query: (dashboardApi?.localQuery?.value as Query) ?? { query: '', language: 'kuery' },
-    filters: dashboardApi?.localFilters?.value ?? [],
+    query: (dashboardApi?.query$?.value as Query) ?? { query: '', language: 'kuery' },
+    filters: dashboardApi?.filters$?.value ?? [],
     dashboard: dashboardApi,
   };
 }

@@ -10,6 +10,7 @@ import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { IntegrationItem } from '../components/dataset_quality/filters/integrations_selector';
+import { NamespaceItem } from '../components/dataset_quality/filters/namespaces_selector';
 
 export const useDatasetQualityFilters = () => {
   const { service } = useDatasetQualityContext();
@@ -18,9 +19,14 @@ export const useDatasetQualityFilters = () => {
   const {
     timeRange,
     integrations: selectedIntegrations,
+    namespaces: selectedNamespaces,
     query: selectedQuery,
   } = useSelector(service, (state) => state.context.filters);
   const integrations = useSelector(service, (state) => state.context.integrations);
+
+  const namespaces = useSelector(service, (state) => state.context.datasets).map(
+    (dataset) => dataset.namespace
+  );
 
   const onTimeChange = useCallback(
     (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
@@ -84,6 +90,27 @@ export const useDatasetQualityFilters = () => {
     [service]
   );
 
+  const namespaceItems: NamespaceItem[] = useMemo(() => {
+    const uniqueNamespaces = [...new Set(namespaces)];
+
+    return uniqueNamespaces.map((namespace) => ({
+      label: namespace,
+      checked: selectedNamespaces.includes(namespace) ? 'on' : undefined,
+    }));
+  }, [namespaces, selectedNamespaces]);
+
+  const onNamespacesChange = useCallback(
+    (newNamespaceItems: NamespaceItem[]) => {
+      service.send({
+        type: 'UPDATE_NAMESPACES',
+        namespaces: newNamespaceItems
+          .filter((namespace) => namespace.checked === 'on')
+          .map((namespace) => namespace.label),
+      });
+    },
+    [service]
+  );
+
   const onQueryChange = useCallback(
     (query: string) => {
       service.send({
@@ -100,7 +127,9 @@ export const useDatasetQualityFilters = () => {
     onRefresh,
     onRefreshChange,
     integrations: integrationItems,
+    namespaces: namespaceItems,
     onIntegrationsChange,
+    onNamespacesChange,
     isLoading,
     selectedQuery,
     onQueryChange,

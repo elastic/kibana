@@ -26,6 +26,7 @@ import {
 import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
 import { useIndicesNav } from '../../enterprise_search_content/components/search_index/indices/indices_nav';
 import {
+  PLAYGROUND_PATH,
   CONNECTORS_PATH,
   CRAWLERS_PATH,
   SEARCH_INDICES_PATH,
@@ -90,6 +91,17 @@ export const useEnterpriseSearchNav = () => {
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CRAWLERS_PATH,
+          }),
+        },
+        {
+          id: 'playground',
+          name: i18n.translate('xpack.enterpriseSearch.nav.PlaygroundTitle', {
+            defaultMessage: 'Playground',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + PLAYGROUND_PATH,
           }),
         },
       ],

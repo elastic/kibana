@@ -39,7 +39,9 @@ export function FieldsList({
                   <span>{fieldTitle}</span>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={4}>{fieldValue}</EuiFlexItem>
+              <EuiFlexItem grow={4} data-test-subj="datasetQualityFlyoutFieldValue">
+                {fieldValue}
+              </EuiFlexItem>
             </EuiFlexGroup>
 
             {index < fields.length - 1 ? <EuiHorizontalRule margin="s" /> : null}

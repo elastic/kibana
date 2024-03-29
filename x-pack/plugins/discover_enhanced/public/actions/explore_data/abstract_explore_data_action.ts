@@ -18,7 +18,7 @@ import {
   apiHasType,
   apiIsOfType,
   apiPublishesDataViews,
-  apiPublishesPartialLocalUnifiedSearch,
+  apiPublishesPartialUnifiedSearch,
   CanAccessViewMode,
   EmbeddableApiContext,
   getInheritedViewMode,
@@ -78,20 +78,17 @@ export abstract class AbstractExploreDataAction {
     }
 
     const parentParams: DiscoverAppLocatorParams = {};
-    if (
-      apiHasParentApi(embeddable) &&
-      apiPublishesPartialLocalUnifiedSearch(embeddable.parentApi)
-    ) {
-      parentParams.filters = embeddable.parentApi.localFilters?.getValue() ?? [];
-      parentParams.query = embeddable.parentApi.localQuery?.getValue();
-      parentParams.timeRange = embeddable.parentApi.localTimeRange?.getValue();
+    if (apiHasParentApi(embeddable) && apiPublishesPartialUnifiedSearch(embeddable.parentApi)) {
+      parentParams.filters = embeddable.parentApi.filters$?.getValue() ?? [];
+      parentParams.query = embeddable.parentApi.query$?.getValue();
+      parentParams.timeRange = embeddable.parentApi.timeRange$?.getValue();
     }
 
     const childParams: DiscoverAppLocatorParams = {};
-    if (apiPublishesPartialLocalUnifiedSearch(embeddable)) {
-      childParams.filters = embeddable.localFilters?.getValue() ?? [];
-      childParams.query = embeddable.localQuery?.getValue();
-      childParams.timeRange = embeddable.localTimeRange?.getValue();
+    if (apiPublishesPartialUnifiedSearch(embeddable)) {
+      childParams.filters = embeddable.filters$?.getValue() ?? [];
+      childParams.query = embeddable.query$?.getValue();
+      childParams.timeRange = embeddable.timeRange$?.getValue();
     }
 
     const params: DiscoverAppLocatorParams = {

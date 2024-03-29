@@ -10,14 +10,13 @@ import { partition } from 'lodash';
 import type { CaseAttributes } from '../../../common/types/domain';
 import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/types/api';
 import { CasesBulkGetResponseRt, CasesBulkGetRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError, generateCaseErrorResponse } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { SOWithErrors } from '../../common/types';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 type CaseSavedObjectWithErrors = Array<SOWithErrors<CaseAttributes>>;
 

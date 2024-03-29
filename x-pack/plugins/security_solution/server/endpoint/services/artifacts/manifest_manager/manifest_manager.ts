@@ -697,7 +697,7 @@ export class ManifestManager {
 
     await policyUpdateBatchProcessor.complete();
 
-    this.logger.info(
+    this.logger.debug(
       `Processed [${updatedPolicies.length + unChangedPolicies.length}] Policies: updated: [${
         updatedPolicies.length
       }], un-changed: [${unChangedPolicies.length}]`
@@ -735,7 +735,7 @@ export class ManifestManager {
       });
     }
 
-    this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
+    this.logger.debug(`Committed manifest ${manifest.getSemanticVersion()}`);
   }
 
   private fetchAllPolicies(): AsyncIterable<PackagePolicy[]> {
@@ -776,7 +776,7 @@ export class ManifestManager {
       total += artifacts.length;
     }
 
-    this.logger.info(`Count of current stored artifacts: ${total}`);
+    this.logger.debug(`Count of current stored artifacts: ${total}`);
 
     return fleetArtifacts;
   }
@@ -828,8 +828,11 @@ export class ManifestManager {
         }] orphaned artifacts:\n${stringify(errors)}`
       );
     } else if (badArtifactIds.length > 0) {
-      this.logger.info(`Count of orphan artifacts cleaned up: ${badArtifactIds.length}`);
-      this.logger.debug(`Orphan artifacts deleted from Fleet:\n${stringify(badArtifactIds)}`);
+      this.logger.debug(
+        `Count of orphan artifacts cleaned up: ${badArtifactIds.length}\n${stringify(
+          badArtifactIds
+        )}`
+      );
     }
   }
 }

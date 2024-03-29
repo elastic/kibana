@@ -7,8 +7,13 @@
 
 import type { Logger } from '@kbn/core/server';
 
+export interface BatchHandlerCallbackOptions<T = unknown> {
+  batch: number;
+  data: T[];
+}
+
 export interface QueueProcessorOptions<T = unknown> {
-  batchHandler: (batch: { batch: number; data: T[] }) => Promise<void>;
+  batchHandler: (batch: BatchHandlerCallbackOptions<T>) => Promise<void>;
   batchSize?: number;
   logger?: Logger;
   /**

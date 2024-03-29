@@ -47,7 +47,7 @@ describe.skip(
     const ADDITIONAL_ENTRY = 'host.hostname';
 
     beforeEach(() => {
-      cy.task('esArchiverUnload', 'endpoint');
+      cy.task('esArchiverUnload', { archiveName: 'endpoint' });
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       login();
       createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
@@ -55,11 +55,11 @@ describe.skip(
       waitForAlertsToPopulate();
     });
     after(() => {
-      cy.task('esArchiverUnload', 'endpoint');
+      cy.task('esArchiverUnload', { archiveName: 'endpoint' });
       deleteAlertsAndRules();
     });
     afterEach(() => {
-      cy.task('esArchiverUnload', 'endpoint');
+      cy.task('esArchiverUnload', { archiveName: 'endpoint' });
     });
 
     it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {

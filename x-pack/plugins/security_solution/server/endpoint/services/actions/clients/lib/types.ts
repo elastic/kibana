@@ -19,6 +19,7 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   EndpointActionData,
+  LogsEndpointActionResponse,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -54,6 +55,11 @@ export interface CommonResponseActionMethodOptions
    * not be dispatched to Fleet or an external EDR system if this value is defined
    */
   error?: string;
+}
+
+export interface ProcessPendingActionsMethodOptions {
+  addToQueue: (...docs: LogsEndpointActionResponse[]) => void;
+  abortSignal: AbortSignal;
 }
 
 /**
@@ -103,4 +109,13 @@ export interface ResponseActionsClient {
     actionRequest: OmitUnsupportedAttributes<UploadActionApiRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>>;
+
+  /**
+   * Will fetch all pending response actions and check to see if they can be Completed. If so, then
+   * a Response record will be added to the queue to be written to the responses index.
+   *
+   * **NOTE**: the actual write to the index is done by the `QueueProcessor` instance - which at
+   * the time of this writing, is being controlled by the background task.
+   */
+  processPendingActions: (options: ProcessPendingActionsMethodOptions) => Promise<void>;
 }
