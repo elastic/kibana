@@ -24,7 +24,7 @@ import { usageCollectorsStatsCollector } from './collector_stats';
 
 const SECOND_IN_MS = 1000;
 // Needed for the general array containing all the collectors. We don't really care about their types here
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 type AnyCollector = ICollector<any, any>;
 interface CollectorWithStatus {
   isReadyWithTimeout: Awaited<ReturnType<typeof withTimeout>>;

@@ -53,9 +53,8 @@ export const formatRow = (
 };
 
 export const formatTopLevelObject = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   row: Record<string, any>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   fields: Record<string, any>,
   dataView: DataView,
   maxEntries: number

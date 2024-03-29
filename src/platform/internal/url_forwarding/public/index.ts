@@ -7,10 +7,10 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110891
-/* eslint-disable @kbn/eslint/no_export_all */
 
 import { UrlForwardingPlugin } from './plugin';
 
 export const plugin = () => new UrlForwardingPlugin();
 
-export * from './plugin';
+export type { ForwardDefinition, UrlForwardingSetup, UrlForwardingStart } from './plugin';
+export { UrlForwardingPlugin } from './plugin';

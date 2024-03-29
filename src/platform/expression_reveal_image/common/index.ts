@@ -7,7 +7,6 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110893
-/* eslint-disable @kbn/eslint/no_export_all */
 
-export * from './constants';
-export * from './expression_functions';
+export { PLUGIN_ID, PLUGIN_NAME, BASE64, URL } from './constants';
+export { functions, revealImageFunction } from './expression_functions';

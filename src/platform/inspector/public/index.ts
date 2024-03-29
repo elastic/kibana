@@ -7,7 +7,6 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/109900
-/* eslint-disable @kbn/eslint/no_export_all */
 
 import './index.scss';
 
@@ -32,4 +31,9 @@ export {
 } from './adapters/has_inspector_adapters';
 export { InspectorPublicPlugin as Plugin } from './plugin';
 export type { Setup, Start } from './plugin';
-export * from './types';
+export type {
+  InspectorViewProps,
+  InspectorViewDescription,
+  InspectorOptions,
+  InspectorSession,
+} from './types';

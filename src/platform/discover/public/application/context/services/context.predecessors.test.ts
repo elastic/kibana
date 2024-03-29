@@ -40,7 +40,6 @@ describe('context predecessors', function () {
     size: number
   ) => ReturnType<typeof fetchSurroundingDocs>;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
   const dataView = {
     id: 'DATA_VIEW_ID',

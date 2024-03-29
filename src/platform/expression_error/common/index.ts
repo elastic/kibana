@@ -7,6 +7,5 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110893
-/* eslint-disable @kbn/eslint/no_export_all */
 
-export * from './constants';
+export { PLUGIN_ID, PLUGIN_NAME, JSON } from './constants';

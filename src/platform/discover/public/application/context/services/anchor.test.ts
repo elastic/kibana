@@ -15,7 +15,6 @@ import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 describe('context app', function () {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let searchSourceStub: any;
   const dataView = {
     id: 'DATA_VIEW_ID',

@@ -38,7 +38,7 @@ describe('context successors', function () {
     size: number
   ) => ReturnType<typeof fetchSurroundingDocs>;
   let dataPluginMock: DataPublicPluginStart;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   let mockSearchSource: any;
   const dataView = {
     id: 'DATA_VIEW_ID',

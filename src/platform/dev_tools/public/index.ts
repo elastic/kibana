@@ -7,11 +7,11 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110892
-/* eslint-disable @kbn/eslint/no_export_all */
 
 import { DevToolsPlugin } from './plugin';
-export * from './plugin';
-export * from '../common/constants';
+export type { DevToolsSetup } from './plugin';
+export { DevToolsPlugin } from './plugin';
+export { DEV_TOOLS_FEATURE_ID, ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID } from '../common/constants';
 
 export function plugin() {
   return new DevToolsPlugin();

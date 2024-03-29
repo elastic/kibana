@@ -14,7 +14,7 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Kibana React Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/plugins/kibana_react',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/platform/kibana_react',
   }),
   showPanel: true.valueOf,
   selectedPanel: PANEL_ID,

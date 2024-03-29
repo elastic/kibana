@@ -40,7 +40,7 @@ export function createSearchSourceStub(hits: EsHitRecord[], timeField?: string) 
     loaded: 1,
     isRestored: false,
   } as unknown as IKibanaSearchResponse<estypes.SearchResponse<unknown>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const searchSourceStub: any = {
     _stubHits: hits,
     _stubTimeField: timeField,

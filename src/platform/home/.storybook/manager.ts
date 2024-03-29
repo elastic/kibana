@@ -14,7 +14,7 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Home Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/plugins/home',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/platform/home',
   }),
   showPanel: true.valueOf,
   selectedPanel: PANEL_ID,

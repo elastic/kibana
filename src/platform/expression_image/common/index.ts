@@ -7,7 +7,13 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110893
-/* eslint-disable @kbn/eslint/no_export_all */
 
-export * from './constants';
-export * from './types';
+export { PLUGIN_ID, PLUGIN_NAME, CONTEXT, BASE64, URL } from './constants';
+export type {
+  Return,
+  ExpressionImageFunction,
+  OriginString,
+  ImageRendererConfig,
+  NodeDimensions,
+} from './types';
+export { ImageMode } from './types';

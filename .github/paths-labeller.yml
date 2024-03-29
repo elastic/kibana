@@ -1,13 +1,12 @@
 ---
 - 'Feature:Embedding':
-    - 'src/plugins/embeddable/**/*.*'
-    - 'src/plugins/dashboard_embeddable_container/**/*.*'
+    - 'src/platform/embeddable/**/*.*'
 - 'Feature:Drilldowns':
     - 'x-pack/plugins/drilldowns/**/*.*'
     - 'x-pack/plugins/dashboard_enhanced/public/services/drilldowns/**/*.*'
 - 'Feature:ExpressionLanguage':
-    - 'src/plugins/expressions/**/*.*'
-    - 'src/plugins/bfetch/**/*.*'
+    - 'src/platform/expressions/**/*.*'
+    - 'src/platform/bfetch/**/*.*'
 - 'Team:obs-ux-infra_services':
     - 'x-pack/plugins/observability_solution/apm/**/*.*'
     - 'x-pack/test/apm_api_integration/**/*.*'

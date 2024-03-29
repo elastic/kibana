@@ -265,14 +265,14 @@ module.exports = {
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
     {
-      files: ['src/plugins/kibana_react/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/kibana_react/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
         'react-hooks/exhaustive-deps': 'off',
       },
     },
     {
-      files: ['src/plugins/kibana_utils/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/kibana_utils/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -1454,7 +1454,7 @@ module.exports = {
      * Discover overrides
      */
     {
-      files: ['src/plugins/discover/**/*.{ts,tsx}', 'src/plugins/saved_search/**/*.{ts,tsx}'],
+      files: ['src/platform/discover/**/*.{ts,tsx}', 'src/platform/saved_search/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [
@@ -1651,7 +1651,7 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: ['src/plugins/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/internal/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-default-export': 'error',
       },
@@ -1764,10 +1764,10 @@ module.exports = {
         'packages/kbn-analytics/**',
         // 'packages/kbn-telemetry-tools/**',
         'src/plugins/kibana_usage_collection/**',
-        'src/plugins/usage_collection/**',
-        'src/plugins/telemetry/**',
-        'src/plugins/telemetry_collection_manager/**',
-        'src/plugins/telemetry_management_section/**',
+        'src/platform/usage_collection/**',
+        'src/platform/telemetry/**',
+        'src/platform/telemetry_collection_manager/**',
+        'src/platform/telemetry_management_section/**',
         'x-pack/plugins/telemetry_collection_xpack/**',
       ],
       rules: {
@@ -1778,20 +1778,20 @@ module.exports = {
       files: [
         // core-team owned code
         'src/core/**',
+        'packages/core/**',
         'x-pack/plugins/features/**',
         'x-pack/plugins/licensing/**',
         'x-pack/plugins/global_search/**',
         'x-pack/plugins/cloud/**',
         'packages/kbn-config-schema',
-        'src/plugins/status_page/**',
-        'src/plugins/saved_objects_management/**',
+        'src/platform/saved_objects_management/**',
         'packages/kbn-analytics/**',
         'packages/kbn-telemetry-tools/**',
         'src/plugins/kibana_usage_collection/**',
-        'src/plugins/usage_collection/**',
-        'src/plugins/telemetry/**',
-        'src/plugins/telemetry_collection_manager/**',
-        'src/plugins/telemetry_management_section/**',
+        'src/platform/usage_collection/**',
+        'src/platform/telemetry/**',
+        'src/platform/telemetry_collection_manager/**',
+        'src/platform/telemetry_management_section/**',
         'x-pack/plugins/telemetry_collection_xpack/**',
       ],
       rules: {
@@ -1810,8 +1810,24 @@ module.exports = {
         'src/core/{server,public,common}/index.ts',
         'src/plugins/*/{server,public,common}/index.ts',
         'src/plugins/*/*/{server,public,common}/index.ts',
+        'src/platform/*/{server,public,common}/index.ts',
+        'src/platform/*/*/{server,public,common}/index.ts',
+        'src/observability/*/{server,public,common}/index.ts',
+        'src/observability/*/*/{server,public,common}/index.ts',
+        'src/search/*/{server,public,common}/index.ts',
+        'src/search/*/*/{server,public,common}/index.ts',
+        'src/security/*/{server,public,common}/index.ts',
+        'src/security/*/*/{server,public,common}/index.ts',
         'x-pack/plugins/*/{server,public,common}/index.ts',
         'x-pack/plugins/*/*/{server,public,common}/index.ts',
+        'x-pack/platform/*/{server,public,common}/index.ts',
+        'x-pack/platform/*/*/{server,public,common}/index.ts',
+        'x-pack/observability/*/{server,public,common}/index.ts',
+        'x-pack/observability/*/*/{server,public,common}/index.ts',
+        'x-pack/search/*/{server,public,common}/index.ts',
+        'x-pack/search/*/*/{server,public,common}/index.ts',
+        'x-pack/security/*/{server,public,common}/index.ts',
+        'x-pack/security/*/*/{server,public,common}/index.ts',
       ],
       rules: {
         '@kbn/eslint/no_export_all': 'error',

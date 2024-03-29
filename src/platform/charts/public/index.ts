@@ -7,7 +7,6 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110891
-/* eslint-disable @kbn/eslint/no_export_all */
 
 import {
   RangeSelectContext,
@@ -20,7 +19,22 @@ export const plugin = () => new ChartsPlugin();
 
 export type { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 
-export * from './static';
+export {
+  createColorPalette,
+  seedColors,
+  CurrentTime,
+  EmptyPlaceholder,
+  useCommonChartStyles,
+  Endzones,
+  getAdjustedInterval,
+  renderEndzoneTooltip,
+  Warnings,
+  ColorPickerLazy,
+  ColorPicker,
+  LegendToggleLazy,
+  LegendToggle,
+  MULTILAYER_TIME_AXIS_STYLE,
+} from './static';
 export { lightenColor } from './services/palettes/lighten_color';
 export { useActiveCursor } from './services/active_cursor';
 

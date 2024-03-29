@@ -102,7 +102,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
   const corePluginMock = coreMock.createStart();
 
   const uiSettingsMock: Partial<typeof corePluginMock.uiSettings> = {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get: jest.fn((key: string): any => {
       if (key === 'fields:popularLimit') {
         return 5;

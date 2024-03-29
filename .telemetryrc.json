@@ -1,13 +1,13 @@
 [
   {
-    "output": "src/plugins/telemetry/schema/oss_plugins.json",
-    "root": "src/plugins/",
+    "output": "src/platform/telemetry/schema/oss_plugins.json",
+    "root": "src/platform/",
     "exclude": [
       "src/plugins/kibana_usage_collection/server/collectors/config_usage/register_config_usage_collector.ts"
     ]
   },
   {
-    "output": "src/plugins/telemetry/schema/kbn_packages.json",
+    "output": "src/platform/telemetry/schema/kbn_packages.json",
     "root": "packages/",
     "exclude": []
   }

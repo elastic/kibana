@@ -18,7 +18,6 @@ import { getKibanaContextFn, KibanaContextStartDependencies } from './kibana_con
 type StartServicesMock = DeeplyMockedKeys<KibanaContextStartDependencies>;
 
 const createExecutionContextMock = (): DeeplyMockedKeys<ExecutionContext> => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abortSignal: {} as any,
   getExecutionContext: jest.fn(),
   getSearchContext: jest.fn(),
