@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, type ReactNode } from 'react';
+import React, { type ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
@@ -54,7 +54,7 @@ export type SecuritySolutionTemplateWrapperProps = Omit<KibanaPageTemplateProps,
 };
 
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateWrapperProps> =
-  React.memo(({ children, ...rest }) => {
+  React.memo(({ children, isEmptyState, ...rest }) => {
     const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
@@ -62,15 +62,12 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
       getTimelineShowStatus(state, TimelineId.active)
     );
     const [routeProps] = useRouteSpy();
+    const isNotEmpty = !isEmptyState;
     const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
     const { euiTheme, colorMode: globalColorMode } = useEuiTheme();
-
-    // There is some logic in the StyledKibanaPageTemplate that checks for children presence, and we dont even need to render the children
-    // here if isEmptyState is set
-    const isNotEmpty = !rest.isEmptyState;
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -98,7 +95,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
               component="div"
               grow={true}
             >
-              <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.eventFlyout}>
+              <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
                 {children}
                 <SecuritySolutionFlyout />
               </ExpandableFlyoutProvider>
