@@ -15,14 +15,14 @@ import type { MapApi } from './types';
 import { getUiActions } from '../kibana_services';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 
-export function initializeActionHandlers(api: MapApi) {
+export function initializeActionHandlers(getApi: () => MapApi | undefined) {
   function getActionContext() {
     const trigger = getUiActions().getTrigger(APPLY_FILTER_TRIGGER);
     if (!trigger) {
       throw new Error('Unable to get context, could not locate trigger');
     }
     return {
-      embeddable: api,
+      embeddable: getApi(),
       trigger,
     } as ActionExecutionContext;
   }
@@ -42,13 +42,13 @@ export function initializeActionHandlers(api: MapApi) {
     getActionContext,
     getFilterActions: async () => {
       const filterActions = await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
-        embeddable: api,
+        embeddable: getApi(),
         filters: [],
       });
       const valueClickActions = await getUiActions().getTriggerCompatibleActions(
         VALUE_CLICK_TRIGGER,
         {
-          embeddable: api,
+          embeddable: getApi(),
           data: {
             // uiActions.getTriggerCompatibleActions validates action with provided context
             // so if event.key and event.value are used in the URL template but can not be parsed from context

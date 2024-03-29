@@ -14,8 +14,8 @@ export interface PublishesPanelTitle {
   defaultPanelTitle?: PublishingSubject<string | undefined>;
 }
 
-export function getPanelTitle(api: Partial<PublishesPanelTitle>): string | undefined {
-  return api.panelTitle?.value || api.defaultPanelTitle?.value;
+export function getPanelTitle(api: Partial<PublishesPanelTitle> | undefined): string | undefined {
+  return api?.panelTitle?.value || api?.defaultPanelTitle?.value;
 }
 
 export type PublishesWritablePanelTitle = PublishesPanelTitle & {

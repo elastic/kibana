@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { initializeTitles } from '@kbn/presentation-publishing';
+import { getPanelTitle, initializeTitles } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { inject } from '../../common/embeddable';
@@ -24,6 +24,11 @@ import { getSpacesApi } from '../kibana_services';
 import { initializeActionHandlers } from './initialize_action_handlers';
 import { MapContainer } from '../connected_components/map_container';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
+import { initializeCrossPanelActions } from './initialize_cross_panel_actions';
+
+export function getControlledBy(id: string) {
+  return `mapEmbeddablePanel${id}`;
+}
 
 export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
@@ -35,22 +40,36 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
         ) as unknown as MapSerializeState)
       : {};
   },
-  buildEmbeddable: async (state, buildApi) => {
+  buildEmbeddable: async (state, buildApi, uuid) => {
     const savedMap = new SavedMap({
       mapEmbeddableInput: state as unknown as MapEmbeddableInput,
     });
     await savedMap.whenReady();
 
+    let api: MapApi | undefined;
+    const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    const controlledBy = getControlledBy(uuid);
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-    const reduxSync = initializeReduxSync(
-      savedMap.getStore(),
-      state
+    const defaultPanelTitle = new BehaviorSubject<string | undefined>(
+      savedMap.getAttributes().title
     );
+    const reduxSync = initializeReduxSync(savedMap.getStore(), state);
+    const actionHandlers = initializeActionHandlers(() => api);
+    const crossPanelActions = initializeCrossPanelActions({
+      controlledBy,
+      getActionContext: actionHandlers.getActionContext,
+      getTitle: () => getPanelTitle(api) ?? uuid,
+      state,
+      savedMap,
+      uuid,
+    });
 
     function serializeState() {
       const { state: rawState, references } = extract({
         ...state,
         ...serializeTitles(),
+        ...crossPanelActions.serialize(),
         ...reduxSync.serialize(),
       } as unknown as MapEmbeddablePersistableState);
       return {
@@ -59,9 +78,9 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       };
     }
 
-    const api = buildApi(
+    api = buildApi(
       {
-        defaultPanelTitle: new BehaviorSubject<string | undefined>(savedMap.getAttributes().title),
+        defaultPanelTitle,
         ...titlesApi,
         ...reduxSync.api,
         ...initializeLibraryTransforms(savedMap, serializeState),
@@ -69,19 +88,17 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       },
       {
         ...titleComparators,
+        ...crossPanelActions.comparators,
         ...reduxSync.comparators,
       }
     );
-
-    const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
-    const spaces = getSpacesApi();
-    const actionHandlers = initializeActionHandlers(api);
 
     return {
       api,
       Component: () => {
         useEffect(() => {
           return () => {
+            crossPanelActions.cleanup();
             reduxSync.cleanup();
           };
         }, []);
