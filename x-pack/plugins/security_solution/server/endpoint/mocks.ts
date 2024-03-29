@@ -46,6 +46,8 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { v4 as uuidV4 } from 'uuid';
 import { responseActionsClientMock } from './services/actions/clients/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
@@ -66,12 +68,12 @@ import { EndpointMetadataService } from './services/metadata';
 import type { SecuritySolutionRequestHandlerContextMock } from '../lib/detection_engine/routes/__mocks__/request_context';
 import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
 import { createEndpointMetadataServiceTestContextMock } from './services/metadata/mocks';
-
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
 import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
 import { createProductFeaturesServiceMock } from '../lib/product_features_service/mocks';
+import { BaseDataGenerator } from '../../common/endpoint/data_generators/base_data_generator';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -374,4 +376,87 @@ export const getRegisteredVersionedRouteMock = (
     versionConfig: routeVersion.config,
     routeHandler: routeVersion.handler,
   };
+};
+
+interface ApplyEsClientSearchMockOptions<TDocument = unknown> {
+  esClientMock: ElasticsearchClientMock;
+  index: string;
+  response: SearchResponse<TDocument>;
+  /**
+   * Mock is to be used only when search is using ES's Point-in-Time
+   */
+  pitUsage?: boolean;
+}
+
+/**
+ * Generic utility for applying mocks to ES Client mock search method. Any existing mock implementation
+ * for the `.search()` method will be called if the mock being applied does not match the target
+ * index, thus this utility can be chained on top of other already applied mock implementations.
+ *
+ * This utility also handles search requests using Point In Time.
+ */
+export const applyEsClientSearchMock = <TDocument = unknown>({
+  esClientMock,
+  index,
+  response,
+  pitUsage,
+}: ApplyEsClientSearchMockOptions<TDocument>) => {
+  const priorSearchMockImplementation = esClientMock.search.getMockImplementation();
+  const priorOpenPointInTimeImplementation = esClientMock.openPointInTime.getMockImplementation();
+  const priorClosePointInTimeImplementation = esClientMock.closePointInTime.getMockImplementation();
+  const openedPitIds = new Set<string>();
+
+  esClientMock.openPointInTime.mockImplementation(async (...args) => {
+    const options = args[0];
+
+    if (options.index === index) {
+      const pitResponse = { id: `mock:pit:${index}:${uuidV4()}` };
+      openedPitIds.add(pitResponse.id);
+
+      return pitResponse;
+    }
+
+    if (priorOpenPointInTimeImplementation) {
+      return priorOpenPointInTimeImplementation(...args);
+    }
+
+    return { id: 'mock' };
+  });
+
+  esClientMock.closePointInTime.mockImplementation(async (...args) => {
+    const closePitResponse = { succeeded: true, num_freed: 1 };
+    const options = args[0];
+    const pitId = 'id' in options ? options.id : 'body' in options ? options.body?.id : undefined;
+
+    if (pitId) {
+      if (openedPitIds.has(pitId)) {
+        openedPitIds.delete(pitId);
+        return closePitResponse;
+      }
+    }
+
+    if (priorClosePointInTimeImplementation) {
+      return priorClosePointInTimeImplementation(options);
+    }
+
+    return closePitResponse;
+  });
+
+  esClientMock.search.mockImplementation(async (...args) => {
+    const params = args[0] ?? {};
+    const searchReqIndexes = Array.isArray(params.index) ? params.index : [params.index];
+    const pit = 'pit' in params ? params.pit : undefined;
+
+    if (params.index && !pitUsage && searchReqIndexes.includes(index)) {
+      return response;
+    } else if (pit && pitUsage && openedPitIds.has(pit.id)) {
+      return response;
+    }
+
+    if (priorSearchMockImplementation) {
+      return priorSearchMockImplementation(...args);
+    }
+
+    return BaseDataGenerator.toEsSearchResponse([]);
+  });
 };
