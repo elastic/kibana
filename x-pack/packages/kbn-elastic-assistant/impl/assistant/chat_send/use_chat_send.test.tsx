@@ -27,7 +27,6 @@ const setUserPrompt = jest.fn();
 const sendMessage = jest.fn();
 const removeLastMessage = jest.fn();
 const clearConversation = jest.fn();
-const refresh = jest.fn();
 const setCurrentConversation = jest.fn();
 
 export const testProps: UseChatSendProps = {
@@ -70,6 +69,7 @@ describe('use chat send', () => {
     });
   });
   it('handleOnChatCleared clears the conversation', async () => {
+    (clearConversation as jest.Mock).mockReturnValueOnce(testProps.currentConversation);
     const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
@@ -79,8 +79,8 @@ describe('use chat send', () => {
     expect(setUserPrompt).toHaveBeenCalledWith('');
     expect(setSelectedPromptContexts).toHaveBeenCalledWith({});
     await waitFor(() => {
-      expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation.id);
-      expect(refresh).toHaveBeenCalled();
+      expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation);
+      expect(setCurrentConversation).toHaveBeenCalled();
     });
     expect(setEditingSystemPromptId).toHaveBeenCalledWith(defaultSystemPrompt.id);
   });
