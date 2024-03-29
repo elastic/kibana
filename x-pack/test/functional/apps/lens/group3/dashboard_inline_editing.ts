@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
       await elasticChart.setNewChartUiDebugFlag(true);
 
-      await dashboardPanelActions.saveToLibrary('My by reference visualization');
+      await dashboardPanelActions.legacySaveToLibrary('My by reference visualization');
 
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickInlineEdit();

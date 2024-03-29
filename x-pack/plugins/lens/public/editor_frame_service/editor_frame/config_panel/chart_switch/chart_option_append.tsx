@@ -7,9 +7,9 @@
 
 import './chart_switch.scss';
 import React from 'react';
-import { EuiFlexItem, EuiIconTip, EuiBetaBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiFlexItem, EuiIconTip, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import { ExperimentalBadge } from '../../../../shared_components';
 
 export const getDataLossWarning = (dataLoss: 'nothing' | 'layers' | 'everything' | 'columns') => {
   if (dataLoss === 'nothing') {
@@ -50,29 +50,6 @@ const DataLossWarning = ({ content, id }: { content?: string; id: string }) => {
   );
 };
 
-export const ExperimentalBadge = () => {
-  return (
-    <EuiFlexItem grow={false}>
-      <EuiToolTip
-        content={i18n.translate('xpack.lens.chartSwitch.experimentalLabel', {
-          defaultMessage: 'Technical preview',
-        })}
-      >
-        <EuiBetaBadge
-          css={css`
-            vertical-align: middle;
-          `}
-          iconType="beaker"
-          label={i18n.translate('xpack.lens.chartSwitch.experimentalLabel', {
-            defaultMessage: 'Technical preview',
-          })}
-          size="s"
-        />
-      </EuiToolTip>
-    </EuiFlexItem>
-  );
-};
-
 export const ChartOptionAppend = ({
   dataLoss,
   showExperimentalBadge,
@@ -88,7 +65,11 @@ export const ChartOptionAppend = ({
     alignItems="center"
     className="lnsChartSwitch__append"
   >
-    {showExperimentalBadge ? <ExperimentalBadge /> : null}
+    {showExperimentalBadge ? (
+      <EuiFlexItem grow={false}>
+        <ExperimentalBadge />
+      </EuiFlexItem>
+    ) : null}
     <DataLossWarning content={getDataLossWarning(dataLoss)} id={id} />
   </EuiFlexGroup>
 );

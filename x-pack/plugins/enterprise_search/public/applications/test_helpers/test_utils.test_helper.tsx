@@ -55,6 +55,9 @@ export const mockKibanaProps: KibanaLogicProps = {
   },
   guidedOnboarding: {},
   history: mockHistory,
+  indexMappingComponent: () => {
+    return <></>;
+  },
   isSidebarEnabled: true,
   lens: {
     EmbeddableComponent: jest.fn(),

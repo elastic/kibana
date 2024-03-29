@@ -8,10 +8,10 @@
 import { isRight } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import * as t from 'io-ts';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import { SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
 import {
   createKbnUrlStateStorage,
   syncState,
@@ -44,15 +44,47 @@ export function useAlertSearchBarStateContainer(
   urlStorageKey: string,
   { replace }: { replace?: boolean } = {}
 ) {
+  const [savedQuery, setSavedQuery] = useState<SavedQuery>();
   const stateContainer = useContainer();
 
   useUrlStateSyncEffect(stateContainer, urlStorageKey, replace);
 
-  const { setRangeFrom, setRangeTo, setKuery, setStatus } = stateContainer.transitions;
-  const { rangeFrom, rangeTo, kuery, status } = useContainerSelector(
+  const { setRangeFrom, setRangeTo, setKuery, setStatus, setFilters, setSavedQueryId } =
+    stateContainer.transitions;
+  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId } = useContainerSelector(
     stateContainer,
     (state) => state
   );
+
+  useEffect(() => {
+    if (!savedQuery) {
+      setSavedQueryId(undefined);
+      return;
+    }
+    if (savedQuery.id !== savedQueryId) {
+      setSavedQueryId(savedQuery.id);
+      if (typeof savedQuery.attributes.query.query === 'string') {
+        setKuery(savedQuery.attributes.query.query);
+      }
+      if (savedQuery.attributes.filters?.length) {
+        setFilters(savedQuery.attributes.filters);
+      }
+      if (savedQuery.attributes.timefilter?.from) {
+        setRangeFrom(savedQuery.attributes.timefilter.from);
+      }
+      if (savedQuery.attributes.timefilter?.to) {
+        setRangeFrom(savedQuery.attributes.timefilter.to);
+      }
+    }
+  }, [
+    savedQuery,
+    savedQueryId,
+    setFilters,
+    setKuery,
+    setRangeFrom,
+    setSavedQueryId,
+    stateContainer,
+  ]);
 
   return {
     kuery,
@@ -60,9 +92,13 @@ export function useAlertSearchBarStateContainer(
     onRangeFromChange: setRangeFrom,
     onRangeToChange: setRangeTo,
     onStatusChange: setStatus,
+    onFiltersChange: setFilters,
+    filters,
     rangeFrom,
     rangeTo,
     status,
+    savedQuery,
+    setSavedQuery,
   };
 }
 

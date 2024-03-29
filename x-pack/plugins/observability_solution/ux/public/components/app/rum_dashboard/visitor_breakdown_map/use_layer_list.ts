@@ -5,62 +5,32 @@
  * 2.0.
  */
 
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import {
-  EMSFileSourceDescriptor,
-  ESTermSourceDescriptor,
-  LayerDescriptor as BaseLayerDescriptor,
-  VectorLayerDescriptor as BaseVectorLayerDescriptor,
-  VectorStyleDescriptor,
   AGG_TYPE,
   COLOR_MAP_TYPE,
+  EMSFileSourceDescriptor,
+  ESTermSourceDescriptor,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
   LABEL_POSITIONS,
+  LayerDescriptor as BaseLayerDescriptor,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
+  VectorLayerDescriptor as BaseVectorLayerDescriptor,
+  VectorStyleDescriptor,
 } from '@kbn/maps-plugin/common';
 
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useMemo } from 'react';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
-
-const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
-  type: SOURCE_TYPES.ES_TERM_SOURCE,
-  id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
-  term: 'client.geo.country_iso_code',
-  metrics: [
-    {
-      type: AGG_TYPE.AVG,
-      field: 'transaction.duration.us',
-      label: 'Page load duration',
-    },
-  ],
-  indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
-  applyGlobalQuery: true,
-  applyGlobalTime: true,
-  applyForceRefresh: true,
-};
-
-const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
-  type: SOURCE_TYPES.ES_TERM_SOURCE,
-  id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
-  term: 'client.geo.region_iso_code',
-  metrics: [{ type: AGG_TYPE.AVG, field: 'transaction.duration.us' }],
-  whereQuery: {
-    query: 'transaction.type : "page-load"',
-    language: 'kuery',
-  },
-  indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
-  applyGlobalQuery: true,
-  applyGlobalTime: true,
-  applyForceRefresh: true,
-};
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useUxPluginContext } from '../../../../context/use_ux_plugin_context';
 
 const getWhereQuery = (serviceName: string) => {
   return {
@@ -84,10 +54,49 @@ interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
 
 export function useLayerList() {
   const { urlParams } = useLegacyUrlParams();
+  const { spaceId } = useUxPluginContext();
+
+  const { esTermSourceCountry, esTermSourceRegion } = useMemo(() => {
+    const _esTermSourceCountry: ESTermSourceDescriptor = {
+      type: SOURCE_TYPES.ES_TERM_SOURCE,
+      id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
+      term: 'client.geo.country_iso_code',
+      metrics: [
+        {
+          type: AGG_TYPE.AVG,
+          field: 'transaction.duration.us',
+          label: 'Page load duration',
+        },
+      ],
+      indexPatternId: getStaticDataViewId(spaceId),
+      applyGlobalQuery: true,
+      applyGlobalTime: true,
+      applyForceRefresh: true,
+    };
+
+    const _esTermSourceRegion: ESTermSourceDescriptor = {
+      type: SOURCE_TYPES.ES_TERM_SOURCE,
+      id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
+      term: 'client.geo.region_iso_code',
+      metrics: [{ type: AGG_TYPE.AVG, field: 'transaction.duration.us' }],
+      whereQuery: {
+        query: 'transaction.type : "page-load"',
+        language: 'kuery',
+      },
+      indexPatternId: getStaticDataViewId(spaceId),
+      applyGlobalQuery: true,
+      applyGlobalTime: true,
+      applyForceRefresh: true,
+    };
+    return {
+      esTermSourceCountry: _esTermSourceCountry,
+      esTermSourceRegion: _esTermSourceRegion,
+    };
+  }, [spaceId]);
 
   const { serviceName } = urlParams;
 
-  ES_TERM_SOURCE_COUNTRY.whereQuery = getWhereQuery(serviceName!);
+  esTermSourceCountry.whereQuery = getWhereQuery(serviceName!);
 
   const getLayerStyle = (fieldName: string): VectorStyleDescriptor => {
     return {
@@ -151,7 +160,7 @@ export function useLayerList() {
     joins: [
       {
         leftField: 'iso2',
-        right: ES_TERM_SOURCE_COUNTRY,
+        right: esTermSourceCountry,
       },
     ],
     sourceDescriptor: {
@@ -169,13 +178,13 @@ export function useLayerList() {
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
-  ES_TERM_SOURCE_REGION.whereQuery = getWhereQuery(serviceName!);
+  esTermSourceRegion.whereQuery = getWhereQuery(serviceName!);
 
   const pageLoadDurationByAdminRegionLayer: VectorLayerDescriptor = {
     joins: [
       {
         leftField: 'region_iso_code',
-        right: ES_TERM_SOURCE_REGION,
+        right: esTermSourceRegion,
       },
     ],
     sourceDescriptor: {
