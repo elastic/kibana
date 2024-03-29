@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON } from '../../../../screens/date_picker';
+import {
+  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
+  GET_LOCAL_SHOW_DATES_BUTTON,
+} from '../../../../screens/date_picker';
 import {
   setStartDate,
   showStartEndDate,
@@ -20,7 +23,6 @@ import {
 } from '../../../../screens/discover';
 import {
   addDiscoverEsqlQuery,
-  submitDiscoverSearchBar,
   addFieldToTable,
   convertEditorNonBreakingSpaceToSpace,
 } from '../../../../tasks/discover';
@@ -53,18 +55,17 @@ describe.skip(
       });
       createNewTimeline();
       goToEsqlTab();
-      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
 
     it('should show data according to the esql query', () => {
+      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       addDiscoverEsqlQuery(`${esqlQuery} | limit 1`);
-      submitDiscoverSearchBar();
       cy.get(DISCOVER_RESULT_HITS).should('have.text', 1);
     });
 
     it('should be able to add fields to the table', () => {
+      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       addDiscoverEsqlQuery(`${esqlQuery} | limit 1`);
-      submitDiscoverSearchBar();
       addFieldToTable('host.name');
       addFieldToTable('user.name');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('be.visible');
@@ -73,7 +74,6 @@ describe.skip(
 
     it('should remove the query when the back button is pressed after adding a query', () => {
       addDiscoverEsqlQuery(esqlQuery);
-      submitDiscoverSearchBar();
       cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).then((subj) => {
         const currentQuery = subj.text();
         const sanitizedQuery = convertEditorNonBreakingSpaceToSpace(currentQuery);
@@ -88,7 +88,13 @@ describe.skip(
     });
 
     it(`should change the timerange to ${DEFAULT_DATE} when back is pressed after modifying timerange to ${NEW_START_DATE} without saving`, () => {
+      cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).click();
+      cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).first().click({});
+
       setStartDate(NEW_START_DATE, DISCOVER_CONTAINER);
+
+      cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).first().click({});
+
       updateDates(DISCOVER_CONTAINER);
 
       cy.go('back');

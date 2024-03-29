@@ -40,9 +40,9 @@ export const useNavigateToTimeline = () => {
   });
 
   const navigateToTimeline = useCallback(
-    (dataProviders: DataProvider[], timeRange?: TimeRange) => {
+    async (dataProviders: DataProvider[], timeRange?: TimeRange) => {
       // Reset the current timeline
-      clearTimeline({ timeRange });
+      await clearTimeline({ timeRange });
       // Update the timeline's providers to match the current prevalence field query
       dispatch(
         updateProviders({
@@ -71,7 +71,7 @@ export const useNavigateToTimeline = () => {
    * @param timeRange Defines the timeline time range field and removes the time range lock
    */
   const openTimelineWithFilters = useCallback(
-    (filters: Array<[...Filter[]]>, timeRange?: TimeRange) => {
+    async (filters: Array<[...Filter[]]>, timeRange?: TimeRange) => {
       const dataProviders = [];
 
       for (const orFilterGroup of filters) {
@@ -94,7 +94,7 @@ export const useNavigateToTimeline = () => {
         }
       }
 
-      navigateToTimeline(dataProviders, timeRange);
+      await navigateToTimeline(dataProviders, timeRange);
     },
     [navigateToTimeline]
   );
