@@ -97,7 +97,7 @@ export function GroupListView({
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup data-test-subj="sloGroupViewPanel">
         <EuiFlexItem>
           <MemoEuiAccordion
             forceState={accordionState}
