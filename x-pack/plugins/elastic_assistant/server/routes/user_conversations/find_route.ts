@@ -19,8 +19,8 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { SearchEsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
-import { transformESToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
+import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
+import { transformESSearchToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
 
 export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -49,7 +49,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const currentUser = ctx.elasticAssistant.getCurrentUser();
 
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
-          const result = await dataClient?.findDocuments<SearchEsConversationSchema>({
+          const result = await dataClient?.findDocuments<EsConversationSchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
@@ -64,7 +64,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
                 perPage: result.perPage,
                 page: result.page,
                 total: result.total,
-                data: transformESToConversations(result.data),
+                data: transformESSearchToConversations(result.data),
               },
             });
           }

@@ -11,7 +11,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { findDocuments } from './find';
-import { SearchEsConversationSchema } from './conversations/types';
+import { EsConversationSchema } from './conversations/types';
 
 export const findDocumentsResponseMock = (): ConversationResponse => ({
   createdAt: '2020-04-20T15:25:31.830Z',
@@ -43,7 +43,7 @@ export const findDocumentsResponseMock = (): ConversationResponse => ({
 });
 
 export const getSearchConversationMock =
-  (): estypes.SearchResponse<SearchEsConversationSchema> => ({
+  (): estypes.SearchResponse<EsConversationSchema> => ({
     _scroll_id: '123',
     _shards: {
       failed: 0,

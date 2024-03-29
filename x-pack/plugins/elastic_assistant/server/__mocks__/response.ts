@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { getConversationSearchEsMock } from './conversations_schema.mock';
 import { estypes } from '@elastic/elasticsearch';
-import { SearchEsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
+import { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
 import { FindResponse } from '../ai_assistant_data_clients/find';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { SearchEsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
@@ -20,7 +20,7 @@ export const responseMock = {
   create: httpServerMock.createResponseFactory,
 };
 
-export const getEmptyFindResult = (): FindResponse<SearchEsConversationSchema> => ({
+export const getEmptyFindResult = (): FindResponse<EsConversationSchema> => ({
   page: 1,
   perPage: 1,
   total: 0,
@@ -28,7 +28,7 @@ export const getEmptyFindResult = (): FindResponse<SearchEsConversationSchema> =
 });
 
 export const getFindConversationsResultWithSingleHit =
-  (): FindResponse<SearchEsConversationSchema> => ({
+  (): FindResponse<EsConversationSchema> => ({
     page: 1,
     perPage: 1,
     total: 1,
@@ -51,7 +51,7 @@ export const getFindAnonymizationFieldsResultWithSingleHit =
   });
 
 export const getBasicEmptySearchResponse =
-  (): estypes.SearchResponse<SearchEsConversationSchema> => ({
+  (): estypes.SearchResponse<EsConversationSchema> => ({
     took: 1,
     timed_out: false,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
