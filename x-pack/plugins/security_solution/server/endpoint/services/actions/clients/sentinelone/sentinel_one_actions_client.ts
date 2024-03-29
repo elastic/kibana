@@ -14,10 +14,11 @@ import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/appl
 import { groupBy, once } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
-  SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
+  SentinelOneGetAgentsResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { SENTINEL_ONE_ACTIVITY_INDEX } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {
   CommonResponseActionMethodOptions,
@@ -27,31 +28,27 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type {
-  SentinelOneConnectorExecuteOptions,
-  SentinelOneIsolationRequestMeta,
-  SentinelOneActionRequestCommonMeta,
-  SentinelOneIsolationResponseMeta,
-  SentinelOneActivityDoc,
-} from './types';
+import type { SentinelOneConnectorExecuteOptions } from './types';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
-  LogsEndpointAction,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
+  LogsEndpointAction,
   LogsEndpointActionResponse,
+  SentinelOneActionRequestCommonMeta,
+  SentinelOneActivityEsDoc,
+  SentinelOneIsolationRequestMeta,
+  SentinelOneIsolationResponseMeta,
 } from '../../../../../../common/endpoint/types';
 import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
-  ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientValidateRequestResponse,
+  ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
-
-const SENTINEL_ONE_ACTIVITY_INDEX = 'logs-sentinel_one.activity-default';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: ActionsClient;
@@ -346,14 +343,17 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         switch (actionType as ResponseActionsApiCommandNames) {
           case 'isolate':
           case 'unisolate':
-            addToQueue(
-              ...(await this.checkPendingIsolateOrReleaseActions(
+            {
+              const isolationResponseDocs = await this.checkPendingIsolateOrReleaseActions(
                 typePendingActions as Array<
                   LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>
                 >,
                 actionType as 'isolate' | 'unisolate'
-              ))
-            );
+              );
+              if (isolationResponseDocs.length) {
+                addToQueue(...isolationResponseDocs);
+              }
+            }
             break;
         }
       }
@@ -411,7 +411,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           this.buildActionResponseEsDoc<{}, SentinelOneIsolationResponseMeta>({
             actionId: action.EndpointActions.action_id,
             agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
-            data: { command: 'isolate' },
+            data: { command },
             error: {
               message: `Unable to very if action completed. SentinelOne agent id ('meta.agentId') missing on action request document!`,
             },
@@ -469,7 +469,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
 
       const searchResults = await this.options.esClient
-        .search<SentinelOneActivityDoc>({
+        .search<SentinelOneActivityEsDoc>({
           index: SENTINEL_ONE_ACTIVITY_INDEX,
           query,
           // There may be many documents for each host/agent, so we collapse it and only get back the
@@ -494,7 +494,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       for (const searchResultHit of searchResults.hits.hits) {
         const isolateActivityResponseDoc = searchResultHit.inner_hits?.first_found.hits
-          .hits[0] as SearchHit<SentinelOneActivityDoc>;
+          .hits[0] as SearchHit<SentinelOneActivityEsDoc>;
 
         if (isolateActivityResponseDoc && isolateActivityResponseDoc._source) {
           const s1ActivityData = isolateActivityResponseDoc._source.sentinel_one.activity;
@@ -536,7 +536,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       this.log.debug(`Nothing to search for. List of agents IDs is empty.`);
     }
 
-    this.log.debug(`${command} action responses generated:\n${stringify(completedResponses)}`);
+    this.log.debug(
+      `${completedResponses.length} ${command} action responses generated:\n${stringify(
+        completedResponses
+      )}`
+    );
 
     if (warnings.length > 0) {
       this.log.warn(warnings.join('\n'));
