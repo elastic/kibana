@@ -436,7 +436,7 @@ export class ObservabilityAIAssistantClient {
             `Token count for conversation: ${JSON.stringify(tokenCountResult)}`
           );
 
-          apm.addLabels({
+          apm.currentTransaction?.addLabels({
             tokenCountPrompt: tokenCountResult.prompt,
             tokenCountCompletion: tokenCountResult.completion,
             tokenCountTotal: tokenCountResult.total,
@@ -632,6 +632,18 @@ export class ObservabilityAIAssistantClient {
       signal.addEventListener('abort', () => response.destroy());
 
       const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
+
+      response$.subscribe({
+        next: (event) => {
+          if (event.type === StreamingChatResponseEventType.TokenCount) {
+            span?.addLabels({
+              tokenCountPrompt: event.tokens.prompt,
+              tokenCountCompletion: event.tokens.completion,
+              tokenCountTotal: event.tokens.total,
+            });
+          }
+        },
+      });
       response$
         .pipe(rejectTokenCountEvents(), concatenateChatCompletionChunks(), lastOperator())
         .subscribe({
