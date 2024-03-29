@@ -14,10 +14,7 @@ export const APM_THROUGHPUT_CHART_EMBEDDABLE =
 export function APMThroughputChartEmbeddableComponent() {
   const {
     query: { kuery, transactionName },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/overview',
-    '/services/{serviceName}/transactions/view'
-  );
+  } = useAnyOfApmParams('/services/{serviceName}/transactions/view');
 
   return (
     <ServiceOverviewThroughputChart

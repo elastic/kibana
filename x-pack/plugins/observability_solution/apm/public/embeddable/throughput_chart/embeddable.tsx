@@ -14,19 +14,13 @@ import {
   EmbeddableOutput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { type CoreStart } from '@kbn/core/public';
 import { APMEmbeddableContext } from '../embeddable_context';
 import { APMThroughputChartEmbeddableComponent } from './chart';
 import type { APMThroughputChartEmbeddableInput } from './types';
-import type { ApmPluginStartDeps } from '../../plugin';
+import type { EmbeddableDeps } from '../types';
 
 export const APM_THROUGHPUT_CHART_EMBEDDABLE =
   'APM_THROUGHPUT_CHART_EMBEDDABLE';
-
-interface APMThroughputChartEmbeddableDeps {
-  core: CoreStart;
-  plugins: ApmPluginStartDeps;
-}
 
 export class APMThroughputChartEmbeddable extends AbstractEmbeddable<
   APMThroughputChartEmbeddableInput,
@@ -37,7 +31,7 @@ export class APMThroughputChartEmbeddable extends AbstractEmbeddable<
   private node?: HTMLElement;
 
   constructor(
-    private readonly deps: APMThroughputChartEmbeddableDeps,
+    private readonly deps: EmbeddableDeps,
     initialInput: APMThroughputChartEmbeddableInput,
     parent?: IContainer
   ) {

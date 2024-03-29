@@ -21,12 +21,8 @@ export function useAlertingProps({
   const { transactionType, serviceName } = useApmServiceContext();
   const { environment } = useEnvironmentsContext();
   const {
-    query,
     query: { transactionName },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/overview',
-    '/services/{serviceName}/transactions/view'
-  );
+  } = useAnyOfApmParams('/services/{serviceName}/transactions/view');
 
   const params = rule.params;
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);

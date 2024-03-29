@@ -16,6 +16,7 @@ export interface EmbeddableAPMAlertingVizProps {
   rangeFrom?: string;
   rangeTo?: string;
   timeZone: string;
+  latencyThresholdInMicroseconds?: number;
 }
 
 export type APMAlertingVizEmbeddableInput = EmbeddableInput &

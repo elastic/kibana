@@ -7,7 +7,6 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { RouterProvider } from '@kbn/typed-react-router-config';
-import { type CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import {
@@ -19,18 +18,13 @@ import { ApmServiceContextProvider } from '../context/apm_service/apm_service_co
 import { ApmTimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
 import { apmRouter } from '../components/routing/apm_route_config';
 import { ApmThemeProvider } from '../components/routing/app_root';
-import { ApmPluginStartDeps } from '../plugin';
 import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
 import { APMEmbeddableInput } from './types';
 import { ENVIRONMENT_ALL_VALUE } from '../../common/environment_filter_values';
-
-interface APMEmbeddableDeps {
-  core: CoreStart;
-  plugins: ApmPluginStartDeps;
-}
+import { EmbeddableDeps } from './types';
 
 type APMEmbeddableContextProps = Omit<APMEmbeddableInput, 'id'> & {
-  deps: APMEmbeddableDeps;
+  deps: EmbeddableDeps;
   children: React.ReactNode;
 };
 
@@ -63,20 +57,34 @@ export function APMEmbeddableContext({
     ],
   });
   const services: ApmPluginContextValue = {
-    core: deps.core,
-    ...deps.plugins,
+    config: deps.config,
+    core: deps.coreStart,
+    plugins: deps.pluginsSetup,
+    data: deps.pluginsStart.data,
+    inspector: deps.pluginsStart.inspector,
+    observability: deps.pluginsStart.observability,
+    observabilityShared: deps.pluginsStart.observabilityShared,
+    dataViews: deps.pluginsStart.dataViews,
+    unifiedSearch: deps.pluginsStart.unifiedSearch,
+    lens: deps.pluginsStart.lens,
+    uiActions: deps.pluginsStart.uiActions,
+    observabilityAIAssistant: deps.pluginsStart.observabilityAIAssistant,
+    share: deps.pluginsSetup.share,
+    kibanaEnvironment: deps.kibanaEnvironment,
+    // appMountParameters: deps.appMountParameters,
+    observabilityRuleTypeRegistry: deps.observabilityRuleTypeRegistry,
   };
 
-  createCallApmApi(deps.core);
+  createCallApmApi(deps.coreStart);
 
-  const I18nContext = deps.core.i18n.Context;
+  const I18nContext = deps.coreStart.i18n.Context;
   return (
     <I18nContext>
       <ApmPluginContext.Provider value={services}>
         <RouterProvider history={history} router={apmRouter as any}>
-          <KibanaThemeProvider theme={deps.core.theme}>
+          <KibanaThemeProvider theme={deps.coreStart.theme}>
             <ApmThemeProvider>
-              <KibanaContextProvider services={deps.core}>
+              <KibanaContextProvider services={deps.coreStart}>
                 <ApmTimeRangeMetadataContextProvider>
                   <ApmServiceContextProvider>
                     <ChartPointerEventContextProvider>
@@ -99,7 +107,7 @@ const getQueryParams = ({
   environment = ENVIRONMENT_ALL_VALUE,
   rangeTo = 'now',
   rangeFrom = 'now-15m',
-}: Omit<APMLatencyChartEmbeddableInput, 'serviceName' | 'id'>) => {
+}: Omit<APMEmbeddableInput, 'serviceName' | 'id'>) => {
   const transactionNameParam = transactionName
     ? `transactionName=${encodeURIComponent(transactionName)}`
     : null;

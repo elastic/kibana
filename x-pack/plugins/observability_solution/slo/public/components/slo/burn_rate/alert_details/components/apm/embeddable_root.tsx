@@ -11,10 +11,17 @@ import { GetSLOResponse, APMTransactionDurationIndicator } from '@kbn/slo-schema
 import { useKibana } from '../../../../../../utils/kibana_react';
 import { BurnRateAlert, BurnRateRule, TimeRange } from '../../types';
 
+type EmbeddableId =
+  | 'APM_THROUGHPUT_CHART_EMBEDDABLE'
+  | 'APM_LATENCY_CHART_EMBEDDABLE'
+  | 'APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE'
+  | 'APM_ALERTING_LATENCY_CHART_EMBEDDABLE'
+  | 'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE';
+
 interface APMEmbeddableRootProps {
   slo: APMTransactionDurationSLOResponse;
   dataTimeRange: TimeRange;
-  embeddableId: 'APM_THROUGHPUT_CHART_EMBEDDABLE' | 'APM_LATENCY_CHART_EMBEDDABLE';
+  embeddableId: EmbeddableId;
   alert: BurnRateAlert;
   rule: BurnRateRule;
 }
@@ -48,7 +55,7 @@ export function APMEmbeddableRoot({
         const { transactionName, transactionType, environment, service } = slo.indicator.params;
         const input = {
           id: uuidv4(),
-          serviceName: slo.indicator.params.service,
+          serviceName: service,
           transactionName: transactionName !== '*' ? transactionName : undefined,
           transactionType: transactionType !== '*' ? transactionType : undefined,
           environment: environment !== '*' ? environment : undefined,

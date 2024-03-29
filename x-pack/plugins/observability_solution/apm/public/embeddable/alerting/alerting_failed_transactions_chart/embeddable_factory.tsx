@@ -11,28 +11,45 @@ import {
   IContainer,
   EmbeddableFactoryDefinition,
   EmbeddableFactory,
-  ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import {
-  APMFailedTransactionsChartEmbeddable,
+  APMAlertingFailedTransactionsChartEmbeddable,
   APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
 } from './embeddable';
-import { ApmPluginStartDeps, ApmPluginStart } from '../../../plugin';
+import type {
+  ApmPluginStartDeps,
+  ApmPluginStart,
+  ApmPluginSetupDeps,
+} from '../../../plugin';
 import type { APMAlertingVizEmbeddableInput } from '../types';
+import type { ConfigSchema } from '../../..';
+import type { KibanaEnvContext } from '../../../context/kibana_environment_context/kibana_environment_context';
+import { APMEmbeddableFactoryDefinition } from '../../apm_embeddable_factory';
 
 export type APMAlertingFailedTransactionsChartEmbeddableFactory =
   EmbeddableFactory;
 export class APMAlertingFailedTransactionsChartEmbeddableFactoryDefinition
+  extends APMEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition
 {
   public readonly type = APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE;
 
   constructor(
-    private getStartServices: CoreSetup<
-      ApmPluginStartDeps,
-      ApmPluginStart
-    >['getStartServices']
-  ) {}
+    coreSetup: CoreSetup<ApmPluginStartDeps, ApmPluginStart>,
+    pluginsSetup: ApmPluginSetupDeps,
+    config: ConfigSchema,
+    kibanaEnvironment: KibanaEnvContext,
+    observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
+  ) {
+    super(
+      coreSetup,
+      pluginsSetup,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry
+    );
+  }
 
   public async isEditable() {
     return true;
@@ -42,19 +59,11 @@ export class APMAlertingFailedTransactionsChartEmbeddableFactoryDefinition
     initialInput: APMAlertingVizEmbeddableInput,
     parent?: IContainer
   ) {
-    try {
-      const [coreStart, pluginsStart] = await this.getStartServices();
-      return new APMFailedTransactionsChartEmbeddable(
-        {
-          core: coreStart,
-          plugins: pluginsStart,
-        },
-        initialInput,
-        parent
-      );
-    } catch (e) {
-      return new ErrorEmbeddable(e, initialInput, parent);
-    }
+    return this.createInstance(
+      APMAlertingFailedTransactionsChartEmbeddable,
+      initialInput,
+      parent
+    );
   }
 
   public getDescription() {

@@ -11,27 +11,44 @@ import {
   IContainer,
   EmbeddableFactoryDefinition,
   EmbeddableFactory,
-  ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import {
   APMThroughputChartEmbeddable,
   APM_THROUGHPUT_CHART_EMBEDDABLE,
 } from './embeddable';
-import { ApmPluginStartDeps, ApmPluginStart } from '../../plugin';
+import type {
+  ApmPluginStartDeps,
+  ApmPluginStart,
+  ApmPluginSetupDeps,
+} from '../../plugin';
 import type { APMThroughputChartEmbeddableInput } from './types';
+import type { ConfigSchema } from '../..';
+import type { KibanaEnvContext } from '../../context/kibana_environment_context/kibana_environment_context';
+import { APMEmbeddableFactoryDefinition } from '../apm_embeddable_factory';
 
 export type APMThroughputChartEmbeddableFactory = EmbeddableFactory;
 export class APMThroughputChartEmbeddableFactoryDefinition
+  extends APMEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition
 {
   public readonly type = APM_THROUGHPUT_CHART_EMBEDDABLE;
 
   constructor(
-    private getStartServices: CoreSetup<
-      ApmPluginStartDeps,
-      ApmPluginStart
-    >['getStartServices']
-  ) {}
+    coreSetup: CoreSetup<ApmPluginStartDeps, ApmPluginStart>,
+    pluginsSetup: ApmPluginSetupDeps,
+    config: ConfigSchema,
+    kibanaEnvironment: KibanaEnvContext,
+    observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
+  ) {
+    super(
+      coreSetup,
+      pluginsSetup,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry
+    );
+  }
 
   public async isEditable() {
     return true;
@@ -41,19 +58,11 @@ export class APMThroughputChartEmbeddableFactoryDefinition
     initialInput: APMThroughputChartEmbeddableInput,
     parent?: IContainer
   ) {
-    try {
-      const [coreStart, pluginsStart] = await this.getStartServices();
-      return new APMThroughputChartEmbeddable(
-        {
-          core: coreStart,
-          plugins: pluginsStart,
-        },
-        initialInput,
-        parent
-      );
-    } catch (e) {
-      return new ErrorEmbeddable(e, initialInput, parent);
-    }
+    return this.createInstance(
+      APMThroughputChartEmbeddable,
+      initialInput,
+      parent
+    );
   }
 
   public getDescription() {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import LatencyChart from '../../../components/alerting/ui_components/alert_details_app_section/latency_chart';
-import { EmbeddableAPMAlertingLatencyChartProps } from './types';
+import { EmbeddableAPMAlertingVizProps } from '../types';
 import { useAlertingProps } from '../use_alerting_props';
 import { TimeRangeCallout } from '../time_range_callout';
 
@@ -18,7 +18,9 @@ export function APMAlertingLatencyChart({
   rangeFrom,
   rangeTo,
   latencyThresholdInMicroseconds,
-}: EmbeddableAPMAlertingLatencyChartProps) {
+}: EmbeddableAPMAlertingVizProps & {
+  latencyThresholdInMicroseconds?: number;
+}) {
   const {
     environment,
     serviceName,
@@ -32,6 +34,10 @@ export function APMAlertingLatencyChart({
 
   if (!rangeFrom || !rangeTo) {
     return <TimeRangeCallout />;
+  }
+
+  if (!serviceName || !transactionType) {
+    return null;
   }
 
   return (

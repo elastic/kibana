@@ -357,6 +357,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     // Register APM telemetry based events
     const telemetry = this.telemetry.start();
 
+    const isCloudEnv = !!pluginSetupDeps.cloud?.isCloudEnabled;
+    const isServerlessEnv =
+      pluginSetupDeps.cloud?.isServerlessEnabled || this.isServerlessEnv;
+    const kibanaEnvironment = {
+      isCloudEnv,
+      isServerlessEnv,
+      kibanaVersion: this.kibanaVersion,
+    };
+
     core.application.register({
       id: 'apm',
       title: 'APM',
@@ -405,19 +414,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           import('./application'),
           core.getStartServices(),
         ]);
-        const isCloudEnv = !!pluginSetupDeps.cloud?.isCloudEnabled;
-        const isServerlessEnv =
-          pluginSetupDeps.cloud?.isServerlessEnabled || this.isServerlessEnv;
         return renderApp({
           coreStart,
           pluginsSetup: pluginSetupDeps as ApmPluginSetupDeps,
           appMountParameters,
           config,
-          kibanaEnvironment: {
-            isCloudEnv,
-            isServerlessEnv,
-            kibanaVersion: this.kibanaVersion,
-          },
+          kibanaEnvironment,
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
           apmServices: {
@@ -428,7 +430,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     registerApmRuleTypes(observabilityRuleTypeRegistry);
-    registerEmbeddables(core, plugins);
+    registerEmbeddables({
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+    });
 
     const locator = plugins.share.url.locators.create(
       new APMServiceDetailLocator(core.uiSettings)

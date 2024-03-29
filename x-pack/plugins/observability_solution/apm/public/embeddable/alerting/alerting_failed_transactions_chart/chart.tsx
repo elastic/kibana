@@ -7,7 +7,7 @@
 
 import React from 'react';
 import FailedTransactionChart from '../../../components/alerting/ui_components/alert_details_app_section/failed_transaction_chart';
-import { EmbeddableAPMAlertingFailedTransactionsChartProps } from './types';
+import { EmbeddableAPMAlertingVizProps } from '../types';
 import { useAlertingProps } from '../use_alerting_props';
 import { TimeRangeCallout } from '../time_range_callout';
 
@@ -16,7 +16,7 @@ export function APMAlertingFailedTransactionsChart({
   timeZone,
   rangeFrom,
   rangeTo,
-}: EmbeddableAPMAlertingFailedTransactionsChartProps) {
+}: EmbeddableAPMAlertingVizProps) {
   const {
     environment,
     serviceName,
@@ -29,6 +29,10 @@ export function APMAlertingFailedTransactionsChart({
 
   if (!rangeFrom || !rangeTo) {
     return <TimeRangeCallout />;
+  }
+
+  if (!serviceName || !transactionType) {
+    return null;
   }
 
   return (

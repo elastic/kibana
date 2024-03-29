@@ -14,18 +14,12 @@ import {
   EmbeddableOutput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { type CoreStart } from '@kbn/core/public';
 import { APMEmbeddableContext } from '../embeddable_context';
 import { APMLatencyChartEmbeddableComponent } from './chart';
 import type { APMLatencyChartEmbeddableInput } from './types';
-import type { ApmPluginStartDeps } from '../../plugin';
+import { EmbeddableDeps } from '../types';
 
 export const APM_LATENCY_CHART_EMBEDDABLE = 'APM_LATENCY_CHART_EMBEDDABLE';
-
-interface APMLatencyChartEmbeddableDeps {
-  core: CoreStart;
-  plugins: ApmPluginStartDeps;
-}
 
 export class APMLatencyChartEmbeddable extends AbstractEmbeddable<
   APMLatencyChartEmbeddableInput,
@@ -36,7 +30,7 @@ export class APMLatencyChartEmbeddable extends AbstractEmbeddable<
   private node?: HTMLElement;
 
   constructor(
-    private readonly deps: APMLatencyChartEmbeddableDeps,
+    private readonly deps: EmbeddableDeps,
     initialInput: APMLatencyChartEmbeddableInput,
     parent?: IContainer
   ) {
@@ -72,7 +66,7 @@ export class APMLatencyChartEmbeddable extends AbstractEmbeddable<
         rangeFrom={input.rangeFrom}
         rangeTo={input.rangeTo}
       >
-        <APMLatencyChartEmbeddableComponent alert={input.alert} />
+        <APMLatencyChartEmbeddableComponent />
       </APMEmbeddableContext>,
       node
     );

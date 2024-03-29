@@ -7,24 +7,22 @@
 
 import React from 'react';
 import ThroughputChart from '../../../components/alerting/ui_components/alert_details_app_section/throughput_chart';
-import { EmbeddableAPMAlertingThroughputChartProps } from './types';
+import { EmbeddableAPMAlertingVizProps } from '../types';
 import { useAlertingProps } from '../use_alerting_props';
 import { TimeRangeCallout } from '../time_range_callout';
 
 export function APMAlertingThroughputChart({
   rule,
-  alert,
   timeZone,
   rangeFrom,
   rangeTo,
-}: EmbeddableAPMAlertingThroughputChartProps) {
+}: EmbeddableAPMAlertingVizProps) {
   const {
     environment,
     serviceName,
     transactionType,
     transactionName,
     comparisonChartTheme,
-    throughputAggregationType,
   } = useAlertingProps({
     rule,
   });
@@ -33,9 +31,13 @@ export function APMAlertingThroughputChart({
     return <TimeRangeCallout />;
   }
 
+  // Todo: Add error state
+  if (!serviceName || !transactionType) {
+    return null;
+  }
+
   return (
     <ThroughputChart
-      alert={alert}
       transactionType={transactionType}
       transactionName={transactionName}
       serviceName={serviceName}

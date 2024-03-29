@@ -9,6 +9,8 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createContext } from 'react';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -22,13 +24,14 @@ import type { ConfigSchema } from '../..';
 import type { KibanaEnvContext } from '../kibana_environment_context/kibana_environment_context';
 
 export interface ApmPluginContextValue {
-  appMountParameters: AppMountParameters;
+  appMountParameters?: AppMountParameters;
   config: ConfigSchema;
   core: CoreStart;
   inspector: InspectorPluginStart;
   plugins: ApmPluginSetupDeps & { maps?: MapsStartApi };
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -36,6 +39,7 @@ export interface ApmPluginContextValue {
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   share: SharePluginSetup;
   kibanaEnvironment: KibanaEnvContext;
+  lens: LensPublicStart;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

@@ -5,37 +5,16 @@
  * 2.0.
  */
 import React from 'react';
-import type { Alert } from '@kbn/observability-plugin/public';
 import { useApmParams } from '../../hooks/use_apm_params';
-import LatencyChart from '../../components/alerting/ui_components/alert_details_app_section/latency_chart';
+import { LatencyChart } from '../../components/shared/charts/latency_chart';
 
 export const APM_THROUGHPUT_CHART_EMBEDDABLE =
   'APM_THROUGHPUT_CHART_EMBEDDABLE';
 
-export function APMLatencyChartEmbeddableComponent({
-  alert,
-}: {
-  alert: Alert;
-}) {
+export function APMLatencyChartEmbeddableComponent() {
   const {
-    query: {
-      kuery,
-      serviceName,
-      transactionType,
-      environment,
-      rangeFrom,
-      rangeTo,
-    },
+    query: { kuery },
   } = useApmParams('/services/{serviceName}/overview');
 
-  return (
-    <LatencyChart
-      serviceName={serviceName}
-      transactionType={transactionType!}
-      environment={environment}
-      alert={alert}
-      start={rangeFrom}
-      end={rangeTo}
-    />
-  );
+  return <LatencyChart kuery={kuery} />;
 }
