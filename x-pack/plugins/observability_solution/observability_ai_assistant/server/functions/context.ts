@@ -126,35 +126,45 @@ export function registerContextFunction({
           };
         }
 
-        const { relevantDocuments, scores } = await scoreSuggestions({
-          suggestions,
-          queries: queriesOrUserPrompt,
-          messages,
-          chat,
-          connectorId,
-          signal,
-          logger: resources.logger,
-        });
-
-        analytics.reportEvent<RecallRanking>(RecallRankingEventType, {
-          prompt: queriesOrUserPrompt.join('|'),
-          scoredDocuments: suggestions.map((suggestion) => {
-            const llmScore = scores.find((score) => score.id === suggestion.id);
-            return {
-              content: suggestion.text,
-              elserScore: suggestion.score ?? -1,
-              llmScore: llmScore ? llmScore.score : -1,
-            };
-          }),
-        });
-
-        return {
-          content: { ...content, learnings: relevantDocuments as unknown as Serializable },
-          data: {
-            scores,
+        try {
+          const { relevantDocuments, scores } = await scoreSuggestions({
             suggestions,
-          },
-        };
+            queries: queriesOrUserPrompt,
+            messages,
+            chat,
+            connectorId,
+            signal,
+            logger: resources.logger,
+          });
+
+          analytics.reportEvent<RecallRanking>(RecallRankingEventType, {
+            prompt: queriesOrUserPrompt.join('|'),
+            scoredDocuments: suggestions.map((suggestion) => {
+              const llmScore = scores.find((score) => score.id === suggestion.id);
+              return {
+                content: suggestion.text,
+                elserScore: suggestion.score ?? -1,
+                llmScore: llmScore ? llmScore.score : -1,
+              };
+            }),
+          });
+
+          return {
+            content: { ...content, learnings: relevantDocuments as unknown as Serializable },
+            data: {
+              scores,
+              suggestions,
+            },
+          };
+        } catch (error) {
+          return {
+            content: { ...content, learnings: suggestions.slice(0, 5) },
+            data: {
+              error,
+              suggestions,
+            },
+          };
+        }
       }
 
       return new Observable<MessageAddEvent>((subscriber) => {

@@ -15,6 +15,7 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { getRequestValidation } from '@kbn/core-http-server';
 
 import { initGetAllSpacesApi } from './get_all';
 import { spacesConfig } from '../../../lib/__fixtures__';
@@ -99,7 +100,8 @@ describe('GET /spaces/space', () => {
           if (routeConfig.validate === false) {
             throw new Error('Test setup failure. Expected route validation');
           }
-          const queryParamsValidation = routeConfig.validate.query! as ObjectType<any>;
+          const queryParamsValidation = getRequestValidation(routeConfig.validate)
+            .query! as ObjectType<any>;
 
           const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
