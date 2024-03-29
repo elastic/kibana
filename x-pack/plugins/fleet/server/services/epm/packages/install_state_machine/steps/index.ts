@@ -7,7 +7,7 @@
 
 export * from './step_create_restart_installation';
 export * from './step_install_kibana_assets';
-export * from './step_install_ML_model';
+export * from './step_install_mlmodel';
 export * from './step_install_ilm_policies';
 export * from './step_install_index_template_pipelines';
 export * from './step_remove_legacy_templates';
