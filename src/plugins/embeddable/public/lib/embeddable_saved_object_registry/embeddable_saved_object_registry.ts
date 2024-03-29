@@ -19,15 +19,32 @@ type SOToEmbeddable<TSavedObjectAttributes extends FinderAttributes = FinderAttr
 export type ReactEmbeddableSavedObject<
   TSavedObjectAttributes extends FinderAttributes = FinderAttributes
 > = {
-  method: SOToEmbeddable<TSavedObjectAttributes>;
+  onAdd: SOToEmbeddable<TSavedObjectAttributes>;
   savedObjectMetaData: SavedObjectMetaData;
 };
 
 const registry: Map<string, ReactEmbeddableSavedObject<any>> = new Map();
 
+/**
+ * Register an embeddable API saved object with the Add from library flyout.
+ *
+ * @example
+ * registerReactEmbeddableSavedObject<MapsByReferenceInput>(
+ *  MAP_EMBEDDABLE_NAME,
+ *  (container, savedObject) => {
+ *    container.addNewPanel({
+ *      panelType: MAP_EMBEDDABLE_NAME,
+ *      initialState: savedObject.attributes,
+ *    });
+ *    }, {
+ *     name: APP_NAME,
+ *     type: MAP_SAVED_OBJECT_TYPE,
+ *     getIconForSavedObject: () => APP_ICON,
+ *   });
+ */
 export const registerReactEmbeddableSavedObject = <TSavedObjectAttributes extends FinderAttributes>(
   type: string,
-  method: SOToEmbeddable<TSavedObjectAttributes>,
+  onAdd: SOToEmbeddable<TSavedObjectAttributes>,
   savedObjectMetaData: SavedObjectMetaData
 ) => {
   if (registry.has(type)) {
@@ -39,7 +56,7 @@ export const registerReactEmbeddableSavedObject = <TSavedObjectAttributes extend
     );
   }
 
-  registry.set(type, { method, savedObjectMetaData });
+  registry.set(type, { onAdd, savedObjectMetaData });
 };
 
 export const getReactEmbeddableSavedObjects = <
@@ -48,8 +65,4 @@ export const getReactEmbeddableSavedObjects = <
   return registry.entries() as IterableIterator<
     [string, ReactEmbeddableSavedObject<TSavedObjectAttributes>]
   >;
-};
-
-export const getReactEmbeddableSavedObject = (type: string) => {
-  return registry.get(type);
 };

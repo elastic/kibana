@@ -18,11 +18,13 @@ import {
 } from '@kbn/saved-objects-finder-plugin/public';
 
 import { PresentationContainer } from '@kbn/presentation-containers';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   core,
   embeddableStart,
   savedObjectsTaggingOss,
   contentManagement,
+  usageCollection,
 } from '../kibana_services';
 import { savedObjectToPanel } from '../registry/saved_object_to_panel_methods';
 import {
@@ -33,7 +35,20 @@ import { EmbeddableFactory, EmbeddableFactoryNotFoundError } from '../lib';
 
 type LegacyFactoryMap = { [key: string]: EmbeddableFactory };
 type FactoryMap<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {
-  [key: string]: ReactEmbeddableSavedObject<TSavedObjectAttributes> & { type?: string };
+  [key: string]: ReactEmbeddableSavedObject<TSavedObjectAttributes> & { type: string };
+};
+
+const runAddTelemetry = (
+  parentType: string,
+  factoryType: string,
+  savedObject: SavedObjectCommon,
+  savedObjectMetaData?: SavedObjectMetaData
+) => {
+  const type = savedObjectMetaData?.getSavedObjectSubType
+    ? savedObjectMetaData.getSavedObjectSubType(savedObject)
+    : factoryType;
+
+  usageCollection?.reportUiCounter?.(parentType, METRIC_TYPE.CLICK, `${type}:add`);
 };
 
 export const AddPanelFlyout = ({ container }: { container: PresentationContainer }) => {
@@ -70,7 +85,7 @@ export const AddPanelFlyout = ({ container }: { container: PresentationContainer
         ...Object.values(legacyFactoriesBySavedObjectType),
       ]
         .filter((embeddableFactory) => Boolean(embeddableFactory.savedObjectMetaData))
-        .map(({ savedObjectMetaData }) => savedObjectMetaData as SavedObjectMetaData)
+        .map(({ savedObjectMetaData }) => savedObjectMetaData!)
         .sort((a, b) => a.type.localeCompare(b.type)),
     [factoriesBySavedObjectType, legacyFactoriesBySavedObjectType]
   );
@@ -84,8 +99,10 @@ export const AddPanelFlyout = ({ container }: { container: PresentationContainer
     ) => {
       if (factoriesBySavedObjectType[type]) {
         const factory = factoriesBySavedObjectType[type];
-        const { method } = factory;
-        method(container, savedObject);
+        const { onAdd, savedObjectMetaData } = factory;
+
+        onAdd(container, savedObject);
+        runAddTelemetry(container.type, factory.type, savedObject, savedObjectMetaData);
         return;
       }
 
@@ -95,13 +112,13 @@ export const AddPanelFlyout = ({ container }: { container: PresentationContainer
       }
 
       const initialState = savedObjectToPanel[type](savedObject) ?? { savedObjectId: id };
-
       container.addNewPanel({
         panelType: legacyFactoryForSavedObjectType.type,
         initialState,
       });
 
-      // TODO figure out a way to pass a factory subtype to container.trackPanelAddMetric
+      const { savedObjectMetaData, type: factoryType } = legacyFactoryForSavedObjectType;
+      runAddTelemetry(container.type, factoryType, savedObject, savedObjectMetaData);
     },
     [container, factoriesBySavedObjectType, legacyFactoriesBySavedObjectType]
   );
