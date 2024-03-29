@@ -43,6 +43,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -125,7 +126,7 @@ export const eqlExecutor = async ({
 
     const { events, sequences } = response.hits;
 
-    if (events?.length) {
+    if (events) {
       if (isAlertSuppressionActive) {
         const createResult = await bulkCreateSuppressedAlertsInMemory({
           enrichedEvents: events,
@@ -146,7 +147,14 @@ export const eqlExecutor = async ({
       } else {
         newSignals = wrapHits(events, buildReasonMessageForEqlAlert);
       }
-    } else if (sequences?.length) {
+    } else if (sequences) {
+      if (isAlertSuppressionActive && completeRule.ruleParams.alertSuppression) {
+        await ruleExecutionLogger.logStatusChange({
+          newStatus: RuleExecutionStatusEnum['partial failure'],
+          message:
+            'Alert suppression does not currently support EQL sequences. The rule will execute without alert suppression.',
+        });
+      }
       newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
     } else {
       throw new Error(

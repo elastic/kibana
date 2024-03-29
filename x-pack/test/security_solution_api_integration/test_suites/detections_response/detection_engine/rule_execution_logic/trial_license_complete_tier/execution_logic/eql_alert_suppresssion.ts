@@ -38,6 +38,8 @@ import {
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 const getQuery = (id: string) => `any where id == "${id}"`;
+const getSequenceQuery = (id: string) =>
+  `sequence by id [any where id == "${id}"] [any where id == "${id}"]`;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -54,21 +56,20 @@ export default ({ getService }: FtrProviderContext) => {
   });
 
   describe('@ess @serverless EQL type rules, alert suppression', () => {
-    describe('Non-Sequence Alert', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
-      });
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+    });
 
-      afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-      });
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
-        );
-      });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+    });
 
+    afterEach(async () => {
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
+    });
+
+    describe('non-sequence queries', () => {
       // First test creates a real rule - remaining tests use preview API
       it('should suppress alert for 2 times rule executions with a suppression duration exceeding the rule execution', async () => {
         const id = uuidv4();
@@ -1468,6 +1469,43 @@ export default ({ getService }: FtrProviderContext) => {
           });
           expect(previewAlerts.length).toEqual(100);
         });
+      });
+    });
+
+    describe('sequence queries', () => {
+      it('logs a warning if suppression is configured', async () => {
+        const id = uuidv4();
+        await indexGeneratedSourceDocuments({
+          docsCount: 10,
+          seed: () => ({ id }),
+        });
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          invocationCount: 1,
+        });
+
+        const [{ warnings }] = logs;
+
+        expect(warnings).toContain(
+          'Alert suppression does not currently support EQL sequences. The rule will execute without alert suppression.'
+        );
       });
     });
   });
