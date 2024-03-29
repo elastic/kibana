@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import datemath from '@elastic/datemath';
 import moment from 'moment';
+import { useLocalStorageListener } from '@kbn/ml-local-storage';
 import { useKibana } from './use_kibana';
 import { useObservabilityAIAssistantAppService } from './use_observability_ai_assistant_app_service';
 
@@ -22,6 +23,8 @@ export function useNavControlScreenContext() {
     },
   } = useKibana();
 
+  const [lsIndex] = useLocalStorageListener('obs-ai-assistant-index', null);
+  const [lsIndexTimeField] = useLocalStorageListener('obs-ai-assistant-index-time-field', null);
   const { from, to } = data.query.timefilter.timefilter.getTime();
 
   const [href, setHref] = useState(window.location.href);
@@ -62,8 +65,13 @@ export function useNavControlScreenContext() {
     const start = datemath.parse(from)?.toISOString() ?? moment().subtract(1, 'day').toISOString();
     const end = datemath.parse(to)?.toISOString() ?? moment().toISOString();
 
+    const index =
+      lsIndex !== null && lsIndexTimeField !== null
+        ? `The current Elasticsearch index is '${lsIndex}' and its time field is '${lsIndexTimeField}'.`
+        : `The current Elasticsearch index could not be identified or the current page does not make use of an Elasticsearch index.`;
+
     return service.setScreenContext({
-      screenDescription: `The user is looking at ${href}. The current time range is ${start} - ${end}.`,
+      screenDescription: `The user is looking at ${href}. The current time range is ${start} - ${end}. ${index}`,
     });
-  }, [service, from, to, href]);
+  }, [service, from, to, href, lsIndex, lsIndexTimeField]);
 }

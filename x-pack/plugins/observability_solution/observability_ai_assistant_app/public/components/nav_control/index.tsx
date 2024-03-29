@@ -132,6 +132,10 @@ export function NavControl() {
     };
   }, [service.conversations]);
 
+  // if (!isVisible) {
+  //   return null;
+  // }
+
   return (
     <>
       <EuiToolTip content={buttonLabel}>

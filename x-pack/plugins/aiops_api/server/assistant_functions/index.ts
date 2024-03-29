@@ -79,8 +79,10 @@ export function registerAssistantFunctions({
     //   return;
     // }
 
+    const esClient = await (await resources.context.core).elasticsearch.client.asCurrentUser;
+
     const parameters: FunctionRegistrationParameters = {
-      resources: {},
+      resources: { esClient },
       apmEventClient: {},
       registerFunction,
     };
