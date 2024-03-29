@@ -35,7 +35,7 @@ export const labelsSchema = schema.object(
      */
     serverless: offeringBasedSchema({ serverless: schema.maybe(schema.string()) }),
   },
-  { unknowns: 'allow', defaultValue: {} }
+  { defaultValue: {} }
 );
 
 export type TelemetryConfigLabels = TypeOf<typeof labelsSchema>;

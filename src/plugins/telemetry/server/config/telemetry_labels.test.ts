@@ -26,11 +26,7 @@ describe('labelsSchema', () => {
   test('set correct defaults', () => {
     expect(labelsSchema.validate({})).toMatchInlineSnapshot(`Object {}`);
   });
-  test('allows unknowns', () => {
-    expect(labelsSchema.validate({ foo: 'bar' })).toEqual(
-      expect.objectContaining({
-        foo: 'bar',
-      })
-    );
+  test('does not allow unknowns', () => {
+    expect(labelsSchema.validate({ foo: 'bar' })).toThrowErrorMatchingInlineSnapshot();
   });
 });
