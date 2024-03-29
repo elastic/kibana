@@ -17,7 +17,8 @@ import {
   ChatCompletionCreateParamsStreaming,
   ChatCompletionCreateParamsNonStreaming,
 } from 'openai/resources/chat/completions';
-import { InvokeAIActionParamsSchema, RequestBody } from '../types';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { InvokeAIActionParamsSchema } from '../types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
 
@@ -26,7 +27,7 @@ interface ActionsClientChatOpenAIParams {
   connectorId: string;
   llmType?: string;
   logger: Logger;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   streaming?: boolean;
   traceId?: string;
   maxRetries?: number;
@@ -55,7 +56,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   #actions: ActionsPluginStart;
   #connectorId: string;
   #logger: Logger;
-  #request: KibanaRequest<unknown, unknown, RequestBody>;
+  #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   #actionResultData: string;
   #traceId: string;
   #signal?: AbortSignal;
@@ -160,18 +161,16 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     return {
       actionId: this.#connectorId,
       params: {
-        ...this.#request.body.params, // the original request body params
         // stream must already be true here
         // langchain expects stream to be of type AsyncIterator<ChatCompletionChunk>
         subAction: 'invokeAsyncIterator',
         subActionParams: {
-          model: completionRequest.model,
           n: completionRequest.n,
           stop: completionRequest.stop,
           temperature: completionRequest.temperature,
           functions: completionRequest.functions,
-          // overrides from client request, such as model
-          ...this.#request.body.params.subActionParams,
+          // possible client model override
+          model: this.#request.body.model ?? completionRequest.model,
           // ensure we take the messages from the completion request, not the client request
           messages: completionRequest.messages.map((message) => ({
             role: message.role,

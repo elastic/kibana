@@ -41,9 +41,6 @@ interface InvokeAIActionsParams {
   subAction: 'invokeAI' | 'invokeStream';
 }
 
-const convertToGenericType = (params: InvokeAIActionsParams): Record<string, unknown> =>
-  params as unknown as Record<string, unknown>;
-
 export const executeAction = async ({
   onLlmResponse,
   actions,
@@ -55,13 +52,12 @@ export const executeAction = async ({
   abortSignal,
 }: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
-  const genericParams = convertToGenericType(params);
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
     params: {
-      ...genericParams,
+      subAction: params.subAction,
       subActionParams: {
-        ...genericParams.subActionParams,
+        ...params.subActionParams,
         signal: abortSignal,
       },
     },
