@@ -103,7 +103,10 @@ export const fetchIndexInfo = async (
   );
   const textFieldCandidates: string[] = [...acceptableTextFields].filter((field) => {
     const fieldName = field.replace(new RegExp(/\.text$/), '');
-    return !fieldCandidates.includes(fieldName) || textFieldCandidatesOverrides.includes(field);
+    return (
+      (!fieldCandidates.includes(fieldName) && !fieldCandidates.includes(`${fieldName}.keyword`)) ||
+      textFieldCandidatesOverrides.includes(field)
+    );
   });
 
   const baselineTotalDocCount = (respBaselineTotalDocCount.hits.total as estypes.SearchTotalHits)

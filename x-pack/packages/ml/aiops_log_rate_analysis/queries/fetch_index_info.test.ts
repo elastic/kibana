@@ -11,12 +11,14 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { paramsSearchQueryMock } from './__mocks__/params_search_query';
 import { fieldCapsPgBenchMock } from './__mocks__/field_caps_pgbench';
+import { fieldCapsEcommerceMock } from './__mocks__/field_caps_ecommerce';
+import { fieldCapsLargeArraysMock } from './__mocks__/field_caps_large_arrays';
 
 import { fetchIndexInfo } from './fetch_index_info';
 
 describe('fetch_index_info', () => {
   describe('fetchFieldCandidates', () => {
-    it('returns field candidates and total hits for the fields', async () => {
+    it('returns field candidates and total hits for "my" fields', async () => {
       const esClientFieldCapsMock = jest.fn(() => ({
         fields: {
           // Should end up as a field candidate
@@ -130,6 +132,93 @@ describe('fetch_index_info', () => {
         'user.name',
       ]);
       expect(textFieldCandidates).toEqual(['error.message', 'message']);
+      expect(baselineTotalDocCount).toEqual(5000000);
+      expect(deviationTotalDocCount).toEqual(5000000);
+      expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
+      expect(esClientSearchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns field candidates and total hits for ecommerce mappings', async () => {
+      const esClientFieldCapsMock = jest.fn(() => fieldCapsEcommerceMock);
+      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
+        return {
+          hits: {
+            hits: [],
+            total: { value: 5000000 },
+          },
+        } as unknown as estypes.SearchResponse;
+      });
+
+      const esClientMock = {
+        fieldCaps: esClientFieldCapsMock,
+        search: esClientSearchMock,
+      } as unknown as ElasticsearchClient;
+
+      const {
+        baselineTotalDocCount,
+        deviationTotalDocCount,
+        fieldCandidates,
+        textFieldCandidates,
+      } = await fetchIndexInfo(esClientMock, paramsSearchQueryMock);
+
+      expect(fieldCandidates).toEqual([
+        'category.keyword',
+        'currency',
+        'customer_first_name.keyword',
+        'customer_full_name.keyword',
+        'customer_gender',
+        'customer_id',
+        'customer_last_name.keyword',
+        'customer_phone',
+        'day_of_week',
+        'email',
+        'geoip.city_name',
+        'geoip.continent_name',
+        'geoip.country_iso_code',
+        'geoip.region_name',
+        'manufacturer.keyword',
+        'order_id',
+        'products._id.keyword',
+        'products.category.keyword',
+        'products.manufacturer.keyword',
+        'products.product_name.keyword',
+        'products.sku',
+        'sku',
+        'type',
+        'user',
+      ]);
+      expect(textFieldCandidates).toEqual([]);
+      expect(baselineTotalDocCount).toEqual(5000000);
+      expect(deviationTotalDocCount).toEqual(5000000);
+      expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
+      expect(esClientSearchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns field candidates and total hits for large-arrays mappings', async () => {
+      const esClientFieldCapsMock = jest.fn(() => fieldCapsLargeArraysMock);
+      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
+        return {
+          hits: {
+            hits: [],
+            total: { value: 5000000 },
+          },
+        } as unknown as estypes.SearchResponse;
+      });
+
+      const esClientMock = {
+        fieldCaps: esClientFieldCapsMock,
+        search: esClientSearchMock,
+      } as unknown as ElasticsearchClient;
+
+      const {
+        baselineTotalDocCount,
+        deviationTotalDocCount,
+        fieldCandidates,
+        textFieldCandidates,
+      } = await fetchIndexInfo(esClientMock, paramsSearchQueryMock);
+
+      expect(fieldCandidates).toEqual(['items']);
+      expect(textFieldCandidates).toEqual([]);
       expect(baselineTotalDocCount).toEqual(5000000);
       expect(deviationTotalDocCount).toEqual(5000000);
       expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
