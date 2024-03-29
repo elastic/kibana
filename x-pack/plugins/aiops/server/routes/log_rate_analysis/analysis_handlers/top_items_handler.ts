@@ -13,17 +13,15 @@ import { i18n } from '@kbn/i18n';
 import {
   addSignificantItemsAction,
   updateLoadingStateAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-
-import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
-
-import { fetchTopCategories } from '../queries/fetch_top_categories';
-import { fetchTopTerms } from '../queries/fetch_top_terms';
+} from '@kbn/aiops-log-rate-analysis/api/actions';
 
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
+import { fetchTopCategories } from '@kbn/aiops-log-rate-analysis/queries/fetch_top_categories';
+import { fetchTopTerms } from '@kbn/aiops-log-rate-analysis/queries/fetch_top_terms';
 
 import {
   LOADED_FIELD_CANDIDATES,
