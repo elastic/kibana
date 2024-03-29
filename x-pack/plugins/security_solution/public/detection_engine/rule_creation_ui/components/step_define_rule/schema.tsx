@@ -507,6 +507,7 @@ export const schema: FormSchema<DefineStepRule> = {
               message: THREAT_MATCH_REQUIRED,
             };
           } else if (containsInvalidItems(formData.threatMapping)) {
+            console.error(formData.threatMapping);
             return {
               code: 'ERR_FIELD_MISSING',
               path,

@@ -102,7 +102,6 @@ export const createThreatSignals = async ({
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
   const allEventFilters = [...filters, eventMappingFilter];
   const allThreatFilters = [...threatFilters, indicatorMappingFilter];
-
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     index: inputIndex,
@@ -166,6 +165,7 @@ export const createThreatSignals = async ({
     createSignal: CreateSignalInterface;
     totalDocumentCount: number;
   }) => {
+    console.error('ARE WE IN CREATE SIGNALS???');
     let list = await getDocumentList({ searchAfter: undefined });
     let documentCount = totalDocumentCount;
 
@@ -175,7 +175,25 @@ export const createThreatSignals = async ({
       ruleExecutionLogger.debug(`${chunks.length} concurrent indicator searches are starting.`);
       const concurrentSearchesPerformed =
         chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(createSignal);
-      const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
+      let searchesPerformed;
+      try {
+        console.error('ABOUT TO PERFORM CONCURRENT SEARCHES');
+        searchesPerformed = await Promise.all(concurrentSearchesPerformed).catch((e) =>
+          console.error('INSIDE DOT CATCH', e)
+        );
+      } catch (exc) {
+        console.error('CONCURRENT SEARCHES FAILED', exc);
+        throw exc;
+      }
+      if (
+        searchesPerformed?.some((search) =>
+          search.errors.some((err) =>
+            err.includes('failed to create query: maxClauseCount is set to')
+          )
+        )
+      ) {
+        console.error('WE FOUND THE ERROR IN THREAT SIGNALS');
+      }
       results = combineConcurrentResults(results, searchesPerformed);
       documentCount -= list.hits.hits.length;
       ruleExecutionLogger.debug(
@@ -216,6 +234,7 @@ export const createThreatSignals = async ({
         searchAfter: list.hits.hits[list.hits.hits.length - 1].sort,
       });
     }
+    ruleExecutionLogger.info('NO HITS FOUND?', list.hits.hits.length === 0);
   };
 
   const license = await firstValueFrom(licensing.license$);

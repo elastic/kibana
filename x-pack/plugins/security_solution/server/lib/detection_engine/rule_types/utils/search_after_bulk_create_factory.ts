@@ -78,6 +78,7 @@ export const searchAfterAndBulkCreateFactory = async ({
     }
 
     while (toReturn.createdSignalsCount <= tuple.maxSignals) {
+      console.error('ARE WE IN HERE');
       const cycleNum = `cycle ${searchingIteration++}`;
       try {
         let mergedSearchResults = createSearchResultReturnType();
@@ -88,63 +89,68 @@ export const searchAfterAndBulkCreateFactory = async ({
         );
 
         if (hasSortId) {
-          const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
-            searchAfterSortIds: sortIds,
-            index: inputIndexPattern,
-            runtimeMappings,
-            from: tuple.from.toISOString(),
-            to: tuple.to.toISOString(),
-            services,
-            ruleExecutionLogger,
-            filter,
-            pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
-            primaryTimestamp,
-            secondaryTimestamp,
-            trackTotalHits,
-            sortOrder,
-            additionalFilters,
-          });
-          mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
-          toReturn = mergeReturns([
-            toReturn,
-            createSearchAfterReturnTypeFromResponse({
-              searchResult: mergedSearchResults,
+          try {
+            const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+              searchAfterSortIds: sortIds,
+              index: inputIndexPattern,
+              runtimeMappings,
+              from: tuple.from.toISOString(),
+              to: tuple.to.toISOString(),
+              services,
+              ruleExecutionLogger,
+              filter,
+              pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
               primaryTimestamp,
-            }),
-            createSearchAfterReturnType({
-              searchAfterTimes: [searchDuration],
-              errors: searchErrors,
-            }),
-          ]);
+              secondaryTimestamp,
+              trackTotalHits,
+              sortOrder,
+              additionalFilters,
+            });
+            mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
+            toReturn = mergeReturns([
+              toReturn,
+              createSearchAfterReturnTypeFromResponse({
+                searchResult: mergedSearchResults,
+                primaryTimestamp,
+              }),
+              createSearchAfterReturnType({
+                searchAfterTimes: [searchDuration],
+                errors: searchErrors,
+              }),
+            ]);
 
-          // determine if there are any candidate signals to be processed
-          const totalHits = getTotalHitsValue(mergedSearchResults.hits.total);
-          const lastSortIds = getSafeSortIds(
-            searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort
-          );
-
-          if (totalHits === 0 || mergedSearchResults.hits.hits.length === 0) {
-            ruleExecutionLogger.debug(
-              `[${cycleNum}] Found 0 events ${
-                sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-              }`
+            // determine if there are any candidate signals to be processed
+            const totalHits = getTotalHitsValue(mergedSearchResults.hits.total);
+            const lastSortIds = getSafeSortIds(
+              searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort
             );
-            break;
-          } else {
-            ruleExecutionLogger.debug(
-              `[${cycleNum}] Found ${
-                mergedSearchResults.hits.hits.length
-              } of total ${totalHits} events${
-                sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-              }, last cursor ${JSON.stringify(lastSortIds)}`
-            );
-          }
 
-          if (lastSortIds != null && lastSortIds.length !== 0) {
-            sortIds = lastSortIds;
-            hasSortId = true;
-          } else {
-            hasSortId = false;
+            if (totalHits === 0 || mergedSearchResults.hits.hits.length === 0) {
+              ruleExecutionLogger.debug(
+                `[${cycleNum}] Found 0 events ${
+                  sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
+                }`
+              );
+              break;
+            } else {
+              ruleExecutionLogger.debug(
+                `[${cycleNum}] Found ${
+                  mergedSearchResults.hits.hits.length
+                } of total ${totalHits} events${
+                  sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
+                }, last cursor ${JSON.stringify(lastSortIds)}`
+              );
+            }
+
+            if (lastSortIds != null && lastSortIds.length !== 0) {
+              sortIds = lastSortIds;
+              hasSortId = true;
+            } else {
+              hasSortId = false;
+            }
+          } catch (exc) {
+            console.error('SINGLE SEARCH FAILED', exc);
+            throw exc;
           }
         }
 
@@ -164,26 +170,30 @@ export const searchAfterAndBulkCreateFactory = async ({
         // if there is a sort id to continue the search_after with.
         if (includedEvents.length !== 0) {
           const enrichedEvents = await enrichment(includedEvents);
+          try {
+            const bulkCreateResult = await bulkCreateExecutor({
+              enrichedEvents,
+              toReturn,
+            });
 
-          const bulkCreateResult = await bulkCreateExecutor({
-            enrichedEvents,
-            toReturn,
-          });
+            ruleExecutionLogger.debug(
+              `[${cycleNum}] Created ${bulkCreateResult.createdItemsCount} alerts from ${enrichedEvents.length} events`
+            );
 
-          ruleExecutionLogger.debug(
-            `[${cycleNum}] Created ${bulkCreateResult.createdItemsCount} alerts from ${enrichedEvents.length} events`
-          );
+            sendAlertTelemetryEvents(
+              enrichedEvents,
+              bulkCreateResult.createdItems,
+              eventsTelemetry,
+              ruleExecutionLogger
+            );
 
-          sendAlertTelemetryEvents(
-            enrichedEvents,
-            bulkCreateResult.createdItems,
-            eventsTelemetry,
-            ruleExecutionLogger
-          );
-
-          if (bulkCreateResult.alertsWereTruncated) {
-            toReturn.warningMessages.push(getWarningMessage());
-            break;
+            if (bulkCreateResult.alertsWereTruncated) {
+              toReturn.warningMessages.push(getWarningMessage());
+              break;
+            }
+          } catch (exc) {
+            console.error('SEARCH AFTER BULK CREATE ERROR', exc);
+            throw exc;
           }
         }
 
@@ -192,6 +202,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           break;
         }
       } catch (exc: unknown) {
+        console.error('WAS THERE AN ERROR IN SEARCH AFTER BULK CREATE');
         ruleExecutionLogger.error(
           'Unable to extract/process events or create alerts',
           JSON.stringify(exc)

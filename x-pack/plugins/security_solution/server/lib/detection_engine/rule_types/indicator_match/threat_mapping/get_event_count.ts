@@ -101,6 +101,8 @@ export const getEventCount = async ({
     searchAfterSortIds: undefined,
     runtimeMappings: undefined,
   }).body.query;
+
+  // console.error('WHAT IS THE QUERY', JSON.stringify(eventSearchQueryBodyQuery, null, 2));
   const response = await esClient.count({
     body: { query: eventSearchQueryBodyQuery },
     ignore_unavailable: true,
