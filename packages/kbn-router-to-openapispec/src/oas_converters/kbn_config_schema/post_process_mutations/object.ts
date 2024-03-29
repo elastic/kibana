@@ -7,16 +7,10 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
+import { metaFields } from '@kbn/config-schema';
+import { deleteField, stripBadDefault } from './utils';
 
-const stripDefaultDeep = (schema: OpenAPIV3.SchemaObject): void => {
-  if (schema.default?.special === 'deep') {
-    if (Object.keys(schema.default).length === 1) {
-      delete schema.default;
-    } else {
-      delete schema.default.special;
-    }
-  }
-};
+const { META_FIELD_X_OAS_OPTIONAL } = metaFields;
 
 const isNullable = (schema: OpenAPIV3.SchemaObject): boolean => {
   return schema.nullable === true;
@@ -26,15 +20,14 @@ const hasDefault = (schema: OpenAPIV3.SchemaObject): boolean => {
   return schema.default != null;
 };
 
-const metaOptional = 'x-oas-optional';
 const populateRequiredFields = (schema: OpenAPIV3.SchemaObject): void => {
   if (!schema.properties) return;
   const required: string[] = [];
 
   const entries = Object.entries(schema.properties as Record<string, OpenAPIV3.SchemaObject>);
   for (const [key, value] of entries) {
-    if ((value as Record<string, unknown>)[metaOptional]) {
-      delete (value as Record<string, unknown>)[metaOptional];
+    if (META_FIELD_X_OAS_OPTIONAL in value) {
+      deleteField(value, META_FIELD_X_OAS_OPTIONAL);
     } else if (
       hasDefault(value) ||
       Boolean(value.anyOf && value.anyOf.some((v) => isNullable(v as OpenAPIV3.SchemaObject)))
@@ -58,11 +51,7 @@ const removeNeverType = (schema: OpenAPIV3.SchemaObject): void => {
 };
 
 export const processObject = (schema: OpenAPIV3.SchemaObject): void => {
-  stripDefaultDeep(schema);
+  stripBadDefault(schema);
   removeNeverType(schema);
   populateRequiredFields(schema);
-};
-
-export const replaceRecordType = (schema: OpenAPIV3.SchemaObject): void => {
-  schema.type = 'object';
 };
