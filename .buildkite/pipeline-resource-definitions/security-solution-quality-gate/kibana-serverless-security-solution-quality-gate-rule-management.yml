@@ -25,6 +25,10 @@ spec:
         trigger_mode: none
         build_tags: false
       teams:
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
         security-engineering-productivity:
