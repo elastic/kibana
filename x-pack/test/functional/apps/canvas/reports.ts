@@ -55,7 +55,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.canvas.goToListingPage();
         await PageObjects.canvas.loadFirstWorkpad('The Very Cool Workpad for PDF Tests');
 
-        await PageObjects.reporting.openExportTab();
+        this.log.debug(`openShareMenuItem title: PDF Reports`);
+        const isShareMenuOpen = await this.isShareMenuOpen();
+        if (!isShareMenuOpen) {
+          await this.clickShareTopNavButton();
+        } else {
+          // there is no easy way to ensure the menu is at the top level
+          // so just close the existing menu
+          await this.clickShareTopNavButton();
+          // and then re-open the menu
+          await this.clickShareTopNavButton();
+        }
+        const menuPanel = await this.find.byCssSelector('div.euiContextMenuPanel');
+        await this.testSubjects.click(`sharePanel-PDFReports`);
+        await this.testSubjects.waitForDeleted(menuPanel);
+
         await PageObjects.reporting.clickGenerateReportButton();
 
         const url = await PageObjects.reporting.getReportURL(60000);
