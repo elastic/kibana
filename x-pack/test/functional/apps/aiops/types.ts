@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { LogRateAnalysisDataGenerator } from '../../services/aiops/log_rate_analysis_data_generator';
