@@ -69,7 +69,7 @@ const defaultProps = {
   request: mockRequest,
   kbResource: ESQL_RESOURCE,
   telemetry: mockTelemetry,
-  replacements: [],
+  replacements: {},
 };
 describe('callAgentExecutor', () => {
   beforeEach(() => {

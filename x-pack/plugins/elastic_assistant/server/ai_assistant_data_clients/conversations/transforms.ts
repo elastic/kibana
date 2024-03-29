@@ -8,7 +8,6 @@
 import { estypes } from '@elastic/elasticsearch';
 import {
   ConversationResponse,
-  Replacement,
   replaceOriginalValuesWithUuidValues,
 } from '@kbn/elastic-assistant-common';
 import { SearchEsConversationSchema } from './types';
@@ -50,10 +49,18 @@ export const transformESToConversations = (
           conversationSchema.messages?.map((message: Record<string, any>) => ({
             timestamp: message['@timestamp'],
             // always return anonymized data from the client
-            content: replaceOriginalValuesWithUuidValues({
-              messageContent: message.content,
-              replacements: conversationSchema.replacements ?? [],
-            }),
+            content: conversationSchema.replacements
+              ? replaceOriginalValuesWithUuidValues({
+                  messageContent: message.content,
+                  replacements: conversationSchema.replacements?.reduce(
+                    (acc: Record<string, string>, r) => {
+                      acc[r.uuid] = r.value;
+                      return acc;
+                    },
+                    {}
+                  ),
+                })
+              : message.content,
             ...(message.is_error ? { isError: message.is_error } : {}),
             ...(message.reader ? { reader: message.reader } : {}),
             role: message.role,
@@ -67,7 +74,10 @@ export const transformESToConversations = (
               : {}),
           })) ?? [],
         updatedAt: conversationSchema.updated_at,
-        replacements: conversationSchema.replacements as Replacement[],
+        replacements: conversationSchema.replacements?.reduce((acc: Record<string, string>, r) => {
+          acc[r.uuid] = r.value;
+          return acc;
+        }, {}),
         namespace: conversationSchema.namespace,
         id: hit._id,
       };

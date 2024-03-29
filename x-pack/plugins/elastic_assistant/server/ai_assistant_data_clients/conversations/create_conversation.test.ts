@@ -37,7 +37,7 @@ export const getCreateConversationMock = (): ConversationCreateProps => ({
   excludeFromLastConversationStorage: false,
   isDefault: false,
   messages: [],
-  replacements: [],
+  replacements: {},
   category: 'assistant',
 });
 
@@ -52,7 +52,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   },
   excludeFromLastConversationStorage: false,
   messages: [],
-  replacements: [],
+  replacements: {},
   createdAt: '2024-01-28T04:20:02.394Z',
   namespace: 'test',
   isDefault: false,
