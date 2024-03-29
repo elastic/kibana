@@ -75,6 +75,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
     });
 
+    // https://github.com/elastic/kibana/issues/179687
     describe('When risk engine is enabled', { tags: ['@brokenInServerlessQA'] }, () => {
       beforeEach(() => {
         login();
