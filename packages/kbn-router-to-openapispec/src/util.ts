@@ -7,7 +7,11 @@
  */
 
 import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
-import { RouterRoute, RouteValidatorConfig } from '@kbn/core-http-server';
+import {
+  getRequestValidation,
+  type RouterRoute,
+  type RouteValidatorConfig,
+} from '@kbn/core-http-server';
 import { KnownParameters } from './type';
 
 export const getPathParameters = (path: string): KnownParameters => {
@@ -37,6 +41,6 @@ export const getJSONContentString = () => {
 export const extractValidationSchemaFromRoute = (
   route: RouterRoute
 ): undefined | RouteValidatorConfig<unknown, unknown, unknown> => {
-  if (route.validationSchemas === false) return undefined;
-  return route.validationSchemas;
+  if (!route.validationSchemas) return undefined;
+  return getRequestValidation(route.validationSchemas);
 };
