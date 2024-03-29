@@ -412,7 +412,7 @@ function validateFunction(
       }
 
       // check every element of the argument (may be an array of elements, or may be a single element)
-      const hasMultipleElements = Array.isArray(outerArg) && isArrayType(argDef.type);
+      const hasMultipleElements = Array.isArray(outerArg);
       const argElements = hasMultipleElements ? outerArg : [outerArg];
       const singularType = extractSingularType(argDef.type);
       let messagesFromAllArgElements = argElements
@@ -433,7 +433,7 @@ function validateFunction(
         })
         .flat();
 
-      if (hasMultipleElements) {
+      if (isArrayType(argDef.type) && hasMultipleElements) {
         messagesFromAllArgElements = collapseWrongArgumentTypeMessages(
           messagesFromAllArgElements,
           outerArg,
