@@ -21,7 +21,7 @@ import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
-import { savedSearchComparator } from '../../../timelines/components/timeline/esql_tab_content/utils';
+import { savedSearchComparator } from '../../../timelines/components/timeline/tabs/esql_tab_content/utils';
 import {
   DISCOVER_SEARCH_SAVE_ERROR_TITLE,
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
