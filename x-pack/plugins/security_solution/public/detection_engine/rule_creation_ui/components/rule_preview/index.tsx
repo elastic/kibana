@@ -233,7 +233,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         </>
       )}
       <EuiSpacer size="xs" />
-      <EuiFormRow label={i18n.QUERY_PREVIEW_LABEL}>
+      <EuiFormRow label={i18n.QUERY_PREVIEW_LABEL} data-test-subj="rule-preview">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
           <EuiFlexItem grow>
             <EuiSuperDatePicker
