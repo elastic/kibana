@@ -35,6 +35,12 @@ const CACHE_DURATION = 1000 * 60 * 60;
 let CACHED_AVAILABLE_VERSIONS: string[] | undefined;
 let LAST_FETCHED: number | undefined;
 
+/**
+ * Fetch the latest available version of Elastic Agent that is compatible with the current Kibana version.
+ *
+ * e.g. if the current Kibana version is 8.12.0, and there is an 8.12.2 patch release of agent available,
+ * this function will return "8.12.2".
+ */
 export const getLatestAvailableAgentVersion = async ({
   includeCurrentVersion = false,
   ignoreCache = false,
