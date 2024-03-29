@@ -69,7 +69,6 @@ export const getConversationResponseMock = (
   title: 'test',
   apiConfig: {
     connectorId: '1',
-    connectorTypeTitle: 'test-connector',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',

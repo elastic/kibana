@@ -15,6 +15,7 @@ import {
   isBelowMinVersion,
   getDefaultAwsCredentialsType,
   getDefaultAzureCredentialsType,
+  getDefaultGcpHiddenVars,
 } from './utils';
 import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS } from './mocks';
 
@@ -412,5 +413,76 @@ describe('getDefaultAzureCredentialsType', () => {
     const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
 
     expect(result).toBe('managed_identity');
+  });
+});
+
+describe('getDefaultGcpHiddenVars', () => {
+  let packageInfo: PackageInfo;
+
+  beforeEach(() => {
+    packageInfo = {
+      policy_templates: [
+        {
+          name: 'cspm',
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'cloud_shell_url',
+                  default: 'https://example.com/cloud_shell_url',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+  });
+
+  it('should return manual credentials-json credentials type for agentless', () => {
+    const setupTechnology = SetupTechnology.AGENTLESS;
+    const result = getDefaultGcpHiddenVars(packageInfo, setupTechnology);
+
+    expect(result).toMatchObject({
+      'gcp.credentials.type': { value: 'credentials-json', type: 'text' },
+      setup_access: { value: 'manual', type: 'text' },
+    });
+  });
+
+  it('should return google_cloud_shell setup access for agent-based if cloud_shell_url is available', () => {
+    const setupTechnology = SetupTechnology.AGENT_BASED;
+    const result = getDefaultGcpHiddenVars(packageInfo, setupTechnology);
+
+    expect(result).toMatchObject({
+      'gcp.credentials.type': { value: 'credentials-none', type: 'text' },
+      setup_access: { value: 'google_cloud_shell', type: 'text' },
+    });
+  });
+
+  it('should return manual setup access for agent-based if cloud_shell_url is not available', () => {
+    const setupTechnology = SetupTechnology.AGENT_BASED;
+    packageInfo = {
+      policy_templates: [
+        {
+          name: 'cspm',
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'arm_template_url',
+                  default: 'https://example.com/arm_template_url',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+    const result = getDefaultGcpHiddenVars(packageInfo, setupTechnology);
+
+    expect(result).toMatchObject({
+      'gcp.credentials.type': { value: 'credentials-file', type: 'text' },
+      setup_access: { value: 'manual', type: 'text' },
+    });
   });
 });

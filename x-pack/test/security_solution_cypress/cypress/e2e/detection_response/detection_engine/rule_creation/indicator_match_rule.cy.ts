@@ -135,7 +135,6 @@ describe('indicator match', { tags: ['@ess', '@serverless'] }, () => {
     describe('Creating new indicator match rules', () => {
       describe('Index patterns', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
@@ -159,7 +158,6 @@ describe('indicator match', { tags: ['@ess', '@serverless'] }, () => {
 
       describe('Indicator index patterns', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
@@ -181,7 +179,6 @@ describe('indicator match', { tags: ['@ess', '@serverless'] }, () => {
 
       describe('custom query input', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
@@ -198,7 +195,6 @@ describe('indicator match', { tags: ['@ess', '@serverless'] }, () => {
 
       describe('custom indicator query input', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
@@ -215,7 +211,6 @@ describe('indicator match', { tags: ['@ess', '@serverless'] }, () => {
 
       describe('Indicator mapping', () => {
         beforeEach(() => {
-          login();
           const rule = getNewThreatIndicatorRule();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
@@ -414,7 +409,6 @@ describe('indicator match', { tags: ['@ess', '@serverless'] }, () => {
 
       describe('Schedule', () => {
         it('IM rule has 1h time interval and lookback by default', () => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());

@@ -37,6 +37,8 @@ interface Props {
   paddingLeft?: number;
   isCancelable?: boolean;
   maxNestedDepth?: number;
+  onCancelAddingNewFields?: () => void;
+  isAddingFields?: boolean;
 }
 
 export const CreateField = React.memo(function CreateFieldComponent({
@@ -46,6 +48,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
   paddingLeft,
   isCancelable,
   maxNestedDepth,
+  onCancelAddingNewFields,
+  isAddingFields,
 }: Props) {
   const dispatch = useDispatch();
 
@@ -65,7 +69,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
   }, [dispatch, subscribe]);
 
   const cancel = () => {
-    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+    if (isAddingFields && onCancelAddingNewFields) {
+      onCancelAddingNewFields();
+    } else {
+      dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+    }
   };
 
   const submitForm = async (e?: React.FormEvent, exitAfter: boolean = false) => {
@@ -136,7 +144,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const renderFormActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-      {isCancelable !== false && (
+      {(isCancelable !== false || isAddingFields) && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={cancel} data-test-subj="cancelButton">
             {i18n.translate('xpack.idxMgmt.mappingsEditor.createField.cancelButtonLabel', {

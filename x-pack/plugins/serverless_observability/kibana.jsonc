@@ -19,6 +19,7 @@
       "observabilityShared",
       "management",
       "discover",
+      "security",
     ],
     "optionalPlugins": [],
     "requiredBundles": []
