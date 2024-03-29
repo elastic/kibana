@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import { FieldFilter as Filter } from '@kbn/es-query';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   SERVICE_NAME,
@@ -17,11 +17,16 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
+import { useUxPluginContext } from '../../../../context/use_ux_plugin_context';
 
-const getWildcardFilter = (field: string, value: string): Filter => {
+const getWildcardFilter = (
+  field: string,
+  value: string,
+  spaceId: string
+): Filter => {
   return {
     meta: {
-      index: APM_STATIC_INDEX_PATTERN_ID,
+      index: getStaticDataViewId(spaceId),
       alias: null,
       negate: false,
       disabled: false,
@@ -33,10 +38,14 @@ const getWildcardFilter = (field: string, value: string): Filter => {
   };
 };
 
-const getMatchFilter = (field: string, value: string): Filter => {
+const getMatchFilter = (
+  field: string,
+  value: string,
+  spaceId: string
+): Filter => {
   return {
     meta: {
-      index: APM_STATIC_INDEX_PATTERN_ID,
+      index: getStaticDataViewId(spaceId),
       alias: null,
       negate: false,
       disabled: false,
@@ -51,11 +60,12 @@ const getMatchFilter = (field: string, value: string): Filter => {
 const getMultiMatchFilter = (
   field: string,
   values: string[],
+  spaceId: string,
   negate = false
 ): Filter => {
   return {
     meta: {
-      index: APM_STATIC_INDEX_PATTERN_ID,
+      index: getStaticDataViewId(spaceId),
       type: 'phrases',
       key: field,
       value: values.join(', '),
@@ -73,25 +83,28 @@ const getMultiMatchFilter = (
   };
 };
 
-const existFilter: Filter = {
-  meta: {
-    index: APM_STATIC_INDEX_PATTERN_ID,
-    alias: null,
-    negate: false,
-    disabled: false,
-    type: 'exists',
-    key: 'transaction.marks.navigationTiming.fetchStart',
-    value: 'exists',
-  },
-  query: {
-    exists: {
-      field: 'transaction.marks.navigationTiming.fetchStart',
+function getExistFilter(spaceId: string): Filter {
+  return {
+    meta: {
+      index: getStaticDataViewId(spaceId),
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'exists',
+      key: 'transaction.marks.navigationTiming.fetchStart',
+      value: 'exists',
     },
-  },
-};
+    query: {
+      exists: {
+        field: 'transaction.marks.navigationTiming.fetchStart',
+      },
+    },
+  };
+}
 
 export const useMapFilters = (): Filter[] => {
   const { urlParams, uxUiFilters } = useLegacyUrlParams();
+  const { spaceId } = useUxPluginContext();
 
   const { serviceName, searchTerm } = urlParams;
 
@@ -109,48 +122,66 @@ export const useMapFilters = (): Filter[] => {
   } = uxUiFilters;
 
   return useMemo(() => {
-    const filters: Filter[] = [existFilter];
+    const filters: Filter[] = [getExistFilter(spaceId)];
     if (serviceName) {
-      filters.push(getMatchFilter(SERVICE_NAME, serviceName));
+      filters.push(getMatchFilter(SERVICE_NAME, serviceName, spaceId));
     }
     if (browser) {
-      filters.push(getMultiMatchFilter(USER_AGENT_NAME, browser));
+      filters.push(getMultiMatchFilter(USER_AGENT_NAME, browser, spaceId));
     }
     if (device) {
-      filters.push(getMultiMatchFilter(USER_AGENT_DEVICE, device));
+      filters.push(getMultiMatchFilter(USER_AGENT_DEVICE, device, spaceId));
     }
     if (os) {
-      filters.push(getMultiMatchFilter(USER_AGENT_OS, os));
+      filters.push(getMultiMatchFilter(USER_AGENT_OS, os, spaceId));
     }
     if (location) {
-      filters.push(getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, location));
+      filters.push(
+        getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, location, spaceId)
+      );
     }
     if (transactionUrl) {
-      filters.push(getMultiMatchFilter(TRANSACTION_URL, transactionUrl));
+      filters.push(
+        getMultiMatchFilter(TRANSACTION_URL, transactionUrl, spaceId)
+      );
     }
     if (browserExcluded) {
-      filters.push(getMultiMatchFilter(USER_AGENT_NAME, browserExcluded, true));
+      filters.push(
+        getMultiMatchFilter(USER_AGENT_NAME, browserExcluded, spaceId, true)
+      );
     }
     if (deviceExcluded) {
       filters.push(
-        getMultiMatchFilter(USER_AGENT_DEVICE, deviceExcluded, true)
+        getMultiMatchFilter(USER_AGENT_DEVICE, deviceExcluded, spaceId, true)
       );
     }
     if (osExcluded) {
-      filters.push(getMultiMatchFilter(USER_AGENT_OS, osExcluded, true));
+      filters.push(
+        getMultiMatchFilter(USER_AGENT_OS, osExcluded, spaceId, true)
+      );
     }
     if (locationExcluded) {
       filters.push(
-        getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, locationExcluded, true)
+        getMultiMatchFilter(
+          CLIENT_GEO_COUNTRY_ISO_CODE,
+          locationExcluded,
+          spaceId,
+          true
+        )
       );
     }
     if (transactionUrlExcluded) {
       filters.push(
-        getMultiMatchFilter(TRANSACTION_URL, transactionUrlExcluded, true)
+        getMultiMatchFilter(
+          TRANSACTION_URL,
+          transactionUrlExcluded,
+          spaceId,
+          true
+        )
       );
     }
     if (searchTerm) {
-      filters.push(getWildcardFilter(TRANSACTION_URL, searchTerm));
+      filters.push(getWildcardFilter(TRANSACTION_URL, searchTerm, spaceId));
     }
 
     return filters;
@@ -167,5 +198,6 @@ export const useMapFilters = (): Filter[] => {
     locationExcluded,
     transactionUrlExcluded,
     searchTerm,
+    spaceId,
   ]);
 };

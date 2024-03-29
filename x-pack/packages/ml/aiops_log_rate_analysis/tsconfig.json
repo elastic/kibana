@@ -1,0 +1,33 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/ml-agg-utils",
+    "@kbn/config-schema",
+    "@kbn/aiops-test-utils",
+    "@kbn/ml-random-sampler-utils",
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/aiops-log-pattern-analysis",
+    "@kbn/aiops-common",
+    "@kbn/ml-is-populated-object",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/field-types",
+    "@kbn/ml-chi2test",
+    "@kbn/ml-string-hash",
+  ]
+}

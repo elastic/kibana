@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { decode } from '@kbn/rison';
 
-import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -106,6 +106,10 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
 
     async assertSearchPanelExists() {
       await testSubjects.existOrFail(`aiopsSearchPanel`);
+    },
+
+    async assertChangePointDetectedPromptExists() {
+      await testSubjects.existOrFail(`aiopsChangePointDetectedPrompt`);
     },
 
     async assertNoWindowParametersEmptyPromptExists() {
