@@ -27,6 +27,8 @@ describe('labelsSchema', () => {
     expect(labelsSchema.validate({})).toMatchInlineSnapshot(`Object {}`);
   });
   test('does not allow unknowns', () => {
-    expect(labelsSchema.validate({ foo: 'bar' })).toThrowErrorMatchingInlineSnapshot();
+    expect(() => {
+      labelsSchema.validate({ foo: 'bar' });
+    }).toThrowErrorMatchingInlineSnapshot(`"[foo]: definition for this key is missing"`);
   });
 });
