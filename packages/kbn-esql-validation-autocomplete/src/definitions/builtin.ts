@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition } from './types';
+import type { FunctionDefinition, ParameterType } from './types';
 
 function createMathDefinition(
   name: string,
-  types: Array<string | string[]>,
+  types: Array<ParameterType | ParameterType[]>,
   description: string,
   validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
@@ -332,8 +332,8 @@ export const builtinFunctions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'left', type: 'boolean' },
-          { name: 'right', type: 'boolean' },
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'boolean' as const },
         ],
         returnType: 'boolean',
       },
@@ -349,7 +349,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     supportedOptions: ['by'],
     signatures: [
       {
-        params: [{ name: 'expression', type: 'boolean' }],
+        params: [{ name: 'expression', type: 'boolean' as const }],
         returnType: 'boolean',
       },
     ],
@@ -374,7 +374,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     supportedCommands: ['eval', 'where', 'row'],
     signatures: [
       {
-        params: [{ name: 'left', type: 'any' }],
+        params: [{ name: 'left', type: 'any' as const }],
         returnType: 'boolean',
       },
     ],

@@ -266,13 +266,13 @@ export function printFunctionSignature(arg: ESQLFunction): string {
             ...fnDef?.signatures[0],
             params: arg.args.map((innerArg) =>
               Array.isArray(innerArg)
-                ? { name: `InnerArgument[]`, type: '' }
+                ? { name: `InnerArgument[]`, type: 'any' as const }
                 : { name: innerArg.text, type: innerArg.type }
             ),
             returnType: '',
           },
         ],
-      },
+      } as FunctionDefinition,
       { withTypes: false }
     );
     return signature[0].declaration;

@@ -8,6 +8,23 @@
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
+export type ParameterType =
+  | 'number'
+  | 'date'
+  | 'string'
+  | 'boolean'
+  | 'any'
+  | 'ip'
+  | 'chrono_literal'
+  | 'time_literal'
+  | 'version'
+  | 'cartesian_point'
+  | 'geo_point'
+  | 'number[]'
+  | 'string[]'
+  | 'boolean[]'
+  | 'date[]';
+
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
   ignoreAsSuggestion?: boolean;
@@ -19,7 +36,7 @@ export interface FunctionDefinition {
   signatures: Array<{
     params: Array<{
       name: string;
-      type: string;
+      type: ParameterType;
       optional?: boolean;
       noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
