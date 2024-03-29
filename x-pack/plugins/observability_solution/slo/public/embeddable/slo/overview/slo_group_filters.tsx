@@ -7,10 +7,9 @@
 import React, { useState, useEffect } from 'react';
 import { EuiFormRow, EuiComboBox, EuiSelect, EuiComboBoxOptionOption } from '@elastic/eui';
 import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
-
 import { i18n } from '@kbn/i18n';
 import { useFetchSloGroups } from '../../../hooks/use_fetch_slo_groups';
-
+import { SLI_OPTIONS } from '../../../pages/slo_edit/constants';
 interface Option {
   value: string;
   text: string;
@@ -18,19 +17,19 @@ interface Option {
 
 const groupByOptions: Option[] = [
   {
-    text: i18n.translate('xpack.slo.list.groupBy.tags', {
+    text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.tags', {
       defaultMessage: 'by Tag',
     }),
     value: 'slo.tags',
   },
   {
-    text: i18n.translate('xpack.slo.list.groupBy.tags', {
+    text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.status', {
       defaultMessage: 'by Status',
     }),
     value: 'status',
   },
   {
-    text: i18n.translate('xpack.slo.list.groupBy.sliType', {
+    text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.sliType', {
       defaultMessage: 'by SLI type',
     }),
     value: 'slo.indicator.type',
@@ -43,10 +42,18 @@ interface Props {
 
 export function SloGroupFilters({ onSelected }: Props) {
   const mapGroupsToOptions = (items: SLOGroupWithSummaryResponse[] | undefined) =>
-    items?.map((item) => ({
-      label: item.group,
-      value: item.group,
-    })) ?? [];
+    items?.map((item) => {
+      let label = item.group;
+      if (item.groupBy === 'status') {
+        label = item.group.toLowerCase();
+      } else if (item.groupBy === 'slo.indicator.type') {
+        label = SLI_OPTIONS.find((option) => option.value === item.group)!.text ?? item.group;
+      }
+      return {
+        label,
+        value: item.group,
+      };
+    }) ?? [];
   const [selectedGroupBy, setSelectedGroupBy] = useState('slo.tags');
   const [selectedGroupByLabel, setSelectedGroupByLabel] = useState('Tag');
   const [groupOptions, setGroupOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -65,12 +72,25 @@ export function SloGroupFilters({ onSelected }: Props) {
       ? mapGroupsToOptions(data?.results)
       : [];
     setGroupOptions(opts);
+
     if (selectedGroupBy === 'slo.tags') {
-      setSelectedGroupByLabel('Tags');
+      setSelectedGroupByLabel(
+        i18n.translate('xpack.slo.sloGroupConfiguration.tagsLabel', {
+          defaultMessage: 'Tags',
+        })
+      );
     } else if (selectedGroupBy === 'status') {
-      setSelectedGroupByLabel('Status');
+      setSelectedGroupByLabel(
+        i18n.translate('xpack.slo.sloGroupConfiguration.statusLabel', {
+          defaultMessage: 'Status',
+        })
+      );
     } else if (selectedGroupBy === 'slo.indicator.type') {
-      setSelectedGroupByLabel('SLI type');
+      setSelectedGroupByLabel(
+        i18n.translate('xpack.slo.sloGroupConfiguration.sliTypeLabel', {
+          defaultMessage: 'SLI type',
+        })
+      );
     }
   }, [isLoading, data, selectedGroupBy]);
 
