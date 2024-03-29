@@ -8,7 +8,8 @@
 
 import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
+import { get as lodashGet } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { type ChromeHelpExtension, type ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import {
@@ -22,6 +23,7 @@ import {
   EuiFlexItem,
   EuiHeaderSectionItemButton,
   EuiButtonIcon,
+  EuiBreadcrumbs,
 } from '@elastic/eui';
 import type { CSSObject } from '@emotion/serialize';
 
@@ -79,6 +81,33 @@ type IHeaderHelpCenter = IHeaderHelpCenterTriggerProps & {
   defaultPosition?: IHelpCenterPosition;
 };
 
+const useContextDocsHeuristics = (docLinks: DocLinksStart) => {
+  return useCallback(
+    (breadCrumbs?: ChromeBreadcrumb[]) => {
+      if (breadCrumbs?.length) {
+        return breadCrumbs.reduceRight((result, { text, deepLinkId, href }, idx, array) => {
+          if (deepLinkId) {
+            result.push([text, lodashGet(docLinks.links, deepLinkId.split(/:/), null)]);
+          } else if (href) {
+            for (const urlPath of href.split(/\//).reverse()) {
+              const lookupResult = lodashGet(docLinks.links, urlPath, null);
+              if (lookupResult) {
+                result.push([text, lookupResult]);
+                break;
+              }
+            }
+          }
+
+          return result;
+        }, [] as Array<[React.ReactNode, string | {} | null]>);
+      }
+
+      return null;
+    },
+    [docLinks]
+  );
+};
+
 const HeaderHelpCenter = ({
   width = 654,
   height = 800,
@@ -122,6 +151,8 @@ const HeaderHelpCenter = ({
 
     return () => subscription.unsubscribe();
   }, [breadCrumbs$, helpExtension$, helpSupportUrl$]);
+
+  const getDocsLinksByContext = useContextDocsHeuristics(docLinks);
 
   const dragEndPosition = useRef<Rx.Observable<{ position: IHelpCenterPosition }>>();
 
@@ -170,7 +201,7 @@ const HeaderHelpCenter = ({
                 return data;
               })
             )
-            .pipe(Rx.takeUntil(mouseup), Rx.last());
+            .pipe(Rx.takeUntil(mouseup), Rx.takeLast(1));
         })
       );
     }
@@ -188,7 +219,7 @@ const HeaderHelpCenter = ({
     }
   }, [helpCenterElm]);
 
-  const { appName, links, content } = helpConfig?.helpExtension || {};
+  const contextDocs = getDocsLinksByContext(helpConfig?.breadCrumbs);
 
   return (
     <EuiFlexGroup ref={setHelpCenterElm} css={helpCenterStyling}>
@@ -201,7 +232,7 @@ const HeaderHelpCenter = ({
               css={{ cursor: 'move' }}
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon type="grabOmnidirectional" />
+                <EuiIcon type="grabOmnidirectional" aria-label="drag help center" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
@@ -209,24 +240,51 @@ const HeaderHelpCenter = ({
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon iconType="cross" onClick={onClose} />
+                <EuiButtonIcon iconType="cross" aria-label="close help center" onClick={onClose} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner color="subdued" css={{ minHeight: '200px' }}>
-            <EuiText>
-              <h4>{appName}</h4>
-            </EuiText>
-            <ul>
-              {links?.map((link) => (
-                <li>
-                  <a href={link.href}>{link.linkType}</a>
-                </li>
-              ))}
-            </ul>
-            <EuiText>
-              <p>{content}</p>
-            </EuiText>
+          <EuiSplitPanel.Inner color="subdued" css={{ minHeight: '200px', overflow: 'auto' }}>
+            {helpConfig?.breadCrumbs && <EuiBreadcrumbs breadcrumbs={helpConfig.breadCrumbs} />}
+            {helpConfig?.helpExtension && (
+              <>
+                <EuiText>
+                  <h4>{helpConfig.helpExtension.appName}</h4>
+                </EuiText>
+                <ul>
+                  {helpConfig.helpExtension.links?.map((link, idx) => (
+                    <li key={idx}>
+                      <EuiLink href={link.href} target="_blank">
+                        {link.linkType}
+                      </EuiLink>
+                    </li>
+                  ))}
+                </ul>
+                <EuiText>
+                  <p>{helpConfig.helpExtension.content}</p>
+                </EuiText>
+              </>
+            )}
+            {contextDocs &&
+              contextDocs.map(
+                ([text, link], idx) =>
+                  link &&
+                  (typeof link === 'string' ? (
+                    <EuiLink href={link} key={idx} target="_blank">
+                      {text}
+                    </EuiLink>
+                  ) : (
+                    <ul>
+                      {Object.entries(link).map(([key, value], linkIdx, arr) => {
+                        return (
+                          <li key={linkIdx}>
+                            <EuiLink href={value}>{key}</EuiLink>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ))
+              )}
           </EuiSplitPanel.Inner>
           <EuiSplitPanel.Inner grow={false} css={{ position: 'relative' }}>
             <EuiFlexGroup>
@@ -251,7 +309,7 @@ const HeaderHelpCenter = ({
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiLink href="http://www.elastic.co" target="_blank">
+                <EuiLink href={docLinks.DOC_LINK_VERSION} target="_blank">
                   {i18n.translate('core.ui.chrome.headerGlobalNav.helpCenterFooterDocLinkText', {
                     defaultMessage: 'Browse all the docs',
                   })}
