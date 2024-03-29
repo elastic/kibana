@@ -29,6 +29,34 @@ const RuleSchema = schema.object({
   ruleUrl: schema.nullable(schema.string()),
 });
 
+const OwnerSchema = schema.string();
+const ReopenClosedCasesSchema = schema.boolean({ defaultValue: false });
+const TimeWindowSchema = schema.string({
+  defaultValue: '7d',
+  validate: (value) => {
+    /**
+     * Validates the time window.
+     * Acceptable format:
+     * - First character should be a digit from 1 to 9
+     * - All next characters should be a digit from 0 to 9
+     * - The last character should be d (day) or w (week) or M (month) or Y (year)
+     *
+     * Example: 20d, 2w, 1M, etc
+     */
+    const timeWindowRegex = new RegExp(/^[1-9][0-9]*[d,w,M,y]$/, 'g');
+
+    if (!timeWindowRegex.test(value)) {
+      return 'Not a valid time window';
+    }
+
+    const date = dateMath.parse(`now-${value}`);
+
+    if (!date || !date.isValid()) {
+      return 'Not a valid time window';
+    }
+  },
+});
+
 /**
  * The case connector does not have any configuration
  * or secrets.
@@ -39,33 +67,19 @@ export const CasesConnectorSecretsSchema = schema.object({});
 export const CasesConnectorRunParamsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema),
   groupingBy: GroupingSchema,
-  owner: schema.string(),
+  owner: OwnerSchema,
   rule: RuleSchema,
-  timeWindow: schema.string({
-    defaultValue: '7d',
-    validate: (value) => {
-      /**
-       * Validates the time window.
-       * Acceptable format:
-       * - First character should be a digit from 1 to 9
-       * - All next characters should be a digit from 0 to 9
-       * - The last character should be d (day) or w (week) or M (month) or Y (year)
-       *
-       * Example: 20d, 2w, 1M, etc
-       */
-      const timeWindowRegex = new RegExp(/^[1-9][0-9]*[d,w,M,y]$/, 'g');
-
-      if (!timeWindowRegex.test(value)) {
-        return 'Not a valid time window';
-      }
-
-      const date = dateMath.parse(`now-${value}`);
-
-      if (!date || !date.isValid()) {
-        return 'Not a valid time window';
-      }
-    },
-  }),
-  reopenClosedCases: schema.boolean({ defaultValue: false }),
+  timeWindow: TimeWindowSchema,
+  reopenClosedCases: ReopenClosedCasesSchema,
   maximumCasesToOpen: schema.number({ defaultValue: 5, min: 1, max: MAX_OPEN_CASES }),
+});
+
+export const CasesConnectorAdapterParamsSchema = schema.object({
+  subAction: schema.literal('run'),
+  subActionParams: schema.object({
+    groupingBy: CasesConnectorRunParamsSchema,
+    reopenClosedCases: ReopenClosedCasesSchema,
+    timeWindow: TimeWindowSchema,
+    owner: OwnerSchema,
+  }),
 });

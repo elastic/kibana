@@ -9,10 +9,15 @@ import { SecurityConnectorFeatureId, UptimeConnectorFeatureId } from '@kbn/actio
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import { CasesConnector } from './cases_connector';
 import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE } from './constants';
 import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
-import { CasesConnectorConfigSchema, CasesConnectorSecretsSchema } from './schema';
+import {
+  CasesConnectorAdapterParamsSchema,
+  CasesConnectorConfigSchema,
+  CasesConnectorSecretsSchema,
+} from './schema';
 import type { CasesClient } from '../../client';
 import { constructRequiredKibanaPrivileges } from './utils';
 
@@ -64,3 +69,23 @@ export const getCasesConnectorType = ({
     return constructRequiredKibanaPrivileges(owner);
   },
 });
+
+// TODO: type returned params
+export const getCasesConnectorAdapter = (): ConnectorAdapter => {
+  return {
+    connectorTypeId: CASES_CONNECTOR_ID,
+    ruleActionParamsSchema: CasesConnectorAdapterParamsSchema,
+    buildActionParams: ({ alerts, rule, params, spaceId, ruleUrl }) => {
+      const caseAlerts = [...alerts.new.data, ...alerts.ongoing.data];
+
+      return {
+        alerts: caseAlerts,
+        rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl },
+        groupingBy: params.groupingBy,
+        owner: params.owner,
+        reopenClosedCases: params.reopenClosedCases,
+        timeWindow: params.timeWindow,
+      };
+    },
+  };
+};

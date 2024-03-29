@@ -9,19 +9,22 @@ import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/act
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup, SavedObjectsClientContract } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
+import type { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
 import type { CasesClient } from '../client';
-import { getCasesConnectorType } from './cases';
+import { getCasesConnectorAdapter, getCasesConnectorType } from './cases';
 
 export * from './types';
 export { casesConnectors } from './factory';
 
 export function registerConnectorTypes({
+  alerting,
   actions,
   core,
   getCasesClient,
   getSpaceId,
 }: {
   actions: ActionsPluginSetupContract;
+  alerting: AlertingPluginSetup;
   core: CoreSetup;
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
   getSpaceId: (request?: KibanaRequest) => string;
@@ -52,4 +55,6 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(
     getCasesConnectorType({ getCasesClient, getSpaceId, getUnsecuredSavedObjectsClient })
   );
+
+  alerting.registerConnectorAdapter(getCasesConnectorAdapter());
 }
