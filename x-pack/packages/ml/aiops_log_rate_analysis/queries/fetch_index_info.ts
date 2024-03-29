@@ -101,10 +101,10 @@ export const fetchIndexInfo = async (
   const fieldCandidates: string[] = [...acceptableFields].filter(
     (field) => !textFieldCandidatesOverridesWithKeywordPostfix.includes(field)
   );
-  const textFieldCandidates: string[] = [...acceptableTextFields].filter(
-    (field) =>
-      !allFieldNames.includes(`${field}.keyword`) || textFieldCandidatesOverrides.includes(field)
-  );
+  const textFieldCandidates: string[] = [...acceptableTextFields].filter((field) => {
+    const fieldName = field.replace(new RegExp(/\.text$/), '');
+    return !fieldCandidates.includes(fieldName) || textFieldCandidatesOverrides.includes(field);
+  });
 
   const baselineTotalDocCount = (respBaselineTotalDocCount.hits.total as estypes.SearchTotalHits)
     .value;

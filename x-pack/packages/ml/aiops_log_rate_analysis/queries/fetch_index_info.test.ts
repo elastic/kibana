@@ -228,14 +228,7 @@ describe('fetch_index_info', () => {
         'type',
         'user.name',
       ]);
-      expect(textFieldCandidates).toEqual([
-        'error.message',
-        'host.os.name.text',
-        'message',
-        'process.executable.text',
-        'process.name.text',
-        'user.name.text',
-      ]);
+      expect(textFieldCandidates).toEqual(['error.message', 'message']);
       expect(baselineTotalDocCount).toEqual(5000000);
       expect(deviationTotalDocCount).toEqual(5000000);
       expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
