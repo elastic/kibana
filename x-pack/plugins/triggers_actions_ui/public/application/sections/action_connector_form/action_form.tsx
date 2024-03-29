@@ -322,10 +322,17 @@ export const ActionForm = ({
           hasDisabledByLicenseActionTypes = true;
         }
 
+        const isSystemActionSelected = Boolean(
+          actionTypesIndex[item.id].isSystemActionType &&
+            actions.find((action) => action.actionTypeId === item.id)
+        );
+
+        const isDisabled = !checkEnabledResult.isEnabled || isSystemActionSelected;
+
         const keyPadItem = (
           <EuiKeyPadMenuItem
             key={index}
-            isDisabled={!checkEnabledResult.isEnabled}
+            isDisabled={isDisabled}
             data-test-subj={`${item.id}-${featureId}-ActionTypeSelectOption`}
             label={actionTypesIndex[item.id].name}
             betaBadgeLabel={item.isExperimental ? betaBadgeProps.label : undefined}

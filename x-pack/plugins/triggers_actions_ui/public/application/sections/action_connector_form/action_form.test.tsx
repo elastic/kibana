@@ -107,6 +107,19 @@ describe('action_form', () => {
     actionParamsFields: mockedActionParamsFields,
   };
 
+  const systemActionType = {
+    id: 'my-system-action-type',
+    iconClass: 'test',
+    selectMessage: 'system action',
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
+      const validationResult = { errors: {} };
+      return Promise.resolve(validationResult);
+    },
+    actionConnectorFields: null,
+    actionParamsFields: mockedActionParamsFields,
+    actionTypeTitle: 'system-action-type-title',
+  };
+
   const allActions = [
     {
       secrets: {},
@@ -178,6 +191,17 @@ describe('action_form', () => {
       isPreconfigured: false,
       isDeprecated: false,
     },
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'test',
+      actionTypeId: systemActionType.id,
+      name: 'Test system connector',
+      config: {},
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: true,
+    },
   ];
 
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -210,13 +234,16 @@ describe('action_form', () => {
       ...actionType,
       isExperimental,
     };
+
     actionTypeRegistry.list.mockReturnValue([
       newActionType,
       disabledByConfigActionType,
       disabledByLicenseActionType,
       disabledByActionType,
       preconfiguredOnly,
+      systemActionType,
     ]);
+
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(newActionType);
     const initialAlert = {
@@ -299,6 +326,16 @@ describe('action_form', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+      },
+      {
+        id: 'my-system-action-type',
+        name: 'System action',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: true,
       },
     ]);
 
@@ -683,6 +720,30 @@ describe('action_form', () => {
       expect(
         wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
       ).toBeTruthy();
+    });
+  });
+
+  describe('system actions', () => {
+    it('renders system action types correctly', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find(
+        `[data-test-subj="${systemActionType.id}-alerting-ActionTypeSelectOption"]`
+      );
+
+      expect(actionOption.exists()).toBeTruthy();
+      expect(actionOption.at(1).prop('disabled')).toBe(false);
+    });
+
+    it('disables the system action type if it is already selected', async () => {
+      const wrapper = await setup([
+        { id: 'system-connector-.cases', actionTypeId: systemActionType.id, params: {} },
+      ]);
+
+      const actionOption = wrapper.find(
+        `[data-test-subj="${systemActionType.id}-alerting-ActionTypeSelectOption"]`
+      );
+
+      expect(actionOption.at(1).prop('disabled')).toBe(true);
     });
   });
 });
