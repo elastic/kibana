@@ -31,4 +31,4 @@ export function validateRelatedIntegration(
   }
 }
 
-const SEMVER_PATTERN = /^(\~|\^)?\d\.\d\.\d$/;
+const SEMVER_PATTERN = /^(\~|\^)?\d+\.\d+\.\d+$/;
