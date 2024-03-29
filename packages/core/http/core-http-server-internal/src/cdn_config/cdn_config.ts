@@ -34,9 +34,11 @@ export class CdnConfig {
   public getCspConfig(): CspAdditionalConfig {
     const host = this.host;
     if (!host) return {};
-    // We exclude `connect_src` from this list as it causes issues for features
-    // like maps that rely on being able to load any external resources.
+    // Since CDN is only used in specific envs we set `connect_src` to allow any
+    // but require https. This hardens security a bit, but allows apps like
+    // maps to still work as expected.
     return {
+      connect_src: ['https:'],
       font_src: [host],
       img_src: [host],
       script_src: [host],
