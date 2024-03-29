@@ -7,6 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import { type ChromeHelpExtension } from '@kbn/core-chrome-browser';
 import {
@@ -54,8 +55,15 @@ export const HeaderHelpCenterTrigger = ({ helpExtension$ }: IHeaderHelpCenterTri
 
   return (
     <div style={{ display: 'contents' }}>
-      <EuiHeaderSectionItemButton onClick={togglePortal}>
-        <EuiIcon type={'questionInCircle'} />
+      <EuiHeaderSectionItemButton
+        aria-expanded={isPortalVisible}
+        aria-haspopup="true"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.helpCenterButtonAriaLabel', {
+          defaultMessage: 'Help Center',
+        })}
+        onClick={togglePortal}
+      >
+        <EuiIcon type={'questionInCircle'} size="m" />
       </EuiHeaderSectionItemButton>
       {portal}
     </div>
@@ -69,20 +77,16 @@ interface IHeaderHelpCenter {
 
 const HeaderHelpCenter = ({ onClose, helpExtension }: IHeaderHelpCenter) => {
   const positionPersistenceKey = useRef('help_center_position');
+  // TODO: add fallback for when there's no persisted position
   const persistedPosition = JSON.parse(
     localStorage.getItem(positionPersistenceKey.current) || '{}'
   );
   const [helpCenterElm, setHelpCenterElm] = useState<HTMLElement | null>(null);
   const [helpCenterStyling, setHelpCenterStyling] = useState<CSSObject>({
-    width: '654px',
-    position: 'absolute',
-    zIndex: 10,
-    ...(Object.keys(persistedPosition).length
-      ? {
-          top: `${persistedPosition.top}px`,
-          left: `${persistedPosition.left}px`,
-        }
-      : {}),
+    width: 654,
+    position: 'fixed',
+    zIndex: 9999999, // TODO: confirm if there's a global zIndex
+    ...persistedPosition,
   });
 
   const dragEndPosition = useRef<Rx.Observable<{ position: { left: number; top: number } }>>();
@@ -98,18 +102,25 @@ const HeaderHelpCenter = ({ onClose, helpExtension }: IHeaderHelpCenter) => {
           // calculate offsets when mouse down
           const startX = md.offsetX;
           const startY = md.offsetY;
+          const startOffsetWidth = (md.target as HTMLElement).offsetWidth;
+          const startOffsetHeight = (md.target as HTMLElement).offsetHeight;
 
           // Calculate delta with mousemove until mouseup
           return mousemove
             .pipe(
               Rx.map(function (mm) {
                 if (mm.preventDefault) mm.preventDefault();
-                else event.returnValue = false;
 
                 return {
                   position: {
-                    left: mm.clientX - startX,
-                    top: mm.clientY - startY,
+                    left: Math.max(
+                      0,
+                      Math.min(mm.clientX - startX, window.innerWidth - startOffsetWidth)
+                    ),
+                    top: Math.max(
+                      0,
+                      Math.min(mm.clientY - startY, window.innerHeight - startOffsetHeight)
+                    ),
                   },
                 };
               }),
@@ -117,8 +128,8 @@ const HeaderHelpCenter = ({ onClose, helpExtension }: IHeaderHelpCenter) => {
                 requestAnimationFrame(() => {
                   setHelpCenterStyling((prevElmStyling) => ({
                     ...prevElmStyling,
-                    top: data.position.top + 'px',
-                    left: data.position.left + 'px',
+                    top: data.position.top,
+                    left: data.position.left,
                   }));
                 });
 
@@ -129,7 +140,7 @@ const HeaderHelpCenter = ({ onClose, helpExtension }: IHeaderHelpCenter) => {
         })
       );
     }
-  }, [helpCenterElm]);
+  }, [helpCenterElm, helpCenterStyling.width]);
 
   useEffect(() => {
     if (helpCenterElm) {
