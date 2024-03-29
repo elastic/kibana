@@ -453,7 +453,6 @@ describe('alert actions', () => {
             version: null,
             savedSearchId: null,
             savedSearch: null,
-            isDiscoverSavedSearchLoaded: false,
             isDataProviderVisible: false,
             rowHeight: 3,
             sampleSize: 500,

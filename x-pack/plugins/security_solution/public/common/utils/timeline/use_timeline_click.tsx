@@ -6,17 +6,12 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import {
-  dispatchUpdateTimeline,
-  queryTimelineById,
-} from '../../../timelines/components/open_timeline/helpers';
+import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import type { TimelineErrorCallback } from '../../../timelines/components/open_timeline/types';
-import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/actions';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export const useTimelineClick = () => {
-  const dispatch = useDispatch();
+  const queryTimelineById = useQueryTimelineById();
 
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
@@ -28,18 +23,10 @@ export const useTimelineClick = () => {
         graphEventId,
         timelineId,
         onError,
-        updateIsLoading: ({
-          id: currentTimelineId,
-          isLoading,
-        }: {
-          id: string;
-          isLoading: boolean;
-        }) => dispatch(dispatchUpdateIsLoading({ id: currentTimelineId, isLoading })),
-        updateTimeline: dispatchUpdateTimeline(dispatch),
         unifiedComponentsInTimelineEnabled,
       });
     },
-    [dispatch, unifiedComponentsInTimelineEnabled]
+    [queryTimelineById, unifiedComponentsInTimelineEnabled]
   );
 
   return handleTimelineClick;
