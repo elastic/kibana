@@ -20,17 +20,14 @@ import type { SortFieldTimeline } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
 import { timelineSelectors } from '../../store';
-import {
-  createTimeline as dispatchCreateNewTimeline,
-  updateIsLoading as dispatchUpdateIsLoading,
-} from '../../store/actions';
+import { createTimeline as dispatchCreateNewTimeline } from '../../store/actions';
 
 import { useGetAllTimeline } from '../../containers/all';
 
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 
 import { OpenTimeline } from './open_timeline';
-import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
+import { OPEN_TIMELINE_CLASS_NAME, useQueryTimelineById } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
 import type {
   ActionTimelineToShow,
@@ -160,12 +157,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
-
-    const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
-    const updateIsLoading = useCallback(
-      (payload) => dispatch(dispatchUpdateIsLoading(payload)),
-      [dispatch]
-    );
 
     const {
       customTemplateTimelineCount,
@@ -345,6 +336,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       setSelectedItems([]);
     }, []);
 
+    const queryTimelineById = useQueryTimelineById();
+
     const openTimeline: OnOpenTimeline = useCallback(
       ({ duplicate, timelineId, timelineType: timelineTypeToOpen }) => {
         if (duplicate) {
@@ -360,12 +353,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           onOpenTimeline,
           timelineId,
           timelineType: timelineTypeToOpen,
-          updateIsLoading,
-          updateTimeline,
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [updateIsLoading, updateTimeline]
+      [queryTimelineById]
     );
 
     useEffect(() => {

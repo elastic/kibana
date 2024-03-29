@@ -20,7 +20,7 @@ import {
   RouteMethod,
   validBodyOutput,
   IKibanaSocket,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   KibanaRequestRoute,
   KibanaRequestEvents,
   KibanaRequestAuth,
@@ -66,7 +66,7 @@ export class CoreKibanaRequest<
     req: RawRequest,
     routeSchemas:
       | RouteValidator<P, Q, B>
-      | RouteValidatorFullConfig<P, Q, B>
+      | RouteValidatorFullConfigRequest<P, Q, B>
       | undefined = undefined,
     withoutSecretHeaders: boolean = true
   ) {

@@ -30,9 +30,6 @@
       "kibanaUtils",
       "embeddable",
       "cases"
-    ],
-    "extraPublicDirs": [
-      "common"
     ]
   }
 }
