@@ -141,7 +141,6 @@ export class DashboardContainer
 
   // performance monitoring
   private dashboardCreationStartTime?: number;
-  private savedObjectLoadTime?: number;
 
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
@@ -268,8 +267,6 @@ export class DashboardContainer
         value2: panelCount,
         key3: 'total_load_time',
         value3: totalDuration,
-        key4: 'saved_object_load_time',
-        value4: this.savedObjectLoadTime,
       });
     }
   }
