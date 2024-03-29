@@ -95,6 +95,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   note: '',
   threatIndicatorPath: undefined,
   timestampOverrideFallbackDisabled: undefined,
+  maxSignals: 100,
 };
 
 const DEFAULT_INTERVAL = '5m';

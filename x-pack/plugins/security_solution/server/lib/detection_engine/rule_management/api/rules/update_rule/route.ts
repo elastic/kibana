@@ -24,7 +24,11 @@ import { updateRules } from '../../../logic/crud/update_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
-import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
+import {
+  transformValidate,
+  validateMaxSignals,
+  validateResponseActionsPermissions,
+} from '../../../utils/validate';
 
 export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.versioned
@@ -63,6 +67,8 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
             savedObjectsClient,
           });
           throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
+
+          validateMaxSignals({ maxSignals: request.body.max_signals, rulesClient });
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
 

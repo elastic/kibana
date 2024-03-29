@@ -193,6 +193,10 @@ export class RulesClient {
     return this.context.auditLogger;
   }
 
+  public getMaxAlertsPerRun() {
+    return this.context.maxAlertsPerRun;
+  }
+
   public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
 
   public getScheduleFrequency = () => getScheduleFrequency(this.context);

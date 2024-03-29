@@ -281,6 +281,7 @@ describe('StepAboutRuleComponent', () => {
         },
       ],
       investigationFields: [],
+      maxSignals: 100,
     };
 
     await act(async () => {
@@ -341,6 +342,7 @@ describe('StepAboutRuleComponent', () => {
         },
       ],
       investigationFields: [],
+      maxSignals: 100,
     };
 
     await act(async () => {

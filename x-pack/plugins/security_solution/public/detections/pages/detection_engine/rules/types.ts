@@ -101,6 +101,7 @@ export interface AboutStepRule {
   threatIndicatorPath?: string;
   threat: Threats;
   note: string;
+  maxSignals?: number;
 }
 
 export interface AboutStepRuleDetails {
@@ -245,6 +246,7 @@ export interface AboutStepRuleJson {
   timestamp_override_fallback_disabled?: boolean;
   note?: string;
   investigation_fields?: InvestigationFields;
+  max_signals?: number;
 }
 
 export interface ScheduleStepRuleJson {

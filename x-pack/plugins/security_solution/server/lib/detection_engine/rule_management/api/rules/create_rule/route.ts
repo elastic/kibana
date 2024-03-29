@@ -23,7 +23,11 @@ import { createRules } from '../../../logic/crud/create_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
+import {
+  transformValidate,
+  validateMaxSignals,
+  validateResponseActionsPermissions,
+} from '../../../utils/validate';
 
 export const createRuleRoute = (
   router: SecuritySolutionPluginRouter,
@@ -80,6 +84,8 @@ export const createRuleRoute = (
               });
             }
           }
+
+          validateMaxSignals({ maxSignals: request.body.max_signals, rulesClient });
 
           const mlAuthz = buildMlAuthz({
             license: ctx.licensing.license,

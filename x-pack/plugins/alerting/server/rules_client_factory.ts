@@ -26,7 +26,7 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
-import { AlertingRulesConfig } from './config';
+import { ActionsConfig, AlertingRulesConfig } from './config';
 import { GetAlertIndicesAlias } from './lib';
 import { AlertsService } from './alerts_service/alerts_service';
 import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
@@ -50,6 +50,7 @@ export interface RulesClientFactoryOpts {
   getAlertIndicesAlias: GetAlertIndicesAlias;
   alertsService: AlertsService | null;
   uiSettings: CoreStart['uiSettings'];
+  maxAlertsPerRun: ActionsConfig['max'];
 }
 
 export class RulesClientFactory {
@@ -73,6 +74,7 @@ export class RulesClientFactory {
   private getAlertIndicesAlias!: GetAlertIndicesAlias;
   private alertsService!: AlertsService | null;
   private uiSettings!: CoreStart['uiSettings'];
+  private maxAlertsPerRun!: ActionsConfig['max'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -98,6 +100,7 @@ export class RulesClientFactory {
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
     this.alertsService = options.alertsService;
     this.uiSettings = options.uiSettings;
+    this.maxAlertsPerRun = options.maxAlertsPerRun;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -129,6 +132,7 @@ export class RulesClientFactory {
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
       uiSettings: this.uiSettings,
+      maxAlertsPerRun: this.maxAlertsPerRun,
 
       async getUserName() {
         if (!securityPluginStart) {

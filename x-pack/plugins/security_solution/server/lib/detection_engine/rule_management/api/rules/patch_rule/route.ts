@@ -24,7 +24,7 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
-import { transformValidate } from '../../../utils/validate';
+import { transformValidate, validateMaxSignals } from '../../../utils/validate';
 
 export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.versioned
@@ -68,6 +68,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
             // reject an unauthorized "promotion" to ML
             throwAuthzError(await mlAuthz.validateRuleType(params.type));
           }
+          validateMaxSignals({ maxSignals: params.max_signals, rulesClient });
 
           const existingRule = await readRules({
             rulesClient,

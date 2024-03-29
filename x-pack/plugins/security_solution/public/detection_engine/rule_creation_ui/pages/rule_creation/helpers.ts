@@ -25,6 +25,7 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
@@ -556,6 +557,7 @@ export const formatAboutStepData = (
     threat,
     isAssociatedToEndpointList,
     isBuildingBlock,
+    maxSignals,
     note,
     ruleNameOverride,
     threatIndicatorPath,
@@ -610,6 +612,7 @@ export const formatAboutStepData = (
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     ...(!isEmpty(note) ? { note } : {}),
+    max_signals: maxSignals ? maxSignals : DEFAULT_MAX_SIGNALS,
     ...rest,
   };
   return resp;

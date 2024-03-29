@@ -40,6 +40,7 @@ import { useRuleIndices } from '../../../rule_management/logic/use_rule_indices'
 import { EsqlAutocomplete } from '../esql_autocomplete';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useInvestigationFields } from '../../hooks/use_investigation_fields';
+import { MaxSignals } from '../max_signals';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -311,6 +312,18 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   euiFieldProps: {
                     disabled: isLoading,
                   },
+                }}
+              />
+            </EuiFormRow>
+            <EuiSpacer size="l" />
+            <EuiFormRow label={I18n.MAX_SIGNALS} fullWidth>
+              <CommonUseField
+                path="maxSignals"
+                component={MaxSignals}
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleMaxSignals',
+                  'data-test-subj': 'detectionEngineStepAboutRuleMaxSignals',
+                  isDisabled: isLoading,
                 }}
               />
             </EuiFormRow>

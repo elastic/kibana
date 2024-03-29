@@ -508,6 +508,7 @@ export class AlertingPlugin {
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       alertsService: this.alertsService,
       uiSettings: core.uiSettings,
+      maxAlertsPerRun: this.config.rules.run.alerts.max,
     });
 
     rulesSettingsClientFactory.initialize({

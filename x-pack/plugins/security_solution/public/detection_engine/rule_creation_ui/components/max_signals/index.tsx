@@ -1,0 +1,80 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo, useCallback } from 'react';
+import type { EuiFieldNumberProps } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import * as i18n from './translations';
+import { useKibana } from '../../../../common/lib/kibana';
+
+interface MaxSignalsFieldProps {
+  dataTestSubj: string;
+  field: FieldHook;
+  idAria: string;
+  isDisabled: boolean;
+  placeholder?: string;
+}
+
+export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
+  dataTestSubj,
+  field,
+  idAria,
+  isDisabled,
+  placeholder,
+}): JSX.Element => {
+  const { setValue, value } = field;
+  const { alerting } = useKibana().services;
+  const maxAlertsPerRun = alerting.getMaxAlertsPerRun() ?? 1000; // Defaults to 1000 in the alerting framework config
+
+  const [isInvalid, error] = useMemo(() => {
+    if (typeof value === 'number' && !isNaN(value)) {
+      if (value <= 0) {
+        return [true, i18n.GREATER_THAN_ERROR];
+      } else if (value > maxAlertsPerRun) {
+        return [true, i18n.LESS_THAN_ERROR(maxAlertsPerRun)];
+      }
+    }
+    return [false];
+  }, [maxAlertsPerRun, value]);
+
+  const handleMaxSignalsChange: EuiFieldNumberProps['onChange'] = useCallback(
+    (e) => {
+      const maxSignalsValue = (e.target as HTMLInputElement).value;
+      // Has to handle an empty string as the field is optional
+      setValue(maxSignalsValue !== '' ? Number(maxSignalsValue.trim()) : '');
+    },
+    [setValue]
+  );
+
+  return (
+    <EuiFormRow
+      data-test-subj={dataTestSubj}
+      describedByIds={idAria ? [idAria] : undefined}
+      fullWidth
+      helpText={field.helpText}
+      label={field.label}
+      labelAppend={field.labelAppend}
+      isInvalid={isInvalid}
+      error={error}
+    >
+      <EuiFieldNumber
+        isInvalid={isInvalid}
+        value={value as EuiFieldNumberProps['value']}
+        onChange={handleMaxSignalsChange}
+        isLoading={field.isValidating}
+        fullWidth
+        data-test-subj="input"
+        placeholder={placeholder}
+        disabled={isDisabled}
+      />
+    </EuiFormRow>
+  );
+};
+
+MaxSignals.displayName = 'MaxSignals';

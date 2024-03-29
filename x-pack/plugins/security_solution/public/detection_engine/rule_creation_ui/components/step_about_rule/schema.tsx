@@ -100,6 +100,17 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  maxSignals: {
+    type: FIELD_TYPES.NUMBER,
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMaxSignalsHelpText',
+      {
+        defaultMessage:
+          'The maximum number of alerts a rule will create per execution. Defaults to 100.',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
   isAssociatedToEndpointList: {
     type: FIELD_TYPES.CHECKBOX,
     label: i18n.translate(

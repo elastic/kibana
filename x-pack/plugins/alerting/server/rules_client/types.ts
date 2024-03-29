@@ -32,7 +32,7 @@ import {
   RawRuleAlertsFilter,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
-import { AlertingRulesConfig } from '../config';
+import { ActionsConfig, AlertingRulesConfig } from '../config';
 import { GetAlertIndicesAlias } from '../lib';
 import { AlertsService } from '../alerts_service';
 
@@ -80,6 +80,7 @@ export interface RulesClientContext {
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;
   readonly uiSettings: UiSettingsServiceStart;
+  readonly maxAlertsPerRun: ActionsConfig['max'];
 }
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
