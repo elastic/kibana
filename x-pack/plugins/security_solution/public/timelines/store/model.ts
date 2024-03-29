@@ -136,7 +136,6 @@ export interface TimelineModel {
   savedSearchId: string | null;
   /* local saved search object, it's not sent to the server */
   savedSearch: SavedSearch | null;
-  isDiscoverSavedSearchLoaded?: boolean;
   isDataProviderVisible: boolean;
   /** used to mark the timeline as unsaved in the UI */
   changed?: boolean;
@@ -196,7 +195,6 @@ export type SubsetTimelineModel = Readonly<
     | 'filters'
     | 'savedSearchId'
     | 'savedSearch'
-    | 'isDiscoverSavedSearchLoaded'
     | 'isDataProviderVisible'
     | 'changed'
   >
