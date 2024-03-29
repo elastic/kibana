@@ -47,19 +47,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should convert to Lens', async () => {
       const visPanel = await panelActions.getPanelHeading('Goal - Basic');
       await panelActions.convertToLens(visPanel);
-      await lens.waitForVisualization('mtrVis');
-      const data = await lens.getMetricVisualizationData();
-      expect(data.length).to.be.equal(1);
-      expect(data).to.eql([
+      const { bullet } = await lens.getCurrentChartDebugStateForVizType('gaugeChart');
+      expect(bullet?.rows.length).to.be.equal(1);
+      expect(bullet?.rows[0].length).to.be.equal(1);
+      expect(bullet?.rows[0]).to.eql([
         {
           title: 'Count',
-          subtitle: undefined,
-          extraText: '',
-          value: '140.05%',
-          color: 'rgba(255, 255, 255, 1)',
-          trendlineColor: undefined,
-          showingBar: true,
-          showingTrendline: false,
+          subtype: BulletSubtype.twoThirdsCircle,
+          value: 1.4005,
+          colorBands: ['#2f7e54'],
+          ticks: [0, 1],
+          domain: [0, 1],
         },
       ]);
     });
