@@ -54,7 +54,7 @@ export type SecuritySolutionTemplateWrapperProps = Omit<KibanaPageTemplateProps,
 };
 
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateWrapperProps> =
-  React.memo(({ children, isEmptyState, ...rest }) => {
+  React.memo(({ children, ...rest }) => {
     const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
@@ -62,7 +62,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
       getTimelineShowStatus(state, TimelineId.active)
     );
     const [routeProps] = useRouteSpy();
-    const isNotEmpty = !isEmptyState;
+    const isNotEmpty = !rest.isEmptyState;
     const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
