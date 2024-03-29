@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import React, { Component, RefObject } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { Subscription } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
-import { EuiLoadingChart } from '@elastic/eui';
-import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor } from '../../common/descriptor_types';
-import { INITIAL_LOCATION } from '../../common';
-import { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable';
+import { INITIAL_LOCATION, MAP_SAVED_OBJECT_TYPE } from '../../common';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
+import { MapApi, MapSerializeState } from '../react_embeddable/types';
 
 interface Props {
-  factory: EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
   passiveLayer: LayerDescriptor;
   onRenderComplete: () => void;
-}
-
-interface State {
-  mapEmbeddable: MapEmbeddable | null;
 }
 
 /*
@@ -32,85 +26,69 @@ interface State {
  * Contrast with traditional map (active map), where layers independently auto-fetch features
  * based on changes to pan, zoom, filter, query, timeRange, and other state changes
  */
-export class PassiveMap extends Component<Props, State> {
-  private _isMounted = false;
-  private _prevPassiveLayer = this.props.passiveLayer;
-  private readonly _embeddableRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
-  private _onRenderSubscription: Subscription | undefined;
-
-  state: State = { mapEmbeddable: null };
-
-  componentDidMount() {
-    this._isMounted = true;
-    this._setupEmbeddable();
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    if (this.state.mapEmbeddable) {
-      this.state.mapEmbeddable.destroy();
-    }
-    if (this._onRenderSubscription) {
-      this._onRenderSubscription.unsubscribe();
-    }
-  }
-
-  componentDidUpdate() {
-    if (this.state.mapEmbeddable && this._prevPassiveLayer !== this.props.passiveLayer) {
-      this.state.mapEmbeddable.updateLayerById(this.props.passiveLayer);
-      this._prevPassiveLayer = this.props.passiveLayer;
-    }
-  }
-
-  async _setupEmbeddable() {
+export function PassiveMap(props: Props) {
+  const isMounted = useMountedState();
+  const mapApiRef = useRef<MapApi | undefined>(undefined);
+  const onRenderCompleteSubscriptionRef = useRef<Subscription | undefined>(undefined);
+  const initialState = useMemo(() => {
     const basemapLayerDescriptor = createBasemapLayerDescriptor();
     const intialLayers = basemapLayerDescriptor ? [basemapLayerDescriptor] : [];
-    const mapEmbeddable = (await this.props.factory.create({
-      id: uuidv4(),
-      attributes: {
-        title: '',
-        layerListJSON: JSON.stringify([...intialLayers, this.props.passiveLayer]),
+    return {
+      rawState: {
+        attributes: {
+          title: '',
+          layerListJSON: JSON.stringify([...intialLayers, props.passiveLayer]),
+        },
+        filters: [],
+        hidePanelTitles: true,
+        viewMode: ViewMode.VIEW,
+        isLayerTOCOpen: false,
+        hideFilterActions: true,
+        mapSettings: {
+          disableInteractive: false,
+          hideToolbarOverlay: false,
+          hideLayerControl: false,
+          hideViewControl: false,
+          initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
+          autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
+        },
+        isSharable: false,
       },
-      filters: [],
-      hidePanelTitles: true,
-      viewMode: ViewMode.VIEW,
-      isLayerTOCOpen: false,
-      hideFilterActions: true,
-      mapSettings: {
-        disableInteractive: false,
-        hideToolbarOverlay: false,
-        hideLayerControl: false,
-        hideViewControl: false,
-        initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
-        autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
-      },
-    })) as MapEmbeddable | undefined;
+      references: [],
+    };
+  }, []);
 
-    if (!mapEmbeddable) {
-      return;
+  useEffect(() => {
+    if (mapApiRef.current) {
+      mapApiRef.current.updateLayerById(props.passiveLayer);
     }
+  }, [props.passiveLayer]);
 
-    this._onRenderSubscription = mapEmbeddable.getOnRenderComplete$().subscribe(() => {
-      if (this._isMounted) {
-        this.props.onRenderComplete();
+  useEffect(() => {
+    return () => {
+      if (onRenderCompleteSubscriptionRef.current) {
+        onRenderCompleteSubscriptionRef.current.unsubscribe();
       }
-    });
-
-    if (this._isMounted) {
-      mapEmbeddable.setIsSharable(false);
-      this.setState({ mapEmbeddable }, () => {
-        if (this.state.mapEmbeddable && this._embeddableRef.current) {
-          this.state.mapEmbeddable.render(this._embeddableRef.current);
-        }
-      });
     }
-  }
+  }, []);
 
-  render() {
-    if (!this.state.mapEmbeddable) {
-      return <EuiLoadingChart mono size="l" />;
-    }
-
-    return <div className="mapEmbeddableContainer" ref={this._embeddableRef} />;
-  }
+  return (
+    <div className="mapEmbeddableContainer">
+      <ReactEmbeddableRenderer<MapSerializeState, MapApi>
+        type={MAP_SAVED_OBJECT_TYPE}
+        state={initialState}
+        onApiAvailable={(api) => {
+          mapApiRef.current = api;
+          onRenderCompleteSubscriptionRef.current = api.onRenderComplete$.subscribe(() => {
+            if (isMounted()) {
+              props.onRenderComplete();
+            }
+          });
+        }}
+        panelProps={{
+          hideHeader: true,
+        }}
+      />
+    </div>
+  );
 }

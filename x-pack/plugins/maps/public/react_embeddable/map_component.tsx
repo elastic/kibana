@@ -6,17 +6,15 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { debounceTime, first } from 'rxjs/operators';
+import useMountedState from 'react-use/lib/useMountedState';
+import { first } from 'rxjs/operators';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { MapApi, MapSerializeState } from './types';
-import {
-  MAP_SAVED_OBJECT_TYPE,
-  RENDER_TIMEOUT,
-} from '../../common/constants';
+import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { BehaviorSubject } from 'rxjs';
 
 interface Props {
@@ -34,6 +32,7 @@ interface Props {
 }
 
 export function MapComponent(props: Props) {
+  const isMounted = useMountedState();
   const initialState = useMemo(() => {
     return {
       rawState: {
@@ -76,11 +75,10 @@ export function MapComponent(props: Props) {
         parentApi={parentApi}
         onApiAvailable={(api) => {
           if (props.onInitialRenderComplete) {
-            api.dataLoading.pipe(
-              first(isDataLoading => typeof isDataLoading === 'boolean' && !isDataLoading),
-              debounceTime(RENDER_TIMEOUT),
+            api.onRenderComplete$.pipe(
+              first(),
             ).subscribe(() => {
-              if (props.onInitialRenderComplete) {
+              if (props.onInitialRenderComplete && isMounted()) {
                 props.onInitialRenderComplete();
               }
             });

@@ -65,13 +65,6 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
       const { ChoroplethChart } = await import('./choropleth_chart');
       const { getEmsFileLayers } = await import('../../util');
 
-      const mapEmbeddableFactory = plugins.embeddable.getEmbeddableFactory(
-        'map'
-      ) as EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
-      if (!mapEmbeddableFactory) {
-        return;
-      }
-
       let emsFileLayers: FileLayer[] = [];
       try {
         emsFileLayers = await getEmsFileLayers();
@@ -111,7 +104,6 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
           formatFactory={plugins.fieldFormats.deserialize}
           uiSettings={coreStart.uiSettings}
           emsFileLayers={emsFileLayers}
-          mapEmbeddableFactory={mapEmbeddableFactory}
           onRenderComplete={renderComplete}
         />,
         domNode

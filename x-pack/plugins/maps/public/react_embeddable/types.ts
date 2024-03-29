@@ -8,8 +8,9 @@
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { HasLibraryTransforms, PublishesDataLoading, SerializedTitles } from '@kbn/presentation-publishing';
+import { Observable } from 'rxjs';
 import { MapAttributes } from '../../common/content_management';
-import { MapCenterAndZoom, MapExtent, MapSettings } from '../../common/descriptor_types';
+import { LayerDescriptor, MapCenterAndZoom, MapExtent, MapSettings } from '../../common/descriptor_types';
 
 export interface MapSerializeState extends SerializedTitles {
   // by-valye
@@ -36,4 +37,7 @@ export interface MapSerializeState extends SerializedTitles {
 
 export type MapApi = DefaultEmbeddableApi<MapSerializeState> &
   PublishesDataLoading &
-  HasLibraryTransforms<MapSerializeState>;
+  HasLibraryTransforms<MapSerializeState> & {
+    updateLayerById: (layerDescriptor: LayerDescriptor) => void;
+    onRenderComplete$: Observable<void>;
+  };

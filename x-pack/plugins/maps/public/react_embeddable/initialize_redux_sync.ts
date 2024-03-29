@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, map } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { StateComparators } from '@kbn/presentation-publishing';
-import { MapCenterAndZoom } from '../../common/descriptor_types';
+import { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
+import { RENDER_TIMEOUT } from '../../common/constants';
 import { MapStore, MapStoreState } from '../reducers/store';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -24,6 +25,7 @@ import {
   setHiddenLayers,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
+  updateLayerById,
 } from '../actions';
 import type { MapSerializeState } from './types';
 
@@ -91,6 +93,18 @@ export function initializeReduxSync(store: MapStore, state: MapSerializeState) {
     cleanupReduxSync: unsubscribeFromStore,
     reduxApi: {
       dataLoading: dataLoading$,
+      onRenderComplete$: dataLoading$.pipe(
+        filter(isDataLoading => typeof isDataLoading === 'boolean' && !isDataLoading),
+        debounceTime(RENDER_TIMEOUT),
+        map(() => {
+          // Observable notifies subscriber when rendering is complete
+          // Return void to not expose internal implemenation details of observabale
+          return;
+        })
+      ),
+      updateLayerById: (layerDescriptor: LayerDescriptor) => {
+        store.dispatch<any>(updateLayerById(layerDescriptor));
+      },
     },
     reduxComparators: {
       // mapBuffer comparator intentionally omitted and is not part of unsaved changes check
