@@ -66,7 +66,7 @@ steps:
         parallelism: 2
         retry:
           automatic:
-            - exit_status: '*'
+            - exit_status: '-1'
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
@@ -79,7 +79,7 @@ steps:
         parallelism: 4
         retry:
           automatic:
-            - exit_status: '*'
+            - exit_status: '-1'
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
@@ -92,7 +92,7 @@ steps:
         parallelism: 8
         retry:
           automatic:
-            - exit_status: '*'
+            - exit_status: '-1'
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
@@ -102,10 +102,10 @@ steps:
           queue: n2-4-spot
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 8
+        parallelism: 5
         retry:
           automatic:
-            - exit_status: '*'
+            - exit_status: '-1'
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
@@ -115,10 +115,10 @@ steps:
           queue: n2-4-spot
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 4
+        parallelism: 2
         retry:
           automatic:
-            - exit_status: '*'
+            - exit_status: '-1'
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
@@ -128,10 +128,10 @@ steps:
           queue: n2-4-spot
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 6
+        parallelism: 5
         retry:
           automatic:
-            - exit_status: '*'
+            - exit_status: '-1'
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
@@ -141,10 +141,10 @@ steps:
           queue: n2-4-spot
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 6
+        parallelism: 2
         retry:
           automatic:
-            - exit_status: '*'
+            - exit_status: '-1'
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
@@ -157,7 +157,7 @@ steps:
         parallelism: 1
         retry:
           automatic:
-            - exit_status: '*'
+            - exit_status: '-1'
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
@@ -167,10 +167,10 @@ steps:
           queue: n2-4-virt
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 10
+        parallelism: 12
         retry:
           automatic:
-            - exit_status: '*'
+            - exit_status: '-1'
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
@@ -180,10 +180,10 @@ steps:
           queue: n2-4-spot
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 6
+        parallelism: 7
         retry:
           automatic:
-            - exit_status: '*'
+            - exit_status: '-1'
               limit: 1
 
   - wait: ~

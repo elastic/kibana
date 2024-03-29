@@ -7,9 +7,9 @@
 
 import { ReactElement } from 'react';
 import { ToastsStart } from '@kbn/core-notifications-browser';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import { type SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
 import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
-import { BoolQuery, Query } from '@kbn/es-query';
+import { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { AlertStatus } from '../../../common/typings';
 export interface AlertStatusFilterProps {
@@ -44,6 +44,8 @@ export interface ObservabilityAlertSearchBarProps
   extends AlertSearchBarContainerState,
     AlertSearchBarStateTransitions,
     CommonAlertSearchBarProps {
+  showFilterBar?: boolean;
+  savedQuery?: SavedQuery;
   services: Services;
 }
 
@@ -52,6 +54,8 @@ interface AlertSearchBarContainerState {
   rangeTo: string;
   kuery: string;
   status: AlertStatus;
+  filters?: Filter[];
+  savedQueryId?: string;
 }
 
 interface AlertSearchBarStateTransitions {
@@ -59,6 +63,8 @@ interface AlertSearchBarStateTransitions {
   onRangeToChange: (rangeTo: string) => void;
   onKueryChange: (kuery: string) => void;
   onStatusChange: (status: AlertStatus) => void;
+  onFiltersChange?: (filters: Filter[]) => void;
+  setSavedQuery?: (savedQueryId?: SavedQuery) => void;
 }
 
 interface CommonAlertSearchBarProps {
