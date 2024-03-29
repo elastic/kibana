@@ -33,6 +33,12 @@ export function setIsCloudEnabled(enabled: boolean) {
 }
 export const getIsCloud = () => isCloudEnabled;
 
+let spaceId = 'default';
+export const getSpaceId = () => spaceId;
+export const setSpaceId = (_spaceId: string) => {
+  spaceId = _spaceId;
+};
+
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
 export const getIndexPatternService = () => pluginsStart.data.dataViews;

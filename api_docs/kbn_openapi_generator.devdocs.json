@@ -145,6 +145,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.GeneratorConfig.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-generator",
             "id": "def-common.GeneratorConfig.rootDir",
             "type": "string",
             "tags": [],
@@ -188,6 +202,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.GeneratorConfig.bundle",
+            "type": "Object",
+            "tags": [],
+            "label": "bundle",
+            "description": [],
+            "signature": [
+              "{ outFile: string; } | undefined"
             ],
             "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
