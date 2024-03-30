@@ -11,10 +11,15 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import { CasesConnector } from './cases_connector';
-import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE } from './constants';
-import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
+import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE, DEFAULT_MAX_OPEN_CASES } from './constants';
+import type {
+  CasesConnectorConfig,
+  CasesConnectorSecrets,
+  CasesConnectorRuleActionParams,
+  CasesConnectorParams,
+} from './types';
 import {
-  CasesConnectorAdapterParamsSchema,
+  CasesConnectorRuleActionParamsSchema,
   CasesConnectorConfigSchema,
   CasesConnectorSecretsSchema,
 } from './schema';
@@ -71,21 +76,27 @@ export const getCasesConnectorType = ({
 });
 
 // TODO: type returned params
-export const getCasesConnectorAdapter = (): ConnectorAdapter => {
+export const getCasesConnectorAdapter = (): ConnectorAdapter<
+  CasesConnectorRuleActionParams,
+  CasesConnectorParams
+> => {
   return {
     connectorTypeId: CASES_CONNECTOR_ID,
-    ruleActionParamsSchema: CasesConnectorAdapterParamsSchema,
+    ruleActionParamsSchema: CasesConnectorRuleActionParamsSchema,
     buildActionParams: ({ alerts, rule, params, spaceId, ruleUrl }) => {
       const caseAlerts = [...alerts.new.data, ...alerts.ongoing.data];
 
-      return {
+      const subActionParams = {
         alerts: caseAlerts,
-        rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl },
-        groupingBy: params.groupingBy,
-        owner: params.owner,
-        reopenClosedCases: params.reopenClosedCases,
-        timeWindow: params.timeWindow,
+        rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
+        groupingBy: params.subActionParams.groupingBy,
+        owner: params.subActionParams.owner,
+        reopenClosedCases: params.subActionParams.reopenClosedCases,
+        timeWindow: params.subActionParams.timeWindow,
+        maximumCasesToOpen: DEFAULT_MAX_OPEN_CASES,
       };
+
+      return { subAction: 'run', subActionParams };
     },
   };
 };

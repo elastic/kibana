@@ -11,6 +11,7 @@ export const CASES_CONNECTOR_ID = '.cases';
 export const CASES_CONNECTOR_TITLE = 'Cases';
 export const MAX_CONCURRENT_ES_REQUEST = 5;
 export const MAX_OPEN_CASES = 10;
+export const DEFAULT_MAX_OPEN_CASES = 5;
 export const INITIAL_ORACLE_RECORD_COUNTER = 1;
 
 export enum CASES_CONNECTOR_SUB_ACTION {

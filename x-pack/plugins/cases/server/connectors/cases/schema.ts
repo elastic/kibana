@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import dateMath from '@kbn/datemath';
-import { MAX_OPEN_CASES } from './constants';
+import { DEFAULT_MAX_OPEN_CASES, MAX_OPEN_CASES } from './constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
   validate: (value) => {
@@ -71,15 +71,24 @@ export const CasesConnectorRunParamsSchema = schema.object({
   rule: RuleSchema,
   timeWindow: TimeWindowSchema,
   reopenClosedCases: ReopenClosedCasesSchema,
-  maximumCasesToOpen: schema.number({ defaultValue: 5, min: 1, max: MAX_OPEN_CASES }),
+  maximumCasesToOpen: schema.number({
+    defaultValue: DEFAULT_MAX_OPEN_CASES,
+    min: 1,
+    max: MAX_OPEN_CASES,
+  }),
 });
 
-export const CasesConnectorAdapterParamsSchema = schema.object({
+export const CasesConnectorRuleActionParamsSchema = schema.object({
   subAction: schema.literal('run'),
   subActionParams: schema.object({
-    groupingBy: CasesConnectorRunParamsSchema,
+    groupingBy: GroupingSchema,
     reopenClosedCases: ReopenClosedCasesSchema,
     timeWindow: TimeWindowSchema,
     owner: OwnerSchema,
   }),
+});
+
+export const CasesConnectorParamsSchema = schema.object({
+  subAction: schema.literal('run'),
+  subActionParams: CasesConnectorRunParamsSchema,
 });
