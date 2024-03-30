@@ -107,8 +107,8 @@ export const transformToCreateScheme = (
     updated_at: createdAt,
     replacements: replacements
       ? Object.keys(replacements).map((key) => ({
-          value: key,
-          uuid: replacements[key],
+          uuid: key,
+          value: replacements[key],
         }))
       : undefined,
     namespace: spaceId,

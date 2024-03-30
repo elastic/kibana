@@ -174,12 +174,12 @@ User prompt text`);
           selectedSystemPrompt: mockSystemPrompt,
         });
 
-        expect(message.replacements).toEqual([
-          { uuid: 'oof', value: 'foo' },
-          { uuid: 'rab', value: 'bar' },
-          { uuid: 'zab', value: 'baz' },
-          { uuid: 'elzoof', value: 'foozle' },
-        ]);
+        expect(message.replacements).toEqual({
+          elzoof: 'foozle',
+          oof: 'foo',
+          rab: 'bar',
+          zab: 'baz',
+        });
       });
 
       it('returns the expected content when `isNewChat` is false', async () => {
