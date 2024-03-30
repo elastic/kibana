@@ -58,7 +58,7 @@ export const INTEGRATION_VERSION = i18n.translate(
 export const INTEGRATION_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.validation.integrationRequired',
   {
-    defaultMessage: 'Version',
+    defaultMessage: 'Integration must be selected',
   }
 );
 

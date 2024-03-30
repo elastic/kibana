@@ -7,9 +7,10 @@
 
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useMemo } from 'react';
+import { capitalize } from 'lodash';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiBadge,
+  EuiTextTruncate,
   EuiButtonIcon,
   EuiComboBox,
   EuiFieldText,
@@ -21,6 +22,7 @@ import {
 import type { FieldHook } from '../../../../shared_imports';
 import type { Integration, RelatedIntegration } from '../../../../../common/api/detection_engine';
 import { useIntegrations } from '../../../../detections/components/rules/related_integrations/use_integrations';
+import { IntegrationStatus } from './integration_status';
 import * as i18n from './translations';
 
 interface RelatedIntegrationItemFormProps {
@@ -34,7 +36,7 @@ export function RelatedIntegrationField({
   relatedIntegrations,
   onRemove,
 }: RelatedIntegrationItemFormProps): JSX.Element {
-  const { data: integrations } = useIntegrations();
+  const { data: integrations, isInitialLoading } = useIntegrations();
   const [integrationOptions, selectedIntegrationOptions] = useMemo(() => {
     const currentKey = getKey(field.value.package, field.value.integration);
     const relatedIntegrationsButCurrent = relatedIntegrations.filter(
@@ -46,9 +48,17 @@ export function RelatedIntegrationField({
     );
 
     const options = unusedIntegrations.map(transformIntegrationToOption) ?? [];
-    const selectedOptions = options.find((option) => option.key === currentKey);
+    const fallbackSelectedOption =
+      field.value.package.length > 0
+        ? {
+            key: currentKey,
+            label: `${capitalize(field.value.package)} ${field.value.integration ?? ''}`,
+          }
+        : undefined;
+    const selectedOption =
+      options.find((option) => option.key === currentKey) ?? fallbackSelectedOption;
 
-    return [options, selectedOptions ? [selectedOptions] : []];
+    return [options, selectedOption ? [selectedOption] : []];
   }, [integrations, field.value, relatedIntegrations]);
 
   const handleIntegrationChange = useCallback(
@@ -88,6 +98,8 @@ export function RelatedIntegrationField({
               renderOption={renderIntegrationOption}
               selectedOptions={selectedIntegrationOptions}
               singleSelection
+              isLoading={isInitialLoading}
+              isDisabled={!integrations}
               onChange={handleIntegrationChange}
               fullWidth
               aria-label={i18n.RELATED_INTEGRATION_ARIA_LABEL}
@@ -97,7 +109,8 @@ export function RelatedIntegrationField({
             <EuiFieldText
               placeholder={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_PLACEHOLDER}
               prepend={i18n.INTEGRATION_VERSION}
-              disabled={!field.value.package}
+              isLoading={isInitialLoading}
+              disabled={!field.value.package || !integrations}
               aria-label={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_ARIA_LABEL}
               value={field.value.version}
               onChange={handleVersionChange}
@@ -142,7 +155,6 @@ function transformIntegrationToOption(
     key: getKey(integration.package_name, integration.integration_name),
     label,
     value: integration,
-    color: integration.is_enabled ? 'success' : integration.is_installed ? 'primary' : undefined,
   };
 }
 
@@ -153,23 +165,22 @@ function getKey(packageName: string | undefined, integrationName: string | undef
 function renderIntegrationOption(
   option: EuiComboBoxOptionOption<Integration>
 ): JSX.Element | string {
-  const { label, value, color } = option;
+  const { label, value } = option;
 
   if (!value) {
     return label;
   }
 
-  const integrationStatus = value.is_enabled
-    ? 'Installed: Enabled'
-    : value.is_installed
-    ? 'Installed: Disabled'
-    : 'Not installed';
-
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>{value.integration_title ?? value.package_title}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTextTruncate text={value.integration_title ?? value.package_title} truncation="end" />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiBadge color={color}>{integrationStatus}</EuiBadge>
+        <IntegrationStatus
+          isIntegrationInstalled={value.is_installed}
+          isIntegrationEnabled={value.is_enabled}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
