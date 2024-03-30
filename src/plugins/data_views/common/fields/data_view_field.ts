@@ -11,7 +11,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewFieldBase } from '@kbn/es-query';
 import { EcsFlat } from '@elastic/ecs';
 import type { RuntimeFieldSpec } from '../types';
-import { FieldSpec, DataView } from '..';
+import { FieldSpec, DataView, IIndexPatternFieldList } from '..';
 import {
   shortenDottedString,
   isDataViewFieldSubtypeMulti,
@@ -42,16 +42,18 @@ export class DataViewField implements DataViewFieldBase {
    * Kbn field type, used mainly for formattering.
    */
   private readonly kbnFieldType: KbnFieldType;
+  private readonly fieldList: IIndexPatternFieldList | undefined;
 
   /**
    * DataView constructor
    * @constructor
    * @param spec Configuration for the field
    */
-  constructor(spec: FieldSpec) {
+  constructor(spec: FieldSpec, fieldList?: IIndexPatternFieldList) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
 
     this.kbnFieldType = getKbnFieldType(spec.type);
+    this.fieldList = fieldList;
   }
 
   // writable attrs
@@ -193,8 +195,11 @@ export class DataViewField implements DataViewFieldBase {
     if (this.spec.customDescription) {
       return this.spec.customDescription;
     }
-    const { description } = EcsFlat[this.name as keyof typeof EcsFlat] ?? {};
-    return description || '';
+    if (this.fieldList?.hasEcsFields()) {
+      const { description } = EcsFlat[this.name as keyof typeof EcsFlat] ?? {};
+      return description || '';
+    }
+    return '';
   }
 
   /**

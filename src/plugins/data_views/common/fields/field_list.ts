@@ -68,6 +68,8 @@ export interface IIndexPatternFieldList extends Array<DataViewField> {
    * @return map of field specs by name
    */
   toSpec(options?: ToSpecOptions): DataViewFieldMap;
+
+  hasEcsFields(): boolean;
 }
 
 // Extending the array class and using a constructor doesn't work well
@@ -101,7 +103,7 @@ export const fieldList = (
       ...(this.groups.get(type) || new Map()).values(),
     ];
     public readonly add = (field: FieldSpec): DataViewField => {
-      const newField = new DataViewField({ ...field, shortDotsEnable });
+      const newField = new DataViewField({ ...field, shortDotsEnable }, this);
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);
@@ -117,7 +119,7 @@ export const fieldList = (
     };
 
     public readonly update = (field: FieldSpec) => {
-      const newField = new DataViewField(field);
+      const newField = new DataViewField(field, this);
       const index = this.findIndex((f) => f.name === newField.name);
       this.splice(index, 1, newField);
       this.setByName(newField);
@@ -147,6 +149,9 @@ export const fieldList = (
           return collector;
         }, {}),
       };
+    }
+    public hasEcsFields(): boolean {
+      return this.getByName('ecs.version') !== undefined;
     }
   }
 
