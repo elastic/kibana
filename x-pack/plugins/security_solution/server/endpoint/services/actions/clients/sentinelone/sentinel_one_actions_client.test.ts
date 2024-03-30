@@ -17,7 +17,7 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
-import { applyEsClientSearchMock } from '../../../../mocks';
+import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import { SENTINEL_ONE_ACTIVITY_INDEX } from '../../../../../../common';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
 import type {

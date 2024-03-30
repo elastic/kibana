@@ -98,7 +98,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends SentinelOneActionRequestCommonMeta = SentinelOneActionRequestCommonMeta
+    TMeta extends {} = SentinelOneActionRequestCommonMeta
   >(
     actionRequest: Omit<
       ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
@@ -108,11 +108,17 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       >,
       'hosts'
     >
-  ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+  ): Promise<
+    LogsEndpointAction<TParameters, TOutputContent, TMeta & SentinelOneActionRequestCommonMeta>
+  > {
     const agentUUID = actionRequest.endpoint_ids[0];
     const agentDetails = await this.getAgentDetails(agentUUID);
 
-    return super.writeActionRequestToEndpointIndex<TParameters, TOutputContent, TMeta>({
+    return super.writeActionRequestToEndpointIndex<
+      TParameters,
+      TOutputContent,
+      TMeta & SentinelOneActionRequestCommonMeta
+    >({
       ...actionRequest,
       hosts: {
         [agentUUID]: { name: agentDetails.computerName },
