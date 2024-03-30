@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { debounce } from 'lodash';
 import { EuiFormRow, EuiComboBox, EuiSelect, EuiComboBoxOptionOption } from '@elastic/eui';
 import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
@@ -60,10 +61,16 @@ export function SloGroupFilters({ onSelected }: Props) {
   const [selectedGroupOptions, setSelectedGroupOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const sliTypeSearch = SLI_OPTIONS.find((option) =>
+    option.text.toLowerCase().includes(searchValue.toLowerCase())
+  )?.value;
+  const query = `${searchValue}*`;
 
   const { data, isLoading } = useFetchSloGroups({
     perPage: 100,
     groupBy: selectedGroupBy,
+    kqlQuery: `slo.tags: (${query}) or status: (${query.toUpperCase()}) or slo.indicator.type: (${sliTypeSearch})`,
   });
 
   useEffect(() => {
@@ -102,6 +109,14 @@ export function SloGroupFilters({ onSelected }: Props) {
         : undefined;
     onSelected('groups', selectedGroups);
   };
+
+  const onSearchChange = useMemo(
+    () =>
+      debounce((value: string) => {
+        setSearchValue(value);
+      }, 300),
+    []
+  );
 
   return (
     <>
@@ -145,6 +160,7 @@ export function SloGroupFilters({ onSelected }: Props) {
           selectedOptions={selectedGroupOptions}
           async
           onChange={onChange}
+          onSearchChange={onSearchChange}
           fullWidth
           singleSelection={false}
         />
