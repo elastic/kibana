@@ -16,11 +16,22 @@ jest.mock('../../../hooks/use_app_context');
 const useAppContextMock = useAppContext as jest.Mock;
 
 const navigateToAppMock = jest.fn(() => Promise.resolve());
-const selectConnectorMock = jest.fn();
+const settingsClientSet = jest.fn();
 
 describe('SettingsTab', () => {
   beforeEach(() => {
     useAppContextMock.mockReturnValue({
+      settings: {
+        client: {
+          set: settingsClientSet,
+        },
+      },
+      uiSettings: {
+        get: jest.fn(),
+      },
+      docLinks: {
+        links: {},
+      },
       application: { navigateToApp: navigateToAppMock },
       observabilityAIAssistant: {
         useGenAIConnectors: () => ({
@@ -29,7 +40,6 @@ describe('SettingsTab', () => {
             { name: 'azureOpenAi', id: 'azureOpenAi' },
             { name: 'bedrock', id: 'bedrock' },
           ],
-          selectConnector: selectConnectorMock,
         }),
         useUserPreferredLanguage: () => ({
           LANGUAGE_OPTIONS: [{ label: 'English' }],
@@ -62,10 +72,18 @@ describe('SettingsTab', () => {
   it('should allow selection of a configured Observability AI Assistant connector', () => {
     const { getByTestId } = render(<SettingsTab />);
 
-    fireEvent.change(getByTestId('settingsTabGenAIConnectorSelect'), {
-      target: { value: 'bedrock' },
-    });
+    fireEvent.change(
+      getByTestId('management-settings-editField-observability:aiAssistantDefaultConnector'),
+      {
+        target: { value: 'bedrock' },
+      }
+    );
 
-    expect(selectConnectorMock).toBeCalledWith('bedrock');
+    fireEvent.click(getByTestId('apmBottomBarActionsButton'));
+
+    expect(settingsClientSet).toBeCalledWith(
+      'observability:aiAssistantDefaultConnector',
+      'bedrock'
+    );
   });
 });

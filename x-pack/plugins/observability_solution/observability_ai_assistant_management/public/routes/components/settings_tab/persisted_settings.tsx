@@ -63,6 +63,7 @@ export function PersistedSettings() {
       {Object.values(fieldDefinitions).map((field) => {
         return (
           <FieldRowProvider
+            key={field.id}
             {...{
               links: docLinks.links.management,
               showDanger: (message: string) => notifications.toasts.addDanger(message),
