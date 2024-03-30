@@ -53,7 +53,7 @@ interface Props {
  */
 export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSettingsChange }) => {
   const { actionTypeRegistry, basePath, http } = useAssistantContext();
-  const { data: connectors } = useLoadConnectors({ actionTypeRegistry, http });
+  const { data: connectors } = useLoadConnectors({ http });
   const {
     data: evalResponse,
     mutate: performEvaluation,

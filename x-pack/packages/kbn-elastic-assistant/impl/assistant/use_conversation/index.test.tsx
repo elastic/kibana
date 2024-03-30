@@ -36,7 +36,6 @@ const mockConvo = {
   messages: [message, anotherMessage],
   apiConfig: {
     connectorId: '123',
-    connectorTypeTitle: 'OpenAI',
     defaultSystemPromptId: 'default-system-prompt',
   },
 };
@@ -69,7 +68,6 @@ describe('useConversation', () => {
         replacements: [],
         apiConfig: {
           connectorId: '123',
-          connectorTypeTitle: 'OpenAI',
           defaultSystemPromptId: 'default-system-prompt',
         },
         title: mockConvo.title,

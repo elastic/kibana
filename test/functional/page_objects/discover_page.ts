@@ -763,9 +763,12 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
-  public async addRuntimeField(name: string, script: string) {
+  public async addRuntimeField(name: string, script: string, type?: string) {
     await this.clickAddField();
     await this.fieldEditor.setName(name);
+    if (type) {
+      await this.fieldEditor.setFieldType(type);
+    }
     await this.fieldEditor.enableValue();
     await this.fieldEditor.typeScript(script);
     await this.fieldEditor.save();

@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRule,
@@ -26,6 +25,7 @@ import {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
   const config = getService('config');
@@ -46,11 +46,8 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
-        const { body } = await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ rule_id: 'rule-1', name: 'some other name' })
+        const { body } = await securitySolutionApi
+          .patchRule({ body: { rule_id: 'rule-1', name: 'some other name' } })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
@@ -66,11 +63,8 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's type to machine learning
-        const { body } = await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ rule_id: 'rule-1', type: 'machine_learning' })
+        const { body } = await securitySolutionApi
+          .patchRule({ body: { rule_id: 'rule-1', type: 'machine_learning' } })
           .expect(403);
 
         expect(body).to.eql({
@@ -86,11 +80,8 @@ export default ({ getService }: FtrProviderContext) => {
         const createRuleBody = await createRule(supertest, log, rule);
 
         // patch a simple rule's name
-        const { body } = await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ rule_id: createRuleBody.rule_id, name: 'some other name' })
+        const { body } = await securitySolutionApi
+          .patchRule({ body: { rule_id: createRuleBody.rule_id, name: 'some other name' } })
           .expect(200);
 
         const outputRule = getSimpleRuleOutputWithoutRuleId();
@@ -106,11 +97,8 @@ export default ({ getService }: FtrProviderContext) => {
         const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
-        const { body } = await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ id: createdBody.id, name: 'some other name' })
+        const { body } = await securitySolutionApi
+          .patchRule({ body: { id: createdBody.id, name: 'some other name' } })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
@@ -126,11 +114,8 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false
-        const { body } = await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ rule_id: 'rule-1', enabled: false })
+        const { body } = await securitySolutionApi
+          .patchRule({ body: { rule_id: 'rule-1', enabled: false } })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
@@ -145,11 +130,8 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false and another property
-        const { body } = await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ rule_id: 'rule-1', severity: 'low', enabled: false })
+        const { body } = await securitySolutionApi
+          .patchRule({ body: { rule_id: 'rule-1', severity: 'low', enabled: false } })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
@@ -166,19 +148,15 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's timeline_title
-        await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ rule_id: 'rule-1', timeline_title: 'some title', timeline_id: 'some id' })
+        await securitySolutionApi
+          .patchRule({
+            body: { rule_id: 'rule-1', timeline_title: 'some title', timeline_id: 'some id' },
+          })
           .expect(200);
 
         // patch a simple rule's name
-        const { body } = await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ rule_id: 'rule-1', name: 'some other name' })
+        const { body } = await securitySolutionApi
+          .patchRule({ body: { rule_id: 'rule-1', name: 'some other name' } })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
@@ -193,11 +171,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should give a 404 if it is given a fake id', async () => {
-        const { body } = await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' })
+        const { body } = await securitySolutionApi
+          .patchRule({
+            body: { id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' },
+          })
           .expect(404);
 
         expect(body).to.eql({
@@ -207,11 +184,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should give a 404 if it is given a fake rule_id', async () => {
-        const { body } = await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ rule_id: 'fake_id', name: 'some other name' })
+        const { body } = await securitySolutionApi
+          .patchRule({ body: { rule_id: 'fake_id', name: 'some other name' } })
           .expect(404);
 
         expect(body).to.eql({

@@ -23,7 +23,6 @@ export const alertConvo: Conversation = {
   ],
   apiConfig: {
     connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
-    connectorTypeTitle: 'OpenAI',
     provider: OpenAiProviderType.OpenAi,
   },
   replacements: [
@@ -42,7 +41,6 @@ export const emptyWelcomeConvo: Conversation = {
   replacements: [],
   apiConfig: {
     connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
-    connectorTypeTitle: 'OpenAI',
     provider: OpenAiProviderType.OpenAi,
   },
 };
@@ -74,7 +72,6 @@ export const customConvo: Conversation = {
   replacements: [],
   apiConfig: {
     connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
-    connectorTypeTitle: 'OpenAI',
     provider: OpenAiProviderType.OpenAi,
   },
 };

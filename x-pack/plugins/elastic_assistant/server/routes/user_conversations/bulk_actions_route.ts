@@ -202,14 +202,20 @@ export const bulkActionConversationsRoute = (
             getUpdateScript: (document: UpdateConversationSchema) =>
               getUpdateScript({ conversation: document, isPatch: true }),
           });
+          const created =
+            docsCreated.length > 0
+              ? await dataClient?.findDocuments<EsConversationSchema>({
+                  page: 1,
+                  perPage: 100,
+                  filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+                })
+              : undefined;
 
           return buildBulkResponse(response, {
             updated: docsUpdated
               ? transformESToConversations(docsUpdated as EsConversationSchema[])
               : [],
-            created: docsCreated
-              ? transformESToConversations(docsCreated as EsConversationSchema[])
-              : [],
+            created: created?.data ? transformESSearchToConversations(created?.data) : [],
             deleted: docsDeleted ?? [],
             errors,
           });

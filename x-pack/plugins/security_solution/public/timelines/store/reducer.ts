@@ -60,7 +60,6 @@ import {
   updateSavedSearchId,
   updateSavedSearch,
   initializeSavedSearch,
-  setIsDiscoverSavedSearchLoaded,
   setDataProviderVisibility,
   setChanged,
   setConfirmingNoteId,
@@ -542,16 +541,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         savedSearch,
-      },
-    },
-  }))
-  .case(setIsDiscoverSavedSearchLoaded, (state, { id, isDiscoverSavedSearchLoaded }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [id]: {
-        ...state.timelineById[id],
-        isDiscoverSavedSearchLoaded,
       },
     },
   }))

@@ -25,7 +25,6 @@ export interface Props {
 
   originatingApp?: string;
   getOriginatingPath?: (dashboardId: string) => string;
-  allowByValueEmbeddables: boolean;
 
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   tagsIds: string[];
@@ -53,7 +52,6 @@ export const SaveModal = (props: Props) => {
     savedObjectId,
     title,
     description,
-    allowByValueEmbeddables,
     returnToOriginSwitchLabel,
     getAppNameFromId,
     onClose,
@@ -63,7 +61,7 @@ export const SaveModal = (props: Props) => {
   } = props;
 
   // Use the modal with return-to-origin features if we're in an app's edit flow or if by-value embeddables are disabled
-  if ((originatingApp || !allowByValueEmbeddables) && returnToOrigin !== false) {
+  if (originatingApp && returnToOrigin !== false) {
     return (
       <TagEnhancedSavedObjectSaveModalOrigin
         savedObjectsTagging={savedObjectsTagging}

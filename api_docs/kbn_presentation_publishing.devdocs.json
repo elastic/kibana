@@ -103,6 +103,107 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiHasLegacyLibraryTransforms",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "apiHasLegacyLibraryTransforms",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasLegacyLibraryTransforms",
+            "text": "HasLegacyLibraryTransforms"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
+          }
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiHasLegacyLibraryTransforms.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiHasLibraryTransforms",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasLibraryTransforms",
+        "description": [],
+        "signature": [
+          "<StateT extends object = object>(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasLibraryTransforms",
+            "text": "HasLibraryTransforms"
+          },
+          "<StateT>"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiHasLibraryTransforms.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.apiHasParentApi",
         "type": "Function",
         "tags": [],
@@ -500,7 +601,7 @@
             "text": "PublishesPanelDescription"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -514,7 +615,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -540,7 +641,7 @@
             "text": "PublishesPanelTitle"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -554,7 +655,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -581,7 +682,7 @@
           },
           ">"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -595,7 +696,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -688,6 +789,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiPublishesTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesTimeRange",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiPublishesTimeRange.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.apiPublishesUnifiedSearch",
         "type": "Function",
         "tags": [],
@@ -703,7 +844,7 @@
             "text": "PublishesUnifiedSearch"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -717,7 +858,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -825,7 +966,7 @@
             "text": "PublishesWritablePanelDescription"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -839,7 +980,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -865,7 +1006,7 @@
             "text": "PublishesWritablePanelTitle"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -879,7 +1020,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -905,7 +1046,7 @@
             "text": "PublishesWritableUnifiedSearch"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -919,7 +1060,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1028,6 +1169,69 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.getInitialValuesFromComparators",
+        "type": "Function",
+        "tags": [],
+        "label": "getInitialValuesFromComparators",
+        "description": [],
+        "signature": [
+          "<StateType extends object = object>(comparators: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.StateComparators",
+            "text": "StateComparators"
+          },
+          "<StateType>, comparatorKeys: (keyof StateType)[]) => Partial<StateType>"
+        ],
+        "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.getInitialValuesFromComparators.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "comparators",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.StateComparators",
+                "text": "StateComparators"
+              },
+              "<StateType>"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.getInitialValuesFromComparators.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "comparatorKeys",
+            "description": [],
+            "signature": [
+              "(keyof StateType)[]"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.getPanelTitle",
         "type": "Function",
         "tags": [],
@@ -1044,7 +1248,7 @@
           },
           ">) => string | undefined"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1066,7 +1270,7 @@
               },
               ">"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1183,6 +1387,252 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.initializeTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "initializeTimeRange",
+        "description": [],
+        "signature": [
+          "(rawState: ",
+          "SerializedTimeRange",
+          ", parentApi?: unknown) => { appliedTimeRange$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined>; cleanupTimeRange: () => void; serializeTimeRange: () => ",
+          "SerializedTimeRange",
+          "; timeRangeApi: ",
+          "PublishesWritableTimeRange",
+          "; timeRangeComparators: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.StateComparators",
+            "text": "StateComparators"
+          },
+          "<",
+          "SerializedTimeRange",
+          ">; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.initializeTimeRange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rawState",
+            "description": [],
+            "signature": [
+              "SerializedTimeRange"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.initializeTimeRange.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "parentApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.initializeTitles",
+        "type": "Function",
+        "tags": [],
+        "label": "initializeTitles",
+        "description": [],
+        "signature": [
+          "(rawState: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.SerializedTitles",
+            "text": "SerializedTitles"
+          },
+          ") => { titlesApi: ",
+          "TitlesApi",
+          "; titleComparators: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.StateComparators",
+            "text": "StateComparators"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.SerializedTitles",
+            "text": "SerializedTitles"
+          },
+          ">; serializeTitles: () => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.SerializedTitles",
+            "text": "SerializedTitles"
+          },
+          "; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.initializeTitles.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rawState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.SerializedTitles",
+                "text": "SerializedTitles"
+              }
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.runComparators",
+        "type": "Function",
+        "tags": [],
+        "label": "runComparators",
+        "description": [],
+        "signature": [
+          "<StateType extends object = object>(comparators: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.StateComparators",
+            "text": "StateComparators"
+          },
+          "<StateType>, comparatorKeys: (keyof StateType)[], lastSavedState: StateType | undefined, latestState: Partial<StateType>) => Partial<StateType> | undefined"
+        ],
+        "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.runComparators.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "comparators",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.StateComparators",
+                "text": "StateComparators"
+              },
+              "<StateType>"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.runComparators.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "comparatorKeys",
+            "description": [],
+            "signature": [
+              "(keyof StateType)[]"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.runComparators.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "lastSavedState",
+            "description": [],
+            "signature": [
+              "StateType | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.runComparators.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "latestState",
+            "description": [],
+            "signature": [
+              "Partial<StateType>"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.useBatchedPublishingSubjects",
         "type": "Function",
         "tags": [],
@@ -1207,7 +1657,9 @@
             "type": "Object",
             "tags": [],
             "label": "subjects",
-            "description": [],
+            "description": [
+              "Publishing subjects array.\nWhen 'subjects' is expected to change, 'subjects' must be part of component react state."
+            ],
             "signature": [
               "[...SubjectsType]"
             ],
@@ -1215,371 +1667,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useBlockingError",
-        "type": "Function",
-        "tags": [],
-        "label": "useBlockingError",
-        "description": [
-          "\nGets this API's fatal error as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesBlockingError",
-            "text": "PublishesBlockingError"
-          },
-          "> | undefined) => Error | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useBlockingError.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesBlockingError",
-                "text": "PublishesBlockingError"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useDataLoading",
-        "type": "Function",
-        "tags": [],
-        "label": "useDataLoading",
-        "description": [
-          "\nGets this API's data loading state as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesDataLoading",
-            "text": "PublishesDataLoading"
-          },
-          "> | undefined) => boolean | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useDataLoading.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesDataLoading",
-                "text": "PublishesDataLoading"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useDataViews",
-        "type": "Function",
-        "tags": [],
-        "label": "useDataViews",
-        "description": [
-          "\nGets this API's data views as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesDataViews",
-            "text": "PublishesDataViews"
-          },
-          "> | undefined) => ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "[] | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useDataViews.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesDataViews",
-                "text": "PublishesDataViews"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useDefaultPanelDescription",
-        "type": "Function",
-        "tags": [],
-        "label": "useDefaultPanelDescription",
-        "description": [
-          "\nA hook that gets this API's default panel description as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelDescription",
-            "text": "PublishesPanelDescription"
-          },
-          "> | undefined) => string | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useDefaultPanelDescription.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesPanelDescription",
-                "text": "PublishesPanelDescription"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useDefaultPanelTitle",
-        "type": "Function",
-        "tags": [],
-        "label": "useDefaultPanelTitle",
-        "description": [
-          "\nA hook that gets this API's default title as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
-          },
-          "> | undefined) => string | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useDefaultPanelTitle.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesPanelTitle",
-                "text": "PublishesPanelTitle"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useDisabledActionIds",
-        "type": "Function",
-        "tags": [],
-        "label": "useDisabledActionIds",
-        "description": [
-          "\nGets this API's disabled action IDs as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesDisabledActionIds",
-            "text": "PublishesDisabledActionIds"
-          },
-          "> | undefined) => string[] | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useDisabledActionIds.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesDisabledActionIds",
-                "text": "PublishesDisabledActionIds"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useHidePanelTitle",
-        "type": "Function",
-        "tags": [],
-        "label": "useHidePanelTitle",
-        "description": [
-          "\nA hook that gets this API's hide panel title setting as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
-          },
-          "> | undefined) => boolean | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useHidePanelTitle.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesPanelTitle",
-                "text": "PublishesPanelTitle"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1646,108 +1733,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.usePanelDescription",
-        "type": "Function",
-        "tags": [],
-        "label": "usePanelDescription",
-        "description": [
-          "\nA hook that gets this API's panel description as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelDescription",
-            "text": "PublishesPanelDescription"
-          },
-          "> | undefined) => string | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.usePanelDescription.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesPanelDescription",
-                "text": "PublishesPanelDescription"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.usePanelTitle",
-        "type": "Function",
-        "tags": [],
-        "label": "usePanelTitle",
-        "description": [
-          "\nA hook that gets this API's panel title as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
-          },
-          "> | undefined) => string | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.usePanelTitle.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesPanelTitle",
-                "text": "PublishesPanelTitle"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.usePublishingSubject",
         "type": "Function",
         "tags": [],
@@ -1786,56 +1771,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useSavedObjectId",
-        "type": "Function",
-        "tags": [],
-        "label": "useSavedObjectId",
-        "description": [
-          "\nA hook that gets this API's saved object ID as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesSavedObjectId",
-            "text": "PublishesSavedObjectId"
-          },
-          " | undefined) => string | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useSavedObjectId.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesSavedObjectId",
-                "text": "PublishesSavedObjectId"
-              },
-              " | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1882,7 +1817,7 @@
             "tags": [],
             "label": "subject",
             "description": [
-              "Publishing subject."
+              "Publishing subject.\nWhen 'subject' is expected to change, 'subject' must be part of component react state."
             ],
             "signature": [
               "SubjectType"
@@ -1891,115 +1826,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useUnsavedChanges",
-        "type": "Function",
-        "tags": [],
-        "label": "useUnsavedChanges",
-        "description": [
-          "\nA hook that gets this API's unsaved changes as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUnsavedChanges",
-            "text": "PublishesUnsavedChanges"
-          },
-          " | undefined) => object | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useUnsavedChanges.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesUnsavedChanges",
-                "text": "PublishesUnsavedChanges"
-              },
-              " | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useViewMode",
-        "type": "Function",
-        "tags": [],
-        "label": "useViewMode",
-        "description": [
-          "\nA hook that gets this API's view mode as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "<ApiType extends Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          "> = Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          ">>(api: ApiType | undefined) => ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useViewMode.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "ApiType | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2139,6 +1965,224 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.HasLibraryTransforms",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasLibraryTransforms",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasLibraryTransforms",
+            "text": "HasLibraryTransforms"
+          },
+          "<StateT>"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.canLinkToLibrary",
+            "type": "Function",
+            "tags": [],
+            "label": "canLinkToLibrary",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "True when embeddable is by-value and can be converted to by-reference"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.saveToLibrary",
+            "type": "Function",
+            "tags": [],
+            "label": "saveToLibrary",
+            "description": [
+              "\nSave embeddable to library\n"
+            ],
+            "signature": [
+              "(title: string) => Promise<string>"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasLibraryTransforms.saveToLibrary.$1",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "id of persisted library item"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.getByReferenceState",
+            "type": "Function",
+            "tags": [],
+            "label": "getByReferenceState",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "(libraryId: string) => StateT"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasLibraryTransforms.getByReferenceState.$1",
+                "type": "string",
+                "tags": [],
+                "label": "libraryId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "by-reference embeddable state replacing by-value embeddable state"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "checkForDuplicateTitle",
+            "description": [],
+            "signature": [
+              "(newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle.$1",
+                "type": "string",
+                "tags": [],
+                "label": "newTitle",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isTitleDuplicateConfirmed",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "onTitleDuplicate",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.canUnlinkFromLibrary",
+            "type": "Function",
+            "tags": [],
+            "label": "canUnlinkFromLibrary",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "True when embeddable is by-reference and can be converted to by-value"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.getByValueState",
+            "type": "Function",
+            "tags": [],
+            "label": "getByValueState",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "() => StateT"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "by-value embeddable state replacing by-reference embeddable state"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -3326,7 +3370,7 @@
         "tags": [],
         "label": "PublishesPanelDescription",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3490,7 +3534,7 @@
               "Subscription",
               "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3511,7 +3555,7 @@
               },
               "<string | undefined> | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3525,7 +3569,7 @@
         "tags": [],
         "label": "PublishesPanelTitle",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3689,7 +3733,7 @@
               "Subscription",
               "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3853,7 +3897,7 @@
               "Subscription",
               "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3874,7 +3918,7 @@
               },
               "<string | undefined> | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4441,34 +4485,18 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.PublishesUnifiedSearch",
+        "id": "def-common.PublishesTimeRange",
         "type": "Interface",
         "tags": [],
-        "label": "PublishesUnifiedSearch",
+        "label": "PublishesTimeRange",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.PublishesUnifiedSearch.isCompatibleWithUnifiedSearch",
-            "type": "Function",
-            "tags": [],
-            "label": "isCompatibleWithUnifiedSearch",
-            "description": [],
-            "signature": [
-              "(() => boolean) | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.PublishesUnifiedSearch.timeRange$",
+            "id": "def-common.PublishesTimeRange.timeRange$",
             "type": "Object",
             "tags": [],
             "label": "timeRange$",
@@ -4826,935 +4854,7 @@
               },
               " | undefined>; }; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.PublishesUnifiedSearch.filters$",
-            "type": "Object",
-            "tags": [],
-            "label": "filters$",
-            "description": [],
-            "signature": [
-              "{ source: ",
-              "Observable",
-              "<any> | undefined; readonly value: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined; error: (err: any) => void; forEach: { (next: (value: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined) => void): Promise<void>; (next: (value: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined; pipe: { (): ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined>; <A>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined, A>): ",
-              "Observable",
-              "<A>; <A, B>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>): ",
-              "Observable",
-              "<B>; <A, B, C>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>): ",
-              "Observable",
-              "<C>; <A, B, C, D>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>): ",
-              "Observable",
-              "<D>; <A, B, C, D, E>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>): ",
-              "Observable",
-              "<E>; <A, B, C, D, E, F>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>): ",
-              "Observable",
-              "<F>; <A, B, C, D, E, F, G>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>): ",
-              "Observable",
-              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>): ",
-              "Observable",
-              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>): ",
-              "Observable",
-              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>, ...operations: ",
-              "OperatorFunction",
-              "<any, any>[]): ",
-              "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
-              "Observer",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
-              "Operator",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined, R>) => ",
-              "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
-              "Observer",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined>> | ((value: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined) => void) | undefined): ",
-              "Subscription",
-              "; (next?: ((value: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
-              "Subscription",
-              "; }; toPromise: { (): Promise<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined>; (PromiseCtor: PromiseConstructor): Promise<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined>; }; }"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.PublishesUnifiedSearch.query$",
-            "type": "Object",
-            "tags": [],
-            "label": "query$",
-            "description": [],
-            "signature": [
-              "{ source: ",
-              "Observable",
-              "<any> | undefined; readonly value: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined; error: (err: any) => void; forEach: { (next: (value: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined) => void): Promise<void>; (next: (value: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined; pipe: { (): ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined>; <A>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined, A>): ",
-              "Observable",
-              "<A>; <A, B>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>): ",
-              "Observable",
-              "<B>; <A, B, C>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>): ",
-              "Observable",
-              "<C>; <A, B, C, D>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>): ",
-              "Observable",
-              "<D>; <A, B, C, D, E>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>): ",
-              "Observable",
-              "<E>; <A, B, C, D, E, F>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>): ",
-              "Observable",
-              "<F>; <A, B, C, D, E, F, G>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>): ",
-              "Observable",
-              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>): ",
-              "Observable",
-              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>): ",
-              "Observable",
-              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>, ...operations: ",
-              "OperatorFunction",
-              "<any, any>[]): ",
-              "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
-              "Observer",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
-              "Operator",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined, R>) => ",
-              "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
-              "Observer",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined>> | ((value: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined) => void) | undefined): ",
-              "Subscription",
-              "; (next?: ((value: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
-              "Subscription",
-              "; }; toPromise: { (): Promise<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined>; (PromiseCtor: PromiseConstructor): Promise<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined>; }; }"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6334,6 +5434,62 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.SerializedTitles",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedTitles",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.SerializedTitles.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.SerializedTitles.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.SerializedTitles.hidePanelTitles",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hidePanelTitles",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -6381,6 +5537,162 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.ComparatorDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "ComparatorDefinition",
+        "description": [],
+        "signature": [
+          "[",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<StateType[KeyType]>, (value: StateType[KeyType]) => void, (",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.ComparatorFunction",
+            "text": "ComparatorFunction"
+          },
+          "<StateType, KeyType> | undefined)?]"
+        ],
+        "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.ComparatorFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "ComparatorFunction",
+        "description": [],
+        "signature": [
+          "(last: StateType[KeyType] | undefined, current: StateType[KeyType] | undefined, lastState?: Partial<StateType> | undefined, currentState?: Partial<StateType> | undefined) => boolean"
+        ],
+        "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.ComparatorFunction.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "last",
+            "description": [],
+            "signature": [
+              "StateType[KeyType] | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.ComparatorFunction.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "current",
+            "description": [],
+            "signature": [
+              "StateType[KeyType] | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.ComparatorFunction.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "lastState",
+            "description": [],
+            "signature": [
+              "Partial<StateType> | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.ComparatorFunction.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "currentState",
+            "description": [],
+            "signature": [
+              "Partial<StateType> | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.HasLegacyLibraryTransforms",
+        "type": "Type",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "HasLegacyLibraryTransforms",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasLibraryTransforms",
+            "text": "HasLibraryTransforms"
+          },
+          "<object>, \"canLinkToLibrary\" | \"canUnlinkFromLibrary\"> & { linkToLibrary: () => Promise<void>; unlinkFromLibrary: () => Promise<void>; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.PhaseEventType",
         "type": "Type",
         "tags": [],
@@ -6392,6 +5704,68 @@
           "\"error\" | \"loading\" | \"rendered\" | \"loaded\""
         ],
         "path": "packages/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.PublishesUnifiedSearch",
+        "type": "Type",
+        "tags": [],
+        "label": "PublishesUnifiedSearch",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
+          },
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6413,7 +5787,7 @@
           },
           " & { setPanelDescription: (newTitle: string | undefined) => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6435,7 +5809,7 @@
           },
           " & { setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6452,10 +5826,50 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUnifiedSearch",
-            "text": "PublishesUnifiedSearch"
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
           },
-          " & { setTimeRange: (timeRange: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & { setTimeRange: (timeRange: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -6463,7 +5877,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => void; setFilters: (filters: ",
+          " | undefined) => void; } & { setFilters: (filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -6481,7 +5895,7 @@
           },
           " | undefined) => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6681,6 +6095,29 @@
           "; }; toPromise: { (): Promise<T | undefined>; (PromiseCtor: PromiseConstructor): Promise<T | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<T | undefined>; }; }"
         ],
         "path": "packages/presentation/presentation_publishing/publishing_subject/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.StateComparators",
+        "type": "Type",
+        "tags": [],
+        "label": "StateComparators",
+        "description": [],
+        "signature": [
+          "{ [KeyType in keyof StateType]: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.ComparatorDefinition",
+            "text": "ComparatorDefinition"
+          },
+          "<StateType, KeyType>; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/comparators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

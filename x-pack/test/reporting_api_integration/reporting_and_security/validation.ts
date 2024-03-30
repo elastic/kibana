@@ -31,19 +31,18 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await reportingAPI.initEcommerce();
     });
+
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/178924
-    describe.skip('printablePdfV2', () => {
+    describe('printablePdfV2', () => {
       it('allows width and height to have decimal', async () => {
         const downloadReportPath = await reportingAPI.postJobJSON(
           '/api/reporting/generate/printablePdfV2',
           { jobParams: createPdfV2Params(1541.5999755859375) }
         );
-
         await retry.tryForTime(60000, async () => {
           const response: supertest.Response = await supertestSvc
             .get(downloadReportPath)
@@ -60,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
           '/api/reporting/generate/printablePdfV2',
           { jobParams: createPdfV2Params('cucucachoo') }
         );
-        await retry.tryForTime(18000, async () => {
+        await retry.tryForTime(30000, async () => {
           const response: supertest.Response = await supertestSvc
             .get(downloadReportPath)
             .responseType('blob')
@@ -75,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
           '/api/reporting/generate/printablePdfV2',
           { jobParams: createPdfV2Params(1541, 'landscape') }
         );
-        await retry.tryForTime(18000, async () => {
+        await retry.tryForTime(30000, async () => {
           const response: supertest.Response = await supertestSvc
             .get(downloadReportPath)
             .responseType('blob')
@@ -86,13 +85,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/179001
-    describe.skip('pngV2', () => {
+    describe('pngV2', () => {
       it('fails if width or height are non-numeric', async () => {
         const downloadReportPath = await reportingAPI.postJobJSON('/api/reporting/generate/pngV2', {
           jobParams: createPngV2Params('cucucachoo'),
         });
-        await retry.tryForTime(18000, async () => {
+        await retry.tryForTime(30000, async () => {
           const response: supertest.Response = await supertestSvc
             .get(downloadReportPath)
             .responseType('blob')

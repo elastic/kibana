@@ -3540,40 +3540,8 @@
                 "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability_solution/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability_solution/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/alerting/inventory_metric_threshold/inventory_metric_threshold_executor.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/alerting/inventory_metric_threshold/inventory_metric_threshold_executor.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
-              },
-              {
-                "plugin": "slo",
-                "path": "x-pack/plugins/observability_solution/slo/server/lib/rules/slo_burn_rate/executor.ts"
               },
               {
                 "plugin": "synthetics",

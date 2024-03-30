@@ -26,7 +26,7 @@ export interface BulkOperationError {
 
 interface WriterBulkResponse {
   errors: BulkOperationError[];
-  docs_created: unknown[];
+  docs_created: string[];
   docs_deleted: string[];
   docs_updated: unknown[];
   took: number;
@@ -78,10 +78,10 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         errors: errors ? this.formatErrorsResponse(items) : [],
         docs_created: items
           .filter((item) => item.create?.status === 201 || item.create?.status === 200)
-          .map((item) => item.create?.get?._source),
+          .map((item) => item.create?._id),
         docs_deleted: items
           .filter((item) => item.delete?.status === 201 || item.delete?.status === 200)
-          .map((item) => item.delete?._id ?? ''),
+          .map((item) => item.delete?._id),
         docs_updated: items
           .filter((item) => item.update?.status === 201 || item.update?.status === 200)
           .map((item) => item.update?.get?._source),
@@ -170,6 +170,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         update: {
           _id: document.id,
           _index: responseToUpdate?.hits.hits.find((c) => c._id === document.id)?._index,
+          _source: true,
         },
       },
       {

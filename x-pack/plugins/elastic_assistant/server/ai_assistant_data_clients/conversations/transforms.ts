@@ -36,7 +36,6 @@ export const transformESSearchToConversations = (
           ? {
               apiConfig: {
                 connectorId: conversationSchema.api_config.connector_id,
-                connectorTypeTitle: conversationSchema.api_config.connector_type_title,
                 defaultSystemPromptId: conversationSchema.api_config.default_system_prompt_id,
                 model: conversationSchema.api_config.model,
                 provider: conversationSchema.api_config.provider,
@@ -96,7 +95,6 @@ export const transformESToConversations = (
         ? {
             apiConfig: {
               connectorId: conversationSchema.api_config.connector_id,
-              connectorTypeTitle: conversationSchema.api_config.connector_type_title,
               defaultSystemPromptId: conversationSchema.api_config.default_system_prompt_id,
               model: conversationSchema.api_config.model,
               provider: conversationSchema.api_config.provider,

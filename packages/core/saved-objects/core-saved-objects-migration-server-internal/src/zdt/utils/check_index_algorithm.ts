@@ -36,19 +36,17 @@ export const checkIndexCurrentAlgorithm = (
     return 'unknown';
   }
 
-  const hasV2Meta = !!meta.migrationMappingPropertyHashes;
   const hasZDTMeta = !!meta.mappingVersions;
+  const hasV2Meta = !!meta.migrationMappingPropertyHashes;
 
-  if (hasV2Meta && hasZDTMeta) {
-    return 'unknown';
+  if (hasZDTMeta) {
+    const isFullZdt = !!meta.docVersions;
+    return isFullZdt ? 'zdt' : 'v2-partially-migrated';
   }
   if (hasV2Meta) {
     const isCompatible = !!meta.indexTypesMap;
     return isCompatible ? 'v2-compatible' : 'v2-incompatible';
   }
-  if (hasZDTMeta) {
-    const isFullZdt = !!meta.docVersions;
-    return isFullZdt ? 'zdt' : 'v2-partially-migrated';
-  }
+
   return 'unknown';
 };

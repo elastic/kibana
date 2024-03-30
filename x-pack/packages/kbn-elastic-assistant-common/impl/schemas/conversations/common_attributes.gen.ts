@@ -146,10 +146,6 @@ export const ApiConfig = z.object({
    */
   connectorId: z.string(),
   /**
-   * connector Type Title
-   */
-  connectorTypeTitle: z.string(),
-  /**
    * defaultSystemPromptId
    */
   defaultSystemPromptId: z.string().optional(),

@@ -37,7 +37,6 @@ export interface UpdateConversationSchema {
   }>;
   api_config?: {
     connector_id?: string;
-    connector_type_title?: string;
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;
@@ -118,7 +117,6 @@ export const transformToUpdateScheme = (
     title,
     api_config: {
       connector_id: apiConfig?.connectorId,
-      connector_type_title: apiConfig?.connectorTypeTitle,
       default_system_prompt_id: apiConfig?.defaultSystemPromptId,
       model: apiConfig?.model,
       provider: apiConfig?.provider,
