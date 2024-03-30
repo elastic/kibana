@@ -122,7 +122,7 @@ const mockOptions = {
 };
 
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
-  jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
+  return jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
 const mockLibs: any = {
@@ -230,6 +230,7 @@ describe('The custom threshold alert type', () => {
   setup();
 
   describe('querying the entire infrastructure', () => {
+    beforeEach(() => jest.clearAllMocks());
     afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
@@ -334,6 +335,7 @@ describe('The custom threshold alert type', () => {
   });
 
   describe('querying with a groupBy parameter', () => {
+    beforeEach(() => jest.clearAllMocks());
     afterAll(() => clearInstances());
     const execute = (
       comparator: Comparator,
@@ -816,6 +818,154 @@ describe('The custom threshold alert type', () => {
         stateResult2
       );
       expect(stateResult3.missingGroups).toEqual(expect.arrayContaining([]));
+    });
+    test('should remove a group from previous missing groups if the related alert is untracked', async () => {
+      setEvaluationResults([
+        {
+          a: {
+            ...customThresholdNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: false,
+            bucketKey: { groupBy0: 'a' },
+          },
+          b: {
+            ...customThresholdNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
+            currentValue: 3,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: false,
+            bucketKey: { groupBy0: 'b' },
+          },
+          c: {
+            ...customThresholdNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
+            currentValue: 3,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: false,
+            bucketKey: { groupBy0: 'c' },
+          },
+        },
+      ]);
+      const { state: stateResult1 } = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.2'
+      );
+      expect(stateResult1.missingGroups).toEqual(expect.arrayContaining([]));
+      setEvaluationResults([
+        {
+          a: {
+            ...customThresholdNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: false,
+            bucketKey: { groupBy0: 'a' },
+          },
+          b: {
+            ...customThresholdNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            currentValue: null,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: true,
+            bucketKey: { groupBy0: 'b' },
+          },
+          c: {
+            ...customThresholdNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            currentValue: null,
+            timestamp: new Date().toISOString(),
+            shouldFire: false,
+            isNoData: true,
+            bucketKey: { groupBy0: 'c' },
+          },
+        },
+      ]);
+      const { state: stateResult2 } = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.1',
+        stateResult1
+      );
+      expect(stateResult2.missingGroups).toEqual(
+        expect.arrayContaining([
+          { key: 'b', bucketKey: { groupBy0: 'b' } },
+          { key: 'c', bucketKey: { groupBy0: 'c' } },
+        ])
+      );
+      const mockedEvaluateRule = setEvaluationResults([
+        {
+          a: {
+            ...customThresholdNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: false,
+            bucketKey: { groupBy0: 'a' },
+          },
+          b: {
+            ...customThresholdNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            currentValue: null,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: true,
+            bucketKey: { groupBy0: 'b' },
+          },
+        },
+      ]);
+      // Consider c as untracked
+      services.alertsClient.isTrackedAlert.mockImplementation((id: string) => id !== 'c');
+      const { state: stateResult3 } = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.1',
+        stateResult2
+      );
+      expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
+      expect(mockedEvaluateRule.mock.calls[2][9]).toEqual([
+        { bucketKey: { groupBy0: 'b' }, key: 'b' },
+      ]);
     });
   });
 
