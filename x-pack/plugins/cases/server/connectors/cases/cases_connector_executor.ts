@@ -7,7 +7,7 @@
 
 import stringify from 'json-stable-stringify';
 import pMap from 'p-map';
-import { partition, pick } from 'lodash';
+import { get, partition, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -83,6 +83,15 @@ export class CasesConnectorExecutor {
 
     const groupedAlerts = this.groupAlerts({ params, alerts, groupingBy });
     const groupedAlertsWithCircuitBreakers = this.applyCircuitBreakers(params, groupedAlerts);
+
+    if (groupedAlertsWithCircuitBreakers.length === 0) {
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor] Grouping did not produce any alerts. Skipping execution.`,
+        this.getLogMetadata(params)
+      );
+
+      return;
+    }
 
     /**
      * Based on the rule ID, the grouping, the owner, the space ID,
@@ -170,7 +179,7 @@ export class CasesConnectorExecutor {
      * alerts will not be attached to any case.
      */
     const filteredAlerts = alerts.filter((alert) =>
-      uniqueGroupingByFields.every((groupingByField) => Object.hasOwn(alert, groupingByField))
+      uniqueGroupingByFields.every((groupingByField) => Boolean(get(alert, groupingByField, null)))
     );
 
     this.logger.debug(

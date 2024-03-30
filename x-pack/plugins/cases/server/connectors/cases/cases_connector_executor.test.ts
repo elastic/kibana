@@ -31,6 +31,7 @@ import {
   timeWindow,
   reopenClosedCases,
   updatedCounterOracleRecord,
+  alertsNested,
 } from './index.mock';
 import {
   expectCasesToHaveTheCorrectAlertsAttachedWithGrouping,
@@ -1010,6 +1011,12 @@ describe('CasesConnectorExecutor', () => {
           expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
         });
 
+        it('attach alerts with nested grouping', async () => {
+          await connectorExecutor.execute({ ...params, alerts: alertsNested });
+
+          expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
+        });
+
         it('attaches alerts to reopened cases', async () => {
           casesClientMock.cases.bulkGet.mockResolvedValue({
             cases: [{ ...cases[0], status: CaseStatuses.closed }],
@@ -1376,6 +1383,25 @@ describe('CasesConnectorExecutor', () => {
           await expect(() =>
             connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(`"get configuration error"`);
+        });
+      });
+
+      describe('Skipping execution', () => {
+        it('skips execution if alerts cannot be grouped', async () => {
+          await connectorExecutor.execute({
+            ...params,
+            groupingBy: ['does.not.exists'],
+          });
+
+          expect(mockGetRecordId).not.toHaveBeenCalled();
+          expect(mockBulkGetRecords).not.toHaveBeenCalled();
+          expect(mockBulkCreateRecords).not.toHaveBeenCalled();
+          expect(mockBulkUpdateRecord).not.toHaveBeenCalled();
+          expect(mockGetCaseId).not.toHaveBeenCalled();
+          expect(casesClientMock.cases.bulkGet).not.toHaveBeenCalled();
+          expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
+          expect(casesClientMock.cases.bulkUpdate).not.toHaveBeenCalled();
+          expect(casesClientMock.configure.get).not.toHaveBeenCalled();
         });
       });
     });
