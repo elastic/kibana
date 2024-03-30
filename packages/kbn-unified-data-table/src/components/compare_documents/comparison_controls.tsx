@@ -103,7 +103,6 @@ export const ComparisonControls = ({
           onClick={() => {
             setIsCompareActive(false);
           }}
-          data-test-subj="unifiedFieldListCloseComparison"
         >
           <FormattedMessage
             id="unifiedDataTable.closeDocumentComparison"
@@ -212,6 +211,7 @@ const ComparisonSettings = ({
             onChange={(e) => {
               setShowAllFields(e.target.checked);
             }}
+            data-test-subj="showAllFields"
             itemCss={{ paddingBottom: 0 }}
           />
         )}
@@ -228,6 +228,7 @@ const ComparisonSettings = ({
           onChange={(e) => {
             setShowMatchingValues(e.target.checked);
           }}
+          data-test-subj="showMatchingValues"
           itemCss={{ paddingBottom: 0 }}
         />
 
@@ -240,6 +241,7 @@ const ComparisonSettings = ({
               'Show text decorations in diffs if enabled, otherwise only use highlighting.',
           })}
           checked={showDiffDecorations ?? true}
+          data-test-subj="showDiffDecorations"
           onChange={(e) => {
             setShowDiffDecorations(e.target.checked);
           }}
@@ -272,6 +274,8 @@ const DiffModeEntry: FC<
       key={entryDiffMode}
       icon={diffMode === entryDiffMode ? 'check' : 'empty'}
       size="s"
+      aria-current={diffMode === entryDiffMode}
+      data-test-subj={`unifiedFieldListDiffMode-${entryDiffMode ?? 'none'}`}
       css={{ paddingTop: 0, paddingBottom: 0 }}
     >
       <EuiFlexGroup
@@ -323,16 +327,24 @@ const DiffOptionSwitch = ({
   description,
   checked,
   onChange,
+  ['data-test-subj']: dataTestSubj,
   itemCss,
 }: Pick<EuiSwitchProps, 'label' | 'checked' | 'onChange'> & {
   description?: string;
+  ['data-test-subj']: string;
   itemCss?: EuiContextMenuItemProps['css'];
 }) => {
   return (
     <EuiContextMenuItem size="s" css={itemCss}>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiSwitch label={label} checked={checked} compressed onChange={onChange} />
+          <EuiSwitch
+            label={label}
+            checked={checked}
+            compressed
+            onChange={onChange}
+            data-test-subj={`unifiedFieldListDiffOptionSwitch-${dataTestSubj}`}
+          />
         </EuiFlexItem>
         {description && (
           <EuiFlexItem grow={false}>

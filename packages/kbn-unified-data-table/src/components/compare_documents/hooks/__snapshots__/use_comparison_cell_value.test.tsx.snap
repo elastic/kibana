@@ -369,6 +369,7 @@ exports[`useComparisonCellValue should render field cells 1`] = `
     >
       <div
         class="euiText unifiedDataTable__comparisonFieldName emotion-euiText-relative"
+        data-test-subj="unifiedDataTableComparisonFieldName"
       >
         message
       </div>
@@ -403,6 +404,7 @@ exports[`useComparisonCellValue should render field cells 2`] = `
     >
       <div
         class="euiText unifiedDataTable__comparisonFieldName emotion-euiText-relative"
+        data-test-subj="unifiedDataTableComparisonFieldName"
       >
         extension
       </div>
@@ -437,6 +439,7 @@ exports[`useComparisonCellValue should render field cells 3`] = `
     >
       <div
         class="euiText unifiedDataTable__comparisonFieldName emotion-euiText-relative"
+        data-test-subj="unifiedDataTableComparisonFieldName"
       >
         bytes
       </div>

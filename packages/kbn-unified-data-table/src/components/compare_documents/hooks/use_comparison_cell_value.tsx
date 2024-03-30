@@ -125,7 +125,11 @@ const FieldCellValue = ({ field, fieldName }: FieldCellValueProps) => {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText size="relative" className={FIELD_NAME_CLASS}>
+        <EuiText
+          size="relative"
+          className={FIELD_NAME_CLASS}
+          data-test-subj="unifiedDataTableComparisonFieldName"
+        >
           {field?.displayName ?? fieldName}
         </EuiText>
       </EuiFlexItem>

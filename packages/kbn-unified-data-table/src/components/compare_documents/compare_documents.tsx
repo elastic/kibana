@@ -200,7 +200,6 @@ const CompareDocuments = ({
       schemaDetectors={schemaDetectors}
       renderCellValue={renderCellValue}
       renderCustomToolbar={renderCustomToolbarFn}
-      data-test-subj="comparisonTable"
       css={comparisonCss}
     />
   );

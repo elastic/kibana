@@ -17,17 +17,19 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
 import type { UnifiedDataTableRenderCustomToolbar } from '../data_table';
 
+export interface ComparisonToolbarProps {
+  renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
+  additionalControls: ReactElement;
+  comparisonFields: string[];
+  totalFields: number;
+}
+
 export const renderComparisonToolbar = ({
   renderCustomToolbar,
   additionalControls,
   comparisonFields,
   totalFields,
-}: {
-  renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
-  additionalControls: ReactElement;
-  comparisonFields: string[];
-  totalFields: number;
-}) => {
+}: ComparisonToolbarProps) => {
   return (toolbarProps: EuiDataGridCustomToolbarProps) => {
     const { euiTheme } = useEuiTheme();
 

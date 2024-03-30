@@ -24,11 +24,15 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { CELL_CLASS } from '../utils/get_render_cell_value';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -77,14 +81,14 @@ function getProps(): UnifiedDataTableProps {
   };
 }
 
-async function getComponent(props: UnifiedDataTableProps = getProps()) {
-  const Proxy = (innerProps: UnifiedDataTableProps) => (
-    <KibanaContextProvider services={servicesMock}>
-      <UnifiedDataTable {...innerProps} />
-    </KibanaContextProvider>
-  );
+const DataTable = (props: Partial<UnifiedDataTableProps>) => (
+  <KibanaContextProvider services={servicesMock}>
+    <UnifiedDataTable {...getProps()} {...props} />
+  </KibanaContextProvider>
+);
 
-  const component = mountWithIntl(<Proxy {...props} />);
+async function getComponent(props: UnifiedDataTableProps = getProps()) {
+  const component = mountWithIntl(<DataTable {...props} />);
   await act(async () => {
     // needed by cell actions to complete async loading
     component.update();
@@ -720,6 +724,7 @@ describe('UnifiedDataTable', () => {
       expect(grid.hasClass('euiDataGrid--bordersNone')).toBeTruthy();
     });
   });
+
   describe('rowLineHeightOverride', () => {
     it('should render the grid with the default row line height if no rowLineHeightOverride is provided', async () => {
       const component = await getComponent({
@@ -741,6 +746,117 @@ describe('UnifiedDataTable', () => {
       expect(gridRowCell.prop('style')).toMatchObject({
         lineHeight: '24px',
       });
+    });
+  });
+
+  describe('document comparison', () => {
+    const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
+      render(
+        <IntlProvider locale="en">
+          <DataTable {...props} />
+        </IntlProvider>
+      );
+    };
+
+    const getSelectedDocumentsButton = () => screen.queryByRole('button', { name: /Selected/ });
+
+    const selectDocument = (document: EsHitRecord) =>
+      userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
+
+    const getCompareDocumentsButton = () =>
+      screen.queryByRole('button', { name: 'Compare selected documents' });
+
+    const goToComparisonMode = async () => {
+      selectDocument(esHitsMock[0]);
+      selectDocument(esHitsMock[1]);
+      userEvent.click(getSelectedDocumentsButton()!);
+      userEvent.click(getCompareDocumentsButton()!, undefined, {
+        skipPointerEventsCheck: true,
+      });
+      await screen.findByText('Comparing 2 documents');
+    };
+
+    const getFullScreenButton = () => screen.queryByTestId('dataGridFullScreenButton');
+
+    const getFieldColumns = () =>
+      screen
+        .queryAllByTestId('unifiedDataTableComparisonFieldName')
+        .map(({ textContent }) => textContent);
+
+    const getColumnHeaders = () =>
+      screen
+        .getAllByRole('columnheader')
+        .map((header) => header.querySelector('.euiDataGridHeaderCell__content')?.textContent);
+
+    const getCellValues = () =>
+      Array.from(document.querySelectorAll(`.${CELL_CLASS}`)).map(({ textContent }) => textContent);
+
+    it('should not allow comparison if less than 2 documents are selected', () => {
+      renderDataTable({ enableComparisonMode: true });
+      expect(getSelectedDocumentsButton()).not.toBeInTheDocument();
+      selectDocument(esHitsMock[0]);
+      expect(getSelectedDocumentsButton()).toBeInTheDocument();
+      userEvent.click(getSelectedDocumentsButton()!);
+      expect(getCompareDocumentsButton()).not.toBeInTheDocument();
+      userEvent.click(getSelectedDocumentsButton()!);
+      selectDocument(esHitsMock[1]);
+      userEvent.click(getSelectedDocumentsButton()!);
+      expect(getCompareDocumentsButton()).toBeInTheDocument();
+    });
+
+    it('should not allow comparison if comparison mode is disabled', () => {
+      renderDataTable({ enableComparisonMode: false });
+      selectDocument(esHitsMock[0]);
+      selectDocument(esHitsMock[1]);
+      userEvent.click(getSelectedDocumentsButton()!);
+      expect(getCompareDocumentsButton()).not.toBeInTheDocument();
+    });
+
+    it('should allow comparison if 2 or more documents are selected and comparison mode is enabled', async () => {
+      renderDataTable({ enableComparisonMode: true });
+      await goToComparisonMode();
+      expect(getColumnHeaders()).toEqual(['Field', '1', '2']);
+      expect(getCellValues()).toEqual(['', '', 'i', 'i', '20', '', '', 'jpg', 'test1', '']);
+    });
+
+    it('should show full screen button if showFullScreenButton is true', async () => {
+      renderDataTable({ enableComparisonMode: true, showFullScreenButton: true });
+      await goToComparisonMode();
+      expect(getFullScreenButton()).toBeInTheDocument();
+    });
+
+    it('should hide full screen button if showFullScreenButton is false', async () => {
+      renderDataTable({ enableComparisonMode: true, showFullScreenButton: false });
+      await goToComparisonMode();
+      expect(getFullScreenButton()).not.toBeInTheDocument();
+    });
+
+    it('should render custom comparison toolbar', async () => {
+      const customToolbar = 'Custom toolbar';
+      renderDataTable({
+        enableComparisonMode: true,
+        renderCustomComparisonToolbar: ({ gridProps: { additionalControls } }) => (
+          <>
+            {additionalControls}
+            <div>{customToolbar}</div>
+          </>
+        ),
+      });
+      await goToComparisonMode();
+      expect(screen.getByText(customToolbar)).toBeInTheDocument();
+    });
+
+    it('should render selected fields', async () => {
+      const columns = ['bytes', 'message'];
+      renderDataTable({ enableComparisonMode: true, columns });
+      await goToComparisonMode();
+      expect(getFieldColumns()).toEqual(['@timestamp', ...columns]);
+    });
+
+    it('should render all available fields if no fields are selected', async () => {
+      renderDataTable({ enableComparisonMode: true });
+      await goToComparisonMode();
+      expect(getFieldColumns()).toEqual(['@timestamp', '_index', 'bytes', 'extension', 'message']);
     });
   });
 });
