@@ -720,6 +720,10 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/functions/context.ts"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/analytics/index.ts"
               },
               {

@@ -9,6 +9,7 @@
 export { prepareLogTable } from './prepare_log_table';
 export type { Dimension } from './prepare_log_table';
 export {
+  findAccessor,
   findAccessorOrFail,
   getAccessorByDimension,
   validateAccessor,

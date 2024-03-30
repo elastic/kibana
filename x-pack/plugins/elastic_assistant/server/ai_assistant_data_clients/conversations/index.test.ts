@@ -61,7 +61,6 @@ describe('AIAssistantConversationsDataClient', () => {
               api_config: {
                 connector_id: 'bedbf764-b991-4115-a9fc-1cfeaef21046',
                 model: 'anthropic.claude-v2',
-                connector_type_title: 'Amazon Bedrock',
               },
               namespace: 'hghjghjghghjghg33',
               created_at: '2024-01-25T01:32:37.649Z',
@@ -113,7 +112,6 @@ describe('AIAssistantConversationsDataClient', () => {
     expect(result).toEqual({
       apiConfig: {
         connectorId: 'bedbf764-b991-4115-a9fc-1cfeaef21046',
-        connectorTypeTitle: 'Amazon Bedrock',
         defaultSystemPromptId: undefined,
         model: 'anthropic.claude-v2',
         provider: undefined,
@@ -180,7 +178,6 @@ describe('AIAssistantConversationsDataClient', () => {
       params: {
         api_config: {
           connector_id: '2',
-          connector_type_title: 'Test connector',
           default_system_prompt_id: 'Default',
           model: 'model',
           provider: undefined,

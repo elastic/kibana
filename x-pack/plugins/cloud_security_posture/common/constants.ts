@@ -168,6 +168,7 @@ export const SETUP_ACCESS_MANUAL = 'manual';
 export const DETECTION_ENGINE_ALERTS_INDEX_DEFAULT = '.alerts-security.alerts-default';
 
 export const GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP: GcpCredentialsTypeFieldMap = {
+  'credentials-none': [],
   'credentials-file': ['gcp.credentials.file'],
   'credentials-json': ['gcp.credentials.json'],
 };

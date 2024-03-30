@@ -96,9 +96,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show filters by type in text-based view', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
-        await browser.refresh();
-
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         let options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
@@ -114,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
-        expect(options).to.have.length(5);
+        expect(options).to.have.length(6);
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '82 available fields.'
@@ -131,9 +128,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show empty fields in text-based view', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
-        await browser.refresh();
-
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.discover.selectTextBaseLang();
 
@@ -433,9 +427,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show selected and available fields in text-based mode', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
-        await browser.refresh();
-
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(

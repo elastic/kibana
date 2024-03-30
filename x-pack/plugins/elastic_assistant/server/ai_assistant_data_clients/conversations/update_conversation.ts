@@ -37,7 +37,6 @@ export interface UpdateConversationSchema {
   }>;
   api_config?: {
     connector_id?: string;
-    connector_type_title?: string;
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;
@@ -118,7 +117,6 @@ export const transformToUpdateScheme = (
     title,
     api_config: {
       connector_id: apiConfig?.connectorId,
-      connector_type_title: apiConfig?.connectorTypeTitle,
       default_system_prompt_id: apiConfig?.defaultSystemPromptId,
       model: apiConfig?.model,
       provider: apiConfig?.provider,
@@ -126,7 +124,7 @@ export const transformToUpdateScheme = (
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
     replacements,
     messages: messages?.map((message) => ({
-      '@timestamp': new Date(message.timestamp).toISOString(),
+      '@timestamp': message.timestamp,
       content: message.content,
       is_error: message.isError,
       reader: message.reader,

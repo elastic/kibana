@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -34,17 +34,15 @@ import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo, EuiLinkTo } from '../../../shared/react_router_helpers';
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { SyncsContextMenu } from '../search_index/components/header_actions/syncs_context_menu';
 import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
-import {
-  BETA_CONNECTORS,
-  CONNECTORS,
-  getConnectorTemplate,
-} from '../search_index/connector/constants';
+
+import { getConnectorTemplate } from '../search_index/connector/constants';
 
 import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';
@@ -58,6 +56,13 @@ export const ConnectorConfiguration: React.FC = () => {
   const cloudContext = useCloudDetails();
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { errorConnectingMessage, http } = useValues(HttpLogic);
+
+  const { connectorTypes } = useValues(KibanaLogic);
+  const BETA_CONNECTORS = useMemo(
+    () => connectorTypes.filter(({ isBeta }) => isBeta),
+    [connectorTypes]
+  );
+
   const { fetchConnector, updateConnectorConfiguration } = useActions(ConnectorViewLogic);
 
   if (!connector) {
@@ -69,7 +74,7 @@ export const ConnectorConfiguration: React.FC = () => {
   }
 
   const hasApiKey = !!(connector.api_key_id ?? apiKeyData);
-  const docsUrl = CONNECTORS.find(
+  const docsUrl = connectorTypes.find(
     ({ serviceType }) => serviceType === connector.service_type
   )?.docsUrl;
 
