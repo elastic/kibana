@@ -16,7 +16,7 @@ export function useGetFilteredRuleTypes() {
     return [
       ES_QUERY_ID,
       ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-      // ...observabilityRuleTypeRegistry.list(),
+      ...observabilityRuleTypeRegistry.list(),
     ];
-  }, []);
+  }, [observabilityRuleTypeRegistry]);
 }

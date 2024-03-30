@@ -26,9 +26,11 @@ import {
   NotificationsStart,
 } from '@kbn/core/public';
 import { Subject } from 'rxjs';
+import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createBrowserHistory } from 'history';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { PluginContext } from '../../../context/plugin_context';
 import { SloCardChartList } from './slo_overview_grid';
 import { SloOverview } from './slo_overview';
 import { GroupListView } from '../../../pages/slos/components/grouped_slos/group_list_view';
@@ -43,6 +45,7 @@ interface SloEmbeddableDeps {
   theme: CoreStart['theme'];
   application: ApplicationStart;
   notifications: NotificationsStart;
+  observability: ObservabilityPublicStart;
 }
 
 export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, EmbeddableOutput> {
@@ -82,6 +85,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     const { sloId, sloInstanceId, showAllGroupByInstances, overviewMode, groupFilters } =
       this.getInput();
     const queryClient = new QueryClient();
+    const { observabilityRuleTypeRegistry } = this.deps.observability;
 
     const I18nContext = this.deps.i18n.Context;
 
@@ -121,9 +125,15 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
           <EuiThemeProvider darkMode={true}>
             <KibanaThemeProvider theme={this.deps.theme}>
               <KibanaContextProvider services={this.deps}>
-                <QueryClientProvider client={queryClient}>
-                  {showAllGroupByInstances ? <SloCardChartList sloId={sloId!} /> : renderOverview()}
-                </QueryClientProvider>
+                <PluginContext.Provider value={{ observabilityRuleTypeRegistry }}>
+                  <QueryClientProvider client={queryClient}>
+                    {showAllGroupByInstances ? (
+                      <SloCardChartList sloId={sloId!} />
+                    ) : (
+                      renderOverview()
+                    )}
+                  </QueryClientProvider>
+                </PluginContext.Provider>
               </KibanaContextProvider>
             </KibanaThemeProvider>
           </EuiThemeProvider>
