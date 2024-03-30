@@ -6,20 +6,16 @@
  */
 
 import { ObjectType } from '@kbn/config-schema';
-import type {
-  RuleActionParams as GenericRuleActionParams,
-  RuleTypeParams,
-  SanitizedRule,
-} from '../../common';
+import type { RuleTypeParams, SanitizedRule } from '../../common';
 import { CombinedSummarizedAlerts } from '../types';
-
-type ActionTypeParams = Record<string, unknown>;
 
 type Rule = Pick<SanitizedRule<RuleTypeParams>, 'id' | 'name' | 'tags'>;
 
-interface BuildActionParamsArgs<
-  RuleActionParams extends GenericRuleActionParams = GenericRuleActionParams
-> {
+export interface ConnectorAdapterParams {
+  [x: string]: unknown;
+}
+
+interface BuildActionParamsArgs<RuleActionParams> {
   alerts: CombinedSummarizedAlerts;
   rule: Rule;
   params: RuleActionParams;
@@ -27,7 +23,10 @@ interface BuildActionParamsArgs<
   ruleUrl?: string;
 }
 
-export interface ConnectorAdapter {
+export interface ConnectorAdapter<
+  RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
+  ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+> {
   connectorTypeId: string;
   /**
    * The schema of the action persisted
@@ -38,7 +37,5 @@ export interface ConnectorAdapter {
    * changes.
    */
   ruleActionParamsSchema: ObjectType;
-  buildActionParams: <RuleActionParams extends GenericRuleActionParams>(
-    args: BuildActionParamsArgs<RuleActionParams>
-  ) => ActionTypeParams;
+  buildActionParams: (args: BuildActionParamsArgs<RuleActionParams>) => ConnectorParams;
 }

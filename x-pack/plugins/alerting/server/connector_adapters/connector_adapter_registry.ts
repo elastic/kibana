@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorAdapter } from './types';
+import { ConnectorAdapter, ConnectorAdapterParams } from './types';
 
 export class ConnectorAdapterRegistry {
   private readonly connectorAdapters: Map<string, ConnectorAdapter> = new Map();
@@ -17,14 +17,20 @@ export class ConnectorAdapterRegistry {
     return this.connectorAdapters.has(connectorTypeId);
   }
 
-  public register(connectorAdapter: ConnectorAdapter) {
+  public register<
+    RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
+    ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+  >(connectorAdapter: ConnectorAdapter<RuleActionParams, ConnectorParams>) {
     if (this.has(connectorAdapter.connectorTypeId)) {
       throw new Error(
         `${connectorAdapter.connectorTypeId} is already registered to the ConnectorAdapterRegistry`
       );
     }
 
-    this.connectorAdapters.set(connectorAdapter.connectorTypeId, connectorAdapter);
+    this.connectorAdapters.set(
+      connectorAdapter.connectorTypeId,
+      connectorAdapter as unknown as ConnectorAdapter
+    );
   }
 
   public get(connectorTypeId: string): ConnectorAdapter {

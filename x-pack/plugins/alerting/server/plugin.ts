@@ -100,7 +100,7 @@ import {
 import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
-import { ConnectorAdapter } from './connector_adapters/types';
+import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
 
@@ -120,7 +120,12 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
-  registerConnectorAdapter(adapter: ConnectorAdapter): void;
+  registerConnectorAdapter<
+    RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
+    ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+  >(
+    adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
+  ): void;
   registerType<
     Params extends RuleTypeParams = RuleTypeParams,
     ExtractedParams extends RuleTypeParams = RuleTypeParams,
@@ -382,7 +387,12 @@ export class AlertingPlugin {
     });
 
     return {
-      registerConnectorAdapter: (adapter: ConnectorAdapter) => {
+      registerConnectorAdapter: <
+        RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
+        ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+      >(
+        adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
+      ) => {
         this.connectorAdapterRegistry.register(adapter);
       },
       registerType: <
