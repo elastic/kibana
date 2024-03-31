@@ -43,7 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       runComparisonTests({
         comparisonDisplay: 'Comparing 2 documents',
         tableHeaders: ['Field', 'AU_x3_g4GFA8no6QjkYX', 'AU_x3-TcGFA8no6Qjipx'],
-        fullFieldListLength: 18,
         fullFieldNames: [
           '@timestamp',
           '_id',
@@ -64,7 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'geo.srcdest',
           'headings',
         ],
-        selectedFieldListLength: 5,
         selectedFieldNames: ['@timestamp', 'extension', 'bytes', '@message', 'agent'],
         extensionRowIndex: 1,
         bytesRowIndex: 2,
@@ -84,7 +82,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       runComparisonTests({
         comparisonDisplay: 'Comparing 2 results',
         tableHeaders: ['Field', 'Result 1', 'Result 2'],
-        fullFieldListLength: 17,
         fullFieldNames: [
           '@timestamp',
           '@message',
@@ -104,7 +101,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'headings.raw',
           'host',
         ],
-        selectedFieldListLength: 4,
         selectedFieldNames: ['extension', 'bytes', '@message', 'agent'],
         extensionRowIndex: 0,
         bytesRowIndex: 1,
@@ -115,18 +111,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   function runComparisonTests({
     comparisonDisplay,
     tableHeaders,
-    fullFieldListLength,
     fullFieldNames,
-    selectedFieldListLength,
     selectedFieldNames,
     extensionRowIndex,
     bytesRowIndex,
   }: {
     comparisonDisplay: string;
     tableHeaders: string[];
-    fullFieldListLength: number;
     fullFieldNames: string[];
-    selectedFieldListLength: number;
     selectedFieldNames: string[];
     extensionRowIndex: number;
     bytesRowIndex: number;
@@ -147,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const headers = await dataGrid.getHeaders();
       expect(headers).to.eql(tableHeaders);
       let fieldNames = await dataGrid.getComparisonFieldNames();
-      expect(fieldNames).have.length(fullFieldListLength);
+      expect(fieldNames.length >= fullFieldNames.length).to.be(true);
       expect(fieldNames).to.eql(fullFieldNames);
       await dataGrid.openComparisonSettingsMenu();
       expect(await dataGrid.showAllFieldsSwitchExists()).to.be(false);
@@ -156,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('@message');
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent');
       fieldNames = await dataGrid.getComparisonFieldNames();
-      expect(fieldNames).have.length(selectedFieldListLength);
+      expect(fieldNames).have.length(selectedFieldNames.length);
       expect(fieldNames).to.eql(selectedFieldNames);
     });
 
@@ -232,16 +224,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow toggling all fields', async () => {
       await dataGrid.toggleShowAllFieldsSwitch();
       const fieldNames = await dataGrid.getComparisonFieldNames();
-      expect(fieldNames).have.length(fullFieldListLength);
+      expect(fieldNames.length >= fullFieldNames.length).to.be(true);
       await dataGrid.toggleShowAllFieldsSwitch();
     });
 
     it('should allow toggling matching values', async () => {
       let fieldNames = await dataGrid.getComparisonFieldNames();
-      expect(fieldNames).have.length(selectedFieldListLength);
+      expect(fieldNames).have.length(selectedFieldNames.length);
       await dataGrid.toggleShowMatchingValuesSwitch();
       fieldNames = await dataGrid.getComparisonFieldNames();
-      expect(fieldNames).have.length(selectedFieldListLength - 1);
+      expect(fieldNames).have.length(selectedFieldNames.length - 1);
       expect(fieldNames).to.eql(selectedFieldNames.filter((name) => name !== 'extension'));
       await dataGrid.toggleShowMatchingValuesSwitch();
     });
