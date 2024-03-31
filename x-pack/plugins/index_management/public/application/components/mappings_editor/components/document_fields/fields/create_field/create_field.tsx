@@ -113,8 +113,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const fieldTypeValue = form.getFields()?.type?.value;
   useEffect(() => {
-    const type = form.getFields()?.type?.value as [];
-
+    const type = form.getFields()?.type?.value as any;
     if (type === undefined || type.length === 0) {
       return;
     }
