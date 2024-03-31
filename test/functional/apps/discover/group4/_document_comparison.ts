@@ -15,6 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const dataGrid = getService('dataGrid');
+  const monacoEditor = getService('monacoEditor');
+  const testSubjects = getService('testSubjects');
 
   describe('Discover document comparison', () => {
     before(async () => {
@@ -22,8 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
@@ -33,8 +33,105 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
+    describe('data view mode', () => {
+      before(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+      });
+
+      runComparisonTests({
+        comparisonDisplay: 'Comparing 2 documents',
+        tableHeaders: ['Field', 'AU_x3_g4GFA8no6QjkYX', 'AU_x3-TcGFA8no6Qjipx'],
+        fullFieldListLength: 18,
+        fullFieldNames: [
+          '@timestamp',
+          '_id',
+          '_index',
+          '@message',
+          '@message.raw',
+          '@tags',
+          '@tags.raw',
+          'agent',
+          'agent.raw',
+          'bytes',
+          'clientip',
+          'extension',
+          'extension.raw',
+          'geo.coordinates',
+          'geo.dest',
+          'geo.src',
+          'geo.srcdest',
+          'headings',
+        ],
+        selectedFieldListLength: 5,
+        selectedFieldNames: ['@timestamp', 'extension', 'bytes', '@message', 'agent'],
+        extensionRowIndex: 1,
+        bytesRowIndex: 2,
+      });
+    });
+
+    describe('ES|QL mode', () => {
+      before(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.selectTextBaseLang();
+        await monacoEditor.setCodeEditorValue('from logstash-* | sort @timestamp desc | limit 10');
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+      });
+
+      runComparisonTests({
+        comparisonDisplay: 'Comparing 2 results',
+        tableHeaders: ['Field', 'Result 1', 'Result 2'],
+        fullFieldListLength: 17,
+        fullFieldNames: [
+          '@timestamp',
+          '@message',
+          '@message.raw',
+          '@tags',
+          '@tags.raw',
+          'agent',
+          'agent.raw',
+          'bytes',
+          'clientip',
+          'extension',
+          'extension.raw',
+          'geo.coordinates',
+          'geo.dest',
+          'geo.src',
+          'geo.srcdest',
+          'headings.raw',
+          'host',
+        ],
+        selectedFieldListLength: 4,
+        selectedFieldNames: ['extension', 'bytes', '@message', 'agent'],
+        extensionRowIndex: 0,
+        bytesRowIndex: 1,
+      });
+    });
+  });
+
+  function runComparisonTests({
+    comparisonDisplay,
+    tableHeaders,
+    fullFieldListLength,
+    fullFieldNames,
+    selectedFieldListLength,
+    selectedFieldNames,
+    extensionRowIndex,
+    bytesRowIndex,
+  }: {
+    comparisonDisplay: string;
+    tableHeaders: string[];
+    fullFieldListLength: number;
+    fullFieldNames: string[];
+    selectedFieldListLength: number;
+    selectedFieldNames: string[];
+    extensionRowIndex: number;
+    bytesRowIndex: number;
+  }) {
     it('should allow comparing documents', async () => {
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       await dataGrid.selectRow(0);
       await dataGrid.openSelectedRowsMenu();
       expect(await dataGrid.compareSelectedButtonExists()).to.be(false);
@@ -43,34 +140,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataGrid.compareSelectedButtonExists()).to.be(true);
       await dataGrid.clickCompareSelectedButton();
       await dataGrid.waitForComparisonModeToLoad();
-      expect(await dataGrid.getComparisonDisplay()).to.be('Comparing 2 documents');
+      expect(await dataGrid.getComparisonDisplay()).to.be(comparisonDisplay);
     });
 
     it('should allow selecting comparison fields', async () => {
       const headers = await dataGrid.getHeaders();
-      expect(headers).to.eql(['Field', 'AU_x3_g4GFA8no6QjkYX', 'AU_x3-TcGFA8no6Qjipx']);
+      expect(headers).to.eql(tableHeaders);
       let fieldNames = await dataGrid.getComparisonFieldNames();
-      expect(fieldNames).have.length(18);
-      expect(fieldNames).to.eql([
-        '@timestamp',
-        '_id',
-        '_index',
-        '@message',
-        '@message.raw',
-        '@tags',
-        '@tags.raw',
-        'agent',
-        'agent.raw',
-        'bytes',
-        'clientip',
-        'extension',
-        'extension.raw',
-        'geo.coordinates',
-        'geo.dest',
-        'geo.src',
-        'geo.srcdest',
-        'headings',
-      ]);
+      expect(fieldNames).have.length(fullFieldListLength);
+      expect(fieldNames).to.eql(fullFieldNames);
       await dataGrid.openComparisonSettingsMenu();
       expect(await dataGrid.showAllFieldsSwitchExists()).to.be(false);
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
@@ -78,8 +156,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('@message');
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent');
       fieldNames = await dataGrid.getComparisonFieldNames();
-      expect(fieldNames).have.length(5);
-      expect(fieldNames).to.eql(['@timestamp', 'extension', 'bytes', '@message', 'agent']);
+      expect(fieldNames).have.length(selectedFieldListLength);
+      expect(fieldNames).to.eql(selectedFieldNames);
     });
 
     const testDiffMode = async ({
@@ -92,10 +170,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expectedBytesValues: string[];
     }) => {
       await dataGrid.selectComparisonDiffMode(diffMode);
-      const extensionRow = await dataGrid.getComparisonRow(1);
+      const extensionRow = await dataGrid.getComparisonRow(extensionRowIndex);
       expect(extensionRow.fieldName).to.be('extension');
       expect(extensionRow.values).to.eql(expectedExtensionValues);
-      const bytesRow = await dataGrid.getComparisonRow(2);
+      const bytesRow = await dataGrid.getComparisonRow(bytesRowIndex);
       expect(bytesRow.fieldName).to.be('bytes');
       expect(bytesRow.values).to.eql(expectedBytesValues);
     };
@@ -154,29 +232,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow toggling all fields', async () => {
       await dataGrid.toggleShowAllFieldsSwitch();
       const fieldNames = await dataGrid.getComparisonFieldNames();
-      expect(fieldNames).have.length(18);
+      expect(fieldNames).have.length(fullFieldListLength);
       await dataGrid.toggleShowAllFieldsSwitch();
     });
 
     it('should allow toggling matching values', async () => {
       let fieldNames = await dataGrid.getComparisonFieldNames();
-      expect(fieldNames).have.length(5);
+      expect(fieldNames).have.length(selectedFieldListLength);
       await dataGrid.toggleShowMatchingValuesSwitch();
       fieldNames = await dataGrid.getComparisonFieldNames();
-      expect(fieldNames).have.length(4);
-      expect(fieldNames).to.eql(['@timestamp', 'bytes', '@message', 'agent']);
+      expect(fieldNames).have.length(selectedFieldListLength - 1);
+      expect(fieldNames).to.eql(selectedFieldNames.filter((name) => name !== 'extension'));
       await dataGrid.toggleShowMatchingValuesSwitch();
     });
 
     it('should allow toggling diff decorations', async () => {
       await dataGrid.selectComparisonDiffMode('words');
-      let diffSegments = await dataGrid.getComparisonDiffSegments(2, 2);
+      let diffSegments = await dataGrid.getComparisonDiffSegments(bytesRowIndex, 2);
       expect(diffSegments).to.eql([
         { decoration: 'removed', value: '7124' },
         { decoration: 'added', value: '5453' },
       ]);
       await dataGrid.toggleShowDiffDecorationsSwitch();
-      diffSegments = await dataGrid.getComparisonDiffSegments(2, 2);
+      diffSegments = await dataGrid.getComparisonDiffSegments(bytesRowIndex, 2);
       expect(diffSegments).to.eql([
         { decoration: undefined, value: '7124' },
         { decoration: undefined, value: '5453' },
@@ -188,5 +266,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.exitComparisonMode();
       await PageObjects.discover.waitForDocTableLoadingComplete();
     });
-  });
+  }
 }
