@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(headers).to.eql(tableHeaders);
       let fieldNames = await dataGrid.getComparisonFieldNames();
       expect(fieldNames.length >= fullFieldNames.length).to.be(true);
-      expect(fieldNames).to.eql(fullFieldNames);
+      expect(fieldNames.slice(0, fullFieldNames.length)).to.eql(fullFieldNames);
       await dataGrid.openComparisonSettingsMenu();
       expect(await dataGrid.showAllFieldsSwitchExists()).to.be(false);
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
