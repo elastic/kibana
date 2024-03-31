@@ -57,7 +57,7 @@ salary histogram:
 ```esql
 FROM employees
 | EVAL bs = AUTO_BUCKET(salary, 20, 25324, 74999)
-| STATS COUNT(*) by bs
+| STATS doc_count = COUNT(*) by bs
 | SORT bs
 ```
 
@@ -69,7 +69,7 @@ per hour:
 FROM sample_data
 | WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
 | EVAL bucket = AUTO_BUCKET(@timestamp, 25, DATE_FORMAT(NOW() - 1 day), DATE_FORMAT(NOW()))
-| STATS COUNT(*) BY bucket
+| STATS doc_count = COUNT(*) BY bucket
 ```
 
 Create monthly buckets for the year 1985, and calculate the average salary by
@@ -78,6 +78,6 @@ hiring month:
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
 | EVAL bucket = AUTO_BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-| STATS AVG(salary) BY bucket
+| STATS avg_salary = AVG(salary) BY bucket
 | SORT bucket
 ```

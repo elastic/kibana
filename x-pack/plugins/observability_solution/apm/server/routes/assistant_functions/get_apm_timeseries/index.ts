@@ -8,6 +8,7 @@
 import datemath from '@elastic/datemath';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import * as t from 'io-ts';
+import type { ChangePointType } from '@kbn/es-types/src';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -106,9 +107,9 @@ export interface ApmTimeseries {
     change_point?: number | undefined;
     r_value?: number | undefined;
     trend?: string | undefined;
-    p_value: number;
+    p_value?: number;
     date: string | undefined;
-    type: string;
+    type: ChangePointType;
   }>;
 }
 
@@ -205,7 +206,7 @@ export async function getApmTimeseries({
     statResults.flatMap((statResult) => {
       const changePointType = Object.keys(
         statResult.change_point?.type ?? {}
-      )?.[0];
+      )?.[0] as ChangePointType;
 
       return {
         stat: statResult.stat,

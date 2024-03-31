@@ -3,5 +3,5 @@ SUM
 The sum of a numeric field.
 ```esql
 FROM employees
-| STATS SUM(languages)
+| STATS sum_languages = SUM(languages)
 ```

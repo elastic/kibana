@@ -36,6 +36,7 @@ import { TopErroneousTransactions } from './top_erroneous_transactions';
 import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
@@ -91,6 +92,12 @@ export function ErrorGroupDetails() {
 
   const apmRouter = useApmRouter();
   const history = useHistory();
+
+  const {
+    observabilityAIAssistant: {
+      service: { setScreenContext },
+    },
+  } = useApmPluginContext();
 
   const {
     path: { groupId },
@@ -199,6 +206,12 @@ export function ErrorGroupDetails() {
 
   // If there are 0 occurrences, show only charts w. empty message
   const showDetails = errorSamplesData.occurrencesCount !== 0;
+
+  useEffect(() => {
+    return setScreenContext({
+      screenDescription: `The user is looking at the error details view. The current error group name is ${groupId}. There have been ${errorSamplesData.occurrencesCount} occurrences in the currently selected time range`,
+    });
+  }, [setScreenContext, errorSamplesData.occurrencesCount, groupId]);
 
   return (
     <>

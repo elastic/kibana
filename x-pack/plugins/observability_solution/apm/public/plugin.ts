@@ -42,7 +42,10 @@ import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/p
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
-import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import {
   FetchDataParams,
   ObservabilityPublicSetup,
@@ -102,6 +105,7 @@ export interface ApmPluginSetupDeps {
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
@@ -127,6 +131,7 @@ export interface ApmPluginStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   fleet?: FleetStart;
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
@@ -137,7 +142,6 @@ export interface ApmPluginStartDeps {
   lens: LensPublicStart;
   uiActions: UiActionsStart;
   profiling?: ProfilingPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;

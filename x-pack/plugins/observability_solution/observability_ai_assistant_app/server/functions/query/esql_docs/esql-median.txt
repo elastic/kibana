@@ -4,7 +4,7 @@ The value that is greater than half of all values and less than half of
 all values, also known as the 50% PERCENTILE.
 ```esql
 FROM employees
-| STATS MEDIAN(salary), PERCENTILE(salary, 50)
+| STATS median_salary = MEDIAN(salary), p50_salary = PERCENTILE(salary, 50)
 ```
 
 Like PERCENTILE, MEDIAN is usually approximate.

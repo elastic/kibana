@@ -40,7 +40,7 @@ FROM employees
 ```esql
 FROM employees
 | WHERE is_rehired IS NOT NULL
-| STATS COUNT(emp_no)
+| STATS emp_no_count = COUNT(emp_no)
 ```
 
 Use LIKE to filter data based on string patterns using wildcards. LIKE

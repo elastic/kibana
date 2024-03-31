@@ -43,12 +43,10 @@ export const registerFunctions: RegistrationCallback = async ({
 
         If you are unsure about which function should be used and with what arguments, ask the user for clarification or confirmation.
 
-        In KQL, escaping happens with double quotes, not single quotes. Some characters that need escaping are: ':()\\\
+        In KQL ("kqlFilter")) escaping happens with double quotes, not single quotes. Some characters that need escaping are: ':()\\\
         /\". Always put a field value in double quotes. Best: service.name:\"opbeans-go\". Wrong: service.name:opbeans-go. This is very important!
 
         You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.
-
-        If multiple functions are suitable, use the most specific and easy one. E.g., when the user asks to visualise APM data, use the APM functions (if available) rather than "query".
 
         Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
 
@@ -62,15 +60,17 @@ export const registerFunctions: RegistrationCallback = async ({
         DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
         DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.
 
+        DO NOT UNDER ANY CIRCUMSTANCES USE ES|QL syntax (\`service.name == "foo"\`) with "kqlFilter" (\`service.name:"foo"\`).
+
         Even if the "context" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,
         even if it has been called before.
 
         When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
         If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.
 
-        Use the "get_dataset_info" function if it is not clear what fields or indices the user means, or if you want to get more information about the mappings.
+        You MUST use the get_dataset_info function or get_apm_dataset_info function before calling the "query" or "changes" function.
 
-        If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "query" function, but be explicit about it potentially being incorrect.
+        If a function requires an index, you MUST use the results from the dataset info functions.
 
         ${
           functions.hasFunction('get_data_on_screen')

@@ -3,5 +3,5 @@ MIN
 The minimum value of a numeric field.
 ```esql
 FROM employees
-| STATS MIN(languages)
+| STATS min_languages = MIN(languages)
 ```

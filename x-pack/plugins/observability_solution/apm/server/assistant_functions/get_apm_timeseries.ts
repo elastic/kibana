@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 import { FromSchema } from 'json-schema-to-ts';
 import { omit } from 'lodash';
+import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { FunctionRegistrationParameters } from '.';
 import {
   ApmTimeseries,
@@ -20,12 +20,12 @@ const parameters = {
     start: {
       type: 'string',
       description:
-        'The start of the time range, in Elasticsearch date math, like `now`.',
+        'The start of the time range, in Elasticsearch date math, like `now-24h`.',
     },
     end: {
       type: 'string',
       description:
-        'The end of the time range, in Elasticsearch date math, like `now-24h`.',
+        'The end of the time range, in Elasticsearch date math, like `now`.',
     },
     stats: {
       type: 'array',
@@ -139,14 +139,10 @@ export function registerGetApmTimeseriesFunction({
     {
       contexts: ['apm'],
       name: 'get_apm_timeseries',
-      descriptionForUser: i18n.translate(
-        'xpack.apm.observabilityAiAssistant.functions.registerGetApmTimeseries.descriptionForUser',
-        {
-          defaultMessage: `Display different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions`,
-        }
-      ),
       description: `Visualise and analyse different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. A visualisation will be displayed above your reply - DO NOT attempt to display or generate an image yourself, or any other placeholder. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions.`,
       parameters,
+      // deprecated
+      visibility: FunctionVisibility.Internal,
     },
     async (
       { arguments: args },

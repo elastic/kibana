@@ -68,6 +68,16 @@ type MaybeArray<T> = T | T[];
 type Fields = Required<Required<estypes.SearchRequest>['body']>['fields'];
 type DocValueFields = MaybeArray<string | estypes.QueryDslFieldAndFormat>;
 
+export type ChangePointType =
+  | 'indeterminable'
+  | 'dip'
+  | 'distribution_change'
+  | 'non_stationary'
+  | 'spike'
+  | 'stationary'
+  | 'step_change'
+  | 'trend_change';
+
 export type SearchHit<
   TSource extends any = unknown,
   TFields extends Fields | undefined = undefined,
@@ -159,6 +169,16 @@ export type AggregateOf<
       bucket_script: {
         value: unknown;
       };
+      categorize_text: {
+        buckets: Array<
+          {
+            doc_count: number;
+            key: string;
+            regex: string;
+            max_matching_length: number;
+          } & SubAggregateOf<TAggregationContainer, TDocument>
+        >;
+      };
       cardinality: {
         value: number;
       };
@@ -167,12 +187,12 @@ export type AggregateOf<
           key: string;
         };
         type: Record<
-          string,
+          ChangePointType,
           {
             change_point?: number;
             r_value?: number;
             trend?: string;
-            p_value: number;
+            p_value?: number;
           }
         >;
       };

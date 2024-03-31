@@ -188,7 +188,7 @@ export class ObservabilityAIAssistantClient {
 
         let numFunctionsCalled: number = 0;
 
-        const MAX_FUNCTION_CALLS = 5;
+        const MAX_FUNCTION_CALLS = 8;
         const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
         const allFunctions = functionClient

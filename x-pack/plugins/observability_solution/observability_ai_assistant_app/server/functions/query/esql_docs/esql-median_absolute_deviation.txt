@@ -8,7 +8,7 @@ the entire sample. That is, for a random variable X, the median absolute deviati
 is median(|median(X) - Xi|).
 ```esql
 FROM employees
-| STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
+| STATS median_salary = MEDIAN(salary), median_abs_dev_salary = MEDIAN_ABSOLUTE_DEVIATION(salary)
 ```
 
 Like PERCENTILE, MEDIAN_ABSOLUTE_DEVIATION is

@@ -1247,6 +1247,7 @@ describe('Observability AI Assistant client', () => {
     let stream: Readable;
 
     let dataHandler: jest.Mock;
+    const maxFunctionCalls = 8;
 
     beforeEach(async () => {
       client = createClient();
@@ -1323,23 +1324,15 @@ describe('Observability AI Assistant client', () => {
 
       await nextTick();
 
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
+      for (let i = 0; i <= maxFunctionCalls; i++) {
+        await requestAlertsFunctionCall();
+      }
 
       await finished(stream);
     });
 
     it('executed the function no more than three times', () => {
-      expect(functionClientMock.executeFunction).toHaveBeenCalledTimes(5);
+      expect(functionClientMock.executeFunction).toHaveBeenCalledTimes(maxFunctionCalls);
     });
 
     it('does not give the LLM the choice to call a function anymore', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -17,6 +17,7 @@ import {
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { ErrorSampleDetails } from './error_sample_detail';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   errorSampleIds: string[];
@@ -41,6 +42,12 @@ export function ErrorSampler({
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
   );
+
+  const {
+    observabilityAIAssistant: {
+      service: { setScreenContext },
+    },
+  } = useApmPluginContext();
 
   const { rangeFrom, rangeTo, environment, kuery, errorId } = query;
 
@@ -81,6 +88,21 @@ export function ErrorSampler({
     });
   };
   const loadingErrorSamplesData = isPending(errorSamplesFetchStatus);
+
+  useEffect(() => {
+    if (!errorData) {
+      return;
+    }
+    return setScreenContext({
+      data: [
+        {
+          name: 'error_sample',
+          description: 'The error document currently displayed',
+          value: errorData,
+        },
+      ],
+    });
+  }, [setScreenContext, errorData]);
 
   if (loadingErrorSamplesData || !errorData) {
     return (

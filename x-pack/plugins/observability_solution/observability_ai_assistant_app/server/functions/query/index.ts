@@ -76,7 +76,8 @@ export function registerQueryFunction({
       name: 'execute_query',
       contexts: ['core'],
       visibility: FunctionVisibility.AssistantOnly,
-      description: 'Display the results of an ES|QL query',
+      description:
+        'Display the results of an ES|QL query. ONLY use this if the "query" function has been used before or if the user or screen context has provided a query you can use.',
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -106,18 +107,8 @@ export function registerQueryFunction({
     {
       name: 'query',
       contexts: ['core'],
-      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another.`,
+      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. Make sure you call one of the get_dataset functions first if you need index or field names.`,
       visibility: FunctionVisibility.AssistantOnly,
-      parameters: {
-        type: 'object',
-        additionalProperties: false,
-        properties: {
-          switch: {
-            type: 'boolean',
-          },
-        },
-        required: ['switch'],
-      } as const,
     },
     async ({ messages, connectorId, chat }, signal) => {
       const [systemMessage, esqlDocs] = await Promise.all([loadSystemMessage(), loadEsqlDocs()]);
@@ -397,7 +388,7 @@ export function registerQueryFunction({
             },
           };
         }),
-        startWith(createFunctionResponseMessage({ name: 'query', content: { switch: true } }))
+        startWith(createFunctionResponseMessage({ name: 'query', content: {} }))
       );
     }
   );

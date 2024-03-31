@@ -29,11 +29,11 @@ accuracy of the cardinality.The COUNT_DISTINCT function takes an optional second
 precision.Supported typesCan take any field type as input.Examples
 ```esql
 FROM hosts
-| STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
+| STATS unique_ip0s = COUNT_DISTINCT(ip0), unique_ip1s COUNT_DISTINCT(ip1)
 ```
 
 With the optional second parameter to configure the precision:
 ```esql
 FROM hosts
-| STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)
+| STATS unique_ip0s = COUNT_DISTINCT(ip0, 80000), unique_ip1s = COUNT_DISTINCT(ip1, 5)
 ```

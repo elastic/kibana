@@ -9,7 +9,7 @@ count all (the number of rows).
 DescriptionReturns the total number (count) of input values.Supported typesCan take any field type as input.Examples
 ```esql
 FROM employees
-| STATS COUNT(height)
+| STATS count = COUNT(height)
 ```
 
 To count the number of rows, use COUNT() or COUNT(*):

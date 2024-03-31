@@ -61,9 +61,7 @@ is 10000.
 - RENAME: renames a column
 - STATS ... BY: groups rows according to a common value and calculates
   one or more aggregated values over the grouped rows
-- SORT: sorts the row in a table. Does NOT support sorting by functions. 
-  never use `SORT COUNT(*) by col` , instead use `STATS count = COUNT(*) by col | SORT count`
-  only supports sorting by column names or aliases, to sort by a function it must first assigned to an alias with STATS
+- SORT: sorts the row in a table by a column. Expressions are not supported.
   If SORT is used right after a KEEP command, make sure it only uses column names in KEEP,
   or move the SORT before the KEEP (e.g. not correct: KEEP date | SORT @timestamp,  correct: SORT @timestamp | KEEP date)
 - WHERE: produces a table that contains all the rows from the input table
@@ -211,7 +209,7 @@ FROM employees
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
 | EVAL bucket = AUTO_BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-| STATS AVG(salary) BY bucket
+| STATS avg_salary = AVG(salary) BY bucket
 | SORT bucket
 ```
 
@@ -242,6 +240,6 @@ FROM logs-*
 ```esql
 FROM logs-*
 | WHERE @timestamp <= NOW() - 24 hours
-| STATS count = COUNT(*) by log.level
-| SORT count DESC
+| STATS doc_count = COUNT(*) by log.level
+| SORT doc_count DESC
 ```

@@ -7,6 +7,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { castArray } from 'lodash';
 import { GetFieldsOptions, IDataViewsApiClient } from '../common/types';
 import { DataViewMissingIndices } from '../common/lib';
 import { IndexPatternsFetcher } from './fetcher';
@@ -49,7 +50,7 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
           err.output.payload.statusCode === 404 &&
           err.output.payload.code === 'no_matching_indices'
         ) {
-          throw new DataViewMissingIndices(pattern);
+          throw new DataViewMissingIndices(castArray(pattern).join(','));
         } else {
           throw err;
         }
