@@ -72,7 +72,6 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   point: { iconType: 'tokenShape' }, // there is no separate icon for `point` yet
   shape: { iconType: 'tokenShape' },
   sparse_vector: { iconType: 'tokenVectorSparse' },
-  semantic_text: { iconType: 'tokenString' },
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
   keyword: { iconType: 'tokenKeyword' },
