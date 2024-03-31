@@ -325,7 +325,6 @@ export const reducer = (state: State, action: Action): State => {
 
       // Add text field to state with copy_to of semantic_text field
       let updatedState = addFieldToState(addTexFieldWithCopyToActionValue, state);
-      updatedState.documentFields.fieldToAddFieldTo = undefined;
 
       const addSemanticTextFieldActionValue: Field = {
         name: action.value.name,
