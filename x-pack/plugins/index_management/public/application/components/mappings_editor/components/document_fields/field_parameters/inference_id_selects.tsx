@@ -19,17 +19,27 @@ interface Props {
 }
 
 export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }: Props) => {
-  const { form } = useForm({ defaultValue: { main: 'elser' } });
+  const { form } = useForm({ defaultValue: { main: 'elser_model_2' } });
   const { subscribe } = form;
   const { api } = useComponentTemplatesContext();
   const [inferenceModels, setInferenceModels] = useState<any>([]);
 
   const fieldConfigModelId = getFieldConfig('inference_id');
-  const inferenceIdOptions: SuperSelectOption[] =
+  const defaultInferenceIds: SuperSelectOption[] = [
+    { value: 'elser_model_2', inputDisplay: 'elser_model_2' },
+    { value: 'e5', inputDisplay: 'e5' },
+  ];
+
+  const inferenceIdOptionsFromModels: SuperSelectOption[] =
     inferenceModels?.data?.map((model: any) => ({
       value: model.model_id,
       inputDisplay: model.model_id,
     })) || [];
+
+  const inferenceIdOptions: SuperSelectOption[] = [
+    ...defaultInferenceIds,
+    ...inferenceIdOptionsFromModels,
+  ];
 
   useEffect(() => {
     const fetchInferenceModels = async () => {
