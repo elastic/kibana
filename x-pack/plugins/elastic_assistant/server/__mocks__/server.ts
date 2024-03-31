@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { httpServiceMock } from '@kbn/core/server/mocks';
+import { getRequestValidation } from '@kbn/core-http-server';
 import type {
   RequestHandler,
   RouteConfig,
@@ -96,10 +97,12 @@ class MockServer {
   }
 
   private validateRequest(request: KibanaRequest): KibanaRequest {
-    const validations = this.getRoute().validate;
-    if (!validations) {
+    const route = this.getRoute();
+    if (!route.validate) {
       return request;
     }
+
+    const validations = getRequestValidation(route.validate);
 
     const validatedRequest = requestMock.create({
       path: request.route.path,
