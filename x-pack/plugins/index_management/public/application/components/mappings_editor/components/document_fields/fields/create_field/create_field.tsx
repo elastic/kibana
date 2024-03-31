@@ -22,7 +22,14 @@ import {
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { useDispatch } from '../../../../mappings_state_context';
-import { Form, FormDataProvider, UseField, useForm, useFormData } from '../../../../shared_imports';
+import {
+  Form,
+  FormDataProvider,
+  FormHook,
+  UseField,
+  useForm,
+  useFormData,
+} from '../../../../shared_imports';
 import { MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { InferenceIdSelects } from '../../field_parameters/inference_id_selects';
@@ -43,6 +50,15 @@ interface Props {
   isAddingFields?: boolean;
   isSemanticTextEnabled?: boolean;
 }
+
+const useFieldEffect = (form: FormHook, fieldName: string, setState: any) => {
+  const fieldValue = form.getFields()?.[fieldName]?.value;
+  useEffect(() => {
+    if (fieldValue !== undefined) {
+      setState(fieldValue);
+    }
+  }, [form, fieldValue, setState]);
+};
 
 export const CreateField = React.memo(function CreateFieldComponent({
   allFields,
@@ -85,31 +101,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
   const [referenceFieldComboValue, setReferenceFieldComboValue] = useState<any>();
   const [nameValue, setNameValue] = useState<any>();
   const [inferenceIdComboValue, setInferenceIdComboValue] = useState<any>();
-  const [semanticFieldType, setSemanticTextFieldType] = useState<any>(null);
+  const [semanticFieldType, setSemanticTextFieldType] = useState<any>();
 
-  const referenceFieldValue = form.getFields()?.referenceField?.value;
-  useEffect(() => {
-    const referenceField = form.getFields()?.referenceField?.value;
-    if (referenceField !== undefined) {
-      setReferenceFieldComboValue(referenceField);
-    }
-  }, [form, referenceFieldValue]);
-
-  const inferenceIdValue = form.getFields()?.inferenceId?.value;
-  useEffect(() => {
-    const inferenceId = form.getFields()?.inferenceId?.value;
-    if (inferenceId !== undefined) {
-      setInferenceIdComboValue(inferenceId);
-    }
-  }, [form, inferenceIdValue]);
-
-  const fieldNameValue = form.getFields()?.name?.value;
-  useEffect(() => {
-    const name = form.getFields()?.name?.value;
-    if (name !== undefined) {
-      setNameValue(name);
-    }
-  }, [form, fieldNameValue]);
+  useFieldEffect(form, 'referenceField', setReferenceFieldComboValue);
+  useFieldEffect(form, 'inferenceId', setInferenceIdComboValue);
+  useFieldEffect(form, 'name', setNameValue);
 
   const fieldTypeValue = form.getFields()?.type?.value;
   useEffect(() => {
@@ -117,8 +113,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     if (type === undefined || type.length === 0) {
       return;
     }
-
-    if (type[0].value === 'semantic_text') {
+    if (type[0]?.value === 'semantic_text') {
       setSemanticTextFieldType(type[0].value);
     }
   }, [form, fieldTypeValue]);
