@@ -155,7 +155,7 @@ export function DataTableDocumentToolbarBtn({
     if (enableComparisonMode && selectedDocs.length > 1) {
       menuItems.push(
         <EuiContextMenuItem
-          data-test-subj="dscGridCompareSelectedDocuments"
+          data-test-subj="unifiedDataTableCompareSelectedDocuments"
           key="compareSelectedDocuments"
           icon="diff"
           onClick={() => {
@@ -247,7 +247,7 @@ export function DataTableDocumentToolbarBtn({
           iconType="documents"
           onClick={toggleSelectionToolbar}
           data-selected-documents={selectedDocs.length}
-          data-test-subj="dscGridSelectionBtn"
+          data-test-subj="unifiedDataTableSelectionBtn"
           isSelected={isFilterActive}
           badgeContent={selectedDocs.length}
           css={{
@@ -272,7 +272,12 @@ export function DataTableDocumentToolbarBtn({
         </EuiDataGridToolbarControl>
       }
     >
-      {isSelectionPopoverOpen && <EuiContextMenuPanel items={getMenuItems()} />}
+      {isSelectionPopoverOpen && (
+        <EuiContextMenuPanel
+          items={getMenuItems()}
+          data-test-subj="unifiedDataTableSelectionMenu"
+        />
+      )}
     </EuiPopover>
   );
 }

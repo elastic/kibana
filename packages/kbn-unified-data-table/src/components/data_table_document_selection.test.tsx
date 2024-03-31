@@ -140,7 +140,7 @@ describe('document selection', () => {
         setIsCompareActive: jest.fn(),
       };
       const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
-      const button = findTestSubject(component, 'dscGridSelectionBtn');
+      const button = findTestSubject(component, 'unifiedDataTableSelectionBtn');
       expect(button.length).toBe(1);
     });
   });

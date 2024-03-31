@@ -200,6 +200,7 @@ const CompareDocuments = ({
       schemaDetectors={schemaDetectors}
       renderCellValue={renderCellValue}
       renderCustomToolbar={renderCustomToolbarFn}
+      data-test-subj="unifiedDataTableCompareDocuments"
       css={comparisonCss}
     />
   );

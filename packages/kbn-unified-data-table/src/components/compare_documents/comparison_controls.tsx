@@ -65,7 +65,7 @@ export const ComparisonControls = ({
     <EuiFlexGroup responsive={false} wrap={true} gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.s }}>
         <EuiText size="s">
-          <strong>
+          <strong data-test-subj="unifiedDataTableComparisonDisplay">
             {isPlainRecord ? (
               <FormattedMessage
                 id="unifiedDataTable.comparingResults"
@@ -103,9 +103,10 @@ export const ComparisonControls = ({
           onClick={() => {
             setIsCompareActive(false);
           }}
+          data-test-subj="unifiedDataTableExitDocumentComparison"
         >
           <FormattedMessage
-            id="unifiedDataTable.closeDocumentComparison"
+            id="unifiedDataTable.exitDocumentComparison"
             defaultMessage="Exit comparison mode"
           />
         </EuiDataGridToolbarControl>
@@ -146,6 +147,7 @@ const ComparisonSettings = ({
           onClick={() => {
             setIsSettingsMenuOpen(!isSettingsMenuOpen);
           }}
+          data-test-subj="unifiedDataTableComparisonSettings"
         >
           <FormattedMessage
             id="unifiedDataTable.comparisonSettings"
@@ -162,6 +164,7 @@ const ComparisonSettings = ({
     >
       <EuiContextMenuPanel
         size="s"
+        data-test-subj="unifiedDataTableComparisonSettingsMenu"
         css={{
           '.euiContextMenuItem__text': {
             overflow: 'visible',

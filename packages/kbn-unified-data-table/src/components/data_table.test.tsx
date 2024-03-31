@@ -97,7 +97,7 @@ async function getComponent(props: UnifiedDataTableProps = getProps()) {
 }
 
 function getSelectedDocNr(component: ReactWrapper<UnifiedDataTableProps>) {
-  const gridSelectionBtn = findTestSubject(component, 'dscGridSelectionBtn');
+  const gridSelectionBtn = findTestSubject(component, 'unifiedDataTableSelectionBtn');
   if (!gridSelectionBtn.length) {
     return 0;
   }
@@ -154,7 +154,7 @@ describe('UnifiedDataTable', () => {
       await toggleDocSelection(component, esHitsMock[0]);
       await toggleDocSelection(component, esHitsMock[1]);
       expect(getSelectedDocNr(component)).toBe(2);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridClearSelectedDocuments').simulate('click');
       expect(getSelectedDocNr(component)).toBe(0);
     });
@@ -163,10 +163,10 @@ describe('UnifiedDataTable', () => {
       await toggleDocSelection(component, esHitsMock[0]);
       await toggleDocSelection(component, esHitsMock[1]);
       expect(getSelectedDocNr(component)).toBe(2);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
       expect(getDisplayedDocNr(component)).toBe(2);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       component.update();
       findTestSubject(component, 'dscGridShowAllDocuments').simulate('click');
       expect(getDisplayedDocNr(component)).toBe(5);
@@ -176,7 +176,7 @@ describe('UnifiedDataTable', () => {
       await toggleDocSelection(component, esHitsMock[0]);
       await toggleDocSelection(component, esHitsMock[1]);
       expect(getSelectedDocNr(component)).toBe(2);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
       expect(getDisplayedDocNr(component)).toBe(2);
       component.setProps({
@@ -200,7 +200,7 @@ describe('UnifiedDataTable', () => {
 
     test('showing only selected documents and remove filter deselecting each doc manually', async () => {
       await toggleDocSelection(component, esHitsMock[0]);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
       expect(getDisplayedDocNr(component)).toBe(1);
       await toggleDocSelection(component, esHitsMock[0]);
@@ -211,7 +211,7 @@ describe('UnifiedDataTable', () => {
 
     test('copying selected documents to clipboard', async () => {
       await toggleDocSelection(component, esHitsMock[0]);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       expect(component.find(EuiCopy).prop('textToCopy')).toMatchInlineSnapshot(
         `"[{\\"_index\\":\\"i\\",\\"_id\\":\\"1\\",\\"_score\\":1,\\"_type\\":\\"_doc\\",\\"_source\\":{\\"date\\":\\"2020-20-01T12:12:12.123\\",\\"message\\":\\"test1\\",\\"bytes\\":20}}]"`
       );
