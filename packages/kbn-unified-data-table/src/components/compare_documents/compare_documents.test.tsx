@@ -101,6 +101,7 @@ describe('CompareDocuments', () => {
             "2",
           ],
         },
+        "data-test-subj": "unifiedDataTableCompareDocuments",
         "gridStyle": Object {
           "border": "horizontal",
           "cellPadding": "l",
