@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { InferenceAPIConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { addBasePath } from '..';
 import { RouteDependencies } from '../../../types';
 
