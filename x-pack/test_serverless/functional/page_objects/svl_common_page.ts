@@ -11,7 +11,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const config = getService('config');
-  const pageObjects = getPageObjects(['security', 'common']);
+  const pageObjects = getPageObjects(['security', 'common', 'header']);
   const retry = getService('retry');
   const deployment = getService('deployment');
   const log = getService('log');
@@ -229,15 +229,22 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clickUserAvatar() {
-      await testSubjects.click('userMenuAvatar');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('userMenuAvatar', 10_000);
     },
 
     async assertUserAvatarExists() {
-      await testSubjects.existOrFail('userMenuAvatar');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('userMenuAvatar', {
+        timeout: 10_000,
+      });
     },
 
     async assertUserMenuExists() {
-      await testSubjects.existOrFail('userMenu');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('userMenu', {
+        timeout: 10_000,
+      });
     },
   };
 }

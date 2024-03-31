@@ -14,14 +14,15 @@ import { openDiscoverLabel } from '../constants';
 
 interface DataViewMenuItemProps {
   dataView: DataViewDescriptor;
+  isAvailable: boolean;
 }
 
 const rightSpacing = css`
   margin-right: ${euiThemeVars.euiSizeS};
 `;
 
-export const DataViewMenuItem = ({ dataView }: DataViewMenuItemProps) => {
-  if (dataView.isLogsDataType()) {
+export const DataViewMenuItem = ({ dataView, isAvailable }: DataViewMenuItemProps) => {
+  if (isAvailable) {
     return <span>{dataView.name}</span>;
   }
 

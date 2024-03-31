@@ -54,7 +54,7 @@ import {
 } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   RuleActionParam,
-  ALERTS_FEATURE_ID,
+  ALERTING_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
   RuleActionAlertsFilterProperty,
@@ -262,7 +262,7 @@ export const RuleForm = ({
           })
         )
         .filter((item) =>
-          rule.consumer === ALERTS_FEATURE_ID
+          rule.consumer === ALERTING_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
             : item.ruleType!.producer === rule.consumer
         );
@@ -438,7 +438,7 @@ export const RuleForm = ({
   const authorizedConsumers = useMemo(() => {
     // If the app context provides a consumer, we assume that consumer is
     // is what we set for all rules that is created in that context
-    if (rule.consumer !== ALERTS_FEATURE_ID) {
+    if (rule.consumer !== ALERTING_FEATURE_ID) {
       return [];
     }
 

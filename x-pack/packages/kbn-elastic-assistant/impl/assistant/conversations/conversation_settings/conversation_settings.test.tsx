@@ -102,7 +102,6 @@ const mockConnector = {
   id: 'cool-id-bro',
   actionTypeId: '.gen-ai',
   name: 'cool name',
-  connectorTypeTitle: 'OpenAI',
 };
 jest.mock('../../../connectorland/connector_selector', () => ({
   // @ts-ignore
@@ -231,7 +230,6 @@ describe('ConversationSettings', () => {
         ...mockConvos[welcomeConvo.title],
         apiConfig: {
           connectorId: mockConnector.id,
-          connectorTypeTitle: 'OpenAI',
           model: undefined,
           provider: undefined,
         },
@@ -243,7 +241,6 @@ describe('ConversationSettings', () => {
           ...mockConvos[welcomeConvo.title],
           apiConfig: {
             connectorId: mockConnector.id,
-            connectorTypeTitle: 'OpenAI',
             model: undefined,
             provider: undefined,
           },
@@ -331,7 +328,6 @@ describe('ConversationSettings', () => {
         id: 'not-the-right-id',
         apiConfig: {
           connectorId: mockConnector.id,
-          connectorTypeTitle: 'OpenAI',
           model: undefined,
           provider: undefined,
         },

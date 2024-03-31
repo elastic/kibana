@@ -95,6 +95,21 @@ export const technicalPreview = i18n.translate('xpack.logsExplorer.TechPreview',
   defaultMessage: 'Technical preview',
 });
 
+export const selectDataViewTypeLabel = i18n.translate(
+  'xpack.logsExplorer.dataSourceSelector.dataViewFilter.selectDataViewType',
+  { defaultMessage: 'Select type' }
+);
+
+export const allDataViewTypesLabel = i18n.translate(
+  'xpack.logsExplorer.dataSourceSelector.dataViewFilter.allDataViewTypes',
+  { defaultMessage: 'Show all' }
+);
+
+export const logsDataViewTypeLabel = i18n.translate(
+  'xpack.logsExplorer.dataSourceSelector.dataViewFilter.logsDataViewType',
+  { defaultMessage: 'Logs-only' }
+);
+
 export const sortOptions = [
   {
     id: 'asc',

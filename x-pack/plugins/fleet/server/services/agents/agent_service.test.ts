@@ -61,6 +61,8 @@ describe('AgentService', () => {
               allAgents: false,
               allSettings: false,
               readSettings: false,
+              addAgents: false,
+              addFleetServers: false,
             },
             integrations: {
               readPackageInfo: false,

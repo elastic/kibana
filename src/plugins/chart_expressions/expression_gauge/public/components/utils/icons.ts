@@ -6,13 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
+import {
+  IconChartHorizontalBullet,
+  IconChartVerticalBullet,
+  IconChartGaugeSemiCircle,
+  IconChartGaugeArc,
+  IconChartGaugeCircle,
+} from '@kbn/chart-icons';
 import { GaugeShape, GaugeShapes } from '../../../common';
 
-export const getIcons = (type: GaugeShape) =>
+export const getGaugeIconByType = (type: GaugeShape) =>
   ({
     [GaugeShapes.HORIZONTAL_BULLET]: IconChartHorizontalBullet,
     [GaugeShapes.VERTICAL_BULLET]: IconChartVerticalBullet,
-    [GaugeShapes.ARC]: 'visGoal',
-    [GaugeShapes.CIRCLE]: 'visGoal',
+    [GaugeShapes.SEMI_CIRCLE]: IconChartGaugeSemiCircle,
+    [GaugeShapes.ARC]: IconChartGaugeArc,
+    [GaugeShapes.CIRCLE]: IconChartGaugeCircle,
   }[type]);

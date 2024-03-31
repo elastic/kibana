@@ -34,6 +34,11 @@ export const createMockConfig = (): ConfigType => {
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
     enabled: true,
     enableUiSettingsValidations: false,
+    entityAnalytics: {
+      riskEngine: {
+        alertSampleSizePerShard: 10_000,
+      },
+    },
   };
 };
 

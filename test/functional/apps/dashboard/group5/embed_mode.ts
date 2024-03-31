@@ -24,8 +24,7 @@ export default function ({
   const screenshot = getService('screenshots');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/176882
-  describe.skip('embed mode', () => {
+  describe('embed mode', () => {
     /*
      * Note: The baseline images used in all of the screenshot tests in this test suite were taken directly from the CI environment
      * in order to overcome a known issue with the pixel density of fonts being significantly different when running locally versus

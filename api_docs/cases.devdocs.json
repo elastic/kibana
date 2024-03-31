@@ -190,15 +190,7 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; onClose?: ((theCase?: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CaseUI",
-            "text": "CaseUI"
-          },
-          " | undefined, isCreateCase?: boolean | undefined) => void) | undefined; owner: string[]; permissions: ",
+          "> | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -224,7 +216,15 @@
             "section": "def-common.CaseUI",
             "text": "CaseUI"
           },
-          " | undefined) => void) | undefined; onCreateCaseClicked?: (() => void) | undefined; }"
+          " | undefined) => void) | undefined; onClose?: ((theCase?: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CaseUI",
+            "text": "CaseUI"
+          },
+          " | undefined, isCreateCase?: boolean | undefined) => void) | undefined; onCreateCaseClicked?: (() => void) | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_all_cases_selector_modal.tsx",
         "deprecated": false,
@@ -241,7 +241,7 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: ",
+          "> | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -251,7 +251,7 @@
           },
           "; basePath?: string | undefined; releasePhase?: ",
           "ReleasePhase",
-          " | undefined; attachments?: ",
+          " | undefined; onClose?: (() => void) | undefined; attachments?: ",
           {
             "pluginId": "cases",
             "scope": "public",

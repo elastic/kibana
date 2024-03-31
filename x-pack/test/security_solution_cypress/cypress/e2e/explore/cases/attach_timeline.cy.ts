@@ -16,16 +16,15 @@ import {
 import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../../../screens/create_new_case';
 import { getCase1 } from '../../../objects/case';
 import { getTimeline } from '../../../objects/timeline';
-import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { deleteAllCasesItems, deleteTimelines } from '../../../tasks/api_calls/common';
-import { createCase } from '../../../tasks/api_calls/cases';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
+import { createCase, deleteCases } from '../../../tasks/api_calls/cases';
 
 describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
   context('without cases created', () => {
     beforeEach(() => {
       login();
       deleteTimelines();
-      deleteAllCasesItems();
+      deleteCases();
       createTimeline(getTimeline()).then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
       });
@@ -61,7 +60,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       deleteTimelines();
-      deleteAllCasesItems();
+      deleteCases();
       createTimeline(getTimeline()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );

@@ -10,7 +10,10 @@ import { ActionsAuthorization } from '../../../../authorization/actions_authoriz
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { getOAuthJwtAccessToken } from '../../../../lib/get_oauth_jwt_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../../../../lib/get_oauth_client_credentials_access_token';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
@@ -21,6 +24,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Logger } from '@kbn/logging';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { ActionTypeRegistry } from '../../../../action_type_registry';
+import { getAllUnsecured } from './get_all';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -77,6 +81,7 @@ const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const eventLogClient = eventLogClientMock.create();
 const getEventLogClient = jest.fn();
 const connectorTokenClient = connectorTokenClientMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 let actionsClient: ActionsClient;
 let actionTypeRegistry: ActionTypeRegistry;
@@ -522,6 +527,450 @@ describe('getAll()', () => {
     });
 
     const result = await actionsClient.getAll({ includeSystemActions: true });
+    expect(result).toEqual([
+      {
+        config: {
+          foo: 'bar',
+        },
+        id: '1',
+        isDeprecated: false,
+        isMissingSecrets: false,
+        isPreconfigured: false,
+        isSystemAction: false,
+        name: 'test',
+        referencedByCount: 6,
+      },
+      {
+        actionTypeId: '.slack',
+        id: 'testPreconfigured',
+        isDeprecated: false,
+        isPreconfigured: true,
+        isSystemAction: false,
+        name: 'test',
+        referencedByCount: 2,
+      },
+    ]);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Error validating connector: 1, Error: [actionTypeId]: expected value of type [string] but got [undefined]'
+    );
+  });
+});
+
+describe('getAllUnsecured()', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.clearAllMocks();
+  });
+
+  test('calls internalSavedObjectRepository with parameters and returns inMemoryConnectors correctly', async () => {
+    const expectedResult = {
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'test',
+            isMissingSecrets: false,
+            config: {
+              foo: 'bar',
+            },
+            secrets: 'this should not be returned',
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    };
+    internalSavedObjectsRepository.find.mockResolvedValueOnce(expectedResult);
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
+        },
+      }
+    );
+
+    const result = await getAllUnsecured({
+      esClient: scopedClusterClient.asInternalUser,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        /**
+         * System actions will not
+         * be returned from getAllUnsecured
+         */
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      internalSavedObjectsRepository,
+      kibanaIndices,
+      logger,
+      spaceId: 'default',
+    });
+
+    expect(result).toEqual([
+      {
+        id: '1',
+        name: 'test',
+        isMissingSecrets: false,
+        config: { foo: 'bar' },
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        referencedByCount: 6,
+      },
+      {
+        id: 'testPreconfigured',
+        actionTypeId: '.slack',
+        name: 'test',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        referencedByCount: 2,
+      },
+    ]);
+
+    expect(internalSavedObjectsRepository.find).toHaveBeenCalledWith({
+      perPage: 10000,
+      type: 'action',
+    });
+
+    expect(scopedClusterClient.asInternalUser.search).toHaveBeenCalledWith({
+      index: kibanaIndices,
+      ignore_unavailable: true,
+      body: {
+        aggs: {
+          '1': {
+            filter: {
+              bool: {
+                must: {
+                  nested: {
+                    path: 'references',
+                    query: {
+                      bool: {
+                        filter: {
+                          bool: {
+                            must: [
+                              {
+                                term: {
+                                  'references.id': '1',
+                                },
+                              },
+                              {
+                                term: {
+                                  'references.type': 'action',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          testPreconfigured: {
+            filter: {
+              bool: {
+                must: {
+                  nested: {
+                    path: 'references',
+                    query: {
+                      bool: {
+                        filter: {
+                          bool: {
+                            must: [
+                              {
+                                term: {
+                                  'references.id': 'testPreconfigured',
+                                },
+                              },
+                              {
+                                term: {
+                                  'references.type': 'action',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        size: 0,
+        query: {
+          match_all: {},
+        },
+      },
+    });
+
+    expect(auditLogger.log).not.toHaveBeenCalled();
+    expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
+  });
+
+  test('passed custom space id if defined', async () => {
+    const expectedResult = {
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'test',
+            isMissingSecrets: false,
+            config: {
+              foo: 'bar',
+            },
+            secrets: 'this should not be returned',
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    };
+    internalSavedObjectsRepository.find.mockResolvedValueOnce(expectedResult);
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
+        },
+      }
+    );
+
+    const result = await getAllUnsecured({
+      esClient: scopedClusterClient.asInternalUser,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        /**
+         * System actions will not
+         * be returned from getAllUnsecured
+         */
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      internalSavedObjectsRepository,
+      kibanaIndices,
+      logger,
+      spaceId: 'custom',
+    });
+
+    expect(result).toEqual([
+      {
+        id: '1',
+        name: 'test',
+        isMissingSecrets: false,
+        config: { foo: 'bar' },
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        referencedByCount: 6,
+      },
+      {
+        id: 'testPreconfigured',
+        actionTypeId: '.slack',
+        name: 'test',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        referencedByCount: 2,
+      },
+    ]);
+
+    expect(internalSavedObjectsRepository.find).toHaveBeenCalledWith({
+      perPage: 10000,
+      type: 'action',
+      namespaces: ['custom'],
+    });
+
+    expect(scopedClusterClient.asInternalUser.search).toHaveBeenCalledWith({
+      index: kibanaIndices,
+      ignore_unavailable: true,
+      body: {
+        aggs: {
+          '1': {
+            filter: {
+              bool: {
+                must: {
+                  nested: {
+                    path: 'references',
+                    query: {
+                      bool: {
+                        filter: {
+                          bool: {
+                            must: [
+                              {
+                                term: {
+                                  'references.id': '1',
+                                },
+                              },
+                              {
+                                term: {
+                                  'references.type': 'action',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          testPreconfigured: {
+            filter: {
+              bool: {
+                must: {
+                  nested: {
+                    path: 'references',
+                    query: {
+                      bool: {
+                        filter: {
+                          bool: {
+                            must: [
+                              {
+                                term: {
+                                  'references.id': 'testPreconfigured',
+                                },
+                              },
+                              {
+                                term: {
+                                  'references.type': 'action',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        size: 0,
+        query: {
+          match_all: {},
+        },
+      },
+    });
+
+    expect(auditLogger.log).not.toHaveBeenCalled();
+    expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
+  });
+
+  test('validates connectors before return', async () => {
+    internalSavedObjectsRepository.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'test',
+            isMissingSecrets: false,
+            config: {
+              foo: 'bar',
+            },
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    });
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+        },
+      }
+    );
+
+    const result = await getAllUnsecured({
+      esClient: scopedClusterClient.asInternalUser,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+      internalSavedObjectsRepository,
+      kibanaIndices,
+      logger,
+      spaceId: 'default',
+    });
+
     expect(result).toEqual([
       {
         config: {
