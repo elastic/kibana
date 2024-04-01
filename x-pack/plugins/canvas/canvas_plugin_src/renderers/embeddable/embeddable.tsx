@@ -23,7 +23,12 @@ import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
-import { CanvasContainerApi, EmbeddableInput, RendererFactory } from '../../../types';
+import {
+  CanvasContainerApi,
+  EmbeddableInput,
+  RendererFactory,
+  RendererHandlers,
+} from '../../../types';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
@@ -39,7 +44,8 @@ const renderReactEmbeddable = (
   type: string,
   uuid: string,
   input: EmbeddableInput,
-  container: CanvasContainerApi
+  container: CanvasContainerApi,
+  handlers: RendererHandlers
 ) => {
   return (
     <ReactEmbeddableRenderer
@@ -48,9 +54,13 @@ const renderReactEmbeddable = (
       parentApi={container as unknown as PresentationContainer}
       key={`${type}_${uuid}`}
       state={{ rawState: input }}
-      onAnyStateChange={(newState) =>
-        container.onEdit(uuid, type, newState.rawState as unknown as EmbeddableInput)
-      }
+      onAnyStateChange={(newState) => {
+        const newExpression = embeddableInputToExpression(
+          newState.rawState as unknown as EmbeddableInput,
+          type
+        );
+        if (newExpression) handlers.onEmbeddableInputChange(newExpression);
+      }}
     />
   );
 };
@@ -116,7 +126,7 @@ export const embeddableRendererFactory = (
          * Prioritize React embeddables
          */
         ReactDOM.render(
-          renderReactEmbeddable(embeddableType, uniqueId, input, canvasApi),
+          renderReactEmbeddable(embeddableType, uniqueId, input, canvasApi, handlers),
           domNode,
           () => handlers.done()
         );

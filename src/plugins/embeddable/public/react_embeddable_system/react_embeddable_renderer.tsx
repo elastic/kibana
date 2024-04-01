@@ -15,7 +15,7 @@ import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-pan
 import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { combineLatest } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, skip } from 'rxjs/operators';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
@@ -87,7 +87,7 @@ export const ReactEmbeddableRenderer = <
             const comparatorDefinitions: Array<ComparatorDefinition<StateType, keyof StateType>> =
               Object.values(comparators);
             combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
-              .pipe(debounceTime(ON_STATE_CHANGE_DEBOUNCE))
+              .pipe(skip(1), debounceTime(ON_STATE_CHANGE_DEBOUNCE))
               .subscribe(() => {
                 onAnyStateChange(apiRegistration.serializeState());
               });

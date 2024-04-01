@@ -16,7 +16,4 @@ export type EmbeddableInput = Input & {
   savedObjectId?: string;
 };
 
-export type CanvasContainerApi = PublishesViewMode &
-  CanAddNewPanel & {
-    onEdit: (id: string, type: string, newState: EmbeddableInput) => void;
-  };
+export type CanvasContainerApi = PublishesViewMode & CanAddNewPanel;

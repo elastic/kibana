@@ -12,11 +12,10 @@ import { BehaviorSubject } from 'rxjs';
 import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
 
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
-import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
 import { CanvasContainerApi } from '../../../types';
+import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
 // @ts-expect-error unconverted file
 import { addElement } from '../../state/actions/elements';
-import { updateEmbeddableExpression } from '../../state/actions/embeddable';
 import { getSelectedPage } from '../../state/selectors/workpad';
 
 export const useCanvasApi: () => CanvasContainerApi = () => {
@@ -36,21 +35,6 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
     [selectedPageId, dispatch]
   );
 
-  const updateEmbeddable = useCallback(
-    (id: string, type: string, newEmbeddableInput: EmbeddableInput) => {
-      const embeddableExpression = embeddableInputToExpression(newEmbeddableInput, type);
-      if (embeddableExpression) {
-        dispatch(
-          updateEmbeddableExpression({
-            elementId: id,
-            embeddableExpression,
-          })
-        );
-      }
-    },
-    [dispatch]
-  );
-
   const getCanvasApi = useCallback(() => {
     return {
       viewMode: new BehaviorSubject<ViewMode>(ViewMode.EDIT), // always in edit mode
@@ -63,9 +47,8 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
       }) => {
         createNewEmbeddable(panelType, initialState);
       },
-      onEdit: updateEmbeddable,
     } as CanvasContainerApi;
-  }, [createNewEmbeddable, updateEmbeddable]);
+  }, [createNewEmbeddable]);
 
   return useMemo(() => getCanvasApi(), [getCanvasApi]);
 };
