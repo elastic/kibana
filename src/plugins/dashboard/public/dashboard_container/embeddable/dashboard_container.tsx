@@ -30,7 +30,7 @@ import {
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { PanelPackage } from '@kbn/presentation-containers';
+import { PanelPackage } from '@kbn/presentation-publishing';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';

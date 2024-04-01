@@ -40,13 +40,19 @@ const embeddablesRegistry: {
   [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
 
-const renderReactEmbeddable = (
-  type: string,
-  uuid: string,
-  input: EmbeddableInput,
-  container: CanvasContainerApi,
-  handlers: RendererHandlers
-) => {
+const renderReactEmbeddable = ({
+  type,
+  uuid,
+  input,
+  container,
+  handlers,
+}: {
+  type: string;
+  uuid: string;
+  input: EmbeddableInput;
+  container: CanvasContainerApi;
+  handlers: RendererHandlers;
+}) => {
   return (
     <ReactEmbeddableRenderer
       type={type}
@@ -128,7 +134,13 @@ export const embeddableRendererFactory = (
          * Prioritize React embeddables
          */
         ReactDOM.render(
-          renderReactEmbeddable(embeddableType, uniqueId, input, canvasApi, handlers),
+          renderReactEmbeddable({
+            input,
+            handlers,
+            uuid: uniqueId,
+            type: embeddableType,
+            container: canvasApi,
+          }),
           domNode,
           () => handlers.done()
         );
@@ -138,6 +150,9 @@ export const embeddableRendererFactory = (
           return ReactDOM.unmountComponentAtNode(domNode);
         });
       } else if (!embeddablesRegistry[uniqueId]) {
+        /**
+         * Handle legacy embeddables - embeddable does not exist in registry
+         */
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
           (embeddableFactory) => embeddableFactory.type === embeddableType
         ) as EmbeddableFactory<EmbeddableInput>;
@@ -204,6 +219,9 @@ export const embeddableRendererFactory = (
           return ReactDOM.unmountComponentAtNode(domNode);
         });
       } else {
+        /**
+         * Handle legacy embeddables - embeddable already exists in registry
+         */
         const embeddable = embeddablesRegistry[uniqueId];
 
         // updating embeddable input with changes made to expression or filters
