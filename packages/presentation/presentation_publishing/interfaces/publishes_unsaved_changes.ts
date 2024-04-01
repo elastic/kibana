@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
+import { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesUnsavedChanges {
   unsavedChanges: PublishingSubject<object | undefined>;
@@ -20,9 +20,3 @@ export const apiPublishesUnsavedChanges = (api: unknown): api is PublishesUnsave
       (api as PublishesUnsavedChanges).resetUnsavedChanges
   );
 };
-
-/**
- * A hook that gets this API's unsaved changes as a reactive variable which will cause re-renders on change.
- */
-export const useUnsavedChanges = (api: PublishesUnsavedChanges | undefined) =>
-  useStateFromPublishingSubject(api?.unsavedChanges);
