@@ -187,6 +187,13 @@ export const createThreatSignals = async ({
       // Did our searches fail with an error containing the maxClauseCount
       // error message?
 
+      // TODO - delete this comment
+      // FOR PR TESTING PURPOSES ONLY
+      // uncomment this line..
+      // const maxClauseCountValue = -1;
+
+      // and comment out the reduce function below to force the
+      // max clause count error to re-appear.
       const maxClauseCountValue = searchesPerformed.reduce<number>((acc, search) => {
         const failureMessage: string | undefined = search.errors.find((err) =>
           err.includes('failed to create query: maxClauseCount is set to')
@@ -207,6 +214,8 @@ export const createThreatSignals = async ({
         // allowed by elasticsearch
 
         chunkPage = maxClauseCountValue - 1;
+
+        // only store results + errors that are not related to maxClauseCount
         results = combineConcurrentResults(
           results,
           searchesPerformed.filter((search) =>
