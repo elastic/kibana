@@ -37,7 +37,6 @@ import {
   getMessageFromRawResponse,
   getPluginNameFromRequest,
 } from './helpers';
-import { getLlmType } from './evaluate/utils';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,

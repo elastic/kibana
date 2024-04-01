@@ -77,7 +77,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...staticDefaults,
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":[],"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
         }
       );
     });
@@ -89,7 +89,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...streamingDefaults,
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".gen-ai","replacements":[],"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
         }
       );
     });
@@ -106,7 +106,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...staticDefaults,
-          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".bedrock","replacements":[],"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
+          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".bedrock","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
         }
       );
     });
@@ -125,7 +125,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...staticDefaults,
-          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".bedrock","replacements":[],"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
+          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".bedrock","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
         }
       );
     });
@@ -143,7 +143,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...streamingDefaults,
-          body: '{"message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".bedrock","replacements":[],"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
+          body: '{"message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".bedrock","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
         }
       );
     });
@@ -156,7 +156,7 @@ describe('API tests', () => {
         alertsIndexPattern: '.alerts-security.alerts-default',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        replacements: [{ value: 'real.hostname', uuid: 'auuid' }],
+        replacements: { auuid: 'real.hostname' },
         size: 30,
       };
 
@@ -166,7 +166,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...staticDefaults,
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":[{"value":"real.hostname","uuid":"auuid"}],"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"size":30}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{"auuid":"real.hostname"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"size":30}',
         }
       );
     });
