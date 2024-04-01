@@ -87,5 +87,7 @@
     "@kbn/core-http-server",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/securitysolution-io-ts-utils",
-    "@kbn/core-elasticsearch-server-mocks"  ]
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/presentation-publishing"
+  ]
 }
