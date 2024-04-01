@@ -51,6 +51,7 @@ export default function ({ loadTestFile, getService }) {
 
     // Uninstall tokens
     loadTestFile(require.resolve('./uninstall_token/get')); // ~ 20s
+    loadTestFile(require.resolve('./uninstall_token/privileges')); // ~ 20s
 
     // Uninstall tokens
     loadTestFile(require.resolve('./fleet_settings_privileges')); // ~ 1m
