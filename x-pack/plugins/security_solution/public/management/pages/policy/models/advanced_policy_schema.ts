@@ -1177,6 +1177,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.events.suppress_caps',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.suppress_caps',
+      {
+        defaultMessage:
+          'This option will remove the thread capabiility arrays just before sending Linux events to Elasticsearch. This can be used to reduce Endpoint data volume at the expense of capability matching detection rules running within the Elastic stack. Detection rules running within Elastic Defend are unaffected. Default is true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.events.callstacks.emit_in_events',
     first_supported_version: '8.8',
     documentation: i18n.translate(
