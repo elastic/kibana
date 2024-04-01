@@ -194,8 +194,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         handleStreamEnd(error.message);
       });
 
-    // TODO before merge to main
-    // figure out how to pass trace_data @spong
+    // TODO figure out how to pass trace_data @spong
     return responseWithHeaders;
   }
 
