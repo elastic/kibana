@@ -127,6 +127,7 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchConnectors: 30000
+  searchNotebooks: 30000
   searchPlayground: 19325
   searchprofiler: 67080
   security: 81771
