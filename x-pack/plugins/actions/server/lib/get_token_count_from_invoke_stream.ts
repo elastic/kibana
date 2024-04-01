@@ -72,13 +72,12 @@ type StreamParser = (
   signal?: AbortSignal
 ) => Promise<
   | {
-  total: number;
-  prompt: number;
-  completion: number;
-}
+      total: number;
+      prompt: number;
+      completion: number;
+    }
   | string
 >;
-
 
 const parseBedrockStream: StreamParser = async (responseStream, logger) => {
   const responseBuffer: Uint8Array[] = [];
