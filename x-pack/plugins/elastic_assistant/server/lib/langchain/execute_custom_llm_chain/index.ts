@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
-import { RetrievalQAChain } from 'langchain/chains';
+// import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
-import { Tool } from '@langchain/core/tools';
+import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientChatOpenAI } from '../llm/openai';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
@@ -41,6 +42,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   llmType,
   logger,
   isStream = false,
+  onLlmResponse,
   onNewReplacements,
   replacements,
   request,
@@ -105,7 +107,9 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     size,
   };
-  const tools: Tool[] = assistantTools.flatMap((tool) => tool.getTool(assistantToolParams) ?? []);
+  const tools: ToolInterface[] = assistantTools.flatMap(
+    (tool) => tool.getTool(assistantToolParams) ?? []
+  );
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
@@ -137,6 +141,9 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     let didEnd = false;
 
     const handleStreamEnd = (finalResponse: string) => {
+      if (onLlmResponse) {
+        onLlmResponse(finalResponse);
+      }
       // @yuliia this would be a good place for pushing the response to the chat history
       streamEnd();
       didEnd = true;
@@ -188,7 +195,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
       });
 
     // TODO before merge to main
-    // figure out how to pass trace_data and replacements @spong @macri @yuliia
+    // figure out how to pass trace_data @spong
     return responseWithHeaders;
   }
 
@@ -213,10 +220,14 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     );
   });
 
+  const langChainOutput = langChainResponse.output;
+  if (onLlmResponse) {
+    await onLlmResponse(langChainOutput, traceData);
+  }
   return {
     body: {
       connector_id: connectorId,
-      data: langChainResponse.output, // the response from the actions framework
+      data: langChainOutput, // the response from the actions framework
       trace_data: traceData,
       replacements,
       status: 'ok',

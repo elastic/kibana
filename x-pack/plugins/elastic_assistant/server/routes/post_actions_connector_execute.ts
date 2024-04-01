@@ -19,6 +19,7 @@ import {
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { getLlmType } from './utils';
 import { StaticReturnType } from '../lib/langchain/executors/types';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
@@ -255,55 +256,38 @@ export const postActionsConnectorExecuteRoute = (
 
           const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
-          const langChainResponse = await callAgentExecutor({
-            abortSignal,
-            alertsIndexPattern: request.body.alertsIndexPattern,
-            allow: request.body.allow,
-            allowReplacement: request.body.allowReplacement,
-            actions,
-            isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
-            assistantTools,
-            connectorId,
-            elserId,
-            esClient,
-            isStream:
-              // TODO implement llmClass for bedrock streaming
-              // tracked here: https://github.com/elastic/security-team/issues/7363
-              request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
-            llmType: actionTypeId,
-            kbResource: ESQL_RESOURCE,
-            langChainMessages,
-            logger,
-            onNewReplacements,
-            request,
-            replacements: request.body.replacements,
-            size: request.body.size,
-            telemetry,
-          });
+          const result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
+            await callAgentExecutor({
+              abortSignal,
+              alertsIndexPattern: request.body.alertsIndexPattern,
+              allow: request.body.allow,
+              allowReplacement: request.body.allowReplacement,
+              actions,
+              isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
+              assistantTools,
+              connectorId,
+              elserId,
+              esClient,
+              isStream:
+                // TODO implement llmClass for bedrock streaming
+                // tracked here: https://github.com/elastic/security-team/issues/7363
+                request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
+              llmType: getLlmType(actionTypeId),
+              kbResource: ESQL_RESOURCE,
+              langChainMessages,
+              logger,
+              onNewReplacements,
+              onLlmResponse,
+              request,
+              replacements: request.body.replacements,
+              size: request.body.size,
+              telemetry,
+            });
 
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
           });
-          let result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
-            langChainResponse;
-          if (Object.hasOwn(langChainResponse.body, 'data')) {
-            // the check above ensures that langChainResponse is a StaticReturnType
-            const staticResponse = langChainResponse as StaticReturnType;
-            if (conversationId) {
-              // if conversationId is defined, onLlmResponse will be too. the ? is to satisfy TS
-              await onLlmResponse?.(
-                staticResponse.body.data,
-                staticResponse.body.trace_data
-                  ? {
-                      traceId: staticResponse.body.trace_data.trace_id,
-                      transactionId: staticResponse.body.trace_data.transaction_id,
-                    }
-                  : {}
-              );
-            }
-            result = staticResponse;
-          }
 
           return response.ok<
             StreamFactoryReturnType['responseWithHeaders']['body'] | StaticReturnType['body']

@@ -9,7 +9,6 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool } from 'langchain/tools/chain';
-import { Tool } from '@langchain/core/tools';
 
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
@@ -74,7 +73,7 @@ export const callOpenAIFunctionsExecutor: AgentExecutor<false> = async ({
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
 
   // TODO: Dependency inject these tools
-  const tools: Tool[] = [
+  const tools = [
     new ChainTool({
       name: 'ESQLKnowledgeBaseTool',
       description:

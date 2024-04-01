@@ -79,7 +79,7 @@
   },
   "resolutions": {
     "**/@hello-pangea/dnd": "16.2.0",
-    "**/@langchain/core": "0.1.23",
+    "**/@langchain/core": "0.1.45",
     "**/@types/node": "20.10.5",
     "**/@typescript-eslint/utils": "5.62.0",
     "**/axios": "1.6.3",
