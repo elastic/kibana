@@ -83,20 +83,6 @@ const historicalSummarySchema = t.intersection([
   summarySchema,
 ]);
 
-const previewDataSchema = t.intersection([
-  t.type({
-    date: dateType,
-    sliValue: t.number,
-  }),
-  t.partial({
-    events: t.type({
-      good: t.number,
-      bad: t.number,
-      total: t.number,
-    }),
-  }),
-]);
-
 const dateRangeSchema = t.type({ from: dateType, to: dateType });
 
 const kqlQuerySchema = t.string;
@@ -137,7 +123,6 @@ export {
   errorBudgetSchema,
   groupingsSchema,
   historicalSummarySchema,
-  previewDataSchema,
   statusSchema,
   summarySchema,
   metaSchema,

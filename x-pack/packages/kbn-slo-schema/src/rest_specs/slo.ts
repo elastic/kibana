@@ -24,7 +24,6 @@ import {
   metaSchema,
   metricCustomIndicatorSchema,
   objectiveSchema,
-  previewDataSchema,
   querySchema,
   settingsSchema,
   sloIdSchema,
@@ -38,27 +37,6 @@ import {
   timeWindowSchema,
   timeWindowTypeSchema,
 } from '../schema';
-
-const getPreviewDataParamsSchema = t.type({
-  body: t.intersection([
-    t.type({
-      indicator: indicatorSchema,
-      range: t.type({
-        start: t.number,
-        end: t.number,
-      }),
-    }),
-    t.partial({
-      objective: objectiveSchema,
-      instanceId: t.string,
-      groupBy: t.string,
-      remoteName: t.string,
-      groupings: t.record(t.string, t.unknown),
-    }),
-  ]),
-});
-
-const getPreviewDataResponseSchema = t.array(previewDataSchema);
 
 const sloResponseSchema = t.intersection([
   t.type({
@@ -127,9 +105,6 @@ type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParams
 type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
 type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
-type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
-type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
-
 type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
 type TimeWindowType = t.OutputOf<typeof timeWindowTypeSchema>;
 type TimeWindow = t.OutputOf<typeof timeWindowSchema>;
@@ -151,8 +126,6 @@ type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
 type QuerySchema = t.TypeOf<typeof querySchema>;
 
 export {
-  getPreviewDataParamsSchema,
-  getPreviewDataResponseSchema,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
   sloResponseSchema,
@@ -160,8 +133,6 @@ export {
 };
 export type {
   BudgetingMethod,
-  GetPreviewDataParams,
-  GetPreviewDataResponse,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
