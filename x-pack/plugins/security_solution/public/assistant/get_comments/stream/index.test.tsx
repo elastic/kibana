@@ -26,7 +26,7 @@ const testProps = {
   content,
   index: 1,
   isEnabledLangChain: true,
-  connectorTypeTitle: 'OpenAI',
+  actionTypeId: '.gen-ai',
   isControlsEnabled: true,
   regenerateMessage: jest.fn(),
   transformMessage: jest.fn(),
