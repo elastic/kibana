@@ -10,6 +10,7 @@ import { TimeRange } from '@kbn/es-query';
 import {
   HasLibraryTransforms,
   PublishesDataLoading,
+  PublishesDataViews,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
@@ -46,7 +47,9 @@ export interface MapSerializeState extends SerializedTitles {
 
 export type MapApi = DefaultEmbeddableApi<MapSerializeState> &
   PublishesDataLoading &
+  PublishesDataViews &
   HasLibraryTransforms<MapSerializeState> & {
+    setLayerList: (layerList: LayerDescriptor[]) => void;
     updateLayerById: (layerDescriptor: LayerDescriptor) => void;
     onRenderComplete$: Observable<void>;
   };

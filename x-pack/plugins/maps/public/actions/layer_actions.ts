@@ -138,19 +138,10 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
   };
 }
 
-export function updateLayerById(layerDescriptor: LayerDescriptor) {
-  return async (
-    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
-    getState: () => MapStoreState
-  ) => {
-    dispatch({
-      type: UPDATE_LAYER,
-      layer: layerDescriptor,
-    });
-    await dispatch(syncDataForLayerId(layerDescriptor.id, false));
-    if (getMapSettings(getState()).autoFitToDataBounds) {
-      dispatch(autoFitToBounds());
-    }
+export function updateLayerDescriptor(layerDescriptor: LayerDescriptor) {
+  return {
+    type: UPDATE_LAYER,
+    layer: layerDescriptor,
   };
 }
 

@@ -25,6 +25,7 @@ import { initializeActionHandlers } from './initialize_action_handlers';
 import { MapContainer } from '../connected_components/map_container';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 import { initializeCrossPanelActions } from './initialize_cross_panel_actions';
+import { initializeDataViews } from './initialize_data_views';
 
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
@@ -55,7 +56,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
     const defaultPanelTitle = new BehaviorSubject<string | undefined>(
       savedMap.getAttributes().title
     );
-    const reduxSync = initializeReduxSync(savedMap.getStore(), state);
+    const reduxSync = initializeReduxSync(savedMap.getStore(), state, uuid);
     const actionHandlers = initializeActionHandlers(getApi);
     const crossPanelActions = initializeCrossPanelActions({
       controlledBy,
@@ -85,6 +86,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
         ...titlesApi,
         ...reduxSync.api,
         ...initializeLibraryTransforms(savedMap, serializeState),
+        ...initializeDataViews(savedMap.getStore()),
         serializeState,
       },
       {

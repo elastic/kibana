@@ -11,7 +11,6 @@ import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import type { PaletteRegistry } from '@kbn/coloring';
-import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Query } from '@kbn/es-query';
 import {
   Embeddable,
@@ -25,12 +24,9 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import {
-  replaceLayerList,
   setMapSettings,
   setQuery,
-  setReadOnly,
   setEmbeddableSearchContext,
-  setExecutionContext,
 } from '../actions';
 import {
   getInspectorAdapters,
@@ -41,8 +37,6 @@ import {
 import {
   getEmbeddableSearchContext,
   getLayerList,
-  getQueryableUniqueIndexPatternIds,
-  getLayerListRaw,
 } from '../selectors/map_selectors';
 import {
   APP_ID,
@@ -53,13 +47,10 @@ import {
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
   getCharts,
-  getExecutionContextService,
   getHttp,
   getSearchService,
 } from '../kibana_services';
-import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { SavedMap } from '../routes/map_page';
-import { getIndexPatternsFromIds } from '../index_pattern_util';
 
 import {
   MapByValueInput,
@@ -107,14 +98,12 @@ export class MapEmbeddable
   deferEmbeddableLoad = true;
 
   private _savedMap: SavedMap;
-  private _renderTooltipContent?: RenderToolTipContent;
   private _subscriptions: Subscription[] = [];
   private _prevIsRestore: boolean = false;
   private _prevSyncColors?: boolean;
   private _domNode?: HTMLElement;
   private _isInitialized = false;
   private _controlledBy: string;
-  private _isSharable = true;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
@@ -152,8 +141,6 @@ export class MapEmbeddable
       return;
     }
 
-    this._savedMap.getStore().dispatch(setExecutionContext(this.getExecutionContext()));
-
     // deferred loading of this embeddable is complete
     this.setInitializationFinished();
 
@@ -163,37 +150,13 @@ export class MapEmbeddable
     }
   }
 
-  private getExecutionContext() {
-    const parentContext = getExecutionContextService().get();
-    const mapContext: KibanaExecutionContext = {
-      type: APP_ID,
-      name: APP_ID,
-      id: this.id,
-      url: this.output.editPath,
-    };
-
-    return parentContext
-      ? {
-          ...parentContext,
-          child: mapContext,
-        }
-      : mapContext;
-  }
-
   private _initializeStore() {
     this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
 
     const store = this._savedMap.getStore();
 
-    store.dispatch(setReadOnly(true));
-    store.dispatch(
-      setMapSettings({
-        keydownScrollZoom: true,
-        showTimesliderToggleButton: false,
-      })
-    );
-
     this._dispatchSetQuery({ forceRefresh: false });
+    
     this._subscriptions.push(
       shouldFetch$<MapEmbeddableInput>(this.getUpdated$(), () => {
         return {
@@ -236,7 +199,6 @@ export class MapEmbeddable
       title,
       editPath: getEditPath(savedObjectId),
       editUrl: getHttp().basePath.prepend(getFullPath(savedObjectId)),
-      indexPatterns: await this._getIndexPatterns(),
     });
   }
 
@@ -281,13 +243,6 @@ export class MapEmbeddable
   setEventHandlers = (eventHandlers: EventHandlers) => {
     this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
   };
-
-  /*
-   * Set to false to exclude sharing attributes 'data-*'.
-   */
-  public setIsSharable(isSharable: boolean): void {
-    this._isSharable = isSharable;
-  }
 
   getInspectorAdapters() {
     return getInspectorAdapters(this._savedMap.getStore().getState());
@@ -374,22 +329,6 @@ export class MapEmbeddable
       <div>Use react embeddable</div>,
       this._domNode
     );
-  }
-
-  setLayerList(layerList: LayerDescriptor[]) {
-    this._savedMap.getStore().dispatch<any>(replaceLayerList(layerList));
-    this._getIndexPatterns().then((indexPatterns) => {
-      this.updateOutput({
-        indexPatterns,
-      });
-    });
-  }
-
-  private async _getIndexPatterns() {
-    const queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(
-      this._savedMap.getStore().getState()
-    );
-    return await getIndexPatternsFromIds(queryableIndexPatternIds);
   }
 
   destroy() {

@@ -8,8 +8,8 @@
 import { BehaviorSubject, debounceTime, filter, map } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { StateComparators } from '@kbn/presentation-publishing';
-import { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
-import { RENDER_TIMEOUT } from '../../common/constants';
+import { MapCenterAndZoom } from '../../common/descriptor_types';
+import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
 import { MapStore, MapStoreState } from '../reducers/store';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -21,13 +21,17 @@ import {
   isMapLoading,
 } from '../selectors/map_selectors';
 import {
+  setExecutionContext,
   setGotoWithCenter,
   setHiddenLayers,
   setIsLayerTOCOpen,
+  setMapSettings,
   setOpenTOCDetails,
-  updateLayerById,
+  setReadOnly,
 } from '../actions';
 import type { MapSerializeState } from './types';
+import { getExecutionContextService } from '../kibana_services';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {
@@ -42,7 +46,7 @@ function getHiddenLayerIds(state: MapStoreState) {
     .map((layer) => layer.id);
 }
 
-export function initializeReduxSync(store: MapStore, state: MapSerializeState) {
+export function initializeReduxSync(store: MapStore, state: MapSerializeState, uuid: string) {
   // initializing comparitor publishing subjects to state instead of store state values
   // because store is not settled until map is rendered and mapReady is true
   const hiddenLayers$ = new BehaviorSubject<string[]>(
@@ -89,6 +93,15 @@ export function initializeReduxSync(store: MapStore, state: MapSerializeState) {
     }
   });
 
+  store.dispatch(setReadOnly(true));
+  store.dispatch(
+    setMapSettings({
+      keydownScrollZoom: true,
+      showTimesliderToggleButton: false,
+    })
+  );
+  store.dispatch(setExecutionContext(getExecutionContext(uuid, state.savedObjectId)));
+
   return {
     cleanup: unsubscribeFromStore,
     api: {
@@ -102,9 +115,6 @@ export function initializeReduxSync(store: MapStore, state: MapSerializeState) {
           return;
         })
       ),
-      updateLayerById: (layerDescriptor: LayerDescriptor) => {
-        store.dispatch<any>(updateLayerById(layerDescriptor));
-      },
     },
     comparators: {
       // mapBuffer comparator intentionally omitted and is not part of unsaved changes check
@@ -146,4 +156,21 @@ export function initializeReduxSync(store: MapStore, state: MapSerializeState) {
       };
     },
   };
+}
+
+function getExecutionContext(uuid: string, savedObjectId: string | undefined) {
+  const parentContext = getExecutionContextService().get();
+  const mapContext: KibanaExecutionContext = {
+    type: APP_ID,
+    name: APP_ID,
+    id: uuid,
+    url: getEditPath(savedObjectId),
+  };
+
+  return parentContext
+    ? {
+        ...parentContext,
+        child: mapContext,
+      }
+    : mapContext;
 }
