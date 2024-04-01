@@ -133,6 +133,7 @@ export class DashboardContainer
   public controlGroup?: ControlGroupContainer;
 
   public searchSessionId?: string;
+  public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   // cleanup
@@ -202,6 +203,7 @@ export class DashboardContainer
 
     this.creationOptions = creationOptions;
     this.searchSessionId = initialSessionId;
+    this.searchSessionId$.next(initialSessionId);
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
@@ -594,6 +596,7 @@ export class DashboardContainer
     const { input: newInput, searchSessionId } = initializeResult;
 
     this.searchSessionId = searchSessionId;
+    this.searchSessionId$.next(searchSessionId);
 
     batch(() => {
       this.dispatch.setLastSavedInput(

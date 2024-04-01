@@ -23,50 +23,24 @@ export interface SerializedTimeRange {
 
 export const initializeTimeRange = (
   rawState: SerializedTimeRange,
-  parentApi?: unknown
 ): {
-  appliedTimeRange$: PublishingSubject<TimeRange | undefined>;
-  cleanupTimeRange: () => void;
-  serializeTimeRange: () => SerializedTimeRange;
-  timeRangeApi: PublishesWritableTimeRange;
-  timeRangeComparators: StateComparators<SerializedTimeRange>;
+  serialize: () => SerializedTimeRange;
+  api: PublishesWritableTimeRange;
+  comparators: StateComparators<SerializedTimeRange>;
 } => {
   const timeRange$ = new BehaviorSubject<TimeRange | undefined>(rawState.timeRange);
   function setTimeRange(nextTimeRange: TimeRange | undefined) {
     timeRange$.next(nextTimeRange);
   }
-  const appliedTimeRange$ = new BehaviorSubject(
-    timeRange$.value ?? (parentApi as Partial<PublishesTimeRange>)?.timeRange$?.value
-  );
-
-  const subscriptions = timeRange$.subscribe((timeRange) => {
-    appliedTimeRange$.next(
-      timeRange ?? (parentApi as Partial<PublishesTimeRange>)?.timeRange$?.value
-    );
-  });
-  if (apiPublishesTimeRange(parentApi)) {
-    subscriptions.add(
-      parentApi?.timeRange$.subscribe((parentTimeRange) => {
-        if (timeRange$?.value) {
-          return;
-        }
-        appliedTimeRange$.next(parentTimeRange);
-      })
-    );
-  }
 
   return {
-    appliedTimeRange$,
-    cleanupTimeRange: () => {
-      subscriptions.unsubscribe();
-    },
-    serializeTimeRange: () => ({
+    serialize: () => ({
       timeRange: timeRange$.value,
     }),
-    timeRangeComparators: {
+    comparators: {
       timeRange: [timeRange$, setTimeRange, fastIsEqual],
     } as StateComparators<SerializedTimeRange>,
-    timeRangeApi: {
+    api: {
       timeRange$,
       setTimeRange,
     },

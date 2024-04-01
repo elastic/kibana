@@ -9,8 +9,8 @@
 import { EuiCallOut } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { initializeTimeRange, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useEffect, useState } from 'react';
+import { FetchContext, getFetchContext, initializeTimeRange, subscribeToFetch, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
@@ -23,13 +23,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
       return state.rawState as State;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const {
-        appliedTimeRange$,
-        cleanupTimeRange,
-        serializeTimeRange,
-        timeRangeApi,
-        timeRangeComparators,
-      } = initializeTimeRange(state, parentApi);
+      const timeRange = initializeTimeRange(state);
       const defaultDataView = await services.dataViews.getDefaultDataView();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         defaultDataView ? [defaultDataView] : undefined
@@ -38,66 +32,67 @@ export const getSearchEmbeddableFactory = (services: Services) => {
 
       const api = buildApi(
         {
-          ...timeRangeApi,
+          ...timeRange.api,
           dataViews: dataViews$,
           dataLoading: dataLoading$,
           serializeState: () => {
             return {
               rawState: {
-                ...serializeTimeRange(),
+                ...timeRange.serialize(),
               },
               references: [],
             };
           },
         },
         {
-          ...timeRangeComparators,
+          ...timeRange.comparators,
         }
       );
+
+      let isUnmounted = false;
+      let onFetchCallCount = 0;
+      const error$ = new BehaviorSubject<Error | undefined>(undefined);
+      const count$ = new BehaviorSubject<number>(0);
+      const onFetch = (fetchContext: FetchContext, isCanceled: () => boolean) => {
+        console.log('onFetch', fetchContext);
+        onFetchCallCount++;
+        error$.next(undefined);
+        if (!defaultDataView) {
+          return;
+        }
+        dataLoading$.next(true);
+        getCount(defaultDataView, services.data, fetchContext.filters ?? [], fetchContext.query, fetchContext.timeRange)
+          .then((nextCount: number) => {
+            if (isUnmounted || isCanceled()) {
+              return;
+            }
+            dataLoading$.next(false);
+            count$.next(nextCount);
+          })
+          .catch((err) => {
+            if (isUnmounted || isCanceled()) {
+              return;
+            }
+            dataLoading$.next(false);
+            error$.next(err);
+          });
+      }
+      const unsubscribeFromFetch = subscribeToFetch(api, onFetch);
 
       return {
         api,
         Component: () => {
-          const [count, setCount] = useState<number>(0);
-          const [error, setError] = useState<Error | undefined>();
-          const [filters, query, appliedTimeRange] = useBatchedPublishingSubjects(
-            api.parentApi?.filters$,
-            api.parentApi?.query$,
-            appliedTimeRange$
-          );
+          const count = useStateFromPublishingSubject(count$);
+          const error = useStateFromPublishingSubject(error$);
 
           useEffect(() => {
+            onFetch(getFetchContext(api), () => onFetchCallCount > 1);
+
             return () => {
-              cleanupTimeRange();
+              isUnmounted = true;
+              unsubscribeFromFetch();
             };
           }, []);
-
-          useEffect(() => {
-            let ignore = false;
-            setError(undefined);
-            if (!defaultDataView) {
-              return;
-            }
-            dataLoading$.next(true);
-            getCount(defaultDataView, services.data, filters ?? [], query, appliedTimeRange)
-              .then((nextCount: number) => {
-                if (ignore) {
-                  return;
-                }
-                dataLoading$.next(false);
-                setCount(nextCount);
-              })
-              .catch((err) => {
-                if (ignore) {
-                  return;
-                }
-                dataLoading$.next(false);
-                setError(err);
-              });
-            return () => {
-              ignore = true;
-            };
-          }, [filters, query, appliedTimeRange]);
 
           if (!defaultDataView) {
             return (
