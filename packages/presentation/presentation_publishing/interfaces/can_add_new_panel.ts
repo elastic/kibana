@@ -25,5 +25,5 @@ export interface CanAddNewPanel {
  * A type guard which can be used to determine if a given API has access to a view mode, its own or from its parent.
  */
 export const apiCanAddNewPanel = (api: unknown): api is CanAddNewPanel => {
-  return typeof (api as CanAddNewPanel).addNewPanel === 'function';
+  return typeof (api as CanAddNewPanel)?.addNewPanel === 'function';
 };
