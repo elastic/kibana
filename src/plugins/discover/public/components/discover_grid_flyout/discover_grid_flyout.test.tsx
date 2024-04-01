@@ -243,7 +243,7 @@ describe('Discover flyout', function () {
     const singleDocumentView = findTestSubject(component, 'docTableRowAction');
     expect(singleDocumentView.length).toBeFalsy();
     const flyoutTitle = findTestSubject(component, 'docTableRowDetailsTitle');
-    expect(flyoutTitle.text()).toBe('Row');
+    expect(flyoutTitle.text()).toBe('Result');
   });
 
   describe('with applied customizations', () => {
