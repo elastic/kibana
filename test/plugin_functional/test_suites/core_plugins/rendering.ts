@@ -177,6 +177,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildId (string)',
         'telemetry.labels.ciBuildJobId (string)',
         'telemetry.labels.ciBuildNumber (number)',
+        'telemetry.labels.environment (string)',
         'telemetry.labels.ftrConfig (string)',
         'telemetry.labels.gitRev (string)',
         'telemetry.labels.isPr (boolean)',
@@ -232,6 +233,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.base_url (string)',
         'xpack.cloud.cname (string)',
         'xpack.cloud.deployment_url (string)',
+        'xpack.cloud.deployments_url (string)',
         'xpack.cloud.is_elastic_staff_owned (boolean)',
         'xpack.cloud.trial_end_date (string)',
         'xpack.cloud_integrations.chat.chatURL (string)',
@@ -339,6 +341,18 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability_onboarding.ui.enabled (boolean)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
         'share.new_version.enabled (boolean)',
+        /**
+         * Rule form V2 feature flags
+         */
+        'discover.experimental.ruleFormV2Enabled (boolean)',
+        'xpack.infra.featureFlags.ruleFormV2Enabled (boolean)',
+        'xpack.legacy_uptime.experimental.ruleFormV2Enabled (boolean)',
+        'xpack.ml.experimental.ruleFormV2.enabled (boolean)',
+        'xpack.transform.experimental.ruleFormV2Enabled (boolean)',
+        'xpack.apm.featureFlags.ruleFormV2Enabled (boolean)',
+        'xpack.observability.unsafe.ruleFormV2.enabled (boolean)',
+        'xpack.slo.experimental.ruleFormV2.enabled (boolean)',
+        /**/
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
@@ -390,6 +404,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildId (string)',
         'telemetry.labels.ciBuildJobId (string)',
         'telemetry.labels.ciBuildNumber (number)',
+        'telemetry.labels.environment (string)',
         'telemetry.labels.ftrConfig (string)',
         'telemetry.labels.gitRev (string)',
         'telemetry.labels.isPr (boolean)',

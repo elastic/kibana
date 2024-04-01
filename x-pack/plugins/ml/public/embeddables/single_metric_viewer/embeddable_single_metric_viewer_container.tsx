@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import { EuiResizeObserver } from '@elastic/eui';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { throttle } from 'lodash';
-import { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useToastNotificationService } from '../../application/services/toast_notification_service';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';

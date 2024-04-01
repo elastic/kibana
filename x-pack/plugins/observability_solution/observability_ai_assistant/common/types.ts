@@ -4,19 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { JSONSchema } from 'json-schema-to-ts';
-import type OpenAI from 'openai';
-import type { Observable } from 'rxjs';
-import { ChatCompletionChunkEvent, MessageAddEvent } from './conversation_complete';
-
-export type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
-  choices: Array<
-    Omit<OpenAI.ChatCompletionChunk.Choice, 'message'> & {
-      delta: { content?: string; function_call?: { name?: string; arguments?: string } };
-    }
-  >;
-};
+import type { ObservabilityAIAssistantChatService } from '../public';
+import type { CompatibleJSONSchema, FunctionResponse } from './functions/types';
 
 export enum MessageRole {
   System = 'system',
@@ -53,6 +42,12 @@ export interface Message {
   };
 }
 
+export interface TokenCount {
+  prompt: number;
+  completion: number;
+  total: number;
+}
+
 export interface Conversation {
   '@timestamp': string;
   user: {
@@ -63,6 +58,7 @@ export interface Conversation {
     id: string;
     title: string;
     last_updated: string;
+    token_count?: TokenCount;
   };
   messages: Message[];
   labels: Record<string, string>;
@@ -72,11 +68,13 @@ export interface Conversation {
 }
 
 export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
-  conversation: { title: string };
+  conversation: { title: string; token_count?: TokenCount };
 };
 
 export type ConversationCreateRequest = ConversationRequestBase;
-export type ConversationUpdateRequest = ConversationRequestBase & { conversation: { id: string } };
+export type ConversationUpdateRequest = ConversationRequestBase & {
+  conversation: { id: string };
+};
 
 export interface KnowledgeBaseEntry {
   '@timestamp': string;
@@ -90,42 +88,30 @@ export interface KnowledgeBaseEntry {
   role: KnowledgeBaseEntryRole;
 }
 
-export type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
+export interface ObservabilityAIAssistantScreenContextRequest {
+  screenDescription?: string;
+  data?: Array<{
+    name: string;
+    description: string;
+    value: any;
+  }>;
+  actions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
+}
 
-export interface ContextDefinition {
+export type ScreenContextActionRespondFunction<TArguments extends unknown> = ({}: {
+  args: TArguments;
+  signal: AbortSignal;
+  connectorId: string;
+  client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'>;
+  messages: Message[];
+}) => Promise<FunctionResponse>;
+
+export interface ScreenContextActionDefinition<TArguments = undefined> {
   name: string;
   description: string;
+  parameters?: CompatibleJSONSchema;
+  respond: ScreenContextActionRespondFunction<TArguments>;
 }
-
-export type FunctionResponse =
-  | {
-      content?: any;
-      data?: any;
-    }
-  | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
-
-export enum FunctionVisibility {
-  AssistantOnly = 'assistantOnly',
-  UserOnly = 'userOnly',
-  Internal = 'internal',
-  All = 'all',
-}
-
-export interface FunctionDefinition<
-  TParameters extends CompatibleJSONSchema = CompatibleJSONSchema
-> {
-  name: string;
-  description: string;
-  visibility?: FunctionVisibility;
-  descriptionForUser?: string;
-  parameters: TParameters;
-  contexts: string[];
-}
-
-export type RegisterContextDefinition = (options: ContextDefinition) => void;
-
-export type ContextRegistry = Map<string, ContextDefinition>;
-export type FunctionRegistry = Map<string, FunctionDefinition>;
 
 export interface ObservabilityAIAssistantScreenContext {
   screenDescription?: string;
@@ -134,4 +120,5 @@ export interface ObservabilityAIAssistantScreenContext {
     description: string;
     value: any;
   }>;
+  actions?: ScreenContextActionDefinition[];
 }

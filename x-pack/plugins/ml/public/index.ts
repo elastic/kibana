@@ -9,14 +9,14 @@
 // the ML plugin's page load bundle. You should either just export types or
 // use `getMlSharedImports()` to export static code.
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import {
-  MlPlugin,
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type {
   MlPluginSetup,
   MlPluginStart,
   MlSetupDependencies,
   MlStartDependencies,
 } from './plugin';
+import { MlPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
   MlPluginSetup,

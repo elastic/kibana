@@ -7,343 +7,180 @@
 
 import { useCallback } from 'react';
 
+import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from './translations';
-import { ELASTIC_AI_ASSISTANT, ELASTIC_AI_ASSISTANT_TITLE } from './translations';
 import { getDefaultSystemPrompt } from './helpers';
+import {
+  createConversation as createConversationApi,
+  deleteConversation as deleteConversationApi,
+  getConversationById,
+  updateConversation,
+} from '../api/conversations';
+import { WELCOME_CONVERSATION } from './sample_conversations';
 
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
-  id: i18n.DEFAULT_CONVERSATION_TITLE,
+  id: '',
   messages: [],
-  apiConfig: {},
-  theme: {
-    title: ELASTIC_AI_ASSISTANT_TITLE,
-    titleIcon: 'logoSecurity',
-    assistant: {
-      name: ELASTIC_AI_ASSISTANT,
-      icon: 'logoSecurity',
-    },
-    system: {
-      icon: 'logoElastic',
-    },
-    user: {},
-  },
+  replacements: [],
+  category: 'assistant',
+  title: i18n.DEFAULT_CONVERSATION_TITLE,
 };
 
-interface AppendMessageProps {
-  conversationId: string;
-  message: Message;
-}
-interface AmendMessageProps {
-  conversationId: string;
-  content: string;
-}
-
-interface AppendReplacementsProps {
-  conversationId: string;
-  replacements: Record<string, string>;
-}
-
 interface CreateConversationProps {
-  conversationId: string;
+  cTitle: string;
   messages?: Message[];
 }
 
 interface SetApiConfigProps {
-  conversationId: string;
-  apiConfig: Conversation['apiConfig'];
-}
-
-interface SetConversationProps {
   conversation: Conversation;
+  apiConfig: ApiConfig;
 }
 
 interface UseConversation {
-  appendMessage: ({ conversationId, message }: AppendMessageProps) => Message[];
-  amendMessage: ({ conversationId, content }: AmendMessageProps) => void;
-  appendReplacements: ({
-    conversationId,
-    replacements,
-  }: AppendReplacementsProps) => Record<string, string>;
-  clearConversation: (conversationId: string) => void;
-  createConversation: ({ conversationId, messages }: CreateConversationProps) => Conversation;
+  clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
+  getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
-  removeLastMessage: (conversationId: string) => Message[];
-  setApiConfig: ({ conversationId, apiConfig }: SetApiConfigProps) => void;
-  setConversation: ({ conversation }: SetConversationProps) => void;
+  removeLastMessage: (conversationId: string) => Promise<Message[] | undefined>;
+  setApiConfig: ({
+    conversation,
+    apiConfig,
+  }: SetApiConfigProps) => Promise<Conversation | undefined>;
+  createConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
+  getConversation: (conversationId: string) => Promise<Conversation | undefined>;
 }
 
 export const useConversation = (): UseConversation => {
-  const {
-    allSystemPrompts,
-    assistantTelemetry,
-    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
-    setConversations,
-  } = useAssistantContext();
+  const { allSystemPrompts, http, toasts } = useAssistantContext();
+
+  const getConversation = useCallback(
+    async (conversationId: string) => {
+      return getConversationById({ http, id: conversationId, toasts });
+    },
+    [http, toasts]
+  );
 
   /**
    * Removes the last message of conversation[] for a given conversationId
    */
   const removeLastMessage = useCallback(
-    (conversationId: string) => {
+    async (conversationId: string) => {
       let messages: Message[] = [];
-      setConversations((prev: Record<string, Conversation>) => {
-        const prevConversation: Conversation | undefined = prev[conversationId];
-
-        if (prevConversation != null) {
-          messages = prevConversation.messages.slice(0, prevConversation.messages.length - 1);
-          const newConversation = {
-            ...prevConversation,
-            messages,
-          };
-          return {
-            ...prev,
-            [conversationId]: newConversation,
-          };
-        } else {
-          return prev;
-        }
-      });
+      const prevConversation = await getConversationById({ http, id: conversationId, toasts });
+      if (prevConversation != null) {
+        messages = prevConversation.messages.slice(0, prevConversation.messages.length - 1);
+        await updateConversation({
+          http,
+          conversationId,
+          messages,
+          toasts,
+        });
+      }
       return messages;
     },
-    [setConversations]
-  );
-
-  /**
-   * Updates the last message of conversation[] for a given conversationId with provided content
-   */
-  const amendMessage = useCallback(
-    ({ conversationId, content }: AmendMessageProps) => {
-      setConversations((prev: Record<string, Conversation>) => {
-        const prevConversation: Conversation | undefined = prev[conversationId];
-
-        if (prevConversation != null) {
-          const { messages, ...rest } = prevConversation;
-          const message = messages[messages.length - 1];
-          const updatedMessages = message
-            ? [...messages.slice(0, -1), { ...message, content }]
-            : [...messages];
-          const newConversation = {
-            ...rest,
-            messages: updatedMessages,
-          };
-          return {
-            ...prev,
-            [conversationId]: newConversation,
-          };
-        } else {
-          return prev;
-        }
-      });
-    },
-    [setConversations]
-  );
-
-  /**
-   * Append a message to the conversation[] for a given conversationId
-   */
-  const appendMessage = useCallback(
-    ({ conversationId, message }: AppendMessageProps): Message[] => {
-      assistantTelemetry?.reportAssistantMessageSent({
-        conversationId,
-        role: message.role,
-        isEnabledKnowledgeBase,
-        isEnabledRAGAlerts,
-      });
-      let messages: Message[] = [];
-      setConversations((prev: Record<string, Conversation>) => {
-        const prevConversation: Conversation | undefined = prev[conversationId];
-
-        if (prevConversation != null) {
-          messages = [...prevConversation.messages, message];
-          const newConversation = {
-            ...prevConversation,
-            messages,
-          };
-          return {
-            ...prev,
-            [conversationId]: newConversation,
-          };
-        } else {
-          return prev;
-        }
-      });
-      return messages;
-    },
-    [isEnabledKnowledgeBase, isEnabledRAGAlerts, assistantTelemetry, setConversations]
-  );
-
-  const appendReplacements = useCallback(
-    ({ conversationId, replacements }: AppendReplacementsProps): Record<string, string> => {
-      let allReplacements = replacements;
-
-      setConversations((prev: Record<string, Conversation>) => {
-        const prevConversation: Conversation | undefined = prev[conversationId];
-
-        if (prevConversation != null) {
-          allReplacements = {
-            ...prevConversation.replacements,
-            ...replacements,
-          };
-
-          const newConversation = {
-            ...prevConversation,
-            replacements: allReplacements,
-          };
-
-          return {
-            ...prev,
-            [conversationId]: newConversation,
-          };
-        } else {
-          return prev;
-        }
-      });
-
-      return allReplacements;
-    },
-    [setConversations]
+    [http, toasts]
   );
 
   const clearConversation = useCallback(
-    (conversationId: string) => {
-      setConversations((prev: Record<string, Conversation>) => {
-        const prevConversation: Conversation | undefined = prev[conversationId];
+    async (conversation: Conversation) => {
+      if (conversation.apiConfig) {
         const defaultSystemPromptId = getDefaultSystemPrompt({
           allSystemPrompts,
-          conversation: prevConversation,
+          conversation,
         })?.id;
 
-        if (prevConversation != null) {
-          const newConversation: Conversation = {
-            ...prevConversation,
-            apiConfig: {
-              ...prevConversation.apiConfig,
-              defaultSystemPromptId,
-            },
-            messages: [],
-            replacements: undefined,
-          };
-
-          return {
-            ...prev,
-            [conversationId]: newConversation,
-          };
-        } else {
-          return prev;
-        }
-      });
+        return updateConversation({
+          http,
+          toasts,
+          conversationId: conversation.id,
+          apiConfig: { ...conversation.apiConfig, defaultSystemPromptId },
+          messages: [],
+          replacements: [],
+        });
+      }
     },
-    [allSystemPrompts, setConversations]
+    [allSystemPrompts, http, toasts]
   );
 
   /**
    * Create a new conversation with the given conversationId, and optionally add messages
    */
-  const createConversation = useCallback(
-    ({ conversationId, messages }: CreateConversationProps): Conversation => {
-      const defaultSystemPromptId = getDefaultSystemPrompt({
-        allSystemPrompts,
-        conversation: undefined,
-      })?.id;
-
-      const newConversation: Conversation = {
-        ...DEFAULT_CONVERSATION_STATE,
-        apiConfig: {
-          ...DEFAULT_CONVERSATION_STATE.apiConfig,
-          defaultSystemPromptId,
-        },
-        id: conversationId,
-        messages: messages != null ? messages : [],
-      };
-      setConversations((prev: Record<string, Conversation>) => {
-        const prevConversation: Conversation | undefined = prev[conversationId];
-        if (prevConversation != null) {
-          throw new Error('Conversation already exists!');
-        } else {
-          return {
-            ...prev,
-            [conversationId]: {
-              ...newConversation,
-            },
-          };
-        }
-      });
+  const getDefaultConversation = useCallback(
+    ({ cTitle, messages }: CreateConversationProps): Conversation => {
+      const newConversation: Conversation =
+        cTitle === i18n.WELCOME_CONVERSATION_TITLE
+          ? WELCOME_CONVERSATION
+          : {
+              ...DEFAULT_CONVERSATION_STATE,
+              id: '',
+              title: cTitle,
+              messages: messages != null ? messages : [],
+            };
       return newConversation;
     },
-    [allSystemPrompts, setConversations]
+    []
+  );
+
+  /**
+   * Create a new conversation with the given conversation
+   */
+  const createConversation = useCallback(
+    async (conversation: Conversation): Promise<Conversation | undefined> => {
+      return createConversationApi({ http, conversation, toasts });
+    },
+    [http, toasts]
   );
 
   /**
    * Delete the conversation with the given conversationId
    */
   const deleteConversation = useCallback(
-    (conversationId: string): Conversation | undefined => {
-      let deletedConversation: Conversation | undefined;
-      setConversations((prev: Record<string, Conversation>) => {
-        const { [conversationId]: prevConversation, ...updatedConversations } = prev;
-        deletedConversation = prevConversation;
-        if (prevConversation != null) {
-          return updatedConversations;
-        }
-        return prev;
-      });
-      return deletedConversation;
+    async (conversationId: string): Promise<void> => {
+      await deleteConversationApi({ http, id: conversationId, toasts });
     },
-    [setConversations]
+    [http, toasts]
   );
 
   /**
-   * Update the apiConfig for a given conversationId
+   * Create/Update the apiConfig for a given conversationId
    */
   const setApiConfig = useCallback(
-    ({ conversationId, apiConfig }: SetApiConfigProps): void => {
-      setConversations((prev: Record<string, Conversation>) => {
-        const prevConversation: Conversation | undefined = prev[conversationId];
-
-        if (prevConversation != null) {
-          const updatedConversation = {
-            ...prevConversation,
+    async ({ conversation, apiConfig }: SetApiConfigProps) => {
+      if (conversation.id === '') {
+        return createConversationApi({
+          http,
+          conversation: {
             apiConfig,
-          };
-
-          return {
-            ...prev,
-            [conversationId]: updatedConversation,
-          };
-        } else {
-          return prev;
-        }
-      });
+            category: 'assistant',
+            title: conversation.title,
+            replacements: conversation.replacements,
+            excludeFromLastConversationStorage: conversation.excludeFromLastConversationStorage,
+            isDefault: conversation.isDefault,
+            id: '',
+            messages: conversation.messages ?? [],
+          },
+          toasts,
+        });
+      } else {
+        return updateConversation({
+          http,
+          conversationId: conversation.id,
+          apiConfig,
+          toasts,
+        });
+      }
     },
-    [setConversations]
-  );
-
-  /**
-   * Set/overwrite an existing conversation (behaves as createConversation if not already existing)
-   */
-  const setConversation = useCallback(
-    ({ conversation }: SetConversationProps): void => {
-      setConversations((prev: Record<string, Conversation>) => {
-        return {
-          ...prev,
-          [conversation.id]: conversation,
-        };
-      });
-    },
-    [setConversations]
+    [http, toasts]
   );
 
   return {
-    amendMessage,
-    appendMessage,
-    appendReplacements,
     clearConversation,
-    createConversation,
+    getDefaultConversation,
     deleteConversation,
     removeLastMessage,
     setApiConfig,
-    setConversation,
+    createConversation,
+    getConversation,
   };
 };

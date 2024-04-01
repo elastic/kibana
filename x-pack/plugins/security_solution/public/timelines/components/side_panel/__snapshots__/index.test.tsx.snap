@@ -344,6 +344,11 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
   transition: opacity 250ms ease;
 }
 
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
+}
+
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
@@ -686,6 +691,11 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
   opacity: 0;
   -webkit-transition: opacity 250ms ease;
   transition: opacity 250ms ease;
+}
+
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
 }
 
 .c0:hover .inspectButtonComponent {

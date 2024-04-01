@@ -59,7 +59,7 @@ export function joinByKey(
   const keys = castArray(key);
   // Create a map to quickly query the key of group.
   const map = new Map();
-  return items.reduce<Array<Record<string, any>>>((prev, current) => {
+  items.forEach((current) => {
     // The key of the map is a stable JSON string of the values from given keys.
     // We need stable JSON string to support plain object values.
     const stableKey = stableStringify(keys.map((k) => current[k]));
@@ -72,7 +72,6 @@ export function joinByKey(
     } else {
       map.set(stableKey, { ...current });
     }
-
-    return [...map.values()];
-  }, []);
+  });
+  return [...map.values()];
 }

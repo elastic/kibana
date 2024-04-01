@@ -35,47 +35,34 @@ describe('calculateRiskScores()', () => {
   describe('inputs', () => {
     it('builds a filter on @timestamp based on the provided range', async () => {
       await calculateRiskScores(params);
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: expect.arrayContaining([
-                {
-                  range: { '@timestamp': { gte: 'now - 15d', lt: 'now' } },
-                },
-              ]),
-            },
+
+      expect(
+        (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+      ).toEqual(
+        expect.arrayContaining([
+          {
+            range: { '@timestamp': { gte: 'now - 15d', lt: 'now' } },
           },
-        })
+        ])
       );
     });
 
     it('drops an empty object filter if specified by the caller', async () => {
       params.filter = {};
       await calculateRiskScores(params);
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: expect.not.arrayContaining([{}]),
-            },
-          },
-        })
-      );
+
+      expect(
+        (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+      ).toEqual(expect.not.arrayContaining([{}]));
     });
 
     it('drops an empty array filter if specified by the caller', async () => {
       params.filter = [];
       await calculateRiskScores(params);
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: expect.not.arrayContaining([[]]),
-            },
-          },
-        })
-      );
+
+      expect(
+        (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+      ).toEqual(expect.not.arrayContaining([[]]));
     });
 
     describe('identifierType', () => {

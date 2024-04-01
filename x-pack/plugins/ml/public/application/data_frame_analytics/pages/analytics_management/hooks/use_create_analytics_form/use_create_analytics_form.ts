@@ -14,24 +14,19 @@ import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { DeepReadonly } from '../../../../../../../common/types/common';
+import type { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 
 import { useRefreshAnalyticsList } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
 
-import { ActionDispatchers, ACTION } from './actions';
+import type { ActionDispatchers } from './actions';
+import { ACTION } from './actions';
 import { reducer } from './reducer';
-import {
-  getInitialState,
-  getJobConfigFromFormState,
-  FormMessage,
-  State,
-  SourceIndexMap,
-  getFormStateFromJobConfig,
-} from './state';
+import type { FormMessage, State, SourceIndexMap } from './state';
+import { getInitialState, getJobConfigFromFormState, getFormStateFromJobConfig } from './state';
 
-import { ANALYTICS_STEPS } from '../../../analytics_creation/page';
+import type { ANALYTICS_STEPS } from '../../../analytics_creation/page';
 
 export interface AnalyticsCreationStep {
   number: ANALYTICS_STEPS;

@@ -15,12 +15,6 @@ import { FtrProviderContext } from '../../functional/ftr_provider_context';
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
-// const REPORTING_ROLE = 'reporting_user_role';
-// const REPORTING_USER_PASSWORD = 'reporting_user-password';
-// const REPORTING_USER_USERNAME = 'reporting_user';
-const REPORTING_USER_USERNAME = 'elastic_serverless';
-const REPORTING_USER_PASSWORD = 'changeme';
-
 /**
  * Services to create roles and users for security testing
  */
@@ -30,45 +24,10 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
   const retry = getService('retry');
   const config = getService('config');
 
+  const REPORTING_USER_USERNAME = config.get('servers.kibana.username');
+  const REPORTING_USER_PASSWORD = config.get('servers.kibana.password');
+
   return {
-    /**
-     * Define a role that DOES grant privileges to create certain types of reports.
-     */
-    // async createReportingRole() {
-    //   await security.role.create(REPORTING_ROLE, {
-    //     metadata: {},
-    //     elasticsearch: {
-    //       cluster: [],
-    //       indices: [
-    //         {
-    //           names: ['ecommerce'],
-    //           privileges: ['read', 'view_index_metadata'],
-    //           allow_restricted_indices: false,
-    //         },
-    //       ],
-    //       run_as: [],
-    //     },
-    //     kibana: [
-    //       {
-    //         base: [],
-    //         feature: { discover: ['minimal_read', 'generate_report'] },
-    //         spaces: ['*'],
-    //       },
-    //     ],
-    //   });
-    // },
-
-    // async createReportingUser(
-    //   username = REPORTING_USER_USERNAME,
-    //   password = REPORTING_USER_PASSWORD
-    // ) {
-    //   await security.user.create(username, {
-    //     password,
-    //     roles: [REPORTING_ROLE],
-    //     full_name: 'Reporting User',
-    //   });
-    // },
-
     /**
      * Use the internal API to create any kind of report job
      */
@@ -101,8 +60,8 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
      */
     async waitForJobToFinish(
       downloadReportPath: string,
-      username: string,
-      password: string,
+      username = REPORTING_USER_USERNAME,
+      password = REPORTING_USER_PASSWORD,
       options?: { timeout?: number }
     ) {
       await retry.waitForWithTimeout(
@@ -115,6 +74,10 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
             .responseType('blob')
             .set(...API_HEADER)
             .set(...INTERNAL_HEADER);
+
+          if (response.status === 500) {
+            throw new Error(`Report at path ${downloadReportPath} has failed`);
+          }
 
           if (response.status === 503) {
             log.debug(`Report at path ${downloadReportPath} is pending`);
@@ -136,7 +99,11 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     /*
      * This function is only used in the API tests, funtional tests we have to click the download link in the UI
      */
-    async getCompletedJobOutput(downloadReportPath: string, username: string, password: string) {
+    async getCompletedJobOutput(
+      downloadReportPath: string,
+      username = REPORTING_USER_USERNAME,
+      password = REPORTING_USER_PASSWORD
+    ) {
       const response = await supertest
         .get(`${downloadReportPath}?elasticInternalOrigin=true`)
         .auth(username, password);

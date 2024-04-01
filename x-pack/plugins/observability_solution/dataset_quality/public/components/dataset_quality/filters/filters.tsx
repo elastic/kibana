@@ -14,6 +14,7 @@ import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_fil
 import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
 import { FilterBar } from './filter_bar';
 import { IntegrationsSelector } from './integrations_selector';
+import { NamespacesSelector } from './namespaces_selector';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -25,7 +26,9 @@ export default function Filters() {
     onRefreshChange,
     isLoading,
     integrations,
+    namespaces,
     onIntegrationsChange,
+    onNamespacesChange,
     selectedQuery,
     onQueryChange,
   } = useDatasetQualityFilters();
@@ -49,7 +52,7 @@ export default function Filters() {
   );
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup data-test-subj="datasetQualityFiltersContainer" gutterSize="s">
       <EuiFlexItem>
         <FilterBar query={selectedQuery} onQueryChange={onQueryChange} />
       </EuiFlexItem>
@@ -58,6 +61,13 @@ export default function Filters() {
           isLoading={isLoading}
           integrations={integrations}
           onIntegrationsChange={onIntegrationsChange}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <NamespacesSelector
+          isLoading={isLoading}
+          namespaces={namespaces}
+          onNamespacesChange={onNamespacesChange}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

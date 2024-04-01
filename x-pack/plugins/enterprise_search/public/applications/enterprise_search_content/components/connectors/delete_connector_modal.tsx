@@ -30,14 +30,16 @@ export interface DeleteConnectorModalProps {
   isCrawler: boolean;
 }
 export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCrawler }) => {
-  const { closeDeleteModal, deleteConnector } = useActions(ConnectorsLogic);
+  const { closeDeleteModal, deleteConnector, deleteIndex } = useActions(ConnectorsLogic);
   const {
     deleteModalConnectorId: connectorId,
-    deleteModalConnectorName: connectorName,
+    deleteModalConnectorName,
     deleteModalIndexName,
     isDeleteLoading,
     isDeleteModalVisible,
   } = useValues(ConnectorsLogic);
+
+  const connectorName = isCrawler ? deleteModalIndexName : deleteModalConnectorName;
 
   const [inputConnectorName, setInputConnectorName] = useState('');
   const [shouldDeleteIndex, setShouldDeleteIndex] = useState(false);
@@ -64,10 +66,16 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
         closeDeleteModal();
       }}
       onConfirm={() => {
-        deleteConnector({
-          connectorId,
-          shouldDeleteIndex,
-        });
+        if (isCrawler) {
+          if (deleteModalIndexName) {
+            deleteIndex({ indexName: deleteModalIndexName });
+          }
+        } else {
+          deleteConnector({
+            connectorId,
+            shouldDeleteIndex,
+          });
+        }
       }}
       cancelButtonText={
         isDeleteLoading
@@ -87,7 +95,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
       confirmButtonText={i18n.translate(
         'xpack.enterpriseSearch.content.connectors.deleteModal.confirmButton.title',
         {
-          defaultMessage: 'Delete index',
+          defaultMessage: 'Delete',
         }
       )}
       defaultFocusedButton="confirm"
@@ -96,12 +104,19 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
       isLoading={isDeleteLoading}
     >
       <p>
-        {i18n.translate(
-          'xpack.enterpriseSearch.content.connectors.deleteModal.delete.description',
-          {
-            defaultMessage: 'You are about to delete this connector:',
-          }
-        )}
+        {!isCrawler
+          ? i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.deleteModal.delete.connector.description',
+              {
+                defaultMessage: 'You are about to delete this connector:',
+              }
+            )
+          : i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.deleteModal.delete.crawler.description',
+              {
+                defaultMessage: 'You are about to delete this crawler:',
+              }
+            )}
       </p>
       <p>
         <ul>
@@ -118,21 +133,40 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
         </ul>
       </p>
       <p>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.connectors.deleteModal.syncsWarning.indexNameDescription"
-            defaultMessage="This action cannot be undone. Please type {connectorName} to confirm."
-            values={{
-              connectorName: (
-                <strong>
-                  <EuiTextColor color="danger">{connectorName}</EuiTextColor>
-                </strong>
-              ),
-            }}
-          />
-        </EuiText>
+        {isCrawler && (
+          <>
+            <EuiText>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.deleteConnectorModal.crawler.warning"
+                defaultMessage="Deleting this crawler will also delete its related index with all of its data and its Crawler configuration. Any associated search applications will no longer be able to access any data stored in this index. This action cannot be undone. Please type {connectorName} to confirm."
+                values={{
+                  connectorName: (
+                    <strong>
+                      <EuiTextColor color="danger">{connectorName}</EuiTextColor>
+                    </strong>
+                  ),
+                }}
+              />
+            </EuiText>
+          </>
+        )}
+        {!isCrawler && (
+          <EuiText>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.connectors.deleteModal.syncsWarning.indexNameDescription"
+              defaultMessage="This action cannot be undone. Please type {connectorName} to confirm."
+              values={{
+                connectorName: (
+                  <strong>
+                    <EuiTextColor color="danger">{connectorName}</EuiTextColor>
+                  </strong>
+                ),
+              }}
+            />
+          </EuiText>
+        )}
       </p>
-      {deleteModalIndexName && (
+      {deleteModalIndexName && !isCrawler && (
         <>
           <EuiCheckbox
             id="delete-related-index"
@@ -148,12 +182,21 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
       )}
       <EuiForm>
         <EuiFormRow
-          label={i18n.translate(
-            'xpack.enterpriseSearch.content.connectors.deleteModal.indexNameInput.label',
-            {
-              defaultMessage: 'Connector name',
-            }
-          )}
+          label={
+            !isCrawler
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.content.connectors.deleteModal.connector.indexNameInput.label',
+                  {
+                    defaultMessage: 'Connector name',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.content.connectors.deleteModal.crawler.indexNameInput.label',
+                  {
+                    defaultMessage: 'Crawler name',
+                  }
+                )
+          }
         >
           <EuiFieldText
             onChange={(e) => setInputConnectorName(e.target.value)}

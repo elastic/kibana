@@ -6,15 +6,17 @@
  */
 
 import { pick } from 'lodash';
-import { Observable, Subject } from 'rxjs';
-import { CoreStart } from '@kbn/core/public';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+import type { CoreStart } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { Required } from 'utility-types';
+import type { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import type { IContainer } from '@kbn/embeddable-plugin/public';
+import { Embeddable } from '@kbn/embeddable-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';

@@ -16,7 +16,7 @@ import type {
   ResolveMlCapabilities,
 } from '../../../common/types/capabilities';
 import type { GetGuards } from '../shared_services';
-import { MlLicense } from '../../../common/license';
+import type { MlLicense } from '../../../common/license';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
 import { capabilitiesProvider } from '../../lib/capabilities';
 

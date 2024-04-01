@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
+import type { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -29,10 +29,8 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { isDataFrameAnalyticsConfigs } from '@kbn/ml-data-frame-analytics-utils';
 import type { DashboardService, DashboardItems } from '../../services/dashboard_service';
-import {
-  ToastNotificationService,
-  toastNotificationServiceProvider,
-} from '../../services/toast_notification_service';
+import type { ToastNotificationService } from '../../services/toast_notification_service';
+import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 import type { MlKibanaReactContextValue } from '../../contexts/kibana';
 import { CustomUrlEditor, CustomUrlList } from './custom_url_editor';
 import {

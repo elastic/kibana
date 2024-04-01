@@ -99,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
           'ignoreMissingComponentTemplates',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
 
         expect(Object.keys(indexTemplateFound).sort()).to.eql(expectedKeys);
@@ -119,6 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
           'order',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
           'composedOf',
           'ignoreMissingComponentTemplates',
         ].sort();
@@ -145,6 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
           'dataStream',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
 
         expect(Object.keys(templateWithDSL).sort()).to.eql(expectedWithDSLKeys);
@@ -168,6 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
           'ignoreMissingComponentTemplates',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
 
         expect(Object.keys(templateWithILM).sort()).to.eql(expectedWithILMKeys);
@@ -191,6 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
           'priority',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
         const expectedTemplateKeys = ['aliases', 'mappings', 'settings'].sort();
 
@@ -211,6 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
           'order',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
           'composedOf',
           'ignoreMissingComponentTemplates',
         ].sort();
@@ -360,6 +366,22 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.attributes).an('object');
         // one of the item of the cause array should point to our script
         expect(body.attributes.causes.join(',')).contain('"hello with error');
+      });
+
+      it('should update a deprecated index template', async () => {
+        const templateName = `deprecated_template-${getRandomString()}`;
+        const indexTemplate: TemplateDeserialized = {
+          _kbnMeta: { hasDatastream: false, type: 'default' },
+          name: templateName,
+          indexPatterns: [getRandomString()],
+          template: {},
+          deprecated: true,
+          allowAutoCreate: 'TRUE',
+        };
+
+        await createTemplate(indexTemplate).expect(200);
+
+        await updateTemplate({ ...indexTemplate }, templateName).expect(200);
       });
     });
 

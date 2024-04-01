@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiBetaBadgeProps } from '@elastic/eui';
-import { EuiBetaBadge } from '@elastic/eui';
+import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EXPERIMENTAL_LABEL, EXPERIMENTAL_DESC } from '../../common/translations';
 
@@ -25,11 +25,12 @@ const ExperimentalBadgeComponent: React.FC<Props> = ({ icon = false, size = 's' 
     tooltipPosition: 'bottom' as const,
     'data-test-subj': 'case-experimental-badge',
   };
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiBetaBadge
       css={css`
-        margin-left: 5px;
+        margin-left: ${euiTheme.size.xs};
       `}
       {...props}
     />

@@ -72,6 +72,7 @@ export const HoverActionPopover = ({
           {hoverActions.map((action) => (
             <EuiToolTip content={action.tooltipContent} key={action.id}>
               <EuiButtonIcon
+                data-test-subj="logsExplorerHoverActionPopoverButton"
                 size="xs"
                 iconType={action.iconType}
                 aria-label={action.tooltipContent as string}

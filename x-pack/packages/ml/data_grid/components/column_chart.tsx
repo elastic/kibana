@@ -11,7 +11,8 @@ import { BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elas
 import { mathWithUnits, type UseEuiTheme, type EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { isUnsupportedChartData, ChartData } from '../lib/field_histograms';
+import type { ChartData } from '../lib/field_histograms';
+import { isUnsupportedChartData } from '../lib/field_histograms';
 
 import { useColumnChart } from '../hooks/use_column_chart';
 

@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     hideAnnouncements: true,
   };
 
-  describe('discover URL state', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/176882
+  describe.skip('discover URL state', () => {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');

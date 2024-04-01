@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
-import { Annotation } from '../../../common/types/annotations';
+import type { Annotation } from '../../../common/types/annotations';
 
 /*
   A TypeScript helper type to allow a given component state attribute to be either an annotation or null.

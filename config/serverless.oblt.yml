@@ -7,11 +7,14 @@ xpack.infra.enabled: true
 xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
 
+## Enable the slo plugin
+xpack.slo.enabled: true
+
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
 
 ## Enable the Serverless Observability plugin
-xpack.serverless.observability.enabled: true
+xpack.serverless.observability.enabled: true 
 
 ## Configure plugins
 

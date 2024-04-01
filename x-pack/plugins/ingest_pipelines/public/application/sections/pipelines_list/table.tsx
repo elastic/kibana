@@ -212,6 +212,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
       ],
       box: {
         incremental: true,
+        'data-test-subj': 'pipelineTableSearch',
       },
       filters: [
         {

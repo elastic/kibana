@@ -5,48 +5,23 @@
  * 2.0.
  */
 
-import { ESSearchRequest } from '@kbn/es-types';
-import { lastValueFrom } from 'rxjs';
-
-import { InfraStaticSourceConfiguration } from '../../../../lib/sources';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
-import { GetInfraMetricsRequestBodyPayload } from '../../../../../common/http_api/infra';
-import {
-  FilteredHostsSearchAggregationResponseRT,
-  FilteredHostsSearchAggregationResponse,
-  GetHostsArgs,
-} from '../types';
+import { GetHostsArgs } from '../types';
 import { BUCKET_KEY, MAX_SIZE } from '../constants';
 import { assertQueryStructure } from '../utils';
-import { createFilters, runQuery, systemMetricsFilter } from '../helpers/query';
+import { createFilters } from '../helpers/query';
 
-export const getFilteredHosts = async ({
-  searchClient,
-  sourceConfig,
-  params,
-}: GetHostsArgs): Promise<FilteredHostsSearchAggregationResponse> => {
-  const query = createQuery(params, sourceConfig);
-  return lastValueFrom(
-    runQuery(searchClient, query, decodeOrThrow(FilteredHostsSearchAggregationResponseRT))
-  );
-};
-
-const createQuery = (
-  params: GetInfraMetricsRequestBodyPayload,
-  sourceConfig: InfraStaticSourceConfiguration
-): ESSearchRequest => {
+export const getFilteredHosts = async ({ infraMetricsClient, params }: GetHostsArgs) => {
   assertQueryStructure(params.query);
 
-  return {
+  return infraMetricsClient.search({
     allow_no_indices: true,
     ignore_unavailable: true,
-    index: sourceConfig.metricAlias,
     body: {
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           ...params.query.bool,
-          ...systemMetricsFilter,
           filter: createFilters({ params, extraFilter: params.query }),
         },
       },
@@ -62,5 +37,5 @@ const createQuery = (
         },
       },
     },
-  };
+  });
 };

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState, useCallback } from 'react';
-import {
-  FieldStats,
+import type { FC } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
+import type {
   FieldStatsProps,
   FieldStatsServices,
   FieldStatsState,
   FieldTopValuesBucketParams,
+} from '@kbn/unified-field-list/src/components/field_stats';
+import {
+  FieldStats,
   FieldTopValuesBucket,
 } from '@kbn/unified-field-list/src/components/field_stats';
 import { isDefined } from '@kbn/ml-is-defined';

@@ -7,8 +7,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { appIds } from '@kbn/management-cards-navigation';
-import { appCategories } from '@kbn/management-cards-navigation/src/types';
+import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { of } from 'rxjs';
 import { navigationTree } from './navigation_tree';
 import { createObservabilityDashboardRegistration } from './logs_signal/overview_registration';
@@ -43,6 +42,8 @@ export class ServerlessObservabilityPlugin
       })
     );
 
+    setupDeps.discover.showInlineTopNav({ showLogsExplorerTabs: true });
+
     return {};
   }
 
@@ -50,19 +51,16 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { observabilityShared, serverless, management } = setupDeps;
-    observabilityShared.setIsSidebarEnabled(false);
+    const { serverless, management, security } = setupDeps;
 
     const navigationTree$ = of(navigationTree);
     serverless.setProjectHome('/app/observability/landing');
     serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
 
-    management.setIsSidebarEnabled(false);
-    management.setupCardsNavigation({
-      enabled: true,
-      hideLinksTo: [appIds.RULES],
-      extendCardNavDefinitions: {
-        aiAssistantManagementObservability: {
+    const extendCardNavDefinitions = serverless.getNavigationCards(
+      security.authz.isRoleManagementEnabled(),
+      {
+        observabilityAiAssistantManagement: {
           category: appCategories.OTHER,
           title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
             defaultMessage: 'AI assistant for Observability settings',
@@ -75,8 +73,14 @@ export class ServerlessObservabilityPlugin
           ),
           icon: 'sparkles',
         },
-      },
+      }
+    );
+    management.setupCardsNavigation({
+      enabled: true,
+      hideLinksTo: [appIds.RULES],
+      extendCardNavDefinitions,
     });
+
     return {};
   }
 

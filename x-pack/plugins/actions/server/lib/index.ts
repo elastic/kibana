@@ -37,3 +37,4 @@ export {
 } from './action_execution_source';
 export { validateEmptyStrings } from './validate_empty_strings';
 export { parseDate } from './parse_date';
+export type { RelatedSavedObjects } from './related_saved_objects';

@@ -7,7 +7,8 @@
 
 import React, { useMemo, type FC } from 'react';
 
-import { Stat, StatsBarStat } from './stat';
+import type { StatsBarStat } from './stat';
+import { Stat } from './stat';
 
 interface Stats {
   total: StatsBarStat;

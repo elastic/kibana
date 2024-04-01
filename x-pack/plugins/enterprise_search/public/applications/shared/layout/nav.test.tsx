@@ -57,6 +57,12 @@ const baseNavItems = [
         items: undefined,
         name: 'Web crawlers',
       },
+      {
+        href: '/app/enterprise_search/content/playground',
+        id: 'playground',
+        items: undefined,
+        name: 'Playground',
+      },
     ],
     name: 'Content',
   },

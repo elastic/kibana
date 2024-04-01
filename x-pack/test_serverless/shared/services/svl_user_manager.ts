@@ -11,11 +11,20 @@ import { readRolesFromResource } from '@kbn/es';
 import { resolve } from 'path';
 import { Role } from '@kbn/test/src/auth/types';
 import { isServerlessProjectType } from '@kbn/es/src/utils';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
+
+export interface RoleCredentials {
+  apiKey: { id: string; name: string };
+  apiKeyHeader: { Authorization: string };
+  cookieHeader: { Cookie: string };
+}
 
 export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
+  const svlCommonApi = getService('svlCommonApi');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const isCloud = !!process.env.TEST_CLOUD;
   const kbnServerArgs = config.get('kbnTestServer.serverArgs') as string[];
   const projectType = kbnServerArgs
@@ -71,6 +80,44 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     },
     async getUserData(role: string) {
       return sessionManager.getUserData(role);
+    },
+    async createApiKeyForRole(role: string): Promise<RoleCredentials> {
+      const cookieHeader = await this.getApiCredentialsForRole(role);
+
+      const { body, status } = await supertestWithoutAuth
+        .post('/internal/security/api_key')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(cookieHeader)
+        .send({
+          name: 'myTestApiKey',
+          metadata: {},
+          role_descriptors: {},
+        });
+      expect(status).to.be(200);
+
+      const apiKey = body;
+      const apiKeyHeader = { Authorization: 'ApiKey ' + apiKey.encoded };
+
+      return { apiKey, apiKeyHeader, cookieHeader };
+    },
+    async invalidateApiKeyForRole(roleCredentials: RoleCredentials) {
+      const requestBody = {
+        apiKeys: [
+          {
+            id: roleCredentials.apiKey.id,
+            name: roleCredentials.apiKey.name,
+          },
+        ],
+        isAdmin: true,
+      };
+
+      const { status } = await supertestWithoutAuth
+        .post('/internal/security/api_key/invalidate')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleCredentials.cookieHeader)
+        .send(requestBody);
+
+      expect(status).to.be(200);
     },
     DEFAULT_ROLE,
   };

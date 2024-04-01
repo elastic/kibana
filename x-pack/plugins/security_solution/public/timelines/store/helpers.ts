@@ -130,7 +130,6 @@ export const addTimelineToStore = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      filterManager: timelineById[id].filterManager,
       isLoading: timelineById[id].isLoading,
       initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
@@ -1158,6 +1157,7 @@ export const unPinTimelineEvent = ({
     [id]: {
       ...timeline,
       pinnedEventIds: omit(eventId, timeline.pinnedEventIds),
+      eventIdToNoteIds: omit(eventId, timeline.eventIdToNoteIds),
     },
   };
 };

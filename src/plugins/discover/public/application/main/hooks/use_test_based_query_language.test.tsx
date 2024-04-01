@@ -102,36 +102,25 @@ describe('useTextBasedQueryLanguage', () => {
   test('a text based query should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(true);
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
-        columns: [],
-      });
-    });
-
     replaceUrlState.mockReset();
 
     stateContainer.dataState.data$.documents$.next(msgComplete);
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
-  test('should change viewMode to DOCUMENT_LEVEL if it was AGGREGATED_LEVEL', async () => {
+  test('should change viewMode to undefined (default) if it was AGGREGATED_LEVEL', async () => {
     const { replaceUrlState } = renderHookWithContext(false, {
       viewMode: VIEW_MODE.AGGREGATED_LEVEL,
     });
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      index: 'the-data-view-id',
-      viewMode: VIEW_MODE.DOCUMENT_LEVEL,
-      columns: [],
+      viewMode: undefined,
     });
   });
   test('changing a text based query with different result columns should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -151,18 +140,15 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
         columns: ['field1'],
       });
     });
   });
 
-  test('changing a text based query with same result columns should change state when loading and finished', async () => {
+  test('changing a text based query with same result columns should not change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    replaceUrlState.mockReset();
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
@@ -176,52 +162,16 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { esql: 'from the-data-view-2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
-        columns: [],
-      });
-    });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
 
-  test('changing a text based query with no transformational commands should only change dataview state when loading and finished', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
-    const documents$ = stateContainer.dataState.data$.documents$;
-    stateContainer.dataState.data$.documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    replaceUrlState.mockReset();
-
-    documents$.next({
-      recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.PARTIAL,
-      result: [
-        {
-          id: '1',
-          raw: { field1: 1 },
-          flattened: { field1: 1 },
-        } as unknown as DataTableRecord,
-      ],
-      // non transformational command
-      query: { esql: 'from the-data-view-title | where field1 > 0' },
-    });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
-        columns: [],
-      });
-    });
-  });
   test('only changing a text based query with same result columns should not change columns', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
 
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -237,6 +187,11 @@ describe('useTextBasedQueryLanguage', () => {
       query: { esql: 'from the-data-view-title | keep field1' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        columns: ['field1'],
+      });
+    });
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -252,14 +207,14 @@ describe('useTextBasedQueryLanguage', () => {
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
   test('if its not a text based query coming along, it should be ignored', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -289,7 +244,6 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
         columns: ['field1'],
       });
     });
@@ -298,9 +252,9 @@ describe('useTextBasedQueryLanguage', () => {
   test('it should not overwrite existing state columns on initial fetch', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
       columns: ['field1'],
-      index: 'the-data-view-id',
     });
     const documents$ = stateContainer.dataState.data$.documents$;
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
@@ -314,6 +268,14 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
+
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        columns: ['field1', 'field2'],
+      });
+    });
+    replaceUrlState.mockReset();
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
@@ -336,7 +298,6 @@ describe('useTextBasedQueryLanguage', () => {
   test('it should not overwrite existing state columns on initial fetch and non transformational commands', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
       columns: ['field1'],
-      index: 'the-data-view-id',
     });
     const documents$ = stateContainer.dataState.data$.documents$;
 
@@ -356,9 +317,8 @@ describe('useTextBasedQueryLanguage', () => {
   });
 
   test('it should overwrite existing state columns on transitioning from a query with non transformational commands to a query with transformational', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
-      index: 'the-data-view-id',
-    });
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {});
+
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next({
@@ -395,7 +355,6 @@ describe('useTextBasedQueryLanguage', () => {
   test('it should not overwrite state column when successfully fetching after an error fetch', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
       columns: [],
-      index: 'the-data-view-id',
     });
     const documents$ = stateContainer.dataState.data$.documents$;
 
@@ -468,7 +427,7 @@ describe('useTextBasedQueryLanguage', () => {
     renderHook(() => useTextBasedQueryLanguage(props), { wrapper: getHookContext(stateContainer) });
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -488,7 +447,6 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
         columns: ['field1'],
       });
     });

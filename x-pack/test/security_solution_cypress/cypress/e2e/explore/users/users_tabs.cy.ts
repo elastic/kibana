@@ -33,8 +33,8 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'users');
-    cy.task('esArchiverUnload', 'risk_users');
+    cy.task('esArchiverUnload', { archiveName: 'users' });
+    cy.task('esArchiverUnload', { archiveName: 'risk_users' });
   });
 
   describe('Users page tabs', () => {

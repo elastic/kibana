@@ -102,7 +102,7 @@ export function AlertDetailsAppSection({
         ),
       },
     ]);
-  }, [alert, rule, ruleLink, setAlertSummaryFields]);
+  }, [rule, ruleLink, setAlertSummaryFields]);
 
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">

@@ -171,7 +171,7 @@ export class TelemetryService {
   };
 
   public updateLastReported = async (): Promise<number | undefined> => {
-    return this.http.put(LastReportedRoute);
+    return this.http.put(LastReportedRoute, INTERNAL_VERSION);
   };
 
   /** Fetches an unencrypted telemetry payload, so we can show it to the user **/

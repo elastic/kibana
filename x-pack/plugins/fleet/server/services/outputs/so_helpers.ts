@@ -12,7 +12,7 @@ import type { Output } from '../../../common/types';
 import {
   getSavedObjectTypes,
   OUTPUT_ENCRYPTED_FIELDS,
-  OUTPUT_EXLCUDE_AAD_FIELDS,
+  OUTPUT_INCLUDE_AAD_FIELDS,
 } from '../../saved_objects';
 import type { OutputSOAttributes } from '../../types';
 
@@ -24,7 +24,7 @@ export const _getFieldsToIncludeEncryptedSO = once(() => {
   for (const field of Object.keys(
     getSavedObjectTypes()[OUTPUT_SAVED_OBJECT_TYPE].mappings.properties
   )) {
-    if (!OUTPUT_EXLCUDE_AAD_FIELDS.has(field)) {
+    if (OUTPUT_INCLUDE_AAD_FIELDS.has(field)) {
       res.add(field);
     }
   }

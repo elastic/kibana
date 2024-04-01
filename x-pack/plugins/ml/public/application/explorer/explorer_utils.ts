@@ -26,6 +26,7 @@ import {
 } from '@kbn/ml-anomaly-utils';
 
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
@@ -42,17 +43,16 @@ import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { getUiSettings } from '../util/dependency_cache';
 
+import type { SwimlaneType } from './explorer_constants';
 import {
   MAX_CATEGORY_EXAMPLES,
   MAX_INFLUENCER_FIELD_VALUES,
   SWIMLANE_TYPE,
-  SwimlaneType,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import { MlResultsService } from '../services/results_service';
-import { TimeRangeBounds } from '../util/time_buckets';
-import { Annotations, AnnotationsTable } from '../../../common/types/annotations';
+import type { MlResultsService } from '../services/results_service';
+import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 
 export interface ExplorerJob {
   id: string;

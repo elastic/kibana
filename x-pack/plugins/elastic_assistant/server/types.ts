@@ -10,19 +10,30 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type {
+  CoreRequestHandlerContext,
+  CoreSetup,
   AnalyticsServiceSetup,
   CustomRequestHandlerContext,
+  IRouter,
   KibanaRequest,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { Tool } from 'langchain/dist/tools/base';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { AssistantFeatures } from '@kbn/elastic-assistant-common';
-import { RequestBody } from './lib/langchain/types';
+import {
+  AssistantFeatures,
+  ExecuteConnectorRequestBody,
+  Replacement,
+} from '@kbn/elastic-assistant-common';
+import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
+import { AIAssistantDataClient } from './ai_assistant_data_clients';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -72,19 +83,29 @@ export interface ElasticAssistantPluginStart {
 export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
   ml: MlPluginSetup;
+  taskManager: TaskManagerSetupContract;
+  spaces?: SpacesPluginSetup;
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  spaces?: SpacesPluginStart;
+  security: SecurityPluginStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
+  core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;
+  getServerBasePath: () => string;
+  getSpaceId: () => string;
+  getCurrentUser: () => AuthenticatedUser | null;
+  getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
+  getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
+  getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   telemetry: AnalyticsServiceSetup;
 }
-
 /**
  * @internal
  */
@@ -92,10 +113,75 @@ export type ElasticAssistantRequestHandlerContext = CustomRequestHandlerContext<
   elasticAssistant: ElasticAssistantApiRequestHandlerContext;
 }>;
 
+export type ElasticAssistantPluginRouter = IRouter<ElasticAssistantRequestHandlerContext>;
+
+export type ElasticAssistantPluginCoreSetupDependencies = CoreSetup<
+  ElasticAssistantPluginStartDependencies,
+  ElasticAssistantPluginStart
+>;
+
 export type GetElser = (
   request: KibanaRequest,
   savedObjectsClient: SavedObjectsClientContract
 ) => Promise<string> | never;
+
+export interface InitAssistantResult {
+  assistantResourcesInstalled: boolean;
+  assistantNamespaceResourcesInstalled: boolean;
+  assistantSettingsCreated: boolean;
+  errors: string[];
+}
+
+export interface AssistantResourceNames {
+  componentTemplate: {
+    conversations: string;
+    prompts: string;
+    anonymizationFields: string;
+    kb: string;
+  };
+  indexTemplate: {
+    conversations: string;
+    prompts: string;
+    anonymizationFields: string;
+    kb: string;
+  };
+  aliases: {
+    conversations: string;
+    prompts: string;
+    anonymizationFields: string;
+    kb: string;
+  };
+  indexPatterns: {
+    conversations: string;
+    prompts: string;
+    anonymizationFields: string;
+    kb: string;
+  };
+  pipelines: {
+    kb: string;
+  };
+}
+
+export interface IIndexPatternString {
+  pattern: string;
+  alias: string;
+  name: string;
+  basePattern: string;
+  validPrefixes?: string[];
+  secondaryAlias?: string;
+}
+
+export interface PublicAIAssistantDataClient {
+  getConversationsLimitValue: () => number;
+}
+
+export interface IAIAssistantDataClient {
+  client(): PublicAIAssistantDataClient | null;
+}
+
+export interface AIAssistantPrompts {
+  id: string;
+}
 
 /**
  * Interfaces for registering tools to be used by the elastic assistant
@@ -118,8 +204,8 @@ export interface AssistantToolParams {
   chain: RetrievalQAChain;
   esClient: ElasticsearchClient;
   modelExists: boolean;
-  onNewReplacements?: (newReplacements: Record<string, string>) => void;
-  replacements?: Record<string, string>;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
+  onNewReplacements?: (newReplacements: Replacement[]) => void;
+  replacements?: Replacement[];
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   size?: number;
 }

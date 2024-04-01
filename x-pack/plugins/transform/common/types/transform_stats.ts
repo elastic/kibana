@@ -8,7 +8,7 @@
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { type TransformHealth, type TransformState, TRANSFORM_STATE } from '../constants';
-import { TransformId } from './transform';
+import type { TransformId } from './transform';
 
 export interface TransformHealthIssue {
   type: string;

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Suspense } from 'react';
+import type { FC } from 'react';
+import React, { Suspense } from 'react';
 
 import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 import type { LogRateAnalysisAppStateProps } from './components/log_rate_analysis';
