@@ -1746,10 +1746,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@93.5.1":
-  version "93.5.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.5.1.tgz#e663017052a1461ec0c67e825f1d7c1346f3c3ee"
-  integrity sha512-40zFwuYakCDxzEDnh2ePgUh4KVfmy8p6sXc8FFES07zoboRt82YxQxwmgouqu02TZHaXir1bXSpmEyXe4T7CMg==
+"@elastic/eui@93.5.2":
+  version "93.5.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.5.2.tgz#42bb985a960a7b2d46fe7e25846a476d30900b71"
+  integrity sha512-/1k7k7xYMPj9AM0OTgMilvKI6IdnVOPyQ7YQwE57NKrmBYfj9H91AKQNZ+rXze7QuuuFi73dUMSfbeE9ncqGZA==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.202"
@@ -1767,8 +1767,8 @@
     react-focus-on "^3.9.1"
     react-is "^17.0.2"
     react-remove-scroll-bar "^2.3.4"
-    react-virtualized-auto-sizer "^1.0.20"
-    react-window "^1.8.9"
+    react-virtualized-auto-sizer "^1.0.24"
+    react-window "^1.8.10"
     refractor "^3.6.0"
     rehype-raw "^5.1.0"
     rehype-react "^6.2.1"
@@ -10347,13 +10347,6 @@
   integrity sha512-YRifyCKnBG84+J/Hny0f3bo8BRrcNT74CvsAVpQpZcS83fdC7lP7RfzwL2ND8/ihhpnDFL1IbxJ9MpQNaKUDuQ==
   dependencies:
     "@types/prop-types" "*"
-    "@types/react" "*"
-
-"@types/react-window@^1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@types/react-window/-/react-window-1.8.5.tgz#285fcc5cea703eef78d90f499e1457e9b5c02fc1"
-  integrity sha512-V9q3CvhC9Jk9bWBOysPGaWy/Z0lxYcTXLtLipkt2cnRj1JOSFNF7wqGpkScSXMgBwC+fnVRg/7shwgddBG5ICw==
-  dependencies:
     "@types/react" "*"
 
 "@types/react-window@^1.8.8":
@@ -26173,10 +26166,10 @@ react-use@^15.3.8:
     ts-easing "^0.2.0"
     tslib "^2.0.0"
 
-react-virtualized-auto-sizer@^1.0.20:
-  version "1.0.20"
-  resolved "https://registry.yarnpkg.com/react-virtualized-auto-sizer/-/react-virtualized-auto-sizer-1.0.20.tgz#d9a907253a7c221c52fa57dc775a6ef40c182645"
-  integrity sha512-OdIyHwj4S4wyhbKHOKM1wLSj/UDXm839Z3Cvfg2a9j+He6yDa6i5p0qQvEiCnyQlGO/HyfSnigQwuxvYalaAXA==
+react-virtualized-auto-sizer@^1.0.24:
+  version "1.0.24"
+  resolved "https://registry.yarnpkg.com/react-virtualized-auto-sizer/-/react-virtualized-auto-sizer-1.0.24.tgz#3ebdc92f4b05ad65693b3cc8e7d8dd54924c0227"
+  integrity sha512-3kCn7N9NEb3FlvJrSHWGQ4iVl+ydQObq2fHMn12i5wbtm74zHOPhz/i64OL3c1S1vi9i2GXtZqNqUJTQ+BnNfg==
 
 react-virtualized@^9.22.5:
   version "9.22.5"
@@ -26190,10 +26183,10 @@ react-virtualized@^9.22.5:
     prop-types "^15.7.2"
     react-lifecycles-compat "^3.0.4"
 
-react-window@^1.8.9:
-  version "1.8.9"
-  resolved "https://registry.yarnpkg.com/react-window/-/react-window-1.8.9.tgz#24bc346be73d0468cdf91998aac94e32bc7fa6a8"
-  integrity sha512-+Eqx/fj1Aa5WnhRfj9dJg4VYATGwIUP2ItwItiJ6zboKWA6EX3lYDAXfGF2hyNqplEprhbtjbipiADEcwQ823Q==
+react-window@^1.8.10:
+  version "1.8.10"
+  resolved "https://registry.yarnpkg.com/react-window/-/react-window-1.8.10.tgz#9e6b08548316814b443f7002b1cf8fd3a1bdde03"
+  integrity sha512-Y0Cx+dnU6NLa5/EvoHukUD0BklJ8qITCtVEPY1C/nL8wwoZ0b5aEw8Ff1dOVHw7fCzMt55XfJDd8S8W8LCaUCg==
   dependencies:
     "@babel/runtime" "^7.0.0"
     memoize-one ">=3.1.1 <6"
