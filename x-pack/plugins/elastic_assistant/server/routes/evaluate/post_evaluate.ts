@@ -29,7 +29,7 @@ import {
   indexEvaluations,
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
-import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
+import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer } from './utils';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
 /**
@@ -151,7 +151,7 @@ export const postEvaluateRoute = (
               subAction: 'invokeAI',
               // does not matter in conjunction with invokeAI
               // TODO is that true ^^
-              llmType: 'openai',
+              actionTypeId: '.gen-ai',
               replacements: [],
               size: DEFAULT_SIZE,
               isEnabledKnowledgeBase: true,
@@ -167,7 +167,6 @@ export const postEvaluateRoute = (
           connectorIds.forEach((connectorId) => {
             agentNames.forEach((agentName) => {
               logger.info(`Creating agent: ${connectorId} + ${agentName}`);
-              const llmType = getLlmType(connectorId, connectors);
               const connectorName =
                 getConnectorName(connectorId, connectors) ?? '[unknown connector]';
               const detailedRunName = `${runName} - ${connectorName} + ${agentName}`;
@@ -182,7 +181,7 @@ export const postEvaluateRoute = (
                     elserId,
                     isStream: false,
                     langChainMessages,
-                    llmType,
+                    llmType: 'openai',
                     logger,
                     request: skeletonRequest,
                     kbResource: ESQL_RESOURCE,

@@ -9,38 +9,8 @@ import type { Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { findDocuments } from './find';
 import { SearchEsConversationSchema } from './conversations/types';
-
-export const findDocumentsResponseMock = (): ConversationResponse => ({
-  createdAt: '2020-04-20T15:25:31.830Z',
-  title: 'title-1',
-  updatedAt: '2020-04-20T15:25:31.830Z',
-  messages: [],
-  id: '1',
-  namespace: 'default',
-  isDefault: true,
-  excludeFromLastConversationStorage: false,
-  timestamp: '2020-04-20T15:25:31.830Z',
-  apiConfig: {
-    connectorId: 'c1',
-    defaultSystemPromptId: 'prompt-1',
-    model: 'test',
-    provider: 'Azure OpenAI',
-  },
-  summary: {
-    content: 'test',
-  },
-  category: 'assistant',
-  users: [
-    {
-      id: '1111',
-      name: 'elastic',
-    },
-  ],
-  replacements: undefined,
-});
 
 export const getSearchConversationMock =
   (): estypes.SearchResponse<SearchEsConversationSchema> => ({
@@ -68,6 +38,7 @@ export const getSearchConversationMock =
             is_default: true,
             exclude_from_last_conversation_storage: false,
             api_config: {
+              action_type_id: '.gen-ai',
               connector_id: 'c1',
               default_system_prompt_id: 'prompt-1',
               model: 'test',

@@ -18,7 +18,6 @@ import { AgentExecutor } from '../executors/types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
-
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**

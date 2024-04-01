@@ -21,6 +21,7 @@ export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => (
   title: 'test',
   apiConfig: {
     connectorId: '1',
+    actionTypeId: '.gen-ai',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',
@@ -42,6 +43,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   id: 'test',
   title: 'test',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: '1',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
@@ -161,6 +163,7 @@ describe('transformToUpdateScheme', () => {
       id: conversation.id,
       title: 'test',
       api_config: {
+        action_type_id: '.gen-ai',
         connector_id: '1',
         default_system_prompt_id: 'default-system-prompt',
         model: 'test-model',
