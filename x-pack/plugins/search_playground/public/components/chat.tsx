@@ -59,6 +59,7 @@ export const Chat = () => {
   const { messages, append, stop: stopRequest, setMessages, reload } = useChat();
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
   const messagesRef = useAutoBottomScroll([showStartPage]);
+  const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
 
   const onSubmit = async (data: ChatForm) => {
     await append(
@@ -82,11 +83,15 @@ export const Chat = () => {
     [messages]
   );
 
-  const regenerateMessages = () => {
+  const regenerateMessages = async () => {
+    setIsRegenerating(true);
+
     const formData = getValues();
-    reload({
+    await reload({
       data: buildFormData(formData),
     });
+
+    setIsRegenerating(false);
   };
 
   if (showStartPage) {
@@ -171,9 +176,9 @@ export const Chat = () => {
                   <QuestionInput
                     value={field.value}
                     onChange={field.onChange}
-                    isDisabled={isSubmitting}
+                    isDisabled={isSubmitting || isRegenerating}
                     button={
-                      isSubmitting ? (
+                      isSubmitting || isRegenerating ? (
                         <EuiButtonIcon
                           aria-label={i18n.translate(
                             'xpack.searchPlayground.chat.stopButtonAriaLabel',
