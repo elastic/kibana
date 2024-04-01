@@ -6,10 +6,15 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../helpers/test_helper';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab';
+import {
+  aiAssistantDefaultConnector,
+  aiAssistantLogsIndexPattern,
+  aiAssistantResponseLanguage,
+} from '@kbn/observability-ai-assistant-plugin/server';
 
 jest.mock('../../../hooks/use_app_context');
 
@@ -69,21 +74,56 @@ describe('SettingsTab', () => {
     });
   });
 
-  it('should allow selection of a configured Observability AI Assistant connector', () => {
-    const { getByTestId } = render(<SettingsTab />);
+  describe('allows updating the AI Assistant settings', () => {
+    const windowLocationReloadMock = jest.fn();
+    const windowLocationOriginal = window.location;
 
-    fireEvent.change(
-      getByTestId('management-settings-editField-observability:aiAssistantDefaultConnector'),
-      {
-        target: { value: 'bedrock' },
-      }
-    );
+    beforeEach(async () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          reload: windowLocationReloadMock,
+        },
+        writable: true,
+      });
 
-    fireEvent.click(getByTestId('apmBottomBarActionsButton'));
+      const { getByTestId, container } = render(<SettingsTab />);
 
-    expect(settingsClientSet).toBeCalledWith(
-      'observability:aiAssistantDefaultConnector',
-      'bedrock'
-    );
+      await waitFor(() => expect(container.querySelector('.euiLoadingSpinner')).toBeNull());
+
+      fireEvent.change(
+        getByTestId(`management-settings-editField-${aiAssistantDefaultConnector}`),
+        {
+          target: { value: 'bedrock' },
+        }
+      );
+
+      fireEvent.input(getByTestId(`management-settings-editField-${aiAssistantLogsIndexPattern}`), {
+        target: { value: 'observability-ai-assistant-*' },
+      });
+
+      fireEvent.change(
+        getByTestId(`management-settings-editField-${aiAssistantResponseLanguage}`),
+        {
+          target: { value: 'da' },
+        }
+      );
+
+      fireEvent.click(getByTestId('apmBottomBarActionsButton'));
+
+      await waitFor(() => expect(windowLocationReloadMock).toHaveBeenCalledTimes(1));
+    });
+
+    afterEach(() => {
+      window.location = windowLocationOriginal;
+    });
+
+    it('calls the settings client with correct args', async () => {
+      expect(settingsClientSet).toBeCalledWith(aiAssistantDefaultConnector, 'bedrock');
+      expect(settingsClientSet).toBeCalledWith(
+        aiAssistantLogsIndexPattern,
+        'observability-ai-assistant-*'
+      );
+      expect(settingsClientSet).toBeCalledWith(aiAssistantResponseLanguage, 'da');
+    });
   });
 });
