@@ -475,7 +475,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     describe('system actions', () => {
       const systemAction = {
         id: 'system-connector-test.system-action',
-        actionTypeId: 'test.system-action',
         params: {},
       };
 

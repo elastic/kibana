@@ -704,8 +704,6 @@ function getAlwaysFiringRuleWithSystemAction(reference: string) {
     actions: [
       {
         id: 'system-connector-test.system-action-connector-adapter',
-        actionTypeId: 'test.system-action-connector-adapter',
-        uuid: '123',
         /**
          * The injected param required by the action will be set by the corresponding
          * connector adapter. Setting it here it will lead to a 400 error by the

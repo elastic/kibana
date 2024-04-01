@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -525,5 +525,66 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         });
       });
     }
+
+    describe('References', () => {
+      const systemAction = {
+        id: 'system-connector-test.system-action',
+        params: {},
+      };
+
+      it('calculates the references correctly', async () => {
+        const { user, space } = SuperuserAtSpace1;
+
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            name: 'My action',
+            connector_type_id: 'test.index-record',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
+            secrets: {
+              encrypted: 'This value should be encrypted',
+            },
+          })
+          .expect(200);
+
+        objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+
+        const ruleRes = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                systemAction,
+                {
+                  id: createdAction.id,
+                  group: 'default',
+                  params: {},
+                },
+              ],
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(space.id, ruleRes.body.id, 'rule', 'alerting');
+
+        const response = await supertestWithoutAuth
+          .get(`${getUrlPrefix(space.id)}/internal/actions/connectors`)
+          .auth(user.username, user.password)
+          .expect(200);
+
+        const connectors = response.body as Array<{ id: string; referenced_by_count: number }>;
+
+        const createdConnector = connectors.find((connector) => connector.id === createdAction.id);
+        const systemConnector = connectors.find((connector) => connector.id === systemAction.id);
+
+        expect(createdConnector?.referenced_by_count).to.be(1);
+        expect(systemConnector?.referenced_by_count).to.be(0);
+      });
+    });
   });
 }

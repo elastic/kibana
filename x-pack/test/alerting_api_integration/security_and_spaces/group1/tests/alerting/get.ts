@@ -345,7 +345,6 @@ const getTestUtils = (
               },
               {
                 id: 'system-connector-test.system-action',
-                actionTypeId: 'test.system-action',
                 params: {},
               },
             ],

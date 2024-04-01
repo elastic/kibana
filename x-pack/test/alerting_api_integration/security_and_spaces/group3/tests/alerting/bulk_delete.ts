@@ -703,7 +703,6 @@ export default ({ getService }: FtrProviderContext) => {
                 },
                 {
                   id: 'system-connector-test.system-action',
-                  actionTypeId: 'test.system-action',
                   params: {},
                 },
               ],
