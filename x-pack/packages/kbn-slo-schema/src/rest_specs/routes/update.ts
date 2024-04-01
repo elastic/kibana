@@ -11,10 +11,10 @@ import {
   budgetingMethodSchema,
   objectiveSchema,
   optionalSettingsSchema,
+  sloDefinitionSchema,
   sloIdSchema,
   tagsSchema,
 } from '../../schema/slo';
-import { sloResponseSchema } from '../slo';
 
 const updateSLOParamsSchema = t.type({
   path: t.type({
@@ -33,7 +33,7 @@ const updateSLOParamsSchema = t.type({
   }),
 });
 
-const updateSLOResponseSchema = sloResponseSchema;
+const updateSLOResponseSchema = sloDefinitionSchema;
 
 type UpdateSLOInput = t.OutputOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;

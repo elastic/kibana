@@ -17,7 +17,7 @@ import {
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
-import { SLO } from '../domain/models';
+import { SLO, SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
@@ -179,7 +179,7 @@ export class UpdateSLO {
     });
   }
 
-  private toResponse(slo: SLO): UpdateSLOResponse {
+  private toResponse(slo: SLODefinition): UpdateSLOResponse {
     return updateSLOResponseSchema.encode(slo);
   }
 }

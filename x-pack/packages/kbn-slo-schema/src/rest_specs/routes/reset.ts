@@ -5,14 +5,13 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { sloIdSchema } from '../../schema/slo';
-import { sloResponseSchema } from '../slo';
+import { sloDefinitionSchema, sloIdSchema } from '../../schema/slo';
 
 const resetSLOParamsSchema = t.type({
   path: t.type({ id: sloIdSchema }),
 });
 
-const resetSLOResponseSchema = sloResponseSchema;
+const resetSLOResponseSchema = sloDefinitionSchema;
 
 type ResetSLOParams = t.TypeOf<typeof resetSLOParamsSchema.props.path>;
 type ResetSLOResponse = t.OutputOf<typeof resetSLOResponseSchema>;

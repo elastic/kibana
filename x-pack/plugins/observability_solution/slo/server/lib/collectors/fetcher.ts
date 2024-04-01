@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
-import { StoredSLO } from '../../domain/models';
+import { StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { Usage } from './type';
 
 export const fetcher = async (context: CollectorFetchContext) => {
-  const finder = context.soClient.createPointInTimeFinder<StoredSLO>({
+  const finder = context.soClient.createPointInTimeFinder<StoredSLODefinition>({
     type: SO_SLO_TYPE,
     perPage: 100,
   });

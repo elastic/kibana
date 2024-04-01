@@ -8,9 +8,9 @@
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { sloSchema } from '@kbn/slo-schema';
+import { sloDefinitionSchema, sloSchema } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
-import { SLO, StoredSLO } from '../domain/models';
+import { SLO, StoredSLODefinition } from '../domain/models';
 import { SLOIdConflict, SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 import { aStoredSLO, createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
@@ -23,7 +23,7 @@ const INVALID_SLO_ID = 'invalid-slo-id';
 function soFindResponse(
   sloList: SLO[],
   includeInvalidStoredSLO: boolean = false
-): SavedObjectsFindResponse<StoredSLO> {
+): SavedObjectsFindResponse<StoredSLODefinition> {
   return {
     page: 1,
     per_page: 25,
@@ -32,7 +32,7 @@ function soFindResponse(
     saved_objects: [
       ...sloList.map((slo) => ({
         id: slo.id,
-        attributes: sloSchema.encode(slo),
+        attributes: sloDefinitionSchema.encode(slo),
         type: SO_SLO_TYPE,
         references: [],
         score: 1,

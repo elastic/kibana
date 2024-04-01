@@ -10,7 +10,7 @@ import {
   ALL_VALUE,
   CreateSLOParams,
   HistogramIndicator,
-  sloSchema,
+  sloDefinitionSchema,
   SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
@@ -26,7 +26,7 @@ import {
   KQLCustomIndicator,
   MetricCustomIndicator,
   SLO,
-  StoredSLO,
+  StoredSLODefinition,
 } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { twoMinute } from './duration';
@@ -188,10 +188,10 @@ export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSL
   ...params,
 });
 
-export const aStoredSLO = (slo: SLO): SavedObject<StoredSLO> => {
+export const aStoredSLO = (slo: SLO): SavedObject<StoredSLODefinition> => {
   return {
     id: slo.id,
-    attributes: sloSchema.encode(slo),
+    attributes: sloDefinitionSchema.encode(slo),
     type: SO_SLO_TYPE,
     references: [],
   };

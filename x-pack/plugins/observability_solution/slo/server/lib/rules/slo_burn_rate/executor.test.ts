@@ -27,7 +27,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { getRuleExecutor } from './executor';
 import { createSLO } from '../../../services/fixtures/slo';
-import { SLO, StoredSLO } from '../../../domain/models';
+import { SLO, StoredSLODefinition } from '../../../domain/models';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
@@ -82,7 +82,7 @@ const commonEsResponse = {
   },
 };
 
-function createFindResponse(sloList: SLO[]): SavedObjectsFindResponse<StoredSLO> {
+function createFindResponse(sloList: SLO[]): SavedObjectsFindResponse<StoredSLODefinition> {
   return {
     page: 1,
     per_page: 25,

@@ -17,7 +17,7 @@ import {
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
-import { Duration, DurationUnit, SLO } from '../domain/models';
+import { Duration, DurationUnit, SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
@@ -114,7 +114,7 @@ export class CreateSLO {
     };
   }
 
-  private toSLO(params: CreateSLOParams): SLO {
+  private toSLO(params: CreateSLOParams): SLODefinition {
     const now = new Date();
     return {
       ...params,
@@ -133,7 +133,7 @@ export class CreateSLO {
     };
   }
 
-  private toResponse(slo: SLO): CreateSLOResponse {
+  private toResponse(slo: SLODefinition): CreateSLOResponse {
     return {
       id: slo.id,
     };
