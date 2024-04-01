@@ -34,5 +34,5 @@ export function toExpression(input: SavedLensInput, palettes?: PaletteRegistry):
     );
   }
 
-  return expressionParts.join(' ');
+  return `${expressionParts.join(' ')} | render`;
 }

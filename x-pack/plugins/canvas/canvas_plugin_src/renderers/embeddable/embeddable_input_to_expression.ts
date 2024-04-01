@@ -22,11 +22,11 @@ export const inputToExpressionTypeMap = {
   Take the input from an embeddable and the type of embeddable and convert it into an expression
 */
 export function embeddableInputToExpression(
-  input: EmbeddableInput,
+  input: Omit<EmbeddableInput, 'id'>,
   embeddableType: string,
   palettes?: PaletteRegistry,
   useGenericEmbeddable?: boolean
-): string | undefined {
+): string {
   if (useGenericEmbeddable) {
     return genericToExpression(input, embeddableType);
   }

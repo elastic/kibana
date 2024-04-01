@@ -23,6 +23,7 @@ import {
   fetchEmbeddableRenderable,
 } from '../../../state/actions/embeddable';
 import { clearValue } from '../../../state/actions/resolved_args';
+import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 
 const { actionsElements: strings } = ErrorStrings;
 
@@ -100,9 +101,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         // select new embeddable element
         dispatch(selectToplevelNodes([embeddableId]));
       } else {
-        const expression = `embeddable config="${encode(incomingInput)}"
-  type="${type}"
-| render`;
+        const expression = embeddableInputToExpression(incomingInput, type);
         dispatch(addElement(selectedPage.id, { expression }));
       }
     }
