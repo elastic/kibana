@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EventCountOptions, EventsOptions, EventDoc } from './types';
 import { getQueryFilter } from '../../utils/get_query_filter';
@@ -49,25 +51,64 @@ export const getEventList = async ({
     fields: indexFields,
   });
 
-  const { searchResult } = await singleSearchAfter({
-    searchAfterSortIds: searchAfter,
-    index,
-    from: tuple.from.toISOString(),
-    to: tuple.to.toISOString(),
-    services,
-    ruleExecutionLogger,
-    pageSize: calculatedPerPage,
-    filter: queryFilter,
-    primaryTimestamp,
-    secondaryTimestamp,
-    sortOrder,
-    trackTotalHits: false,
-    runtimeMappings,
-    overrideBody: eventListConfig,
-  });
+  try {
+    const { searchResult } = await singleSearchAfter({
+      searchAfterSortIds: searchAfter,
+      index,
+      from: tuple.from.toISOString(),
+      to: tuple.to.toISOString(),
+      services,
+      ruleExecutionLogger,
+      pageSize: calculatedPerPage,
+      filter: queryFilter,
+      primaryTimestamp,
+      secondaryTimestamp,
+      sortOrder,
+      trackTotalHits: false,
+      runtimeMappings,
+      overrideBody: eventListConfig,
+    });
 
-  ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);
-  return searchResult;
+    ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);
+    return searchResult;
+  } catch (exc) {
+    // console.error('WE CAUGHT THE SEARCH AFTER ERROR event count', exc);
+    // if (exc.message.includes('failed to create query: maxClauseCount is set to')) {
+    //   console.error('THE MESSAGE IS MAX CLAUSE, RERUNNING GET EVENT COUNT');
+    //   const regex = /[0-9]/g;
+    //   const found = exc.message?.match(regex);
+
+    //   if (!isEmpty(found) && found != null) {
+    //     const maxClauseValue = parseInt(found.join(''), 10);
+
+    //     const { searchResult } = await singleSearchAfter({
+    //       searchAfterSortIds: searchAfter,
+    //       index,
+    //       from: tuple.from.toISOString(),
+    //       to: tuple.to.toISOString(),
+    //       services,
+    //       ruleExecutionLogger,
+    //       pageSize: maxClauseValue - 1,
+    //       filter: queryFilter,
+    //       primaryTimestamp,
+    //       secondaryTimestamp,
+    //       sortOrder,
+    //       trackTotalHits: false,
+    //       runtimeMappings,
+    //       overrideBody: eventListConfig,
+    //     });
+
+    //     ruleExecutionLogger.debug(
+    //       `Retrieved events items of size: ${searchResult.hits.hits.length}`
+    //     );
+    //     return searchResult;
+    //   }
+    // } else {
+    //   throw exc;
+    // }
+
+    throw exc;
+  }
 };
 
 export const getEventCount = async ({

@@ -115,7 +115,9 @@ export const searchAfterAndBulkCreateFactory = async ({
               }),
               createSearchAfterReturnType({
                 searchAfterTimes: [searchDuration],
-                errors: searchErrors,
+                errors: searchErrors.filter((err) =>
+                  err.includes('failed to create query: maxClauseCount is set to')
+                ),
               }),
             ]);
 
@@ -149,7 +151,16 @@ export const searchAfterAndBulkCreateFactory = async ({
               hasSortId = false;
             }
           } catch (exc) {
-            console.error('SINGLE SEARCH FAILED', exc);
+            console.error('WE CAUGHT THE SEARCH AFTER ERROR factory', exc);
+            // if (exc.message.includes('failed to create query: maxClauseCount is set to')) {
+            //   console.error('THE MESSAGE IS MAX CLAUSE, RERUNNING GET EVENT COUNT');
+            //   const regex = /[0-9]/g;
+            //   const found = exc.message?.match(regex);
+
+            //   // do nothing since we will re-run the query
+            // } else {
+            //   throw exc;
+            // }
             throw exc;
           }
         }

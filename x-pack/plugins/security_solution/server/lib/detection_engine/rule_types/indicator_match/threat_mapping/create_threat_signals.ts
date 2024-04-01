@@ -209,8 +209,17 @@ export const createThreatSignals = async ({
 
         console.error('WE FOUND THE ERROR IN THREAT SIGNALS', maxClauseCountValue);
         chunkPage = maxClauseCountValue - 1;
+        results = combineConcurrentResults(
+          results,
+          searchesPerformed.filter((search) =>
+            search.errors.some(
+              (err) => !err.includes('failed to create query: maxClauseCount is set to')
+            )
+          )
+        );
+      } else {
+        results = combineConcurrentResults(results, searchesPerformed);
       }
-      results = combineConcurrentResults(results, searchesPerformed);
       documentCount -= list.hits.hits.length;
       ruleExecutionLogger.debug(
         `Concurrent indicator match searches completed with ${results.createdSignalsCount} signals found`,

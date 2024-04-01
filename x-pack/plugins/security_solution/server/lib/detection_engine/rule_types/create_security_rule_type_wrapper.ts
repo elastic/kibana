@@ -426,6 +426,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   },
                 });
 
+                console.error('RESULT.ERRORS', JSON.stringify(result.errors, null, 2));
+                console.error('runResult.ERRORS', JSON.stringify(runResult.errors, null, 2));
+
                 const createdSignals = result.createdSignals.concat(runResult.createdSignals);
                 const warningMessages = result.warningMessages.concat(runResult.warningMessages);
                 result = {
