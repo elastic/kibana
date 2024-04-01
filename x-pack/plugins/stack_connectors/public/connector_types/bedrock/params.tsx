@@ -13,9 +13,9 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as i18n from './translations';
 import { DEFAULT_BODY } from './constants';
-import { SUB_ACTION } from '../../../common/bedrock/constants';
+import * as i18n from './translations';
+import { DEFAULT_BEDROCK_MODEL, SUB_ACTION } from '../../../common/bedrock/constants';
 import { BedrockActionParams } from './types';
 
 const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActionParams>> = ({
@@ -40,7 +40,13 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
 
   useEffect(() => {
     if (!subActionParams) {
-      editAction('subActionParams', { body: DEFAULT_BODY }, index);
+      editAction(
+        'subActionParams',
+        {
+          body: DEFAULT_BODY,
+        },
+        index
+      );
     }
   }, [editAction, index, subActionParams]);
 
@@ -70,7 +76,8 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
         ariaLabel={i18n.BODY_DESCRIPTION}
         errors={errors.body as string[]}
         onDocumentsChange={(json: string) => {
-          editSubActionParams({ body: json });
+          // trim to prevent sending extra space at the end of JSON, which causes a timeout error in Bedrock
+          editSubActionParams({ body: json.trim() });
         }}
         onBlur={() => {
           if (!body) {
@@ -102,7 +109,7 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
       >
         <EuiFieldText
           data-test-subj="bedrock-model"
-          placeholder={'anthropic.claude-v2:1'}
+          placeholder={DEFAULT_BEDROCK_MODEL}
           value={model}
           onChange={(ev) => {
             editSubActionParams({ model: ev.target.value });
