@@ -278,6 +278,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // delete drilldown
           await PageObjects.dashboard.switchToEditMode();
           await dashboardPanelActions.openContextMenu();
+          await dashboardPanelActions.clickContextMenuMoreItem();
           await dashboardDrilldownPanelActions.expectExistsManageDrilldownsAction();
           await dashboardDrilldownPanelActions.clickManageDrilldowns();
           await dashboardDrilldownsManage.expectsManageDrilldownsFlyoutOpen();
