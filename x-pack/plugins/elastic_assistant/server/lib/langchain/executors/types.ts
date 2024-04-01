@@ -12,7 +12,7 @@ import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { LangChainTracer } from 'langchain/callbacks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { ExecuteConnectorRequestBody, Replacement } from '@kbn/elastic-assistant-common';
+import { ExecuteConnectorRequestBody, Replacements } from '@kbn/elastic-assistant-common';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 
@@ -29,8 +29,8 @@ export interface AgentExecutorParams {
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
-  onNewReplacements?: (newReplacements: Replacement[]) => void;
-  replacements: Replacement[];
+  onNewReplacements?: (newReplacements: Replacements) => void;
+  replacements: Replacements;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   size?: number;
   elserId?: string;
