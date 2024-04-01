@@ -32,6 +32,7 @@ import {
   EuiModalBody,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useMeasure } from 'react-use';
 
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
@@ -160,6 +161,10 @@ const AssistantComponent: React.FC<Props> = ({
       return updatedConv.data;
     }
   }, [refetch]);
+
+  let [flyoutCommentsRef, { height }] = useMeasure<HTMLDivElement>();
+
+  console.error('flyoutCommentsRef', flyoutCommentsRef, height);
 
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
@@ -305,7 +310,11 @@ const AssistantComponent: React.FC<Props> = ({
     }
     // when scrollHeight changes, parent is scrolled to bottom
     parent.scrollTop = parent.scrollHeight;
-  });
+  }, [
+    isFlyoutMode,
+    commentsContainerRef.current?.parentElement?.scrollHeight,
+    commentsContainerRef.current?.parentElement?.parentElement?.scrollHeight,
+  ]);
 
   const getWrapper = (children: React.ReactNode, isCommentContainer: boolean) =>
     isCommentContainer ? <span ref={commentsContainerRef}>{children}</span> : <>{children}</>;
@@ -601,7 +610,7 @@ const AssistantComponent: React.FC<Props> = ({
             `}
           >
             <ConversationSidePanel
-              selectedConversationId={currentConversation.id}
+              currentConversation={currentConversation}
               onConversationSelected={handleOnConversationSelected}
               conversations={conversations}
             />
@@ -630,6 +639,7 @@ const AssistantComponent: React.FC<Props> = ({
                     docLinks={docLinks}
                     isDisabled={isDisabled}
                     isSettingsModalVisible={isSettingsModalVisible}
+                    setCurrentConversation={setCurrentConversation}
                     onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     showAnonymizedValues={showAnonymizedValues}
@@ -652,7 +662,13 @@ const AssistantComponent: React.FC<Props> = ({
                     flex: 1;
                   `}
                 >
-                  <EuiPanel hasShadow={false} panelRef={commentsContainerRef}>
+                  <EuiPanel
+                    hasShadow={false}
+                    panelRef={(element) => {
+                      console.error('element', element);
+                      flyoutCommentsRef = element;
+                    }}
+                  >
                     {comments}
 
                     {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (

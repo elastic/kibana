@@ -38,7 +38,6 @@ export const AssistantTitle: React.FC<{
   isFlyoutMode: boolean;
   onChange: (updatedConversation: Conversation) => void;
 }> = ({ isDisabled = false, title, docLinks, selectedConversation, isFlyoutMode, onChange }) => {
-  // const { conversationIds } = useAssistantContext();
   const [newTitle, setNewTitle] = useState(title);
   const [newTitleError, setNewTitleError] = useState(false);
   const { updateConversationTitle } = useConversation();
@@ -80,27 +79,18 @@ export const AssistantTitle: React.FC<{
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen: boolean) => !isOpen), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-  // const existingConversationIds = useMemo(
-  //   () => conversationIds.filter((cid) => cid !== selectedConversation?.id),
-  //   [conversationIds, selectedConversation?.id]
-  // );
+  const handleUpdateTitle = useCallback(
+    (updatedTitle: string) => {
+      setNewTitleError(false);
 
-  // const handleUpdateTitle = useCallback(
-  //   (updatedTitle: string) => {
-  //     if (existingConversationIds.includes(updatedTitle)) {
-  //       setNewTitleError(true);
-  //       return false;
-  //     }
-
-  //     setNewTitleError(false);
-
-  //     if (selectedConversation) {
-  //       updateConversationTitle({ currentTitle: selectedConversation?.id, updatedTitle });
-  //       onChange(updatedTitle);
-  //     }
-  //   },
-  //   [existingConversationIds, selectedConversation, updateConversationTitle]
-  // );
+      if (selectedConversation) {
+        updateConversationTitle({ conversationId: selectedConversation?.id, updatedTitle }).then(
+          onChange
+        );
+      }
+    },
+    [onChange, selectedConversation, updateConversationTitle]
+  );
 
   useEffect(() => {
     // Reset the title when the prop changes
@@ -127,7 +117,7 @@ export const AssistantTitle: React.FC<{
             isReadOnly={selectedConversation?.isDefault}
             onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
             onCancel={() => setNewTitle(title)}
-            // onSave={handleUpdateTitle}
+            onSave={handleUpdateTitle}
             editModeProps={{
               formRowProps: {
                 fullWidth: true,

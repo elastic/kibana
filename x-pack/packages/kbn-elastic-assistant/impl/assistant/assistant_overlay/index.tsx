@@ -120,7 +120,7 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode }) => {
         hideCloseButton
       >
         <Assistant
-          conversationId={conversationId}
+          conversationTitle={conversationTitle}
           promptContextId={promptContextId}
           onCloseFlyout={handleCloseModal}
           isFlyoutMode={isFlyoutMode}

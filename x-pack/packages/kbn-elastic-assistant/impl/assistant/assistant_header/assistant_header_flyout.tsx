@@ -36,8 +36,9 @@ interface OwnProps {
   isSettingsModalVisible: boolean;
   onToggleShowAnonymizedValues: () => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
   showAnonymizedValues: boolean;
-  title: string | JSX.Element;
+  title: string;
   onChatCleared: () => void;
   onCloseFlyout?: () => void;
   chatHistoryVisible: boolean;
@@ -61,6 +62,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   isSettingsModalVisible,
   onToggleShowAnonymizedValues,
   setIsSettingsModalVisible,
+  setCurrentConversation,
   showAnonymizedValues,
   title,
   onChatCleared,
@@ -98,6 +100,17 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
 
   const closeDestroyModal = useCallback(() => setIsResetConversationModalVisible(false), []);
   const showDestroyModal = useCallback(() => setIsResetConversationModalVisible(true), []);
+
+  const onConversationChange = useCallback(
+    (updatedConversation) => {
+      setCurrentConversation(updatedConversation);
+      onConversationSelected({
+        cId: updatedConversation.id,
+        cTitle: updatedConversation.title,
+      });
+    },
+    [onConversationSelected, setCurrentConversation]
+  );
 
   const panels = useMemo(
     () => [
@@ -154,16 +167,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   return (
     <>
       <FlyoutNavigation isExpanded={chatHistoryVisible} setIsExpanded={setChatHistoryVisible}>
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="showAnonymizedValues"
-              title={showAnonymizedValuesChecked ? 'Play' : 'Pause'}
-              aria-label={showAnonymizedValuesChecked ? 'Play' : 'Pause'}
-              iconType={showAnonymizedValuesChecked ? 'eye' : 'eyeClosed'}
-              onClick={onToggleShowAnonymizedValues}
-            />
-          </EuiFlexItem>
+        <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <AssistantSettingsButton
               defaultConnector={defaultConnector}
@@ -207,42 +211,55 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
           >
             <AssistantTitle
               docLinks={docLinks}
-              title={selectedConversation.id ?? title}
+              title={title}
               selectedConversation={selectedConversation}
-              onChange={onConversationSelected}
+              onChange={onConversationChange}
               isFlyoutMode={true}
             />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
+            <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
               <EuiFlexItem>
                 <ConnectorSelectorInline
                   isDisabled={isDisabled || selectedConversation === undefined}
                   selectedConnectorId={selectedConnectorId}
                   selectedConversation={selectedConversation}
                   isFlyoutMode={true}
-                  onConnectorSelected={onChange}
+                  onConnectorSelected={onConversationChange}
                 />
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  css={css`
+                    border-radius: 50%;
+                  `}
+                  display="base"
+                  data-test-subj="showAnonymizedValues"
+                  title={showAnonymizedValuesChecked ? 'Play' : 'Pause'}
+                  aria-label={showAnonymizedValuesChecked ? 'Play' : 'Pause'}
+                  iconType={showAnonymizedValuesChecked ? 'eye' : 'eyeClosed'}
+                  onClick={onToggleShowAnonymizedValues}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPopover
+                  button={
+                    <EuiButtonIcon
+                      aria-label="test"
+                      iconType="boxesVertical"
+                      onClick={onButtonClick}
+                    />
+                  }
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                >
+                  <EuiContextMenu initialPanelId={0} panels={panels} />
+                </EuiPopover>
+              </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiPopover
-                button={
-                  <EuiButtonIcon
-                    aria-label="test"
-                    iconType="boxesVertical"
-                    onClick={onButtonClick}
-                  />
-                }
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-              >
-                <EuiContextMenu initialPanelId={0} panels={panels} />
-              </EuiPopover>
-            </EuiFlexItem>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

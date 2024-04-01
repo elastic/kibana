@@ -55,9 +55,12 @@ interface UseConversation {
     conversation,
     apiConfig,
   }: SetApiConfigProps) => Promise<Conversation | undefined>;
-  createConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
+  createConversation: (conversation: Partial<Conversation>) => Promise<Conversation | undefined>;
   getConversation: (conversationId: string) => Promise<Conversation | undefined>;
-  updateConversationTitle: ({ conversationId, updatedTitle }: UpdateConversationTitleProps) => void;
+  updateConversationTitle: ({
+    conversationId,
+    updatedTitle,
+  }: UpdateConversationTitleProps) => Promise<Conversation>;
 }
 
 export const useConversation = (): UseConversation => {
@@ -185,13 +188,12 @@ export const useConversation = (): UseConversation => {
   );
 
   const updateConversationTitle = useCallback(
-    ({ conversationId, updatedTitle }: UpdateConversationTitleProps): void => {
+    ({ conversationId, updatedTitle }: UpdateConversationTitleProps): Promise<Conversation> =>
       updateConversation({
         http,
         conversationId,
         title: updatedTitle,
-      });
-    },
+      }),
     [http]
   );
 

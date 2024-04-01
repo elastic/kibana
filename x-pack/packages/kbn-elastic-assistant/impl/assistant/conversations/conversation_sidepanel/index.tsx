@@ -19,6 +19,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
+import { isEmpty } from 'lodash';
 import { Conversation } from '../../../..';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
 import { useConversation } from '../../use_conversation';
@@ -27,7 +28,7 @@ import * as i18n from './translations';
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
-  selectedConversationId: string | undefined;
+  currentConversation: Conversation;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
@@ -52,7 +53,7 @@ export type ConversationSelectorOption = EuiComboBoxOptionOption<{
 
 export const ConversationSidePanel: React.FC<Props> = React.memo(
   ({
-    selectedConversationId = DEFAULT_CONVERSATION_TITLE,
+    currentConversation,
     onConversationSelected,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
@@ -66,24 +67,43 @@ export const ConversationSidePanel: React.FC<Props> = React.memo(
     // Callback for when user deletes a conversation
     const onDelete = useCallback(
       (cId: string) => {
-        if (selectedConversationId === cId) {
-          onConversationSelected(getPreviousConversationId(conversationIds, cId));
+        if (currentConversation.id === cId) {
+          const previousConversation =
+            conversations[getPreviousConversationId(conversationIds, cId)];
+          onConversationSelected({
+            cId: previousConversation.id,
+            cTitle: previousConversation.title,
+          });
         }
         setTimeout(() => {
           deleteConversation(cId);
         }, 0);
       },
-      [conversationIds, deleteConversation, selectedConversationId, onConversationSelected]
+      [
+        currentConversation,
+        conversations,
+        conversationIds,
+        onConversationSelected,
+        deleteConversation,
+      ]
     );
 
     const onLeftArrowClick = useCallback(() => {
-      const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
-      onConversationSelected(prevId);
-    }, [conversationIds, selectedConversationId, onConversationSelected]);
+      const previousConversation =
+        conversations[getPreviousConversationId(conversationIds, currentConversation.id)];
+      onConversationSelected({
+        cId: previousConversation.id,
+        cTitle: previousConversation.title,
+      });
+    }, [conversations, conversationIds, deleteConversationId, onConversationSelected]);
     const onRightArrowClick = useCallback(() => {
-      const nextId = getNextConversationId(conversationIds, selectedConversationId);
-      onConversationSelected(nextId);
-    }, [conversationIds, selectedConversationId, onConversationSelected]);
+      const nextConversation =
+        conversations[getNextConversationId(conversationIds, currentConversation.id)];
+      onConversationSelected({
+        cId: nextConversation.id,
+        cTitle: nextConversation.title,
+      });
+    }, [conversations, conversationIds, currentConversation.id, onConversationSelected]);
 
     // Register keyboard listener for quick conversation switching
     const onKeyDown = useCallback(
@@ -119,18 +139,18 @@ export const ConversationSidePanel: React.FC<Props> = React.memo(
     );
 
     const onSubmit = useCallback(() => {
-      const newConversation = createConversation({
-        conversationIds,
-        apiConfig: conversations[selectedConversationId].apiConfig,
+      createConversation({
+        title: 'New chat',
+        apiConfig: currentConversation.apiConfig,
+      }).then((newConversation) => {
+        if (newConversation) {
+          onConversationSelected({
+            cId: newConversation.id,
+            cTitle: newConversation.title,
+          });
+        }
       });
-      onConversationSelected(newConversation.id);
-    }, [
-      conversationIds,
-      conversations,
-      createConversation,
-      onConversationSelected,
-      selectedConversationId,
-    ]);
+    }, [createConversation, currentConversation.apiConfig, onConversationSelected]);
 
     const handleCloseModal = useCallback(() => {
       setDeleteConversationId(null);
@@ -144,6 +164,8 @@ export const ConversationSidePanel: React.FC<Props> = React.memo(
     }, [deleteConversationId, onDelete]);
 
     useEvent('keydown', onKeyDown);
+
+    console.error('conversations', conversations, currentConversation);
 
     return (
       <>
@@ -160,10 +182,16 @@ export const ConversationSidePanel: React.FC<Props> = React.memo(
                   .reverse()
                   .map((conversation) => (
                     <EuiListGroupItem
-                      key={conversation.id}
-                      onClick={() => onConversationSelected(conversation.id)}
-                      label={conversation.id}
-                      isActive={conversation.id === selectedConversationId}
+                      key={conversation.id + conversation.title}
+                      onClick={() =>
+                        onConversationSelected({ cId: conversation.id, cTitle: conversation.title })
+                      }
+                      label={conversation.title}
+                      isActive={
+                        !isEmpty(conversation.id)
+                          ? conversation.id === currentConversation.id
+                          : conversation.title === currentConversation.title
+                      }
                       extraAction={{
                         color: 'danger',
                         onClick: () => setDeleteConversationId(conversation.id),

@@ -132,11 +132,13 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         justifyContent={'flexStart'}
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.INLINE_CONNECTOR_LABEL}
-          </EuiText>
-        </EuiFlexItem>
+        {!isFlyoutMode && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.INLINE_CONNECTOR_LABEL}
+            </EuiText>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           {isOpen ? (
             <ConnectorSelector
@@ -154,6 +156,14 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
           ) : (
             <span>
               <EuiButtonEmpty
+                css={
+                  isFlyoutMode &&
+                  css`
+                    padding: 0;
+                    height: auto;
+                    block-size: auto;
+                  `
+                }
                 className={placeholderButtonClassName}
                 color={isFlyoutMode ? 'primary' : 'text'}
                 data-test-subj="connectorSelectorPlaceholderButton"
