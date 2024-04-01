@@ -200,7 +200,9 @@ export const getTableColumns: GetTableColumns = (openRuleInTimelineWithAdditiona
     render: (count: number, { ruleName }) => (
       <EuiLink
         disabled={count === 0}
-        onClick={() => openRuleInTimelineWithAdditionalFields(ruleName)}
+        onClick={async () => {
+          await openRuleInTimelineWithAdditionalFields(ruleName);
+        }}
       >
         <FormattedCount count={count} />
       </EuiLink>
