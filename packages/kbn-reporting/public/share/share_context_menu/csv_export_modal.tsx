@@ -159,6 +159,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
                 disabled={isUnsaved}
                 flush="both"
                 onClick={copy}
+                data-share-url={absoluteUrl}
                 data-test-subj="shareReportingCopyURL"
               >
                 <FormattedMessage
@@ -189,6 +190,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
               disabled={isUnsaved}
               flush="both"
               onClick={copy}
+              data-share-url={absoluteUrl}
               data-test-subj="shareReportingCopyURL"
             >
               <FormattedMessage

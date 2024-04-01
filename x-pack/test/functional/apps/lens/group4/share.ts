@@ -53,8 +53,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should enable both download and URL sharing for valid configuration', async () => {
       await PageObjects.lens.clickShareMenu();
 
-      expect(await PageObjects.lens.isShareActionEnabled('csvDownload'));
-      expect(await PageObjects.lens.isShareActionEnabled('permalinks'));
+      expect(await PageObjects.lens.isShareActionEnabled('Export'));
+      expect(await PageObjects.lens.isShareActionEnabled('Links'));
     });
 
     it('should provide only snapshot url sharing if visualization is not saved yet', async () => {
