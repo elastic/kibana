@@ -84,9 +84,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
           updatedInput = { ...originalInput, ...incomingInput };
         }
 
-        const expression = `embeddable config="${encode(updatedInput)}"
-  type="${type}"
-| render`;
+        const expression = embeddableInputToExpression(updatedInput, type, undefined, true);
 
         dispatch(
           updateEmbeddableExpression({
@@ -101,7 +99,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         // select new embeddable element
         dispatch(selectToplevelNodes([embeddableId]));
       } else {
-        const expression = embeddableInputToExpression(incomingInput, type);
+        const expression = embeddableInputToExpression(incomingInput, type, undefined, true);
         dispatch(addElement(selectedPage.id, { expression }));
       }
     }

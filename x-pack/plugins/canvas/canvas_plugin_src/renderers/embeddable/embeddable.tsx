@@ -57,7 +57,9 @@ const renderReactEmbeddable = (
       onAnyStateChange={(newState) => {
         const newExpression = embeddableInputToExpression(
           newState.rawState as unknown as EmbeddableInput,
-          type
+          type,
+          undefined,
+          true
         );
         if (newExpression) handlers.onEmbeddableInputChange(newExpression);
       }}
