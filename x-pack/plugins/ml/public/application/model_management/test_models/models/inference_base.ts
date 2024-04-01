@@ -71,7 +71,6 @@ export abstract class InferenceBase<TInferResponse> {
   private inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
   private runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
   private isValid$ = new BehaviorSubject<boolean>(false);
-  // @ts-expect-error pipeline._meta is defined as mandatory
   private pipeline$ = new BehaviorSubject<estypes.IngestPipeline>({});
   private supportedFieldTypes: ES_FIELD_TYPES[] = [ES_FIELD_TYPES.TEXT];
   private selectedDataViewId: string | undefined;
@@ -248,7 +247,6 @@ export abstract class InferenceBase<TInferResponse> {
   protected abstract inferIndex(): Promise<TInferResponse[]>;
 
   public generatePipeline(): estypes.IngestPipeline {
-    // @ts-expect-error pipeline._meta is defined as mandatory
     return {
       processors: this.getProcessors(),
     };
