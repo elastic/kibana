@@ -84,7 +84,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               title: c ?? '',
               category: 'assistant',
               messages: [],
-              replacements: [],
+              replacements: {},
               ...(defaultConnector
                 ? {
                     apiConfig: {
