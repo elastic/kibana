@@ -16,7 +16,6 @@ import {
   groupingsSchema,
   groupSummarySchema,
   histogramIndicatorSchema,
-  historicalSummarySchema,
   indicatorSchema,
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
@@ -71,39 +70,8 @@ const sloWithSummaryResponseSchema = t.intersection([
   ]),
 ]);
 
-const fetchHistoricalSummaryParamsSchema = t.type({
-  body: t.type({
-    list: t.array(
-      t.intersection([
-        t.type({
-          sloId: sloIdSchema,
-          instanceId: t.string,
-          timeWindow: timeWindowSchema,
-          budgetingMethod: budgetingMethodSchema,
-          objective: objectiveSchema,
-          groupBy: allOrAnyStringOrArray,
-          revision: t.number,
-        }),
-        t.partial({ remoteName: t.string }),
-      ])
-    ),
-  }),
-});
-
-const fetchHistoricalSummaryResponseSchema = t.array(
-  t.type({
-    sloId: sloIdSchema,
-    instanceId: allOrAnyString,
-    data: t.array(historicalSummarySchema),
-  })
-);
-
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
-
-type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParamsSchema.props.body>;
-type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
-type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
 type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
 type TimeWindowType = t.OutputOf<typeof timeWindowTypeSchema>;
@@ -125,17 +93,9 @@ type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
 type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
 type QuerySchema = t.TypeOf<typeof querySchema>;
 
-export {
-  fetchHistoricalSummaryParamsSchema,
-  fetchHistoricalSummaryResponseSchema,
-  sloResponseSchema,
-  sloWithSummaryResponseSchema,
-};
+export { sloResponseSchema, sloWithSummaryResponseSchema };
 export type {
   BudgetingMethod,
-  FetchHistoricalSummaryParams,
-  FetchHistoricalSummaryResponse,
-  HistoricalSummaryResponse,
   SLOResponse,
   SLOWithSummaryResponse,
   APMTransactionDurationIndicator,

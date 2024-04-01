@@ -76,13 +76,6 @@ const groupSummarySchema = t.type({
   noData: t.number,
 });
 
-const historicalSummarySchema = t.intersection([
-  t.type({
-    date: dateType,
-  }),
-  summarySchema,
-]);
-
 const dateRangeSchema = t.type({ from: dateType, to: dateType });
 
 const kqlQuerySchema = t.string;
@@ -122,7 +115,6 @@ export {
   dateType,
   errorBudgetSchema,
   groupingsSchema,
-  historicalSummarySchema,
   statusSchema,
   summarySchema,
   metaSchema,
