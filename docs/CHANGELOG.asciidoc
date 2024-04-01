@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.13.1>>
 * <<release-notes-8.13.0>>
 * <<release-notes-8.12.2>>
 * <<release-notes-8.12.1>>
@@ -61,6 +62,37 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.13.1]]
+== {kib} 8.13.1
+
+The 8.13.1 release includes the following bug fixes.
+
+[float]
+[[enhancement-v8.13.1]]
+=== Enhancements
+Fleet::
+* Feature/default fields ({kibana-pull}178020[#178020]).
+
+[float]
+[[fixes-v8.13.1]]
+=== Bug Fixes
+Alerting::
+* Limit useEffect to calculate view in app URL ({kibana-pull}179197[#179197]).
+Data Discovery::
+* Hide "Save"/"Save as" actions from "Unsaved changes" badge for read-only users ({kibana-pull}179132[#179132]).
+Elastic Security::
+For the Elastic Security 8.13.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Use index exists check in fleet-metrics-task ({kibana-pull}179404[#179404]).
+Lens & Visualizations::
+* Fixes wilcard complex scenarios ({kibana-pull}178938[#178938]).
+Machine Learning::
+* AIOps: Fix text field candidate selection for log rate analysis ({kibana-pull}179699[#179699]).
+Observability::
+* Fall back to top 5 docs on scoring error ({kibana-pull}179615[#179615]).
+* Fixing APM data view id ({kibana-pull}179257[#179257]).
+
 [[release-notes-8.13.0]]
 == {kib} 8.13.0
 
