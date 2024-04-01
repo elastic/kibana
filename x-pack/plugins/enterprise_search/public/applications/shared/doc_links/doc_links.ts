@@ -65,6 +65,7 @@ class DocLinks {
   public clientsRustOverview: string;
   public cloudIndexManagement: string;
   public connectors: string;
+  public connectorsMappings: string;
   public connectorsAzureBlobStorage: string;
   public connectorsBox: string;
   public connectorsClients: string;
@@ -239,6 +240,7 @@ class DocLinks {
     this.clientsRustOverview = '';
     this.cloudIndexManagement = '';
     this.connectors = '';
+    this.connectorsMappings = '';
     this.connectorsAzureBlobStorage = '';
     this.connectorsBox = '';
     this.connectorsConfluence = '';
@@ -414,6 +416,7 @@ class DocLinks {
     this.clientsRustOverview = docLinks.links.clients.rustOverview;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.connectors = docLinks.links.enterpriseSearch.connectors;
+    this.connectorsMappings = docLinks.links.enterpriseSearch.connectorsMappings;
     this.connectorsAzureBlobStorage = docLinks.links.enterpriseSearch.connectorsAzureBlobStorage;
     this.connectorsBox = docLinks.links.enterpriseSearch.connectorsBox;
     this.connectorsConfluence = docLinks.links.enterpriseSearch.connectorsConfluence;
