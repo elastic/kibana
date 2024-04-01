@@ -8,33 +8,32 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { PackageClient } from '@kbn/fleet-plugin/server';
 import { PackageNotFoundError } from '@kbn/fleet-plugin/server/errors';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { Dashboard, DataStreamStat, Integration } from '../../../../common/api_types';
-import { getBulkSavedObjects, getIntegrationInstalledSavedObjects } from './saved_object_helpers';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { Dashboard, DataStreamStat, Integration } from '../../../common/api_types';
 
 export async function getIntegrationDashboards(
+  packageClient: PackageClient,
   savedObjectsClient: SavedObjectsClientContract,
   integration: string
 ): Promise<Dashboard[]> {
   // Retrieve integration savedObject
-  const integrationSavedObjects = await getIntegrationInstalledSavedObjects(
-    savedObjectsClient,
-    integration
-  );
+  const integrationSavedObjects = await packageClient.getInstallation(integration);
+  if (!integrationSavedObjects) return [];
 
   // Extract dashboard ids
   const dashboardIds: string[] = [];
-  integrationSavedObjects.saved_objects.forEach((intSavedObject) => {
-    (intSavedObject.attributes?.installed_kibana || []).forEach((so) => {
-      if (so.type === DASHBOARD_SAVED_OBJECT_TYPE) {
-        dashboardIds.push(so.id);
-      }
-    });
+  integrationSavedObjects.installed_kibana.forEach((intSavedObject) => {
+    if (intSavedObject.type === DASHBOARD_SAVED_OBJECT_TYPE) {
+      dashboardIds.push(intSavedObject.id);
+    }
   });
 
   // Fetch dashboards savedObject
-  const dashboardsSavedObjects = await getBulkSavedObjects(
-    savedObjectsClient,
+  // We are directly querying the SO here
+  // The dashboard service is not exposed from the server side at the moment
+  const dashboardsSavedObjects = await savedObjectsClient.bulkGet<{
+    title?: string;
+  }>(
     dashboardIds.map((id) => ({
       id,
       type: DASHBOARD_SAVED_OBJECT_TYPE,
