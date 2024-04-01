@@ -13,7 +13,7 @@ import type {
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import type { LogRateHistogramItem, WindowParameters } from '@kbn/aiops-utils';
+import type { LogRateHistogramItem, WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import { DocumentCountChart, type BrushSelectionUpdateHandler } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';

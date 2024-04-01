@@ -14,7 +14,7 @@ import {
   Replacement,
 } from '@kbn/elastic-assistant-common';
 
-export interface SearchEsConversationSchema {
+export interface EsConversationSchema {
   id: string;
   '@timestamp': string;
   created_at: string;
