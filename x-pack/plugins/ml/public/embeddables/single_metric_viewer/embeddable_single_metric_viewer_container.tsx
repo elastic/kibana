@@ -60,6 +60,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [zoom, setZoom] = useState<AppStateZoom | undefined>();
   const [selectedForecastId, setSelectedForecastId] = useState<string | undefined>();
+  const [detectorIndex, setDetectorIndex] = useState<number>(0);
   const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
   const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
   const [jobsLoaded, setJobsLoaded] = useState(false);
@@ -139,6 +140,10 @@ export const EmbeddableSingleMetricViewerContainer: FC<
        */
 
       switch (action) {
+        case APP_STATE_ACTION.SET_DETECTOR_INDEX:
+          setDetectorIndex(payload);
+          break;
+
         case APP_STATE_ACTION.SET_FORECAST_ID:
           setSelectedForecastId(payload);
           setZoom(undefined);
@@ -154,7 +159,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
       }
     },
 
-    [setZoom, setSelectedForecastId]
+    [setZoom, setDetectorIndex, setSelectedForecastId]
   );
 
   const containerPadding = 10;
@@ -186,7 +191,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
               lastRefresh={lastRefresh ?? 0}
               previousRefresh={previousRefresh}
               selectedJobId={selectedJobId}
-              selectedDetectorIndex={data.selectedDetectorIndex}
+              selectedDetectorIndex={detectorIndex}
               selectedEntities={data.selectedEntities}
               selectedForecastId={selectedForecastId}
               tableInterval="auto"
