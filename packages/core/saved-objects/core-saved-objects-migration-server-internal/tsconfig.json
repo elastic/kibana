@@ -9,6 +9,7 @@
   },
   "include": [
     "**/*.ts",
+    "src/hash_to_version_map.json"
   ],
   "kbn_references": [
     "@kbn/logging",
