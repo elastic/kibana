@@ -36,4 +36,9 @@ describe('checkFleetServerVersion', () => {
       'Cannot force upgrade to version 8.5.1 because it does not satisfy the major and minor of the latest fleet server version 8.4.0.'
     );
   });
+
+  it('should not throw in serverless if there is not in fleetServers', () => {
+    const fleetServers = [] as any;
+    expect(() => checkFleetServerVersion('8.5.1', fleetServers, true)).not.toThrow();
+  });
 });
