@@ -35,6 +35,7 @@ export const ShareMenuTabs = () => {
     shareMenuItems
       // need to filter out the null shareMenuItem from Lens and just use the reporting image modal that includes CSV for Lens
       .filter((item) => item !== null)
+      //@ts-ignore null is screened above
       .forEach(({ shareMenuItem, panel }) => {
         tabs.push({
           id: panel.id.toString(),

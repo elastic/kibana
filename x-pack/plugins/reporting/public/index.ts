@@ -13,6 +13,8 @@ import { ReportingPublicPlugin } from './plugin';
  * Setup contract for the Reporting plugin.
  */
 export interface ReportingSetup {
+  reporting: any;
+  reporting: any;
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    *

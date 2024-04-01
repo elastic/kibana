@@ -50,7 +50,7 @@ export interface ReportingModalProps {
   // needed for canvas
   getJobParams?: JobAppParamsPDFV2;
   objectType: string;
-  downloadCsvFromLens: () => void;
+  downloadCsvFromLens?: () => void;
 }
 
 type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { parsePath } from 'history';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import * as Rx from 'rxjs';
@@ -15,43 +14,60 @@ import {
   EuiButton,
   EuiCard,
   EuiCodeBlock,
-  EuiContextMenu,
-  EuiContextMenuProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiModal,
   EuiPage,
   EuiPageBody,
   EuiPageHeader,
   EuiPageSection,
-  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
-import { JobParamsPDFDeprecated, JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import {
+  JobParamsPDFDeprecated,
+  JobParamsPDFV2,
+} from '@kbn/reporting-export-types-pdf-common';
 import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import { BrowserRouter as Router, useHistory } from 'react-router-dom';
+import { Router, useHistory } from 'react-router-dom';
 
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 import { useApplicationContext } from '../application_context';
-import { ROUTES } from '../constants';
 import type { MyForwardableState } from '../types';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { I18nStart, OverlayStart, ThemeServiceSetup } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { parsePath } from 'history';
+import { ROUTES } from '../constants';
+import { ReportingModalContent } from '@kbn/reporting-public/share/share_context_menu/reporting_panel_content_lazy';
 
 interface ReportingExampleAppProps {
   basename: string;
   reporting: ReportingStart;
   screenshotMode: ScreenshotModePluginSetup;
+  overlays: OverlayStart;
+  i18n: I18nStart;
+  theme: ThemeServiceSetup;
+  toasts: ToastsSetup;
 }
 
 const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
 
-export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAppProps) => {
+export const Main = ({
+  basename,
+  screenshotMode,
+  reportingAPIClient,
+  toasts,
+  overlays,
+  i18n,
+  theme,
+}: ReportingExampleAppProps) => {
   const history = useHistory();
   const { forwardedState } = useApplicationContext();
   useEffect(() => {
@@ -59,14 +75,28 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     console.log('forwardedState', forwardedState);
   }, [forwardedState]);
 
-  // Context Menu
-  const [isPopoverOpen, setPopover] = useState(false);
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
+  const openModal = () => {
+    const session = overlays.openModal(
+      toMountPoint(
+        <EuiModal
+          id="contextMenuExample"
+          onClose={() => {
+            session.close();
+            setIsModalOpen(false);
+          }}
+        >
+          {getTabs()}
+        </EuiModal>,
+        { i18n, theme }
+      ),
+      { 'data-test-subj': 'share-modal-reporting-example' }
+    );
   };
-
-  const closePopover = () => {
-    setPopover(false);
+  // Open the Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const onButtonClick = () => {
+    setIsModalOpen(!isModalOpen);
+    openModal();
   };
 
   // Async Logos
@@ -158,15 +188,27 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     };
   };
 
-  const panels: EuiContextMenuProps['panels'] = [
+  const getTabs =  () => {[
     {
       id: 0,
-      items: [
-        { name: 'PDF Reports', icon: 'document', panel: 1 },
-        { name: 'PNG Reports', icon: 'document', panel: 7 },
-        { name: 'Capture test', icon: 'document', panel: 8, 'data-test-subj': 'captureTestPanel' },
-      ],
+      name: 'PDF Reports',
+      content: (
+        <ReportingModalContent apiClient={} toasts={undefined} uiSettings={undefined} requiresSavedState={false} onClose={} theme={undefined} objectType={''}} />
+        )
     },
+    {
+      id: 0,
+      name: 'PNG Reports',
+      content: ()
+    },
+    {
+      id: 0,
+      name: 'Capture test',
+      content: (
+        'data-test-subj': 'captureTestPanel'
+      )
+    },
+
     {
       id: 1,
       initialFocusedItemIndex: 1,
@@ -209,23 +251,12 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       items: [{ name: 'Default layout V2', icon: 'document', panel: 5 }],
     },
     {
-      id: 2,
-      title: 'Default layout',
-      content: (
-        <reporting.components.ReportingPanelPDF
-          getJobParams={getPDFJobParamsDefault}
-          onClose={closePopover}
-        />
-      ),
-    },
-    {
       id: 3,
       title: 'Canvas Layout Option',
       content: (
-        <reporting.components.ReportingPanelPDF
+        <reporting.components.ReportingPanelPDFV2
           layoutOption="canvas"
           getJobParams={getPDFJobParamsDefault}
-          onClose={closePopover}
         />
       ),
     },
@@ -235,7 +266,6 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       content: (
         <reporting.components.ReportingPanelPDFV2
           getJobParams={getPDFJobParamsDefaultV2}
-          onClose={closePopover}
         />
       ),
     },
@@ -243,9 +273,8 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 5,
       title: 'Default layout V2',
       content: (
-        <reporting.components.ReportingPanelPNGV2
+        <reporting.components.ReportingModalPNGV2
           getJobParams={getPNGJobParamsDefaultV2}
-          onClose={closePopover}
         />
       ),
     },
@@ -253,9 +282,8 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 9,
       title: 'Test A',
       content: (
-        <reporting.components.ReportingPanelPNGV2
+        <reporting.components.ReportingModalPNGV2
           getJobParams={getCaptureTestPNGJobParams}
-          onClose={closePopover}
         />
       ),
     },
@@ -263,9 +291,8 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 10,
       title: 'Test A',
       content: (
-        <reporting.components.ReportingPanelPDFV2
+        <reporting.components.ReportingModalPDFV2
           getJobParams={getCaptureTestPDFJobParams(false)}
-          onClose={closePopover}
         />
       ),
     },
@@ -273,106 +300,94 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 11,
       title: 'Test A',
       content: (
-        <reporting.components.ReportingPanelPDFV2
+        <reporting.components.ReportingModalPDFV2
           layoutOption="print"
           getJobParams={getCaptureTestPDFJobParams(true)}
-          onClose={closePopover}
         />
       ),
     },
-  ];
+  ]};
 
   return (
-    <Router basename={basename}>
-      <I18nProvider>
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageHeader>
-              <EuiTitle size="l">
-                <h1>Reporting Example</h1>
-              </EuiTitle>
-            </EuiPageHeader>
-            <EuiPageSection>
-              <EuiTitle>
-                <h2>Example of a Sharing menu using components from Reporting</h2>
-              </EuiTitle>
-              <EuiSpacer />
-              <EuiText>
-                <EuiFlexGroup alignItems="center" gutterSize="l">
-                  <EuiFlexItem grow={false}>
-                    <EuiPopover
-                      id="contextMenuExample"
-                      button={
-                        <EuiButton data-test-subj="shareButton" onClick={onButtonClick}>
-                          Share
-                        </EuiButton>
-                      }
-                      isOpen={isPopoverOpen}
-                      closePopover={closePopover}
-                      panelPaddingSize="none"
-                      anchorPosition="downLeft"
+    // <Router basename={basename}>
+    <I18nProvider>
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageHeader>
+            <EuiTitle size="l">
+              <h1>Reporting Example</h1>
+            </EuiTitle>
+          </EuiPageHeader>
+          <EuiPageSection>
+            <EuiTitle>
+              <h2>Example of a Sharing menu using components from Reporting</h2>
+            </EuiTitle>
+            <EuiSpacer />
+            <EuiText>
+              <EuiFlexGroup alignItems="center" gutterSize="l">
+                <EuiFlexItem grow={false}>
+                  <EuiButton data-test-subj="shareButton" onClick={onButtonClick}>
+                    Share
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <EuiLink href={history.createHref(parsePath(ROUTES.captureTest))}>
+                      Go to capture test
+                    </EuiLink>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiHorizontalRule />
+
+              <div data-shared-items-container data-shared-items-count="5">
+                <EuiFlexGroup gutterSize="l">
+                  <EuiFlexItem data-shared-item>
+                    {forwardedState ? (
+                      <>
+                        <EuiText>
+                          <p>
+                            <strong>Forwarded app state</strong>
+                          </p>
+                        </EuiText>
+                        <EuiCodeBlock>{JSON.stringify(forwardedState)}</EuiCodeBlock>
+                      </>
+                    ) : (
+                      <>
+                        <EuiText>
+                          <p>
+                            <strong>No forwarded app state found</strong>
+                          </p>
+                        </EuiText>
+                        <EuiCodeBlock>{'{}'}</EuiCodeBlock>
+                      </>
+                    )}
+                  </EuiFlexItem>
+                  {logos.map((item, index) => (
+                    <EuiFlexItem
+                      key={index}
+                      data-shared-item
+                      data-shared-render-error
+                      data-render-error="This is an example error"
                     >
-                      <EuiContextMenu initialPanelId={0} panels={panels} />
-                    </EuiPopover>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <EuiLink href={history.createHref(parsePath(ROUTES.captureTest))}>
-                        Go to capture test
-                      </EuiLink>
-                    </EuiText>
-                  </EuiFlexItem>
+                      <EuiCard
+                        icon={<EuiIcon size="xxl" type={`logo${item}`} />}
+                        title={`Elastic ${item}`}
+                        description="Example of a card's description. Stick to one or two sentences."
+                        onClick={() => {}}
+                      />
+                    </EuiFlexItem>
+                  ))}
                 </EuiFlexGroup>
 
-                <EuiHorizontalRule />
-
-                <div data-shared-items-container data-shared-items-count="5">
-                  <EuiFlexGroup gutterSize="l">
-                    <EuiFlexItem data-shared-item>
-                      {forwardedState ? (
-                        <>
-                          <EuiText>
-                            <p>
-                              <strong>Forwarded app state</strong>
-                            </p>
-                          </EuiText>
-                          <EuiCodeBlock>{JSON.stringify(forwardedState)}</EuiCodeBlock>
-                        </>
-                      ) : (
-                        <>
-                          <EuiText>
-                            <p>
-                              <strong>No forwarded app state found</strong>
-                            </p>
-                          </EuiText>
-                          <EuiCodeBlock>{'{}'}</EuiCodeBlock>
-                        </>
-                      )}
-                    </EuiFlexItem>
-                    {logos.map((item, index) => (
-                      <EuiFlexItem
-                        key={index}
-                        data-shared-item
-                        data-shared-render-error
-                        data-render-error="This is an example error"
-                      >
-                        <EuiCard
-                          icon={<EuiIcon size="xxl" type={`logo${item}`} />}
-                          title={`Elastic ${item}`}
-                          description="Example of a card's description. Stick to one or two sentences."
-                          onClick={() => {}}
-                        />
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
-
-                  <p>Screenshot Mode is {screenshotMode.isScreenshotMode() ? 'ON' : 'OFF'}!</p>
-                </div>
-              </EuiText>
-            </EuiPageSection>
-          </EuiPageBody>
-        </EuiPage>
-      </I18nProvider>
-    </Router>
+                <p>Screenshot Mode is {screenshotMode.isScreenshotMode() ? 'ON' : 'OFF'}!</p>
+              </div>
+            </EuiText>
+          </EuiPageSection>
+        </EuiPageBody>
+      </EuiPage>
+    </I18nProvider>
+    // </Router>
   );
 };
