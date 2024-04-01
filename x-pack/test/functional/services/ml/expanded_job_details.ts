@@ -77,6 +77,7 @@ export function MachineLearningExpandedJobDetailsProvider(
           await testSubjects.click('clearSearchButton');
         await testSubjects.click(jobTable.detailsSelector(jobId, 'euiCollapsedItemActionsButton'));
         await testSubjects.click('mlAnnotationsActionViewDatafeed');
+        await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutChart');
         const visibleText = await testSubjects.getVisibleText(
           'mlAnnotationsViewDatafeedFlyoutTitle'
         );
