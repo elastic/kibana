@@ -25,9 +25,11 @@ export function APMAlertingLatencyChart({
     environment,
     serviceName,
     transactionType,
+    setTransactionType,
     transactionName,
     comparisonChartTheme,
     latencyAggregationType,
+    setLatencyAggregationType,
   } = useAlertingProps({
     rule,
   });
@@ -52,6 +54,8 @@ export function APMAlertingLatencyChart({
       comparisonChartTheme={comparisonChartTheme}
       timeZone={timeZone}
       latencyAggregationType={latencyAggregationType}
+      setLatencyAggregationType={setLatencyAggregationType}
+      setTransactionType={setTransactionType}
       comparisonEnabled={false}
       offset={''}
       customAlertEvaluationThreshold={latencyThresholdInMicroseconds}

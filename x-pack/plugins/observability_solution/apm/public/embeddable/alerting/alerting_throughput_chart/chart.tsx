@@ -23,6 +23,7 @@ export function APMAlertingThroughputChart({
     transactionType,
     transactionName,
     comparisonChartTheme,
+    setTransactionType,
   } = useAlertingProps({
     rule,
   });
@@ -39,6 +40,7 @@ export function APMAlertingThroughputChart({
   return (
     <ThroughputChart
       transactionType={transactionType}
+      setTransactionType={setTransactionType}
       transactionName={transactionName}
       serviceName={serviceName}
       environment={environment}

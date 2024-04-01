@@ -23,6 +23,7 @@ export function APMAlertingFailedTransactionsChart({
     transactionType,
     transactionName,
     comparisonChartTheme,
+    setTransactionType,
   } = useAlertingProps({
     rule,
   });
@@ -38,6 +39,7 @@ export function APMAlertingFailedTransactionsChart({
   return (
     <FailedTransactionChart
       transactionType={transactionType}
+      setTransactionType={setTransactionType}
       transactionName={transactionName}
       serviceName={serviceName}
       environment={environment}

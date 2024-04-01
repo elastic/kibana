@@ -26,6 +26,7 @@ import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { yLabelFormat } from './helpers';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
+import { TransactionTypeSelect } from './transaction_type_select';
 
 type ErrorRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
@@ -43,6 +44,7 @@ const INITIAL_STATE_ERROR_RATE: ErrorRate = {
 
 function FailedTransactionChart({
   transactionType,
+  setTransactionType,
   transactionName,
   serviceName,
   environment,
@@ -52,6 +54,7 @@ function FailedTransactionChart({
   timeZone,
 }: {
   transactionType: string;
+  setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
   serviceName: string;
   environment: string;
@@ -136,6 +139,14 @@ function FailedTransactionChart({
           <EuiFlexItem grow={false}>
             <EuiIconTip content={errorRateI18n} position="right" />
           </EuiFlexItem>
+          {setTransactionType && (
+            <EuiFlexItem grow={false}>
+              <TransactionTypeSelect
+                transactionType={transactionType}
+                setTransactionType={setTransactionType}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <TimeseriesChart

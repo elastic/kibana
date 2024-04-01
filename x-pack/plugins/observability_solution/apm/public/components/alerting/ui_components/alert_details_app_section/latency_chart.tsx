@@ -25,6 +25,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { filterNil } from '../../../shared/charts/latency_chart';
+import { LatencyAggregationTypeSelect } from '../../../shared/charts/latency_chart/latency_aggregation_type_select';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
   getMaxY,
@@ -38,6 +39,7 @@ import { isLatencyThresholdRuleType } from './helpers';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { DEFAULT_DATE_FORMAT } from './constants';
+import { TransactionTypeSelect } from './transaction_type_select';
 
 function LatencyChart({
   alert,
@@ -48,6 +50,8 @@ function LatencyChart({
   start,
   end,
   latencyAggregationType,
+  setLatencyAggregationType,
+  setTransactionType,
   comparisonChartTheme,
   comparisonEnabled,
   offset,
@@ -63,6 +67,8 @@ function LatencyChart({
   end: string;
   comparisonChartTheme: RecursivePartial<Theme>;
   latencyAggregationType: LatencyAggregationType;
+  setLatencyAggregationType?: (value: LatencyAggregationType) => void;
+  setTransactionType?: (value: string) => void;
   comparisonEnabled: boolean;
   offset: string;
   timeZone: string;
@@ -204,6 +210,22 @@ function LatencyChart({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
+          {setLatencyAggregationType && (
+            <EuiFlexItem grow={false}>
+              <LatencyAggregationTypeSelect
+                latencyAggregationType={latencyAggregationType}
+                setLatencyAggregationType={setLatencyAggregationType}
+              />
+            </EuiFlexItem>
+          )}
+          {setTransactionType && (
+            <EuiFlexItem grow={false}>
+              <TransactionTypeSelect
+                transactionType={transactionType}
+                setTransactionType={setTransactionType}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <TimeseriesChart
           id="latencyChart"

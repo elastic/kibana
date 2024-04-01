@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { useState, useEffect } from 'react';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../context/environments_context/use_environments_context';
@@ -18,22 +18,36 @@ export function useAlertingProps({
 }: {
   rule: Rule<{ aggregationType: LatencyAggregationType }>;
 }) {
-  const { transactionType, serviceName } = useApmServiceContext();
+  const { transactionType: defaultTransactionType, serviceName } =
+    useApmServiceContext();
+
   const { environment } = useEnvironmentsContext();
   const {
     query: { transactionName },
   } = useAnyOfApmParams('/services/{serviceName}/transactions/view');
 
   const params = rule.params;
-  const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
   const comparisonChartTheme = getComparisonChartTheme();
+
+  const [latencyAggregationType, setLatencyAggregationType] = useState(
+    getAggsTypeFromRule(params.aggregationType)
+  );
+  const [transactionType, setTransactionType] = useState(
+    defaultTransactionType
+  );
+
+  useEffect(() => {
+    setTransactionType(defaultTransactionType);
+  }, [defaultTransactionType]);
 
   return {
     transactionType,
+    setTransactionType,
     transactionName,
     serviceName,
     environment,
     latencyAggregationType,
+    setLatencyAggregationType,
     comparisonChartTheme,
   };
 }

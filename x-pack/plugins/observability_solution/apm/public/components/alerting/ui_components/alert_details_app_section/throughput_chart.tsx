@@ -26,6 +26,7 @@ import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
+import { TransactionTypeSelect } from './transaction_type_select';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -33,6 +34,7 @@ const INITIAL_STATE = {
 };
 function ThroughputChart({
   transactionType,
+  setTransactionType,
   transactionName,
   serviceName,
   environment,
@@ -44,6 +46,7 @@ function ThroughputChart({
   timeZone,
 }: {
   transactionType: string;
+  setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
   serviceName: string;
   environment: string;
@@ -151,6 +154,14 @@ function ThroughputChart({
               position="right"
             />
           </EuiFlexItem>
+          {setTransactionType && (
+            <EuiFlexItem grow={false}>
+              <TransactionTypeSelect
+                transactionType={transactionType}
+                setTransactionType={setTransactionType}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <TimeseriesChart
