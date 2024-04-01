@@ -113,9 +113,7 @@ export const searchAfterAndBulkCreateFactory = async ({
             }),
             createSearchAfterReturnType({
               searchAfterTimes: [searchDuration],
-              errors: searchErrors.filter((err) =>
-                err.includes('failed to create query: maxClauseCount is set to')
-              ),
+              errors: searchErrors,
             }),
           ]);
 

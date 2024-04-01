@@ -169,6 +169,7 @@ export const createThreatSignals = async ({
     let list = await getDocumentList({ searchAfter: undefined });
     let documentCount = totalDocumentCount;
 
+    // this is re-assigned depending on max clause count errors
     let chunkPage = itemsPerSearch;
 
     while (list.hits.hits.length !== 0) {
