@@ -6683,19 +6683,20 @@
     uuid "^9.0.0"
     zod "^3.22.3"
 
-"@langchain/community@~0.0.20":
-  version "0.0.26"
-  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.0.26.tgz#9d311e3a2d73b2cde7d24d33ed903f4ccc52046d"
-  integrity sha512-E5/lltEkkRCxA9WQ/IpdTWUBj5gaCOYuf6r2MX4ZNTR5gfaZkHdLQWF1rew6uG3Z7XjRMMtIxxT9jS7me6sRRA==
+"@langchain/community@~0.0.41":
+  version "0.0.43"
+  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.0.43.tgz#017e2f9b3209b3999482f10df5aec2520731a63c"
+  integrity sha512-60TjV3knGGOPHfbJxLpuwARr8oA0r6Txm8wTFvFx+TjRUrloyBUcWSbJIdm62gAwBJDEHmdjjyWOOzU+eewcuA==
   dependencies:
-    "@langchain/core" "~0.1.16"
-    "@langchain/openai" "~0.0.10"
+    "@langchain/core" "~0.1.44"
+    "@langchain/openai" "~0.0.19"
+    expr-eval "^2.0.2"
     flat "^5.0.2"
-    langsmith "~0.0.48"
+    langsmith "~0.1.1"
     uuid "^9.0.0"
     zod "^3.22.3"
 
-"@langchain/core@0.1.45", "@langchain/core@^0.1.45", "@langchain/core@~0.1.13", "@langchain/core@~0.1.16":
+"@langchain/core@0.1.45", "@langchain/core@^0.1.45", "@langchain/core@~0.1.13", "@langchain/core@~0.1.16", "@langchain/core@~0.1.44", "@langchain/core@~0.1.45":
   version "0.1.45"
   resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.1.45.tgz#8acb3d85ca868489cb2d047da981f17b0b246f3e"
   integrity sha512-3kjaScJwwUu1so3o4Lvr+tNKIGP/+dORZ4avZYve5qRtIiegRG7J3W66d//Gcgs5UwwfVgadj5ELGvWWUym8TA==
@@ -6712,12 +6713,23 @@
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-"@langchain/openai@^0.0.14", "@langchain/openai@~0.0.10", "@langchain/openai@~0.0.12":
+"@langchain/openai@^0.0.14", "@langchain/openai@~0.0.10":
   version "0.0.14"
   resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.0.14.tgz#27a6ba83f6b754391868b22f3b90cd440038acf0"
   integrity sha512-co6nRylPrLGY/C3JYxhHt6cxLq07P086O7K3QaZH7SFFErIN9wSzJonpvhZR07DEUq6eK6wKgh2ORxA/NcjSRQ==
   dependencies:
     "@langchain/core" "~0.1.13"
+    js-tiktoken "^1.0.7"
+    openai "^4.26.0"
+    zod "^3.22.4"
+    zod-to-json-schema "^3.22.3"
+
+"@langchain/openai@~0.0.19":
+  version "0.0.25"
+  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.0.25.tgz#8332abea1e3acb9b1169f90636e518c0ee90622e"
+  integrity sha512-cD9xPDDXK2Cjs6yYg27BpdzBnQZvBb1yaNgMoGLWIT27UQVRyT96PLC1OVMQOmMmHaKDBCj/1bW4GQQgX7+d2Q==
+  dependencies:
+    "@langchain/core" "~0.1.45"
     js-tiktoken "^1.0.7"
     openai "^4.26.0"
     zod "^3.22.4"
@@ -21098,22 +21110,21 @@ kuler@^2.0.0:
   resolved "https://registry.yarnpkg.com/kuler/-/kuler-2.0.0.tgz#e2c570a3800388fb44407e851531c1d670b061b3"
   integrity sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==
 
-langchain@^0.1.13:
-  version "0.1.13"
-  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.1.13.tgz#da5a8c6df70e9b5e4869ca0c0463cf3d3ae28fa8"
-  integrity sha512-A56Qi5Jlxc3b/G9ny/B6gsqujFp9dFpnT7HIKFCq/mS/5foCb0nQ8P2F/Pwv8COg6b/be9Gwu1WQ97L93uE+dw==
+langchain@^0.1.30:
+  version "0.1.30"
+  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.1.30.tgz#e1adb3f1849fcd5c596c668300afd5dc8cb37a97"
+  integrity sha512-5h/vNMmutQ98tbB0sPDlAileZVca6A2McFgGa3+D56Dm8mSSCzTQL2DngPA6h09DlKDpSr7+6PdFw5Hoj0ZDSw==
   dependencies:
     "@anthropic-ai/sdk" "^0.9.1"
-    "@langchain/community" "~0.0.20"
-    "@langchain/core" "~0.1.16"
-    "@langchain/openai" "~0.0.12"
+    "@langchain/community" "~0.0.41"
+    "@langchain/core" "~0.1.44"
+    "@langchain/openai" "~0.0.19"
     binary-extensions "^2.2.0"
-    expr-eval "^2.0.2"
     js-tiktoken "^1.0.7"
     js-yaml "^4.1.0"
     jsonpointer "^5.0.1"
-    langchainhub "~0.0.6"
-    langsmith "~0.0.59"
+    langchainhub "~0.0.8"
+    langsmith "~0.1.7"
     ml-distance "^4.0.0"
     openapi-types "^12.1.3"
     p-retry "4"
@@ -21122,12 +21133,12 @@ langchain@^0.1.13:
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-langchainhub@~0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/langchainhub/-/langchainhub-0.0.6.tgz#9d2d06e4ce0807b4e8a31e19611f57aef990b54d"
-  integrity sha512-SW6105T+YP1cTe0yMf//7kyshCgvCTyFBMTgH2H3s9rTAR4e+78DA/BBrUL/Mt4Q5eMWui7iGuAYb3pgGsdQ9w==
+langchainhub@~0.0.8:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/langchainhub/-/langchainhub-0.0.8.tgz#fd4b96dc795e22e36c1a20bad31b61b0c33d3110"
+  integrity sha512-Woyb8YDHgqqTOZvWIbm2CaFDGfZ4NTSyXV687AG4vXEfoNo7cGQp7nhl7wL3ehenKWmNEmcxCLgOZzW8jE6lOQ==
 
-langsmith@~0.0.48, langsmith@~0.0.59:
+langsmith@~0.0.48:
   version "0.0.66"
   resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.0.66.tgz#a43e1e0a7cad4053e81fde9caceeff34e0694236"
   integrity sha512-yextqrwQiN+2Y0WjHEjQmwS9V6886RIuUG8esibiSh6BTHrtt1WMCAPKJIy8E1+HQvVY7IzsuJ4vzpkKi0wcTQ==
@@ -21138,7 +21149,7 @@ langsmith@~0.0.48, langsmith@~0.0.59:
     p-retry "4"
     uuid "^9.0.0"
 
-langsmith@~0.1.7:
+langsmith@~0.1.1, langsmith@~0.1.7:
   version "0.1.13"
   resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.1.13.tgz#cdaa653c1300c7277c46ecdbd6d416bde9c95f6d"
   integrity sha512-iyGrsaWhZ70F1aG8T8Nd4iH33Z0JFMdxbfBbaRV/+LkJDH4PByZHNJbApT6G2pQmmYD0cei9oW7kXp89N5SXXQ==

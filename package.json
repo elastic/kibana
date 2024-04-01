@@ -91,6 +91,7 @@
     "**/remark-parse/trim": "1.0.1",
     "**/sharp": "0.32.6",
     "**/typescript": "4.9.5",
+    "@langchain/core": "0.1.45",
     "globby/fast-glob": "^3.2.11"
   },
   "dependencies": {
@@ -1029,7 +1030,7 @@
     "jsonwebtoken": "^9.0.2",
     "jsts": "^1.6.2",
     "kea": "^2.6.0",
-    "langchain": "^0.1.13",
+    "langchain": "^0.1.30",
     "langsmith": "~0.0.48",
     "launchdarkly-js-client-sdk": "^3.1.4",
     "launchdarkly-node-server-sdk": "^7.0.3",
