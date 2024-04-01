@@ -135,6 +135,7 @@ Array [
       },
       Object {
         "set": Object {
+          "description": "Store the stringified indicator params",
           "field": "slo.indicator.params",
           "ignore_failure": true,
           "value": Object {
@@ -187,11 +188,13 @@ Array [
       "sliValue": -1,
       "slo": Object {
         "budgetingMethod": "occurrences",
+        "createdAt": "2024-01-01T00:00:00.000Z",
         "description": "irrelevant",
         "groupBy": "*",
         "groupings": Object {},
         "id": "unique-id",
         "indicator": Object {
+          "params": "{\\"environment\\":\\"irrelevant\\",\\"service\\":\\"irrelevant\\",\\"transactionName\\":\\"irrelevant\\",\\"transactionType\\":\\"irrelevant\\",\\"index\\":\\"metrics-apm*\\"}",
           "type": "sli.apm.transactionErrorRate",
         },
         "instanceId": "*",
@@ -207,6 +210,7 @@ Array [
           "duration": "7d",
           "type": "rolling",
         },
+        "updatedAt": "2024-01-01T00:00:00.000Z",
       },
       "spaceId": "some-space",
       "status": "NO_DATA",
