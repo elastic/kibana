@@ -6,9 +6,9 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
 import { PackageClient } from '@kbn/fleet-plugin/server';
 import { PackageNotFoundError } from '@kbn/fleet-plugin/server/errors';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { Dashboard, DataStreamStat, Integration } from '../../../common/api_types';
 
 export async function getIntegrationDashboards(
