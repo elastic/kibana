@@ -81,7 +81,7 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
     try {
       await embeddable.parentApi.replacePanel(embeddable.uuid, {
         panelType: embeddable.type,
-        initialState: { ...embeddable.savedObjectAttributesToState(), title },
+        initialState: { ...embeddable.getByValueState(), title },
       });
       this.toastsService.addSuccess({
         title: dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),

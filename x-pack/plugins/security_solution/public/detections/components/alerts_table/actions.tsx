@@ -886,7 +886,7 @@ const createSuppressedTimeline = async (
   }
 };
 
-export const sendBulkEventsToTimelineAction = (
+export const sendBulkEventsToTimelineAction = async (
   createTimeline: CreateTimeline,
   ecs: Ecs[],
   prefer: 'dataProvider' | 'KqlFilter' = 'dataProvider',
@@ -902,7 +902,7 @@ export const sendBulkEventsToTimelineAction = (
     label || `${ecs.length} event IDs`
   );
 
-  createTimeline({
+  await createTimeline({
     from,
     notes: null,
     timeline: {
