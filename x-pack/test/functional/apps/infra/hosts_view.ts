@@ -7,14 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
-import url from 'url';
-import { kbnTestConfig } from '@kbn/test';
+import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
@@ -110,6 +103,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
   const pageObjects = getPageObjects([
     'assetDetails',
     'common',
@@ -122,17 +116,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   // Helpers
-
-  const getKibanaServerUrl = () => {
-    const kibanaServerUrl = url.format(kbnTestConfig.getUrlParts() as url.UrlObject);
-    const kibanaServerUrlWithAuth = url
-      .format({
-        ...url.parse(kibanaServerUrl),
-        auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
-      })
-      .slice(0, -1);
-    return kibanaServerUrlWithAuth;
-  };
 
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
@@ -156,16 +139,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Hosts View', function () {
     let synthtraceApmClient: ApmSynthtraceEsClient;
     before(async () => {
-      const kibanaClient = new ApmSynthtraceKibanaClient({
-        target: getKibanaServerUrl(),
-        logger: createLogger(LogLevel.debug),
-      });
-      const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
-      await kibanaClient.installApmPackage(kibanaVersion);
       synthtraceApmClient = new ApmSynthtraceEsClient({
         client: esClient,
         logger: createLogger(LogLevel.info),
-        version: kibanaVersion,
+        version: await apmSynthtraceKibanaClient.installApmPackage(),
         refreshAfterIndex: true,
       });
 
@@ -189,6 +166,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       return Promise.all([
+        apmSynthtraceKibanaClient.uninstallApmPackage(),
         synthtraceApmClient.clean(),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),

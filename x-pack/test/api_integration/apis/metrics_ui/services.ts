@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ServicesAPIResponseRT } from '@kbn/infra-plugin/common/http_api/host_details';
+import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
 import { FtrProviderContext } from './types';
 import { generateServicesData, generateServicesLogsOnlyData } from './helpers';
@@ -15,16 +16,32 @@ const SERVICES_ENDPOINT = '/api/infra/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const synthtrace = getService('apmSynthtraceEsClient');
+  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
+  const esClient = getService('es');
+
   describe('GET /infra/services', () => {
+    let synthtraceApmClient: ApmSynthtraceEsClient;
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const to = new Date().toISOString();
+    before(
+      async () =>
+        new ApmSynthtraceEsClient({
+          client: esClient,
+          logger: createLogger(LogLevel.info),
+          version: await apmSynthtraceKibanaClient.installApmPackage(),
+          refreshAfterIndex: true,
+        })
+    );
+    after(async () => apmSynthtraceKibanaClient.uninstallApmPackage());
 
     describe('with transactions', () => {
       before(async () =>
-        synthtrace.index(generateServicesData({ from, to, instanceCount: 3, servicesPerHost: 3 }))
+        synthtraceApmClient.index(
+          generateServicesData({ from, to, instanceCount: 3, servicesPerHost: 3 })
+        )
       );
-      after(async () => synthtrace.clean());
+      after(async () => synthtraceApmClient.clean());
+
       it('returns no services with no data', async () => {
         const filters = JSON.stringify({
           'host.name': 'some-host',
@@ -81,14 +98,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     describe('with logs only', () => {
-      before(async () => {
-        await synthtrace.index(
+      before(async () =>
+        synthtraceApmClient.index(
           generateServicesLogsOnlyData({ from, to, instanceCount: 1, servicesPerHost: 2 })
-        );
-      });
-      after(async () => {
-        await synthtrace.clean();
-      });
+        )
+      );
+      after(async () => synthtraceApmClient.clean());
       it('should return services with logs only data', async () => {
         const filters = JSON.stringify({
           'host.name': 'host-0',

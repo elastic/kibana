@@ -41,8 +41,11 @@ export class ApmSynthtraceKibanaClient {
     return latestVersion as string;
   }
 
-  async installApmPackage(packageVersion: string) {
+  async installApmPackage(packageVersion?: string) {
     this.logger.debug(`Installing APM package ${packageVersion}`);
+    if (!packageVersion) {
+      packageVersion = await this.fetchLatestApmPackageVersion();
+    }
 
     const url = `${this.target}/api/fleet/epm/packages/apm/${packageVersion}`;
     const response = await pRetry(
@@ -80,5 +83,50 @@ export class ApmSynthtraceKibanaClient {
     }
 
     this.logger.info(`Installed APM package ${packageVersion}`);
+    return packageVersion;
+  }
+
+  async uninstallApmPackage() {
+    this.logger.debug('Uninstalling APM package');
+    const latestApmPackageVersion = this.fetchLatestApmPackageVersion();
+
+    const url = `${this.target}/api/fleet/epm/packages/apm/${latestApmPackageVersion}`;
+    const response = await pRetry(
+      async () => {
+        const res = await fetch(url, {
+          method: 'DELETE',
+          headers: kibanaHeaders(),
+          body: '{"force":true}',
+        });
+
+        if (res.status >= 400) {
+          const errorJson = await res.json();
+          throw new Error(
+            `APM package version ${latestApmPackageVersion} uninstallation returned ${res.status} status code\nError: ${errorJson}`
+          );
+        }
+        return res;
+      },
+      {
+        retries: 5,
+        onFailedAttempt: (error) => {
+          this.logger.debug(
+            `APM package version ${latestApmPackageVersion} uninstallation failure. ${
+              error.retriesLeft >= 1 ? 'Retrying' : 'Aborting'
+            }`
+          );
+        },
+      }
+    );
+
+    const responseJson = await response.json();
+
+    if (!responseJson.items) {
+      throw new Error(
+        `Failed to uninstall APM package version ${latestApmPackageVersion}, received HTTP ${response.status} and message: ${responseJson.message} for url ${url}`
+      );
+    }
+
+    this.logger.info(`Uninstalled APM package ${latestApmPackageVersion}`);
   }
 }
