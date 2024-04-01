@@ -461,6 +461,8 @@ ${JSON.stringify(argv, null, 2)}
       const isOpen = argv._.includes('open');
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
+      // KIBANA_MKI_USE_LATEST_COMMIT === 1 means that we are overriding the image for the periodic pipeline execution.
+      // We don't override the image when executing the tests on the second quality gate.
       if (
         !process.env.KIBANA_MKI_USE_LATEST_COMMIT ||
         process.env.KIBANA_MKI_USE_LATEST_COMMIT !== '1'
