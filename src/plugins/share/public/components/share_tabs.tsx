@@ -30,7 +30,7 @@ export const ShareMenuTabs = () => {
 
   const { allowEmbed, objectType, onClose, shareMenuItems } = shareContext;
 
-  const tabs = [linkTab, allowEmbed ? embedTab : null].filter(Boolean);
+  const tabs = [linkTab];
   if (shareMenuItems) {
     shareMenuItems
       // need to filter out the null shareMenuItem from Lens and just use the reporting image modal that includes CSV for Lens
@@ -44,6 +44,8 @@ export const ShareMenuTabs = () => {
         });
       });
   }
+
+  if (allowEmbed) tabs.push(embedTab);
 
   return (
     <TabbedModal

@@ -121,7 +121,7 @@ export default function (ctx: FtrProviderContext) {
 
       it('shows CSV reports', async () => {
         await PageObjects.share.clickShareTopNavButton();
-        await testSubjects.existOrFail('sharePanel-CSVReports');
+        await testSubjects.existOrFail('Export');
         await PageObjects.share.clickShareTopNavButton();
       });
 

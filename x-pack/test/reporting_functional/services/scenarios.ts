@@ -114,7 +114,7 @@ export function createScenarios(
   };
   const tryDiscoverCsvNotAvailable = async () => {
     await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('sharePanel-CSVReports');
+    await testSubjects.missingOrFail('Export');
   };
   const tryDiscoverCsvSuccess = async () => {
     await PageObjects.reporting.openExportTab();
@@ -128,7 +128,7 @@ export function createScenarios(
   };
   const tryGeneratePdfNotAvailable = async () => {
     PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail(`sharePanel-PDFReports`);
+    await testSubjects.missingOrFail(`Export`);
   };
   const tryGeneratePdfSuccess = async () => {
     await PageObjects.reporting.openExportTab();
@@ -141,7 +141,7 @@ export function createScenarios(
   };
   const tryReportsNotAvailable = async () => {
     await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('sharePanel-Reports');
+    await testSubjects.missingOrFail('Export');
   };
 
   return {

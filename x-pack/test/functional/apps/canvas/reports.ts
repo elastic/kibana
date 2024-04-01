@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await this.clickShareTopNavButton();
         }
         const menuPanel = await this.find.byCssSelector('div.euiContextMenuPanel');
-        await this.testSubjects.click(`sharePanel-PDFReports`);
+        await this.testSubjects.click(`Export`);
         await this.testSubjects.waitForDeleted(menuPanel);
 
         await PageObjects.reporting.clickGenerateReportButton();
