@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback } from 'react';
 
 import {
   EuiContextMenu,
@@ -18,12 +18,8 @@ import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
-import { useUiActionsService } from '../../../services';
-import {
-  addCanvasElementTrigger,
-  ADD_CANVAS_ELEMENT_TRIGGER,
-} from '../../../state/triggers/add_canvas_element_trigger';
-import { CanvasContainer, useCanvasApi } from '../../hooks/use_canvas_api';
+import { addCanvasElementTrigger } from '../../../state/triggers/add_canvas_element_trigger';
+import { useCanvasApi } from '../../hooks/use_canvas_api';
 
 const strings = {
   getEditorMenuButtonLabel: () =>
@@ -42,42 +38,32 @@ interface FactoryGroup {
 
 interface Props {
   factories: EmbeddableFactoryDefinition[];
+  addPanelActions: Action[];
   promotedVisTypes: BaseVisType[];
   visTypeAliases: VisTypeAlias[];
   createNewVisType: (visType?: BaseVisType | VisTypeAlias) => () => void;
-  createNewEmbeddable: (factory: EmbeddableFactoryDefinition) => () => void;
+  createNewEmbeddableFromFactory: (factory: EmbeddableFactoryDefinition) => () => void;
+  createNewEmbeddableFromAction: (
+    action: Action,
+    context: ActionExecutionContext<object>,
+    closePopover: () => void
+  ) => (event: React.MouseEvent) => void;
 }
 
 export const EditorMenu: FC<Props> = ({
   factories,
+  addPanelActions,
   promotedVisTypes,
   visTypeAliases,
   createNewVisType,
-  createNewEmbeddable,
+  createNewEmbeddableFromAction,
+  createNewEmbeddableFromFactory,
 }: Props) => {
   const factoryGroupMap: Record<string, FactoryGroup> = {};
   const ungroupedFactories: EmbeddableFactoryDefinition[] = [];
-  const uiActions = useUiActionsService();
   const canvasApi = useCanvasApi();
 
-  const [addPanelActions, setAddPanelActions] = useState<Array<Action<object>>>([]);
-
   let panelCount = 1;
-
-  useEffect(() => {
-    let mounted = true;
-    async function loadPanelActions() {
-      const registeredActions = await uiActions?.getTriggerCompatibleActions?.(
-        ADD_CANVAS_ELEMENT_TRIGGER,
-        { embeddable: canvasApi }
-      );
-      if (mounted) setAddPanelActions(registeredActions);
-    }
-    loadPanelActions();
-    return () => {
-      mounted = false;
-    };
-  }, [uiActions, canvasApi]);
 
   // Maps factories with a group to create nested context menus for each group type
   // and pushes ungrouped factories into a separate array
@@ -141,52 +127,29 @@ export const EditorMenu: FC<Props> = ({
       name: factory.getDisplayName(),
       icon,
       toolTipContent,
-      onClick: createNewEmbeddable(factory),
+      onClick: createNewEmbeddableFromFactory(factory),
       'data-test-subj': `createNew-${factory.type}`,
     };
   };
 
-  const onAddPanelActionClick =
-    (action: Action, context: ActionExecutionContext<object>, closePopover: () => void) =>
-    (event: React.MouseEvent) => {
-      closePopover();
-      if (event.currentTarget instanceof HTMLAnchorElement) {
-        if (
-          !event.defaultPrevented && // onClick prevented default
-          event.button === 0 &&
-          (!event.currentTarget.target || event.currentTarget.target === '_self') &&
-          !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
-        ) {
-          event.preventDefault();
-          action.execute(context);
-        }
-      } else action.execute(context);
-    };
-
   const getAddPanelActionMenuItems = useCallback(
-    (
-      api: CanvasContainer,
-      actions: Array<Action<object>> | undefined,
-      closePopover: () => void
-    ) => {
-      return (
-        actions?.map((item) => {
-          const context = {
-            embeddable: api,
-            trigger: addCanvasElementTrigger,
-          };
-          const actionName = item.getDisplayName(context);
-          return {
-            name: actionName,
-            icon: item.getIconType(context),
-            onClick: onAddPanelActionClick(item, context, closePopover),
-            'data-test-subj': `create-action-${actionName}`,
-            toolTipContent: item?.getDisplayNameTooltip?.(context),
-          };
-        }) ?? []
-      );
+    (closePopover: () => void) => {
+      return addPanelActions.map((item) => {
+        const context = {
+          embeddable: canvasApi,
+          trigger: addCanvasElementTrigger,
+        };
+        const actionName = item.getDisplayName(context);
+        return {
+          name: actionName,
+          icon: item.getIconType(context),
+          onClick: createNewEmbeddableFromAction(item, context, closePopover),
+          'data-test-subj': `create-action-${actionName}`,
+          toolTipContent: item?.getDisplayNameTooltip?.(context),
+        };
+      });
     },
-    []
+    [addPanelActions, createNewEmbeddableFromAction, canvasApi]
   );
 
   const getEditorMenuPanels = (closePopover: () => void) => [
@@ -194,7 +157,7 @@ export const EditorMenu: FC<Props> = ({
       id: 0,
       items: [
         ...visTypeAliases.map(getVisTypeAliasMenuItem),
-        ...getAddPanelActionMenuItems(canvasApi, addPanelActions, closePopover),
+        ...getAddPanelActionMenuItems(closePopover),
         ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
           name: appName,
           icon,
