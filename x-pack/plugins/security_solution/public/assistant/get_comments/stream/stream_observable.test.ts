@@ -21,7 +21,7 @@ describe('getStreamObservable', () => {
 
   const setLoading = jest.fn();
   const defaultProps = {
-    llmType: '.gen-ai',
+    actionTypeId: '.gen-ai',
     isEnabledLangChain: false,
     isError: false,
     reader: typedReader,
@@ -76,7 +76,7 @@ describe('getStreamObservable', () => {
 
     const source = getStreamObservable({
       ...defaultProps,
-      llmType: '.bedrock',
+      actionTypeId: '.bedrock',
     });
     const emittedStates: PromptObservableState[] = [];
 

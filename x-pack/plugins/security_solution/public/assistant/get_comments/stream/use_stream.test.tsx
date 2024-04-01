@@ -41,7 +41,7 @@ const defaultProps = {
   reader: readerComplete,
   isEnabledLangChain: false,
   isError: false,
-  llmType: '.gen-ai',
+  actionTypeId: '.gen-ai',
 };
 describe('useStream', () => {
   beforeEach(() => {

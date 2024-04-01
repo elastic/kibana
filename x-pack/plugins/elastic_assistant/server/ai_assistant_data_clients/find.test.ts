@@ -104,6 +104,7 @@ describe('findDocuments', () => {
               _source: {
                 '@timestamp': '2020-04-20T15:25:31.830Z',
                 api_config: {
+                  action_type_id: '.gen-ai',
                   connector_id: 'c1',
                   default_system_prompt_id: 'prompt-1',
                   model: 'test',
