@@ -460,6 +460,30 @@ describe('ResponseActionsClientImpl base class', () => {
       });
 
       describe('#riteActionRequestToEndpointIndex()', () => {
+        it('should write doc with all expected data', async () => {
+          indexDocOptions.meta = { one: 1 };
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).resolves.toEqual({
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'isolate',
+                comment: 'test comment',
+                parameters: undefined,
+              },
+              expiration: expect.any(String),
+              input_type: 'endpoint',
+              type: 'INPUT_ACTION',
+            },
+            agent: { id: ['one'] },
+            meta: { one: 1 },
+            user: { id: 'foo' },
+          });
+        });
+
         it('should write doc with error when license is not Enterprise', async () => {
           (
             constructorOptions.endpointService.getLicenseService().isEnterprise as jest.Mock
@@ -514,6 +538,7 @@ describe('ResponseActionsClientImpl base class', () => {
           comment: 'some comment',
           output: undefined,
         },
+        meta: { one: 1 },
       };
     });
 
@@ -539,6 +564,7 @@ describe('ResponseActionsClientImpl base class', () => {
         error: {
           message: 'test error',
         },
+        meta: { one: 1 },
       } as LogsEndpointActionResponse);
     });
 

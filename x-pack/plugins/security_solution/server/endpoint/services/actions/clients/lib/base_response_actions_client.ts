@@ -380,6 +380,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       user: {
         id: this.options.username,
       },
+      meta: actionRequest.meta,
       ...(errorMsg ? { error: { message: errorMsg } } : {}),
       ...(actionRequest.ruleId && actionRequest.ruleName
         ? { rule: { id: actionRequest.ruleId, name: actionRequest.ruleName } }
@@ -427,6 +428,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     error,
     agentId,
     data,
+    meta,
   }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
     TOutputContent,
     TMeta
@@ -445,6 +447,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         data,
       },
       error,
+      meta,
     };
 
     return doc;
