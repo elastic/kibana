@@ -142,7 +142,7 @@ export const ApiConfig = z.object({
   /**
    * action type Id
    */
-  actionTypeId: z.enum(['.gen-ai', '.bedrock']),
+  actionTypeId: z.string(),
   /**
    * defaultSystemPromptId
    */
