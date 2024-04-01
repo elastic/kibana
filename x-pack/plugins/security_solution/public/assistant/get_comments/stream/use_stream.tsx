@@ -81,6 +81,7 @@ export const useStream = ({
       setComplete({ complete: false, didAbort: false });
     }
   }, [complete, onCompleteStream]);
+
   useEffect(() => {
     const newSubscription = observer$.subscribe({
       next: ({ message, loading: isLoading }) => {
@@ -91,7 +92,6 @@ export const useStream = ({
         setComplete({ complete: true, didAbort: false });
       },
       error: (err) => {
-        console.log('error', err.name);
         if (err.name === 'AbortError') {
           // the fetch was canceled, we don't need to do anything about it
         } else {
@@ -101,6 +101,7 @@ export const useStream = ({
     });
     setSubscription(newSubscription);
   }, [observer$]);
+
   return {
     error,
     isLoading: loading,
