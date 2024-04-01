@@ -278,7 +278,12 @@ We also need to modify the `RuleToImport` schema, since now we will be allowing 
 
 Currently, `RuleToImport` optionally accepts the `immutable` param, but rejects validation if its value is set to anything else than `false` - since we don't currently support importing prebuilt rules. 
 
-We will be changing the mechanism for importing rules so that, besides the `rule_id`, the `version` of the rule is also a required parameter. These two parameters will be used to determine if the rule is prebuilt or not, and dynamically calculate `rule_source` during import.
+We will be changing the mechanism for importing rules so that onlt the `rule_id` is required parameter. This parameters will be used to determine if the rule is prebuilt or not, and dynamically calculate `rule_source` during import.
+
+The rule import endpoint should:
+
+- for custom rules being imported, if `version` is not specified, set it to `1`.
+- for prebuilt rules being imported, if `version` is not specified, throw an error.
 
 See the detailed explanation for this mechanism in the [Exporting and importing rules](#exporting-and-importing-rules) sections.
 
@@ -301,7 +306,6 @@ export type RuleToImportInput = z.input<typeof RuleToImport>;
 export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
-    version: RuleVersion,
   })
 );
 ```
@@ -363,7 +367,7 @@ In order to mark the `immutable` field as deprecated, and making sure that our a
 2. via a deprecation warning in the OpenAPI schema, as detailed above
 3. by adding a custom response header in said endpoints.
 
-The `immutable` field will afterwards be actually removed from our API endpoint responses and our application after a deprecation period that should give our users enough time to adapt to this change. The length of this deprecation period can vary depending on adoption or other factors, but around 18 monthscan be a good starting point.
+The `immutable` field will afterwards be actually removed from our API endpoint responses and our application after a deprecation period that should give our users enough time to adapt to this change. The length of this deprecation period can vary depending on adoption or other factors, but should be at least 24 months.
 
 Both the docs and the custom response header should communicate that the `immutable` field:
 
@@ -412,7 +416,6 @@ For example: the `createRules` method is used in 3 use cases:
 
 The same happens with `patchRules`. It is used:
 1. when patching rules via our Rule Patch endpoints
-2. when importing rules, when the imported `rule_id` is brand new
 3. when upgrading rules, if a rule maintains its `type`.
 
 This causes these 3 CRUD functions to have an unnecessary complex interfaces and logic in order to handle all these different use cases.
@@ -443,8 +446,12 @@ Our migration strategy will consist of two distinct types of migration: a **migr
 |  <li>_**Enable and disable action**_</li> | <center>✅</center> | <center>❌</center> | - Migration-on-write is technically possible but should be done on Alerting Framework side. |
 | <li>_**Delete action**_</li> | <center>✅</center> | <center>❌</center> | - Deletes ES object but returns deleted rules data, so so normalization-on-read is enough. |
 | <li>_**Export action**_</li> | <center>✅</center> | <center>❌</center> | - See section [Exporting rules](#exporting-rules) |
-| <li>_**Duplicate rule action**_</li> | <center>❌</center> | <center>❌</center> | - Per definition, all duplicated rules will be `custom` rules. That means that all duplicated rules (the duplicates) are newly created and should get a `rule_source` of type `internal`, and no migration or normalization is neccessary. |
-| <li>_**Edit rule action**_</li> | <center>❌</center> | <center>✅</center> | - No normalization-on-read is needed since endpoint doesn't return whole rule object <br>- We can take advantage of the `ruleParamsModifier` to carry out the migration-on-write, regardless of the type of edit that is being performed. <br>- See implementation details in the [Bulk editing rules](#bulk-editing-rules) section.
+| <li>_**Duplicate rule action**_</li> | <center>✅</center> | <center>❌</center> | - Per definition, all duplicated rules will be `custom` rules. That means that all duplicated rules (the duplicates) are newly created and should get a `rule_source` of type `internal`, and no migration-on-write is neccessary. |
+| <li>_**Edit rule action**_</li> | <center>✅</center> | <center>✅</center> | - We can take advantage of the `ruleParamsModifier` to carry out the migration-on-write, regardless of the type of edit that is being performed. <br>- See implementation details in the [Bulk editing rules](#bulk-editing-rules) section.
+| **Review Rule Installation** - `POST /prebuilt_rules/installation/_review`| <center>✅</center> | <center>❌</center> |  |
+| **Perform Rule Installation** - `POST /prebuilt_rules/installation/_install`| <center>✅</center> | <center>❌</center> | - Newly installed rules will be installed with new schema; but no migration-on-write should happen in this endpoint. |
+| **Review Rule Upgrade** - `POST /prebuilt_rules/upgrade/_review` | <center>✅</center> | <center>❌</center> |  |
+| **Perform Rule Upgrade** - `POST /prebuilt_rules/upgrade/_perform`| <center>✅</center> | <center>✅</center> |  |
 
 
 #### Normalization on read
@@ -575,8 +582,7 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
   <thead>
     <tr>
       <th>Migration use case</th>
-      <th>Current value of <pre>rule_source</pre></th>
-      <th>Current value of <pre>immutable</pre></th>
+      <th>Current value of <code>rule_source</code> and <code>immutable</code></th>
       <th>Any field diverges <br> from base version after update?</th>
       <th>Results</th>
     </tr>
@@ -585,14 +591,17 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     <tr>
       <td><b>Custom rule</b> (not migrated yet)</td>
       <td>
-        <pre>undefined</pre>
+        <pre>
+{
+  immutable: false,
+}
+        </pre>
       </td>
-      <td><pre>false</pre></td>
       <td>N/A - Doesn't apply for custom rules</td>
       <td>
         <pre>
 {
-  rule_source: {
+  ruleSource: {
     type: 'internal'
   },
   immutable: false,
@@ -605,16 +614,18 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
       <td>
         <pre>
 {
-  type: 'internal'
+  ruleSource: {
+    type: 'internal'
+  },
+  immutable: false,
 }
         </pre>
       </td>
-      <td><pre>false</pre></td>
       <td>N/A - Doesn't apply for custom rules</td>
       <td>
         <pre>
 {
-  rule_source: {
+  ruleSource: {
     type: 'internal'
   },
   immutable: false,
@@ -625,14 +636,17 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     <tr>
       <td><b>Prebuilt rule</b> (not yet migrated, no customizations)</td>
       <td>
-        <pre>undefined</pre>
+        <pre>
+{
+  immutable: true,
+}
+        </pre>
       </td>
-      <td><pre>true</pre></td>
       <td>No</td>
       <td>
         <pre>
 {
-  rule_source: {
+  ruleSource: {
     type: 'external',
     isCustomized: false,
     ...
@@ -645,14 +659,17 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     <tr>
       <td><b>Prebuilt rule</b> (not yet migrated, with customizations)</td>
       <td>
-        <pre>undefined</pre>
+        <pre>
+{
+  immutable: true,
+}
+        </pre>
       </td>
-      <td><pre>true</pre></td>
       <td>Yes</td>
       <td>
         <pre>
 {
-  rule_source: {
+  ruleSource: {
     type: 'external',
     isCustomized: true,
     ...
@@ -665,20 +682,22 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     <tr>
       <td><b>Prebuilt rule</b> (already migrated, no customizations)</td>
       <td>
-        <pre> 
+        <pre>
 {
-  type: 'external',
-  isCustomized: false,
+  ruleSource: {
+    type: 'external',
+    isCustomized: false,
     ...
+  },
+  immutable: true,
 }
-          </pre>
+        </pre>
       </td>
-      <td><pre>true</pre></td>
       <td>No</td>
       <td>
         <pre>
 {
-  rule_source: {
+  ruleSource: {
     type: 'external',
     isCustomized: false,
     ...
@@ -691,20 +710,22 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     <tr>
       <td><b>Prebuilt rule</b> (already migrated, with customizations)</td>
       <td>
-        <pre> 
+        <pre>
 {
-  type: 'external',
-  isCustomized: true,
+  ruleSource: {
+    type: 'external',
+    isCustomized: true,
     ...
+  },
+  immutable: true,
 }
-          </pre>
+        </pre>
       </td>
-      <td><pre>true</pre></td>
       <td>Yes</td>
       <td>
         <pre>
 {
-  rule_source: {
+  ruleSource: {
     type: 'external',
     isCustomized: true,
     ...
@@ -717,20 +738,22 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     <tr>
       <td><i>Customized</i> <b>Prebuilt rule</b> (already migrated, no customizations after update)</td>
       <td>
-        <pre> 
+        <pre>
 {
-  type: 'external',
-  isCustomized: true,
+  ruleSource: {
+    type: 'external',
+    isCustomized: true,
     ...
+  },
+  immutable: true,
 }
-          </pre>
+        </pre>
       </td>
-      <td><pre>true</pre></td>
       <td>No</td>
       <td>
         <pre>
 {
-  rule_source: {
+  ruleSource: {
     type: 'external',
     isCustomized: false,
     ...
@@ -741,22 +764,24 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
       </td>
     </tr>
     <tr>
-      <td>Invalid case: Migrating a migrated non-customized prebuilt rule, with customizations. <br><br> `immutable` should never be false if `rule_source.type' is 'external'. Migration should correct this inconsistency.</td>
+      <td>Invalid case: Migrating a migrated non-customized prebuilt rule, with customizations. <br><br> `immutable` should never be false if `ruleSource.type' is 'external'. Migration should correct this inconsistency.</td>
       <td>
-        <pre> 
+        <pre>
 {
-  type: 'external',
-  isCustomized: false,
+  ruleSource: {
+    type: 'external',
+    isCustomized: false,
     ...
+  },
+  immutable: false,
 }
-          </pre>
+        </pre>
       </td>
-      <td><pre>false</pre></td>
       <td>Yes</td>
       <td>
         <pre>
 {
-  rule_source: {
+  ruleSource: {
     type: 'external',
     isCustomized: true,
     ...
@@ -1399,7 +1424,7 @@ With the rule schema updated, we will allow users to **edit their prebuilt rules
 
 Endpoints that users will be able to use to modify rules are:
 
-- **Update Rule** - `PUT /rules`: called by the UI when updating/modifying a single rule via the Rule Details page
+- **Update Rule** - `PUT /rules`: called by the UI when updating/modifying a single rule via the Rule Editing page
 - **Patch Rule** - `PATCH /rules`: used for attaching shared exceptions list to rules
 - **Bulk Patch Rules** - `PATCH /rules/_bulk_update`: deprecated and unused by the UI (might still be used by public API users)
 - **Bulk Update Rules** - `PUT /rules/_bulk_update`: deprecated and unused by the UI (might still be used by public API users)
@@ -1806,11 +1831,14 @@ Once done editing the rule, the user clicks on the "Save Changes" button, which 
 - The only fields in the UI that should not be customizable are: **Rule Type**, **Author** and **License**, which should continue to be read-only.
 - **Definition** should be the default open tab when opening the edit rule page for a prebuilt rule (current default is **Actions**)
 - Field validation should continue to work as it does for custom rules.
-- No fields should return a validation error for the values that come from the `security_detection_engine` package prebuilt rules. This means that a user should be able to successfully save the prebuilt rule with no changes. See **List of issues to fix** below.
+- No fields should return a validation error for the values that come from the `security_detection_engine` package with prebuilt rules. This means that a user should be able to successfully save any stock prebuilt rule with no changes.
 
-#### Via Rules Table page
+#### Via the Rule Management page
 
-- The Rules Table's filter should be updated so that rules can be fitlered according to their status as **custom**, **Elastic prebuilt** and **customized Elastic prebuilt**. Notice that **customized Elastic prebuilt** will be a subset of **Elastic prebuilt**.
+The existing filter in the Rules table should be updated so that rules can be filtered by:
+- custom rules
+- non-customized prebuilt rules
+- customized prebuilt rules
 
 #### Via Bulk Actions
 
@@ -1921,7 +1949,7 @@ For single-line string fields we will continue to use the existing simple diff a
       <th>Current version</th>
       <th style="border-right:3px solid black">Target version</th>
       <th>Merged version (output)</th>
-      <th>Mark as conflict?</th>
+      <th>Conflict</th>
     </tr>
   </thead>
   <tbody align="center">
@@ -1963,7 +1991,7 @@ For single-line string fields we will continue to use the existing simple diff a
       <td><code>My GREAT rule name</code></td>
       <td style="border-right:3px solid black"><code>My EXCELLENT rule name</code></td>
       <td><code>My GREAT rule name</code></td>
-      <td><code>YES</code></td>
+      <td><code>NON_SOLVABLE</code></td>
     </tr>
   </tbody>
 </table>
@@ -2076,7 +2104,7 @@ In summary:
       <th>Current version</th>
       <th style="border-right:3px solid black">Target version</th>
       <th>Merged version (output)</th>
-      <th>Mark as conflict?</th>
+      <th>Conflict</th>
     </tr>
   </thead>
   <tbody >
@@ -2118,7 +2146,7 @@ In summary:
       <td><pre>My GREAT description. <br>This is a second line.</pre></td>
       <td style="border-right:3px solid black"><pre>My description. <br>This is a second line, now longer.</pre></td>
       <td><pre>My GREAT description. <br>This is a second line, now longer.</pre></td>
-      <td><pre>YES</pre></td>
+      <td><pre>SOLVABLE</pre></td>
     </tr>
     <tr>
       <td style="border-right:3px solid black">Customization and upstream update <b>non-solvable conflict</b> (ABC)</td>
@@ -2126,7 +2154,7 @@ In summary:
       <td><pre>My GREAT description. <br>This is a third line.</pre></td>
       <td style="border-right:3px solid black"><pre>My EXCELLENT description. <br>This is a fourth line.</pre></td>
       <td><pre>My GREAT description. <br>This is a third line.</pre></td>
-      <td><pre>YES</pre></td>
+      <td><pre>NON_SOLVABLE</pre></td>
     </tr>
   </tbody>
 </table>
@@ -2147,7 +2175,7 @@ Number fields should be treated as a whole unit, i.e. not breakable by digits. T
       <th>Current version</th>
       <th style="border-right:3px solid black">Target version</th>
       <th>Merged version (output)</th>
-      <th>Mark as conflict?</th>
+      <th>Conflict</th>
     </tr>
   </thead>
   <tbody align="center">
@@ -2189,7 +2217,7 @@ Number fields should be treated as a whole unit, i.e. not breakable by digits. T
       <td><code>20</code></td>
       <td style="border-right:3px solid black"><code>30</code></td>
       <td><code>20</code></td>
-      <td><code>YES</code></td>
+      <td><code>NON_SOLVABLE</code></td>
     </tr>
   </tbody>
 </table>
@@ -2260,7 +2288,7 @@ The possible scenarios are:
       <th>Current version</th>
       <th style="border-right:3px solid black">Target version</th>
       <th>Merged version (output)</th>
-      <th>Mark as conflict?</th>
+      <th>Conflict</th>
     </tr>
   </thead>
   <tbody align="center">
@@ -2368,7 +2396,7 @@ The possible scenarios are:
       <th>Current version</th>
       <th style="border-right:3px solid black">Target version</th>
       <th>Merged version (output)</th>
-      <th>Mark as conflict?</th>
+      <th>Conflict</th>
     </tr>
   </thead>
   <tbody >
@@ -2661,7 +2689,7 @@ The possible scenarios are:
   {
     ecs: true,
     name: "event.action",
-    type: "unknown"
+    type: "keyword"
   },
     {
     ecs: false,
@@ -2732,7 +2760,7 @@ The current UI of the **Rule Updates** page has an button with the label "Update
 
 ![](2024-02-23-14-09-16.png)
 
-We can replace this button for an **Update rules with no conflicts** button. Clicking this button would make a request to `/upgrade/_perform` with a payload that includes only rules that have no conflicts. That payload can be built out of the response of the `/upgrade/_review` endpoint, including only rules with no conflicts and specifying that all rules should be updated to their `MERGED` version, which represents the "clean" (conflictless) update.
+We can replace this button for an **Update rules with no conflicts** button. Clicking this button would make a request to `/upgrade/_perform` with a payload that includes only rules that don't have non-solvable conflicts. That payload can be built out of the response of the `/upgrade/_review` endpoint, including ids of such rules and specifying that all rules should be updated to their `MERGED` version.
 
 ```ts
 // [PSEUDOCODE]
