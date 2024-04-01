@@ -15,17 +15,25 @@ export function validateRelatedIntegration(
   const [{ value, path }] = args;
 
   if (value.package.length === 0) {
-    return { code: 'ERR_FIELD_MISSING', path, message: i18n.INTEGRATION_REQUIRED };
+    return {
+      code: 'ERR_FIELD_MISSING',
+      path: `${path}.package`,
+      message: i18n.INTEGRATION_REQUIRED,
+    };
   }
 
   if (value.version.length === 0) {
-    return { code: 'ERR_FIELD_MISSING', path, message: i18n.VERSION_DEPENDENCY_REQUIRED };
+    return {
+      code: 'ERR_FIELD_MISSING',
+      path: `${path}.version`,
+      message: i18n.VERSION_DEPENDENCY_REQUIRED,
+    };
   }
 
   if (!SEMVER_PATTERN.test(value.version)) {
     return {
-      code: 'ERR_FIELD_MISSING',
-      path,
+      code: 'ERR_FIELD_FORMAT',
+      path: `${path}.version`,
       message: i18n.VERSION_DEPENDENCY_INVALID,
     };
   }

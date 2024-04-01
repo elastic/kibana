@@ -61,6 +61,16 @@ export function RelatedIntegrationField({
     return [options, selectedOption ? [selectedOption] : []];
   }, [integrations, field.value, relatedIntegrations]);
 
+  const [packageErrorMessage, versionErrorMessage] = useMemo(() => {
+    const packagePath = `${field.path}.package`;
+    const versionPath = `${field.path}.version`;
+
+    return [
+      field.errors.find((err) => 'path' in err && err.path === packagePath),
+      field.errors.find((err) => 'path' in err && err.path === versionPath),
+    ];
+  }, [field.path, field.errors]);
+
   const handleIntegrationChange = useCallback(
     ([changedSelectedOption]: Array<EuiComboBoxOptionOption<Integration>>) =>
       field.setValue({
@@ -88,8 +98,8 @@ export function RelatedIntegrationField({
     <EuiPanel color="subdued">
       <EuiFormRow
         fullWidth
-        isInvalid={field.errors.length > 0}
-        error={field.errors.length > 0 ? field.errors[0].message : undefined}
+        isInvalid={Boolean(packageErrorMessage) || Boolean(versionErrorMessage)}
+        error={packageErrorMessage?.message ?? versionErrorMessage?.message}
       >
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={8}>
@@ -103,6 +113,7 @@ export function RelatedIntegrationField({
               onChange={handleIntegrationChange}
               fullWidth
               aria-label={i18n.RELATED_INTEGRATION_ARIA_LABEL}
+              isInvalid={Boolean(packageErrorMessage)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
@@ -114,6 +125,7 @@ export function RelatedIntegrationField({
               aria-label={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_ARIA_LABEL}
               value={field.value.version}
               onChange={handleVersionChange}
+              isInvalid={Boolean(versionErrorMessage)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
