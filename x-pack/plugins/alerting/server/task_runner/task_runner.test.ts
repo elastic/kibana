@@ -1957,7 +1957,7 @@ describe('Task Runner', () => {
     expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed']);
     expect(loggerMeta?.error?.stack_trace).toBeDefined();
     expect(logger.error).toBeCalledTimes(1);
-    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
   test('recovers gracefully when the Rule Task Runner throws an exception when loading rule to prepare for run', async () => {
