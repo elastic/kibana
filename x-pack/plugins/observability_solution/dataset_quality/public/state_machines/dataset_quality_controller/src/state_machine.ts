@@ -8,6 +8,7 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
 import {
   DashboardType,
   DataStreamDetails,
@@ -367,12 +368,14 @@ export interface DatasetQualityControllerStateMachineDependencies {
   initialContext?: DatasetQualityControllerContext;
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
+  dataStreamDetailsClient: IDataStreamDetailsClient;
 }
 
 export const createDatasetQualityControllerStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
   toasts,
   dataStreamStatsClient,
+  dataStreamDetailsClient,
 }: DatasetQualityControllerStateMachineDependencies) =>
   createPureDatasetQualityControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -410,7 +413,7 @@ export const createDatasetQualityControllerStateMachine = ({
 
         const { type, name: dataset, namespace } = context.flyout.dataset;
 
-        return dataStreamStatsClient.getDataStreamDetails({
+        return dataStreamDetailsClient.getDataStreamDetails({
           dataStream: dataStreamPartsToIndexName({
             type: type as DataStreamType,
             dataset,
@@ -428,7 +431,7 @@ export const createDatasetQualityControllerStateMachine = ({
         const { integration } = context.flyout.dataset;
 
         return integration
-          ? dataStreamStatsClient.getIntegrationDashboards({ integration: integration.name })
+          ? dataStreamDetailsClient.getIntegrationDashboards({ integration: integration.name })
           : Promise.resolve({});
       },
     },
