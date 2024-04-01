@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
    * the "signal.original_time" field, ensuring that timestamp overrides operate, and ensuring that
    * partial errors happen correctly
    */
-  describe('@ess @serverless timestamp tests', () => {
+  describe('@ess @serverless timestamp usage during execution', () => {
     describe('alerts generated from events with a timestamp in seconds is converted correctly into the forced ISO8601 format when copying', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

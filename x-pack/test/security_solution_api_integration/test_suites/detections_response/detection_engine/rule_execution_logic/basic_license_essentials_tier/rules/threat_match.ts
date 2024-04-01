@@ -650,8 +650,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('timeout behavior', () => {
-      // TODO: unskip this and see if we can make it not flaky
-      it.skip('will return an error if a rule execution exceeds the rule interval', async () => {
+      it('will return an error if a rule execution exceeds the rule interval', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           override: {
             concurrent_searches: 1,

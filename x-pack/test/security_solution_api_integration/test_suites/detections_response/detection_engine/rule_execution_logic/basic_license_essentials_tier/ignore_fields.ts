@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
    * server/lib/detection_engine/signals/source_fields_merging/utils/is_ignored.ts
    * server/lib/detection_engine/signals/source_fields_merging/utils/is_eql_bug_77152.ts
    */
-  describe('@ess @serverless ignore_fields', () => {
+  describe('@ess @serverless @brokenInServerless ignore_fields', () => {
     const supertest = getService('supertest');
     const esArchiver = getService('esArchiver');
     const log = getService('log');
@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    it('@skipInQA should ignore the field of "testing_ignored"', async () => {
+    it('should ignore the field of "testing_ignored"', async () => {
       const rule = getEqlRuleForAlertTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(hits).to.eql([undefined, undefined, undefined, undefined]);
     });
 
-    it('@skipInQA should ignore the field of "testing_regex"', async () => {
+    it('should ignore the field of "testing_regex"', async () => {
       const rule = getEqlRuleForAlertTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
@@ -110,25 +110,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Value should be "constant_value for all records"
       expect(hits).to.eql(['constant_value', 'constant_value', 'constant_value', 'constant_value']);
-    });
-
-    // TODO: Remove this test once https://github.com/elastic/elasticsearch/issues/77152 is fixed
-    it('should ignore the field of "_ignored" when using EQL and index the data', async () => {
-      const rule = getEqlRuleForAlertTesting(['ignore_fields']);
-
-      const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccess({ supertest, log, id });
-      await waitForAlertsToBePresent(supertest, log, 4, [id]);
-      const alertsOpen = await getAlertsById(supertest, log, id);
-      const hits = alertsOpen.hits.hits.map((hit) => (hit._source as Ignore).small_field).sort();
-
-      // We just test a constant value to ensure this did not blow up on us and did index data.
-      expect(hits).to.eql([
-        '1 indexed',
-        '2 large not indexed',
-        '3 large not indexed',
-        '4 large not indexed',
-      ]);
     });
   });
 };

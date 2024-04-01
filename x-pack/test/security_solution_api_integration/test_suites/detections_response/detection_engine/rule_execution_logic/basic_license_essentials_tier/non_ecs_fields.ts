@@ -11,13 +11,13 @@ import {
   previewRule,
   dataGeneratorFactory,
   enhanceDocument,
-} from '../../../../utils';
+} from '../../../utils';
 import {
   deleteAllRules,
   deleteAllAlerts,
   getRuleForAlertTesting,
-} from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+} from '../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 const getQueryRule = (docIdToQuery: string) => ({
   ...getRuleForAlertTesting(['ecs_non_compliant']),
