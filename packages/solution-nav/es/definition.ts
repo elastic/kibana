@@ -31,7 +31,7 @@ const navTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
-          link: 'home',
+          link: 'enterpriseSearch',
         },
         {
           id: 'dev_tools',
@@ -44,8 +44,8 @@ const navTree: NavigationTreeDefinition = {
           },
         },
         {
-          id: 'explore',
-          title: i18n.translate('navigation.searchNav.explore', {
+          id: 'kibana',
+          title: i18n.translate('navigation.searchNav.kibana', {
             defaultMessage: 'Kibana',
           }),
           children: [
@@ -58,19 +58,6 @@ const navTree: NavigationTreeDefinition = {
                 return pathNameSerialized.startsWith(prepend('/app/dashboards'));
               },
             },
-            {
-              link: 'visualize',
-              title: i18n.translate('navigation.searchNav.visualize', {
-                defaultMessage: 'Visualizations',
-              }),
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return (
-                  pathNameSerialized.startsWith(prepend('/app/visualize')) ||
-                  pathNameSerialized.startsWith(prepend('/app/lens')) ||
-                  pathNameSerialized.startsWith(prepend('/app/maps'))
-                );
-              },
-            },
           ],
         },
         {
@@ -80,111 +67,98 @@ const navTree: NavigationTreeDefinition = {
           }),
           children: [
             {
-              title: i18n.translate('navigation.searchNav.content.indices', {
-                defaultMessage: 'Indices',
-              }),
-              renderAs: 'accordion',
-              children: [
-                {
-                  title: i18n.translate(
-                    'navigation.searchNav.content.indices.searchGithub.overview',
-                    {
-                      defaultMessage: 'Overview',
-                    }
-                  ),
-                  link: 'management:index_management',
-                  breadcrumbStatus:
-                    'hidden' /* management sub-pages set their breadcrumbs themselves */,
-                },
-                {
-                  title: i18n.translate(
-                    'navigation.searchNav.content.indices.searchGithub.documents',
-                    {
-                      defaultMessage: 'Documents',
-                    }
-                  ),
-                  link: 'management:index_management',
-                },
-                {
-                  title: i18n.translate(
-                    'navigation.searchNav.content.indices.searchGithub.indexMappings',
-                    {
-                      defaultMessage: 'Index Mappings',
-                    }
-                  ),
-                  link: 'management:index_management',
-                },
-                {
-                  title: i18n.translate(
-                    'navigation.searchNav.content.indices.searchGithub.pipelines',
-                    {
-                      defaultMessage: 'Pipelines',
-                    }
-                  ),
-                  link: 'management:ingest_pipelines',
-                },
-              ],
+              link: 'enterpriseSearchContent:searchIndices',
+              // TODO: Build the children dynamically
+              // https://github.com/elastic/kibana/issues/179751
+              // renderAs: 'accordion',
+              // children: [
+              //   {
+              //     title: i18n.translate(
+              //       'navigation.searchNav.content.indices.searchGithub.overview',
+              //       {
+              //         defaultMessage: 'Overview',
+              //       }
+              //     ),
+              //     link: 'management:index_management',
+              //     breadcrumbStatus:
+              //       'hidden' /* management sub-pages set their breadcrumbs themselves */,
+              //   },
+              //   {
+              //     title: i18n.translate(
+              //       'navigation.searchNav.content.indices.searchGithub.documents',
+              //       {
+              //         defaultMessage: 'Documents',
+              //       }
+              //     ),
+              //     link: 'management:index_management',
+              //   },
+              //   {
+              //     title: i18n.translate(
+              //       'navigation.searchNav.content.indices.searchGithub.indexMappings',
+              //       {
+              //         defaultMessage: 'Index Mappings',
+              //       }
+              //     ),
+              //     link: 'management:index_management',
+              //   },
+              //   {
+              //     title: i18n.translate(
+              //       'navigation.searchNav.content.indices.searchGithub.pipelines',
+              //       {
+              //         defaultMessage: 'Pipelines',
+              //       }
+              //     ),
+              //     link: 'management:ingest_pipelines',
+              //   },
+              // ],
             },
-            {
-              title: i18n.translate('navigation.searchNav.content.connectors', {
-                defaultMessage: 'Connectors',
-              }),
-              link: 'management:triggersActionsConnectors',
-            },
-            {
-              title: i18n.translate('navigation.searchNav.content.webCrawlers', {
-                defaultMessage: 'Web crawlers',
-              }),
-              link: 'management:triggersActionsConnectors',
-            },
+            { link: 'enterpriseSearchContent:connectors' },
+            { link: 'enterpriseSearchContent:webCrawlers' },
           ],
         },
         {
-          id: 'apps',
-          title: i18n.translate('navigation.searchNav.apps', {
-            defaultMessage: 'Applications',
+          id: 'build',
+          title: i18n.translate('navigation.searchNav.build', {
+            defaultMessage: 'Build',
           }),
           children: [
             {
-              title: i18n.translate('navigation.searchNav.apps.aiPlayground', {
-                defaultMessage: 'AI playground',
-              }),
-              link: 'management:api_keys',
+              link: 'enterpriseSearchContent:playground',
             },
             {
-              title: i18n.translate('navigation.searchNav.apps.searchApplications', {
+              title: i18n.translate('navigation.searchNav.build.searchApplications', {
                 defaultMessage: 'Search applications',
               }),
-              renderAs: 'accordion',
-              children: [
-                {
-                  title: i18n.translate(
-                    'navigation.searchNav.apps.searchApplications.docsExplorer',
-                    {
-                      defaultMessage: 'Docs explorer',
-                    }
-                  ),
-                  link: 'home',
-                },
-                {
-                  title: i18n.translate('navigation.searchNav.apps.searchApplications.content', {
-                    defaultMessage: 'Content',
-                  }),
-                  link: 'home',
-                },
-                {
-                  title: i18n.translate('navigation.searchNav.apps.searchApplications.connect', {
-                    defaultMessage: 'Connect',
-                  }),
-                  link: 'home',
-                },
-              ],
+              link: 'enterpriseSearchApplications:searchApplications',
+              // TODO: Build the children dynamically
+              // https://github.com/elastic/kibana/issues/179751
+              // renderAs: 'accordion',
+              // children: [
+              //   {
+              //     title: i18n.translate(
+              //       'navigation.searchNav.build.searchApplications.docsExplorer',
+              //       {
+              //         defaultMessage: 'Docs explorer',
+              //       }
+              //     ),
+              //     link: 'home',
+              //   },
+              //   {
+              //     title: i18n.translate('navigation.searchNav.build.searchApplications.content', {
+              //       defaultMessage: 'Content',
+              //     }),
+              //     link: 'home',
+              //   },
+              //   {
+              //     title: i18n.translate('navigation.searchNav.build.searchApplications.connect', {
+              //       defaultMessage: 'Connect',
+              //     }),
+              //     link: 'home',
+              //   },
+              // ],
             },
             {
-              title: i18n.translate('navigation.searchNav.apps.behavioralAnalytics', {
-                defaultMessage: 'Behavioral analytics',
-              }),
-              link: 'ml:logRateAnalysis',
+              link: 'enterpriseSearchAnalytics',
             },
           ],
         },
@@ -198,13 +172,13 @@ const navTree: NavigationTreeDefinition = {
               title: i18n.translate('navigation.searchNav.entsearch.appSearch', {
                 defaultMessage: 'App Search',
               }),
-              link: 'home',
+              link: 'appSearch:engines',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/enterprise_search/app_search'));
+              },
             },
             {
-              title: i18n.translate('navigation.searchNav.entsearch.workplaceSearch', {
-                defaultMessage: 'Workplace Search',
-              }),
-              link: 'home',
+              link: 'workplaceSearch',
             },
           ],
         },
@@ -225,7 +199,7 @@ const navTree: NavigationTreeDefinition = {
           title: i18n.translate('navigation.searchNav.management.trainedModels', {
             defaultMessage: 'Trained models',
           }),
-          link: 'home',
+          link: 'ml:modelManagement',
         },
         {
           link: 'management',
@@ -303,6 +277,6 @@ export const definition: SolutionNavigationDefinition = {
   id: 'es',
   title,
   icon,
-  homePage: 'home', // Temp. Wil be updated when all links are registered
+  homePage: 'enterpriseSearch',
   navigationTree$: of(navTree),
 };

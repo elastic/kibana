@@ -35,6 +35,8 @@ import {
   PLAYGROUND_PATH,
 } from './routes';
 
+export { CONNECTORS_PATH, SEARCH_INDICES_PATH, CRAWLERS_PATH, PLAYGROUND_PATH } from './routes';
+
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);

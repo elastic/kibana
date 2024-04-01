@@ -264,6 +264,7 @@ const navTree: NavigationTreeDefinition = {
             defaultMessage: 'Stack Management',
           }),
           renderAs: 'panelOpener',
+          spaceBefore: null,
           children: [
             {
               title: 'Ingest',

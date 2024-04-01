@@ -16,11 +16,13 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
+  AppDeepLink,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { IndexManagementPluginStart } from '@kbn/index-management-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -49,6 +51,15 @@ import {
   CreatIndexLocatorParams,
 } from '../common/locators/create_index_locator';
 import { ClientConfigType, InitialAppData } from '../common/types';
+
+import { SEARCH_APPLICATIONS_PATH } from './applications/applications';
+
+import {
+  CONNECTORS_PATH,
+  SEARCH_INDICES_PATH,
+  CRAWLERS_PATH,
+  PLAYGROUND_PATH,
+} from './applications/enterprise_search_content';
 
 import { docLinks } from './applications/shared/doc_links';
 
@@ -86,6 +97,60 @@ export interface PluginsStart {
 export interface ESConfig {
   elasticsearch_host: string;
 }
+
+const contentLinks: AppDeepLink[] = [
+  {
+    id: 'connectors',
+    path: `/${CONNECTORS_PATH}`,
+    title: i18n.translate('xpack.enterpriseSearch.navigation.contentConnectorsLinkLabel', {
+      defaultMessage: 'Connectors',
+    }),
+  },
+  {
+    id: 'searchIndices',
+    path: `/${SEARCH_INDICES_PATH}`,
+    title: i18n.translate('xpack.enterpriseSearch.navigation.contentIndicesLinkLabel', {
+      defaultMessage: 'Indices',
+    }),
+  },
+  {
+    id: 'webCrawlers',
+    path: `/${CRAWLERS_PATH}`,
+    title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
+      defaultMessage: 'Web crawlers',
+    }),
+  },
+  {
+    id: 'playground',
+    path: `/${PLAYGROUND_PATH}`,
+    title: i18n.translate('xpack.enterpriseSearch.navigation.contentPlaygroundLinkLabel', {
+      defaultMessage: 'Playground',
+    }),
+  },
+];
+
+const applicationsLinks: AppDeepLink[] = [
+  {
+    id: 'searchApplications',
+    path: `/${SEARCH_APPLICATIONS_PATH}`,
+    title: i18n.translate(
+      'xpack.enterpriseSearch.navigation.applicationsSearchApplicationsLinkLabel',
+      {
+        defaultMessage: 'Search Applications',
+      }
+    ),
+  },
+];
+
+const appSearchLinks: AppDeepLink[] = [
+  {
+    id: 'engines',
+    path: `/${SEARCH_APPLICATIONS_PATH}`,
+    title: i18n.translate('xpack.enterpriseSearch.navigation.appSearchEnginesLinkLabel', {
+      defaultMessage: 'Engines',
+    }),
+  },
+];
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
@@ -130,9 +195,9 @@ export class EnterpriseSearchPlugin implements Plugin {
         : undefined;
     const plugins = { ...pluginsStart, cloud } as PluginsStart;
 
-    coreStart.chrome
-      .getChromeStyle$()
-      .subscribe((style) => (this.isSidebarEnabled = style === 'classic'));
+    coreStart.chrome.getChromeStyle$().subscribe((style) => {
+      this.isSidebarEnabled = style === 'classic';
+    });
 
     return { core: coreStart, isSidebarEnabled: this.isSidebarEnabled, params, plugins };
   }
@@ -184,6 +249,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      deepLinks: contentLinks,
       euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
       id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
@@ -271,6 +337,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       appRoute: APPLICATIONS_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      deepLinks: applicationsLinks,
       euiIconType: APPLICATIONS_PLUGIN.LOGO,
       id: APPLICATIONS_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
@@ -338,6 +405,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       core.application.register({
         appRoute: APP_SEARCH_PLUGIN.URL,
         category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        deepLinks: appSearchLinks,
         euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
         id: APP_SEARCH_PLUGIN.ID,
         mount: async (params: AppMountParameters) => {

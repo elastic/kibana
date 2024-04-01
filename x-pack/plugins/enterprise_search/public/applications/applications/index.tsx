@@ -14,6 +14,8 @@ import { NotFound } from './components/not_found';
 import { SearchApplicationsRouter } from './components/search_applications/search_applications_router';
 import { ROOT_PATH, SEARCH_APPLICATIONS_PATH } from './routes';
 
+export { SEARCH_APPLICATIONS_PATH } from './routes';
+
 export const Applications = () => {
   return (
     <Routes>
