@@ -23,7 +23,7 @@ import { WELCOME_CONVERSATION } from './sample_conversations';
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
   id: '',
   messages: [],
-  replacements: [],
+  replacements: {},
   category: 'assistant',
   title: i18n.DEFAULT_CONVERSATION_TITLE,
 };
@@ -96,7 +96,7 @@ export const useConversation = (): UseConversation => {
           conversationId: conversation.id,
           apiConfig: { ...conversation.apiConfig, defaultSystemPromptId },
           messages: [],
-          replacements: [],
+          replacements: {},
         });
       }
     },
