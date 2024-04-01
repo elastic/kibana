@@ -95,7 +95,7 @@ export function MachineLearningExpandedJobDetailsProvider(
     async assertModelSnapshotManagement(jobId: string): Promise<void> {
       await jobTable.withDetailsOpen(jobId, async () => {
         await this.openModelSnapshotTab(jobId);
-        await testSubjects.existOrFail('mlADModelSnapShotsRevertButton');
+        await testSubjects.existOrFail('mlADModelSnapShotRevertButton');
         await testSubjects.existOrFail('mlADModelSnapShotsEditButton');
       });
     },

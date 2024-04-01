@@ -187,7 +187,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
           type: 'icon',
           icon: 'crosshairs',
           onClick: checkJobIsClosed,
-          'data-test-subj': `mlADModelSnapShotsRevertButton`,
+          'data-test-subj': `mlADModelSnapShotRevertButton`,
         },
         {
           name: i18n.translate('xpack.ml.modelSnapshotTable.actions.edit.name', {
