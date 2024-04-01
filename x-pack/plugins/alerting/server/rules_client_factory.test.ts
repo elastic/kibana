@@ -243,11 +243,19 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
     id: 'abc',
     name: '',
   });
-  const createAPIKeyResult = await constructorCall.createAPIKey();
+  const createAPIKeyResult = await constructorCall.createAPIKey('test');
   expect(createAPIKeyResult).toEqual({
     apiKeysEnabled: true,
     result: { api_key: '123', id: 'abc', name: '' },
   });
+  expect(securityPluginStart.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+    expect.any(Object),
+    {
+      metadata: { managed: true },
+      name: 'test',
+      role_descriptors: {},
+    }
+  );
 });
 
 test('createAPIKey() throws when security plugin createAPIKey throws an error', async () => {
