@@ -274,9 +274,9 @@ export class ControlGroupContainer extends Container<
   };
 
   public setSavedState(lastSavedInput: PersistableControlGroupInput | undefined): void {
-    batch(() => {
-      this.dispatch.setLastSavedInput(lastSavedInput);
-      this.calculateFiltersFromSelections(lastSavedInput?.panels ?? {}).then((filterOutput) => {
+    this.calculateFiltersFromSelections(lastSavedInput?.panels ?? {}).then((filterOutput) => {
+      batch(() => {
+        this.dispatch.setLastSavedInput(lastSavedInput);
         this.dispatch.setLastSavedFilters(filterOutput);
       });
     });
