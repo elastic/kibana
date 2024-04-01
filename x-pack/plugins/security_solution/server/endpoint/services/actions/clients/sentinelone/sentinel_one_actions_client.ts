@@ -98,15 +98,12 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = SentinelOneActionRequestCommonMeta
+    TMeta extends {} = {}
   >(
-    actionRequest: Omit<
-      ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-        TParameters,
-        TOutputContent,
-        TMeta
-      >,
-      'hosts'
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      TMeta
     >
   ): Promise<
     LogsEndpointAction<TParameters, TOutputContent, TMeta & SentinelOneActionRequestCommonMeta>
@@ -114,7 +111,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     const agentUUID = actionRequest.endpoint_ids[0];
     const agentDetails = await this.getAgentDetails(agentUUID);
 
-    return super.writeActionRequestToEndpointIndex<
+    const doc = await super.writeActionRequestToEndpointIndex<
       TParameters,
       TOutputContent,
       TMeta & SentinelOneActionRequestCommonMeta
@@ -129,8 +126,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         agentId: agentDetails.id,
         hostName: agentDetails.computerName,
         ...(actionRequest.meta ?? {}),
-      },
+      } as TMeta & SentinelOneActionRequestCommonMeta,
     });
+
+    return doc;
   }
 
   /**
