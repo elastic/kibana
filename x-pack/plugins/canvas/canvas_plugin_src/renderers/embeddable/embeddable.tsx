@@ -116,7 +116,7 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
 export const embeddableRendererFactory = (
   core: CoreStart,
   plugins: StartDeps
-): RendererFactory<EmbeddableExpression<EmbeddableInput>> => {
+): RendererFactory<EmbeddableExpression<EmbeddableInput> & { canvasApi: CanvasContainerApi }> => {
   const renderEmbeddable = renderEmbeddableFactory(core, plugins);
   return () => ({
     name: 'embeddable',
