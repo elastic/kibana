@@ -122,10 +122,11 @@ export async function fetchSeries<T extends ValueAggregationMap>({
   }
 
   return response.aggregations.groupBy.buckets.map((bucket) => {
+    const bucketValue = bucket.value as ValueAggregationMap | undefined;
     let value =
-      bucket.value?.value === undefined || bucket.value?.value === null
+      bucketValue?.value === undefined || bucketValue?.value === null
         ? null
-        : Number(bucket.value.value);
+        : Number(bucketValue.value);
 
     if (value !== null) {
       value =
