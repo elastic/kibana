@@ -25,12 +25,12 @@ export default function ({ getService }: FtrProviderContext) {
     const to = new Date().toISOString();
     before(
       async () =>
-        new ApmSynthtraceEsClient({
+        (synthtraceApmClient = new ApmSynthtraceEsClient({
           client: esClient,
           logger: createLogger(LogLevel.info),
           version: await apmSynthtraceKibanaClient.installApmPackage(),
           refreshAfterIndex: true,
-        })
+        }))
     );
     after(async () => apmSynthtraceKibanaClient.uninstallApmPackage());
 
