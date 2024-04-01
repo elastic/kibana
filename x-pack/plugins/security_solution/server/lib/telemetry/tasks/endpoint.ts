@@ -64,10 +64,10 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('endpoint')).l;
+      const log = newTelemetryLogger(logger.get('endpoint'));
       const trace = taskMetricsService.start(taskType);
 
-      log(
+      log.l(
         `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
       );
 
@@ -103,7 +103,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          * a metric document(s) exists for an EP agent we map to fleet agent and policy
          */
         if (endpointData.endpointMetrics === undefined) {
-          log('no endpoint metrics to report');
+          log.l('no endpoint metrics to report');
           taskMetricsService.end(trace);
           return 0;
         }
@@ -113,7 +113,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         };
 
         if (endpointMetricsResponse.aggregations === undefined) {
-          log(`no endpoint metrics to report`);
+          log.l(`no endpoint metrics to report`);
           taskMetricsService.end(trace);
           return 0;
         }
@@ -147,7 +147,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         const agentsResponse = endpointData.fleetAgentsResponse;
 
         if (agentsResponse === undefined) {
-          log('no fleet agent information available');
+          log.l('no fleet agent information available');
           taskMetricsService.end(trace);
           return 0;
         }
@@ -175,7 +175,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             try {
               agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
             } catch (err) {
-              log(`error fetching policy config due to ${err?.message}`);
+              log.l(`error fetching policy config due to ${err?.message}`);
             }
             const packagePolicies = agentPolicy?.package_policies;
 
@@ -236,7 +236,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          * a metadata document(s) exists for an EP agent we map to fleet agent and policy
          */
         if (endpointData.endpointMetadata === undefined) {
-          log(`no endpoint metadata to report`);
+          log.l(`no endpoint metadata to report`);
         }
 
         const { body: endpointMetadataResponse } = endpointData.endpointMetadata as unknown as {
@@ -244,7 +244,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         };
 
         if (endpointMetadataResponse.aggregations === undefined) {
-          log(`no endpoint metadata to report`);
+          log.l(`no endpoint metadata to report`);
         }
 
         const endpointMetadata =

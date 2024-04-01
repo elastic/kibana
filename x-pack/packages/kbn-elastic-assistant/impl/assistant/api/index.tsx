@@ -67,7 +67,6 @@ export const fetchConnectorExecuteAction = async ({
   });
 
   const requestBody = {
-    // only used for openai, azure and bedrock ignore field
     model: apiConfig?.model,
     message,
     subAction: isStream ? 'invokeStream' : 'invokeAI',
