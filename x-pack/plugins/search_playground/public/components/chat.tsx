@@ -59,16 +59,7 @@ export const Chat = () => {
   const { messages, append, stop: stopRequest, setMessages, reload, error } = useChat();
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
   const messagesRef = useAutoBottomScroll([showStartPage]);
-
-  const buildFormData = (formData: ChatForm) => ({
-    prompt: formData[ChatFormFields.prompt],
-    indices: formData[ChatFormFields.indices].join(),
-    api_key: formData[ChatFormFields.openAIKey],
-    citations: formData[ChatFormFields.citations],
-    elasticsearchQuery: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
-    summarization_model:
-      formData[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
-  });
+  const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
 
   const onSubmit = async (data: ChatForm) => {
     await append(
@@ -87,29 +78,20 @@ export const Chat = () => {
         role: MessageRole.system,
         content: 'You can start chat now',
       },
-      ...(error
-        ? [
-            {
-              id: uuidv4(),
-              role: MessageRole.system,
-              content: 'Please verify if you have correct OPENAI API key and retry again.',
-            },
-          ]
-        : []),
       ...transformFromChatMessages(messages),
     ],
-    [messages, error]
+    [messages]
   );
 
-  const regenerateMessages = () => {
+  const regenerateMessages = async () => {
+    setIsRegenerating(true);
+
     const formData = getValues();
-    reload({
+    await reload({
       data: buildFormData(formData),
     });
-  };
 
-  const regenerateMessages = () => {
-    reload();
+    setIsRegenerating(false);
   };
 
   if (showStartPage) {
@@ -194,9 +176,9 @@ export const Chat = () => {
                   <QuestionInput
                     value={field.value}
                     onChange={field.onChange}
-                    isDisabled={isSubmitting}
+                    isDisabled={isSubmitting || isRegenerating}
                     button={
-                      isSubmitting ? (
+                      isSubmitting || isRegenerating ? (
                         <EuiButtonIcon
                           aria-label={i18n.translate(
                             'xpack.searchPlayground.chat.stopButtonAriaLabel',
