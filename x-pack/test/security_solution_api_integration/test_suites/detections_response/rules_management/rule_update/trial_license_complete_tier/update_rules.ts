@@ -770,12 +770,7 @@ export default ({ getService }: FtrProviderContext) => {
             setup: 'A different setup guide',
           };
 
-          const { body } = await supertest
-            .put(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .send(ruleUpdate)
-            .expect(200);
+          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
 
           expect(body.setup).to.eql('A different setup guide');
         });
@@ -791,11 +786,7 @@ export default ({ getService }: FtrProviderContext) => {
             setup: undefined,
           };
 
-          const { body } = await supertest
-            .put(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .send(ruleUpdate)
-            .expect(200);
+          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
 
           expect(body.setup).to.eql('');
         });
