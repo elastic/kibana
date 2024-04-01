@@ -250,9 +250,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
         >
           <div className="mappingsEditor__createFieldContent">
             <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem className="mappingsEditor__createFieldContent__formFields">
-                {renderFormFields()}
-              </EuiFlexItem>
+              <EuiFlexItem>{renderFormFields()}</EuiFlexItem>
             </EuiFlexGroup>
 
             <FormDataProvider pathsToWatch={['type', 'subType']}>
