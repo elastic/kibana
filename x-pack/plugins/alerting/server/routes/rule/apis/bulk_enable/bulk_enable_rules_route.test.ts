@@ -7,16 +7,16 @@
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
 
-import { bulkEnableRulesRoute } from './bulk_enable_rules';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
-import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { bulkEnableRulesRoute } from './bulk_enable_rules_route';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -27,6 +27,7 @@ beforeEach(() => {
 describe('bulkEnableRulesRoute', () => {
   const bulkEnableRequest = { filter: '' };
   const bulkEnableResult = { errors: [], rules: [], total: 1, taskIdsFailedToBeEnabled: [] };
+  const bulkEnableResponse = { errors: [], rules: [], total: 1, task_ids_failed_to_be_enabled: [] };
 
   it('should enable rules with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
@@ -49,7 +50,7 @@ describe('bulkEnableRulesRoute', () => {
     );
 
     expect(await handler(context, req, res)).toEqual({
-      body: bulkEnableResult,
+      body: bulkEnableResponse,
     });
 
     expect(rulesClient.bulkEnableRules).toHaveBeenCalledTimes(1);

@@ -6,21 +6,23 @@
  */
 
 import pMap from 'p-map';
+import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
-import { RawRule } from '../../types';
-import { convertRuleIdsToKueryNode } from '../../lib';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { RawRule } from '../../../../types';
+import { RuleParams } from '../../types';
+import { convertRuleIdsToKueryNode } from '../../../../lib';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
-} from '../common';
-import { getRuleCircuitBreakerErrorMessage } from '../../../common';
+} from '../../../../rules_client/common';
+import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
@@ -28,11 +30,13 @@ import {
   updateMeta,
   createNewAPIKeySet,
   migrateLegacyActions,
-} from '../lib';
-import { RulesClientContext, BulkOperationError, BulkOptions } from '../types';
-import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
-import { RuleAttributes } from '../../data/rule/types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+} from '../../../../rules_client/lib';
+import { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
+import { validateScheduleLimit } from '../get_schedule_frequency';
+import { RuleAttributes } from '../../../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
+import { bulkEnableRulesParamsSchema } from './schemas';
 
 const getShouldScheduleTask = async (
   context: RulesClientContext,
@@ -58,8 +62,17 @@ const getShouldScheduleTask = async (
   }
 };
 
-export const bulkEnableRules = async (context: RulesClientContext, options: BulkOptions) => {
-  const { ids, filter } = getAndValidateCommonBulkOptions(options);
+export const bulkEnableRules = async <Params extends RuleParams = never>(
+  context: RulesClientContext,
+  params: BulkEnableRulesParams
+): Promise<BulkEnableRulesResult<Params>> => {
+  const { ids, filter } = getAndValidateCommonBulkOptions(params);
+
+  try {
+    bulkEnableRulesParamsSchema.validate(params);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating bulk enable rules data - ${error.message}`);
+  }
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'ENABLE' });

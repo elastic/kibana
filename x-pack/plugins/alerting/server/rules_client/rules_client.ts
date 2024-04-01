@@ -9,7 +9,7 @@ import { getRuleTags, RuleTagsParams } from '../application/rule/methods/tags';
 import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
-import { RulesClientContext, BulkOptions } from './types';
+import { RulesClientContext } from './types';
 import { clone, CloneArguments } from './methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
 import { snoozeRule, SnoozeRuleOptions } from '../application/rule/methods/snooze';
@@ -52,7 +52,7 @@ import {
   bulkEditRules,
   BulkEditOptions,
 } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
-import { bulkEnableRules } from './methods/bulk_enable';
+import { bulkEnableRules, BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { updateApiKey } from './methods/update_api_key';
 import { enable } from './methods/enable';
 import { disable } from './methods/disable';
@@ -153,7 +153,8 @@ export class RulesClient {
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
-  public bulkEnableRules = (options: BulkOptions) => bulkEnableRules(this.context, options);
+  public bulkEnableRules = <Params extends RuleTypeParams = never>(params: BulkEnableRulesParams) =>
+    bulkEnableRules<Params>(this.context, params);
   public bulkDisableRules = (options: BulkDisableRulesRequestBody) =>
     bulkDisableRules(this.context, options);
 
