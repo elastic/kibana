@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // open the share menu and check that reporting is disabled
           await PageObjects.lens.clickShareMenu();
 
-          expect(await PageObjects.lens.isShareActionEnabled(`${type}Reports`));
+          expect(await PageObjects.lens.isShareActionEnabled(`Export`));
         });
 
         it(`should be able to download report of the current visualization`, async () => {

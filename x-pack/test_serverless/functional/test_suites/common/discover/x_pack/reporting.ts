@@ -62,6 +62,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Discover CSV Export', () => {
+    afterEach(async () => {
+      retry.waitFor('close share modal', async () => {
+        await PageObjects.share.closeShareModal(); // close modal
+        return await testSubjects.exists('shareTopNavButton');
+      });
+    });
     describe('Check Available', () => {
       before(async () => {
         await PageObjects.svlCommonPage.loginAsAdmin();
@@ -110,6 +116,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
+      });
+
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
 
       it('generates a report with single timefilter', async () => {
@@ -288,6 +301,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal(TEST_DOC_COUNT.toString());
+        });
+      });
+
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
         });
       });
 

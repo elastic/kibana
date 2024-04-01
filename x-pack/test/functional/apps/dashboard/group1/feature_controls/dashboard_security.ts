@@ -322,13 +322,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await panelActions.expectMissingPanelAction('embeddablePanelAction-copyToDashboard');
       });
 
-      it(`Permalinks doesn't show create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlMissingOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
-      });
-
       it('allows loading a saved query via the saved query management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();

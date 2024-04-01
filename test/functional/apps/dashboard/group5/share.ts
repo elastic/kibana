@@ -38,8 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardCustomizePanel = getService('dashboardCustomizePanel');
 
   const PageObjects = getPageObjects(['dashboard', 'common', 'share', 'timePicker']);
 
@@ -109,45 +107,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
-    describe('snapshot share', async () => {
-      describe('test local state', async () => {
-        it('should not have "panels" state when not in unsaved changes state', async () => {
-          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
-          expect(await getSharedUrl()).to.not.contain('panels');
-        });
-
-        it('should have "panels" in app state when a panel has been modified', async () => {
-          await dashboardPanelActions.customizePanel();
-          await dashboardCustomizePanel.setCustomPanelTitle('Test New Title');
-          await dashboardCustomizePanel.clickSaveButton();
-          await PageObjects.dashboard.waitForRenderComplete();
-          await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
-
-          const sharedUrl = await getSharedUrl();
-          const { appState } = getStateFromUrl(sharedUrl);
-          expect(appState).to.contain('panels');
-        });
-
-        it('should once again not have "panels" state when save is clicked', async () => {
-          await PageObjects.dashboard.clickQuickSave();
-          await PageObjects.dashboard.waitForRenderComplete();
-          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
-          expect(await getSharedUrl()).to.not.contain('panels');
-        });
-      });
-
-      describe('test filter state', async () => {
-        await testFilterState();
-      });
-
-      after(async () => {
-        await filterBar.removeAllFilters();
-        await PageObjects.dashboard.clickQuickSave();
-        await PageObjects.dashboard.waitForRenderComplete();
-      });
-    });
-
     describe('saved object share', async () => {
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
       describe('test filter state', async () => {
         await testFilterState();
       });

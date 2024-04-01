@@ -181,7 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           };
         }
       );
-
+      await PageObjects.share.closeShareModal();
       // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
       await browser.get(newUrl.toString());
       await PageObjects.header.waitUntilLoadingHasFinished();

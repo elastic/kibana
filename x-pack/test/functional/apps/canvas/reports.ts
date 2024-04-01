@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.canvas.goToListingPage();
         await PageObjects.canvas.loadFirstWorkpad('The Very Cool Workpad for PDF Tests');
 
-        this.log.debug(`openShareMenuItem title: PDF Reports`);
+        log.debug(`openShareMenuItem title: PDF Reports`);
         const isShareMenuOpen = await this.isShareMenuOpen();
         if (!isShareMenuOpen) {
           await this.clickShareTopNavButton();

@@ -19,6 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
   const kibanaServer = getService('kibanaServer');
   const png = getService('png');
+  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   const PageObjects = getPageObjects([
     'reporting',
@@ -70,6 +72,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
       });
 
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
+
       it('is available if new', async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.clickNewVisualization();
@@ -117,7 +126,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await PageObjects.share.closeShareModal();
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
       it('TSVB Gauge: PNG file matches the baseline image', async function () {
         log.debug('load saved visualization');

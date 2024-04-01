@@ -1819,20 +1819,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    async isShareActionEnabled(action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports') {
+    async isShareActionEnabled(action: 'Export' | 'Links') {
       switch (action) {
-        case 'csvDownload':
-          return await testSubjects.isEnabled('sharePanel-CSVDownload');
-        case 'permalinks':
-          return await testSubjects.isEnabled('sharePanel-Permalinks');
+        case 'Links':
+          return await testSubjects.isEnabled('Links');
         default:
-          return await testSubjects.isEnabled(`sharePanel-${action}`);
+          return await testSubjects.isEnabled(action);
       }
     },
 
-    async ensureShareMenuIsOpen(
-      action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports'
-    ) {
+    async ensureShareMenuIsOpen(action: 'Export' | 'Links') {
       await this.clickShareMenu();
 
       if (!(await testSubjects.exists('shareContextMenu'))) {
@@ -1844,8 +1840,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openPermalinkShare() {
-      await this.ensureShareMenuIsOpen('permalinks');
-      await testSubjects.click('sharePanel-Permalinks');
+      await this.ensureShareMenuIsOpen('Links');
+      await testSubjects.click('Links');
     },
 
     async getAvailableUrlSharingOptions() {
@@ -1875,8 +1871,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openCSVDownloadShare() {
-      await this.ensureShareMenuIsOpen('csvDownload');
-      await testSubjects.click('sharePanel-CSVDownload');
+      await this.ensureShareMenuIsOpen('Export');
+      await testSubjects.click('Export');
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
@@ -1886,8 +1882,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openReportingShare(type: 'PNG' | 'PDF') {
-      await this.ensureShareMenuIsOpen(`${type}Reports`);
-      await testSubjects.click(`sharePanel-${type}Reports`);
+      await this.ensureShareMenuIsOpen(`Export`);
+      await testSubjects.click(`Export`);
     },
 
     async getCSVContent() {
