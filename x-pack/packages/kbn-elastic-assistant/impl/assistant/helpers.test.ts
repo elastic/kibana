@@ -19,7 +19,7 @@ const defaultConversation = {
   theme: {},
   messages: [],
   apiConfig: { actionTypeId: '.gen-ai', connectorId: '123' },
-  replacements: [],
+  replacements: {},
   title: 'conversation_id',
 };
 describe('helpers', () => {
@@ -220,7 +220,7 @@ describe('helpers', () => {
       category: 'assistant',
       theme: {},
       apiConfig: { actionTypeId: '.gen-ai', connectorId: '123' },
-      replacements: [],
+      replacements: {},
     };
     const baseConversations = {
       conversation1: {

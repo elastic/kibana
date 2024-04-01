@@ -152,7 +152,7 @@ export const postEvaluateRoute = (
               // does not matter in conjunction with invokeAI
               // TODO is that true ^^
               actionTypeId: '.gen-ai',
-              replacements: [],
+              replacements: {},
               size: DEFAULT_SIZE,
               isEnabledKnowledgeBase: true,
               isEnabledRAGAlerts: true,
@@ -198,7 +198,7 @@ export const postEvaluateRoute = (
                       ],
                       tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
                     },
-                    replacements: [],
+                    replacements: {},
                   });
                   return evalResult.body;
                 },

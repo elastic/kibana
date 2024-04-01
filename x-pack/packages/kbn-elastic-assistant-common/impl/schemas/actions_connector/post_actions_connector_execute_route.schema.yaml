@@ -58,9 +58,7 @@ paths:
                 isEnabledRAGAlerts:
                   type: boolean
                 replacements:
-                  type: array
-                  items:
-                    $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacement'
+                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
                 size:
                   type: number
       responses:
@@ -76,9 +74,7 @@ paths:
                   connector_id:
                     type: string
                   replacements:
-                    type: array
-                    items:
-                      $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacement'
+                    $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
                   status:
                     type: string
                   trace_data:

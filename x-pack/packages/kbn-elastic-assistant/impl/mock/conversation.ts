@@ -26,11 +26,11 @@ export const alertConvo: Conversation = {
     actionTypeId: '.gen-ai',
     provider: OpenAiProviderType.OpenAi,
   },
-  replacements: [
-    { uuid: '94277492-11f8-493b-9c52-c1c9ecd330d2', value: '192.168.0.4' },
-    { uuid: '67bf8338-261a-4de6-b43e-d30b59e884a7', value: '192.168.0.1' },
-    { uuid: '0b2e352b-35fc-47bd-a8d4-43019ed38a25', value: 'Stephs-MacBook-Pro.local' },
-  ],
+  replacements: {
+    '94277492-11f8-493b-9c52-c1c9ecd330d2': '192.168.0.4',
+    '67bf8338-261a-4de6-b43e-d30b59e884a7': '192.168.0.1',
+    '0b2e352b-35fc-47bd-a8d4-43019ed38a25': 'Stephs-MacBook-Pro.local',
+  },
 };
 
 export const emptyWelcomeConvo: Conversation = {
@@ -39,7 +39,7 @@ export const emptyWelcomeConvo: Conversation = {
   category: 'assistant',
   isDefault: true,
   messages: [],
-  replacements: [],
+  replacements: {},
   apiConfig: {
     connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
     actionTypeId: '.gen-ai',
@@ -71,7 +71,7 @@ export const customConvo: Conversation = {
   title: 'Custom option',
   isDefault: false,
   messages: [],
-  replacements: [],
+  replacements: {},
   apiConfig: {
     connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
     actionTypeId: '.gen-ai',

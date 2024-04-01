@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 1
  */
 
-import { UUID, Replacement } from '../conversations/common_attributes.gen';
+import { UUID, Replacements } from '../conversations/common_attributes.gen';
 
 export type ExecuteConnectorRequestParams = z.infer<typeof ExecuteConnectorRequestParams>;
 export const ExecuteConnectorRequestParams = z.object({
@@ -39,7 +39,7 @@ export const ExecuteConnectorRequestBody = z.object({
   allowReplacement: z.array(z.string()).optional(),
   isEnabledKnowledgeBase: z.boolean().optional(),
   isEnabledRAGAlerts: z.boolean().optional(),
-  replacements: z.array(Replacement),
+  replacements: Replacements,
   size: z.number().optional(),
 });
 export type ExecuteConnectorRequestBodyInput = z.input<typeof ExecuteConnectorRequestBody>;
@@ -48,7 +48,7 @@ export type ExecuteConnectorResponse = z.infer<typeof ExecuteConnectorResponse>;
 export const ExecuteConnectorResponse = z.object({
   data: z.string().optional(),
   connector_id: z.string().optional(),
-  replacements: z.array(Replacement).optional(),
+  replacements: Replacements.optional(),
   status: z.string().optional(),
   /**
    * Trace Data

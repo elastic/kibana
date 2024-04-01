@@ -106,7 +106,12 @@ export const transformToCreateScheme = (
       },
     })),
     updated_at: createdAt,
-    replacements,
+    replacements: replacements
+      ? Object.keys(replacements).map((key) => ({
+          uuid: key,
+          value: replacements[key],
+        }))
+      : undefined,
     namespace: spaceId,
   };
 };

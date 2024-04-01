@@ -15,7 +15,7 @@ const currentConversation = {
     connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
     provider: OpenAiProviderType.OpenAi,
   },
-  replacements: [],
+  replacements: {},
   category: 'assistant',
   id: '1',
   title: '1',
@@ -52,7 +52,7 @@ describe('getComments', () => {
           connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
           provider: OpenAiProviderType.OpenAi,
         },
-        replacements: [],
+        replacements: {},
         id: '1',
         title: '1',
         messages: [

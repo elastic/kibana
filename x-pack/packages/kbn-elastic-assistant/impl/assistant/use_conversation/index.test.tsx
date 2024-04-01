@@ -65,7 +65,7 @@ describe('useConversation', () => {
 
       const createResult = await result.current.createConversation({
         ...mockConvo,
-        replacements: [],
+        replacements: {},
         title: mockConvo.title,
         category: 'assistant',
       });

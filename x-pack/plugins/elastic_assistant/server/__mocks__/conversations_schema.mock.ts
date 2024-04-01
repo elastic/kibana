@@ -13,10 +13,10 @@ import {
   ConversationResponse,
   ConversationUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import { SearchEsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
+import { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
 
 export const getConversationSearchEsMock = () => {
-  const searchResponse: estypes.SearchResponse<SearchEsConversationSchema> = {
+  const searchResponse: estypes.SearchResponse<EsConversationSchema> = {
     took: 3,
     timed_out: false,
     _shards: {
@@ -133,7 +133,6 @@ export const getConversationMock = (
     connectorId: '1',
     defaultSystemPromptId: 'Default',
   },
-  replacements: [],
   title: 'test',
   ...params,
   createdAt: '2019-12-13T16:40:33.400Z',

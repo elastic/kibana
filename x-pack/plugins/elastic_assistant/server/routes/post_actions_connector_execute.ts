@@ -15,7 +15,7 @@ import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   ExecuteConnectorRequestBody,
   Message,
-  Replacement,
+  Replacements,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
@@ -37,6 +37,7 @@ import {
   getMessageFromRawResponse,
   getPluginNameFromRequest,
 } from './helpers';
+import { getLlmType } from './evaluate/utils';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -79,25 +80,9 @@ export const postActionsConnectorExecuteRoute = (
           }
           const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
-          let latestReplacements: Replacement[] = request.body.replacements;
-          const onNewReplacements = (newReplacements: Replacement[]) => {
-            const latestReplacementsDict = latestReplacements.reduce(
-              (acc: Record<string, string>, r) => {
-                acc[r.value] = r.uuid;
-                return acc;
-              },
-              {}
-            );
-            const newReplacementsDict = newReplacements.reduce((acc: Record<string, string>, r) => {
-              acc[r.value] = r.uuid;
-              return acc;
-            }, {});
-
-            const updatedReplacements = { ...latestReplacementsDict, ...newReplacementsDict };
-            latestReplacements = Object.keys(updatedReplacements).map((key) => ({
-              value: key,
-              uuid: updatedReplacements[key],
-            }));
+          let latestReplacements: Replacements = request.body.replacements;
+          const onNewReplacements = (newReplacements: Replacements) => {
+            latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
           let onLlmResponse;
@@ -183,7 +168,7 @@ export const postActionsConnectorExecuteRoute = (
                   ],
                 });
               }
-              if (latestReplacements.length > 0) {
+              if (Object.keys(latestReplacements).length > 0) {
                 await dataClient?.updateConversation({
                   conversationUpdateProps: {
                     id: conversationId,

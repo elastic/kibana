@@ -59,7 +59,7 @@ const defaultConvo: Conversation = {
   category: 'assistant',
   messages: [],
   apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
-  replacements: [],
+  replacements: {},
   title: 'conversation_id',
 };
 
@@ -134,7 +134,7 @@ describe('ConnectorSelectorInline', () => {
       },
       conversation: {
         apiConfig: { actionTypeId: '.gen-ai', connectorId: '123' },
-        replacements: [],
+        replacements: {},
         category: 'assistant',
         id: 'conversation_id',
         messages: [],

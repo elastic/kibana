@@ -80,7 +80,7 @@ const defaultProps = {
   request: mockRequest,
   kbResource: ESQL_RESOURCE,
   telemetry: mockTelemetry,
-  replacements: [],
+  replacements: {},
 };
 describe('callAgentExecutor', () => {
   beforeEach(() => {
@@ -137,7 +137,7 @@ describe('callAgentExecutor', () => {
           connector_id: 'mock-connector-id',
           data: mockActionResponse,
           status: 'ok',
-          replacements: [],
+          replacements: {},
           trace_data: undefined,
         },
         headers: {

@@ -9,7 +9,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { createConversation } from './create_conversation';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { estypes } from '@elastic/elasticsearch';
-import { SearchEsConversationSchema } from './types';
+import { EsConversationSchema } from './types';
 import { getConversation } from './get_conversation';
 import { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
@@ -38,7 +38,7 @@ export const getCreateConversationMock = (): ConversationCreateProps => ({
   excludeFromLastConversationStorage: false,
   isDefault: false,
   messages: [],
-  replacements: [],
+  replacements: {},
   category: 'assistant',
 });
 
@@ -54,7 +54,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   },
   excludeFromLastConversationStorage: false,
   messages: [],
-  replacements: [],
+  replacements: {},
   createdAt: '2024-01-28T04:20:02.394Z',
   namespace: 'test',
   isDefault: false,
@@ -68,55 +68,54 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   ],
 });
 
-export const getSearchConversationMock =
-  (): estypes.SearchResponse<SearchEsConversationSchema> => ({
-    _scroll_id: '123',
-    _shards: {
-      failed: 0,
-      skipped: 0,
-      successful: 0,
-      total: 0,
-    },
-    hits: {
-      hits: [
-        {
-          _id: '1',
-          _index: '',
-          _score: 0,
-          _source: {
-            '@timestamp': '2020-04-20T15:25:31.830Z',
-            created_at: '2020-04-20T15:25:31.830Z',
-            title: 'title-1',
-            updated_at: '2020-04-20T15:25:31.830Z',
-            messages: [],
-            category: 'assistant',
-            id: '1',
-            namespace: 'default',
-            is_default: true,
-            exclude_from_last_conversation_storage: false,
-            api_config: {
-              action_type_id: '.gen-ai',
-              connector_id: 'c1',
-              default_system_prompt_id: 'prompt-1',
-              model: 'test',
-              provider: 'Azure OpenAI',
-            },
-            users: [
-              {
-                id: '1111',
-                name: 'elastic',
-              },
-            ],
-            replacements: undefined,
+export const getSearchConversationMock = (): estypes.SearchResponse<EsConversationSchema> => ({
+  _scroll_id: '123',
+  _shards: {
+    failed: 0,
+    skipped: 0,
+    successful: 0,
+    total: 0,
+  },
+  hits: {
+    hits: [
+      {
+        _id: '1',
+        _index: '',
+        _score: 0,
+        _source: {
+          '@timestamp': '2020-04-20T15:25:31.830Z',
+          created_at: '2020-04-20T15:25:31.830Z',
+          title: 'title-1',
+          updated_at: '2020-04-20T15:25:31.830Z',
+          messages: [],
+          category: 'assistant',
+          id: '1',
+          namespace: 'default',
+          is_default: true,
+          exclude_from_last_conversation_storage: false,
+          api_config: {
+            action_type_id: '.gen-ai',
+            connector_id: 'c1',
+            default_system_prompt_id: 'prompt-1',
+            model: 'test',
+            provider: 'Azure OpenAI',
           },
+          users: [
+            {
+              id: '1111',
+              name: 'elastic',
+            },
+          ],
+          replacements: undefined,
         },
-      ],
-      max_score: 0,
-      total: 1,
-    },
-    timed_out: false,
-    took: 10,
-  });
+      },
+    ],
+    max_score: 0,
+    total: 1,
+  },
+  timed_out: false,
+  took: 10,
+});
 
 describe('createConversation', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

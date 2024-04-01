@@ -45,7 +45,7 @@ const fetchConnectorArgs: FetchConnectorExecuteAction = {
   http: mockHttp,
   message: 'This is a test',
   conversationId: 'test',
-  replacements: [],
+  replacements: {},
 };
 const streamingDefaults = {
   method: 'POST',
