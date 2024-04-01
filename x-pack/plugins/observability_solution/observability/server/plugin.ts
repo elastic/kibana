@@ -277,7 +277,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     core.savedObjects.registerType(threshold);
 
-    registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, ruleDataService, {
+    registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, {
       alertsLocator,
       logsExplorerLocator,
     });
