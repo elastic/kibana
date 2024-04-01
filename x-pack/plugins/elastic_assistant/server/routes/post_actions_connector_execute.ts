@@ -33,6 +33,7 @@ import {
   getMessageFromRawResponse,
   getPluginNameFromRequest,
 } from './helpers';
+import { getLlmType } from './evaluate/utils';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -208,7 +209,7 @@ export const postActionsConnectorExecuteRoute = (
               actions,
               request,
               connectorId,
-              llmType: connectors[0]?.actionTypeId,
+              actionTypeId: connectors[0]?.actionTypeId,
               params: {
                 subAction: request.body.subAction,
                 subActionParams: {
@@ -255,6 +256,7 @@ export const postActionsConnectorExecuteRoute = (
 
           const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
+          const llmType = getLlmType(connectorId, connectors);
           const langChainResponseBody = await callAgentExecutor({
             alertsIndexPattern: request.body.alertsIndexPattern,
             allow: request.body.allow,
@@ -265,7 +267,7 @@ export const postActionsConnectorExecuteRoute = (
             connectorId,
             elserId,
             esClient,
-            llmType: connectors[0]?.actionTypeId,
+            llmType,
             kbResource: ESQL_RESOURCE,
             langChainMessages,
             logger,
