@@ -86,7 +86,7 @@ export const StreamComment = ({
       return (
         <StopGeneratingButton
           onClick={() => {
-            setComplete(true);
+            setComplete({ complete: true, didAbort: true });
             abortStream();
           }}
         />

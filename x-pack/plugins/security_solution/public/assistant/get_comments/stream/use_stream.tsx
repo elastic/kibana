@@ -26,8 +26,8 @@ interface UseStream {
   isStreaming: boolean;
   // The pending message from the streaming data.
   pendingMessage: string;
-  //  A function to mark the streaming as complete
-  setComplete: (complete: boolean) => void;
+  //  A function to mark the streaming as complete, with a parameter to indicate if the streaming was aborted.
+  setComplete: (args: { complete: boolean; didAbort: boolean }) => void;
 }
 /**
  * A hook that takes a ReadableStreamDefaultReader and returns an object with properties and functions
@@ -59,17 +59,26 @@ export const useStream = ({
         : getPlaceholderObservable(),
     [content, isEnabledLangChain, isError, reader, actionTypeId]
   );
-  const onCompleteStream = useCallback(() => {
-    subscription?.unsubscribe();
-    setLoading(false);
-    refetchCurrentConversation();
-  }, [refetchCurrentConversation, subscription]);
+  const onCompleteStream = useCallback(
+    (didAbort: boolean) => {
+      subscription?.unsubscribe();
+      setLoading(false);
+      if (!didAbort) {
+        refetchCurrentConversation();
+      }
+    },
+    [refetchCurrentConversation, subscription]
+  );
 
-  const [complete, setComplete] = useState(false);
+  const [complete, setComplete] = useState<{ complete: boolean; didAbort: boolean }>({
+    complete: false,
+    didAbort: false,
+  });
+
   useEffect(() => {
-    if (complete) {
-      setComplete(false);
-      onCompleteStream();
+    if (complete.complete) {
+      onCompleteStream(complete.didAbort);
+      setComplete({ complete: false, didAbort: false });
     }
   }, [complete, onCompleteStream]);
   useEffect(() => {
@@ -79,9 +88,10 @@ export const useStream = ({
         setPendingMessage(message);
       },
       complete: () => {
-        setComplete(true);
+        setComplete({ complete: true, didAbort: false });
       },
       error: (err) => {
+        console.log('error', err.name);
         if (err.name === 'AbortError') {
           // the fetch was canceled, we don't need to do anything about it
         } else {

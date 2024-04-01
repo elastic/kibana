@@ -62,7 +62,7 @@ export const getComments = ({
   const regenerateMessageOfConversation = () => {
     regenerateMessage(currentConversation.id);
   };
-  // TODO handle error
+  // should only happen when no apiConfig is present
   const actionTypeId = currentConversation.apiConfig?.actionTypeId ?? '';
 
   const extraLoadingComment = isFetchingResponse
@@ -79,8 +79,6 @@ export const getComments = ({
               refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
               isEnabledLangChain={isEnabledLangChain}
-              // TODO verify i dont need this?
-              // isLastComment
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
@@ -133,8 +131,6 @@ export const getComments = ({
               index={index}
               isControlsEnabled={isControlsEnabled}
               isEnabledLangChain={isEnabledLangChain}
-              // TODO verify i dont need this
-              // isLastComment={isLastComment}
               isError={message.isError}
               reader={message.reader}
               refetchCurrentConversation={refetchCurrentConversation}
@@ -159,8 +155,6 @@ export const getComments = ({
             index={index}
             isControlsEnabled={isControlsEnabled}
             isEnabledLangChain={isEnabledLangChain}
-            // TODO verify i dont need this?
-            // isLastComment={isLastComment}
             // reader is used to determine if streaming controls are shown
             reader={transformedMessage.reader}
             regenerateMessage={regenerateMessageOfConversation}

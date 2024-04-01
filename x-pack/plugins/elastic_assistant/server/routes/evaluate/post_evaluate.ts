@@ -149,8 +149,7 @@ export const postEvaluateRoute = (
               allow: [],
               allowReplacement: [],
               subAction: 'invokeAI',
-              // does not matter in conjunction with invokeAI
-              // TODO is that true ^^
+              // The actionTypeId is irrelevant when used with the invokeAI subaction
               actionTypeId: '.gen-ai',
               replacements: {},
               size: DEFAULT_SIZE,

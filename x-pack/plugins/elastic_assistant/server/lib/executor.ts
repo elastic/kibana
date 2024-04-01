@@ -91,6 +91,7 @@ export const executeAction = async ({
     onMessageSent: onLlmResponse,
     logger,
     responseStream: readable,
+    abortSignal,
   });
 
   return readable.pipe(new PassThrough());
