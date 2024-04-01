@@ -166,7 +166,6 @@ export const createThreatSignals = async ({
     createSignal: CreateSignalInterface;
     totalDocumentCount: number;
   }) => {
-    console.error('ARE WE IN CREATE SIGNALS???');
     let list = await getDocumentList({ searchAfter: undefined });
     let documentCount = totalDocumentCount;
 
@@ -182,7 +181,6 @@ export const createThreatSignals = async ({
       const concurrentSearchesPerformed =
         chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(createSignal);
 
-      console.error('ABOUT TO PERFORM CONCURRENT SEARCHES');
       const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
 
       // Did our searches fail with an error containing the maxClauseCount
@@ -207,7 +205,6 @@ export const createThreatSignals = async ({
         // parse the error message to acquire the maximum available clauses
         // allowed by elasticsearch
 
-        console.error('WE FOUND THE ERROR IN THREAT SIGNALS', maxClauseCountValue);
         chunkPage = maxClauseCountValue - 1;
         results = combineConcurrentResults(
           results,

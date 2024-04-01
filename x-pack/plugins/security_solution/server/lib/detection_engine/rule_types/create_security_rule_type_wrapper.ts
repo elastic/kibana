@@ -426,9 +426,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   },
                 });
 
-                console.error('RESULT.ERRORS', JSON.stringify(result.errors, null, 2));
-                console.error('runResult.ERRORS', JSON.stringify(runResult.errors, null, 2));
-
                 const createdSignals = result.createdSignals.concat(runResult.createdSignals);
                 const warningMessages = result.warningMessages.concat(runResult.warningMessages);
                 result = {
@@ -509,7 +506,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 });
               }
             } else {
-              console.error('DID WE RETURN ERROR');
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.failed,
                 message: `An error occurred during rule execution: message: "${truncateList(
@@ -523,7 +519,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
             }
           } catch (error) {
-            console.error('DID WE CATCH ERROR');
             const errorMessage = error.message ?? '(no error message given)';
 
             await ruleExecutionLogger.logStatusChange({

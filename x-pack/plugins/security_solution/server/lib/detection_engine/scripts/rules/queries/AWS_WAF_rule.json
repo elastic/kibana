@@ -1,8 +1,0 @@
-{
-  "name": "AWS WAF suspicious behavior",
-  "description": "Is something happening with our AWS WAF?",
-  "risk_score": 1,
-  "severity": "high",
-  "type": "query",
-  "query": "*"
-}

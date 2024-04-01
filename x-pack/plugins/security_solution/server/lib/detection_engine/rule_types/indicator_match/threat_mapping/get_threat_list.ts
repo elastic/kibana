@@ -53,36 +53,30 @@ export const getThreatList = async ({
     `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
-  try {
-    console.error('ACQUIRING SEARCH OF THREAT LIST');
-    const response = await esClient.search<
-      ThreatListDoc,
-      Record<string, estypes.AggregationsAggregate>
-    >({
-      body: {
-        ...threatListConfig,
-        query: queryFilter,
-        search_after: searchAfter,
-        runtime_mappings: runtimeMappings,
-        sort: getSortForThreatList({
-          index,
-          listItemIndex: listClient.getListItemName(),
-        }),
-      },
-      track_total_hits: false,
-      size: calculatedPerPage,
-      pit: { id: pitId },
-    });
+  const response = await esClient.search<
+    ThreatListDoc,
+    Record<string, estypes.AggregationsAggregate>
+  >({
+    body: {
+      ...threatListConfig,
+      query: queryFilter,
+      search_after: searchAfter,
+      runtime_mappings: runtimeMappings,
+      sort: getSortForThreatList({
+        index,
+        listItemIndex: listClient.getListItemName(),
+      }),
+    },
+    track_total_hits: false,
+    size: calculatedPerPage,
+    pit: { id: pitId },
+  });
 
-    ruleExecutionLogger.debug(`Retrieved indicator items of size: ${response.hits.hits.length}`);
+  ruleExecutionLogger.debug(`Retrieved indicator items of size: ${response.hits.hits.length}`);
 
-    reassignPitId(response.pit_id);
+  reassignPitId(response.pit_id);
 
-    return response;
-  } catch (exc) {
-    console.error('DID THREAT LIST THROW ERROR?', exc);
-    throw exc;
-  }
+  return response;
 };
 
 export const getSortForThreatList = ({
