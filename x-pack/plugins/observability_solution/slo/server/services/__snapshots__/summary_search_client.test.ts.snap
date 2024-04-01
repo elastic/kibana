@@ -39,7 +39,6 @@ Object {
       "groupings": Object {},
       "id": "slo-one",
       "instanceId": "*",
-      "kibanaUrl": undefined,
       "remoteName": undefined,
       "summary": Object {
         "errorBudget": Object {
@@ -57,7 +56,6 @@ Object {
       "groupings": Object {},
       "id": "slo_two",
       "instanceId": "*",
-      "kibanaUrl": undefined,
       "remoteName": undefined,
       "summary": Object {
         "errorBudget": Object {
@@ -75,7 +73,6 @@ Object {
       "groupings": Object {},
       "id": "slo-three",
       "instanceId": "*",
-      "kibanaUrl": undefined,
       "remoteName": undefined,
       "summary": Object {
         "errorBudget": Object {
@@ -93,7 +90,6 @@ Object {
       "groupings": Object {},
       "id": "slo-five",
       "instanceId": "*",
-      "kibanaUrl": undefined,
       "remoteName": undefined,
       "summary": Object {
         "errorBudget": Object {
@@ -111,7 +107,6 @@ Object {
       "groupings": Object {},
       "id": "slo-four",
       "instanceId": "*",
-      "kibanaUrl": undefined,
       "remoteName": undefined,
       "summary": Object {
         "errorBudget": Object {
