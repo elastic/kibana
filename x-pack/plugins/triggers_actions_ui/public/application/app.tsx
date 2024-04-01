@@ -28,7 +28,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { ruleDetailsRoute } from '@kbn/rule-data-utils';
+import { createRuleRoute, ruleDetailsRoute } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -50,6 +50,7 @@ import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { ALERTS_PLUGIN_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
+import { CreateRulePage } from './sections/create_rule';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -128,6 +129,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           path={`/:section(${sectionsRegex})`}
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
         />
+        <Route path={createRuleRoute} component={CreateRulePage} />
         <Route
           path={ruleDetailsRoute}
           component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}

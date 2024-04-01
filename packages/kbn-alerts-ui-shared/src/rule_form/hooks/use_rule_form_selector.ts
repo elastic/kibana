@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const ruleDetailsRoute = '/rule/:ruleId' as const;
-export const triggersActionsRoute = '/app/management/insightsAndAlerting/triggersActions' as const;
-export const createRuleRoute = '/rule/create/:ruleTypeId' as const;
+import { useSelector } from 'react-redux';
+import type { RuleFormRootState } from '../store';
 
-export const getRuleDetailsRoute = (ruleId: string) => ruleDetailsRoute.replace(':ruleId', ruleId);
+export const useRuleFormSelector = <TSelected>(selector: (state: RuleFormRootState) => TSelected) =>
+  useSelector(selector);
