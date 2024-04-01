@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { fromExpression } from '@kbn/interpreter';
 import { ErrorStrings } from '../../../../i18n';
 import { CANVAS_APP } from '../../../../common/lib';
-import { decode, encode } from '../../../../common/lib/embeddable_dataurl';
+import { decode } from '../../../../common/lib/embeddable_dataurl';
 import { CanvasElement, CanvasPage } from '../../../../types';
 import { useEmbeddablesService, useLabsService, useNotifyService } from '../../../services';
 // @ts-expect-error unconverted file
