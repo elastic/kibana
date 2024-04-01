@@ -459,10 +459,15 @@ ${JSON.stringify(argv, null, 2)}
 `);
 
       const isOpen = argv._.includes('open');
-
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
-
+      if (
+        !process.env.KIBANA_MKI_USE_LATEST_COMMIT ||
+        process.env.KIBANA_MKI_USE_LATEST_COMMIT !== '1'
+      ) {
+        cypressConfigFile.env.grepTags =
+          '@serverlessQA --@brokenInServerless --@skipInServerless --@brokenInServerlessQA';
+      }
       const tier: string = argv.tier;
       const endpointAddon: boolean = argv.endpointAddon;
       const cloudAddon: boolean = argv.cloudAddon;
