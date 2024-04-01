@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { checkFleetServerVersion } from './check_fleet_server_versions';
+import {
+  checkFleetServerVersion,
+  isAgentVersionLessThanFleetServer,
+} from './check_fleet_server_versions';
 
 describe('checkFleetServerVersion', () => {
   it('should not throw if no force is specified and patch is newer', () => {
@@ -40,5 +43,27 @@ describe('checkFleetServerVersion', () => {
   it('should not throw in serverless if there is not in fleetServers', () => {
     const fleetServers = [] as any;
     expect(() => checkFleetServerVersion('8.5.1', fleetServers, true)).not.toThrow();
+  });
+});
+
+describe('isAgentVersionLessThanFleetServer', () => {
+  it('should return true if there is no fleet server (serverless)', () => {
+    expect(isAgentVersionLessThanFleetServer('8.12.0', [])).toBe(true);
+  });
+
+  it('should return true if version is less than fleet server ', () => {
+    const fleetServers = [
+      { local_metadata: { elastic: { agent: { version: '8.3.0' } } } },
+      { local_metadata: { elastic: { agent: { version: '8.4.0' } } } },
+    ] as any;
+    expect(isAgentVersionLessThanFleetServer('8.3.0', fleetServers)).toBe(true);
+  });
+
+  it('should return false if version is more than fleet server ', () => {
+    const fleetServers = [
+      { local_metadata: { elastic: { agent: { version: '8.3.0' } } } },
+      { local_metadata: { elastic: { agent: { version: '8.4.0' } } } },
+    ] as any;
+    expect(isAgentVersionLessThanFleetServer('8.5.0', fleetServers)).toBe(false);
   });
 });
