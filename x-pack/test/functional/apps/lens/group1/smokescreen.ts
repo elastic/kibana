@@ -71,47 +71,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(4);
     });
 
-    describe('dimension flyout keeping open/closing when palette is open ', () => {
-      it('should keep the dimension editor open when switching to a chart that moves the column to the new group', async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickVisType('lens');
-        await PageObjects.lens.goToTimeRange();
-
-        await PageObjects.lens.configureDimension({
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'average',
-          field: 'bytes',
-        });
-
-        await PageObjects.lens.configureDimension({
-          dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
-          operation: 'terms',
-          field: '@message.raw',
-          keepOpen: true,
-        });
-
-        await PageObjects.lens.openPalettePanel();
-
-        await PageObjects.lens.switchToVisualization('bar');
-
-        expect(await PageObjects.lens.isDimensionEditorOpen()).to.eql(true);
-      });
-      it('should close the dimension editor when switching to a chart that removes the column', async () => {
-        await PageObjects.lens.closeDimensionEditor();
-        await PageObjects.lens.configureDimension({
-          dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
-          operation: 'terms',
-          field: '@message.raw',
-          keepOpen: true,
-        });
-
-        await PageObjects.lens.openPalettePanel();
-        await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
-
-        expect(await PageObjects.lens.isDimensionEditorOpen()).to.eql(false);
-      });
-    });
-
     it('should create an xy visualization with filters aggregation', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -166,6 +125,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
 
       await PageObjects.lens.switchToVisualization('line');
+
+      expect(await PageObjects.lens.getLayerType(0)).to.eql('Line');
+      // expect first layer to be line, second layer to be bar chart
+      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar vertical stacked');
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -174,14 +137,67 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'median',
-        field: 'bytes',
+        operation: 'average',
+        field: 'machine.ram',
       });
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
       await PageObjects.lens.removeLayer();
       await PageObjects.lens.removeLayer();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
+    });
+
+    it('should transition selected layer in a multi layer bar using layer chart switch', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.createLayer();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'geo.src',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'machine.ram',
+      });
+
+      // only changes one layer for compatible chart
+      await PageObjects.lens.switchToVisualization('line', undefined, 1);
+      expect(await PageObjects.lens.getLayerType(0)).to.eql('Bar vertical stacked');
+      expect(await PageObjects.lens.getLayerType(1)).to.eql('Line');
+
+      // changes all layers for multilayer chart
+      await PageObjects.lens.switchToVisualization('bar_horizontal_stacked', undefined, 0);
+      expect(await PageObjects.lens.getLayerType(0)).to.eql('Bar horizontal stacked');
+      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar horizontal stacked');
+
+      // generates new one layer chart based on selected layer
+      await PageObjects.lens.switchToVisualization('pie', undefined, 1);
+      expect(await PageObjects.lens.getLayerType(0)).to.eql('Pie');
+      const sliceByText = await PageObjects.lens.getDimensionTriggerText(
+        'lnsPie_sliceByDimensionPanel'
+      );
+      const sizeByText = await PageObjects.lens.getDimensionTriggerText(
+        'lnsPie_sizeByDimensionPanel'
+      );
+      expect(sliceByText).to.be('Top 5 values of geo.src');
+      expect(sizeByText).to.be('Average of machine.ram');
     });
 
     it('should edit settings of xy line chart', async () => {
@@ -392,12 +408,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should transition from bar chart to line chart using layer chart switch', async () => {
+    it('should transition from bar chart to line chart', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchLayerSeriesType('line');
+      await PageObjects.lens.switchToVisualization('line');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
         '@timestamp'

@@ -71,7 +71,7 @@ export interface CreateTimelineProps {
   ruleAuthor?: string | string[];
 }
 
-export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;
+export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => Promise<void>;
 export type GetExceptionFilter = (ecsData: Ecs) => Promise<Filter | undefined>;
 
 export interface ThresholdAggregationData {
