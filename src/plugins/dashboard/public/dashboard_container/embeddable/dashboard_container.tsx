@@ -11,7 +11,6 @@ import { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import {
-  apiHasForceRefresh,
   apiPublishesPanelTitle,
   apiPublishesUnsavedChanges,
   getPanelTitle,
@@ -531,15 +530,6 @@ export class DashboardContainer
     this.dispatch.setLastReloadRequestTimeToNow({});
     if (refreshControlGroup) {
       this.controlGroup?.reload();
-
-      /**
-       * we only refresh react embeddable children if this refresh is NOT caused by the control group.
-       * This is because the react embeddable children subscribe to the localFilters subject which
-       * already has the control group filters included.
-       */
-      for (const reactEmbeddableChild of Object.values(this.children$.value)) {
-        if (apiHasForceRefresh(reactEmbeddableChild)) reactEmbeddableChild.forceRefresh();
-      }
     }
   }
 
