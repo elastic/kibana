@@ -379,7 +379,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       <EuiText size="xs">
         <FormattedMessage
           id="xpack.lists.exceptions.builder.exceptionIsOperator.warningMessage.incorrectWildCardUsage"
-          defaultMessage="Use the 'MATCHES' operator when using wildcards."
+          defaultMessage="Change the operator to 'matches' to ensure wildcards run properly."
         />{' '}
         <EuiIconTip type="iInCircle" content={i18n.WILDCARD_WITH_IS_OPERATOR_TOOLTIP} />
       </EuiText>

@@ -106,7 +106,7 @@ export const validateWildcardInput = (value?: string): string | undefined => {
   }
 };
 
-export const hasWildcardAndInvalidOperator = ({
+export const validateHasWildcardWithWrongOperator = ({
   operator,
   value,
 }: {

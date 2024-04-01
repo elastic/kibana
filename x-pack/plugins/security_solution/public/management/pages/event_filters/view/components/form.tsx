@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
-import { OperatingSystem, hasWildcardAndInvalidOperator } from '@kbn/securitysolution-utils';
+import { OperatingSystem, validateHasWildcardWithWrongOperator } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
@@ -56,7 +56,7 @@ import {
   OS_LABEL,
   RULE_NAME,
 } from '../event_filters_list';
-import { OS_TITLES } from '../../../../common/translations';
+import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
 
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
@@ -194,9 +194,12 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         onChange({
           item,
           isValid: isFormValid && areConditionsValid,
+          confirmModalLabels: hasWildcardWithWrongOperator
+            ? CONFIRM_WARNING_MODAL_LABELS
+            : undefined,
         });
       },
-      [areConditionsValid, exception, isFormValid, onChange]
+      [areConditionsValid, exception, isFormValid, onChange, hasWildcardWithWrongOperator]
     );
 
     // set initial state of `wasByPolicy` that checks
@@ -417,12 +420,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
 
         // handle wildcard with wrong operator case
         arg.exceptionItems[0]?.entries.forEach((e) => {
-          if (hasWildcardAndInvalidOperator({ operator: e.type, value: e.value })) {
+          if (validateHasWildcardWithWrongOperator({ operator: e.type, value: e.value })) {
             sethasWildcardWithWrongOperator(true);
           }
         });
-        console.log(hasWildcardWithWrongOperator);
-        // do i have to change hasFormChanged?
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
           arg.exceptionItems[0] !== undefined
@@ -445,7 +446,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         processChanged(updatedItem);
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, hasFormChanged, processChanged]
+      [exception, hasFormChanged, processChanged, hasWildcardWithWrongOperator]
     );
     const exceptionBuilderComponentMemo = useMemo(
       () =>

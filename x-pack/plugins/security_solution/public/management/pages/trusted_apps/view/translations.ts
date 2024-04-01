@@ -160,25 +160,3 @@ export const INPUT_ERRORS = {
       values: { row: index + 1 },
     }),
 };
-
-export const CONFIRM_WARNING_MODAL_LABELS = {
-  title: i18n.translate('xpack.securitySolution.trustedapps.confirmWarningModal.title', {
-    defaultMessage: 'Confirm trusted application',
-  }),
-  body: i18n.translate('xpack.securitySolution.trustedapps.confirmWarningModal.body', {
-    defaultMessage:
-      'Using a "*" or a "?" in the value and with the "IS" operator can make the entry ineffective. Change the operator to ‘matches’ to ensure wildcards run properly. Select “cancel” to revise your entry, or "add" to continue with entry in its current state.',
-  }),
-  confirmButton: i18n.translate(
-    'xpack.securitySolution.trustedapps.confirmWarningModal.confirmButtonText',
-    {
-      defaultMessage: 'Add',
-    }
-  ),
-  cancelButton: i18n.translate(
-    'xpack.securitySolution.trustedapps.confirmWarningModal.cancelButtonText',
-    {
-      defaultMessage: 'Cancel',
-    }
-  ),
-};
