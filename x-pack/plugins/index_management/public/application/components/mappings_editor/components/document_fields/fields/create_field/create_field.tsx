@@ -113,9 +113,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     if (type === undefined || type.length === 0) {
       return;
     }
-    if (type[0]?.value === 'semantic_text') {
-      setSemanticTextFieldType(type[0].value);
-    }
+    setSemanticTextFieldType(type[0]?.value === 'semantic_text' ? type[0].value : undefined);
   }, [form, fieldTypeValue]);
 
   const submitForm = async (e?: React.FormEvent, exitAfter: boolean = false) => {
