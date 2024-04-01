@@ -308,7 +308,7 @@ export interface UpdateRequestWithOriginalCase {
  *
  * @ignore
  */
-export const update = async (
+export const bulkUpdate = async (
   cases: CasesPatchRequest,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient

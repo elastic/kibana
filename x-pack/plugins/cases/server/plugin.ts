@@ -18,15 +18,8 @@ import type {
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { APP_ID } from '../common/constants';
-import {
-  createCaseCommentSavedObjectType,
-  caseConfigureSavedObjectType,
-  caseConnectorMappingsSavedObjectType,
-  createCaseSavedObjectType,
-  createCaseUserActionSavedObjectType,
-  casesTelemetrySavedObjectType,
-} from './saved_object_types';
 
 import type { CasesClient } from './client';
 import type {
@@ -49,6 +42,8 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
+import { registerConnectorTypes } from './connectors';
+import { registerSavedObjects } from './saved_object_types';
 
 export class CasePlugin
   implements
@@ -90,6 +85,7 @@ export class CasePlugin
       this.externalReferenceAttachmentTypeRegistry,
       this.persistableStateAttachmentTypeRegistry
     );
+
     registerCaseFileKinds(this.caseConfig.files, plugins.files);
 
     this.securityPluginSetup = plugins.security;
@@ -99,23 +95,12 @@ export class CasePlugin
       plugins.features.registerKibanaFeature(getCasesKibanaFeature());
     }
 
-    core.savedObjects.registerType(
-      createCaseCommentSavedObjectType({
-        migrationDeps: {
-          persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-          lensEmbeddableFactory: this.lensEmbeddableFactory,
-        },
-      })
-    );
-    core.savedObjects.registerType(caseConfigureSavedObjectType);
-    core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
-    core.savedObjects.registerType(createCaseSavedObjectType(core, this.logger));
-    core.savedObjects.registerType(
-      createCaseUserActionSavedObjectType({
-        persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-      })
-    );
-    core.savedObjects.registerType(casesTelemetrySavedObjectType);
+    registerSavedObjects({
+      core,
+      logger: this.logger,
+      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      lensEmbeddableFactory: this.lensEmbeddableFactory,
+    });
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,
@@ -146,6 +131,21 @@ export class CasePlugin
     });
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
+
+    const getCasesClient = async (request: KibanaRequest): Promise<CasesClient> => {
+      const [coreStart] = await core.getStartServices();
+      return this.getCasesClientWithRequest(coreStart)(request);
+    };
+
+    const getSpaceId = (request?: KibanaRequest) => {
+      if (!request) {
+        return DEFAULT_SPACE_ID;
+      }
+
+      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    };
+
+    registerConnectorTypes({ actions: plugins.actions, core, getCasesClient, getSpaceId });
 
     return {
       attachmentFramework: {
@@ -198,18 +198,8 @@ export class CasePlugin
       filesPluginStart: plugins.files,
     });
 
-    const client = core.elasticsearch.client;
-
-    const getCasesClientWithRequest = async (request: KibanaRequest): Promise<CasesClient> => {
-      return this.clientFactory.create({
-        request,
-        scopedClusterClient: client.asScoped(request).asCurrentUser,
-        savedObjectsService: core.savedObjects,
-      });
-    };
-
     return {
-      getCasesClientWithRequest,
+      getCasesClientWithRequest: this.getCasesClientWithRequest(core),
       getExternalReferenceAttachmentTypeRegistry: () =>
         this.externalReferenceAttachmentTypeRegistry,
       getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
@@ -240,4 +230,16 @@ export class CasePlugin
       };
     };
   };
+
+  private getCasesClientWithRequest =
+    (core: CoreStart) =>
+    async (request: KibanaRequest): Promise<CasesClient> => {
+      const client = core.elasticsearch.client;
+
+      return this.clientFactory.create({
+        request,
+        scopedClusterClient: client.asScoped(request).asCurrentUser,
+        savedObjectsService: core.savedObjects,
+      });
+    };
 }
