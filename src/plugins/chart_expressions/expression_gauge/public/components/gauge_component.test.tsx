@@ -450,7 +450,7 @@ describe('GaugeComponent', function () {
         },
       },
     };
-    const createColumnsWithMetricParams = (params: DatatableColumnMeta['params']) =>
+    const createColumnsWithMetricParams = (params?: DatatableColumnMeta['params']) =>
       wrapperProps.data.columns.map((c) =>
         c.id !== 'metric-accessor'
           ? c
@@ -527,14 +527,11 @@ describe('GaugeComponent', function () {
         ...baseFormattingProps,
         args: {
           ...baseFormattingProps.args,
-          metric: {
-            ...(baseFormattingProps.args.metric as ExpressionValueVisDimension),
-            format: undefined,
-          },
+          metric: 'metric-accessor',
         },
         data: {
           ...wrapperProps.data,
-          columns: createColumnsWithMetricParams({ id: 'test' }),
+          columns: createColumnsWithMetricParams(),
         },
       };
 
