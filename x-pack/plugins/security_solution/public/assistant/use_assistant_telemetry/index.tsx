@@ -32,11 +32,13 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
     }): Promise<{
       fn: keyof AssistantTelemetry;
       params: AssistantTelemetry[keyof AssistantTelemetry];
-    }> =>
-      fn({
+    }> => {
+      console.log('rest???', rest);
+      return fn({
         ...rest,
         conversationId: await getAnonymizedConversationTitle(conversationId),
-      }),
+      });
+    },
     [getAnonymizedConversationTitle]
   );
 

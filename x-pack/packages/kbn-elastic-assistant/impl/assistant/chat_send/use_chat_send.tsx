@@ -123,6 +123,11 @@ export const useChatSend = ({
         role: userMessage.role,
         isEnabledKnowledgeBase,
         isEnabledRAGAlerts,
+        // TODO before merge to main
+        // this will be available once 174126 is merged
+        actionTypeId: '.gen-ai', // currentConversation.apiConfig.actionTypeId,
+        model: currentConversation.apiConfig.model,
+        provider: currentConversation.apiConfig.provider,
       });
 
       const responseMessage: Message = getMessageFromRawResponse(rawResponse);
@@ -135,6 +140,11 @@ export const useChatSend = ({
       assistantTelemetry?.reportAssistantMessageSent({
         conversationId: currentConversation.title,
         role: responseMessage.role,
+        // TODO before merge to main
+        // this will be available once 174126 is merged
+        actionTypeId: '.gen-ai', // currentConversation.apiConfig.actionTypeId,
+        model: currentConversation.apiConfig.model,
+        provider: currentConversation.apiConfig.provider,
         isEnabledKnowledgeBase,
         isEnabledRAGAlerts,
       });

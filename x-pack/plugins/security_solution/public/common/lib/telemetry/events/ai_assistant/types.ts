@@ -18,6 +18,9 @@ export interface ReportAssistantMessageSentParams {
   role: string;
   isEnabledKnowledgeBase: boolean;
   isEnabledRAGAlerts: boolean;
+  actionTypeId: string;
+  provider?: string;
+  model?: string;
 }
 
 export interface ReportAssistantQuickPromptParams {
