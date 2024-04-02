@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { getIndexPatternFromESQLQuery, getLimitFromESQLQuery } from '@kbn/esql-utils';

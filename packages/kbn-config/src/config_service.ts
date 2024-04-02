@@ -11,7 +11,7 @@ import { SchemaTypeError, Type, ValidationError } from '@kbn/config-schema';
 import { cloneDeep, isEqual, merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { BehaviorSubject, combineLatest, firstValueFrom, Observable, identity } from 'rxjs';
-import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs/operators';
+import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs';
 import { Logger, LoggerFactory } from '@kbn/logging';
 import { getDocLinks, DocLinks } from '@kbn/doc-links';
 
