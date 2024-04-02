@@ -40,7 +40,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
 > {
   private static token: string | null;
   private static tokenExpiryTimeout: NodeJS.Timeout;
-
+  private static base64encodedData: string;
   private urls: {
     getToken: string;
     agents: string;
@@ -54,6 +54,12 @@ export class CrowdstrikeConnector extends SubActionConnector<
       hostAction: `${API_PATH}/devices/entities/devices-actions/v2`,
       agents: `${API_PATH}/devices/entities/devices/v2`,
     };
+
+    if (!CrowdstrikeConnector.base64encodedData) {
+      CrowdstrikeConnector.base64encodedData = Buffer.from(
+        this.secrets.clientId + ':' + this.secrets.clientSecret
+      ).toString('base64');
+    }
 
     this.registerSubActions();
   }
@@ -102,17 +108,13 @@ export class CrowdstrikeConnector extends SubActionConnector<
   }
 
   private async getTokenRequest() {
-    const base64encodedData = Buffer.from(
-      this.secrets.clientId + ':' + this.secrets.clientSecret
-    ).toString('base64');
-
     const response = await this.request<CrowdstrikeGetTokenResponse>({
       url: this.urls.getToken,
       method: 'post',
       headers: {
         accept: 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',
-        authorization: 'Basic ' + base64encodedData,
+        authorization: 'Basic ' + this.base64encodedData,
       },
       responseSchema: CrowdstrikeGetTokenResponseSchema,
     });
@@ -156,11 +158,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
 
       return response.data;
     } catch (error) {
-      if (
-        error.code === 401 &&
-        error.message === 'access denied, invalid bearer token' &&
-        !retried
-      ) {
+      if (error.code === 401 && !retried) {
         CrowdstrikeConnector.token = null;
         return this.crowdstrikeApiRequest(req, true);
       }

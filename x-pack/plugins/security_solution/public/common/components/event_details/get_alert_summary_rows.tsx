@@ -42,6 +42,7 @@ import {
   CROWDSTRIKE_AGENT_ID_FIELD,
   isAlertFromCrowdstrikeEvent,
 } from '../../utils/crowdstrike_alert_check';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
@@ -314,8 +315,6 @@ export const getSummaryRows = ({
   isDraggable = false,
   isReadOnly = false,
   investigationFields,
-  sentinelOneManualHostActionsEnabled,
-  crowdstrikeManualHostActionsEnabled,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
@@ -324,9 +323,13 @@ export const getSummaryRows = ({
   investigationFields?: string[];
   isDraggable?: boolean;
   isReadOnly?: boolean;
-  sentinelOneManualHostActionsEnabled?: boolean;
-  crowdstrikeManualHostActionsEnabled?: boolean;
 }) => {
+  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'sentinelOneManualHostActionsEnabled'
+  );
+  const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
   const eventCategories = getEventCategoriesFromData(data);
 
   const eventCodeField = find({ category: 'event', field: 'event.code' }, data);

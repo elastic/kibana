@@ -28,7 +28,7 @@ export const useGetCrowdstrikeAgentStatus = (
   options: UseQueryOptions<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>> => {
   const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-    'crowdstrikeManualHostActionsEnabled'
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
   );
 
   const http = useHttp();

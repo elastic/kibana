@@ -302,7 +302,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       (req.body.agent_type === 'sentinel_one' &&
         !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
       (req.body.agent_type === 'crowdstrike' &&
-        !endpointContext.experimentalFeatures.responseActionsCrowdstrikeEnabled)
+        !endpointContext.experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled)
     ) {
       return errorHandler(
         logger,

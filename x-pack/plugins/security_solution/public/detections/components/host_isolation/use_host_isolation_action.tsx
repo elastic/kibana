@@ -46,7 +46,7 @@ export const useHostIsolationAction = ({
   );
 
   const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-    'crowdstrikeManualHostActionsEnabled'
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
   );
   const { canIsolateHost, canUnIsolateHost } = useUserPrivileges().endpointPrivileges;
 

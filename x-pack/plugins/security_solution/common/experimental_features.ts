@@ -95,7 +95,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
    */
-  responseActionsCrowdstrikeEnabled: true,
+  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -192,14 +192,9 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneManualHostActionsEnabled: true,
 
   /**
-   * Enables Crowdstrike manual host manipulation actions
-   */
-  crowdstrikeManualHostActionsEnabled: true,
-
-  /**
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
-  crowdstrikeDataInAnalyzerEnabled: true,
+  crowdstrikeDataInAnalyzerEnabled: false,
 
   /**
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.

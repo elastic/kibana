@@ -258,7 +258,9 @@ export const useActionsLogFilter = ({
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
     'responseActionsSentinelOneV1Enabled'
   );
-  const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled('responseActionsCrowdstrikeEnabled');
+  const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
 
   const {
     agentTypes = [],

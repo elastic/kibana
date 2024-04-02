@@ -9,7 +9,7 @@ import type { ResponseActionsClient } from '../lib/types';
 import { responseActionsClientMock } from '../mocks';
 import { CrowdstrikeActionsClient } from './crowdstrike_actions_client';
 import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
-import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
+import { ResponseActionsNotSupportedError } from '../errors';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { CrowdstrikeActionsClientOptionsMock } from './mocks';
 import { CrowdstrikeMock } from './mocks';
@@ -64,54 +64,6 @@ describe('CrowdstrikeActionsClient class', () => {
       );
     }
   );
-
-  it('should error if unable to retrieve list of connectors', async () => {
-    connectorActionsMock.getAll.mockImplementation(async () => {
-      throw new Error('oh oh');
-    });
-    const responsePromise = crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions());
-
-    await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsClientError);
-    await expect(responsePromise).rejects.toHaveProperty(
-      'message',
-      expect.stringContaining('Unable to retrieve list of stack connectors:')
-    );
-    await expect(responsePromise).rejects.toHaveProperty('statusCode', 400);
-  });
-
-  it('should error if retrieving connectors fails', async () => {
-    (connectorActionsMock.getAll as jest.Mock).mockImplementation(async () => {
-      throw new Error('oh oh');
-    });
-
-    await expect(
-      crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions())
-    ).rejects.toMatchObject({
-      message: `Unable to retrieve list of stack connectors: oh oh`,
-      statusCode: 400,
-    });
-  });
-
-  it.each([
-    ['no connector defined', async () => []],
-    [
-      'deprecated connector',
-      async () => [responseActionsClientMock.createConnector({ isDeprecated: true })],
-    ],
-    [
-      'missing secrets',
-      async () => [responseActionsClientMock.createConnector({ isMissingSecrets: true })],
-    ],
-  ])('should error if: %s', async (_, getAllImplementation) => {
-    (connectorActionsMock.getAll as jest.Mock).mockImplementation(getAllImplementation);
-
-    await expect(
-      crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions())
-    ).rejects.toMatchObject({
-      message: `No Crowdstrike stack connector found`,
-      statusCode: 400,
-    });
-  });
 
   it('should error if multiple agent ids are received', async () => {
     const payload = createCrowdstrikeIsolationOptions();

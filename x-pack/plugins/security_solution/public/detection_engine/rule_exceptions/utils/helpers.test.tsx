@@ -1768,31 +1768,33 @@ describe('Exception helpers', () => {
           prefixesToExclude,
           alertData
         );
-        expect(filteredFields).not.toEqual(
-          expect.arrayContaining([
-            {
-              id: 'agent.id',
-              overrideField: 'agent.status',
-              label: 'Agent status',
-            },
-            {
-              id: 'observer.serial_number',
-              overrideField: 'agent.status',
-              label: 'Agent status',
-            },
-            {
-              id: 'crowdstrike.event.DeviceId',
-              overrideField: 'agent.status',
-              label: 'Agent status',
-            },
-            {
-              id: 'cloud.provider',
-            },
-            {
-              id: 'cloud.region',
-            },
-          ])
+        const unexpectedObjects = [
+          {
+            id: 'agent.id',
+            overrideField: 'agent.status',
+            label: 'Agent status',
+          },
+          {
+            id: 'observer.serial_number',
+            overrideField: 'agent.status',
+            label: 'Agent status',
+          },
+          {
+            id: 'crowdstrike.event.DeviceId',
+            overrideField: 'agent.status',
+            label: 'Agent status',
+          },
+          {
+            id: 'cloud.provider',
+          },
+          {
+            id: 'cloud.region',
+          },
+        ];
+        unexpectedObjects.forEach((unexpectedObject) =>
+          expect(filteredFields).not.toContain(unexpectedObject)
         );
+        // expect(filteredFields).not.toEqual(expect.arrayContaining());
       });
     });
     describe('getAlertHighlightedFields', () => {
