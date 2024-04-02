@@ -16,6 +16,7 @@ import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerLensFunction } from './lens';
 import { registerKibanaFunction } from './kibana';
 import { registerVisualizeESQLFunction } from './visualize_esql';
+import { registerConnectorFunction } from './connector';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<ChatRegistrationFunction>[0],
@@ -90,6 +91,7 @@ export const registerFunctions: ChatRegistrationFunction = async ({
     registerQueryFunction(registrationParameters);
     registerAlertsFunction(registrationParameters);
     registerGetDatasetInfoFunction(registrationParameters);
+    registerConnectorFunction(registrationParameters);
 
     registerContext({
       name: 'core',
