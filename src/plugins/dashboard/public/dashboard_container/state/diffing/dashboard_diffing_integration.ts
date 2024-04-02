@@ -117,16 +117,14 @@ export function startDiffingDashboardState(
     switchMap((newChildIds: string[]) => {
       if (newChildIds.length === 0) return of([]);
       const childrenThatPublishUnsavedChanges = Object.entries(this.children$.value).filter(
-        (child) => apiPublishesUnsavedChanges(child)
+        ([childId, child]) => apiPublishesUnsavedChanges(child)
       ) as Array<[string, PublishesUnsavedChanges]>;
+
+      if (childrenThatPublishUnsavedChanges.length === 0) return of([]);
 
       return combineLatest(
         childrenThatPublishUnsavedChanges.map(([childId, child]) =>
-          child.unsavedChanges.pipe(
-            map((unsavedChanges) => {
-              return { childId, unsavedChanges };
-            })
-          )
+          child.unsavedChanges.pipe(map((unsavedChanges) => ({ childId, unsavedChanges })))
         )
       );
     }),

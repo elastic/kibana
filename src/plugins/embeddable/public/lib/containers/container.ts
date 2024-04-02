@@ -504,7 +504,7 @@ export abstract class Container<
   private onPanelRemoved(id: string) {
     // Clean up
     const embeddable = this.getChild(id);
-    if (embeddable) {
+    if (embeddable && embeddable.destroy) {
       embeddable.destroy();
 
       // Remove references.
