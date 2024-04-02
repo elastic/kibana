@@ -198,15 +198,18 @@ export function buildExpression({
       const dataFnIndex = datasourceExpressionsByLayers[layerId].chain.findIndex((f) =>
         ['esdsl', 'essql', 'esaggs', 'esql'].includes(f.function)
       );
-      const exprFn = toExpression(datasourceExpressionsByLayers[layerId].chain[dataFnIndex]);
 
-      const cacheItem = exprCache.get(layerId);
-      if (cacheItem && cacheItem.expression === exprFn && cacheItem.value && canUseCache) {
-        // and update it to var X
-        datasourceExpressionsByLayers[layerId].chain[dataFnIndex] =
-          loadFromCacheExpression(layerId);
-      } else {
-        exprCache.set(layerId, exprFn);
+      if (datasourceExpressionsByLayers[layerId].chain[dataFnIndex]) {
+        const exprFn = toExpression(datasourceExpressionsByLayers[layerId].chain[dataFnIndex]);
+
+        const cacheItem = exprCache.get(layerId);
+        if (cacheItem && cacheItem.expression === exprFn && cacheItem.value && canUseCache) {
+          // and update it to var X
+          datasourceExpressionsByLayers[layerId].chain[dataFnIndex] =
+            loadFromCacheExpression(layerId);
+        } else {
+          exprCache.set(layerId, exprFn);
+        }
       }
     }
   }
