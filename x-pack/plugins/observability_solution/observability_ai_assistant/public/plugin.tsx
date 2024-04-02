@@ -89,7 +89,7 @@ export class ObservabilityAIAssistantPlugin
 
     return {
       service,
-      useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service, coreStart),
+      useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
       useChat: createUseChat({
         notifications: coreStart.notifications,
       }),
