@@ -39,14 +39,6 @@ export enum AddLayerPanelType {
   layerVisualizationType = 'layerVisualizationType',
 }
 
-// function shift<T>(array: T[], positions: number): T[] {
-//   // Handle negative or values greater than array length
-//   positions = positions % array.length;
-
-//   // Split the array into two parts and concatenate them in the shifted order
-//   return array.slice(positions).concat(array.slice(0, positions));
-// }
-
 export function AddLayerButton({
   state,
   supportedLayers,
@@ -109,11 +101,8 @@ export function AddLayerButton({
     (t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly
   );
 
-  // to decide: should we shift the availableVisTypes array?
   const currentLayerVisType =
-    availableVisTypes.findIndex((t) => t.id === getDataLayers(state.layers)[0].seriesType) || 0;
-
-  // const availableVisTypes = shift(availableVisTypes, currentLayerVisType)
+    availableVisTypes.findIndex((t) => t.id === getDataLayers(state.layers)?.[0]?.seriesType) || 0;
 
   return (
     <>
@@ -206,8 +195,8 @@ export function AddLayerButton({
             {
               id: AddLayerPanelType.layerVisualizationType,
               initialFocusedItemIndex: currentLayerVisType,
-              title: i18n.translate('xpack.lens.layerPanel.layerVisualizationType', {
-                defaultMessage: 'Layer visualization type',
+              title: i18n.translate('xpack.lens.layerPanel.selectVisualizationType', {
+                defaultMessage: 'Select visualization type',
               }),
               items: availableVisTypes.map((t) => ({
                 name: t.fullLabel || t.label,
