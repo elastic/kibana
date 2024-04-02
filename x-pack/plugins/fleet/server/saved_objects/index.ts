@@ -24,6 +24,7 @@ import {
   INGEST_SAVED_OBJECT_INDEX,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
+import { getSettingsSavedObjectMappings } from '../services/form_settings';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
@@ -155,6 +156,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         is_protected: { type: 'boolean' },
         overrides: { type: 'flattened', index: false },
         keep_monitoring_alive: { type: 'boolean' },
+        ...getSettingsSavedObjectMappings('AGENT_POLICY_ADVANCED_SETTINGS'),
       },
     },
     migrations: {
