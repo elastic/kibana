@@ -12,7 +12,6 @@ import {
   ISearchSource,
   ISearchStartSearchSource,
   SortDirection,
-  SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
 import {
   BUCKET_SELECTOR_FIELD,
@@ -58,15 +57,7 @@ export async function fetchSearchSourceQuery({
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
 
-  const initialSearchSource = await searchSourceClient.create({
-    ...params.searchConfiguration,
-    fields: [
-      ...((params.searchConfiguration as SerializedSearchSourceFields)?.fields || []),
-      'index',
-      'filter',
-      'query',
-    ],
-  });
+  const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
   const index = initialSearchSource.getField('index') as DataView;
   const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
@@ -211,11 +202,14 @@ export async function generateLink(
   }
 
   // make new adhoc data view
-  const newDataView = await dataViews.create({
-    ...dataViewToUpdate.toSpec(false),
-    version: undefined,
-    id: undefined,
-  });
+  const newDataView = await dataViews.create(
+    {
+      ...dataViewToUpdate.toSpec(false),
+      version: undefined,
+      id: undefined,
+    },
+    true
+  );
   const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id!);
 
   const redirectUrlParams: DiscoverAppLocatorParams = {
