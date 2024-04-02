@@ -45,7 +45,7 @@ interface IModalTabActionBtn<S> extends CommonProps {
   label: string;
   handler: (args: { state: S }) => void;
   isCopy?: boolean;
-  style: (args: { state: S }) => boolean;
+  style?: (args: { state: S }) => boolean;
 }
 
 export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclaration<S> {
@@ -120,7 +120,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButton
-          isDisabled={style({ state: selectedTabState })}
+          isDisabled={style ? style({ state: selectedTabState }) : false}
           fill
           data-test-subj={dataTestSubj}
           data-share-url={state.url}

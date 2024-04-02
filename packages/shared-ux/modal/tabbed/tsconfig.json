@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["src/**/*", "storybook/**/*", "**"],
+  "include": ["src/**/*", "storybook/**/*", "index.*"],
   "kbn_references": [
     "@kbn/shared-ux-storybook-mock",
   ],
