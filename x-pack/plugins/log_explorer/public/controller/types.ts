@@ -23,7 +23,7 @@ import {
 import { LogExplorerCustomizations } from './controller_customizations';
 
 export interface LogExplorerController {
-  actions: {};
+  actions: LogExplorerControllerActions;
   customizations: LogExplorerCustomizations;
   datasetsClient: IDatasetsClient;
   discoverServices: LogExplorerDiscoverServices;
@@ -31,6 +31,11 @@ export interface LogExplorerController {
   service: LogExplorerControllerStateService;
   state$: Observable<LogExplorerPublicState>;
   stateMachine: LogExplorerControllerStateMachine;
+}
+
+export interface LogExplorerControllerActions {
+  addFilter: () => void;
+  removeFilter: () => void;
 }
 
 export type LogExplorerDiscoverServices = Pick<

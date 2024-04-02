@@ -9,6 +9,14 @@ import type { CreateLogExplorerController } from '@kbn/log-explorer-plugin/publi
 import type { InvokeCreator } from 'xstate';
 import type { ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent } from './types';
 
+type ControllerServiceEvent =
+  | {
+      type: 'addFilter';
+    }
+  | {
+      type: 'removeFilter';
+    };
+
 export const createController =
   ({
     createLogExplorerController,
@@ -29,8 +37,10 @@ export const createController =
 
 export const subscribeToLogExplorerState: InvokeCreator<
   ObservabilityLogExplorerContext,
-  ObservabilityLogExplorerEvent
-> = (context, event) => (send) => {
+  ObservabilityLogExplorerEvent,
+  any,
+  ControllerServiceEvent
+> = (context, event) => (send, onEvent) => {
   if (!('controller' in context)) {
     throw new Error('Failed to subscribe to controller: no controller in context');
   }
@@ -44,6 +54,14 @@ export const subscribeToLogExplorerState: InvokeCreator<
   });
 
   controller.service.start();
+
+  onEvent((receivedEvent) => {
+    if (receivedEvent.type === 'addFilter') {
+      controller.actions.addFilter();
+    } else if (receivedEvent.type === 'removeFilter') {
+      controller.actions.removeFilter();
+    }
+  });
 
   return () => {
     subscription.unsubscribe();

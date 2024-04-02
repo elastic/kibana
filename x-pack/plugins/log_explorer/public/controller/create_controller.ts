@@ -13,6 +13,7 @@ import { interpret } from 'xstate';
 import { DatasetsService } from '../services/datasets';
 import { createLogExplorerControllerStateMachine } from '../state_machines/log_explorer_controller';
 import { LogExplorerStartDeps } from '../types';
+import { addFilter, removeFilter } from './actions/filter';
 import { LogExplorerCustomizations } from './controller_customizations';
 import { createDataServiceProxy } from './custom_data_service';
 import { createUiSettingsServiceProxy } from './custom_ui_settings_service';
@@ -23,6 +24,7 @@ import {
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
 import {
   LogExplorerController,
+  LogExplorerControllerActions,
   LogExplorerDiscoverServices,
   LogExplorerPublicStateUpdate,
 } from './types';
@@ -83,8 +85,13 @@ export const createLogExplorerControllerFactory =
       shareReplay(1)
     );
 
+    const actions: LogExplorerControllerActions = {
+      addFilter,
+      removeFilter,
+    };
+
     return {
-      actions: {},
+      actions,
       customizations,
       datasetsClient,
       discoverServices,

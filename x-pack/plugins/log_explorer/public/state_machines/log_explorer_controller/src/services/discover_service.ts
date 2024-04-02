@@ -16,11 +16,19 @@ import {
 } from '../../../../utils/convert_discover_app_state';
 import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
 
+export type DiscoverServiceEvent =
+  | {
+      type: 'ADD_FILTER';
+    }
+  | {
+      type: 'REMOVE_FILTER';
+    };
+
 export const subscribeToDiscoverState =
   () =>
   (
     context: LogExplorerControllerContext
-  ): InvokeCallback<LogExplorerControllerEvent, LogExplorerControllerEvent> =>
+  ): InvokeCallback<DiscoverServiceEvent, LogExplorerControllerEvent> =>
   (send, onEvent) => {
     if (!('discoverStateContainer' in context)) {
       throw new Error('Failed to subscribe to the Discover state: no state container in context.');
@@ -39,6 +47,16 @@ export const subscribeToDiscoverState =
           appState: newAppState,
         });
       },
+    });
+
+    onEvent((discoverServiceEvent) => {
+      switch (discoverServiceEvent.type) {
+        case 'ADD_FILTER':
+          // TODO: figure out what to do here
+          break;
+        case 'REMOVE_FILTER':
+          break;
+      }
     });
 
     return () => {

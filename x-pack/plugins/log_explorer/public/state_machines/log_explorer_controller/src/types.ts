@@ -11,6 +11,7 @@ import { DiscoverAppState, DiscoverStateContainer } from '@kbn/discover-plugin/p
 import { DoneInvokeEvent } from 'xstate';
 import { ControlPanels, DisplayOptions } from '../../../../common';
 import type { DatasetEncodingError, DatasetSelection } from '../../../../common/dataset_selection';
+import { DiscoverServiceEvent } from './services/discover_service';
 
 export interface WithDatasetSelection {
   datasetSelection: DatasetSelection;
@@ -163,4 +164,5 @@ export type LogExplorerControllerEvent =
   | DoneInvokeEvent<ControlPanels>
   | DoneInvokeEvent<ControlGroupAPI>
   | DoneInvokeEvent<DatasetEncodingError>
-  | DoneInvokeEvent<Error>;
+  | DoneInvokeEvent<Error>
+  | DiscoverServiceEvent;

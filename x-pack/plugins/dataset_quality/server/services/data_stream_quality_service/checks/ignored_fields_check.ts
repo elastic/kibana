@@ -31,10 +31,7 @@ export const checkForIgnoredFields: DataStreamQualityCheck = {
               type: 'ignored-field',
               field_name: fieldName,
               document_count: documentCount,
-              causes: await findIgnoredFieldCauses({ search, elasticsearchClient })(fieldName, {
-                dataStream,
-                timeRange,
-              }),
+              causes: [],
             }))
           ),
         };

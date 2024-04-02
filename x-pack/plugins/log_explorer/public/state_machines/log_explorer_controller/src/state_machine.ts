@@ -42,7 +42,7 @@ import {
 export const createPureLogExplorerControllerStateMachine = (
   initialContext: LogExplorerControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCBhVAOwBdDU88SA6AVwoEt2q2BDPNgL0gBiAEoZSGAJIA1DABEA+gGUAKgEEVGBaQDyAOXWS9GEQG0ADAF1EoHKlhsulGyCyIAtACYAbIwDsAIzmAJwAzH4ArAA0IACeiJ5+AByMwZ6hnokALD6e5kneAL6FMWiYuATEZJQ0dAyEjByOPHz8HFBy3FTc0mxgAO5CEJRgjRQAbqgA1qNl2PhEJOTUtPRMTVy8Au2d3b0DCByTAMZdbJQWlpcudg5OFC5uCAGejObentFxiBHBwYyeLIBX5JfLeX7BCLFUroeaVJY1Vb1MbNLZtCgdLo9PqDEi0Br4LoAMyIAFtGHMKotqis6utOC1thjdtiDkdUKd7pdrkgQLdms5eU9sowAqEkn8IuLIUDvN4YvEEFksqE3hFQaEglkperPNCQJSFlVlrU1g0Noz0VATasAArcChgPCwIYjMaTGYU2FU42Iunmhlo9o2uj2x3Ow4TDlnC5WHm2ewCh5Cjy+YLeJJ+cGfTMS96fBWIJJJAKMULa8wZbzmPyfbxZfWG+E003Ii1BjEhvBhp0uvFERiEqgkwjkpvUrttwOtYN+7sO3uRk4xijcqw3RP3R4JPyqgJZDM14sygJywsIXf-TV+LLBEIFXc5Rveo0I2lmlGbVrCMQSGRaORJCUXRZBEBQ1FtW1lHUTR4z5TdzmTUBhVCdNRX3QEQmSbUknPCJAn8IJawiTxgm1dIoRKA0X2bSd6VRb8IFEcQpFkBQAEUAFUTAATWgjQMDg-ktxTBBMIiRhiyzcUpSzSJz0fRhvACPws0rEsIgietn3KV8WyReivwESBGAgLFYDAKglCdMBjnuRhxi2MyuAxayGDsxChGQIDND0BQVB0bQAAk1D0ABxDAlCEhDBWQxAyN8W8wkCJIfDSIFzzlLJ0KyfIwmVAIklCUIdLhCc5ynBjjIgUzzMstzbPsxy+Gc9oGo8yghE4205AEhRevUJQMBUZQMGQcQVEkfRoruRDtwQB9RXBVCIn3cwQnBc8S1VcEVQ0yIPgCAJSp9N9W0My0TOc7gLKsmyOooBynLOVz7vuIQBrUIaRqG8bSEm-QFDEVQdDEBQADE1EkZBOLEGak3m8FS1COUAmCNS5Wvc80hSYtPFS4rvDvJJNJOvS6IDKrBBq67bva+y2AgBgup6vrPu+0a-oBvR4ZEuLnh8FJCaK6t8drcstrFJSIj24EDs8I6ydoiqLrRK66ru9yGaZsAPo0L7hs5iapr84GArByHodhwT115YS5tE4FwUYFUifMdJlQid2sklnaZfFOWtIV46qPHX130qozqdq7o6bexCWBwVrmSxfZBmGR13WmWYaPKiPVcYmObvq+PKET5PMT2HEl2jLk41thNZti1xEEK4qlKBPIUfVHJQmxtCIVS9MvewopQ9z8PzspqP1djkutYT5gk5eyvWVxQh8UHPBiTJL1dOV-Pp8ummNfpxfl5c1e05rzlELXaw7ZipCW+edMUi9kIwh77xNXPIJITeGkfKy0ayniVnnKen5j6MGOHOMKtAl6wBYOwac1UhBGEkJNNQ3kABaWhdAGBEDoZACgwpEO6uBW0kheYO35nmAEgI0afGVAHXC3xnjlgkrlSUwQmHuzHjCfeECDJHzVjVWB754GoEQY0HWet1AKGkJIDAAB1BQ3UBryBoc3J4LwDwAk1Ojcih5wh-ylNlIqljEj4wopRQRZVJ4iKgWImBcCEE4CQYzZmGi+oEJUEQkhtpQpjSig3eCTdn66JRn4VImRqx+DCLwzIAQzFkRdvuDMqk-D5FvHY6iQjHH+mcYXCRpopEyKXhXLsPZnSukzuyT0YczpOPbCUtx0iPHlxXtUhcEZ2S31jFcMJ9sdGt3RuYN4GRAShG-r-dhKkMzSzvFpXcRNEgh3sadfSRTWnVVcZI9xSDKndLnDUvsG8BxDhHGOCezSdmoOjqU1Y5TOnHMvj08MsAb4rnvhuCJ80VJpKSNqLIoJ+FpBvH-QIEl1rlhJumImaRKJUQoKgCAcAXBNO2WaP5CNRLuBvIREI4QviKgSf4CUwQSYkQPOkMi4DCkflYLs6muK+YvxyH-bwMT8Z-D5fyv4Aj8kOLuR+FlOxU44jZbQl+7hSye01AWdhyoJnYV+DM7UMzUoMtFZHS0s53xnOlaMhAXgJlZCzEHJK-KCgKX3GWFSt57zcvLHqceBTdUF2qsayJPwSKpA+JWBWvwgTanPKhV4CteEkTlCEHIwQdXYr1S42m89GoypGb6hA1ZVQo2UujasmMVJ4QIoENIGZgS5MSImimxS9mps1umsuzVGYrzPs3TN81Ah7hybC3aeQ-CZV+ACJhqUf5BoKDWlWojC4NvbY9LxYAfUAu1DyksCSSb1nMAeNhioso5TyuWIERUSrupFUmr10c52l0em8iVVcBjLsdqeGJwJULig3WRIq-dspVgjcCI8B4p2HzrY89piCn382rBM9MXdg1kX3KS1unxX0oyBO+9U6M8lYtrSykyTy6AvKOSgqmkBIMv3rCkWDQbgQIbDfMlGKQxTZlPGkfhwHIF4fEeBzpi7yO6KlP8UiylbzZLyPjP+R6lLdwVms9jZ6tm4YefhnjRyL4GtNEax+-zHZYQBH8EInxNLrsHfMt2bxKygt+HKP4nxijFCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCBhVAOwBdDU88SA6AVwoEt2q2BDPNgL0gBiAEoZSGAJIA1DABEA+gGUAKgEEVGBaQDyAOXWS9GEQG0ADAF1EoHKlhsulGyCyIAtACYAbIwDsAIzmAJwAzH4ArAA0IACeiJ5+AByMwZ6hnokALD6e5kneAL6FMWiYuATEZJQ0dAyEjByOPHz8HFBy3FTc0mxgAO5CEJRgjRQAbqgA1qNl2PhEJOTUtPRMTVy8Au2d3b0DCByTAMZdbJQWlpcudg5OFC5uCAGejObentFxiBHBwYyeLIBX5JfLeX7BCLFUroeaVJY1Vb1MbNLZtCgdLo9PqDEi0Br4LoAMyIAFtGHMKotqis6utOC1thjdtiDkdUKd7pdrkgQLdms5eU9sowAqEkn8IuLIUDvN4YvEEFksqE3hFQaEglkperPNCQJSFlVlrU1g0Noz0VATasAArcChgPCwIYjMaTGYU2FU42Iunmhlo9o2uj2x3Ow4TDlnC5WHm2ewCh5Cjy+YLeJJ+cGfTMS96fBWIJJJAKMULa8wZbzmPyfbxZfWG+E003Ii1BjEhvBhp0uvFERiEqgkwjkpvUrttwOtYN+7sO3uRk4xijcqw3RP3R4JPyqgJZDM14sygJywsIXf-TV+LLBEIFXc5Rveo0I2lmlGbVrCMQSGRaORJCUXRZBEBQ1FtW1lHUTR4z5TdzmTUBhVCdNRX3QEQmSbUknPCJAn8IJawiTxgm1dIoRKA0X2bSd6VRb8IFEcQpFkBQAEUAFUTAATWgjQMDg-ktxTBBMIiRhiyzcUpSzSJz0fRhvACPws0rEsIgietn3KV8WyReivwEH8WP-BQVEkABZDAADFJGQTQwIs6yhIQwVkISVDzDecwQjCdUD01PD0kImtPlI8jQkomFdNoucpwY4ymN-VitGc2z7MchQxBssQlAACQUIxHOkNRkFcu5EO3MSvJ8vyoqSQKAnPLJIlC4iIpIqKdLhCd4sMy1hDUORFDshyTAqpNqsBNJJJUrJzBVDNwSyc8AheVV028YIkk1ZScz1Kjx19d8EqMwQIEYCAsVgMAqCUJ0wGOe5GHGLZrq4DEHoYZ7EKEZAgM0PRzJ0bR8rUPQAHEMCUSaRI8hAyN8W8wkCJIfDSIFzzlLJ0IWiVyyBXbQh6n031bAa0UgK6bru76npet6+A+9p6d+yghE4205AEhQefUJQMBUZQMGQcQLP0OGqtEh9RXBVCIn3Xz0y+RUS1VFbxWBSIPnW0m9LogNEoumnulu+7HvZihXves4vst+4hH5tRBeFwWxdICXgbylQdDEBQbLUezOLEKX3NcRBwVLUI5QCYI1Lla9zzSFJi08dHQhju8kk0-W4tOynGNN7hzbZl62AgBhOe53nnddkWPa9sOkIj54fBSTOMxj8x09rctz3VpSIhVDSdc8PWjpovqC6N87qY+ku6YdxDGkrsAnY0F2hYb8XJH0bKYd9-3A+D0P115YTpYR4FwUYJa73SZUIh71bvgQQfNdHrTx4CPPp4p2eg1LoL1LsvSgLAcAs2ZFifYgxhiOndNMWYU8ToAM-EA4uoCfovWYJAu2mI9g4iXNGLkcZz4JkquHJ4ARiZKSBHkGOAV0jJzQhCdGKsjwHj-qggygCqbANphbbBK9cFQIIayXEhB8SDjwMSMkXpYr-14eg-hmCl7CPAaI-BLJYHEM5IhNc1gL5uRbtQ9MKRn71QCt4IKb8giQjeGkMIB4pQ1lPNw8myj2xF2OHOSGtBcGwBYOwacSUhBGEkBZMqkgABaWhdAGBEDoZAChIZJK5uBW0khm7VTzACQEcdPjKi1rhOx5YJILUlMEQpPciiT0UTw-0KifF+ICTgIJFcq7OwUNISQGAADqCgub83kDk0SLwDwAk1PHcih5whrSlLjXayzEjpwotFaiDTPFNO8UlRgvj3z+NQIE1eVdhm8wSSoJJKTbQQ1FrDch8FKGmMQGKbwfhUiZGrH4MI1TMjNTsb8XGQIDyZlUvkW8GzjrbI-Lsk2BzTRHJOVoz61o5w9mdK6BB7JPTQv0js0J8LWnHPaRAsRXYMWwD0SuQxG5nnVTjn4bylZMgqmsbYxUKkMxDzvFpXc21Ei-3qb1RpsLCXUwRasJFpKUWznfJSoQ-YCSyOHPIvFhtml7MlXQaVQTZWdnRQuCM7J9GxiuI8y+VDXk-KWdqLIoJalpBvGtQIElfLlhzltP4nwPH4rFcbEylkdBsTGo5MZCNASqTeJEGhOdn47R8GtQEyNAhMp2iRfIu5ihUQoKgCAcAXDqv6oQOlU1RLuBvKFVGqtEA-P8HeXyNjVIUSBL6jVrA4WQFLfDVuOQ1rvIBBKP4w6R3pjbcWzVVodE4m7VfVu7hSxP01AWN+ypvLYV+FFbUDVDoxRFTCs6lo5WmkpbOq1CAvDeVauCD4KMR0FAUvuMs807w7XeeWXdmz91+sPfws9LyECaVeOmBh48gX7hrQgVCrxx5hHSKCesORP1FpnpO+egiy5zstQB6sqoY7KXjtWROKk8IEUCHB8wUpULHnHahztAizbqIZivJmFd8GYfDth6qgQ9wQvdStPIfhsa-ABIU9GNiWUFFo2g+jaihHMfAZ0sA-6GXag+enFS6b6yLQzNjeseN8jOKJpnaTXjxUMcXvJq2ZLtEwJncY+l4zTwfOBKhcUPyJT2tCCw3GVZoPAk4XUvdZMf2Fy1cSwJKnRLVm8iBllwIyIQaTfhUUjDfjpeWqZglAbLrarwLq4J9GosI3rCkOLGQEsgsg28lIbySKnjSLUrL-q565Yi6SpTxXW6uf+KRZSt4mV5HTmtQmSlGHjwFU14VIWNWybywV-VaL5VGvgA5st18sIAj+CET4mkSyqX7XeHyHrfhym9ZRYoQA */
   createMachine<
     LogExplorerControllerContext,
     LogExplorerControllerEvent,
@@ -62,6 +62,7 @@ export const createPureLogExplorerControllerStateMachine = (
             },
           },
         },
+
         initializingDataView: {
           invoke: {
             src: 'createDataView',
@@ -79,6 +80,7 @@ export const createPureLogExplorerControllerStateMachine = (
             },
           },
         },
+
         initializingControlPanels: {
           invoke: {
             src: 'initializeControlPanels',
@@ -91,6 +93,7 @@ export const createPureLogExplorerControllerStateMachine = (
             },
           },
         },
+
         initialized: {
           type: 'parallel',
           invoke: [
@@ -152,6 +155,7 @@ export const createPureLogExplorerControllerStateMachine = (
                 },
               },
             },
+
             controlGroups: {
               initial: 'uninitialized',
               states: {
@@ -196,12 +200,15 @@ export const createPureLogExplorerControllerStateMachine = (
             RECEIVE_DISCOVER_APP_STATE: {
               actions: ['updateContextFromDiscoverAppState'],
             },
+
             RECEIVE_QUERY_STATE: {
               actions: ['updateQueryStateFromQueryServiceState'],
             },
+
             RECEIVE_TIMEFILTER_TIME: {
               actions: ['updateContextFromTimefilter'],
             },
+
             RECEIVE_TIMEFILTER_REFRESH_INTERVAL: {
               actions: ['updateContextFromTimefilter'],
             },
