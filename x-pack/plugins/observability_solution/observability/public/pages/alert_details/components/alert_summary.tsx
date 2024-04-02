@@ -18,18 +18,22 @@ interface AlertSummaryProps {
 
 export function AlertSummary({ alertSummaryFields }: AlertSummaryProps) {
   return (
-    <>
-      <EuiFlexGroup data-test-subj="alert-summary-container" gutterSize="xl">
-        {alertSummaryFields?.map((field, idx) => {
-          return (
-            <EuiFlexItem key={idx} grow={false}>
-              <EuiText color="subdued">{field.label}</EuiText>
-              <EuiText>{field.value}</EuiText>
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGroup>
-      {alertSummaryFields && alertSummaryFields.length > 0 && <EuiSpacer size="l" />}
-    </>
+    <div data-test-subj="alert-summary-container">
+      {alertSummaryFields && alertSummaryFields.length > 0 && (
+        <>
+          <EuiFlexGroup gutterSize="xl">
+            {alertSummaryFields.map((field, idx) => {
+              return (
+                <EuiFlexItem key={idx} grow={false}>
+                  <EuiText color="subdued">{field.label}</EuiText>
+                  <EuiText>{field.value}</EuiText>
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+        </>
+      )}
+    </div>
   );
 }

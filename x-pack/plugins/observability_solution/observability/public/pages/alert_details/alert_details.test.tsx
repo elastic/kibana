@@ -41,6 +41,7 @@ const ruleType: RuleTypeModel = {
   requiresAppContext: false,
   validate: validationMethod,
   ruleParamsExpression: () => <Fragment />,
+  alertDetailsAppSection: () => <Fragment />,
 };
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
@@ -136,6 +137,26 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
     expect(alertDetails.queryByTestId('alertDetailsPageTitle')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsTabbedContent')).toBeTruthy();
+    expect(alertDetails.queryByTestId('alert-summary-container')).toBeTruthy();
+    expect(alertDetails.queryByTestId('overviewTab')).toBeTruthy();
+    expect(alertDetails.queryByTestId('metadataTab')).toBeTruthy();
+  });
+
+  it('should show Metadata tab', async () => {
+    useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
+
+    const alertDetails = renderComponent();
+
+    await waitFor(() => expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy());
+
+    expect(alertDetails.queryByTestId('alertDetailsTabbedContent')?.textContent).toContain(
+      'Metadata'
+    );
+    alertDetails.getByText('Metadata').click();
+    expect(alertDetails.queryByTestId('metadataTabPanel')).toBeTruthy();
+    expect(alertDetails.queryByTestId('metadataTabPanel')?.textContent).toContain(
+      'kibana.alert.status'
+    );
   });
 
   it('should show error loading the alert details', async () => {

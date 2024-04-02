@@ -181,17 +181,19 @@ export function AlertDetails() {
   const OVERVIEW_TAB_ID = 'overview';
   const METADATA_TAB_ID = 'metadata';
 
-  const overviewTab = AlertDetailsAppSection && rule && alertDetail?.formatted && (
+  const overviewTab = (
     <>
       <EuiSpacer size="l" />
       <AlertSummary alertSummaryFields={summaryFields} />
-      <AlertDetailsAppSection
-        alert={alertDetail.formatted}
-        rule={rule}
-        timeZone={timeZone}
-        setAlertSummaryFields={setSummaryFields}
-        ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
-      />
+      {AlertDetailsAppSection && rule && alertDetail?.formatted && (
+        <AlertDetailsAppSection
+          alert={alertDetail.formatted}
+          rule={rule}
+          timeZone={timeZone}
+          setAlertSummaryFields={setSummaryFields}
+          ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
+        />
+      )}
     </>
   );
 
