@@ -8,8 +8,6 @@
 
 import _ from 'lodash';
 import globby from 'globby';
-import path from 'path';
-import normalizePath from 'normalize-path';
 import processFunctionDefinition from './process_function_definition';
 
 export default function (directory) {
@@ -20,7 +18,7 @@ export default function (directory) {
   // Get a list of all files and use the filename as the object key
   const files = _.map(
     globby
-      .sync(normalizePath(path.resolve(__dirname, '../' + directory + '/*.js')), { noext: true })
+      .sync('../' + directory + '/*.js', { cwd: __dirname })
       .filter((filename) => !filename.includes('.test')),
     function (file) {
       const name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
@@ -30,8 +28,8 @@ export default function (directory) {
 
   // Get a list of all directories with an index.js, use the directory name as the key in the object
   const directories = _.chain(
-    globby.sync(normalizePath(path.resolve(__dirname, '../' + directory + '/*/index.js')), {
-      noext: true,
+    globby.sync('../' + directory + '/*/index.js', {
+      cwd: __dirname,
     })
   )
     .map(function (file) {
