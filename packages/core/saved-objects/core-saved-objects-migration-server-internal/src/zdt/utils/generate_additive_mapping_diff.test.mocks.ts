@@ -6,17 +6,13 @@
  * Side Public License, v 1.
  */
 
-export const getVirtualVersionsFromMappingsMock = jest.fn();
-export const compareVirtualVersionsMock = jest.fn();
-export const getVirtualVersionMapMock = jest.fn();
+export const getBaseMappingsMock = jest.fn();
 
-jest.doMock('@kbn/core-saved-objects-base-server-internal', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-base-server-internal');
+jest.doMock('../../core/build_active_mappings', () => {
+  const actual = jest.requireActual('../../core/build_active_mappings');
   return {
     ...actual,
-    getVirtualVersionsFromMappings: getVirtualVersionsFromMappingsMock,
-    compareVirtualVersions: compareVirtualVersionsMock,
-    getVirtualVersionMap: getVirtualVersionMapMock,
+    getBaseMappings: getBaseMappingsMock,
   };
 });
 
