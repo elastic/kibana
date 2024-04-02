@@ -42,7 +42,8 @@
       "ml",
       "serverless",
       "spaces",
-      "telemetry"
+      "telemetry",
+      "licenseManagement"
     ],
     "requiredBundles": [
       "data",

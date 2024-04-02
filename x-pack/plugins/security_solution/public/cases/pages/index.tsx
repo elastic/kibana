@@ -54,7 +54,7 @@ const TimelineDetailsPanel = () => {
 };
 
 const CaseContainerComponent: React.FC = () => {
-  const { cases } = useKibana().services;
+  const { cases, telemetry } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
@@ -82,6 +82,10 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
         });
+        telemetry.reportDetailsFlyoutOpened({
+          tableId: TimelineId.casePage,
+          panel: 'right',
+        });
       }
       // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
       // support of old flyout in cases page
@@ -98,7 +102,7 @@ const CaseContainerComponent: React.FC = () => {
         );
       }
     },
-    [dispatch, isSecurityFlyoutEnabled, openFlyout]
+    [dispatch, isSecurityFlyoutEnabled, openFlyout, telemetry]
   );
 
   const endpointDetailsHref = (endpointId: string) =>

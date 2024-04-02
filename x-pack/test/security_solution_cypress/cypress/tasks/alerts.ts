@@ -8,7 +8,7 @@
 import { encode } from '@kbn/rison';
 import { recurse } from 'cypress-recurse';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
-import type { FilterItemObj } from '@kbn/security-solution-plugin/public/common/components/filter_group/types';
+import type { FilterItemObj } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import {
   ADD_EXCEPTION_BTN,
   ALERT_CHECKBOX,
@@ -464,8 +464,9 @@ export const sumAlertCountFromAlertCountTable = (callback?: (sumOfEachRow: numbe
 };
 
 export const selectFirstPageAlerts = () => {
-  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().scrollIntoView();
-  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().click({ force: true });
+  const ALERTS_DATA_GRID = '[data-test-subj="alertsTable"]';
+  cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).scrollIntoView();
+  cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).click({ force: true });
 };
 
 export const selectAllAlerts = () => {

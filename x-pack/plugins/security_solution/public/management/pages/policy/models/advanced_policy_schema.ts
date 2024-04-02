@@ -638,6 +638,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.filewrite_sync',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.filewrite_sync',
+      {
+        defaultMessage:
+          'Send file kernel driver write notifications synchronously where possible.  May improve the reliability of file write and malware-on-write enrichments at the cost of system responsiveness. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.kernel.network',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -1096,6 +1107,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Additional filesystems for fanotify to ignore. The format is a comma separated list of filesystem names as they appear in "/proc/filesystems", e.g. "ext4,tmpfs". When "ignore_unknown_filesystems" is false, parsed entries of this option supplement internally known bad filesystems to be ignored. When "ignore_unknown_filesystems" is true, parsed entries of this option override entries in "monitored_filesystems" and internally CI tested filesystems.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.fanotify.seccomp_restricted',
+    first_supported_version: '8.13.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.seccomp_restricted',
+      {
+        defaultMessage:
+          'Prevent the Defend permission checking thread from calling the open/openat syscalls when running on kernels which require FAN_OPEN_PERM (older than 5.0). Will avoid potential deadlocks with other anti-virus vendors at the cost of racy hash-based trusted application entries. Ignored when running on newer kernels. Default: false',
       }
     ),
   },
@@ -1630,6 +1652,39 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'A comma-separated list of feature flags. Currently no feature flags are supported.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
       }
     ),
   },

@@ -6,6 +6,8 @@
  */
 import React, { ReactNode } from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiBadge,
   EuiFlexGrid,
@@ -19,18 +21,18 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../shared/kibana';
 import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_helpers';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import {
   connectorStatusToColor,
   connectorStatusToText,
 } from '../../utils/connector_status_helpers';
-
-import { CONNECTORS } from '../search_index/connector/constants';
 
 import { ConnectorDetailTabId } from './connector_detail';
 
@@ -87,7 +89,8 @@ const configureLabel = i18n.translate(
 );
 
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, indexData }) => {
-  const connectorDefinition = CONNECTORS.find((c) => c.serviceType === connector.service_type);
+  const { connectorTypes } = useValues(KibanaLogic);
+  const connectorDefinition = connectorTypes.find((c) => c.serviceType === connector.service_type);
   return (
     <EuiFlexGrid columns={3} direction="row">
       <EuiFlexItem>
@@ -105,9 +108,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
               alignItems="center"
               justifyContent="spaceBetween"
             >
-              {connectorDefinition && connectorDefinition.icon && (
+              {connectorDefinition && connectorDefinition.iconPath && (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={connectorDefinition.icon} size="xl" />
+                  <EuiIcon type={connectorDefinition.iconPath} size="xl" />
                 </EuiFlexItem>
               )}
               <EuiFlexItem>
@@ -166,7 +169,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
       </EuiFlexItem>
       <EuiFlexItem>
         <StatCard
-          title="Index"
+          title={
+            <FormattedMessage
+              id="xpack.enterpriseSearch.connectorStats.statCard.indexLabel"
+              defaultMessage="Index"
+            />
+          }
           content={
             connector.index_name ? (
               indexData ? (

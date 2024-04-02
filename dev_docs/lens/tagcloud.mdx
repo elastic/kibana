@@ -42,7 +42,7 @@ const tagCloudConfig: LensConfig = {
   breakdown: 'geo.dest',
   value: 'bytes',
 };
-const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
+const configBuilder = new LensConfigBuilder(dataViewsAPI, lensFormulaAPI);
 const lensConfig = configBuilder.build(tagCloudConfig, {
   timeRange: { from: 'now-1M', to: 'now', type: 'relative' },
   embeddable: true,

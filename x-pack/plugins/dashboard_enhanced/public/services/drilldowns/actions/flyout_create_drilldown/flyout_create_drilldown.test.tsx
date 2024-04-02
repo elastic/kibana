@@ -18,6 +18,7 @@ import {
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import { UiActionsEnhancedActionFactory } from '@kbn/ui-actions-enhanced-plugin/public';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 
 function createAction(
   allPossibleTriggers = ['VALUE_CLICK_TRIGGER'],
@@ -50,6 +51,9 @@ function createAction(
   ]);
   return new FlyoutCreateDrilldownAction(params);
 }
+const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
+  dynamicActions: { events: [] },
+});
 
 const compatibleEmbeddableApi = {
   enhancements: {
@@ -59,6 +63,10 @@ const compatibleEmbeddableApi = {
       uiActions: uiActionsEnhancedPluginMock.createStartContract(),
     }),
   },
+  setDynamicActions: (newDynamicActions: DynamicActionsSerializedState['enhancements']) => {
+    dynamicActionsState$.next(newDynamicActions);
+  },
+  dynamicActionsState$,
   parentApi: {
     type: 'dashboard',
   },

@@ -154,6 +154,7 @@ export const useIndicesNav = () => {
                   }
                 ),
                 ...generateNavLink({
+                  shouldShowActiveForSubroutes: true,
                   to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
                     indexName,
                     tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,

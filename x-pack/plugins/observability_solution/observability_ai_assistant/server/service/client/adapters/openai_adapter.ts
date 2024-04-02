@@ -5,19 +5,62 @@
  * 2.0.
  */
 
+import { encode } from 'gpt-tokenizer';
 import { compact, isEmpty, merge, omit } from 'lodash';
 import OpenAI from 'openai';
-import { MessageRole } from '../../../../common';
-import { processOpenAiStream } from '../../../../common/utils/process_openai_stream';
+import { CompatibleJSONSchema } from '../../../../common/functions/types';
+import { Message, MessageRole } from '../../../../common';
+import { processOpenAiStream } from './process_openai_stream';
 import { eventsourceStreamIntoObservable } from '../../util/eventsource_stream_into_observable';
 import { LlmApiAdapterFactory } from './types';
+
+function getOpenAIPromptTokenCount({
+  messages,
+  functions,
+}: {
+  messages: Message[];
+  functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
+}) {
+  // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+  const tokensFromMessages = encode(
+    messages
+      .map(
+        ({ message }) =>
+          `<|start|>${message.role}\n${message.content}\n${
+            'name' in message
+              ? message.name
+              : 'function_call' in message && message.function_call
+              ? message.function_call.name + '\n' + message.function_call.arguments
+              : ''
+          }<|end|>`
+      )
+      .join('\n')
+  ).length;
+
+  // this is an approximation. OpenAI cuts off a function schema
+  // at a certain level of nesting, so their token count might
+  // be lower than what we are calculating here.
+  const tokensFromFunctions = functions
+    ? encode(
+        functions
+          ?.map(
+            (fn) =>
+              `<|start|>${fn.name}\n${fn.description}\n${JSON.stringify(fn.parameters)}<|end|>`
+          )
+          .join('\n')
+      ).length
+    : 0;
+
+  return tokensFromMessages + tokensFromFunctions;
+}
 
 export const createOpenAiAdapter: LlmApiAdapterFactory = ({
   messages,
   functions,
   functionCall,
-  logger,
 }) => {
+  const promptTokens = getOpenAIPromptTokenCount({ messages, functions });
+
   return {
     getSubAction: () => {
       const messagesForOpenAI: Array<
@@ -72,7 +115,7 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
       };
     },
     streamIntoObservable: (readable) => {
-      return eventsourceStreamIntoObservable(readable).pipe(processOpenAiStream());
+      return eventsourceStreamIntoObservable(readable).pipe(processOpenAiStream(promptTokens));
     },
   };
 };

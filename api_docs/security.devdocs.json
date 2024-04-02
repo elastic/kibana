@@ -205,6 +205,38 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-public.AuthorizationServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthorizationServiceSetup",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-public.AuthorizationServiceSetup.isRoleManagementEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isRoleManagementEnabled",
+            "description": [
+              "\nDetermines if role management is enabled."
+            ],
+            "signature": [
+              "() => boolean | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-public.ChangePasswordProps",
         "type": "Interface",
         "tags": [],
@@ -1015,6 +1047,29 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-public.AuthorizationServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AuthorizationServiceStart",
+        "description": [
+          "\nStart has the same contract as Setup for now."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-public",
+            "scope": "public",
+            "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+            "section": "def-public.AuthorizationServiceSetup",
+            "text": "AuthorizationServiceSetup"
+          }
+        ],
+        "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -1119,6 +1174,28 @@
               "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
               "section": "def-public.AuthenticationServiceSetup",
               "text": "AuthenticationServiceSetup"
+            }
+          ],
+          "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginSetup.authz",
+          "type": "Object",
+          "tags": [],
+          "label": "authz",
+          "description": [
+            "\nExposes authorization configuration."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/security-plugin-types-public",
+              "scope": "public",
+              "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+              "section": "def-public.AuthorizationServiceSetup",
+              "text": "AuthorizationServiceSetup"
             }
           ],
           "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
@@ -2291,7 +2368,7 @@
               "\nSaved object that was created, changed, deleted or accessed as part of this event."
             ],
             "signature": [
-              "{ type: string; id: string; } | undefined"
+              "{ type: string; id: string; name?: string | undefined; } | undefined"
             ],
             "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
             "deprecated": false,
@@ -5226,6 +5303,23 @@
           "Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/authorization/role_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.ROUTE_TAG_AUTH_FLOW",
+        "type": "string",
+        "tags": [],
+        "label": "ROUTE_TAG_AUTH_FLOW",
+        "description": [
+          "\nThe routes that are involved into authentication flows, especially if they are used by the 3rd\nparties, require special handling."
+        ],
+        "signature": [
+          "\"security:authFlow\""
+        ],
+        "path": "x-pack/plugins/security/server/routes/tags.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

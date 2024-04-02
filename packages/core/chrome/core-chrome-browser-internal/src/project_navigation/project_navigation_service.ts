@@ -230,6 +230,7 @@ export class ProjectNavigationService {
       this.navigationChangeSubscription.unsubscribe();
     }
 
+    let redirectLocation = location;
     this.projectNavigationNavTreeFlattened = {};
     this.navigationChangeSubscription = combineLatest([
       navTreeDefinition$,
@@ -251,7 +252,8 @@ export class ProjectNavigationService {
           this.navigationTreeUi$.next(navigationTreeUI);
 
           this.projectNavigationNavTreeFlattened = flattenNav(navigationTree);
-          this.updateActiveProjectNavigationNodes(location);
+          this.updateActiveProjectNavigationNodes(redirectLocation);
+          redirectLocation = undefined; // we don't want to redirect on subsequent changes, only when initiating
         },
         error: (err) => {
           this.logger?.error(err);
