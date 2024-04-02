@@ -20,7 +20,10 @@ import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es
 import { i18n } from '@kbn/i18n';
 import { asDuration, asPercent } from '../../../../../common';
 import { createFormatter } from '../../../../../common/custom_threshold_rule/formatters';
-import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
+import {
+  metricValueFormatter,
+  NO_DATA,
+} from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { METRIC_FORMATTERS } from '../../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../pages/alert_details/alert_details';
 import {
@@ -82,7 +85,8 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
-          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
+          pctAboveThreshold:
+            formattedValue === NO_DATA ? '' : getPctAboveThreshold(observedValue, threshold),
         } as unknown as FlyoutThresholdData;
       });
 
@@ -109,7 +113,8 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
-          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
+          pctAboveThreshold:
+            formattedValue === NO_DATA ? '' : getPctAboveThreshold(observedValue, threshold),
         } as unknown as FlyoutThresholdData;
       });
 

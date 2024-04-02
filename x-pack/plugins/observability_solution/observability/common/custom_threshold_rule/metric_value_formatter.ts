@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { createFormatter } from './formatters';
-
+export const NO_DATA = '[NO DATA]';
 export const metricValueFormatter = (value: number | null, metric: string = '') => {
   const noDataValue = i18n.translate(
     'xpack.observability.customThreshold.rule.alerting.noDataFormattedValue',
     {
-      defaultMessage: '[NO DATA]',
+      defaultMessage: NO_DATA,
     }
   );
 
