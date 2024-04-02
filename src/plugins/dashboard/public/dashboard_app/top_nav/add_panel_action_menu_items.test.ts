@@ -21,8 +21,40 @@ describe('getAddPanelActionMenuItems', () => {
         isCompatible: () => Promise.resolve(true),
         execute: jest.fn(),
       },
+      {
+        id: 'TEST_ACTION_01',
+        type: 'TEST_ACTION_01',
+        getDisplayName: () => 'Action name 01',
+        getIconType: () => 'pencil',
+        getDisplayNameTooltip: () => 'Action tooltip',
+        isCompatible: () => Promise.resolve(true),
+        execute: jest.fn(),
+        grouping: [
+          {
+            id: 'groupedAddPanelAction',
+            getDisplayName: () => 'Custom group',
+            getIconType: () => 'logoElasticsearch',
+          },
+        ],
+      },
+      {
+        id: 'TEST_ACTION_02',
+        type: 'TEST_ACTION_02',
+        getDisplayName: () => 'Action name',
+        getIconType: () => 'pencil',
+        getDisplayNameTooltip: () => 'Action tooltip',
+        isCompatible: () => Promise.resolve(true),
+        execute: jest.fn(),
+        grouping: [
+          {
+            id: 'groupedAddPanelAction',
+            getDisplayName: () => 'Custom group',
+            getIconType: () => 'logoElasticsearch',
+          },
+        ],
+      },
     ];
-    const items = getAddPanelActionMenuItems(
+    const [items, grouped] = getAddPanelActionMenuItems(
       getMockPresentationContainer(),
       registeredActions,
       jest.fn()
@@ -36,10 +68,37 @@ describe('getAddPanelActionMenuItems', () => {
         toolTipContent: 'Action tooltip',
       },
     ]);
+    expect(grouped).toEqual({
+      groupedAddPanelAction: {
+        id: 'groupedAddPanelAction',
+        title: 'Custom group',
+        items: [
+          {
+            'data-test-subj': 'create-action-Action name 01',
+            icon: 'pencil',
+            name: 'Action name 01',
+            onClick: expect.any(Function),
+            toolTipContent: 'Action tooltip',
+          },
+          {
+            'data-test-subj': 'create-action-Action name',
+            icon: 'pencil',
+            name: 'Action name',
+            onClick: expect.any(Function),
+            toolTipContent: 'Action tooltip',
+          },
+        ],
+      },
+    });
   });
 
   it('returns empty array if no actions have been registered', async () => {
-    const items = getAddPanelActionMenuItems(getMockPresentationContainer(), [], jest.fn());
+    const [items, grouped] = getAddPanelActionMenuItems(
+      getMockPresentationContainer(),
+      [],
+      jest.fn()
+    );
     expect(items).toStrictEqual([]);
+    expect(grouped).toStrictEqual({});
   });
 });

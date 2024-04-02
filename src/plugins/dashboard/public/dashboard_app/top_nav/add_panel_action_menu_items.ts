@@ -7,6 +7,10 @@
  */
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import { addPanelMenuTrigger } from '../../triggers';
 
 const onAddPanelActionClick =
@@ -30,21 +34,53 @@ export const getAddPanelActionMenuItems = (
   api: PresentationContainer,
   actions: Array<Action<object>> | undefined,
   closePopover: () => void
-) => {
-  return (
-    actions?.map((item) => {
-      const context = {
-        embeddable: api,
-        trigger: addPanelMenuTrigger,
-      };
-      const actionName = item.getDisplayName(context);
-      return {
-        name: actionName,
-        icon: item.getIconType(context),
-        onClick: onAddPanelActionClick(item, context, closePopover),
-        'data-test-subj': `create-action-${actionName}`,
-        toolTipContent: item?.getDisplayNameTooltip?.(context),
-      };
-    }) ?? []
-  );
+): [EuiContextMenuPanelItemDescriptor[], Record<string, EuiContextMenuPanelDescriptor>] => {
+  const ungrouped: EuiContextMenuPanelItemDescriptor[] = [];
+  const grouped: Record<string, EuiContextMenuPanelDescriptor> = {};
+
+  const context = {
+    embeddable: api,
+    trigger: addPanelMenuTrigger,
+  };
+
+  const getMenuItem = (item: Action<object>) => {
+    const actionName = item.getDisplayName(context);
+
+    return {
+      name: actionName,
+      icon: item.getIconType(context),
+      onClick: onAddPanelActionClick(item, context, closePopover),
+      'data-test-subj': `create-action-${actionName}`,
+      toolTipContent: item?.getDisplayNameTooltip?.(context),
+    };
+  };
+
+  actions?.forEach((item) => {
+    if (Array.isArray(item.grouping)) {
+      item.grouping.forEach((group) => {
+        const actionName = item.getDisplayName(context);
+
+        if (!grouped[group.id]) {
+          grouped[group.id] = {
+            id: group.id,
+            // @ts-expect-error
+            title: group.getDisplayName(context),
+            items: [],
+          };
+        }
+
+        grouped[group.id]!.items!.push({
+          name: actionName,
+          icon: item.getIconType(context),
+          onClick: onAddPanelActionClick(item, context, closePopover),
+          'data-test-subj': `create-action-${actionName}`,
+          toolTipContent: item?.getDisplayNameTooltip?.(context),
+        });
+      });
+    } else {
+      ungrouped.push(getMenuItem(item));
+    }
+  });
+
+  return [ungrouped, grouped];
 };
