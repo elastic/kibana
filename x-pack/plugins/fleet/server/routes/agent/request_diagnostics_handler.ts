@@ -41,7 +41,7 @@ export const requestDiagnosticsHandler: RequestHandler<
     const result = await AgentService.requestDiagnostics(
       esClient,
       request.params.agentId,
-      request.body.additional_metrics
+      request.body?.additional_metrics
     );
 
     return response.ok({ body: { actionId: result.actionId } });

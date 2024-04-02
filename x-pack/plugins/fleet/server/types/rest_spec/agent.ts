@@ -165,11 +165,13 @@ export const PostRequestDiagnosticsActionRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
-  body: schema.object({
-    additional_metrics: schema.maybe(
-      schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
-    ),
-  }),
+  body: schema.nullable(
+    schema.object({
+      additional_metrics: schema.maybe(
+        schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
+      ),
+    })
+  ),
 };
 
 export const PostBulkRequestDiagnosticsActionRequestSchema = {

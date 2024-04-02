@@ -51,7 +51,6 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
   const authz = useAuthz();
   const { notifications } = useStartServices();
   const { getAbsolutePath } = useLink();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [diagnosticsEntries, setDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
   const [prevDiagnosticsEntries, setPrevDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
@@ -198,9 +197,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       onClick={() => {
         setIsRequestDiagnosticsModalOpen(true);
       }}
-      disabled={
-        isSubmitting || !isAgentRequestDiagnosticsSupported(agent) || !authz.fleet.readAgents
-      }
+      disabled={!isAgentRequestDiagnosticsSupported(agent) || !authz.fleet.readAgents}
     >
       <FormattedMessage
         id="xpack.fleet.requestDiagnostics.diagnosticsOneButton"
