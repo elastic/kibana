@@ -76,7 +76,11 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         languageId={mode}
         value={value}
         fullWidth={true}
-        options={{ theme: mode === CONSOLE_OUTPUT_LANG_ID ? CONSOLE_OUTPUT_THEME_ID : undefined }}
+        options={{
+          fontSize: readOnlySettings.fontSize,
+          wordWrap: readOnlySettings.wrapMode === true ? 'on' : 'off',
+          theme: mode === CONSOLE_OUTPUT_LANG_ID ? CONSOLE_OUTPUT_THEME_ID : undefined,
+        }}
       />
     </div>
   );
