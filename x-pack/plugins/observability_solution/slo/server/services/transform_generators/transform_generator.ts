@@ -33,14 +33,7 @@ export abstract class TransformGenerator {
         },
       },
       ...(hasGroupings
-        ? {
-            'slo.instanceId': {
-              type: 'keyword',
-              script: {
-                source: this.buildInstanceId(slo),
-              },
-            },
-          }
+        ? {}
         : {
             'slo.instanceId': {
               type: 'keyword',
@@ -50,12 +43,6 @@ export abstract class TransformGenerator {
             },
           }),
     };
-  }
-
-  public buildInstanceId(slo: SLO): string {
-    const groups = [slo.groupBy].flat().filter((value) => !!value);
-    const groupings = groups.map((group) => `'${group}:'+doc['${group}'].value`).join(`+'|'+`);
-    return `emit(${groupings})`;
   }
 
   public buildDescription(slo: SLO): string {
@@ -76,23 +63,16 @@ export abstract class TransformGenerator {
 
     const groupings =
       !groups.includes(ALL_VALUE) && groups.length
-        ? groups.reduce(
-            (acc, field) => {
-              return {
-                ...acc,
-                [`slo.groupings.${field}`]: {
-                  terms: {
-                    field,
-                  },
+        ? groups.reduce((acc, field) => {
+            return {
+              ...acc,
+              [`slo.groupings.${field}`]: {
+                terms: {
+                  field,
                 },
-              };
-            },
-            {
-              'slo.instanceId': {
-                terms: { field: 'slo.instanceId' },
               },
-            }
-          )
+            };
+          }, {})
         : { 'slo.instanceId': { terms: { field: 'slo.instanceId' } } };
 
     return {

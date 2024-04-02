@@ -25,6 +25,13 @@ export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => (
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },
     },
+    {
+      fingerprint: {
+        fields: ['slo.groupings'],
+        target_field: 'slo.instanceId',
+        ignore_missing: true,
+      },
+    },
   ],
   _meta: {
     description: 'Ingest pipeline for SLO rollup data',
