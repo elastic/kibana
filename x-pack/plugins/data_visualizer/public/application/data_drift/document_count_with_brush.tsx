@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LogRateHistogramItem } from '@kbn/aiops-utils';
+import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
 import type { FC } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';

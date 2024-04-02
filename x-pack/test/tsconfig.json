@@ -145,7 +145,6 @@
     "@kbn/ml-category-validator",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/stack-connectors-plugin",
-    "@kbn/aiops-utils",
     "@kbn/stack-alerts-plugin",
     "@kbn/apm-data-access-plugin",
     "@kbn/coloring",
@@ -170,6 +169,8 @@
     "@kbn/slo-plugin",
     "@kbn/aiops-test-utils",
     "@kbn/observability-ai-assistant-app-plugin",
+    "@kbn/aiops-log-rate-analysis",
     "@kbn/apm-data-view",
+    "@kbn/core-saved-objects-api-server",
   ]
 }
