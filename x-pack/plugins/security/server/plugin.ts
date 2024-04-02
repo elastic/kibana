@@ -58,7 +58,7 @@ import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
-import { UserProfileService } from './user_profile';
+import { getUserSettingNamespaceRegistrationService, UserProfileService } from './user_profile';
 import type { UserProfileServiceStartInternal } from './user_profile';
 import { UserProfileSettingsClient } from './user_profile/user_profile_settings_client';
 import type { UserSettingServiceStart } from './user_profile/user_setting_service';
@@ -331,6 +331,8 @@ export class SecurityPlugin
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
     });
 
+    const namespaceRegistrationService = getUserSettingNamespaceRegistrationService();
+
     return Object.freeze<SecurityPluginSetup>({
       audit: this.auditSetup,
       authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
@@ -351,6 +353,8 @@ export class SecurityPlugin
         license,
         logger: this.logger.get('deprecations'),
       }),
+
+      namespaceRegistrationService,
     });
   }
 
@@ -432,6 +436,7 @@ export class SecurityPlugin
         getCurrent: this.userProfileStart.getCurrent,
         bulkGet: this.userProfileStart.bulkGet,
         suggest: this.userProfileStart.suggest,
+        update: this.userProfileStart.update,
       },
     });
   }

@@ -10,6 +10,7 @@ import type { AuditServiceSetup } from './audit';
 import type { PrivilegeDeprecationsService, AuthorizationServiceSetup } from './authorization';
 import type { AuthenticationServiceStart } from './authentication';
 import type { UserProfileServiceStart } from './user_profile';
+import { UserSettingsNamespaceRegistrationService } from './user_profile/user_settings_namespace_registration_service';
 
 /**
  * Describes public Security plugin contract returned at the `setup` stage.
@@ -27,6 +28,10 @@ export interface SecurityPluginSetup {
    * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
    */
   privilegeDeprecationsService: PrivilegeDeprecationsService;
+  /**
+   * register custom name space for registration service
+   */
+  namespaceRegistrationService: UserSettingsNamespaceRegistrationService;
 }
 
 /**

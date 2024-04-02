@@ -51,6 +51,8 @@ export interface UserProfileServiceStart {
   suggest<D extends UserProfileData>(
     params: UserProfileSuggestParams
   ): Promise<Array<UserProfile<D>>>;
+
+  update<D extends UserProfileData>(uid: string, data: D): Promise<void>;
 }
 
 /**

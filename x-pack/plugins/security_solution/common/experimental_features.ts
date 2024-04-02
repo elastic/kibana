@@ -223,6 +223,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables date pickers and sourcerer in analyzer if needed.
    */
   analyzerDatePickersAndSourcererDisabled: false,
+  /*
+   * Enables the user profile setting personalization for Security Solution.
+   *
+   * */
+securitySolutionUserProfileEnabled: false
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

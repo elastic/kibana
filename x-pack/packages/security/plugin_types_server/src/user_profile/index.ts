@@ -12,3 +12,8 @@ export type {
   UserProfileRequiredPrivileges,
   UserProfileGetCurrentParams,
 } from './user_profile_service';
+
+export type {
+  UserSettingsNamespaceRegistrationService,
+  GetNamespaceRegistrationService,
+} from './user_settings_namespace_registration_service';

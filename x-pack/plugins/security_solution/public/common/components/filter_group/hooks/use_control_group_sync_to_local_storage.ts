@@ -9,9 +9,12 @@ import type { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
+import { getFilterItemObjListFromControlInput } from '../utils';
+import type { FilterItemObj } from '../types';
 
 interface UseControlGroupSyncToLocalStorageArgs {
   storageKey: string;
+  onSync?: (filterControls: FilterItemObj[]) => void;
   shouldSync: boolean;
 }
 
@@ -24,6 +27,7 @@ type UseControlGroupSyncToLocalStorage = (args: UseControlGroupSyncToLocalStorag
 export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorage = ({
   storageKey,
   shouldSync,
+  onSync,
 }) => {
   const storage = useRef<Storage>(new Storage(localStorage));
 
@@ -33,9 +37,11 @@ export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorag
 
   useEffect(() => {
     if (shouldSync && controlGroupInput) {
-      storage.current.set(storageKey, controlGroupInput);
+      // storage.current.set(storageKey, controlGroupInput);
+      const filterItemObj = getFilterItemObjListFromControlInput(controlGroupInput);
+      onSync?.(filterItemObj);
     }
-  }, [shouldSync, controlGroupInput, storageKey]);
+  }, [shouldSync, controlGroupInput, storageKey, onSync]);
 
   const getStoredControlGroupInput = () => {
     return (storage.current.get(storageKey) as ControlGroupInput) ?? undefined;

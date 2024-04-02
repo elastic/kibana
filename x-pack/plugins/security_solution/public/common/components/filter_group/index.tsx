@@ -76,6 +76,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     initialControls,
     spaceId,
     onInit,
+    onControlsUpdate,
   } = props;
 
   const filterChangedSubscription = useRef<Subscription>();
@@ -119,6 +120,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   } = useControlGroupSyncToLocalStorage({
     storageKey: localStoragePageFilterKey,
     shouldSync: isViewMode,
+    onSync: onControlsUpdate,
   });
 
   const [initialUrlParam, setInitialUrlParam] = useState<FilterItemObj[]>();
@@ -128,6 +130,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   const urlDataApplied = useRef<boolean>(false);
 
   const onUrlParamInit = (param: FilterItemObj[] | null) => {
+    console.log('saved controls : ', { param });
     if (!param) {
       setInitialUrlParam([]);
       return;
@@ -274,11 +277,18 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     let controlsFromLocalStorage: FilterItemObj[] = [];
     const storedControlGroupInput = getStoredControlInput();
     if (storedControlGroupInput) {
-      controlsFromLocalStorage = getFilterItemObjListFromControlInput(storedControlGroupInput);
+      controlsFromLocalStorage = []; // getFilterItemObjListFromControlInput(storedControlGroupInput);
     }
     let overridingControls = mergeControls({
       controlsWithPriority: [controlsFromURL, controlsFromLocalStorage],
       defaultControlsObj: initialControlsObj,
+    });
+
+    console.log('saved ', {
+      controlsFromURL,
+      controlsFromLocalStorage,
+      overridingControls,
+      initialControls,
     });
 
     if (!overridingControls || overridingControls.length === 0) return initialControls;

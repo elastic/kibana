@@ -349,6 +349,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType(ruleOptions)));
 
+    plugins.security?.namespaceRegistrationService.registerNamespace(APP_ID);
+
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,

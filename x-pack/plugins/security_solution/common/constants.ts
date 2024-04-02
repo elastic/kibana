@@ -314,6 +314,12 @@ export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
 export const RISK_SCORE_INDEX_STATUS_API_URL = '/internal/risk_score/index_status' as const;
 
+/*
+ * Internal user Preferences routes
+ *
+ * */
+export const USER_PREFERENCES_URL = '/api/user_preferences' as const;
+
 /**
  * Default signals index key for kibana.dev.yml
  */
