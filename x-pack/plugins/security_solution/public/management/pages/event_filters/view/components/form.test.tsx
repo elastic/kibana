@@ -474,6 +474,31 @@ describe('Event filter form', () => {
       rerender();
       expect(renderResult.findByTestId('duplicate-fields-warning-message')).not.toBeNull();
     });
+
+    it('should not show warning callout when wildcard is used with the "MATCHES" operator', async () => {
+      formProps.item.entries = [
+        {
+          field: 'event.category',
+          operator: 'included',
+          type: 'wildcard',
+          value: 'valuewithwildcard*',
+        },
+      ];
+      rerender();
+      expect(renderResult.queryByTestId('wildcardWithWrongOperatorCallout')).toBeNull();
+    });
+    it('should show warning callout when wildcard is used with the "IS" operator', async () => {
+      formProps.item.entries = [
+        {
+          field: 'event.category',
+          operator: 'included',
+          type: 'match',
+          value: 'valuewithwildcard*',
+        },
+      ];
+      rerender();
+      expect(renderResult.findByTestId('wildcardWithWrongOperatorCallout')).not.toBeNull();
+    });
   });
 
   describe('Errors', () => {
