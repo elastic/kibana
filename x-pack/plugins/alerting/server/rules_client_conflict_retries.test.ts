@@ -27,6 +27,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
+import { DEFAULT_MAX_ALERTS } from './config';
 
 jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
@@ -74,6 +75,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   isSystemAction: jest.fn(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  maxAlertsPerRun: DEFAULT_MAX_ALERTS,
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:

@@ -32,6 +32,7 @@ import { migrateLegacyActions } from '../lib';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { RuleDomain } from '../../application/rule/types';
+import { DEFAULT_MAX_ALERTS } from '../../config';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -99,6 +100,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  maxAlertsPerRun: DEFAULT_MAX_ALERTS,
 };
 
 beforeEach(() => {

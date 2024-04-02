@@ -23,6 +23,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
+import { DEFAULT_MAX_ALERTS } from '../../../../config';
 
 describe('resolve', () => {
   const taskManager = taskManagerMock.createStart();
@@ -65,6 +66,7 @@ describe('resolve', () => {
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    maxAlertsPerRun: DEFAULT_MAX_ALERTS,
   };
 
   let rulesClient: RulesClient;

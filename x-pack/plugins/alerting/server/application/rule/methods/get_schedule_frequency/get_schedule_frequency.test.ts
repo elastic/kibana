@@ -22,6 +22,7 @@ import { AlertingAuthorization } from '../../../../authorization/alerting_author
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { DEFAULT_MAX_ALERTS } from '../../../../config';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -60,6 +61,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   alertsService: null,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  maxAlertsPerRun: DEFAULT_MAX_ALERTS,
 };
 
 const getMockAggregationResult = (

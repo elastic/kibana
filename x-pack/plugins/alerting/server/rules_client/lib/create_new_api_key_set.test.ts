@@ -23,6 +23,7 @@ import { getBeforeSetup, mockedDateString } from '../tests/lib';
 import { createNewAPIKeySet } from './create_new_api_key_set';
 import { RulesClientContext } from '../types';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { DEFAULT_MAX_ALERTS } from '../../config';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -59,6 +60,7 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   alertsService: null,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  maxAlertsPerRun: DEFAULT_MAX_ALERTS,
 };
 
 const username = 'test';
