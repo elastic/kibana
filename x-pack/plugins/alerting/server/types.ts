@@ -27,6 +27,7 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
+import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -87,6 +88,7 @@ export interface AlertingApiRequestHandlerContext {
  */
 export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
   alerting: AlertingApiRequestHandlerContext;
+  actions: ActionsApiRequestHandlerContext;
 }>;
 
 /**
@@ -435,7 +437,7 @@ export interface RawRuleAlertsFilter extends AlertsFilter {
 
 export interface RawRuleAction extends SavedObjectAttributes {
   uuid: string;
-  group: string;
+  group?: string;
   actionRef: string;
   actionTypeId: string;
   params: RuleActionParams;
@@ -445,6 +447,7 @@ export interface RawRuleAction extends SavedObjectAttributes {
     throttle: string | null;
   };
   alertsFilter?: RawRuleAlertsFilter;
+  useAlertDataAsTemplate?: boolean;
 }
 
 // note that the `error` property is "null-able", as we're doing a partial

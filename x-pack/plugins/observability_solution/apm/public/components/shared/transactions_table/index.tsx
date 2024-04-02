@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
+import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   getLatencyAggregationType,
@@ -151,9 +152,18 @@ export function TransactionsTable({
     shouldShowSparkPlots,
   ]);
 
+  const { core, observabilityAIAssistant } = useApmPluginContext();
+  const { setScreenContext } = observabilityAIAssistant.service;
+
+  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
+    apmEnableTableSearchBar,
+    true
+  );
+
   const tableSearchBar: TableSearchBar<ApiResponse['transactionGroups'][0]> =
     useMemo(() => {
       return {
+        isEnabled: isTableSearchBarEnabled,
         fieldsToSearch: ['name'],
         maxCountExceeded: mainStatistics.maxCountExceeded,
         onChangeSearchQuery: setSearchQueryDebounced,
@@ -162,10 +172,11 @@ export function TransactionsTable({
           { defaultMessage: 'Search transactions by name' }
         ),
       };
-    }, [mainStatistics.maxCountExceeded, setSearchQueryDebounced]);
-
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+    }, [
+      isTableSearchBarEnabled,
+      mainStatistics.maxCountExceeded,
+      setSearchQueryDebounced,
+    ]);
 
   useEffect(() => {
     return setScreenContext({
