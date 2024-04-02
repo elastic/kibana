@@ -17,11 +17,21 @@ interface GetIsAlertSuppressionActiveParams {
   licensing: LicensingPluginSetup;
 }
 
+/**
+ * checks if alert suppression is active:
+ * - rule should have alert suppression config
+ * - feature flag should not be disabled
+ * - license should be platinum
+ */
 export const getIsAlertSuppressionActive = async ({
   licensing,
   alertSuppression,
   isFeatureDisabled = false,
 }: GetIsAlertSuppressionActiveParams) => {
+  if (isFeatureDisabled) {
+    return false;
+  }
+
   const isAlertSuppressionConfigured = Boolean(alertSuppression?.groupBy?.length);
 
   if (!isAlertSuppressionConfigured) {
@@ -31,5 +41,5 @@ export const getIsAlertSuppressionActive = async ({
   const license = await firstValueFrom(licensing.license$);
   const hasPlatinumLicense = license.hasAtLeast('platinum');
 
-  return hasPlatinumLicense && !isFeatureDisabled;
+  return hasPlatinumLicense;
 };

@@ -118,6 +118,9 @@ export interface ExecuteBulkCreateAlertsParams<T extends SuppressionFieldsLatest
   toReturn: SearchAfterAndBulkCreateReturnType;
 }
 
+/**
+ * creates alerts in ES, both suppressed and unsuppressed
+ */
 export const executeBulkCreateAlerts = async <
   T extends SuppressionFieldsLatest & BaseFieldsLatest
 >({
