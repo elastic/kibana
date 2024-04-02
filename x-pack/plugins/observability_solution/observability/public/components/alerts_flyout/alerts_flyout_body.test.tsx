@@ -13,11 +13,18 @@ import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { fireEvent } from '@testing-library/react';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
 
 const tabsData = [
   { name: 'Overview', subj: 'overviewTab' },
   { name: 'Metadata', subj: 'metadataTab' },
 ];
+
+const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+jest.mock('../../utils/kibana_react', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+}));
 
 describe('AlertsFlyoutBody', () => {
   jest
