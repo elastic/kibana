@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { distinctUntilKeyChanged, map } from 'rxjs/operators';
+import { distinctUntilKeyChanged, map } from 'rxjs';
 
 import type {
   HttpServiceSetup,

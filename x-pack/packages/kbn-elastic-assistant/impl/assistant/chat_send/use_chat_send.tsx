@@ -28,7 +28,6 @@ export interface UseChatSendProps {
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
-  refresh: () => Promise<Conversation | undefined>;
   setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
 }
 
@@ -56,7 +55,6 @@ export const useChatSend = ({
   setPromptTextPreview,
   setSelectedPromptContexts,
   setUserPrompt,
-  refresh,
   setCurrentConversation,
 }: UseChatSendProps): UseChatSend => {
   const {
@@ -182,7 +180,7 @@ export const useChatSend = ({
       http,
       // do not send any new messages, the previous conversation is already stored
       conversationId: currentConversation.id,
-      replacements: [],
+      replacements: {},
     });
 
     const responseMessage: Message = getMessageFromRawResponse(rawResponse);
@@ -209,15 +207,16 @@ export const useChatSend = ({
     setPromptTextPreview('');
     setUserPrompt('');
     setSelectedPromptContexts({});
-    await clearConversation(currentConversation.id);
-    await refresh();
-
+    const updatedConversation = await clearConversation(currentConversation);
+    if (updatedConversation) {
+      setCurrentConversation(updatedConversation);
+    }
     setEditingSystemPromptId(defaultSystemPromptId);
   }, [
     allSystemPrompts,
     clearConversation,
     currentConversation,
-    refresh,
+    setCurrentConversation,
     setEditingSystemPromptId,
     setPromptTextPreview,
     setSelectedPromptContexts,
