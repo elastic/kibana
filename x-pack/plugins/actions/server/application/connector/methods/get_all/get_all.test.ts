@@ -587,8 +587,6 @@ describe('getAll()', () => {
         {
           aggregations: {
             '1': { doc_count: 6 },
-            testPreconfigured: { doc_count: 2 },
-            'system-connector-.cases': { doc_count: 2 },
           },
         }
       );
@@ -604,36 +602,7 @@ describe('getAll()', () => {
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
-        inMemoryConnectors: [
-          {
-            id: 'testPreconfigured',
-            actionTypeId: '.slack',
-            secrets: {},
-            isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
-            name: 'test',
-            config: {
-              foo: 'bar',
-            },
-          },
-          /**
-           * System actions will not
-           * be returned from getAll
-           * if no options are provided
-           */
-          {
-            id: 'system-connector-.cases',
-            actionTypeId: '.cases',
-            name: 'System action: .cases',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
-            isSystemAction: true,
-          },
-        ],
+        inMemoryConnectors: [],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
       });
