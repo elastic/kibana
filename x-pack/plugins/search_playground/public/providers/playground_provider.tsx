@@ -18,7 +18,7 @@ export const PlaygroundProvider: React.FC = ({ children }) => {
       prompt: 'You are an assistant for question-answering tasks.',
       docSize: 5,
       source_fields: [],
-      summarization_model: SummarizationModelName.gpt3_5_turbo_16k,
+      summarization_model: SummarizationModelName.gpt3_5_turbo,
     },
   });
 
