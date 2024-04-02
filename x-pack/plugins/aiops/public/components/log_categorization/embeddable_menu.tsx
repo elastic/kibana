@@ -20,7 +20,6 @@ import React, { useState, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { RandomSampler } from './sampling_menu';
 import { SamplingPanel } from './sampling_menu/sampling_panel';
 import type { WidenessOption } from './log_categorization_for_embeddable';
@@ -33,7 +32,7 @@ interface Props {
   setSelectedField: (field: DataViewField) => void;
   widenessOption: WidenessOption;
   setWidenessOption: (w: WidenessOption) => void;
-  categories: Category[] | undefined;
+  categoryCount: number | undefined;
   reload: () => void;
 }
 
@@ -44,7 +43,7 @@ export const EmbeddableMenu: FC<Props> = ({
   setSelectedField,
   widenessOption,
   setWidenessOption,
-  categories,
+  categoryCount,
   reload,
 }) => {
   const [showPopover, setShowPopover] = useState(false);
@@ -117,9 +116,9 @@ export const EmbeddableMenu: FC<Props> = ({
           )}
           helpText={
             <>
-              {categories !== undefined ? (
+              {categoryCount !== undefined ? (
                 <>
-                  Total patterns in {widenessOption}: {categories.length}
+                  Total patterns in {widenessOption}: {categoryCount}
                 </>
               ) : null}
             </>

@@ -34,7 +34,7 @@ export function useWiderTimeRange() {
 
       // the time range is already wide enough
       if (currentWideness > widenessMs) {
-        return timeRange;
+        return { ...timeRange, useSubAgg: false };
       }
 
       const resp = await getTimeFieldRange({
@@ -51,6 +51,7 @@ export function useWiderTimeRange() {
         return {
           from: resp.start.epoch,
           to: resp.end.epoch,
+          useSubAgg: true,
         };
       }
 
@@ -61,6 +62,7 @@ export function useWiderTimeRange() {
       return {
         from: newFrom,
         to: newTo,
+        useSubAgg: true,
       };
     },
     [http]

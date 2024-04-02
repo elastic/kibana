@@ -32,7 +32,8 @@ export function createCategoryRequest(
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number,
   additionalFilter?: CategorizationAdditionalFilter,
-  useStandardTokenizer: boolean = true
+  useStandardTokenizer: boolean = true,
+  includeSparkline: boolean = true
 ) {
   const query = createCategorizeQuery(queryIn, timeField, timeRange);
   const aggs = {
@@ -50,16 +51,16 @@ export function createCategoryRequest(
             _source: field,
           },
         },
-        // ...(intervalMs
-        //   ? {
-        //       sparkline: {
-        //         date_histogram: {
-        //           field: timeField,
-        //           fixed_interval: `${intervalMs}ms`,
-        //         },
-        //       },
-        //     }
-        //   : {}),
+        ...(intervalMs && includeSparkline
+          ? {
+              sparkline: {
+                date_histogram: {
+                  field: timeField,
+                  fixed_interval: `${intervalMs}ms`,
+                },
+              },
+            }
+          : {}),
         ...(additionalFilter
           ? {
               sub_time_range: {

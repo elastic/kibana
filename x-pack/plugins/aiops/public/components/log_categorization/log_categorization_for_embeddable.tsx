@@ -56,11 +56,12 @@ enum SELECTED_TAB {
   FULL_TIME_RANGE,
 }
 
-export type WidenessOption = '1 week' | '1 month' | '3 months' | '6 months';
+export type WidenessOption = 'No minimum' | '1 week' | '1 month' | '3 months' | '6 months';
 
 type Wideness = Record<WidenessOption, { factor: number; unit: unitOfTime.Base }>;
 
 export const WIDENESS: Wideness = {
+  'No minimum': { factor: 0, unit: 'w' },
   '1 week': { factor: 1, unit: 'w' },
   '1 month': { factor: 1, unit: 'M' },
   '3 months': { factor: 3, unit: 'M' },
@@ -130,8 +131,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
-    categoriesInBucket: Category[] | null;
     displayExamples: boolean;
+    totalCategories: number;
   } | null>(null);
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
@@ -216,10 +217,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       to: latest,
     };
 
-    // const timeRange: TimeRange = {
-    //   from: moment(earliest).add(-5, 'w').valueOf(),
-    //   to: latest,
-    // };
     const timeRange = await getWiderTimeRange(
       index,
       timeField,
@@ -250,10 +247,10 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
           index,
           selectedField.name,
           timeField,
-          timeRange,
+          { to: timeRange.to, from: timeRange.from },
           searchQuery,
           intervalMs,
-          tempAdditionalFilter
+          timeRange.useSubAgg ? tempAdditionalFilter : undefined
         ),
       ]);
 
@@ -261,9 +258,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         setFieldValidationResult(validationResult);
         const { categories, hasExamples } = categorizationResult;
 
-        let categoriesInBucket: any | null = null;
-        if (tempAdditionalFilter !== undefined) {
-          categoriesInBucket = categorizationResult.categories
+        if (timeRange.useSubAgg) {
+          const categoriesInBucket = categorizationResult.categories
             .map((category) => ({
               ...category,
               count: category.subFieldCount ?? category.subTimeRangeCount!,
@@ -272,18 +268,23 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
             }))
             .filter((category) => category.count > 0)
             .sort((a, b) => b.count - a.count);
+          setData({
+            categories: categoriesInBucket,
+            displayExamples: hasExamples,
+            totalCategories: categories.length,
+          });
+        } else {
+          setData({
+            categories,
+            displayExamples: hasExamples,
+            totalCategories: categories.length,
+          });
         }
 
         // eslint-disable-next-line no-console
         console.log('categories', categories);
-        // eslint-disable-next-line no-console
-        console.log('categoriesInBucket', categoriesInBucket);
 
-        setData({
-          categories,
-          categoriesInBucket,
-          displayExamples: hasExamples,
-        });
+        // console.log('categoriesInBucket', categoriesInBucket);
 
         setSelectedTab(SELECTED_TAB.BUCKET);
       }
@@ -390,7 +391,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">
-            <>{getViewModeToggle(data?.categoriesInBucket?.length ?? 0)}</>
+            <>{getViewModeToggle(data?.categories?.length ?? 0)}</>
             <EuiFlexItem />
             <EuiFlexItem grow={false}>
               {randomSampler !== undefined ? (
@@ -402,7 +403,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
                   selectedField={selectedField}
                   widenessOption={widenessOption}
                   setWidenessOption={setWidenessOption}
-                  categories={data?.categories}
+                  categoryCount={data?.totalCategories}
                 />
               ) : null}
             </EuiFlexItem>
@@ -468,11 +469,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
             selectedField !== null ? (
               <>
                 <CategoryTable
-                  categories={
-                    selectedTab === SELECTED_TAB.BUCKET && data.categoriesInBucket !== null
-                      ? data.categoriesInBucket
-                      : data.categories
-                  }
+                  categories={data.categories}
                   aiopsListState={stateFromUrl}
                   dataViewId={dataView.id!}
                   eventRate={eventRate}
