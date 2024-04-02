@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { getSummaryRows } from './get_alert_summary_rows';
 import { SummaryView } from './summary_view';
 
@@ -33,6 +34,12 @@ const AlertSummaryViewComponent: React.FC<{
   isReadOnly,
   investigationFields,
 }) => {
+  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'sentinelOneManualHostActionsEnabled'
+  );
+  const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
   const summaryRows = useMemo(
     () =>
       getSummaryRows({
@@ -43,8 +50,20 @@ const AlertSummaryViewComponent: React.FC<{
         scopeId,
         isReadOnly,
         investigationFields,
+        sentinelOneManualHostActionsEnabled,
+        crowdstrikeManualHostActionsEnabled,
       }),
-    [browserFields, data, eventId, isDraggable, scopeId, isReadOnly, investigationFields]
+    [
+      browserFields,
+      data,
+      eventId,
+      isDraggable,
+      scopeId,
+      isReadOnly,
+      investigationFields,
+      sentinelOneManualHostActionsEnabled,
+      crowdstrikeManualHostActionsEnabled,
+    ]
   );
 
   return (

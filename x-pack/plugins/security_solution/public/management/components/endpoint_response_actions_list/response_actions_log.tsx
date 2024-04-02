@@ -66,7 +66,7 @@ export const ResponseActionsLog = memo<
       'responseActionsSentinelOneV1Enabled'
     );
     const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
-      'responseActionsCrowdstrikeEnabled'
+      'responseActionsCrowdstrikeManualHostIsolationEnabled'
     );
 
     // Used to decide if display global loader or not (only the fist time tha page loads)
