@@ -74,6 +74,10 @@ export const DiscoverTopNav = ({
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   const [lsIndex, saveLsIndex] = useLocalStorageListener('obs-ai-assistant-index', null);
+  const [lsDataViewId, saveLsDataViewId] = useLocalStorageListener(
+    'obs-ai-assistant-data-view-id',
+    null
+  );
   const [lsIndexTimeField, saveLsIndexTimeField] = useLocalStorageListener(
     'obs-ai-assistant-index-time-field',
     null
@@ -209,6 +213,7 @@ export const DiscoverTopNav = ({
   useEffect(() => {
     saveLsIndex(dataView?.getIndexPattern() || null);
     saveLsIndexTimeField(dataView?.getTimeField()?.spec.name || null);
+    saveLsDataViewId(dataView?.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataView]);
 

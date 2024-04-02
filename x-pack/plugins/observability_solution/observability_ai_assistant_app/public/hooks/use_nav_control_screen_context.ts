@@ -24,6 +24,7 @@ export function useNavControlScreenContext() {
   } = useKibana();
 
   const [lsIndex] = useLocalStorageListener('obs-ai-assistant-index', null);
+  const [lsDataViewId] = useLocalStorageListener('obs-ai-assistant-data-view-id', null);
   const [lsIndexTimeField] = useLocalStorageListener('obs-ai-assistant-index-time-field', null);
   const { from, to } = data.query.timefilter.timefilter.getTime();
 
@@ -71,7 +72,7 @@ export function useNavControlScreenContext() {
         : `The current Elasticsearch index could not be identified or the current page does not make use of an Elasticsearch index.`;
 
     return service.setScreenContext({
-      screenDescription: `The user is looking at ${href}. The current time range is ${start} - ${end}. ${index}`,
+      screenDescription: `The user is looking at ${href}. The current time range is ${start} - ${end}. ${index} The Kibana Data View Id is ${lsDataViewId}.`,
     });
-  }, [service, from, to, href, lsIndex, lsIndexTimeField]);
+  }, [service, from, to, href, lsDataViewId, lsIndex, lsIndexTimeField]);
 }
