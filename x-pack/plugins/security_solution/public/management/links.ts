@@ -16,6 +16,7 @@ import {
 import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
+  ENTITY_ANALYTICS_ASSET_CLASSIFICATION_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -56,7 +57,10 @@ const categories = [
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
       defaultMessage: 'Entity Analytics',
     }),
-    linkIds: [SecurityPageName.entityAnalyticsManagement],
+    linkIds: [
+      SecurityPageName.entityAnalyticsManagement,
+      SecurityPageName.entityAnalyticsAssetClassification,
+    ],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
@@ -178,6 +182,20 @@ export const links: LinkItem = {
       hideTimeline: true,
       capabilities: [`${SERVER_APP_ID}.entity-analytics`],
       experimentalKey: 'riskScoringRoutesEnabled',
+      licenseType: 'platinum',
+    },
+    {
+      id: SecurityPageName.entityAnalyticsAssetClassification,
+      title: 'Asset classification', // TODO i18n
+      description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
+        defaultMessage: 'Description test 1 2 3',
+      }),
+      landingIcon: IconEntityAnalytics,
+      path: ENTITY_ANALYTICS_ASSET_CLASSIFICATION_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+      // experimentalKey: 'riskScoringRoutesEnabled',
       licenseType: 'platinum',
     },
     {
