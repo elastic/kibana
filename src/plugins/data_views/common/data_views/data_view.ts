@@ -11,7 +11,7 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
-import { each, mapValues, pick, pickBy, reject  } from 'lodash';
+import { each, mapValues, pick, pickBy, reject } from 'lodash';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
 import type {

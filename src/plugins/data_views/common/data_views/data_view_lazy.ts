@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { each, pickBy, mapValues, omit, assign, chain } from 'lodash';
+import { each, pickBy, mapValues, pick, assign, chain } from 'lodash';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { AbstractDataView } from './abstract_data_views';
 import { DataViewField } from '../fields';
@@ -526,17 +526,24 @@ export class DataViewLazy extends AbstractDataView {
   /**
    * Creates a minimal static representation of the data view. Fields and popularity scores will be omitted.
    */
-  public toMinimalSpec(): Omit<DataViewSpec, 'fields'> {
+  // todo make shared
+  public toMinimalSpec(params?: {
+    keepFieldAttrs?: Array<'customLabel' | 'customDescription'>;
+  }): Omit<DataViewSpec, 'fields'> {
+    const fieldAttrsToKeep = params?.keepFieldAttrs ?? ['customLabel', 'customDescription'];
     // removes `fields`
     const spec = this.toSpecShared(false);
 
     if (spec.fieldAttrs) {
       // removes `count` props (popularity scores) from `fieldAttrs`
       spec.fieldAttrs = pickBy(
-        mapValues(spec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
+        // removes unnecessary attributes
+        mapValues(spec.fieldAttrs, (fieldAttrs) => pick(fieldAttrs, fieldAttrsToKeep)),
+        // removes empty objects if all attributes have been removed
         (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
       );
 
+      // removes `fieldAttrs` if it's empty
       if (Object.keys(spec.fieldAttrs).length === 0) {
         delete spec.fieldAttrs;
       }
