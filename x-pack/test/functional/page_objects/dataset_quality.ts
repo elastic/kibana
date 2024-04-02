@@ -60,6 +60,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFlyoutTitle: 'datasetQualityFlyoutTitle',
     datasetQualityHeaderButton: 'datasetQualityHeaderButton',
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
+    datasetQualityFlyoutIntegrationActionsButton: 'datasetQualityFlyoutIntegrationActionsButton',
+    datasetQualityFlyoutIntegrationAction: (action: string) =>
+      `datasetQualityFlyoutIntegrationAction${action}`,
     datasetQualityFilterBarFieldSearch: 'datasetQualityFilterBarFieldSearch',
     datasetQualityIntegrationsSelectable: 'datasetQualityIntegrationsSelectable',
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
@@ -235,6 +238,20 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     getFlyoutLogsExplorerButton() {
       return testSubjects.find(testSubjectSelectors.datasetQualityHeaderButton);
+    },
+
+    openIntegrationActionsMenu() {
+      return testSubjects.click(testSubjectSelectors.datasetQualityFlyoutIntegrationActionsButton);
+    },
+
+    getIntegrationActionButtonByAction(action: string) {
+      return testSubjects.find(testSubjectSelectors.datasetQualityFlyoutIntegrationAction(action));
+    },
+
+    getIntegrationDashboardButtons() {
+      return testSubjects.findAll(
+        testSubjectSelectors.datasetQualityFlyoutIntegrationAction('Dashboard')
+      );
     },
 
     async doestTextExistInFlyout(text: string, elementSelector: string) {

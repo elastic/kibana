@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { omit, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { SavedObjectReference } from '@kbn/core/server';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import { RuleDomain, Monitoring, RuleParams } from '../types';
 import { RuleAttributes } from '../../../data/rule/types';
-import { RawRule, PartialRule } from '../../../types';
+import { PartialRule } from '../../../types';
 import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
-import {
-  injectReferencesIntoActions,
-  injectReferencesIntoParams,
-} from '../../../rules_client/common';
+import { injectReferencesIntoParams } from '../../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
+import {
+  transformRawActionsToDomainActions,
+  transformRawActionsToDomainSystemActions,
+} from './transform_raw_actions_to_domain_actions';
 
 const INITIAL_LAST_RUN_METRICS = {
   duration: 0,
@@ -120,7 +121,8 @@ interface TransformEsToRuleParams {
 
 export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = never>(
   esRule: RuleAttributes,
-  transformParams: TransformEsToRuleParams
+  transformParams: TransformEsToRuleParams,
+  isSystemAction: (connectorId: string) => boolean
 ): RuleDomain<Params> => {
   const { scheduledTaskId, executionStatus, monitoring, snoozeSchedule, lastRun } = esRule;
 
@@ -141,6 +143,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       ...(s.rRule.until ? { until: new Date(s.rRule.until).toISOString() } : {}),
     },
   }));
+
   const includeSnoozeSchedule = snoozeSchedule !== undefined && !isEmpty(snoozeSchedule);
   const isSnoozedUntil = includeSnoozeSchedule
     ? getRuleSnoozeEndTime({
@@ -149,13 +152,21 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       })?.toISOString()
     : null;
 
-  let actions = esRule.actions
-    ? injectReferencesIntoActions(id, esRule.actions as RawRule['actions'], references || [])
-    : [];
-
-  if (omitGeneratedValues) {
-    actions = actions.map((ruleAction) => omit(ruleAction, 'alertsFilter.query.dsl'));
-  }
+  const ruleDomainActions: RuleDomain['actions'] = transformRawActionsToDomainActions({
+    ruleId: id,
+    actions: esRule.actions,
+    references,
+    isSystemAction,
+    omitGeneratedValues,
+  });
+  const ruleDomainSystemActions: RuleDomain['systemActions'] =
+    transformRawActionsToDomainSystemActions({
+      ruleId: id,
+      actions: esRule.actions,
+      references,
+      isSystemAction,
+      omitGeneratedValues,
+    });
 
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
@@ -177,7 +188,8 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     alertTypeId: esRule.alertTypeId,
     consumer: esRule.consumer,
     schedule: esRule.schedule,
-    actions: actions as RuleDomain['actions'],
+    actions: ruleDomainActions,
+    systemActions: ruleDomainSystemActions,
     params,
     mapped_params: esRule.mapped_params,
     ...(scheduledTaskId ? { scheduledTaskId } : {}),
