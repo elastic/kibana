@@ -5,7 +5,7 @@ metadata:
   name: bk-purge-cloud-deployment
   description: Purge a cloud deployment
   links:
-    - url: 'https://buildkite.com/elastic/purge-cloud-deployment'
+    - url: 'https://buildkite.com/elastic/kibana-purge-cloud-deployment'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -19,7 +19,7 @@ spec:
       description: Purge a cloud deployment
     spec:
       env:
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
       allow_rebuilds: false
       branch_configuration: main
       default_branch: main
