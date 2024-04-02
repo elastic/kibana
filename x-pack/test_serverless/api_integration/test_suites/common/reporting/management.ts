@@ -13,14 +13,16 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 // the archived data holds a report created by test_user
 const TEST_USERNAME = 'test_user';
 const TEST_USER_PASSWORD = 'changeme';
-const REPORTING_USER_USERNAME = 'elastic_serverless';
-const REPORTING_USER_PASSWORD = 'changeme';
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
+  const config = getService('config');
+
+  const REPORTING_USER_USERNAME = config.get('servers.kibana.username');
+  const REPORTING_USER_PASSWORD = config.get('servers.kibana.password');
 
   describe('Reporting Management', function () {
     // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.reporting-2020.04.19], this action is granted by the index privileges [create_index,manage,all]

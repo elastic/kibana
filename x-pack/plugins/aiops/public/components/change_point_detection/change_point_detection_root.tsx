@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { pick } from 'lodash';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -23,8 +24,8 @@ import {
   mlTimefilterRefresh$,
 } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 
-import { type Observable } from 'rxjs';
 import { DataSourceContext } from '../../hooks/use_data_source';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -39,7 +40,6 @@ import {
 } from './change_point_detection_context';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 import { ReloadContextProvider } from '../../hooks/use_reload';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 
 const localStorage = new Storage(window.localStorage);
