@@ -365,7 +365,7 @@ describe('Stage: init', () => {
         expect(generateAdditiveMappingDiffMock).toHaveBeenCalledTimes(1);
         expect(generateAdditiveMappingDiffMock).toHaveBeenCalledWith({
           types: ['foo', 'bar'].map((type) => context.typeRegistry.getType(type)),
-          meta: fetchIndexResponse[currentIndex].mappings._meta,
+          mapping: fetchIndexResponse[currentIndex].mappings,
           deletedTypes: context.deletedTypes,
         });
       });

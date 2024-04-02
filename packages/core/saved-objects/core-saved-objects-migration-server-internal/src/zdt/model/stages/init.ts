@@ -169,7 +169,7 @@ export const init: ModelStage<
     case 'greater':
       const additiveMappingChanges = generateAdditiveMappingDiff({
         types,
-        meta: currentMappings._meta ?? {},
+        mapping: currentMappings,
         deletedTypes: context.deletedTypes,
       });
       return {
