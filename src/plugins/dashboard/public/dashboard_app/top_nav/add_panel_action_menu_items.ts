@@ -58,8 +58,6 @@ export const getAddPanelActionMenuItems = (
   actions?.forEach((item) => {
     if (Array.isArray(item.grouping)) {
       item.grouping.forEach((group) => {
-        const actionName = item.getDisplayName(context);
-
         if (!grouped[group.id]) {
           grouped[group.id] = {
             id: group.id,
@@ -69,13 +67,7 @@ export const getAddPanelActionMenuItems = (
           };
         }
 
-        grouped[group.id]!.items!.push({
-          name: actionName,
-          icon: item.getIconType(context),
-          onClick: onAddPanelActionClick(item, context, closePopover),
-          'data-test-subj': `create-action-${actionName}`,
-          toolTipContent: item?.getDisplayNameTooltip?.(context),
-        });
+        grouped[group.id]!.items!.push(getMenuItem(item));
       });
     } else {
       ungrouped.push(getMenuItem(item));
