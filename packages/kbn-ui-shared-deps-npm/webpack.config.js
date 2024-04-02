@@ -95,7 +95,6 @@ module.exports = (_, argv) => {
         'reselect',
         'rxjs',
         'styled-components',
-        'tslib',
         'uuid',
       ],
       'kbn-ui-shared-deps-npm.v8.dark': ['@elastic/eui/dist/eui_theme_dark.css'],

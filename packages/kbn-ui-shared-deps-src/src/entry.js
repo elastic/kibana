@@ -59,7 +59,6 @@ const { unzlibSync, strFromU8 } = require('fflate');
 export const Fflate = { unzlibSync, strFromU8 };
 
 // runtime deps which don't need to be copied across all bundles
-export const TsLib = require('tslib');
 export const Uuid = require('uuid');
 export const KbnAnalytics = require('@kbn/analytics');
 export const KbnEsQuery = require('@kbn/es-query');

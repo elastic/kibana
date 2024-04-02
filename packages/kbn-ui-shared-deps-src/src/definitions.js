@@ -84,7 +84,6 @@ const externals = {
   /**
    * runtime deps which don't need to be copied across all bundles
    */
-  tslib: '__kbnSharedDeps__.TsLib',
   uuid: '__kbnSharedDeps__.Uuid',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
