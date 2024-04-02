@@ -40,8 +40,7 @@ const buildFormData = (formData: ChatForm) => ({
   api_key: formData[ChatFormFields.openAIKey],
   citations: formData[ChatFormFields.citations],
   elasticsearchQuery: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
-  summarization_model:
-    formData[ChatFormFields.summarizationModel],
+  summarization_model: formData[ChatFormFields.summarizationModel],
   source_fields: JSON.stringify(formData[ChatFormFields.sourceFields]),
   docSize: formData[ChatFormFields.docSize],
 });
