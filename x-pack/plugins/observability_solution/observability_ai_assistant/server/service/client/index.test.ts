@@ -463,11 +463,7 @@ describe('Observability AI Assistant client', () => {
   });
 
   describe('when completing a conversation with an initial conversation id', () => {
-    let stream: Readable;
-
-    let dataHandler: jest.Mock;
-
-    beforeEach(async () => {
+    const init = async (conversationId: string, isNewConversation: boolean) => {
       client = createClient();
       actionsClientMock.execute.mockImplementationOnce(async () => {
         llmSimulator = createLlmSimulator();
@@ -488,7 +484,7 @@ describe('Observability AI Assistant client', () => {
                 _source: {
                   '@timestamp': new Date().toISOString(),
                   conversation: {
-                    id: 'my-conversation-id',
+                    id: conversationId,
                     title: 'My stored conversation',
                     last_updated: new Date().toISOString(),
                   },
@@ -510,18 +506,19 @@ describe('Observability AI Assistant client', () => {
         return {} as any;
       });
 
-      stream = observableIntoStream(
+      const stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
-          conversationId: 'my-conversation-id',
           persist: true,
+          conversationId,
+          isNewConversation,
         })
       );
 
-      dataHandler = jest.fn();
+      const dataHandler = jest.fn();
 
       stream.on('data', dataHandler);
 
@@ -532,9 +529,12 @@ describe('Observability AI Assistant client', () => {
       await llmSimulator.complete();
 
       await finished(stream);
-    });
 
-    it('updates the conversation', () => {
+      return dataHandler;
+    };
+
+    it('updates the conversation', async () => {
+      const dataHandler = await init('my-conversation-id', false);
       expect(JSON.parse(dataHandler.mock.calls[2])).toEqual({
         conversation: {
           title: 'My stored conversation',
@@ -602,6 +602,23 @@ describe('Observability AI Assistant client', () => {
             },
           ],
         },
+      });
+    });
+
+    it('creates a new conversation if specified', async () => {
+      const dataHandler = await init('my-precomputed-conversation-id', true);
+      expect(JSON.parse(dataHandler.mock.calls[2])).toEqual({
+        conversation: {
+          title: 'My stored conversation',
+          id: 'my-precomputed-conversation-id',
+          last_updated: expect.any(String),
+          token_count: {
+            completion: 2,
+            prompt: 100,
+            total: 102,
+          },
+        },
+        type: StreamingChatResponseEventType.ConversationCreate,
       });
     });
   });

@@ -148,11 +148,13 @@ export class ObservabilityAIAssistantClient {
     persist: boolean;
     responseLanguage?: string;
     conversationId?: string;
+    isNewConversation?: boolean;
     title?: string;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
-        const { messages, connectorId, signal, functionClient, persist } = params;
+        const { messages, connectorId, signal, functionClient, persist, isNewConversation } =
+          params;
 
         const conversationId = params.conversationId || '';
         const title = params.title || '';
@@ -443,7 +445,7 @@ export class ObservabilityAIAssistantClient {
           });
 
           // store the updated conversation and close the stream
-          if (conversationId) {
+          if (conversationId && !isNewConversation) {
             const conversation = await this.getConversationWithMetaFields(conversationId);
             if (!conversation) {
               throw createConversationNotFoundError();
@@ -495,6 +497,7 @@ export class ObservabilityAIAssistantClient {
               conversation: {
                 title: generatedTitle || title || 'New conversation',
                 token_count: tokenCountResult,
+                id: conversationId || '',
               },
               messages: nextMessages,
               labels: {},
@@ -519,7 +522,7 @@ export class ObservabilityAIAssistantClient {
         });
 
         const titlePromise =
-          !conversationId && !title && persist
+          (!conversationId || isNewConversation) && !title && persist
             ? this.getGeneratedTitle({
                 chat: chatWithTokenCountIncrement,
                 messages,
@@ -832,7 +835,7 @@ export class ObservabilityAIAssistantClient {
       conversation,
       {
         '@timestamp': now,
-        conversation: { id: v4() },
+        conversation: { id: conversation.conversation.id || v4() },
       },
       this.getConversationUpdateValues(now)
     );
