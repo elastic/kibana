@@ -8,7 +8,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
-import { ChatForm } from '../types';
+import { ChatForm, SummarizationModelName } from '../types';
 
 const queryClient = new QueryClient({});
 
@@ -16,6 +16,9 @@ export const PlaygroundProvider: React.FC = ({ children }) => {
   const form = useForm<ChatForm>({
     defaultValues: {
       prompt: 'You are an assistant for question-answering tasks.',
+      docSize: 5,
+      source_fields: [],
+      summarization_model: SummarizationModelName.gpt3_5_turbo_16k,
     },
   });
 

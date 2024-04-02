@@ -63,6 +63,15 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
         openAIApiKey: data.api_key,
       });
 
+      let sourceFields = {};
+
+      try {
+        sourceFields = JSON.parse(data.source_fields);
+      } catch (e) {
+        log.error('Failed to parse the source fields', e);
+        throw Error(e);
+      }
+
       const chain = ConversationalChain({
         model,
         rag: {
@@ -73,10 +82,11 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
               return query.query;
             } catch (e) {
               log.error('Failed to parse the Elasticsearch query', e);
+              throw Error(e);
             }
           },
-          content_field: JSON.parse(data.source_fields),
-          size: data.size ? Number(data.size) : 3,
+          content_field: sourceFields,
+          size: Number(data.docSize),
         },
         prompt: Prompt(data.prompt, {
           citations: data.citations,
