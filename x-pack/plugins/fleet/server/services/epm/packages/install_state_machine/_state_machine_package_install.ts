@@ -143,17 +143,10 @@ export async function _stateMachineInstallPackage(
       installStates,
       installStates.context
     );
-    if (
-      installedKibanaAssetsRefs &&
-      installedKibanaAssetsRefs.length &&
-      esReferences &&
-      esReferences.length
-    )
-      return [
-        ...(installedKibanaAssetsRefs as KibanaAssetReference[]),
-        ...(esReferences as EsAssetReference[]),
-      ];
-    return [];
+    return [
+      ...(installedKibanaAssetsRefs as KibanaAssetReference[]),
+      ...(esReferences as EsAssetReference[]),
+    ];
   } catch (err) {
     const { packageInfo } = installStates.context.packageInstallContext;
     const { name: pkgName, version: pkgVersion } = packageInfo;

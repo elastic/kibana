@@ -45,9 +45,8 @@ export async function stepDeletePreviousPipelines(context: InstallContext) {
         esReferences || []
       )
     );
-  }
-  // pipelines from a different version may have installed during a failed update
-  if (installType === 'rollback' && installedPkg) {
+  } else if (installType === 'rollback' && installedPkg) {
+    // pipelines from a different version may have been installed during a failed update
     logger.debug(`Package install - installType ${installType} Deleting previous ingest pipelines`);
     updatedESReferences = await withPackageSpan('Delete previous ingest pipelines', () =>
       deletePreviousPipelines(
@@ -58,6 +57,9 @@ export async function stepDeletePreviousPipelines(context: InstallContext) {
         esReferences || []
       )
     );
+  } else {
+    // if none of the previous cases, return the original esRefences
+    updatedESReferences = esReferences;
   }
   return { esReferences: updatedESReferences };
 }

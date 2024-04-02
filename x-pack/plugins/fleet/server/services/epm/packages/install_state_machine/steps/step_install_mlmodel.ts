@@ -17,5 +17,5 @@ export async function stepInstallMlModel(context: InstallContext) {
   const updatedEsReferences = await withPackageSpan('Install ML models', () =>
     installMlModel(packageInstallContext, esClient, savedObjectsClient, logger, esReferences || [])
   );
-  return { esReferences: updatedEsReferences };
+  return { esReferences: updatedEsReferences || esReferences };
 }

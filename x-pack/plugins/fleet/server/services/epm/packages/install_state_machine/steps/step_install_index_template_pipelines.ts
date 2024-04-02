@@ -23,6 +23,9 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
   const { packageInfo } = packageInstallContext;
 
   if (packageInfo.type === 'integration') {
+    logger.debug(
+      `Package install - Installing index templates and pipelines, packageInfo.type: ${packageInfo.type}`
+    );
     const { installedTemplates, esReferences: templateEsReferences } =
       await installIndexTemplatesAndPipelines({
         installedPkg: installedPkg ? installedPkg.attributes : undefined,
@@ -32,14 +35,17 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
         logger,
         esReferences: esReferences || [],
       });
-    return { esReferences: templateEsReferences, indexTemplates: installedTemplates };
+    return {
+      esReferences: templateEsReferences || esReferences,
+      indexTemplates: installedTemplates,
+    };
   }
 
   if (packageInfo.type === 'input' && installedPkg) {
     // input packages create their data streams during package policy creation
     // we must use installed_es to infer which streams exist first then
     // we can install the new index templates
-    logger.debug(`Package install - packageInfo.type ${packageInfo.type}`);
+    logger.debug(`Package install - packageInfo.type: ${packageInfo.type}`);
     const dataStreamNames = installedPkg.attributes.installed_es
       .filter((ref) => ref.type === 'index_template')
       // index templates are named {type}-{dataset}, remove everything before first hyphen

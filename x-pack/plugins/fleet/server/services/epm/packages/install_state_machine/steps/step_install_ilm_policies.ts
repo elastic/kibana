@@ -45,6 +45,6 @@ export async function stepInstallILMPolicies(context: InstallContext) {
         updatedEsReferences
       )
     );
-    return { esReferences: res.esReferences };
+    return { esReferences: res?.esReferences || esReferences };
   }
 }

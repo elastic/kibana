@@ -33,6 +33,5 @@ export async function stepInstallTransforms(context: InstallContext) {
       authorizationHeader,
     })
   );
-
-  return { esReferences: res.esReferences };
+  return { esReferences: res.esReferences || esReferences };
 }
