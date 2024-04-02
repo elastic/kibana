@@ -430,13 +430,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('job creation and toggling model change annotation triggers enable annotation recommendation callout', async () => {
-      await ml.jobWizardCommon.goBackToJobDetailsSection();
+      await ml.jobWizardCommon.goBackToJobDetailsStep();
       await ml.jobWizardCommon.ensureAdvancedSectionOpen();
       await ml.jobWizardCommon.togglingModelChangeAnnotationsShowsCalloutAndRemovesCallout();
     });
 
     it('job creation memory limit too large results in validation callout', async () => {
-      await ml.jobWizardCommon.goBackToJobDetailsSection();
+      await ml.jobWizardCommon.goBackToJobDetailsStep();
 
       const tooLarge = '100000000MB';
       await ml.jobWizardCommon.setModelMemoryLimit(tooLarge);

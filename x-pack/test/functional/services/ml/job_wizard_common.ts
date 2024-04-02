@@ -620,38 +620,12 @@ export function MachineLearningJobWizardCommonProvider(
       });
     },
 
-    async getAnnotationSwitchCheckedState(): Promise<boolean> {
-      const subj = 'mlJobWizardSwitchAnnotations';
-      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
-      return isSelected === 'true';
-    },
-
-    async getAnnotationsSwitchCheckedState(expectedValue: boolean) {
-      const actualCheckedState = await this.getAnnotationSwitchCheckedState();
-      expect(actualCheckedState).to.eql(
-        expectedValue,
-        `Expected annotations switch to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          actualCheckedState ? 'enabled' : 'disabled'
-        }')`
-      );
-    },
-
-    async toggleAnnotationSwitch(toggle: boolean) {
-      const subj = 'mlJobWizardSwitchAnnotations';
-      if ((await this.getAnnotationSwitchCheckedState()) !== toggle) {
-        await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
-          await this.getAnnotationSwitchCheckedState();
-        });
-      }
-    },
-
     async togglingModelChangeAnnotationsShowsCalloutAndRemovesCallout() {
-      await this.toggleAnnotationSwitch(false);
+      await mlCommonUI.toggleSwitchIfNeeded('mlJobWizardSwitchAnnotations', false);
       await testSubjects.existOrFail('mlJobWizardAlsoEnableAnnotationsRecommendationCallout', {
         timeout: 3_000,
       });
-      await this.toggleAnnotationSwitch(true);
+      await mlCommonUI.toggleSwitchIfNeeded('mlJobWizardSwitchAnnotations', true);
       await testSubjects.missingOrFail('mlJobWizardAlsoEnableAnnotationsRecommendationCallout', {
         timeout: 3_000,
       });
@@ -662,6 +636,9 @@ export function MachineLearningJobWizardCommonProvider(
         timeout: 3_000,
       });
       await testSubjects.click('mlJobWizardTimeRangeStep');
+      await testSubjects.existOrFail('mlJobWizardStepTitleTimeRange', {
+        timeout: 3_000,
+      });
     },
 
     async assertShortDurationTimeRange() {
@@ -687,11 +664,14 @@ export function MachineLearningJobWizardCommonProvider(
       );
     },
 
-    async goBackToJobDetailsSection() {
+    async goBackToJobDetailsStep() {
       await testSubjects.existOrFail('mlJobWizardJobDetailsStep', {
         timeout: 3_000,
       });
       await testSubjects.click('mlJobWizardJobDetailsStep');
+      await testSubjects.existOrFail('mlJobWizardStepTitleJobDetails', {
+        timeout: 3_000,
+      });
     },
 
     async assertValidationCallouts(expectedCallOutSelectors: string[]) {
@@ -704,7 +684,9 @@ export function MachineLearningJobWizardCommonProvider(
     async cloneJob() {
       await testSubjects.click('euiCollapsedItemActionsButton');
       await testSubjects.click('mlActionButtonCloneJob');
-      await testSubjects.existOrFail('mlPageJobWizardHeader-single_metric');
+      await testSubjects.existOrFail('mlPageJobWizardHeader-single_metric', {
+        timeout: 3_000,
+      });
     },
   };
 }
