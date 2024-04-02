@@ -40,6 +40,10 @@ export function buildActiveMappings(
  * @returns {IndexMapping}
  */
 export function getBaseMappings(): IndexMapping {
+  // Important: the ZDT algorithm won't trigger a reindex on documents
+  // when changes on root field mappings are detected, meaning that adding
+  // a non-indexed root field and then later switching it to indexed is
+  // not support atm and would require changes to the ZDT algo.
   return {
     dynamic: 'strict',
     properties: {

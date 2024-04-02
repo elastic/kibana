@@ -20,7 +20,7 @@ export {
 export { XJsonLang } from './src/xjson';
 export { SQLLang } from './src/sql';
 export { ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang } from './src/esql';
-export type { ESQLCallbacks } from './src/esql';
+export type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 
 export * from './src/painless';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
