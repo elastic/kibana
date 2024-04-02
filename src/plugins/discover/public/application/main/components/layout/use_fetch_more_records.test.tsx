@@ -41,17 +41,18 @@ describe('useFetchMoreRecords', () => {
   };
 
   it('should not be allowed if all records are already loaded', async () => {
-    const params = {
-      isTextBasedQuery: false,
-      stateContainer: getStateContainer({
-        fetchStatus: FetchStatus.COMPLETE,
-        loadedRecordsCount: 3,
-        totalRecordsCount: 3,
-      }),
-    };
     const {
       result: { current },
-    } = renderHook(() => useFetchMoreRecords(params));
+    } = renderHook((props) => useFetchMoreRecords(props), {
+      initialProps: {
+        isTextBasedQuery: false,
+        stateContainer: getStateContainer({
+          fetchStatus: FetchStatus.COMPLETE,
+          loadedRecordsCount: 3,
+          totalRecordsCount: 3,
+        }),
+      },
+    });
 
     expect(current.onFetchMoreRecords).toBeUndefined();
     expect(current.isMoreDataLoading).toBe(false);
@@ -59,69 +60,72 @@ describe('useFetchMoreRecords', () => {
   });
 
   it('should be allowed when there are more records to load', async () => {
-    const params = {
-      isTextBasedQuery: false,
-      stateContainer: getStateContainer({
-        fetchStatus: FetchStatus.COMPLETE,
-        loadedRecordsCount: 3,
-        totalRecordsCount: 5,
-      }),
-    };
-
     const {
       result: { current },
-    } = renderHook(() => useFetchMoreRecords(params));
+    } = renderHook((props) => useFetchMoreRecords(props), {
+      initialProps: {
+        isTextBasedQuery: false,
+        stateContainer: getStateContainer({
+          fetchStatus: FetchStatus.COMPLETE,
+          loadedRecordsCount: 3,
+          totalRecordsCount: 5,
+        }),
+      },
+    });
     expect(current.onFetchMoreRecords).toBeDefined();
     expect(current.isMoreDataLoading).toBe(false);
     expect(current.totalHits).toBe(5);
   });
 
   it('should not be allowed when there is no initial documents', async () => {
-    const params = {
-      isTextBasedQuery: false,
-      stateContainer: getStateContainer({
-        fetchStatus: FetchStatus.COMPLETE,
-        loadedRecordsCount: 0,
-        totalRecordsCount: 5,
-      }),
-    };
     const {
       result: { current },
-    } = renderHook(() => useFetchMoreRecords(params));
+    } = renderHook((props) => useFetchMoreRecords(props), {
+      initialProps: {
+        isTextBasedQuery: false,
+        stateContainer: getStateContainer({
+          fetchStatus: FetchStatus.COMPLETE,
+          loadedRecordsCount: 0,
+          totalRecordsCount: 5,
+        }),
+      },
+    });
     expect(current.onFetchMoreRecords).toBeUndefined();
     expect(current.isMoreDataLoading).toBe(false);
     expect(current.totalHits).toBe(5);
   });
 
   it('should return loading status correctly', async () => {
-    const params = {
-      isTextBasedQuery: false,
-      stateContainer: getStateContainer({
-        fetchStatus: FetchStatus.LOADING_MORE,
-        loadedRecordsCount: 3,
-        totalRecordsCount: 5,
-      }),
-    };
     const {
       result: { current },
-    } = renderHook(() => useFetchMoreRecords(params));
+    } = renderHook((props) => useFetchMoreRecords(props), {
+      initialProps: {
+        isTextBasedQuery: false,
+        stateContainer: getStateContainer({
+          fetchStatus: FetchStatus.LOADING_MORE,
+          loadedRecordsCount: 3,
+          totalRecordsCount: 5,
+        }),
+      },
+    });
     expect(current.onFetchMoreRecords).toBeDefined();
     expect(current.isMoreDataLoading).toBe(true);
     expect(current.totalHits).toBe(5);
   });
 
   it('should not be allowed for text-based queries', async () => {
-    const params = {
-      isTextBasedQuery: true,
-      stateContainer: getStateContainer({
-        fetchStatus: FetchStatus.COMPLETE,
-        loadedRecordsCount: 3,
-        totalRecordsCount: 5,
-      }),
-    };
     const {
       result: { current },
-    } = renderHook(() => useFetchMoreRecords(params));
+    } = renderHook((props) => useFetchMoreRecords(props), {
+      initialProps: {
+        isTextBasedQuery: true,
+        stateContainer: getStateContainer({
+          fetchStatus: FetchStatus.COMPLETE,
+          loadedRecordsCount: 3,
+          totalRecordsCount: 5,
+        }),
+      },
+    });
     expect(current.onFetchMoreRecords).toBeUndefined();
   });
 });
