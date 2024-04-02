@@ -5,7 +5,26 @@
  * 2.0.
  */
 
-import type { AgentStatuses } from '../../../server/endpoint/services';
+import type { HostStatus } from '.';
+import type {
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+} from '../service/response_actions/constants';
+
+export interface AgentStatuses {
+  [agentId: string]: {
+    agentId: string;
+    agentType: ResponseActionAgentType;
+    capabilities: string[];
+    found: boolean;
+    isolated: boolean;
+    isPendingUninstall: boolean | undefined;
+    isUninstalled: boolean | undefined;
+    lastSeen: string; // ISO date
+    pendingActions: Record<ResponseActionsApiCommandNames | string, number>;
+    status: HostStatus;
+  };
+}
 
 export interface AgentStatusApiResponse {
   data: AgentStatuses;

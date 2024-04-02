@@ -25,13 +25,13 @@ export const registerAgentStatusRoute = (
 ) => {
   router.versioned
     .get({
-      access: 'public',
+      access: 'internal',
       path: AGENT_STATUS_ROUTE,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: EndpointAgentStatusRequestSchema,
         },
@@ -55,25 +55,15 @@ export const getAgentStatusRouteHandler = (
   const logger = endpointContext.logFactory.get('agentStatus');
 
   return async (context, request, response) => {
-    const { agentType, agentIds: _agentIds } = request.query;
-    const agentIds = Array.isArray(_agentIds)
-      ? _agentIds.filter((id) => id.trim() !== '')
-      : [_agentIds];
-
-    if (!agentIds.length) {
-      return errorHandler(
-        logger,
-        response,
-        new CustomHttpRequestError(`[request query.agentIds]: must be a non-empty list`, 400)
-      );
-    }
+    const { agentType = 'endpoint', agentIds: _agentIds } = request.query;
+    const agentIds = Array.isArray(_agentIds) ? _agentIds : [_agentIds];
 
     // Note:  because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
     //        `agentType` is included in the schema independent of the feature flag
     if (
-      agentType === 'sentinel_one' &&
-      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled
+      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled &&
+      agentType === 'sentinel_one'
     ) {
       return errorHandler(
         logger,

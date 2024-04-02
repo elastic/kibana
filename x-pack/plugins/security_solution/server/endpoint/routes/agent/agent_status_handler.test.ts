@@ -63,7 +63,7 @@ describe('Agent Status API route handler', () => {
     };
 
     await apiTestSetup
-      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '2023-10-31')
+      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
     expect(httpResponseMock.customError).toHaveBeenCalledWith({
@@ -80,7 +80,7 @@ describe('Agent Status API route handler', () => {
     };
 
     await apiTestSetup
-      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '2023-10-31')
+      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
     expect(httpResponseMock.ok).toHaveBeenCalled();
@@ -89,7 +89,7 @@ describe('Agent Status API route handler', () => {
   it.each(RESPONSE_ACTION_AGENT_TYPE)('should (v8.14) accept %s agent type', async (agentType) => {
     httpRequestMock = getHttpReqMock(agentType);
     await apiTestSetup
-      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '2023-10-31')
+      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
     expect(httpResponseMock.ok).toHaveBeenCalled();
@@ -100,7 +100,7 @@ describe('Agent Status API route handler', () => {
     async (agentType) => {
       httpRequestMock = getHttpReqMock(agentType);
       await apiTestSetup
-        .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '2023-10-31')
+        .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
         .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(httpResponseMock.ok).toHaveBeenCalledWith({

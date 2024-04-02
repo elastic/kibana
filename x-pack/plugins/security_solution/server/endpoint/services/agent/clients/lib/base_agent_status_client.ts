@@ -68,10 +68,6 @@ export abstract class AgentStatusClient implements AgentStatusClientInterface {
   }
 
   public async getAgentStatuses(agentIds: string[]): Promise<AgentStatuses> {
-    const validation = await this.validateRequest(agentIds, this.agentType);
-    if (!validation.isValid) {
-      throw validation.error;
-    }
     throw new AgentStatusNotSupportedError(agentIds, this.agentType);
   }
 }

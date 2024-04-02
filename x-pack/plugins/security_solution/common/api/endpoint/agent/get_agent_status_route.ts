@@ -24,9 +24,14 @@ export const EndpointAgentStatusRequestSchema = {
       AgentStatusAgentIdSchema,
     ]),
 
-    agentType: schema.oneOf(
-      // @ts-expect-error TS2769: No overload matches this call
-      AgentTypeSchemaLiteral
+    agentType: schema.maybe(
+      schema.oneOf(
+        // @ts-expect-error TS2769: No overload matches this call
+        AgentTypeSchemaLiteral,
+        {
+          defaultValue: 'endpoint',
+        }
+      )
     ),
   }),
 };

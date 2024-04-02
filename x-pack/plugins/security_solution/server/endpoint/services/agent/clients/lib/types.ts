@@ -5,39 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
-} from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { HostStatus } from '../../../../../../common/endpoint/types';
-
-export interface RawSentinelOneInfo {
-  sentinel_one: {
-    agent: {
-      uuid: string;
-      last_active_date: string;
-      network_status: string;
-      is_active: boolean;
-      is_pending_uninstall: boolean;
-      is_uninstalled: boolean;
-    };
-  };
-}
-
-export interface AgentStatuses {
-  [agentId: string]: {
-    agentId: string;
-    agentType: ResponseActionAgentType;
-    capabilities: string[];
-    found: boolean;
-    isolated: boolean;
-    isPendingUninstall: boolean | undefined;
-    isUninstalled: boolean | undefined;
-    lastSeen: string; // ISO date
-    pendingActions: Record<ResponseActionsApiCommandNames | string, number>;
-    status: HostStatus;
-  };
-}
+import type { AgentStatuses } from '../../../../../../common/endpoint/types';
 
 export interface AgentStatusClientInterface {
   getAgentStatuses: (agentIds: string[]) => Promise<AgentStatuses>;

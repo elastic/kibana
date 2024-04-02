@@ -6,11 +6,12 @@
  */
 
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AgentStatuses } from '../../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../../common/endpoint/types';
-import type { AgentStatuses, RawSentinelOneInfo } from '../lib/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { AgentStatusClientError } from '../errors';
+import type { RawSentinelOneInfo } from './types';
 
 const SENTINEL_ONE_AGENT_INDEX = `logs-sentinel_one.agent-default`;
 
@@ -102,10 +103,10 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
           agentId,
           agentType: this.agentType,
           capabilities: [],
-          found: agentInfo?.uuid === agentId ?? false,
-          isolated: agentInfo?.network_status === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTED ?? false,
-          isPendingUninstall: agentInfo?.is_pending_uninstall ?? false,
-          isUninstalled: agentInfo?.is_uninstalled ?? false,
+          found: agentInfo?.uuid === agentId,
+          isolated: agentInfo?.network_status === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTED,
+          isPendingUninstall: agentInfo?.is_pending_uninstall,
+          isUninstalled: agentInfo?.is_uninstalled,
           lastSeen: agentInfo?.last_active_date || '',
           status: agentInfo?.is_active ? HostStatus.HEALTHY : HostStatus.OFFLINE,
           pendingActions: agentInfo

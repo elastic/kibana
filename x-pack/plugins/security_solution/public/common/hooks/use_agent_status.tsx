@@ -36,7 +36,7 @@ export const useAgentStatus = (
     queryFn: () =>
       http
         .get<{ data: AgentStatusApiResponse['data'] }>(AGENT_STATUS_ROUTE, {
-          version: '2023-10-31',
+          version: '1',
           query: {
             agentIds,
             agentType,
@@ -54,7 +54,7 @@ export const fetchEndpointPendingActionsByAgentId = async (
   const response = await KibanaServices.get().http.get<AgentStatusApiResponse['data']>(
     AGENT_STATUS_ROUTE,
     {
-      version: '2023-10-31',
+      version: '1',
       query: {
         agentIds,
         agentType: 'endpoint',
