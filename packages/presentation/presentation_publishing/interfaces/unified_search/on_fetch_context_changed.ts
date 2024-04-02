@@ -58,7 +58,7 @@ export function onFetchContextChanged({
 
   if (apiPublishesTimeRange(api)) {
     subscriptions.push(api.timeRange$.pipe(skip(1)).subscribe(() => {
-      debouncedFetch(false);
+      debouncedFetch();
     }));
   }
 
@@ -75,7 +75,7 @@ export function onFetchContextChanged({
       if ((api?.parentApi as Partial<PublishesSearchSession>)?.searchSessionId$?.value) {
         return;
       }
-      debouncedFetch(false);
+      debouncedFetch();
     }));
 
     if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)) {
@@ -88,7 +88,7 @@ export function onFetchContextChanged({
         if ((api?.parentApi as Partial<PublishesSearchSession>)?.searchSessionId$?.value || (api as Partial<PublishesTimeRange>).timeRange$?.value) {
           return;
         }
-        debouncedFetch(false);
+        debouncedFetch();
       }));
     }
     if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
