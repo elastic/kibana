@@ -20,7 +20,7 @@ describe('transformRawData', () => {
     const result = transformRawData({
       allow: inputRawData.allow,
       allowReplacement: inputRawData.allowReplacement,
-      currentReplacements: [],
+      currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
       onNewReplacements: () => {},
       rawData: inputRawData.rawData,
@@ -42,13 +42,13 @@ describe('transformRawData', () => {
     transformRawData({
       allow: inputRawData.allow,
       allowReplacement: inputRawData.allowReplacement,
-      currentReplacements: [],
+      currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
       onNewReplacements,
       rawData: inputRawData.rawData,
     });
 
-    expect(onNewReplacements).toHaveBeenCalledWith([{ uuid: '1eulav', value: 'value1' }]);
+    expect(onNewReplacements).toHaveBeenCalledWith({ '1eulav': 'value1' });
   });
 
   it('returns the expected mix of anonymized and non-anonymized data as a CSV string', () => {
@@ -62,7 +62,7 @@ describe('transformRawData', () => {
     const result = transformRawData({
       allow: inputRawData.allow,
       allowReplacement: inputRawData.allowReplacement,
-      currentReplacements: [],
+      currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
       onNewReplacements: () => {},
       rawData: inputRawData.rawData,
@@ -86,7 +86,7 @@ describe('transformRawData', () => {
     const result = transformRawData({
       allow: inputRawData.allow,
       allowReplacement: inputRawData.allowReplacement,
-      currentReplacements: [],
+      currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
       onNewReplacements: () => {},
       rawData: inputRawData.rawData,

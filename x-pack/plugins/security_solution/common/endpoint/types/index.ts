@@ -973,7 +973,7 @@ export interface PolicyConfig {
       registry: boolean;
       security: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     memory_protection: ProtectionFields & SupportedFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
@@ -1014,7 +1014,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
@@ -1044,7 +1044,7 @@ export interface PolicyConfig {
       session_data: boolean;
       tty_io: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
@@ -1118,6 +1118,10 @@ export interface SupportedFields {
 
 export interface BlocklistFields {
   blocklist: boolean;
+}
+
+export interface OnWriteScanFields {
+  on_write_scan?: boolean;
 }
 
 /** Policy protection mode options */
