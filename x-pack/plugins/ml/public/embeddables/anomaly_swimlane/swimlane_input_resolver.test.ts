@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useSwimlaneInputResolver } from './swimlane_input_resolver';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, of, Subject } from 'rxjs';
-import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { BehaviorSubject, of, Subject } from 'rxjs';
+import type { AnomalySwimlaneServices } from '..';
+import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import type { MlStartDependencies } from '../../plugin';
-import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
+import { useSwimlaneInputResolver } from './swimlane_input_resolver';
+import type { AnomalySwimLaneEmbeddableApi } from './types';
 
 describe('useSwimlaneInputResolver', () => {
-  let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;
+  let jobIds: BehaviorSubject<string[]>;
+
+  let api: AnomalySwimLaneEmbeddableApi;
   let refresh: Subject<any>;
   let services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
-  let onInputChange: jest.Mock;
-
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const renderCallbacks = {
     onLoading: jest.fn(),
@@ -28,14 +27,27 @@ describe('useSwimlaneInputResolver', () => {
   };
 
   beforeEach(() => {
-    embeddableInput = new BehaviorSubject({
-      id: 'test-swimlane-embeddable',
-      jobIds: ['test-job'],
-      swimlaneType: SWIMLANE_TYPE.OVERALL,
-      filters: [],
-      query: { language: 'kuery', query: '' },
-    } as Partial<AnomalySwimlaneEmbeddableInput>);
+    jest.useFakeTimers();
+
+    jobIds = new BehaviorSubject(['test-job']);
+
+    api = {
+      jobIds,
+      swimlaneType: new BehaviorSubject(SWIMLANE_TYPE.OVERALL),
+      fromPage: new BehaviorSubject(1),
+      perPage: new BehaviorSubject(10),
+      viewBy: new BehaviorSubject(undefined),
+      query$: new BehaviorSubject(undefined),
+      filters$: new BehaviorSubject(undefined),
+      appliedTimeRange$: new BehaviorSubject({
+        from: '2019-11-04T16:00:00.000Z',
+        to: '2019-11-04T21:30:00.000Z',
+      }),
+      setInterval: jest.fn(),
+    } as unknown as AnomalySwimLaneEmbeddableApi;
+
     refresh = new Subject();
+
     services = [
       {
         uiSettings: {
@@ -82,31 +94,23 @@ describe('useSwimlaneInputResolver', () => {
         },
       } as unknown as AnomalySwimlaneServices,
     ];
-    onInputChange = jest.fn();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.useRealTimers();
   });
 
   test('should fetch jobs only when input job ids have been changed', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useSwimlaneInputResolver(
-        embeddableInput as Observable<AnomalySwimlaneEmbeddableInput>,
-        onInputChange,
-        refresh,
-        services,
-        1000,
-        1,
-        renderCallbacks
-      )
+    const { result } = renderHook(() =>
+      useSwimlaneInputResolver(api, refresh, services, 1000, renderCallbacks)
     );
 
     expect(result.current[0]).toBe(undefined);
     expect(result.current[1]).toBe(undefined);
 
-    await act(async () => {
-      await Promise.all([delay(501), waitForNextUpdate()]);
+    act(() => {
+      jest.advanceTimersByTime(501);
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
@@ -114,15 +118,9 @@ describe('useSwimlaneInputResolver', () => {
 
     expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(1);
 
-    await act(async () => {
-      embeddableInput.next({
-        id: 'test-swimlane-embeddable',
-        jobIds: ['another-id'],
-        swimlaneType: SWIMLANE_TYPE.OVERALL,
-        filters: [],
-        query: { language: 'kuery', query: '' },
-      });
-      await Promise.all([delay(501), waitForNextUpdate()]);
+    act(() => {
+      jobIds.next(['another-id']);
+      jest.advanceTimersByTime(501);
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
@@ -131,14 +129,8 @@ describe('useSwimlaneInputResolver', () => {
     expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(2);
 
     await act(async () => {
-      embeddableInput.next({
-        id: 'test-swimlane-embeddable',
-        jobIds: ['another-id'],
-        swimlaneType: SWIMLANE_TYPE.OVERALL,
-        filters: [],
-        query: { language: 'kuery', query: '' },
-      });
-      await Promise.all([delay(501), waitForNextUpdate()]);
+      jobIds.next(['another-id']);
+      jest.advanceTimersByTime(501);
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
@@ -147,30 +139,16 @@ describe('useSwimlaneInputResolver', () => {
     expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(3);
   });
 
-  test('should not complete the observable on error', async () => {
+  test('should not complete the observable on error', () => {
     const { result } = renderHook(() =>
-      useSwimlaneInputResolver(
-        embeddableInput as Observable<AnomalySwimlaneEmbeddableInput>,
-        onInputChange,
-        refresh,
-        services,
-        1000,
-        1,
-        renderCallbacks
-      )
+      useSwimlaneInputResolver(api, refresh, services, 1000, renderCallbacks)
     );
 
-    await act(async () => {
-      embeddableInput.next({
-        id: 'test-swimlane-embeddable',
-        jobIds: ['invalid-job-id'],
-        swimlaneType: SWIMLANE_TYPE.OVERALL,
-        filters: [],
-        query: { language: 'kuery', query: '' },
-      } as Partial<AnomalySwimlaneEmbeddableInput>);
+    act(() => {
+      jobIds.next(['invalid-job-id']);
     });
 
-    expect(result.current[6]?.message).toBe('Invalid job');
+    expect(result.current[4]?.message).toBe('Invalid job');
 
     expect(renderCallbacks.onError).toHaveBeenCalledTimes(1);
   });
