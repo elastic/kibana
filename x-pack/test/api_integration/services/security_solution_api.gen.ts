@@ -21,6 +21,7 @@ import {
 
 import { BulkCreateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
 import { BulkDeleteRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
+import { BulkGetRulesSourcesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_get_sources/bulk_get_sources_route.gen';
 import { BulkPatchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
 import { BulkUpdateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
@@ -77,6 +78,17 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     bulkDeleteRules(props: BulkDeleteRulesProps) {
       return supertest
         .delete('/api/detection_engine/rules/_bulk_delete')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Returns rules sources.
+     */
+    bulkGetRulesSources(props: BulkGetRulesSourcesProps) {
+      return supertest
+        .post('/api/detection_engine/rules/_bulk_get_sources')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -300,6 +312,9 @@ export interface BulkCreateRulesProps {
 }
 export interface BulkDeleteRulesProps {
   body: BulkDeleteRulesRequestBodyInput;
+}
+export interface BulkGetRulesSourcesProps {
+  body: BulkGetRulesSourcesRequestBodyInput;
 }
 export interface BulkPatchRulesProps {
   body: BulkPatchRulesRequestBodyInput;
