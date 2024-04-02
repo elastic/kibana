@@ -458,7 +458,6 @@ const AssistantComponent: React.FC<Props> = ({
     selectedPromptContexts,
     setSelectedPromptContexts,
     setCurrentConversation,
-    refresh: refetchCurrentConversation,
   });
 
   const chatbotComments = useMemo(
