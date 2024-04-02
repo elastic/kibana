@@ -90,6 +90,7 @@ export const ApmRuleTypeAlertDefinition: IRuleTypeAlerts = {
   context: APM_RULE_TYPE_ALERT_CONTEXT,
   mappings: { fieldMap: apmRuleTypeAlertFieldMap },
   useLegacyAlerts: true,
+  shouldWrite: false,
 };
 
 export interface RegisterRuleDependencies {

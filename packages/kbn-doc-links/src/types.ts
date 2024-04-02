@@ -122,6 +122,8 @@ export interface DocLinks {
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
+    readonly connectorsClientDeploy: string;
+    readonly connectorsMappings: string;
     readonly connectorsAzureBlobStorage: string;
     readonly connectorsBox: string;
     readonly connectorsClients: string;
@@ -543,6 +545,7 @@ export interface DocLinks {
     policySecrets: string;
     remoteESOoutput: string;
     performancePresets: string;
+    scalingKubernetesResourcesAndLimits: string;
   }>;
   readonly ecs: {
     readonly guide: string;

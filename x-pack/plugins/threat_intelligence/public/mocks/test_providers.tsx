@@ -126,7 +126,10 @@ export const mockedServices = {
   securityLayout: {
     getPluginWrapper:
       () =>
-      ({ children }: any) => {
+      ({ children, isEmptyState, emptyPageBody }: any) => {
+        if (isEmptyState && emptyPageBody) {
+          return <>{emptyPageBody}</>;
+        }
         return <>{children}</>;
       },
   },

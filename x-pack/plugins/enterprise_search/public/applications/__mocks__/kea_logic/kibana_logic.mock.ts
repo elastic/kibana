@@ -40,6 +40,7 @@ export const mockKibanaValues = {
   esConfig: { elasticsearch_host: 'https://your_deployment_url' },
   guidedOnboarding: {},
   history: mockHistory,
+  indexMappingComponent: null,
   isCloud: false,
   isSidebarEnabled: true,
   lens: {
