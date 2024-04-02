@@ -53,8 +53,8 @@ const getPctAboveThreshold = (observedValue: number, threshold: number[]) => {
 
 export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] | undefined => {
   const ruleParams = alert.fields[ALERT_RULE_PARAMETERS];
+  if (!ruleParams) return;
   const ruleCriteria = ruleParams?.criteria as Array<Record<string, any>>;
-  if (!ruleCriteria) return;
   const ruleId = alert.fields[ALERT_RULE_TYPE_ID];
   const observedValues: number[] = alert.fields[ALERT_EVALUATION_VALUES]! || [
     alert.fields[ALERT_EVALUATION_VALUE]!,

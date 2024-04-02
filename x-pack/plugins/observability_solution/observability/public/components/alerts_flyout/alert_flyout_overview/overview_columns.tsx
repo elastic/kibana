@@ -92,7 +92,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
             </EuiLink>
           );
         case ColumnIDs.OBSERVED_VALUE:
-          if (!ruleCriteria || ruleCriteria.length) return <>{'-'}</>;
+          if (!ruleCriteria) return <>{'-'}</>;
           return (
             <div>
               {ruleCriteria.map((criteria, criteriaIndex) => {
@@ -119,7 +119,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
           );
 
         case ColumnIDs.THRESHOLD:
-          if (!ruleCriteria || ruleCriteria.length) return <>{'-'}</>;
+          if (!ruleCriteria) return <>{'-'}</>;
           return (
             <div>
               {ruleCriteria.map((criteria, criticalIndex) => {
