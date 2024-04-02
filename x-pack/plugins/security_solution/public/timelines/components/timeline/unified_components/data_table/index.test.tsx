@@ -91,7 +91,8 @@ describe('unified data table', () => {
     SPECIAL_TEST_TIMEOUT
   );
 
-  describe('custom cell rendering based on data Type', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/179843
+  describe.skip('custom cell rendering based on data Type', () => {
     it(
       'should render source.ip as link',
       async () => {
