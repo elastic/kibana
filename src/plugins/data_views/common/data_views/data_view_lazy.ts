@@ -40,7 +40,7 @@ interface DataViewDeps {
 interface GetFieldsParams {
   indexFilter?: QueryDslQueryContainer;
   unmapped?: boolean;
-  fieldName?: string[]; // supports wildcard
+  fieldName: string[]; // supports wildcard
   mapped?: boolean;
   scripted?: boolean;
   runtime?: boolean;
@@ -70,12 +70,12 @@ export class DataViewLazy extends AbstractDataView {
     mapped = true,
     scripted = true,
     runtime = true,
-    fieldName = ['*'],
+    fieldName,
     forceRefresh = false,
     unmapped,
     indexFilter,
     metaFields = true,
-  }: GetFieldsParams = {}) {
+  }: GetFieldsParams) {
     let mappedResult: DataViewFieldMap = {};
     let scriptedResult: DataViewFieldMap = {};
     let runtimeResult: DataViewFieldMap = {};
@@ -118,7 +118,7 @@ export class DataViewLazy extends AbstractDataView {
     };
   }
 
-  private getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
+  public getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
     // getRuntimeFieldSpecMap flattens composites into a list of fields
     Object.values(this.getRuntimeFieldSpecMap({ fieldName })).reduce<DataViewFieldMap>(
       (col, field) => {
@@ -370,7 +370,7 @@ export class DataViewLazy extends AbstractDataView {
     return spec;
   };
 
-  private getScriptedFields({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) {
+  public getScriptedFields({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) {
     const dataViewFields: Record<string, DataViewField> = {};
 
     Object.values(this.scriptedFieldsMap).forEach((field) => {
@@ -458,12 +458,12 @@ export class DataViewLazy extends AbstractDataView {
     );
   }
 
-  async getComputedFields({ fieldNames = ['*'] }: { fieldNames: string[] }) {
+  async getComputedFields({ fieldName = ['*'] }: { fieldName: string[] }) {
     const scriptFields: Record<string, estypes.ScriptField> = {};
 
     const fieldMap = (
       await this.getFields({
-        fieldName: fieldNames,
+        fieldName,
         fieldTypes: ['date', 'date_nanos'],
         scripted: false,
         runtime: false,
@@ -480,10 +480,10 @@ export class DataViewLazy extends AbstractDataView {
       };
     });
 
-    each(this.getScriptedFields({ fieldName: fieldNames }), function (field) {
+    each(this.getScriptedFields({ fieldName }), function (field) {
       scriptFields[field.name] = {
         script: {
-          source: field.script as string,
+          source: field.script!,
           lang: field.lang,
         },
       };
@@ -556,7 +556,7 @@ export class DataViewLazy extends AbstractDataView {
    * returns true if dataview contains TSDB fields
    */
   async isTSDBMode() {
-    const fieldMap = (await this.getFields()).getFieldMap();
+    const fieldMap = (await this.getFields({ fieldName: ['*'] })).getFieldMap();
 
     return Object.values(fieldMap).some(
       (field) => field.timeSeriesDimension || field.timeSeriesMetric

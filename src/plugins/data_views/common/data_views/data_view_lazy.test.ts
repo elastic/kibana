@@ -114,7 +114,7 @@ describe('DataViewLazy', () => {
 
   describe('sorted fields', () => {
     test('should have expected properties on fields', async function () {
-      const fieldMap = (await dataViewLazy.getFields()).getFieldMapSorted();
+      const fieldMap = (await dataViewLazy.getFields({ fieldName: ['*'] })).getFieldMapSorted();
       const expectSortedsKeys = fieldCapsResponse
         .map((field) => field.name)
         .concat([
@@ -154,7 +154,9 @@ describe('DataViewLazy', () => {
         .filter((item: DataViewField) => item.scripted === true)
         .map((item: DataViewField) => item.name);
       const respNames = Object.keys(
-        (await dataViewLazy.getFields({ mapped: false, runtime: false })).getFieldMap()
+        (
+          await dataViewLazy.getFields({ fieldName: ['*'], mapped: false, runtime: false })
+        ).getFieldMap()
       );
 
       expect(respNames).toEqual(scriptedNames);
@@ -170,7 +172,7 @@ describe('DataViewLazy', () => {
       fieldCapsResponse = Object.values(stubLogstashFieldSpecMap).filter(
         (field) => field.type === 'date' && !field.scripted
       );
-      const { docvalueFields } = await dataViewLazy.getComputedFields({ fieldNames: ['*'] });
+      const { docvalueFields } = await dataViewLazy.getComputedFields({ fieldName: ['*'] });
       const docValueFieldNames = docvalueFields.map((field) => field.field);
 
       expect(Object.keys(docValueFieldNames).length).toBe(3);
@@ -180,20 +182,20 @@ describe('DataViewLazy', () => {
     });
 
     test('should return runtimeField', async () => {
-      expect((await dataViewLazy.getComputedFields({ fieldNames: ['*'] })).runtimeFields).toEqual({
+      expect((await dataViewLazy.getComputedFields({ fieldName: ['*'] })).runtimeFields).toEqual({
         runtime_field: runtimeFieldScript,
       });
     });
 
     test('should request date field doc values in date_time format', async () => {
-      const { docvalueFields } = await dataViewLazy.getComputedFields({ fieldNames: ['*'] });
+      const { docvalueFields } = await dataViewLazy.getComputedFields({ fieldName: ['*'] });
       const timestampField = docvalueFields.find((field) => field.field === '@timestamp');
 
       expect(timestampField).toHaveProperty('format', 'date_time');
     });
 
     test('should not request scripted date fields as docvalue_fields', async () => {
-      const { docvalueFields } = await dataViewLazy.getComputedFields({ fieldNames: ['*'] });
+      const { docvalueFields } = await dataViewLazy.getComputedFields({ fieldName: ['*'] });
 
       expect(docvalueFields).not.toContain('script date');
     });
@@ -209,7 +211,9 @@ describe('DataViewLazy', () => {
         .map((item: DataViewField) => item.name);
       notScriptedNames.push('runtime_field');
 
-      const fieldMap = (await dataViewLazy.getFields({ scripted: false })).getFieldMap();
+      const fieldMap = (
+        await dataViewLazy.getFields({ fieldName: ['*'], scripted: false })
+      ).getFieldMap();
 
       const respNames = map(fieldMap, 'name');
 
@@ -221,7 +225,9 @@ describe('DataViewLazy', () => {
     test('should append the scripted field', async () => {
       // keep a copy of the current scripted field count
       const oldCount = Object.keys(
-        (await dataViewLazy.getFields({ mapped: false, runtime: false })).getFieldMap()
+        (
+          await dataViewLazy.getFields({ fieldName: ['*'], mapped: false, runtime: false })
+        ).getFieldMap()
       ).length;
 
       // add a new scripted field
@@ -242,7 +248,9 @@ describe('DataViewLazy', () => {
       });
 
       const scriptedFields = Object.keys(
-        (await dataViewLazy.getFields({ mapped: false, runtime: false })).getFieldMap()
+        (
+          await dataViewLazy.getFields({ fieldName: ['*'], mapped: false, runtime: false })
+        ).getFieldMap()
       );
       expect(scriptedFields).toHaveLength(oldCount + 1);
 
@@ -254,7 +262,9 @@ describe('DataViewLazy', () => {
     test('should remove scripted field, by name', async () => {
       fieldCapsResponse = [];
       const scriptedFields = Object.values(
-        (await dataViewLazy.getFields({ mapped: false, runtime: false })).getFieldMap()
+        (
+          await dataViewLazy.getFields({ fieldName: ['*'], mapped: false, runtime: false })
+        ).getFieldMap()
       );
       const oldCount = scriptedFields.length;
       const scriptedField = last(scriptedFields)!;
@@ -262,8 +272,11 @@ describe('DataViewLazy', () => {
       await dataViewLazy.removeScriptedField(scriptedField.name);
 
       expect(
-        Object.keys((await dataViewLazy.getFields({ mapped: false, runtime: false })).getFieldMap())
-          .length
+        Object.keys(
+          (
+            await dataViewLazy.getFields({ fieldName: ['*'], mapped: false, runtime: false })
+          ).getFieldMap()
+        ).length
       ).toEqual(oldCount - 1);
 
       expect(await dataViewLazy.getFieldByName(scriptedField.name)).toEqual(undefined);
@@ -449,7 +462,7 @@ describe('DataViewLazy', () => {
     });
 
     test('add and remove composite runtime field as new fields', async () => {
-      const fieldMap = (await dataViewLazy.getFields()).getFieldMap();
+      const fieldMap = (await dataViewLazy.getFields({ fieldName: ['*'] })).getFieldMap();
       const fieldCount = Object.values(fieldMap).length;
       await dataViewLazy.addRuntimeField('new_field', runtimeCompositeWithAttrs);
       expect((await dataViewLazy.toSpec(toSpecGetAllFields)).runtimeFieldMap).toEqual({
@@ -457,7 +470,8 @@ describe('DataViewLazy', () => {
         runtime_field: runtimeField.runtimeField,
       });
       expect(
-        Object.values((await dataViewLazy.getFields()).getFieldMap()).length - fieldCount
+        Object.values((await dataViewLazy.getFields({ fieldName: ['*'] })).getFieldMap()).length -
+          fieldCount
       ).toEqual(2);
       expect(dataViewLazy.getRuntimeField('new_field')).toMatchSnapshot();
       expect((await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['new_field.a']).toBeDefined();
@@ -554,8 +568,10 @@ describe('DataViewLazy', () => {
       expect(restoredPattern.id).toEqual(dataViewLazy.id);
       expect(restoredPattern.getIndexPattern()).toEqual(dataViewLazy.getIndexPattern());
       expect(restoredPattern.timeFieldName).toEqual(dataViewLazy.timeFieldName);
-      const restoredPatternFieldMap = (await restoredPattern.getFields()).getFieldMap();
-      const fieldMap = (await dataViewLazy.getFields()).getFieldMap();
+      const restoredPatternFieldMap = (
+        await restoredPattern.getFields({ fieldName: ['*'] })
+      ).getFieldMap();
+      const fieldMap = (await dataViewLazy.getFields({ fieldName: ['*'] })).getFieldMap();
       expect(Object.keys(restoredPatternFieldMap).length).toEqual(Object.keys(fieldMap).length);
     });
 
@@ -689,7 +705,6 @@ describe('DataViewLazy', () => {
         }
       `);
     });
-
 
     test('can customize what attributes to keep', () => {
       const fieldsMap = {

@@ -54,11 +54,7 @@ export const getRuntimeField = async ({
 
   return {
     dataView,
-    fields: Object.values(
-      (
-        await dataView.getFields({ fieldName: [name], mapped: false, scripted: false })
-      ).getFieldMap()
-    ),
+    fields: Object.values(dataView.getRuntimeFields({ fieldName: [name] })),
   };
 };
 
