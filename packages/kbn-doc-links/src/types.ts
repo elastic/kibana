@@ -123,6 +123,7 @@ export interface DocLinks {
     readonly configuration: string;
     readonly connectors: string;
     readonly connectorsClientDeploy: string;
+    readonly connectorsMappings: string;
     readonly connectorsAzureBlobStorage: string;
     readonly connectorsBox: string;
     readonly connectorsClients: string;
