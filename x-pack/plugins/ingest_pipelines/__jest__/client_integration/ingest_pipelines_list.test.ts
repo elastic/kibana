@@ -70,7 +70,14 @@ describe('<PipelinesList />', () => {
       tableCellsValues.forEach((row, i) => {
         const pipeline = pipelines[i];
 
-        expect(row).toEqual(['', pipeline.name, '', `test_pipeline${i + 1} description`, '0', 'EditDelete']);
+        expect(row).toEqual([
+          '',
+          pipeline.name,
+          '',
+          `test_pipeline${i + 1} description`,
+          '0',
+          'EditDelete',
+        ]);
       });
     });
 
