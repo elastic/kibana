@@ -31,6 +31,7 @@ import { GetAlertIndicesAlias } from './lib';
 import { AlertsService } from './alerts_service/alerts_service';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from './saved_objects';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -51,6 +52,7 @@ export interface RulesClientFactoryOpts {
   getAlertIndicesAlias: GetAlertIndicesAlias;
   alertsService: AlertsService | null;
   backfillClient: BackfillClient;
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
 }
 
@@ -75,6 +77,7 @@ export class RulesClientFactory {
   private getAlertIndicesAlias!: GetAlertIndicesAlias;
   private alertsService!: AlertsService | null;
   private backfillClient!: BackfillClient;
+  private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
 
   public initialize(options: RulesClientFactoryOpts) {
@@ -101,6 +104,7 @@ export class RulesClientFactory {
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
     this.alertsService = options.alertsService;
     this.backfillClient = options.backfillClient;
+    this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
   }
 
@@ -137,6 +141,7 @@ export class RulesClientFactory {
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
       backfillClient: this.backfillClient,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
 
       async getUserName() {
@@ -195,6 +200,9 @@ export class RulesClientFactory {
           };
         }
         return { apiKeysEnabled: false };
+      },
+      isSystemAction(actionId: string) {
+        return actions.isSystemActionConnector(actionId);
       },
     });
   }

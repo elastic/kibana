@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { filterStateStore } from './v1';
-export type { FilterStateStore } from './v1';
+export { listTypesWithSystemRoute } from './list_types_system';

@@ -23,6 +23,7 @@ import { alertsServiceMock } from '../../../../alerts_service/alerts_service.moc
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -63,6 +64,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   alertsService,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
 };
 
 describe('bulkUntrackAlerts()', () => {

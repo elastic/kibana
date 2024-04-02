@@ -27,6 +27,7 @@ import { RegistryRuleType } from '../../rule_type_registry';
 import { schema } from '@kbn/config-schema';
 import { enabledRule1, enabledRule2, siemRule1, siemRule2 } from './test_helpers';
 import { formatLegacyActions } from '../lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
@@ -66,10 +67,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn().mockImplementation((id) => id === 'system_action-id'),
 };
 
 beforeEach(() => {
@@ -102,10 +105,12 @@ describe('find()', () => {
       validLegacyConsumers: [],
     },
   ]);
+
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
     });
+
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
       per_page: 10,
@@ -125,11 +130,13 @@ describe('find()', () => {
             notifyWhen: 'onActiveAlert',
             actions: [
               {
+                actionTypeId: 'test-action-id',
                 group: 'default',
                 actionRef: 'action_0',
                 params: {
                   foo: true,
                 },
+                uuid: 100,
               },
             ],
           },
@@ -144,6 +151,7 @@ describe('find()', () => {
         },
       ],
     });
+
     ruleTypeRegistry.list.mockReturnValue(listedTypes);
     authorization.filterByRuleTypeAuthorization.mockResolvedValue(
       new Set([
@@ -178,11 +186,13 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionTypeId": "test-action-id",
                 "group": "default",
                 "id": "1",
                 "params": Object {
                   "foo": true,
                 },
+                "uuid": 100,
               },
             ],
             "alertTypeId": "myType",
@@ -196,6 +206,7 @@ describe('find()', () => {
               "interval": "10s",
             },
             "snoozeSchedule": Array [],
+            "systemActions": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -272,18 +283,22 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionTypeId": undefined,
                 "group": "default",
                 "id": "1",
                 "params": Object {
                   "foo": true,
                 },
+                "uuid": undefined,
               },
               Object {
+                "actionTypeId": undefined,
                 "group": "default",
                 "id": "preconfigured",
                 "params": Object {
                   "foo": true,
                 },
+                "uuid": undefined,
               },
             ],
             "alertTypeId": "myType",
@@ -297,6 +312,7 @@ describe('find()', () => {
               "interval": "10s",
             },
             "snoozeSchedule": Array [],
+            "systemActions": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -363,24 +379,23 @@ describe('find()', () => {
         },
       ],
     });
+
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.find({ options: {} });
+
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Array [
           Object {
             "actions": Array [
               Object {
+                "actionTypeId": undefined,
                 "group": "default",
                 "id": "1",
                 "params": Object {
                   "foo": true,
                 },
-              },
-              Object {
-                "group": "default",
-                "id": "system_action-id",
-                "params": Object {},
+                "uuid": undefined,
               },
             ],
             "alertTypeId": "myType",
@@ -394,6 +409,14 @@ describe('find()', () => {
               "interval": "10s",
             },
             "snoozeSchedule": Array [],
+            "systemActions": Array [
+              Object {
+                "actionTypeId": undefined,
+                "id": "system_action-id",
+                "params": Object {},
+                "uuid": undefined,
+              },
+            ],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -615,11 +638,13 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionTypeId": undefined,
                 "group": "default",
                 "id": "1",
                 "params": Object {
                   "foo": true,
                 },
+                "uuid": undefined,
               },
             ],
             "alertTypeId": "myType",
@@ -633,16 +658,19 @@ describe('find()', () => {
               "interval": "10s",
             },
             "snoozeSchedule": Array [],
+            "systemActions": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
           Object {
             "actions": Array [
               Object {
+                "actionTypeId": undefined,
                 "group": "default",
                 "id": "1",
                 "params": Object {
                   "foo": true,
                 },
+                "uuid": undefined,
               },
             ],
             "alertTypeId": "123",
@@ -657,6 +685,7 @@ describe('find()', () => {
               "interval": "20s",
             },
             "snoozeSchedule": Array [],
+            "systemActions": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -883,6 +912,7 @@ describe('find()', () => {
               "params": undefined,
               "schedule": undefined,
               "snoozeSchedule": Array [],
+              "systemActions": Array [],
               "tags": Array [
                 "myTag",
               ],

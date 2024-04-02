@@ -29,6 +29,7 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 import { backfillClientMock } from './backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
@@ -50,8 +51,6 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   ruleTypeRegistry: ruleTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   internalSavedObjectsRepository,
@@ -62,7 +61,10 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   authorization:
     alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
   backfillClient,
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 const actionsAuthorization = actionsAuthorizationMock.create();
@@ -126,6 +128,8 @@ test('creates a rules client with proper constructor arguments when security is 
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+    isSystemAction: expect.any(Function),
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
     backfillClient,
@@ -176,6 +180,8 @@ test('creates a rules client with proper constructor arguments', async () => {
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+    isSystemAction: expect.any(Function),
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
     backfillClient,

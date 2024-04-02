@@ -130,17 +130,22 @@ export async function scheduleBackfill(
     rulesToSchedule = [...response.saved_objects];
   }
 
+  const actionsClient = await context.getActionsClient();
   return await context.backfillClient.bulkQueue({
     params,
     rules: rulesToSchedule.map(({ id, attributes, references }) => {
       const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-      return transformRuleAttributesToRuleDomain(attributes as RuleAttributes, {
-        id,
-        logger: context.logger,
-        ruleType,
-        references,
-        omitGeneratedValues: false,
-      });
+      return transformRuleAttributesToRuleDomain(
+        attributes as RuleAttributes,
+        {
+          id,
+          logger: context.logger,
+          ruleType,
+          references,
+          omitGeneratedValues: false,
+        },
+        (connectorId: string) => actionsClient.isSystemAction(connectorId)
+      );
     }),
     ruleTypeRegistry: context.ruleTypeRegistry,
     spaceId: context.spaceId,

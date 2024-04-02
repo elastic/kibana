@@ -27,6 +27,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ConstructorOptions, RulesClient } from '../../../../rules_client';
 import { ScheduleBackfillParam } from './types';
 import { adHocRunStatus } from '../../../../../common/constants';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -67,6 +68,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
   backfillClient,
+  isSystemAction: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
@@ -95,6 +98,7 @@ const existingRule = {
     throttle: null,
     notifyWhen: null,
     actions: [],
+    systemActions: [],
     name: 'my rule name',
     revision: 0,
   },
@@ -396,6 +400,7 @@ describe('scheduleBackfill()', () => {
           schedule: existingDecryptedRule1.attributes.schedule,
           scheduledTaskId: existingDecryptedRule1.attributes.scheduledTaskId,
           snoozeSchedule: existingDecryptedRule1.attributes.snoozeSchedule,
+          systemActions: existingDecryptedRule1.attributes.systemActions,
           tags: existingDecryptedRule1.attributes.tags,
           throttle: existingDecryptedRule1.attributes.throttle,
           updatedAt: new Date(existingDecryptedRule1.attributes.updatedAt),
@@ -425,6 +430,7 @@ describe('scheduleBackfill()', () => {
           schedule: existingDecryptedRule2.attributes.schedule,
           scheduledTaskId: existingDecryptedRule2.attributes.scheduledTaskId,
           snoozeSchedule: existingDecryptedRule2.attributes.snoozeSchedule,
+          systemActions: existingDecryptedRule2.attributes.systemActions,
           tags: existingDecryptedRule2.attributes.tags,
           throttle: existingDecryptedRule2.attributes.throttle,
           updatedAt: new Date(existingDecryptedRule2.attributes.updatedAt),

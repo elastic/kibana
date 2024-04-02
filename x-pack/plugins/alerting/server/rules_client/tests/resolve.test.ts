@@ -24,6 +24,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { formatLegacyActions } from '../lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
@@ -63,10 +64,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -123,11 +126,13 @@ describe('resolve()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
@@ -147,6 +152,7 @@ describe('resolve()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -303,11 +309,13 @@ describe('resolve()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
@@ -328,6 +336,7 @@ describe('resolve()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -440,6 +449,106 @@ describe('resolve()', () => {
     await expect(rulesClient.resolve({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error injecting reference into rule params for rule id 1 - something went wrong!"`
     );
+  });
+
+  test('resolves a rule with actions using system connectors', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          alertTypeId: '123',
+          schedule: { interval: '10s' },
+          params: {
+            bar: true,
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              actionRef: 'system_action:system_action-id',
+              params: {},
+            },
+          ],
+          notifyWhen: 'onActiveAlert',
+          executionStatus: {
+            status: 'ok',
+            last_execution_date: new Date().toISOString(),
+            last_duration: 10,
+          },
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+        ],
+      },
+      outcome: 'aliasMatch',
+      alias_target_id: '2',
+    });
+
+    const result = await rulesClient.resolve({ id: '1' });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": undefined,
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+            "uuid": undefined,
+          },
+        ],
+        "alertTypeId": "123",
+        "alias_target_id": "2",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "ok",
+        },
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "outcome": "aliasMatch",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "snoozeSchedule": Array [],
+        "systemActions": Array [
+          Object {
+            "actionTypeId": undefined,
+            "id": "system_action-id",
+            "params": Object {},
+            "uuid": undefined,
+          },
+        ],
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+
+    expect(unsecuredSavedObjectsClient.resolve).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.resolve.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "alert",
+        "1",
+        undefined,
+      ]
+    `);
   });
 
   describe('authorization', () => {
