@@ -29,7 +29,7 @@ import {
   RuleSystemAction,
 } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { betaBadgeProps } from './beta_badge_props';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionTypeModel,
@@ -335,10 +335,8 @@ export const ActionForm = ({
             isDisabled={isDisabled}
             data-test-subj={`${item.id}-${featureId}-ActionTypeSelectOption`}
             label={actionTypesIndex[item.id].name}
-            betaBadgeLabel={item.isExperimental ? betaBadgeProps.label : undefined}
-            betaBadgeTooltipContent={
-              item.isExperimental ? betaBadgeProps.tooltipContent : undefined
-            }
+            betaBadgeLabel={item.isExperimental ? TECH_PREVIEW_LABEL : undefined}
+            betaBadgeTooltipContent={item.isExperimental ? TECH_PREVIEW_DESCRIPTION : undefined}
             onClick={() => addActionType(item)}
           >
             <EuiIcon

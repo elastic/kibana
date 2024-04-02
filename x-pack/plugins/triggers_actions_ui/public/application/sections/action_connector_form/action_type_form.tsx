@@ -44,8 +44,8 @@ import {
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
 import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
-import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
   RuleAction,
@@ -702,8 +702,8 @@ export const ActionTypeForm = ({
                 <EuiFlexItem grow={false}>
                   <EuiBetaBadge
                     data-test-subj="action-type-form-beta-badge"
-                    label={betaBadgeProps.label}
-                    tooltipContent={betaBadgeProps.tooltipContent}
+                    label={TECH_PREVIEW_LABEL}
+                    tooltipContent={TECH_PREVIEW_DESCRIPTION}
                   />
                 </EuiFlexItem>
               )}

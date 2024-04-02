@@ -88,3 +88,18 @@ export const FEATURE_LABEL = i18n.translate(
     defaultMessage: 'Feature',
   }
 );
+
+export const TECH_PREVIEW_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.technicalPreviewBadgeLabel',
+  {
+    defaultMessage: 'Technical preview',
+  }
+);
+
+export const TECH_PREVIEW_DESCRIPTION = i18n.translate(
+  'xpack.triggersActionsUI.technicalPreviewBadgeDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);

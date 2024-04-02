@@ -44,6 +44,7 @@ import { createMatchPhraseFilter, createRuleTypesFilter } from '../../lib/search
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 import { nonNullable } from '../../../../common/utils';
 import { useRuleTypeIdsByFeatureId } from './hooks/use_rule_type_ids_by_feature_id';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 const AlertsTable = lazy(() => import('../alerts_table/alerts_table_state'));
 
 /**
@@ -167,20 +168,7 @@ const PageContent = () => {
               </span>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.managementSection.alerts.technicalPreview"
-                    defaultMessage="Technical preview"
-                  />
-                }
-                tooltipContent={
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.technicalPreviewBadgeDescription"
-                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features"
-                  />
-                }
-              />
+              <EuiBetaBadge label={TECH_PREVIEW_LABEL} tooltipContent={TECH_PREVIEW_DESCRIPTION} />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
