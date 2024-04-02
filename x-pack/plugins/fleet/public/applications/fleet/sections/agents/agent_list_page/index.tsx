@@ -111,6 +111,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setDraftKuery,
     fetchData,
     currentRequestRef,
+    latestAgentActionErrors,
+    setLatestAgentActionErrors,
   } = useFetchAgentsData();
 
   const onSubmitSearch = useCallback(
@@ -267,7 +269,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const onClickAgentActivity = useCallback(() => {
     setAgentActivityFlyoutOpen(true);
-  }, [setAgentActivityFlyoutOpen]);
+    setLatestAgentActionErrors(0);
+  }, [setAgentActivityFlyoutOpen, setLatestAgentActionErrors]);
 
   const refreshAgents = ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
     fetchData({ refreshTags });
@@ -425,6 +428,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         agentsOnCurrentPage={agentsOnCurrentPage}
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
+        latestAgentActionErrors={latestAgentActionErrors}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

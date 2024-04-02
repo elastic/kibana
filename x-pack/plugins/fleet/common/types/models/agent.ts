@@ -443,6 +443,7 @@ export interface ActionStatusOptions {
   page?: number;
   perPage?: number;
   date?: string;
+  latest?: number;
 }
 
 export interface AgentUpgradeDetails {

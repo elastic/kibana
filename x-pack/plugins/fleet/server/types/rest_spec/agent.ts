@@ -256,6 +256,7 @@ export const GetActionStatusRequestSchema = {
         },
       })
     ),
+    latest: schema.maybe(schema.number()),
     errorSize: schema.number({ defaultValue: 5 }),
   }),
 };

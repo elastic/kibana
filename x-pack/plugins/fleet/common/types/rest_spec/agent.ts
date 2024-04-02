@@ -239,6 +239,7 @@ export interface GetActionStatusRequest {
     perPage?: number;
     page?: number;
     date?: string;
+    latest?: number;
   };
 }
 export interface GetActionStatusResponse {

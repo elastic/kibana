@@ -216,14 +216,17 @@ async function getActions(
             },
           },
         ],
-        ...(options.date
+        ...(options.date || options.latest
           ? {
               filter: [
                 {
                   range: {
                     '@timestamp': {
-                      gte: options.date,
-                      lte: moment(options.date).add(1, 'days').toISOString(),
+                      // options.date overrides options.latest
+                      gte: options.date ?? `now-${(options.latest ?? 0) / 1000}s/s`,
+                      lte: options.date
+                        ? moment(options.date).add(1, 'days').toISOString()
+                        : 'now/s',
                     },
                   },
                 },
@@ -339,6 +342,11 @@ async function getPolicyChangeActions(
   esClient: ElasticsearchClient,
   options: ActionStatusOptions
 ): Promise<ActionStatus[]> {
+  // option.latest is used to fetch recent errors, which policy change actions do not contain
+  if (options.latest) {
+    return [];
+  }
+
   const agentPoliciesRes = await esClient.search({
     index: AGENT_POLICY_INDEX,
     size: getPerPage(options),
