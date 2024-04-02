@@ -10,16 +10,15 @@ import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import { groupBy, once } from 'lodash';
+import { groupBy } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
   SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { NormalizedExternalConnectorClientExecuteOptions } from '../lib/normalized_external_connector_client';
 import { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
-import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { SENTINEL_ONE_ACTIVITY_INDEX } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {

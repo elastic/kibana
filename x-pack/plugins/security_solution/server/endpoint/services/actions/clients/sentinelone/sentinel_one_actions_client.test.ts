@@ -127,6 +127,11 @@ describe('SentinelOneActionsClient class', () => {
             },
             agent: { id: ['1-2-3'] },
             user: { id: 'foo' },
+            meta: {
+              agentId: '1845174760470303882',
+              agentUUID: '1-2-3',
+              hostName: 'sentinelone-1460',
+            },
           },
           index: ENDPOINT_ACTIONS_INDEX,
           refresh: 'wait_for',
@@ -194,6 +199,11 @@ describe('SentinelOneActionsClient class', () => {
             },
             agent: { id: ['1-2-3'] },
             user: { id: 'foo' },
+            meta: {
+              agentId: '1845174760470303882',
+              agentUUID: '1-2-3',
+              hostName: 'sentinelone-1460',
+            },
           },
           index: ENDPOINT_ACTIONS_INDEX,
           refresh: 'wait_for',
@@ -307,6 +317,12 @@ describe('SentinelOneActionsClient class', () => {
             id: 'agent-uuid-1',
           },
           error: undefined,
+          meta: {
+            activityLogEntryDescription: 'Some description here',
+            activityLogEntryId: 'd78282bc-e413-468d-9df6-570b91756a6d',
+            activityLogEntryType: 1001,
+            elasticDocId: '85f7f003-ebed-4157-b8e6-16ae44fc4be7',
+          },
         });
       });
 
