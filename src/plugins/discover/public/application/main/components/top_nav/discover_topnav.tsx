@@ -73,6 +73,10 @@ export const DiscoverTopNav = ({
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   const [lsIndex, saveLsIndex] = useLocalStorageListener('obs-ai-assistant-index', null);
+  const [lsDataViewId, saveLsDataViewId] = useLocalStorageListener(
+    'obs-ai-assistant-data-view-id',
+    null
+  );
   const [lsIndexTimeField, saveLsIndexTimeField] = useLocalStorageListener(
     'obs-ai-assistant-index-time-field',
     null
@@ -192,6 +196,7 @@ export const DiscoverTopNav = ({
     console.log('time field', dataView?.getTimeField()?.spec.name);
     saveLsIndex(dataView?.getIndexPattern() || null);
     saveLsIndexTimeField(dataView?.getTimeField()?.spec.name || null);
+    saveLsDataViewId(dataView?.id);
   }, [dataView]);
 
   const savedSearchId = useSavedSearch().id;

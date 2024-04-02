@@ -9,6 +9,7 @@ import { queue } from 'async';
 import { FromSchema } from 'json-schema-to-ts';
 import { mean } from 'd3-array';
 import moment from 'moment';
+import rison from '@kbn/rison';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -44,6 +45,10 @@ const parameters = {
       type: 'string',
       description: 'The Elasticsearch source index pattern.',
     },
+    dataViewId: {
+      type: 'string',
+      description: 'The Kibana data view id.',
+    },
     timefield: {
       type: 'string',
       description: 'The Elasticesarch source index pattern time field.',
@@ -57,7 +62,7 @@ const parameters = {
       description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
     },
   },
-  required: ['index', 'timefield', 'start', 'end'],
+  required: ['dataViewId', 'index', 'timefield', 'start', 'end'],
 } as const;
 
 export function registerGetAiopsLogRateAnalysisFunction({
@@ -75,7 +80,7 @@ export function registerGetAiopsLogRateAnalysisFunction({
           defaultMessage: `Log rate analysis is a feature that uses advanced statistical methods to identify reasons for increases or decreases in log rates.`,
         }
       ),
-      description: `Log rate analysis is a Elastic AIOps feature that uses advanced statistical methods to identify reasons for increases or decreases in time series of log rates. The analysis returns significant field/value pairs found in the log rate change. The importance of field/value pairs is logIncrease descending. Briefly explain the data with value examples. Values with the same increase might correlate. Suggest actionable insights for remediations and identify potential security and performance issues.`,
+      description: `Log rate analysis is a Elastic AIOps feature that uses advanced statistical methods to identify reasons for increases or decreases in time series of log rates. The analysis returns significant field/value pairs found in the log rate change. The importance of field/value pairs is logIncrease descending. Briefly explain the data with value examples. Values with the same increase might correlate. Suggest actionable insights for remediations and identify potential security and performance issues. Finally, if available, provide a link to the log rate analysis UI.`,
       parameters,
     },
     async ({ arguments: args }, abortSignal): Promise<GetAiopsLogRateAnalysisFunctionResponse> => {
@@ -286,6 +291,18 @@ export function registerGetAiopsLogRateAnalysisFunction({
 
       return {
         content: {
+          logRateAnalysisUILink: `/app/ml/aiops/log_rate_analysis?index=${
+            args.dataViewId
+          }&_a=${rison.encode({
+            logRateAnalysis: {
+              wp: {
+                bMin: wp.baselineMin,
+                bMax: wp.baselineMax,
+                dMin: wp.deviationMin,
+                dMax: wp.deviationMax,
+              },
+            },
+          })}`,
           logRateChange: {
             type: Object.keys(histogram.aggregations.change_point_request.type)[0],
             timestamp: histogram.aggregations.change_point_request.bucket.key,
