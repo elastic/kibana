@@ -88,7 +88,7 @@ export class ApmSynthtraceKibanaClient {
 
   async uninstallApmPackage() {
     this.logger.debug('Uninstalling APM package');
-    const latestApmPackageVersion = this.fetchLatestApmPackageVersion();
+    const latestApmPackageVersion = await this.fetchLatestApmPackageVersion();
 
     const url = `${this.target}/api/fleet/epm/packages/apm/${latestApmPackageVersion}`;
     const response = await pRetry(
@@ -102,7 +102,9 @@ export class ApmSynthtraceKibanaClient {
         if (res.status >= 400) {
           const errorJson = await res.json();
           throw new Error(
-            `APM package version ${latestApmPackageVersion} uninstallation returned ${res.status} status code\nError: ${errorJson}`
+            `APM package ${url} uninstallation returned ${
+              res.status
+            } status code\nError: ${JSON.stringify(errorJson, null, 2)}`
           );
         }
         return res;

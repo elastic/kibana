@@ -160,7 +160,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
-        kibanaServer.savedObjects.cleanStandardList(),
       ]);
     });
 
