@@ -28,10 +28,66 @@ describe('onFetchContextChanged', () => {
     parentApi.timeRange$.next(undefined);
   });
 
-  /*describe('searchSessionId', () => {
-  });*/
+  describe('searchSessionId', () => {
+    let i = 0;
+    function setSearchSession() {
+      i++;
+      parentApi.searchSessionId$.next(`${i}`);
+    }
+    beforeEach(() => {
+      i = 0;
+      setSearchSession();
+    });
+
+    it('should call onFetch a single time when fetch context changes', async () => {
+      const unsubscribe = onFetchContextChanged({
+        api: { parentApi }, 
+        onFetch: onFetchMock,
+        fetchOnSetup: false,
+      });
+      parentApi.filters$.next([]);
+      parentApi.query$.next({ language: 'kquery', query: '' });
+      parentApi.timeRange$.next({
+        from: 'now-24h',
+        to: 'now',
+      });
+      setSearchSession();
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      expect(onFetchMock.mock.calls).toHaveLength(1);
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext).toEqual({
+        filters:[],
+        isReload: true,
+        query: {
+          language: 'kquery',
+          query: '',
+        },
+        searchSessionId: '2',
+        timeRange: {
+          from: 'now-24h',
+          to: 'now',
+        },
+        timeslice: undefined,
+      });
+      unsubscribe();
+    });
+  });
 
   describe('no searchSession$', () => {
+    it('should call onFetch when reload triggered', async () => {
+      const unsubscribe = onFetchContextChanged({
+        api: { parentApi }, 
+        onFetch: onFetchMock,
+        fetchOnSetup: false,
+      });
+      parentApi.reload$.next();
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      expect(onFetchMock.mock.calls).toHaveLength(1);
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.isReload).toBe(true);
+      unsubscribe();
+    });
+
     describe('local and parent time range', () => {
       const api = {
         parentApi,

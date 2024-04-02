@@ -54,7 +54,6 @@ export const getSearchEmbeddableFactory = (services: Services) => {
       const error$ = new BehaviorSubject<Error | undefined>(undefined);
       const count$ = new BehaviorSubject<number>(0);
       const onFetch = (fetchContext: FetchContext, isCanceled: () => boolean) => {
-        console.log('onFetch', fetchContext);
         error$.next(undefined);
         if (!defaultDataView) {
           return;
