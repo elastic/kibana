@@ -13,6 +13,7 @@ import {
   EuiBadge,
   EuiContextMenu,
   EuiContextMenuItemIcon,
+  EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
@@ -255,19 +256,78 @@ export const EditorMenu = ({
   });
 
   const getEditorMenuPanels = (closePopover: () => void) => {
+    const [ungroupedAddPanelActions, groupedAddPanelAction] = getAddPanelActionMenuItems(
+      api,
+      addPanelActions,
+      closePopover
+    );
+
+    // Merge factory groups with add panel actions
+    const initialPanelGroups: EuiContextMenuPanelItemDescriptor[] = [];
+    const additionalPanels: EuiContextMenuPanelDescriptor[] = [];
+    new Set(Object.keys(factoryGroupMap).concat(Object.keys(groupedAddPanelAction))).forEach(
+      (groupId) => {
+        const factoryGroup = factoryGroupMap[groupId];
+        const addPanelGroup = groupedAddPanelAction[groupId];
+        if (factoryGroup && addPanelGroup) {
+          const panelId = factoryGroup.panelId;
+
+          initialPanelGroups.push({
+            'data-test-subj': `dashboardEditorMenu-${groupId}Group`,
+            name: factoryGroup.appName,
+            icon: factoryGroup.icon,
+            panel: panelId,
+          });
+
+          additionalPanels.push({
+            id: panelId,
+            title: factoryGroup.appName,
+            items: [
+              ...factoryGroup.factories.map((factory) => {
+                return getEmbeddableFactoryMenuItem(factory, closePopover);
+              }),
+              // @ts-expect-error
+              ...addPanelGroup.items,
+            ],
+          });
+        } else if (factoryGroup) {
+          const panelId = factoryGroup.panelId;
+
+          initialPanelGroups.push({
+            'data-test-subj': `dashboardEditorMenu-${groupId}Group`,
+            name: factoryGroup.appName,
+            icon: factoryGroup.icon,
+            panel: panelId,
+          });
+
+          additionalPanels.push({
+            id: panelId,
+            title: factoryGroup.appName,
+            items: [
+              ...factoryGroup.factories.map((factory) => {
+                return getEmbeddableFactoryMenuItem(factory, closePopover);
+              }),
+            ],
+          });
+        } else if (addPanelGroup) {
+          additionalPanels.push({
+            id: panelCount,
+            title: addPanelGroup.title,
+            items: addPanelGroup.items,
+          });
+          panelCount++;
+        }
+      }
+    );
+
     const initialPanelItems = [
       ...visTypeAliases.map(getVisTypeAliasMenuItem),
-      ...getAddPanelActionMenuItems(api, addPanelActions, closePopover),
+      ...ungroupedAddPanelActions,
       ...toolVisTypes.map(getVisTypeMenuItem),
       ...ungroupedFactories.map((factory) => {
         return getEmbeddableFactoryMenuItem(factory, closePopover);
       }),
-      ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
-        name: appName,
-        icon,
-        panel: panelId,
-        'data-test-subj': `dashboardEditorMenu-${id}Group`,
-      })),
+      ...initialPanelGroups,
       ...promotedVisTypes.map(getVisTypeMenuItem),
     ];
     if (aggsBasedVisTypes.length > 0) {
@@ -289,15 +349,7 @@ export const EditorMenu = ({
         title: aggsPanelTitle,
         items: aggsBasedVisTypes.map(getVisTypeMenuItem),
       },
-      ...Object.values(factoryGroupMap).map(
-        ({ appName, panelId, factories: groupFactories }: FactoryGroup) => ({
-          id: panelId,
-          title: appName,
-          items: groupFactories.map((factory) => {
-            return getEmbeddableFactoryMenuItem(factory, closePopover);
-          }),
-        })
-      ),
+      ...additionalPanels,
     ];
   };
   return (
