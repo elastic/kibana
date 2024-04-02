@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { combineLatest, skip, Subscription } from 'rxjs';
+import { debounce } from 'lodash';
+import { combineLatest, Observable, skip, Subscription } from 'rxjs';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { apiPublishesTimeRange, apiPublishesUnifiedSearch, PublishesTimeRange, PublishesUnifiedSearch } from './publishes_unified_search';
 import { apiPublishesSearchSession, PublishesSearchSession } from './publishes_search_session';
 import { apiHasParentApi, HasParentApi } from '../has_parent_api';
+import { apiPublishesReload } from './publishes_reload';
 
 export type FetchContext = {
+  isReload: boolean;
   filters: Filter[] | undefined;
   query: Query | AggregateQuery | undefined;
   searchSessionId: string | undefined;
@@ -20,9 +23,10 @@ export type FetchContext = {
   timeslice: [number, number] | undefined;
 };
 
-function getFetchContext(api: unknown) {
+function getFetchContext(api: unknown, isReload: boolean) {
   const typeApi = api as Partial<PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>>;
   return {
+    isReload,
     filters: typeApi?.parentApi?.filters$?.value,
     query: typeApi?.parentApi?.query$?.value,
     searchSessionId: typeApi?.parentApi?.searchSessionId$?.value,
@@ -43,25 +47,25 @@ export function onFetchContextChanged({
   fetchOnSetup: boolean;
 }): () => void {
   let fetchSymbol: Symbol | undefined;
-  function fetch() {
+  const debouncedFetch = debounce(fetch, 0);
+  function fetch(isReload: boolean = false) {
     const currentFetchSymbol = Symbol();
     fetchSymbol = currentFetchSymbol;
-    onFetch(getFetchContext(api), () => fetchSymbol !== currentFetchSymbol);
+    onFetch(getFetchContext(api, isReload), () => fetchSymbol !== currentFetchSymbol);
   }
 
   const subscriptions: Subscription[] = [];
 
   if (apiPublishesTimeRange(api)) {
     subscriptions.push(api.timeRange$.pipe(skip(1)).subscribe(() => {
-      console.log('onFetch from timeRange$');
-      fetch();
+      debouncedFetch(false);
     }));
   }
 
   if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
     subscriptions.push(api.parentApi?.searchSessionId$.pipe(skip(1)).subscribe(() => {
-      console.log('onFetch from searchSessionId$');
-      fetch();
+      debouncedFetch.cancel();
+      fetch(true);
     }));
   }
 
@@ -71,32 +75,36 @@ export function onFetchContextChanged({
       if ((api?.parentApi as Partial<PublishesSearchSession>)?.searchSessionId$?.value) {
         return;
       }
-      console.log('onFetch from parentApi.filters$ and parentApi.query$');
-      fetch();
+      debouncedFetch(false);
     }));
-    subscriptions.push(api.parentApi?.timeRange$.pipe(skip(1)).subscribe(() => {
-      // Ignore changes when searchSessionId is provided or local time range is provided.
-      if ((api?.parentApi as Partial<PublishesSearchSession>)?.searchSessionId$?.value || (api as Partial<PublishesTimeRange>).timeRange$?.value) {
-        return;
+
+    if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)) {
+      const timeObservables: Array<Observable<unknown>> = [api.parentApi.timeRange$];
+      if (api.parentApi.timeslice$) {
+        timeObservables.push(api.parentApi.timeslice$);
       }
-      console.log('onFetch from parentApi.timeRange$');
-      fetch();
-    }));
-    if (api.parentApi.timeslice$) {
-      subscriptions.push(api.parentApi?.timeslice$.pipe(skip(1)).subscribe(() => {
+      subscriptions.push(combineLatest(timeObservables).pipe(skip(1)).subscribe(() => {
         // Ignore changes when searchSessionId is provided or local time range is provided.
         if ((api?.parentApi as Partial<PublishesSearchSession>)?.searchSessionId$?.value || (api as Partial<PublishesTimeRange>).timeRange$?.value) {
           return;
         }
-        console.log('onFetch from parentApi.timeslice$');
-        fetch();
+        debouncedFetch(false);
+      }));
+    }
+    if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
+      subscriptions.push(api.parentApi.reload$.subscribe(() => {
+        // Ignore changes when searchSessionId is provided
+        if ((api?.parentApi as Partial<PublishesSearchSession>)?.searchSessionId$?.value) {
+          return;
+        }
+        debouncedFetch.cancel();
+        fetch(true);
       }));
     }
   }
 
   if (fetchOnSetup) {
-    console.log('onFetch on setup');
-    fetch();
+    debouncedFetch();
   }
   
   return () => {

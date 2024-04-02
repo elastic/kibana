@@ -134,6 +134,7 @@ export class DashboardContainer
 
   public searchSessionId?: string;
   public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
+  public reload$ = new Subject<void>();
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   // cleanup
@@ -528,6 +529,7 @@ export class DashboardContainer
 
   public forceRefresh(refreshControlGroup: boolean = true) {
     this.dispatch.setLastReloadRequestTimeToNow({});
+    this.reload$.next();
     if (refreshControlGroup) this.controlGroup?.reload();
   }
 
