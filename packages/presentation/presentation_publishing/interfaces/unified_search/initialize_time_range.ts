@@ -9,20 +9,15 @@
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { TimeRange } from '@kbn/es-query';
-import { PublishingSubject } from '../../publishing_subject';
 import { StateComparators } from '../../comparators';
-import {
-  apiPublishesTimeRange,
-  PublishesTimeRange,
-  PublishesWritableTimeRange,
-} from './publishes_unified_search';
+import { PublishesWritableTimeRange } from './publishes_unified_search';
 
 export interface SerializedTimeRange {
   timeRange: TimeRange | undefined;
 }
 
 export const initializeTimeRange = (
-  rawState: SerializedTimeRange,
+  rawState: SerializedTimeRange
 ): {
   serialize: () => SerializedTimeRange;
   api: PublishesWritableTimeRange;

@@ -12,8 +12,6 @@ export interface PublishesReload {
   reload$: PublishingSubject<void>;
 }
 
-export const apiPublishesReload = (
-  unknownApi: null | unknown
-): unknownApi is PublishesReload => {
+export const apiPublishesReload = (unknownApi: null | unknown): unknownApi is PublishesReload => {
   return Boolean(unknownApi && (unknownApi as PublishesReload)?.reload$ !== undefined);
 };

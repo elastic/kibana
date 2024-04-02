@@ -15,5 +15,7 @@ export interface PublishesSearchSession {
 export const apiPublishesSearchSession = (
   unknownApi: null | unknown
 ): unknownApi is PublishesSearchSession => {
-  return Boolean(unknownApi && (unknownApi as PublishesSearchSession)?.searchSessionId$ !== undefined);
+  return Boolean(
+    unknownApi && (unknownApi as PublishesSearchSession)?.searchSessionId$ !== undefined
+  );
 };
