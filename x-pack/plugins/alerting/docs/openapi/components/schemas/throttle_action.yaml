@@ -2,11 +2,10 @@ type:
   - "string"
   - "null"
 description: >
-  Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead.
   The throttle interval, which defines how often an alert generates repeated actions.
-  NOTE: You cannot specify the throttle interval at both the rule and action level.
+  It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`.
+  NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action.
   If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
 default: null
-deprecated: true
 examples:
   - 10m
