@@ -19,7 +19,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
-import { isEmpty, findIndex } from 'lodash';
+import { isEmpty, findIndex, orderBy } from 'lodash';
 import { Conversation } from '../../../..';
 import { useConversation } from '../../use_conversation';
 import * as i18n from './translations';
@@ -33,6 +33,7 @@ interface Props {
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
   onConversationDeleted: (conversationId: string) => void;
+  refetchConversationsState: () => Promise<void>;
 }
 
 const getCurrentConversationIndex = (
@@ -77,11 +78,15 @@ export const ConversationSidePanel = React.memo<Props>(
     isDisabled = false,
     conversations,
     onConversationDeleted,
+    refetchConversationsState,
   }) => {
     const { createConversation } = useConversation();
     const [deleteConversationItem, setDeleteConversationItem] = useState<Conversation | null>(null);
 
-    const conversationList = useMemo(() => Object.values(conversations).reverse(), [conversations]);
+    const conversationList = useMemo(
+      () => orderBy(Object.values(conversations), 'updatedAt', 'desc'),
+      [conversations]
+    );
 
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
 
@@ -149,7 +154,7 @@ export const ConversationSidePanel = React.memo<Props>(
       ]
     );
 
-    const onSubmit = useCallback(() => {
+    const onSubmit = useCallback(async () => {
       if (conversations[i18n.NEW_CHAT]) {
         onConversationSelected({
           cId: conversations[i18n.NEW_CHAT].id,
@@ -158,18 +163,26 @@ export const ConversationSidePanel = React.memo<Props>(
         return;
       }
 
-      createConversation({
+      const newConversation = await createConversation({
         title: i18n.NEW_CHAT,
         apiConfig: currentConversation.apiConfig,
-      }).then((newConversation) => {
-        if (newConversation) {
-          onConversationSelected({
-            cId: newConversation.id,
-            cTitle: newConversation.title,
-          });
-        }
       });
-    }, [conversations, createConversation, currentConversation.apiConfig, onConversationSelected]);
+
+      await refetchConversationsState();
+
+      if (newConversation) {
+        onConversationSelected({
+          cId: newConversation.id,
+          cTitle: newConversation.title,
+        });
+      }
+    }, [
+      conversations,
+      createConversation,
+      currentConversation.apiConfig,
+      onConversationSelected,
+      refetchConversationsState,
+    ]);
 
     const handleCloseModal = useCallback(() => {
       setDeleteConversationItem(null);

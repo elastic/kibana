@@ -38,7 +38,6 @@ interface OwnProps {
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
   showAnonymizedValues: boolean;
-  title: string;
   onChatCleared: () => void;
   onCloseFlyout?: () => void;
   chatHistoryVisible: boolean;
@@ -64,7 +63,6 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   setIsSettingsModalVisible,
   setCurrentConversation,
   showAnonymizedValues,
-  title,
   onChatCleared,
   chatHistoryVisible,
   setChatHistoryVisible,
@@ -183,7 +181,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
           >
             <AssistantTitle
               docLinks={docLinks}
-              title={title}
+              title={selectedConversation.title}
               selectedConversation={selectedConversation}
               onChange={onConversationChange}
               isFlyoutMode={true}

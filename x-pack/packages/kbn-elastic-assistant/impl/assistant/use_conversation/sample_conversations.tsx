@@ -43,6 +43,7 @@ export const WELCOME_CONVERSATION: Conversation = {
     },
   ],
   replacements: {},
+  excludeFromLastConversationStorage: true,
 };
 
 export const enterpriseMessaging: Message[] = [

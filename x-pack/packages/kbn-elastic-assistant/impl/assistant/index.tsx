@@ -7,16 +7,7 @@
 
 /* eslint-disable complexity */
 
-import React, {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -83,7 +74,6 @@ export interface Props {
   showTitle?: boolean;
   onCloseFlyout?: () => void;
   isFlyoutMode?: boolean;
-  setConversationTitle?: Dispatch<SetStateAction<string>>;
 }
 
 /**
@@ -98,7 +88,6 @@ const AssistantComponent: React.FC<Props> = ({
   showTitle = true,
   onCloseFlyout,
   isFlyoutMode = false,
-  setConversationTitle,
 }) => {
   const {
     assistantTelemetry,
@@ -139,6 +128,7 @@ const AssistantComponent: React.FC<Props> = ({
     isLoading,
     isError,
     refetch,
+    isSuccess: conversationsLoaded,
   } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
 
   useEffect(() => {
@@ -161,34 +151,28 @@ const AssistantComponent: React.FC<Props> = ({
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
-  const [selectedConversationTitle, setSelectedConversationTitle] = useState<string>(
-    isAssistantEnabled ? getLastConversationTitle(conversationTitle) : WELCOME_CONVERSATION_TITLE
-  );
-
-  useEffect(() => {
-    if (setConversationTitle) {
-      setConversationTitle(selectedConversationTitle);
-    }
-  }, [selectedConversationTitle, setConversationTitle]);
-
   const [currentConversation, setCurrentConversation] = useState<Conversation>(
-    getDefaultConversation({ cTitle: selectedConversationTitle })
+    getDefaultConversation({
+      cTitle: isAssistantEnabled
+        ? getLastConversationTitle(conversationTitle)
+        : WELCOME_CONVERSATION_TITLE,
+    })
   );
 
   const refetchCurrentConversation = useCallback(
     async (cId?: string) => {
-      if (cId === '' || !conversations[selectedConversationTitle]) {
+      if (cId === '' || !conversations[currentConversation?.title]) {
         return;
       }
       const updatedConversation = await getConversation(
-        cId ?? conversations[selectedConversationTitle].id
+        cId ?? conversations[currentConversation?.title].id
       );
       if (updatedConversation) {
         setCurrentConversation(updatedConversation);
       }
       return updatedConversation;
     },
-    [conversations, getConversation, selectedConversationTitle]
+    [conversations, currentConversation?.title, getConversation]
   );
 
   // Welcome setup state
@@ -219,8 +203,8 @@ const AssistantComponent: React.FC<Props> = ({
       return setLastConversationTitle(WELCOME_CONVERSATION_TITLE);
     }
 
-    if (!currentConversation.excludeFromLastConversationStorage) {
-      setLastConversationTitle(currentConversation.title);
+    if (!currentConversation?.excludeFromLastConversationStorage) {
+      setLastConversationTitle(currentConversation?.title);
     }
   }, [
     areConnectorsFetched,
@@ -303,13 +287,11 @@ const AssistantComponent: React.FC<Props> = ({
         const updatedConv = await refetchResults();
         if (updatedConv) {
           setCurrentConversation(updatedConv[cTitle]);
-          setSelectedConversationTitle(cTitle);
           setEditingSystemPromptId(
             getDefaultSystemPrompt({ allSystemPrompts, conversation: updatedConv[cTitle] })?.id
           );
         }
       } else {
-        setSelectedConversationTitle(cTitle);
         const refetchedConversation = await refetchCurrentConversation(cId);
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
@@ -332,7 +314,7 @@ const AssistantComponent: React.FC<Props> = ({
     onSetupComplete: () => {
       setConversations({
         ...conversations,
-        [currentConversation.title]: clearPresentationData(currentConversation),
+        [currentConversation?.title]: clearPresentationData(currentConversation),
       });
     },
   });
@@ -366,7 +348,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
-    if (currentConversation.messages.length || conversationTitle !== selectedConversationTitle) {
+    if (currentConversation.messages.length || conversationTitle !== currentConversation?.title) {
       return;
     }
 
@@ -404,7 +386,7 @@ const AssistantComponent: React.FC<Props> = ({
     promptContexts,
     promptContextId,
     conversationTitle,
-    selectedConversationTitle,
+    currentConversation?.title,
     selectedPromptContexts,
     autoPopulatedOnce,
     defaultAllow,
@@ -413,12 +395,14 @@ const AssistantComponent: React.FC<Props> = ({
 
   // Show missing connector callout if no connectors are configured
   useEffect(() => {
-    const connectorExists =
-      connectors?.some(
-        (connector) => connector.id === currentConversation.apiConfig?.connectorId
-      ) ?? false;
-    setShowMissingConnectorCallout(!connectorExists);
-  }, [connectors, currentConversation]);
+    if (conversationsLoaded && areConnectorsFetched) {
+      const connectorExists =
+        connectors?.some(
+          (connector) => connector.id === currentConversation.apiConfig?.connectorId
+        ) ?? false;
+      setShowMissingConnectorCallout(!connectorExists);
+    }
+  }, [areConnectorsFetched, connectors, conversationsLoaded, currentConversation]);
 
   const createCodeBlockPortals = useCallback(
     () =>
@@ -560,43 +544,60 @@ const AssistantComponent: React.FC<Props> = ({
 
   const refetchConversationsState = useCallback(async () => {
     const refetchedConversations = await refetchResults();
-    if (
-      refetchedConversations &&
-      refetchedConversations[
-        !isEmpty(currentConversation.id) ? currentConversation.id : currentConversation.title
-      ]
-    ) {
-      setCurrentConversation(refetchedConversations[currentConversation.title]);
+
+    if (refetchedConversations) {
+      const conversation = Object.values(refetchedConversations).find(
+        (c) =>
+          (!isEmpty(currentConversation.id) && c.id === currentConversation.id) ||
+          c.title === currentConversation.title
+      );
+
+      if (conversation) {
+        setCurrentConversation(conversation);
+      }
     }
   }, [currentConversation.id, currentConversation.title, refetchResults]);
 
   useEffect(() => {
-    if (!isLoading && Object.keys(conversations).length > 0) {
+    if (conversationsLoaded && Object.keys(conversations).length > 0) {
       const conversation =
-        conversations[selectedConversationTitle ?? getLastConversationTitle(conversationTitle)];
-      const newCurrentConversation =
-        conversation ??
-        conversations[WELCOME_CONVERSATION_TITLE] ??
-        getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
+        conversations[currentConversation?.title ?? getLastConversationTitle(conversationTitle)];
       // Set the last conversation as current conversation or use persisted or non-persisted Welcome conversation
-      setCurrentConversation(newCurrentConversation);
-      if (!newCurrentConversation?.apiConfig?.connectorId && defaultConnector) {
-        setApiConfig({
-          conversation: newCurrentConversation,
-          apiConfig: { connectorId: defaultConnector.id },
-        }).then(() => refetchConversationsState());
-      }
+      setCurrentConversation(
+        conversation ??
+          conversations[WELCOME_CONVERSATION_TITLE] ??
+          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE })
+      );
     }
   }, [
     conversationTitle,
     conversations,
-    defaultConnector,
+    conversationsLoaded,
+    currentConversation?.title,
     getDefaultConversation,
     getLastConversationTitle,
     isLoading,
+  ]);
+
+  useEffect(() => {
+    if (
+      showMissingConnectorCallout &&
+      areConnectorsFetched &&
+      defaultConnector &&
+      !currentConversation.excludeFromLastConversationStorage
+    ) {
+      setApiConfig({
+        conversation: currentConversation,
+        apiConfig: { connectorId: defaultConnector.id },
+      }).then(() => refetchConversationsState());
+    }
+  }, [
+    currentConversation,
+    defaultConnector,
     refetchConversationsState,
-    selectedConversationTitle,
     setApiConfig,
+    showMissingConnectorCallout,
+    areConnectorsFetched,
   ]);
 
   if (isFlyoutMode) {
@@ -615,6 +616,7 @@ const AssistantComponent: React.FC<Props> = ({
               onConversationSelected={handleOnConversationSelected}
               conversations={conversations}
               onConversationDeleted={handleOnConversationDeleted}
+              refetchConversationsState={refetchConversationsState}
             />
           </EuiFlexItem>
         )}
@@ -645,7 +647,6 @@ const AssistantComponent: React.FC<Props> = ({
                     onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     showAnonymizedValues={showAnonymizedValues}
-                    title={selectedConversationTitle}
                     onCloseFlyout={onCloseFlyout}
                     onChatCleared={handleOnChatCleared}
                     chatHistoryVisible={chatHistoryVisible}
@@ -915,7 +916,5 @@ const AssistantComponent: React.FC<Props> = ({
     embeddedLayout
   );
 };
-
-AssistantComponent.displayName = 'AssistantComponent';
 
 export const Assistant = React.memo(AssistantComponent);
