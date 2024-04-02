@@ -11,7 +11,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { findDocuments } from './find';
-import { SearchEsConversationSchema } from './conversations/types';
+import { EsConversationSchema } from './conversations/types';
 
 export const findDocumentsResponseMock = (): ConversationResponse => ({
   createdAt: '2020-04-20T15:25:31.830Z',
@@ -42,57 +42,56 @@ export const findDocumentsResponseMock = (): ConversationResponse => ({
   replacements: undefined,
 });
 
-export const getSearchConversationMock =
-  (): estypes.SearchResponse<SearchEsConversationSchema> => ({
-    _scroll_id: '123',
-    _shards: {
-      failed: 0,
-      skipped: 0,
-      successful: 0,
-      total: 0,
-    },
-    hits: {
-      hits: [
-        {
-          _id: '1',
-          _index: '',
-          _score: 0,
-          _source: {
-            '@timestamp': '2020-04-20T15:25:31.830Z',
-            created_at: '2020-04-20T15:25:31.830Z',
-            title: 'title-1',
-            updated_at: '2020-04-20T15:25:31.830Z',
-            messages: [],
-            id: '1',
-            namespace: 'default',
-            is_default: true,
-            exclude_from_last_conversation_storage: false,
-            api_config: {
-              connector_id: 'c1',
-              default_system_prompt_id: 'prompt-1',
-              model: 'test',
-              provider: 'Azure OpenAI',
-            },
-            summary: {
-              content: 'test',
-            },
-            category: 'assistant',
-            users: [
-              {
-                id: '1111',
-                name: 'elastic',
-              },
-            ],
-            replacements: undefined,
+export const getSearchConversationMock = (): estypes.SearchResponse<EsConversationSchema> => ({
+  _scroll_id: '123',
+  _shards: {
+    failed: 0,
+    skipped: 0,
+    successful: 0,
+    total: 0,
+  },
+  hits: {
+    hits: [
+      {
+        _id: '1',
+        _index: '',
+        _score: 0,
+        _source: {
+          '@timestamp': '2020-04-20T15:25:31.830Z',
+          created_at: '2020-04-20T15:25:31.830Z',
+          title: 'title-1',
+          updated_at: '2020-04-20T15:25:31.830Z',
+          messages: [],
+          id: '1',
+          namespace: 'default',
+          is_default: true,
+          exclude_from_last_conversation_storage: false,
+          api_config: {
+            connector_id: 'c1',
+            default_system_prompt_id: 'prompt-1',
+            model: 'test',
+            provider: 'Azure OpenAI',
           },
+          summary: {
+            content: 'test',
+          },
+          category: 'assistant',
+          users: [
+            {
+              id: '1111',
+              name: 'elastic',
+            },
+          ],
+          replacements: undefined,
         },
-      ],
-      max_score: 0,
-      total: 1,
-    },
-    timed_out: false,
-    took: 10,
-  });
+      },
+    ],
+    max_score: 0,
+    total: 1,
+  },
+  timed_out: false,
+  took: 10,
+});
 
 describe('findDocuments', () => {
   let loggerMock: Logger;
