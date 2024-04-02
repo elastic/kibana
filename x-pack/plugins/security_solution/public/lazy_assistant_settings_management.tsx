@@ -10,6 +10,6 @@
  * By loading these later we can reduce the initial bundle size and allow users to delay loading these dependencies until they are needed.
  */
 
-import { renderManagementApp } from './assistant/stack_management/management_app';
+import { ManagementSettings } from './assistant/stack_management/management_settings';
 
-export { renderManagementApp };
+export { ManagementSettings };

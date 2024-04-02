@@ -5,37 +5,55 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { AssistantSettingsManagement } from '@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management';
-import { useAssistantContext, WELCOME_CONVERSATION_TITLE } from '@kbn/elastic-assistant';
+import type { Conversation } from '@kbn/elastic-assistant';
+import {
+  mergeBaseWithPersistedConversations,
+  useAssistantContext,
+  useFetchCurrentUserConversations,
+  WELCOME_CONVERSATION_TITLE,
+} from '@kbn/elastic-assistant';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
+import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 
 export const ManagementSettings = React.memo(() => {
-  const conversationId = WELCOME_CONVERSATION_TITLE;
-  const {
-    assistantAvailability: { isAssistantEnabled },
-    conversations,
-    getConversationId,
-  } = useAssistantContext();
+  const { baseConversations, http } = useAssistantContext();
+
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
+      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
+    [baseConversations]
+  );
+  const { data: conversations } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+  });
+
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
-    isAssistantEnabled ? getConversationId(conversationId) : WELCOME_CONVERSATION_TITLE
+    WELCOME_CONVERSATION_TITLE
   );
 
-  const { createConversation } = useConversation();
+  const { getDefaultConversation } = useConversation();
 
   const currentConversation = useMemo(
     () =>
-      conversations[selectedConversationId] ??
-      createConversation({ conversationId: selectedConversationId }),
-    [conversations, createConversation, selectedConversationId]
+      conversations?.[selectedConversationId] ??
+      getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE }),
+    [conversations, getDefaultConversation, selectedConversationId]
   );
 
-  return (
-    <AssistantSettingsManagement
-      selectedConversation={currentConversation}
-      setSelectedConversationId={setSelectedConversationId}
-    />
-  );
+  if (conversations) {
+    return (
+      <AssistantSettingsManagement
+        selectedConversation={currentConversation}
+        setSelectedConversationId={setSelectedConversationId}
+        conversations={conversations}
+      />
+    );
+  }
+
+  return <></>;
 });
 
 ManagementSettings.displayName = 'ManagementSettings';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Subject, mergeMap, firstValueFrom } from 'rxjs';
 import type * as H from 'history';
@@ -25,6 +26,7 @@ import {
 } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
 import type {
@@ -198,15 +200,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           registerAlertsTableConfiguration(alertsTableConfigurationRegistry, this.storage);
 
           const [coreStart, startPlugins] = await core.getStartServices();
+          const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+          const store = await this.store(coreStart, startPlugins, subPlugins);
           const services = await startServices(params);
+          await this.registerActions(store, params.history, services);
 
-          const { renderManagementApp } = await this.lazyAssistantSettingsManagement();
+          const { renderApp } = await this.lazyApplicationDependencies();
+          const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
 
-          return renderManagementApp({
+          return renderApp({
             ...params,
-            coreStart,
             services,
+            store,
             usageCollection: plugins.usageCollection,
+            children: <ManagementSettings />,
           });
         },
       });
@@ -217,7 +224,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * This is a promise because these aren't available until the `start` lifecycle phase but they are referenced
      * in the `setup` lifecycle phase.
      */
-    const startServices = async (params: AppMountParameters<unknown>): Promise<StartServices> => {
+    const startServices = async (
+      params: AppMountParameters<unknown> | ManagementAppMountParams
+    ): Promise<StartServices> => {
       const [coreStart, startPluginsDeps] = await core.getStartServices();
       const { apm } = await import('@elastic/apm-rum');
       const { SecuritySolutionTemplateWrapper } = await import('./app/home/template_wrapper');
@@ -253,11 +262,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
-        setHeaderActionMenu: params.setHeaderActionMenu,
+        setHeaderActionMenu: (params as AppMountParameters).setHeaderActionMenu,
         storage: this.storage,
         sessionStorage: this.sessionStorage,
         security: startPluginsDeps.security,
-        onAppLeave: params.onAppLeave,
+        onAppLeave: (params as AppMountParameters).onAppLeave,
         securityLayout: {
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },

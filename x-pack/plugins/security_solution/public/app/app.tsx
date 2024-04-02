@@ -12,7 +12,7 @@ import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -36,18 +36,11 @@ import { AssistantProvider } from '../assistant/provider';
 interface StartAppComponent {
   children: React.ReactNode;
   history: History;
-  onAppLeave: (handler: AppLeaveHandler) => void;
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
 
-const StartAppComponent: FC<StartAppComponent> = ({
-  children,
-  history,
-  onAppLeave,
-  store,
-  theme$,
-}) => {
+const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, theme$ }) => {
   const services = useKibana().services;
   const {
     i18n,
@@ -78,9 +71,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                               <UpsellingProvider upsellingService={upselling}>
                                 <DiscoverInTimelineContextProvider>
                                   <AssistantProvider>
-                                    <PageRouter history={history} onAppLeave={onAppLeave}>
-                                      {children}
-                                    </PageRouter>
+                                    <PageRouter history={history}>{children}</PageRouter>
                                   </AssistantProvider>
                                 </DiscoverInTimelineContextProvider>
                               </UpsellingProvider>
@@ -107,7 +98,6 @@ const StartApp = memo(StartAppComponent);
 interface SecurityAppComponentProps {
   children: React.ReactNode;
   history: History;
-  onAppLeave: (handler: AppLeaveHandler) => void;
   services: StartServices;
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
@@ -116,7 +106,6 @@ interface SecurityAppComponentProps {
 const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   children,
   history,
-  onAppLeave,
   services,
   store,
   theme$,
@@ -131,7 +120,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       }}
     >
       <CloudProvider>
-        <StartApp history={history} onAppLeave={onAppLeave} store={store} theme$={theme$}>
+        <StartApp history={history} store={store} theme$={theme$}>
           {children}
         </StartApp>
       </CloudProvider>
