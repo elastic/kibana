@@ -33,7 +33,12 @@ export const MonacoEditorOutput: FunctionComponent = () => {
 
   useEffect(() => {
     if (data) {
-      setMode(languageForContentType(data[0].response.contentType));
+      const isMultipleRequest = data.length > 1;
+      setMode(
+        isMultipleRequest
+          ? CONSOLE_OUTPUT_LANG_ID
+          : languageForContentType(data[0].response.contentType)
+      );
       setValue(
         data
           .map((result) => {
