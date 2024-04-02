@@ -37,9 +37,12 @@ const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timel
 
 export const addNote = actionCreator<{ id: string; noteId: string }>('ADD_NOTE');
 
-export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
-  'ADD_NOTE_TO_EVENT'
-);
+export const addNoteToEvent = actionCreator<{
+  id: string;
+  noteId: string;
+  eventId: string;
+  pinEvent?: boolean;
+}>('ADD_NOTE_TO_EVENT');
 
 export const deleteNoteFromEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
   'DELETE_NOTE_FROM_EVENT'

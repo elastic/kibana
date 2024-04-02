@@ -21,6 +21,7 @@ import {
   showCallOutUnauthorizedMsg,
   updateTimeline,
   saveTimeline,
+  pinEvent,
 } from '../actions';
 import { persistNote } from '../../containers/notes/api';
 import type { ResponseNote } from '../../../../common/api/timeline';
@@ -38,17 +39,21 @@ function isNoteAction(action: Action): action is NoteAction {
   return timelineNoteActionsType.has(action.type);
 }
 
+function isAddNoteToEventAction(action: Action): action is ReturnType<typeof addNoteToEvent> {
+  return action.type === addNoteToEvent.type;
+}
+
 export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State> =
   (kibana: CoreStart) => (store) => (next) => async (action: Action) => {
     // perform the action
     const ret = next(action);
 
     if (isNoteAction(action)) {
-      const { id, noteId: localNoteId } = action.payload;
-      const timeline = selectTimelineById(store.getState(), id);
+      const { id: localTimelineId, noteId: localNoteId } = action.payload;
+      const timeline = selectTimelineById(store.getState(), localTimelineId);
       const notes = appSelectors.selectNotesByIdSelector(store.getState());
 
-      store.dispatch(startTimelineSaving({ id }));
+      store.dispatch(startTimelineSaving({ id: localTimelineId }));
 
       try {
         const result = await persistNote({
@@ -68,7 +73,7 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
 
         refreshTimelines(store.getState());
 
-        store.dispatch(
+        await store.dispatch(
           updateNote({
             note: {
               ...notes[localNoteId],
@@ -88,20 +93,30 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
         // locally and then remotely again in order not to lose the SO associations.
         // This also involves setting the status and the default title.
         if (!timeline.savedObjectId && response.note.timelineId && response.note.timelineVersion) {
-          const currentTimeline = selectTimelineById(store.getState(), id);
+          const currentTimeline = selectTimelineById(store.getState(), localTimelineId);
           await store.dispatch(
             updateTimeline({
-              id,
+              id: localTimelineId,
               timeline: {
                 ...currentTimeline,
-                savedObjectId: currentTimeline.savedObjectId || response.note.timelineId,
-                version: currentTimeline.version || response.note.timelineVersion || null,
+                savedObjectId: response.note.timelineId,
+                version: response.note.timelineVersion || currentTimeline.version,
                 status: TimelineStatus.active,
                 title: currentTimeline.title || UNTITLED_TIMELINE,
               },
             })
           );
-          await store.dispatch(saveTimeline({ id, saveAsNew: false }));
+          await store.dispatch(saveTimeline({ id: localTimelineId, saveAsNew: false }));
+        }
+
+        // Events can be automatically pinned
+        if (isAddNoteToEventAction(action) && action.payload.pinEvent) {
+          await store.dispatch(
+            pinEvent({
+              id: localTimelineId,
+              eventId: action.payload.eventId,
+            })
+          );
         }
       } catch (error) {
         kibana.notifications.toasts.addDanger({
@@ -111,7 +126,7 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
       } finally {
         store.dispatch(
           endTimelineSaving({
-            id,
+            id: localTimelineId,
           })
         );
       }

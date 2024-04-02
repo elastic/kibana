@@ -247,10 +247,14 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const associateNote = useCallback(
     (noteId: string) => {
-      dispatch(timelineActions.addNoteToEvent({ eventId: event._id, id: timelineId, noteId }));
-      if (!isEventPinned) {
-        dispatch(timelineActions.pinEvent({ id: timelineId, eventId: event._id }));
-      }
+      dispatch(
+        timelineActions.addNoteToEvent({
+          eventId: event._id,
+          id: timelineId,
+          noteId,
+          pinEvent: !isEventPinned,
+        })
+      );
     },
     [dispatch, event, isEventPinned, timelineId]
   );

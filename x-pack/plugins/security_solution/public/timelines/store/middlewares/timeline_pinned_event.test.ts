@@ -126,6 +126,14 @@ describe('Timeline pinned event middleware', () => {
     expect(selectTimelineById(store.getState(), TimelineId.test).pinnedEventIds).toEqual({});
     await store.dispatch(pinEvent({ id: TimelineId.test, eventId: testEventId }));
 
+    expect(persistPinnedEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timelineId: null,
+        eventId: testEventId,
+        pinnedEventId: null,
+      })
+    );
+
     expect(updateTimelineMock).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({

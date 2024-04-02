@@ -19,6 +19,7 @@ import {
   addNoteToEvent,
   updateTimeline,
   saveTimeline,
+  pinEvent,
 } from '../actions';
 import { updateNote } from '../../../common/store/app/actions';
 import { createNote } from '../../components/notes/helpers';
@@ -31,6 +32,7 @@ jest.mock('../actions', () => {
   (endTLSaving as unknown as { match: Function }).match = () => false;
   return {
     ...actual,
+    pinEvent: jest.fn((...args) => actual.pinEvent(...args)),
     updateTimeline: jest.fn().mockImplementation((...args) => actual.updateTimeline(...args)),
     saveTimeline: jest.fn().mockImplementation((...args) => actual.saveTimeline(...args)),
     showCallOutUnauthorizedMsg: jest
@@ -50,6 +52,7 @@ const endTimelineSavingMock = endTimelineSaving as unknown as jest.Mock;
 const showCallOutUnauthorizedMsgMock = showCallOutUnauthorizedMsg as unknown as jest.Mock;
 const updateTimelineMock = updateTimeline as unknown as jest.Mock;
 const saveTimelineMock = saveTimeline as unknown as jest.Mock;
+const pinEventMock = pinEvent as unknown as jest.Mock;
 
 describe('Timeline note middleware', () => {
   let store = createMockStore(undefined, undefined, kibanaMock);
@@ -150,6 +153,39 @@ describe('Timeline note middleware', () => {
       })
     );
     expect(saveTimelineMock).toHaveBeenCalled();
+  });
+
+  it('should pin the event when the `pinEvent` flag is passed', async () => {
+    const testTimelineId = 'testTimelineId';
+    const testTimelineVersion = 'testVersion';
+    (persistNote as jest.Mock).mockResolvedValue({
+      data: {
+        persistNote: {
+          code: 200,
+          message: 'success',
+          note: {
+            noteId: testNote.id,
+            timelineId: testTimelineId,
+            timelineVersion: testTimelineVersion,
+          },
+        },
+      },
+    });
+
+    await store.dispatch(updateNote({ note: testNote }));
+    await store.dispatch(
+      addNoteToEvent({
+        eventId: testEventId,
+        id: TimelineId.test,
+        noteId: testNote.id,
+        pinEvent: true,
+      })
+    );
+
+    expect(pinEventMock).toHaveBeenCalledWith({
+      eventId: testEventId,
+      id: TimelineId.test,
+    });
   });
 
   it('should show an error message when the call is unauthorized', async () => {

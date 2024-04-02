@@ -53,7 +53,7 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
               ? timeline.pinnedEventsSaveObject[eventId].pinnedEventId
               : null,
           eventId,
-          timelineId: timeline.id,
+          timelineId: timeline.savedObjectId,
         });
 
         const response: PinnedEventResponse = get('data.persistPinnedEventOnTimeline', result);
@@ -63,31 +63,33 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
 
         refreshTimelines(store.getState());
 
+        const currentTimeline = selectTimelineById(store.getState(), action.payload.id);
         // The response is null in case we unpinned an event.
         // In that case we want to remove the locally pinned event.
         if (!response) {
-          store.dispatch(
+          return store.dispatch(
             updateTimeline({
               id: action.payload.id,
               timeline: {
-                ...timeline,
-                pinnedEventIds: omit(eventId, timeline.pinnedEventIds),
-                pinnedEventsSaveObject: omit(eventId, timeline.pinnedEventsSaveObject),
+                ...currentTimeline,
+                pinnedEventIds: omit(eventId, currentTimeline.pinnedEventIds),
+                pinnedEventsSaveObject: omit(eventId, currentTimeline.pinnedEventsSaveObject),
               },
             })
           );
         } else {
           const updatedTimeline = {
-            ...timeline,
+            ...currentTimeline,
             pinnedEventIds: {
-              ...timeline.pinnedEventIds,
+              ...currentTimeline.pinnedEventIds,
               [eventId]: true,
             },
             pinnedEventsSaveObject: {
-              ...timeline.pinnedEventsSaveObject,
+              ...currentTimeline.pinnedEventsSaveObject,
               [eventId]: response,
             },
           };
+
           await store.dispatch(
             updateTimeline({
               id: action.payload.id,
@@ -99,14 +101,13 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
           // locally and then remotely again in order not to lose the SO associations.
           // This also involves setting the status and the default title.
           if (!timeline.savedObjectId && response.timelineId && response.timelineVersion) {
-            const currentTimeline = selectTimelineById(store.getState(), action.payload.id);
             await store.dispatch(
               updateTimeline({
                 id: action.payload.id,
                 timeline: {
-                  ...currentTimeline,
+                  ...updatedTimeline,
                   savedObjectId: response.timelineId,
-                  version: response.timelineVersion || null,
+                  version: response.timelineVersion || updatedTimeline.version,
                   status: TimelineStatus.active,
                   title: currentTimeline.title || UNTITLED_TIMELINE,
                 },
