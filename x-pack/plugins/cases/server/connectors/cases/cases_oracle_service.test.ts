@@ -304,7 +304,21 @@ describe('CasesOracleService', () => {
           grouping,
           updatedAt: null,
         },
-        { id }
+        {
+          id,
+          references: [
+            {
+              id: 'test-rule-id',
+              name: 'associated-alert',
+              type: 'alert',
+            },
+            {
+              id: 'test-case-id',
+              name: 'associated-cases',
+              type: 'cases',
+            },
+          ],
+        }
       );
     });
   });
@@ -375,6 +389,18 @@ describe('CasesOracleService', () => {
           },
           id: 'so-id',
           type: 'cases-oracle',
+          references: [
+            {
+              id: 'test-rule-id',
+              name: 'associated-alert',
+              type: 'alert',
+            },
+            {
+              id: 'test-case-id',
+              name: 'associated-cases',
+              type: 'cases',
+            },
+          ],
         },
         {
           attributes: {
@@ -387,6 +413,18 @@ describe('CasesOracleService', () => {
           },
           id: 'so-id-2',
           type: 'cases-oracle',
+          references: [
+            {
+              id: 'test-rule-id',
+              name: 'associated-alert',
+              type: 'alert',
+            },
+            {
+              id: 'test-case-id',
+              name: 'associated-cases',
+              type: 'cases',
+            },
+          ],
         },
       ]);
     });

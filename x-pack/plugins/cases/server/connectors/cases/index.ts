@@ -75,7 +75,6 @@ export const getCasesConnectorType = ({
   },
 });
 
-// TODO: type returned params
 export const getCasesConnectorAdapter = (): ConnectorAdapter<
   CasesConnectorRuleActionParams,
   CasesConnectorParams
