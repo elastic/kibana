@@ -22,3 +22,14 @@ export function findCustomDashboard(
     searchFields: ['assetType'] as [keyof InfraCustomDashboard],
   });
 }
+
+export function findCustomDashboardByDashboardId(
+  dashboardSavedObjectId: string,
+  savedObjectsClient: SavedObjectsClientContract
+) {
+  return savedObjectsClient.find<InfraCustomDashboard>({
+    type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+    search: dashboardSavedObjectId,
+    searchFields: ['dashboardSavedObjectId'] as [keyof InfraCustomDashboard],
+  });
+}

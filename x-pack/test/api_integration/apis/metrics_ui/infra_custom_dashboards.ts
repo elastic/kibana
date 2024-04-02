@@ -12,7 +12,10 @@ import { INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '@kbn/infra-plugin/ser
 import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const CUSTOM_DASHBOARDS_API_URL = '/api/infra/custom-dashboards';
+const getCustomDashboardsUrl = (assetType: string, dashboardSavedObjectId?: string) =>
+  dashboardSavedObjectId
+    ? `/api/infra/${assetType}/custom-dashboards/${dashboardSavedObjectId}`
+    : `/api/infra/${assetType}/custom-dashboards`;
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -31,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
           [enableInfrastructureAssetCustomDashboards]: false,
         });
 
-        await supertest.get(`${CUSTOM_DASHBOARDS_API_URL}/host`).expect(403);
+        await supertest.get(getCustomDashboardsUrl('host')).expect(403);
       });
 
       it('responds with an error when trying to request a custom dashboard for unsupported asset type', async () => {
@@ -39,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
           [enableInfrastructureAssetCustomDashboards]: false,
         });
 
-        await supertest.get(`${CUSTOM_DASHBOARDS_API_URL}/unsupported-asset-type`).expect(400);
+        await supertest.get(getCustomDashboardsUrl('unsupported-asset-type')).expect(400);
       });
 
       it('responds with an empty configuration if custom dashboard saved object does not exist', async () => {
@@ -50,18 +53,22 @@ export default function ({ getService }: FtrProviderContext) {
           types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
         });
 
-        const response = await supertest.get(`${CUSTOM_DASHBOARDS_API_URL}/host`).expect(200);
+        const response = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
 
-        expect(response.body).to.be.eql({
-          assetType: 'host',
-          dashboardIdList: [],
-        });
+        expect(response.body).to.be.eql([
+          {
+            assetType: 'host',
+            dashboardSavedObjectId: '',
+            dashboardFilterAssetIdEnabled: false,
+          },
+        ]);
       });
 
       it('responds with the custom dashboard configuration for a given asset type when it exists', async () => {
         const customDashboard: InfraCustomDashboard = {
           assetType: 'host',
-          dashboardIdList: ['123'],
+          dashboardSavedObjectId: '123',
+          dashboardFilterAssetIdEnabled: true,
         };
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: true,
@@ -72,24 +79,24 @@ export default function ({ getService }: FtrProviderContext) {
           overwrite: true,
         });
 
-        const response = await supertest.get(`${CUSTOM_DASHBOARDS_API_URL}/host`).expect(200);
+        const response = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
 
-        expect(response.body).to.be.eql(customDashboard);
+        expect(response.body).to.be.eql([customDashboard]);
       });
     });
 
     describe('POST endpoint for saving (creating or updating) custom dashboard', () => {
       it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
         const payload: InfraSaveCustomDashboardsRequestPayload = {
-          assetType: 'host',
-          dashboardIdList: ['123'],
+          dashboardSavedObjectId: '123',
+          dashboardFilterAssetIdEnabled: true,
         };
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: false,
         });
 
         await supertest
-          .post(`${CUSTOM_DASHBOARDS_API_URL}`)
+          .post(getCustomDashboardsUrl('host'))
           .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(403);
@@ -97,15 +104,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('responds with an error when trying to update a custom dashboard for unsupported asset type', async () => {
         const payload = {
-          assetType: 'unsupported-asset-type',
-          dashboardIdList: ['123'],
+          dashboardSavedObjectId: '123',
+          dashboardFilterAssetIdEnabled: true,
         };
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: true,
         });
 
         await supertest
-          .post(`${CUSTOM_DASHBOARDS_API_URL}`)
+          .post(getCustomDashboardsUrl('unsupported-asset-type'))
           .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(400);
@@ -113,8 +120,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('creates a new dashboard configuration when saving for the first time', async () => {
         const payload: InfraSaveCustomDashboardsRequestPayload = {
-          assetType: 'host',
-          dashboardIdList: ['123'],
+          dashboardSavedObjectId: '123',
+          dashboardFilterAssetIdEnabled: true,
         };
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: true,
@@ -124,15 +131,15 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const response = await supertest
-          .post(`${CUSTOM_DASHBOARDS_API_URL}`)
+          .post(getCustomDashboardsUrl('host'))
           .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(200);
 
-        expect(response.body).to.be.eql(payload);
+        expect(response.body).to.be.eql({ ...payload, assetType: 'host' });
       });
 
-      it('updates existing dashboard configuration when for a given asset type', async () => {
+      it('updates existing dashboard configuration for a given asset type', async () => {
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: true,
         });
@@ -143,24 +150,98 @@ export default function ({ getService }: FtrProviderContext) {
           type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
           attributes: {
             assetType: 'host',
-            dashboardIdList: ['123'],
+            dashboardSavedObjectId: '123',
+            dashboardFilterAssetIdEnabled: true,
+          },
+          overwrite: true,
+        });
+        await kibanaServer.savedObjects.create({
+          type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+          attributes: {
+            assetType: 'host',
+            dashboardSavedObjectId: '456',
+            dashboardFilterAssetIdEnabled: true,
           },
           overwrite: true,
         });
 
         const payload: InfraSaveCustomDashboardsRequestPayload = {
-          assetType: 'host',
-          dashboardIdList: ['123', '456'],
+          dashboardSavedObjectId: '123',
+          dashboardFilterAssetIdEnabled: false,
         };
         const updateResponse = await supertest
-          .post(`${CUSTOM_DASHBOARDS_API_URL}`)
+          .post(getCustomDashboardsUrl('host'))
           .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(200);
-        const getResponse = await supertest.get(`${CUSTOM_DASHBOARDS_API_URL}/host`).expect(200);
+        const getResponse = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
 
-        expect(updateResponse.body).to.be.eql(payload);
-        expect(getResponse.body).to.be.eql(payload);
+        expect(updateResponse.body).to.be.eql({ ...payload, assetType: 'host' });
+        expect(getResponse.body).to.be.eql([
+          {
+            dashboardSavedObjectId: '456',
+            dashboardFilterAssetIdEnabled: true,
+            assetType: 'host',
+          },
+          { ...payload, assetType: 'host' },
+        ]);
+      });
+    });
+
+    describe('DELETE endpoint for removing a custom dashboard', () => {
+      it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
+        await kibanaServer.uiSettings.update({
+          [enableInfrastructureAssetCustomDashboards]: false,
+        });
+
+        await supertest
+          .delete(getCustomDashboardsUrl('host', '123'))
+          .set('kbn-xsrf', 'xxx')
+          .expect(403);
+      });
+
+      it('responds with an error when trying to delete not existing dashboard', async () => {
+        await kibanaServer.uiSettings.update({
+          [enableInfrastructureAssetCustomDashboards]: true,
+        });
+
+        await supertest
+          .delete(getCustomDashboardsUrl('host', '000'))
+          .set('kbn-xsrf', 'xxx')
+          .expect(404);
+      });
+
+      it('deletes an existing dashboard', async () => {
+        await kibanaServer.uiSettings.update({
+          [enableInfrastructureAssetCustomDashboards]: true,
+        });
+        await kibanaServer.savedObjects.clean({
+          types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
+        });
+        await kibanaServer.savedObjects.create({
+          type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+          attributes: {
+            assetType: 'host',
+            dashboardSavedObjectId: '123',
+            dashboardFilterAssetIdEnabled: true,
+          },
+          overwrite: true,
+        });
+
+        await supertest
+          .delete(getCustomDashboardsUrl('host', '123'))
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const afterDeleteResponse = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
+
+        expect(afterDeleteResponse.body).to.be.eql([
+          {
+            assetType: 'host',
+            dashboardSavedObjectId: '',
+            dashboardFilterAssetIdEnabled: false,
+          },
+        ]);
       });
     });
   });

@@ -11,7 +11,7 @@ import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_a
 import { handleRouteErrors } from '../../utils/handle_route_errors';
 import { checkCustomDashboardsEnabled } from './lib/check_custom_dashboards_enabled';
 import { deleteCustomDashboard } from './lib/delete_custom_dashboard';
-import { findCustomDashboard } from './lib/find_custom_dashboard';
+import { findCustomDashboardByDashboardId } from './lib/find_custom_dashboard';
 
 export function initDeleteCustomDashboardRoute(framework: KibanaFramework) {
   const validateParams = createRouteValidationFunction(InfraDeleteCustomDashboardsRequestParamsRT);
@@ -33,20 +33,18 @@ export function initDeleteCustomDashboardRoute(framework: KibanaFramework) {
       await checkCustomDashboardsEnabled(uiSettingsClient);
 
       const params = request.params;
-      const customDashboards = await findCustomDashboard(params.assetType, savedObjectsClient);
-
-      // WIP
-      const existingCustomDashboard = customDashboards.saved_objects.find(
-        ({ attributes }) => attributes.dashboardSavedObjectId === params.dashboardSavedObjectId
+      const existingCustomDashboard = await findCustomDashboardByDashboardId(
+        params.dashboardSavedObjectId,
+        savedObjectsClient
       );
 
-      const deletedDashboard = await deleteCustomDashboard({
+      await deleteCustomDashboard({
         savedObjectsClient,
-        savedObjectId: existingCustomDashboard?.id ?? '',
+        savedObjectId: existingCustomDashboard?.saved_objects[0]?.id ?? '',
       });
 
       return response.ok({
-        body: existingCustomDashboard?.id,
+        body: existingCustomDashboard?.saved_objects[0]?.id,
       });
     })
   );
