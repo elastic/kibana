@@ -6,45 +6,47 @@
  * Side Public License, v 1.
  */
 
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   EmbeddableSetup,
   EmbeddableStart,
   registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
 import {
   HelloWorldEmbeddableFactory,
-  HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddableFactoryDefinition,
+  HELLO_WORLD_EMBEDDABLE,
 } from './hello_world';
 
 import {
-  LIST_CONTAINER,
-  ListContainerFactoryDefinition,
   ListContainerFactory,
+  ListContainerFactoryDefinition,
+  LIST_CONTAINER,
 } from './list_container';
 
 import {
-  SIMPLE_EMBEDDABLE,
-  SimpleEmbeddableFactory,
-  SimpleEmbeddableFactoryDefinition,
-} from './migrations';
-import {
-  FILTER_DEBUGGER_EMBEDDABLE,
   FilterDebuggerEmbeddableFactory,
   FilterDebuggerEmbeddableFactoryDefinition,
+  FILTER_DEBUGGER_EMBEDDABLE,
 } from './filter_debugger';
-import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
-import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
-import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
+import {
+  SimpleEmbeddableFactory,
+  SimpleEmbeddableFactoryDefinition,
+  SIMPLE_EMBEDDABLE,
+} from './migrations';
 import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
+import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
+import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 import { SEARCH_EMBEDDABLE_ID } from './react_embeddables/search/constants';
+import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -58,6 +60,7 @@ export interface EmbeddableExamplesStartDependencies {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
+  serverless?: ServerlessPluginStart;
 }
 
 interface ExampleEmbeddableFactories {
@@ -126,7 +129,7 @@ export class EmbeddableExamplesPlugin
       return getFieldListFactory(core, deps);
     });
 
-    registerCreateEuiMarkdownAction(deps.uiActions);
+    registerCreateEuiMarkdownAction(deps.uiActions, deps.serverless);
     registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
       const { markdownEmbeddableFactory } = await import(
         './react_embeddables/eui_markdown/eui_markdown_react_embeddable'
