@@ -25,16 +25,16 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { betaBadgeProps } from './beta_badge_props';
-import { RuleAction, ActionTypeIndex, ActionConnector } from '../../../types';
+import { RuleUiAction, ActionTypeIndex, ActionConnector } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { getValidConnectors } from '../common/connectors';
 import { ConnectorsSelection } from './connectors_selection';
 
-type AddConnectorInFormProps = {
+export type AddConnectorInFormProps = {
   actionTypesIndex: ActionTypeIndex;
-  actionItem: RuleAction;
+  actionItem: RuleUiAction;
   connectors: ActionConnector[];
   index: number;
   onAddConnector: () => void;

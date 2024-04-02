@@ -12,7 +12,6 @@ import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   getDataStreamsDegradedDocsStatsResponseRt,
   getDataStreamsStatsResponseRt,
-  getDataStreamsDetailsResponseRt,
   getDataStreamsEstimatedDataInBytesResponseRt,
 } from '../../../common/api_types';
 import { DEFAULT_DATASET_TYPE, NONE } from '../../../common/constants';
@@ -23,12 +22,9 @@ import {
   GetDataStreamsStatsError,
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
-  GetDataStreamDetailsParams,
-  GetDataStreamDetailsResponse,
   GetDataStreamsEstimatedDataInBytesParams,
   GetDataStreamsEstimatedDataInBytesResponse,
 } from '../../../common/data_streams_stats';
-import { DataStreamDetails } from '../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { IDataStreamsStatsClient } from './types';
 
@@ -93,24 +89,6 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     )(response);
 
     return degradedDocs;
-  }
-
-  public async getDataStreamDetails({ dataStream }: GetDataStreamDetailsParams) {
-    const response = await this.http
-      .get<GetDataStreamDetailsResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/details`
-      )
-      .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data stream details": ${error}`);
-      });
-
-    const dataStreamDetails = decodeOrThrow(
-      getDataStreamsDetailsResponseRt,
-      (message: string) =>
-        new GetDataStreamsStatsError(`Failed to decode data stream details response: ${message}"`)
-    )(response);
-
-    return dataStreamDetails as DataStreamDetails;
   }
 
   public async getDataStreamsEstimatedDataInBytes(
