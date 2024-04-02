@@ -13,7 +13,7 @@ import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   ExecuteConnectorRequestBody,
   Message,
-  Replacement,
+  Replacements,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
@@ -33,6 +33,7 @@ import {
   getMessageFromRawResponse,
   getPluginNameFromRequest,
 } from './helpers';
+import { getLlmType } from './evaluate/utils';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -76,25 +77,9 @@ export const postActionsConnectorExecuteRoute = (
           }
           const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
-          let latestReplacements: Replacement[] = request.body.replacements;
-          const onNewReplacements = (newReplacements: Replacement[]) => {
-            const latestReplacementsDict = latestReplacements.reduce(
-              (acc: Record<string, string>, r) => {
-                acc[r.value] = r.uuid;
-                return acc;
-              },
-              {}
-            );
-            const newReplacementsDict = newReplacements.reduce((acc: Record<string, string>, r) => {
-              acc[r.value] = r.uuid;
-              return acc;
-            }, {});
-
-            const updatedReplacements = { ...latestReplacementsDict, ...newReplacementsDict };
-            latestReplacements = Object.keys(updatedReplacements).map((key) => ({
-              value: key,
-              uuid: updatedReplacements[key],
-            }));
+          let latestReplacements: Replacements = request.body.replacements;
+          const onNewReplacements = (newReplacements: Replacements) => {
+            latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
           let onLlmResponse;
@@ -179,7 +164,7 @@ export const postActionsConnectorExecuteRoute = (
                   ],
                 });
               }
-              if (latestReplacements.length > 0) {
+              if (Object.keys(latestReplacements).length > 0) {
                 await dataClient?.updateConversation({
                   conversationUpdateProps: {
                     id: conversationId,
@@ -208,7 +193,7 @@ export const postActionsConnectorExecuteRoute = (
               actions,
               request,
               connectorId,
-              llmType: connectors[0]?.actionTypeId,
+              actionTypeId: connectors[0]?.actionTypeId,
               params: {
                 subAction: request.body.subAction,
                 subActionParams: {
@@ -216,9 +201,10 @@ export const postActionsConnectorExecuteRoute = (
                   messages: [...(prevMessages ?? []), ...(newMessage ? [newMessage] : [])],
                   ...(connectors[0]?.actionTypeId === '.gen-ai'
                     ? { n: 1, stop: null, temperature: 0.2 }
-                    : {}),
+                    : { temperature: 0, stopSequences: [] }),
                 },
               },
+              logger,
             });
 
             telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
@@ -254,6 +240,7 @@ export const postActionsConnectorExecuteRoute = (
 
           const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
+          const llmType = getLlmType(connectorId, connectors);
           const langChainResponseBody = await callAgentExecutor({
             alertsIndexPattern: request.body.alertsIndexPattern,
             allow: request.body.allow,
@@ -264,6 +251,7 @@ export const postActionsConnectorExecuteRoute = (
             connectorId,
             elserId,
             esClient,
+            llmType,
             kbResource: ESQL_RESOURCE,
             langChainMessages,
             logger,
