@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
@@ -194,6 +196,9 @@ export class EnterpriseSearchPlugin implements Plugin {
         ? { ...cloudSetup, ...(pluginsStart as PluginsStart).cloud }
         : undefined;
     const plugins = { ...pluginsStart, cloud } as PluginsStart;
+
+    const chromeStyle = await firstValueFrom(coreStart.chrome.getChromeStyle$());
+    this.isSidebarEnabled = chromeStyle === 'classic';
 
     coreStart.chrome.getChromeStyle$().subscribe((style) => {
       this.isSidebarEnabled = style === 'classic';
