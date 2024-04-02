@@ -133,6 +133,33 @@ export const FleetAllIntegrNoneUser: User = {
   password: 'password',
   roles: [FleetAllIntegrNoneRole.name],
 };
+export const FleetAgentsReadIntegrNoneRole: Role = {
+  name: 'fleet_agents_read_int_none_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          fleetv2: ['minimal_read', 'agents_read'],
+          fleet: ['none'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+export const FleetAgentsReadIntegrNoneUser: User = {
+  username: 'fleet_agents_read_int_none_role',
+  password: 'password',
+  roles: [FleetAgentsReadIntegrNoneRole.name],
+};
 export const FleetNoneIntegrAllRole: Role = {
   name: 'fleet_none_int_all_role',
   privileges: {
