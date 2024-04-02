@@ -42,7 +42,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const config = getService('config');
 
   describe('@ess create rule exception routes, ESS specific logic', () => {
     before(async () => {
