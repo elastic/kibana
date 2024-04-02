@@ -61,14 +61,17 @@ export const PresentationPanelTitle = ({
   }, [hideTitle, panelTitle, viewMode, api]);
 
   const describedPanelTitleElement = useMemo(() => {
-    if (!panelDescription)
+    if (!panelDescription) {
+      if (hideTitle) return null;
       return (
         <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
           {panelTitleElement}
         </span>
       );
+    }
     return (
       <EuiToolTip
+        title={!hideTitle ? panelTitle || undefined : undefined}
         content={panelDescription}
         delay="regular"
         position="top"
@@ -76,7 +79,7 @@ export const PresentationPanelTitle = ({
         anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
       >
         <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
-          {panelTitleElement}{' '}
+          {!hideTitle ? <>{panelTitleElement}&nbsp;</> : null}
           <EuiIcon
             type="iInCircle"
             color="subdued"
@@ -85,7 +88,7 @@ export const PresentationPanelTitle = ({
         </span>
       </EuiToolTip>
     );
-  }, [panelDescription, panelTitleElement]);
+  }, [hideTitle, panelDescription, panelTitle, panelTitleElement]);
 
   return describedPanelTitleElement;
 };

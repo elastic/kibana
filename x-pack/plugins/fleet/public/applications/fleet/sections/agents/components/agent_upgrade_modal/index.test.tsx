@@ -11,9 +11,11 @@ import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { sendGetAgentsAvailableVersions, sendPostBulkAgentUpgrade } from '../../../../hooks';
-
-import { sendAllFleetServerAgents } from './hooks';
+import {
+  sendGetAllFleetServerAgents,
+  sendGetAgentsAvailableVersions,
+  sendPostBulkAgentUpgrade,
+} from '../../../../hooks';
 
 import { AgentUpgradeAgentModal } from '.';
 import type { AgentUpgradeAgentModalProps } from '.';
@@ -32,20 +34,20 @@ jest.mock('../../../../hooks', () => {
     sendPostBulkAgentUpgrade: jest.fn(),
     useAgentVersion: jest.fn().mockReturnValue('8.10.2'),
     useKibanaVersion: jest.fn().mockReturnValue('8.10.2'),
+    sendGetAllFleetServerAgents: jest.fn(),
   };
 });
 
 jest.mock('./hooks', () => {
   return {
     ...jest.requireActual('./hooks'),
-    sendAllFleetServerAgents: jest.fn(),
   };
 });
 
 const mockSendPostBulkAgentUpgrade = sendPostBulkAgentUpgrade as jest.Mock;
 
 const mockSendGetAgentsAvailableVersions = sendGetAgentsAvailableVersions as jest.Mock;
-const mockSendAllFleetServerAgents = sendAllFleetServerAgents as jest.Mock;
+const mockSendAllFleetServerAgents = sendGetAllFleetServerAgents as jest.Mock;
 
 function renderAgentUpgradeAgentModal(props: Partial<AgentUpgradeAgentModalProps>) {
   const renderer = createFleetTestRendererMock();

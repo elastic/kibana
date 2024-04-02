@@ -273,11 +273,6 @@ export const updateSavedSearchId = actionCreator<{
   savedSearchId: string;
 }>('UPDATE_DISCOVER_SAVED_SEARCH_ID');
 
-export const setIsDiscoverSavedSearchLoaded = actionCreator<{
-  id: string;
-  isDiscoverSavedSearchLoaded: boolean;
-}>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
-
 export const initializeSavedSearch = actionCreator<{
   id: string;
   savedSearch: SavedSearch;

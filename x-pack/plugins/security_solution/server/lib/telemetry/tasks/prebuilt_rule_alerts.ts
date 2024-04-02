@@ -34,10 +34,10 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('prebuilt_rule_alerts')).l;
+      const log = newTelemetryLogger(logger.get('prebuilt_rule_alerts'));
       const trace = taskMetricsService.start(taskType);
 
-      log(
+      log.l(
         `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
       );
 
@@ -61,7 +61,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
         const index = receiver.getAlertsIndex();
 
         if (index === undefined) {
-          log(`alerts index is not ready yet, skipping telemetry task`);
+          log.l(`alerts index is not ready yet, skipping telemetry task`);
           taskMetricsService.end(trace);
           return 0;
         }
@@ -104,7 +104,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             })
           );
 
-          log(`sending ${enrichedAlerts.length} elastic prebuilt alerts`);
+          log.l(`sending ${enrichedAlerts.length} elastic prebuilt alerts`);
           const batches = batchTelemetryRecords(enrichedAlerts, maxTelemetryBatch);
 
           const promises = batches.map(async (batch) => {
