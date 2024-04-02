@@ -349,7 +349,7 @@ const useCloudShellUrl = ({
 
 export const getGcpCredentialsType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
-): GcpCredentialsType | undefined => input.streams[0].vars?.setup_access.value;
+): GcpCredentialsType | undefined => input.streams[0].vars?.['gcp.credentials.type'].value;
 
 export const GcpCredentialsForm = ({
   input,
@@ -371,7 +371,7 @@ export const GcpCredentialsForm = ({
   const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
   const isInvalid = semverLt(integrationVersionNumberOnly, MIN_VERSION_GCP_CIS);
   const fieldsSnapshot = useRef({});
-  const lastSetupAccessType = useRef<string | undefined>(undefined);
+  const lastCredentialsType = useRef<string | undefined>(undefined);
   const setupFormat = getSetupFormatFromInput(input);
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === 'organization-account';
@@ -401,12 +401,16 @@ export const GcpCredentialsForm = ({
         fieldsToHide.map((field) => [field.id, { value: field.value }])
       );
       // We need to store the last manual credentials type to restore it later
-      lastSetupAccessType.current = getGcpCredentialsType(input);
+      lastCredentialsType.current = getGcpCredentialsType(input);
 
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
-            value: 'google_cloud_shell',
+            value: SETUP_ACCESS_CLOUD_SHELL,
+            type: 'text',
+          },
+          'gcp.credentials.type': {
+            value: 'credentials-none',
             type: 'text',
           },
           // Clearing fields from previous setup format to prevent exposing credentials
@@ -418,8 +422,12 @@ export const GcpCredentialsForm = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
+            value: SETUP_ACCESS_MANUAL,
+            type: 'text',
+          },
+          'gcp.credentials.type': {
             // Restoring last manual credentials type
-            value: lastSetupAccessType.current || SETUP_ACCESS_MANUAL,
+            value: lastCredentialsType.current || 'credentials-file',
             type: 'text',
           },
           // Restoring fields from manual setup format if any
