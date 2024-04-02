@@ -141,9 +141,10 @@ export class ProjectNavigationService {
         return this.projectName$.asObservable();
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
-        navTreeDefinition: Observable<NavigationTreeDefinition<LinkId>>
+        id: string,
+        navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>
       ) => {
-        this.initNavigation(navTreeDefinition);
+        this.initNavigation(id, navTreeDefinition$);
       },
       getNavigationTreeUi$: this.getNavigationTreeUi$.bind(this),
       getActiveNodes$: () => {
@@ -219,18 +220,19 @@ export class ProjectNavigationService {
    * Initialize a "serverless style" navigation. For stateful deployments (not serverless), this
    * handler initialize one of the solution navigations registered.
    *
+   * @param id Id for the navigation tree definition
    * @param navTreeDefinition$ The navigation tree definition
-   * @param location Optional location to use to detect the active node in the new navigation tree
    */
-  private initNavigation(
-    navTreeDefinition$: Observable<NavigationTreeDefinition>,
-    location?: Location
-  ) {
+  private initNavigation(id: string, navTreeDefinition$: Observable<NavigationTreeDefinition>) {
+    if (this.activeSolutionNavDefinitionId$.getValue() === id) return;
+
+    this.activeSolutionNavDefinitionId$.next(id);
+
     if (this.navigationChangeSubscription) {
       this.navigationChangeSubscription.unsubscribe();
     }
 
-    let redirectLocation = location;
+    let initialised = false;
     this.projectNavigationNavTreeFlattened = {};
     this.navigationChangeSubscription = combineLatest([
       navTreeDefinition$,
@@ -252,8 +254,11 @@ export class ProjectNavigationService {
           this.navigationTreeUi$.next(navigationTreeUI);
 
           this.projectNavigationNavTreeFlattened = flattenNav(navigationTree);
-          this.updateActiveProjectNavigationNodes(redirectLocation);
-          redirectLocation = undefined; // we don't want to redirect on subsequent changes, only when initiating
+
+          // At initialization, we want to force the update of the active nodes, so 2 empty arrays []
+          // are not considered equal and we update the Observable value.
+          this.updateActiveProjectNavigationNodes({ forceUpdate: !initialised });
+          initialised = true;
         },
         error: (err) => {
           this.logger?.error(err);
@@ -292,14 +297,18 @@ export class ProjectNavigationService {
    * and update the activeNodes$ Observable.
    *
    * @param location Optional location to use to detect the active node in the new navigation tree, if not set the current location is used
+   * @param forceUpdate Optional flag to force the update of the active nodes even if the active nodes are the same
    */
-  private updateActiveProjectNavigationNodes(location?: Location) {
+  private updateActiveProjectNavigationNodes({
+    location,
+    forceUpdate = false,
+  }: { location?: Location; forceUpdate?: boolean } = {}) {
     const activeNodes = this.findActiveNodes({ location });
     // Each time we call findActiveNodes() we create a new array of activeNodes. As this array is used
     // in React in useCallback() and useMemo() dependencies arrays it triggers an infinite navigation
     // tree registration loop. To avoid that we only notify the listeners when the activeNodes array
     // has actually changed.
-    const requiresUpdate = !deepEqual(activeNodes, this.activeNodes$.value);
+    const requiresUpdate = forceUpdate ? true : !deepEqual(activeNodes, this.activeNodes$.value);
 
     if (!requiresUpdate) return;
 
@@ -308,7 +317,7 @@ export class ProjectNavigationService {
 
   private onHistoryLocationChange(location: Location) {
     this.location$.next(location);
-    this.updateActiveProjectNavigationNodes(location);
+    this.updateActiveProjectNavigationNodes({ location });
   }
 
   private handleActiveNodesChange() {
@@ -411,6 +420,7 @@ export class ProjectNavigationService {
       if (id === null) {
         this.setChromeStyle('classic');
         this.navigationTree$.next(undefined);
+        this.activeSolutionNavDefinitionId$.next(null);
       } else {
         const definition = definitions[id];
         if (!definition) {
@@ -436,14 +446,11 @@ export class ProjectNavigationService {
           }
         }
 
-        // We want to pass the upcoming location where we are going to navigate to
-        // so we can immediately set the active nodes based on the new location and we
-        // don't have to wait for the location change event to be triggered.
-        this.initNavigation(definition.navigationTree$, location);
+        this.initNavigation(id, definition.navigationTree$);
       }
+    } else if (id !== null) {
+      this.activeSolutionNavDefinitionId$.next(id);
     }
-
-    this.activeSolutionNavDefinitionId$.next(id);
   }
 
   private getSolutionsNavDefinitions$() {
