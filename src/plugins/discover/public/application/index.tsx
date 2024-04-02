@@ -23,6 +23,8 @@ export interface RenderAppProps {
   experimentalFeatures: ExperimentalFeatures;
 }
 
+const clipboardDataPrefix = 'timerangeData.v1:';
+
 export const renderApp = ({
   element,
   services,
@@ -31,6 +33,32 @@ export const renderApp = ({
   experimentalFeatures,
 }: RenderAppProps) => {
   const { history, capabilities, chrome, data, core } = services;
+
+  const onCopy = (eve: ClipboardEvent) => {
+    // If the user is actually copying something, ignore it
+    if (window.getSelection()?.toString() || !eve.clipboardData) return;
+    const activeBounds = services.data.query.timefilter.timefilter.getTime();
+    if (!activeBounds) return;
+
+    eve.preventDefault();
+    eve.clipboardData.setData('text', `${clipboardDataPrefix}${JSON.stringify(activeBounds)}`);
+    core.notifications.toasts.addSuccess({
+      title: 'Copied time range to clipboard!',
+    });
+  };
+  const onPaste = (eve: ClipboardEvent) => {
+    if (!eve.clipboardData) return;
+    const clipboardData = eve.clipboardData.getData('text');
+    if (!clipboardData.startsWith(clipboardDataPrefix)) return;
+
+    const bounds = JSON.parse(clipboardData.slice(clipboardDataPrefix.length));
+    services.data.query.timefilter.timefilter.setTime(bounds);
+    core.notifications.toasts.addSuccess({
+      title: 'Pasted time range!',
+    });
+  };
+  element.addEventListener('copy', onCopy);
+  element.addEventListener('paste', onPaste);
 
   if (!capabilities.discover.save) {
     chrome.setBadge({
@@ -59,6 +87,8 @@ export const renderApp = ({
 
   return () => {
     unmount();
+    element.removeEventListener('copy', onCopy);
+    element.removeEventListener('paste', onPaste);
     data.search.session.clear();
   };
 };
