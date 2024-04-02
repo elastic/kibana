@@ -97,7 +97,6 @@ export {
   ReactEmbeddableRenderer,
   reactEmbeddableRegistryHasKey,
   registerReactEmbeddableFactory,
-  getReactEmbeddableFactory,
   type DefaultEmbeddableApi,
   type ReactEmbeddableFactory,
   type ReactEmbeddableRegistration,
