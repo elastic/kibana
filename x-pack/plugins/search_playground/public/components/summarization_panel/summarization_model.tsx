@@ -78,7 +78,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
       }
       labelAppend={
         <EuiText size="xs">
-          <EuiLink target="_blank" href={managementLink}>
+          <EuiLink target="_blank" href={managementLink} data-test-subj="manageConnectorsLink">
             <FormattedMessage
               id="xpack.searchPlayground.sidebar.summarizationModel.manageConnectors"
               defaultMessage="Manage Gen AI connectors"
@@ -87,7 +87,12 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
         </EuiText>
       }
     >
-      <EuiSuperSelect options={modelsOption} valueOfSelected={selectedModel} onChange={onChange} />
+      <EuiSuperSelect
+        data-test-subj="summarizationModelSelect"
+        options={modelsOption}
+        valueOfSelected={selectedModel}
+        onChange={onChange}
+      />
     </EuiFormRow>
   );
 };

@@ -33,7 +33,7 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
   };
 
   if (isConnectorListLoading || !isConnectorListLoadSuccess) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj="loadingSpinner" />;
   }
 
   return Object.keys(connectors).length ? (
@@ -50,6 +50,7 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
       })}
       iconType="check"
       color="success"
+      data-test-subj="connectorsAdded"
     />
   ) : (
     <>
@@ -66,7 +67,11 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton color="primary" onClick={() => setConnectorFlyoutOpen(true)}>
+            <EuiButton
+              color="primary"
+              data-test-subj="setupGenAIConnectorButton"
+              onClick={() => setConnectorFlyoutOpen(true)}
+            >
               <FormattedMessage
                 id="xpack.searchPlayground.emptyPrompts.setUpConnector.btn"
                 defaultMessage="Set up GenAI connector"

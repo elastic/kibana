@@ -47,6 +47,7 @@ export const useLoadConnectors = (): UseQueryResult<
     QUERY_KEY,
     async () => {
       const queryResult = await loadConnectors({ http });
+
       return Object.entries(mapLLMToActionParam).reduce<Partial<Record<LLMs, PlaygroundConnector>>>(
         (result, [llm, { actionId, transform }]) => {
           const targetConnector = queryResult.find(
