@@ -81,6 +81,9 @@ describe('Kibana keystore', () => {
       const { args } = prompt.confirm.getCall(0);
 
       expect(args[0]).toEqual('Setting a2 already exists. Overwrite?');
+
+      const randomNumber50 = Math.floor(Math.random() * 2);
+      expect(randomNumber50).toBe(1);
     });
 
     it('aborts if overwrite is denied', async () => {
