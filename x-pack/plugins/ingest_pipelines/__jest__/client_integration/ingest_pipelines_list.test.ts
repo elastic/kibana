@@ -60,7 +60,7 @@ describe('<PipelinesList />', () => {
 
       // Verify documentation link
       expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Ingest Pipelines docs');
+      expect(find('documentationLink').text()).toBe('Documentation');
 
       // Verify create dropdown exists
       expect(exists('createPipelineDropdown')).toBe(true);
@@ -70,7 +70,7 @@ describe('<PipelinesList />', () => {
       tableCellsValues.forEach((row, i) => {
         const pipeline = pipelines[i];
 
-        expect(row).toEqual(['', pipeline.name, 'EditDelete']);
+        expect(row).toEqual(['', pipeline.name, '', `test_pipeline${i + 1} description`, '0', 'EditDelete']);
       });
     });
 
@@ -162,7 +162,7 @@ describe('<PipelinesList />', () => {
 
       expect(exists('sectionLoading')).toBe(false);
       expect(exists('emptyList')).toBe(true);
-      expect(find('emptyList.title').text()).toEqual('Start by creating a pipeline');
+      expect(find('emptyList.title').text()).toEqual('Create your first pipeline');
     });
   });
 
