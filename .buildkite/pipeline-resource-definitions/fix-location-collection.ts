@@ -29,9 +29,9 @@ async function main() {
   const locationFile = path.resolve(resourceDefinitionsFolder, 'locations.yml');
   const locationFileLines = fs.readFileSync(locationFile, 'utf8').split('\n');
 
-  const pipelines = fs
-    .readdirSync(resourceDefinitionsFolder)
+  const pipelines = readDirRecursively(resourceDefinitionsFolder)
     .filter((file) => file.endsWith('.yml'))
+    .map((file) => file.replace(`${resourceDefinitionsFolder}/`, ''))
     .filter((f) => !EXCLUDE_LIST.includes(f));
 
   const preamble = locationFileLines.slice(0, 1);
@@ -43,11 +43,23 @@ async function main() {
     (fileName) => `${resourceDefinitionsBaseUrl}/${fileName}`
   );
 
-  const locationYaml = jsYaml.dump(locationObj, { lineWidth: 180 });
+  const locationYaml = jsYaml.dump(locationObj, { lineWidth: 400 });
 
   fs.writeFileSync(locationFile, `${preamble.join('\n')}\n${locationYaml}`);
 
   console.log('Updated locations.yml');
+}
+
+function readDirRecursively(dir: string): string[] {
+  const files = fs.readdirSync(dir);
+  return files.reduce((acc, file) => {
+    const filePath = path.join(dir, file);
+    if (fs.statSync(filePath).isDirectory()) {
+      return [...acc, ...readDirRecursively(filePath)];
+    } else {
+      return [...acc, filePath];
+    }
+  }, [] as string[]);
 }
 
 main().catch((error) => {

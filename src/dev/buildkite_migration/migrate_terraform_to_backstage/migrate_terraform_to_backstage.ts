@@ -78,7 +78,7 @@ export const runMigration = () =>
           onlyFiles: true,
           gitignore: true,
         })
-      ).filter((p) => !filterExpression || p.includes(filterExpression));
+      ).filter((p) => !filterExpression || p.match(filterExpression));
 
       // Generate YAML files for each pipeline definition
       const unprocessedFiles: string[] = [];
