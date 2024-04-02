@@ -6839,6 +6839,34 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = values(stringField)",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = values(stringField) > 0",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval values(stringField)",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval values(stringField) > 0",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval var = abs(numberField)",
       "error": [],
       "warning": []
@@ -12123,6 +12151,16 @@
       "error": [
         "Using wildcards (*) in st_centroid is not allowed"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(stringField)",
+      "error": [],
       "warning": []
     },
     {

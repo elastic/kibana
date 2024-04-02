@@ -175,4 +175,22 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         },
       ],
     },
+    {
+      name: 'values',
+      type: 'agg',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.values', {
+        defaultMessage: 'Returns all values in a group as an array.',
+      }),
+      supportedCommands: ['stats'],
+      signatures: [
+        {
+          params: [{ name: 'expression', type: 'any', noNestingFunctions: true }],
+          returnType: 'any[]',
+          examples: [
+            'from index | stats all_agents=values(agents.keyword)',
+            'from index | stats all_sorted_agents=mv_sort(values(agents.keyword))',
+          ],
+        },
+      ],
+    },
   ]);
