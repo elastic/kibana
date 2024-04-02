@@ -490,11 +490,13 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                         onCancelAddingNewFields={onCancelAddingNewFields}
                         isAddingFields={isAddingFields}
                         isSemanticTextEnabled={isSemanticTextEnabled}
+                        indexName={indexName}
                       />
                     ) : (
                       <DocumentFields
                         isAddingFields={isAddingFields}
                         isSemanticTextEnabled={isSemanticTextEnabled}
+                        indexName={indexName}
                       />
                     )}
                   </EuiPanel>

@@ -16,12 +16,14 @@ interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   isSemanticTextEnabled?: boolean;
+  indexName?: string;
 }
 
 export const DocumentFieldsTreeEditor = ({
   onCancelAddingNewFields,
   isAddingFields,
   isSemanticTextEnabled = false,
+  indexName,
 }: Props) => {
   const dispatch = useDispatch();
   const {
@@ -52,6 +54,7 @@ export const DocumentFieldsTreeEditor = ({
         onCancelAddingNewFields={onCancelAddingNewFields}
         isAddingFields={isAddingFields}
         isSemanticTextEnabled={isSemanticTextEnabled}
+        indexName={indexName}
       />
     );
   };

@@ -21,6 +21,7 @@ interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   isSemanticTextEnabled?: boolean;
+  indexName?: string;
 }
 export const DocumentFields = React.memo(
   ({
@@ -29,6 +30,7 @@ export const DocumentFields = React.memo(
     onCancelAddingNewFields,
     isAddingFields,
     isSemanticTextEnabled,
+    indexName,
   }: Props) => {
     const { fields, documentFields } = useMappingsState();
     const dispatch = useDispatch();
@@ -52,6 +54,7 @@ export const DocumentFields = React.memo(
           onCancelAddingNewFields={onCancelAddingNewFields}
           isAddingFields={isAddingFields}
           isSemanticTextEnabled={isSemanticTextEnabled}
+          indexName={indexName}
         />
       );
 

@@ -49,6 +49,7 @@ interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   isSemanticTextEnabled?: boolean;
+  indexName?: string;
 }
 
 const useFieldEffect = (
@@ -74,6 +75,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   onCancelAddingNewFields,
   isAddingFields,
   isSemanticTextEnabled,
+  indexName,
 }: Props) {
   const dispatch = useDispatch();
 
@@ -186,7 +188,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       </FormDataProvider>
 
       {/* Field reference_field for semantic_text field type */}
-      <ReferenceFieldCombo />
+      <ReferenceFieldCombo indexName={indexName} />
 
       {/* Field name */}
       <EuiFlexItem>
@@ -303,7 +305,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   );
 });
 
-function ReferenceFieldCombo() {
+function ReferenceFieldCombo({ indexName }: { indexName: string }) {
   const [{ type }] = useFormData({ watch: 'type' });
 
   if (type === undefined || type[0]?.value !== 'semantic_text') {
@@ -313,7 +315,7 @@ function ReferenceFieldCombo() {
   return (
     <EuiFlexItem grow={false}>
       <UseField path="referenceField">
-        {(field) => <ReferenceFieldSelects onChange={field.setValue} />}
+        {(field) => <ReferenceFieldSelects onChange={field.setValue} indexName={indexName} />}
       </UseField>
     </EuiFlexItem>
   );
