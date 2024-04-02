@@ -632,7 +632,7 @@ describe('CasesConnectorExecutor', () => {
             casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].description;
 
           expect(description).toBe(
-            'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `foo` equals `["bar",1,true,{}]` and `bar` equals `{"foo":"test"}` and `baz` equals `my value`'
+            'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `foo` equals `["bar",1,true,{}]` and `bar.foo` equals `test` and `baz` equals `my value`'
           );
         });
 

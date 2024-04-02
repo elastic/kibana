@@ -12,6 +12,7 @@ import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
+import { getFlattenedObject } from '@kbn/std';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import {
   MAX_ALERTS_PER_CASE,
@@ -737,7 +738,9 @@ export class CasesConnectorExecutor {
   }
 
   private getGroupingDescription(grouping: GroupedAlerts['grouping']) {
-    return Object.entries(grouping)
+    const flattenGrouping = getFlattenedObject(grouping);
+
+    return Object.entries(flattenGrouping)
       .map(([key, value]) => {
         const keyAsCodeBlock = `\`${key}\``;
         const valueAsCodeBlock = `\`${convertValueToString(value)}\``;
