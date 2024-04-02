@@ -14,13 +14,8 @@ import { PersistedSettings } from './persisted_settings';
 export function SettingsTab() {
   const {
     application: { navigateToApp },
+    http,
   } = useAppContext();
-
-  const handleNavigateToConnectors = () => {
-    navigateToApp('management', {
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-    });
-  };
 
   const handleNavigateToSpacesConfiguration = () => {
     navigateToApp('management', {
@@ -91,7 +86,9 @@ export function SettingsTab() {
         <EuiFormRow fullWidth>
           <EuiButton
             data-test-subj="settingsTabGoToConnectorsButton"
-            onClick={handleNavigateToConnectors}
+            href={http.basePath.prepend(
+              `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
+            )}
           >
             {i18n.translate(
               'xpack.observabilityAiAssistantManagement.settingsPage.goToConnectorsButtonLabel',
