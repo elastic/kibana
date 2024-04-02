@@ -325,8 +325,8 @@ export function registerRepositoriesRoutes({
         // Otherwise update repository
         const response = await clusterClient.asCurrentUser.snapshot.createRepository({
           name,
-          body: {
-            // @ts-expect-error upgrade to @elastic/elasticsearch v8.13.0: can't be string, only valid "source"
+          repository: {
+            // @ts-expect-error our type is a string, which doesn't match any of the overloads "source", "s3", "azure", ...
             type,
             settings: serializeRepositorySettings(settings),
           },
