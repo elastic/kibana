@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import {
   ensureOnlyEventCollectionIsAllowed,
   isPolicySetToEventCollectionOnly,
@@ -16,33 +16,33 @@ import {
 import type { PolicyData } from '../../../common/endpoint/types';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
-import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
+import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
 export const turnOffPolicyProtectionsIfNotSupported = async (
   esClient: ElasticsearchClient,
   fleetServices: EndpointInternalFleetServicesInterface,
-  appFeaturesService: AppFeaturesService,
+  productFeaturesService: ProductFeaturesService,
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('endpoint', 'policyProtections');
 
-  const isProtectionUpdatesFeatureEnabled = appFeaturesService.isEnabled(
-    AppFeatureSecurityKey.endpointProtectionUpdates
+  const isProtectionUpdatesFeatureEnabled = productFeaturesService.isEnabled(
+    ProductFeatureSecurityKey.endpointProtectionUpdates
   );
 
-  const isPolicyProtectionsEnabled = appFeaturesService.isEnabled(
-    AppFeatureSecurityKey.endpointPolicyProtections
+  const isPolicyProtectionsEnabled = productFeaturesService.isEnabled(
+    ProductFeatureSecurityKey.endpointPolicyProtections
   );
 
   if (isPolicyProtectionsEnabled) {
     log.info(
-      `App feature [${AppFeatureSecurityKey.endpointPolicyProtections}] is enabled. Nothing to do!`
+      `App feature [${ProductFeatureSecurityKey.endpointPolicyProtections}] is enabled. Nothing to do!`
     );
   }
 
   if (isProtectionUpdatesFeatureEnabled) {
     log.info(
-      `App feature [${AppFeatureSecurityKey.endpointProtectionUpdates}] is enabled. Nothing to do!`
+      `App feature [${ProductFeatureSecurityKey.endpointProtectionUpdates}] is enabled. Nothing to do!`
     );
   }
 
@@ -52,13 +52,13 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
 
   if (!isPolicyProtectionsEnabled) {
     log.info(
-      `App feature [${AppFeatureSecurityKey.endpointPolicyProtections}] is disabled. Checking endpoint integration policies for compliance`
+      `App feature [${ProductFeatureSecurityKey.endpointPolicyProtections}] is disabled. Checking endpoint integration policies for compliance`
     );
   }
 
   if (!isProtectionUpdatesFeatureEnabled) {
     log.info(
-      `App feature [${AppFeatureSecurityKey.endpointProtectionUpdates}] is disabled. Checking endpoint integration policies for compliance`
+      `App feature [${ProductFeatureSecurityKey.endpointProtectionUpdates}] is disabled. Checking endpoint integration policies for compliance`
     );
   }
 

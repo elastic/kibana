@@ -84,7 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('2 groups');
+        expect(groupCount).to.be('2 cloud accounts');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('2 vulnerabilities');
@@ -124,7 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('2 groups');
+        expect(groupCount).to.be('2 CVEs');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('2 vulnerabilities');
@@ -165,7 +165,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('2 groups');
+        expect(groupCount).to.be('2 resources');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('2 vulnerabilities');
@@ -197,7 +197,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await groupRow.getVisibleText()).to.contain(resourceName1);
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('1 group');
+        expect(groupCount).to.be('1 resource');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('1 vulnerability');
@@ -210,7 +210,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const grouping = await findings.findingsGrouping();
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('2 groups');
+        expect(groupCount).to.be('2 resources');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('2 vulnerabilities');
@@ -226,7 +226,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await groupRow.getVisibleText()).to.contain(resourceName1);
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('1 group');
+        expect(groupCount).to.be('1 resource');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('1 vulnerability');
@@ -234,7 +234,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await queryBar.setQuery('');
         await queryBar.submitQuery();
 
-        expect(await grouping.getGroupCount()).to.be('2 groups');
+        expect(await grouping.getGroupCount()).to.be('2 resources');
         expect(await grouping.getUnitCount()).to.be('2 vulnerabilities');
       });
     });

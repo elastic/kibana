@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface IndexExistsApiParams {
@@ -27,3 +27,5 @@ export const fetchIndexExists = async ({
 };
 
 export const IndexExistsApiLogic = createApiLogic(['index_exists_api_logic'], fetchIndexExists);
+
+export type IndexExistsApiLogicActions = Actions<IndexExistsApiParams, IndexExistsApiResponse>;

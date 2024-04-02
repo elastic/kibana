@@ -30,31 +30,32 @@ import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import {
-  createAlertsIndex,
   fetchRule,
-  createRule,
   getSimpleRule,
-  deleteAllRules,
   createExceptionList,
   createExceptionListItem,
   getThresholdRuleForAlertTesting,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   downgradeImmutableRule,
-  waitForRuleSuccess,
   installMockPrebuiltRules,
-  waitForAlertsToBePresent,
-  getAlertsByIds,
   findImmutableRuleById,
   getPrebuiltRulesAndTimelinesStatus,
   getOpenAlerts,
   createRuleWithExceptionEntries,
   getEqlRuleForAlertTesting,
   SAMPLE_PREBUILT_RULES,
-  deleteAllAlerts,
   updateUsername,
 } from '../../../../utils';
-
+import {
+  createAlertsIndex,
+  createRule,
+  deleteAllRules,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  getAlertsByIds,
+  deleteAllAlerts,
+} from '../../../../../../../common/utils/security_solution';
 import {
   createListsIndex,
   deleteAllExceptions,

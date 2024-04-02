@@ -19,6 +19,7 @@ import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
 import { SvlTriggersActionsPageProvider } from './svl_triggers_actions_ui_page';
 import { SvlRuleDetailsPageProvider } from './svl_rule_details_ui_page';
 import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
+import { SvlManagementPageProvider } from './svl_management_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -34,4 +35,5 @@ export const pageObjects = {
   svlSecLandingPage: SvlSecLandingPageProvider,
   svlTriggersActionsUI: SvlTriggersActionsPageProvider,
   svlRuleDetailsUI: SvlRuleDetailsPageProvider,
+  svlManagementPage: SvlManagementPageProvider,
 };

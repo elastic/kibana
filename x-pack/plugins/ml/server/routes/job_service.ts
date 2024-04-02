@@ -19,7 +19,6 @@ import {
   forceStartDatafeedSchema,
   jobIdsSchema,
   optionalJobIdsSchema,
-  jobsWithTimerangeSchema,
   lookBackProgressSchema,
   topCategoriesSchema,
   updateGroupsSchema,
@@ -390,13 +389,9 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .addVersion(
       {
         version: '1',
-        validate: {
-          request: {
-            body: jobsWithTimerangeSchema,
-          },
-        },
+        validate: false,
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { jobsWithTimerange } = jobServiceProvider(client, mlClient);
           const resp = await jobsWithTimerange();

@@ -36,9 +36,11 @@ describe('Security Plugin', () => {
         )
       ).toEqual({
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
+        authz: { isRoleManagementEnabled: expect.any(Function) },
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
           hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
@@ -66,6 +68,7 @@ describe('Security Plugin', () => {
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
           hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
@@ -73,7 +76,20 @@ describe('Security Plugin', () => {
         management: managementSetupMock,
         fatalErrors: coreSetupMock.fatalErrors,
         getStartServices: coreSetupMock.getStartServices,
+        buildFlavor: expect.stringMatching(new RegExp('^serverless|traditional$')),
       });
+    });
+
+    it('calls core.security.registerSecurityApi', () => {
+      const coreSetupMock = coreMock.createSetup({ basePath: '/some-base-path' });
+
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+
+      plugin.setup(coreSetupMock, {
+        licensing: licensingMock.createSetup(),
+      });
+
+      expect(coreSetupMock.security.registerSecurityApi).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -95,6 +111,9 @@ describe('Security Plugin', () => {
           "authc": Object {
             "areAPIKeysEnabled": [Function],
             "getCurrentUser": [Function],
+          },
+          "authz": Object {
+            "isRoleManagementEnabled": [Function],
           },
           "navControlService": Object {
             "addUserMenuLinks": [Function],

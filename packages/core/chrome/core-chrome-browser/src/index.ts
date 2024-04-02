@@ -53,4 +53,6 @@ export type {
   NavigationGroupPreset,
   RootNavigationItemDefinition,
   NavigationTreeDefinitionUI,
+  SolutionNavigationDefinition,
+  SolutionNavigationDefinitions,
 } from './project_navigation';

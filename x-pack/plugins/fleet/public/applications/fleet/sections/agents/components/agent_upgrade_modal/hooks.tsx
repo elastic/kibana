@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useMemo, useCallback } from 'react';
+
+import { useCallback, useState, useMemo } from 'react';
 import moment from 'moment';
 
 export function useScheduleDateTime(now?: string) {

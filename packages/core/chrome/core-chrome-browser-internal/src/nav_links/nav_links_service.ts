@@ -34,10 +34,11 @@ export class NavLinksService {
             [...apps]
               .filter(([, app]) => !app.chromeless)
               .reduce((navLinks: Array<[string, NavLinkWrapper]>, [appId, app]) => {
-                navLinks.push(
-                  [appId, toNavLink(app, http.basePath)],
-                  ...toNavDeepLinks(app, app.deepLinks, http.basePath)
-                );
+                const navLink = toNavLink(app, http.basePath);
+                if (navLink) {
+                  navLinks.push([appId, navLink]);
+                }
+                navLinks.push(...toNavDeepLinks(app, app.deepLinks, http.basePath));
                 return navLinks;
               }, [])
           );
@@ -100,7 +101,10 @@ function toNavDeepLinks(
   return deepLinks.reduce((navDeepLinks: Array<[string, NavLinkWrapper]>, deepLink) => {
     const id = `${app.id}:${deepLink.id}`;
     if (deepLink.path) {
-      navDeepLinks.push([id, toNavLink(app, basePath, { ...deepLink, id })]);
+      const navDeepLink = toNavLink(app, basePath, { ...deepLink, id });
+      if (navDeepLink) {
+        navDeepLinks.push([id, navDeepLink]);
+      }
     }
     navDeepLinks.push(...toNavDeepLinks(app, deepLink.deepLinks, basePath));
     return navDeepLinks;

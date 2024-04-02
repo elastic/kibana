@@ -15,10 +15,10 @@ import {
   EuiPortal,
   EuiScreenReaderOnly,
   EuiThemeProvider,
-  EuiWindowEvent,
   keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { dynamic } from '@kbn/shared-ux-utility';
 
 import {
   EmbeddableConsoleProps,
@@ -28,12 +28,17 @@ import {
 import * as store from '../../stores/embeddable_console';
 import { setLoadFromParameter, removeLoadFromParameter } from '../../lib/load_from';
 
-import { ConsoleWrapper } from './console_wrapper';
 import './_index.scss';
+
+const KBN_BODY_CONSOLE_CLASS = 'kbnBody--hasEmbeddableConsole';
 
 const landmarkHeading = i18n.translate('console.embeddableConsole.landmarkHeading', {
   defaultMessage: 'Developer console',
 });
+
+const ConsoleWrapper = dynamic(async () => ({
+  default: (await import('./console_wrapper')).ConsoleWrapper,
+}));
 
 export const EmbeddableConsole = ({
   size = 'm',
@@ -58,6 +63,10 @@ export const EmbeddableConsole = ({
       removeLoadFromParameter();
     }
   }, [consoleState.isOpen, consoleState.loadFromContent]);
+  useEffect(() => {
+    document.body.classList.add(KBN_BODY_CONSOLE_CLASS);
+    return () => document.body.classList.remove(KBN_BODY_CONSOLE_CLASS);
+  }, []);
 
   const isConsoleOpen = consoleState.isOpen;
   const setIsConsoleOpen = (value: boolean) => {
@@ -115,12 +124,7 @@ export const EmbeddableConsole = ({
               </EuiButton>
             </div>
           </EuiThemeProvider>
-          {isConsoleOpen ? (
-            <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
-              <EuiWindowEvent event="keydown" handler={onKeyDown} />
-              <ConsoleWrapper core={core} usageCollection={usageCollection} />
-            </div>
-          ) : null}
+          {isConsoleOpen ? <ConsoleWrapper {...{ core, usageCollection, onKeyDown }} /> : null}
         </section>
         <EuiScreenReaderOnly>
           <p aria-live="assertive">
@@ -135,7 +139,3 @@ export const EmbeddableConsole = ({
     </EuiPortal>
   );
 };
-
-// Default Export is needed to lazy load this react component
-// eslint-disable-next-line import/no-default-export
-export default EmbeddableConsole;

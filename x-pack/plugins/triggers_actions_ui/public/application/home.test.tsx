@@ -81,7 +81,7 @@ describe('home', () => {
     });
   });
 
-  it('hides the internal alerts table tab if the config is not set', async () => {
+  it('shows the correct number of tabs', async () => {
     (hasShowActionsCapability as jest.Mock).mockImplementation(() => {
       return true;
     });
@@ -98,7 +98,7 @@ describe('home', () => {
       },
     };
 
-    let home = mountWithIntl(
+    const home = mountWithIntl(
       <Router history={props.history}>
         <QueryClientProvider client={queryClient}>
           <TriggersActionsUIHome {...props} />
@@ -108,20 +108,6 @@ describe('home', () => {
 
     // Just rules and logs
     expect(home.find('span.euiTab__content').length).toBe(2);
-
-    (getIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
-      return feature === 'internalAlertsTable';
-    });
-
-    home = mountWithIntl(
-      <Router history={props.history}>
-        <QueryClientProvider client={queryClient}>
-          <TriggersActionsUIHome {...props} />
-        </QueryClientProvider>
-      </Router>
-    );
-    // alerts now too!
-    expect(home.find('span.euiTab__content').length).toBe(3);
   });
 
   it('hides the logs tab if the read rules privilege is missing', async () => {

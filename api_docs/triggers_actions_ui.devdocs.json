@@ -55,7 +55,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; }"
+              "{ readonly rulesListDatagrid: boolean; readonly globalAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly ruleFormV2: boolean; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
@@ -1382,6 +1382,73 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.loadRuleTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "loadRuleTypes",
+        "description": [],
+        "signature": [
+          "({ http }: { http: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }) => Promise<",
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.RuleType",
+            "text": "RuleType"
+          },
+          "<string, string>[]>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.loadRuleTypes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ http }",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRuleTypes.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-common.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.MustacheTextFieldWrapper",
         "type": "Function",
         "tags": [],
@@ -1715,7 +1782,7 @@
         "label": "transformRule",
         "description": [],
         "signature": [
-          "({ rule_type_id: ruleTypeId, created_by: createdBy, updated_by: updatedBy, created_at: createdAt, updated_at: updatedAt, api_key_owner: apiKeyOwner, api_key_created_by_user: apiKeyCreatedByUser, notify_when: notifyWhen, mute_all: muteAll, muted_alert_ids: mutedInstanceIds, scheduled_task_id: scheduledTaskId, execution_status: executionStatus, actions: actions, snooze_schedule: snoozeSchedule, is_snoozed_until: isSnoozedUntil, active_snoozes: activeSnoozes, last_run: lastRun, next_run: nextRun, ...rest }: any) => any"
+          "({ rule_type_id: ruleTypeId, created_by: createdBy, updated_by: updatedBy, created_at: createdAt, updated_at: updatedAt, api_key_owner: apiKeyOwner, api_key_created_by_user: apiKeyCreatedByUser, notify_when: notifyWhen, mute_all: muteAll, muted_alert_ids: mutedInstanceIds, scheduled_task_id: scheduledTaskId, execution_status: executionStatus, actions: actions, snooze_schedule: snoozeSchedule, is_snoozed_until: isSnoozedUntil, active_snoozes: activeSnoozes, last_run: lastRun, next_run: nextRun, alert_delay: alertDelay, ...rest }: any) => any"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/common_transformations.ts",
         "deprecated": false,
@@ -1726,7 +1793,7 @@
             "id": "def-public.transformRule.$1",
             "type": "Any",
             "tags": [],
-            "label": "{\n  rule_type_id: ruleTypeId,\n  created_by: createdBy,\n  updated_by: updatedBy,\n  created_at: createdAt,\n  updated_at: updatedAt,\n  api_key_owner: apiKeyOwner,\n  api_key_created_by_user: apiKeyCreatedByUser,\n  notify_when: notifyWhen,\n  mute_all: muteAll,\n  muted_alert_ids: mutedInstanceIds,\n  scheduled_task_id: scheduledTaskId,\n  execution_status: executionStatus,\n  actions: actions,\n  snooze_schedule: snoozeSchedule,\n  is_snoozed_until: isSnoozedUntil,\n  active_snoozes: activeSnoozes,\n  last_run: lastRun,\n  next_run: nextRun,\n  ...rest\n}",
+            "label": "{\n  rule_type_id: ruleTypeId,\n  created_by: createdBy,\n  updated_by: updatedBy,\n  created_at: createdAt,\n  updated_at: updatedAt,\n  api_key_owner: apiKeyOwner,\n  api_key_created_by_user: apiKeyCreatedByUser,\n  notify_when: notifyWhen,\n  mute_all: muteAll,\n  muted_alert_ids: mutedInstanceIds,\n  scheduled_task_id: scheduledTaskId,\n  execution_status: executionStatus,\n  actions: actions,\n  snooze_schedule: snoozeSchedule,\n  is_snoozed_until: isSnoozedUntil,\n  active_snoozes: activeSnoozes,\n  last_run: lastRun,\n  next_run: nextRun,\n  alert_delay: alertDelay,\n  ...rest\n}",
             "description": [],
             "signature": [
               "any"
@@ -5104,7 +5171,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"monitoring\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -7856,7 +7923,7 @@
             },
             ">(props: Omit<",
             "RuleAddProps",
-            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
             "RuleAddProps",
             "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
@@ -7874,7 +7941,7 @@
               "signature": [
                 "Omit<",
                 "RuleAddProps",
-                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
+                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -7926,7 +7993,7 @@
             },
             ">(props: Omit<",
             "RuleEditProps",
-            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
             "RuleEditProps",
             "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
@@ -7944,7 +8011,7 @@
               "signature": [
                 "Omit<",
                 "RuleEditProps",
-                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
+                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -10119,18 +10186,6 @@
     "misc": [
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-common.ALERT_TABLE_GENERIC_CONFIG_ID",
-        "type": "string",
-        "tags": [],
-        "label": "ALERT_TABLE_GENERIC_CONFIG_ID",
-        "description": [],
-        "path": "x-pack/plugins/triggers_actions_ui/common/alert_config.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-common.BASE_TRIGGERS_ACTIONS_UI_API_PATH",
         "type": "string",
         "tags": [],
@@ -10194,7 +10249,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly globalAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly ruleFormV2: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -10273,7 +10328,7 @@
           "\nA list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly rulesListDatagrid: true; readonly internalAlertsTable: false; readonly ruleTagFilter: true; readonly ruleStatusFilter: true; readonly rulesDetailLogs: true; readonly ruleUseExecutionStatus: false; readonly ruleKqlBar: false; readonly isMustacheAutocompleteOn: false; readonly showMustacheAutocompleteSwitch: false; }"
+          "{ readonly rulesListDatagrid: true; readonly globalAlertsPage: false; readonly ruleTagFilter: true; readonly ruleStatusFilter: true; readonly rulesDetailLogs: true; readonly ruleUseExecutionStatus: false; readonly ruleKqlBar: false; readonly isMustacheAutocompleteOn: false; readonly showMustacheAutocompleteSwitch: false; readonly ruleFormV2: false; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,

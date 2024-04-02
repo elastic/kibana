@@ -29,7 +29,7 @@ import { useNetworkDetails } from '../../../../explore/network/containers/detail
 import { networkModel } from '../../../../explore/network/store';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 
 interface ExpandableNetworkProps {
   expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };
@@ -147,6 +147,6 @@ export const ExpandableNetworkDetails = ({
       jobNameById={jobNameById}
     />
   ) : (
-    <LandingPageComponent />
+    <EmptyPrompt />
   );
 };

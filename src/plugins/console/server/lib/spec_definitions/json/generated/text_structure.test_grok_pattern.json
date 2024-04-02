@@ -1,0 +1,23 @@
+{
+  "text_structure.test_grok_pattern": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "ecs_compatibility": ""
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_text_structure/test_grok_pattern"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/test-grok-pattern-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

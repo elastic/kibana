@@ -10,6 +10,7 @@ import type {
   ExceptionListSchema,
   ExceptionListItemSchema,
   CreateEndpointListItemSchema,
+  FoundAllListItemsSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ITEM_URL, ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';
 import type { ExceptionList, ExceptionListItem, RuleExceptionItem } from '../../objects/exception';
@@ -100,9 +101,30 @@ export const updateExceptionListItem = (
     failOnStatusCode: false,
   });
 
-export const deleteExceptionList = (listId: string, namespaceType: string) =>
+export const deleteExceptionList = (listId: string, namespaceType: string = 'default') =>
   rootRequest({
     method: 'DELETE',
     url: `/api/exception_lists?list_id=${listId}&namespace_type=${namespaceType}`,
     failOnStatusCode: false,
   });
+
+export const getExceptionLists = () =>
+  rootRequest<FoundAllListItemsSchema>({
+    method: 'GET',
+    url: 'api/exception_lists/_find',
+  });
+
+export const deleteExceptionLists = () => {
+  getExceptionLists().then(($lists) => {
+    const listsIds = $lists.body.data.map((list) => {
+      return list.list_id;
+    });
+    listsIds.forEach((id) => {
+      deleteExceptionList(id, 'single');
+    });
+  });
+};
+
+export const deleteEndpointExceptionList = () => {
+  deleteExceptionList('endpoint_list', 'agnostic');
+};

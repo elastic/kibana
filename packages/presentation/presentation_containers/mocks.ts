@@ -17,5 +17,7 @@ export const getMockPresentationContainer = (): PresentationContainer => {
     registerPanelApi: jest.fn(),
     lastSavedState: new Subject<void>(),
     getLastSavedStateForChild: jest.fn(),
+    getChildIds: jest.fn(),
+    getChild: jest.fn(),
   };
 };

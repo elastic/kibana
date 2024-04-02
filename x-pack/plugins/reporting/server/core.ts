@@ -9,6 +9,7 @@ import * as Rx from 'rxjs';
 import { map, take } from 'rxjs/operators';
 
 import type {
+  AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,
   IBasePath,
@@ -46,13 +47,15 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
+import { checkLicense } from '@kbn/reporting-server/check_license';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
-import { ExportTypesRegistry, checkLicense } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
+import { EventTracker } from './usage';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -69,6 +72,7 @@ export interface ReportingInternalSetup {
 
 export interface ReportingInternalStart {
   store: ReportingStore;
+  analytics: AnalyticsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
@@ -301,11 +305,24 @@ export class ReportingCore {
   }
 
   /*
-   *
-   * Track usage of code paths for telemetry
+   * Track usage of API endpoints
    */
   public getUsageCounter(): UsageCounter | undefined {
     return this.pluginSetupDeps?.usageCounter;
+  }
+
+  /*
+   * Track metrics of internal events
+   */
+  public getEventTracker(
+    reportId: string,
+    exportType: string,
+    objectType: string
+  ): EventTracker | undefined {
+    const { analytics } = this.pluginStartDeps ?? {};
+    if (analytics) {
+      return new EventTracker(analytics, reportId, exportType, objectType);
+    }
   }
 
   /*
@@ -401,6 +418,10 @@ export class ReportingCore {
     return new ReportingEventLogger(report, task);
   }
 
+  /**
+   * @deprecated
+   * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+   */
   public async getCsvSearchSourceImmediate() {
     const startDeps = await this.getPluginStartDeps();
 

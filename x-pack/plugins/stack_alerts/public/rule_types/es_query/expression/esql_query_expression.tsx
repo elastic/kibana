@@ -66,6 +66,7 @@ export const EsqlQueryExpression: React.FC<
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectTimestamp, setDetectTimestamp] = useState<boolean>(false);
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -109,6 +110,7 @@ export const EsqlQueryExpression: React.FC<
     }
     const timeWindow = parseDuration(window);
     const now = Date.now();
+    setIsLoading(true);
     const table = await fetchFieldsFromESQL(
       esqlQuery,
       expressions,
@@ -126,6 +128,7 @@ export const EsqlQueryExpression: React.FC<
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
       const hits = toEsQueryHits(esqlTable);
+      setIsLoading(false);
       return {
         testResults: parseAggregationResults({
           isCountAgg: true,
@@ -142,6 +145,7 @@ export const EsqlQueryExpression: React.FC<
         rawResults: {
           cols: esqlTable.columns.map((col) => ({
             id: col.name,
+            actions: false,
           })),
           rows: esqlTable.values.slice(0, 5).map((row) => rowToDocument(esqlTable.columns, row)),
         },
@@ -224,6 +228,7 @@ export const EsqlQueryExpression: React.FC<
           detectTimestamp={detectTimestamp}
           hideMinimizeButton={true}
           hideRunQueryText={true}
+          isLoading={isLoading}
         />
       </EuiFormRow>
       <SourceFields

@@ -1,157 +1,253 @@
 [[whats-new]]
-== What's new in {minor-version}
+== What's new in 8.13
 
-Here are the highlights of what's new and improved in {minor-version}.
+Here are the highlights of what's new and improved in 8.13.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
+Previous versions: {kibana-ref-all}/8.12/whats-new.html[8.12] | {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
 | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
-
-
-[discrete]
-=== Dashboard
-
-[discrete]
-==== Edit {esql} in a dashboard
-
-We are introducing editing of an {esql} query on a dashboard and allows the users to select among different chart suggestions. This is quite powerful since users don't need to go back to Discover to edit the query and recreate the chart, they can simply adjust the query right there on a dashboard. 
-
-[role="screenshot"]
-image::images/edit-esql-dashboard.gif[A short video demo of how to edit {esql} in a dashboard]
-
-[discrete]
-==== Improved ES|QL in-app documentation search
-Many users open the {esql} editor’s documentation popover to familiarize themselves with the commands and find examples. Our search input was searching only on the titles of the commands/functions and not the description of each. As a result users were failing to find what they wanted. For example, if they searched for IP then CIDR_MATCH would not appear, but only TO_IP. This change helps users learn {esql} faster by improving the search. 
-
-[role="screenshot"]
-image::images/esql-in-app.png[A screenshot of the {esql} in app documentation]
-
-[discrete]
-==== Improved error messages for {ccs}
-Customers querying data from multiple clusters link:{ref}/modules-cross-cluster-search.html[({ccs-init} queries)] will get more information on why their search failed for each of the visualizations in a dashboard as well as in the Discover application.
-
-[role="screenshot"]
-image::images/improved-errors.png[A screenshot of an improved error message, width=50%]
 
 [discrete]
 === Discover
 
 [discrete]
-==== Improved long field names handling in {kib}
-Long field names are very normal in Observability and Security datasets. That’s why we adapted multiple elements in Discover, Dashboards, Maps, and Lens such as field selectors, table headers, filter pills, and chart tooltips amongst others to handle long field names. For example, you will notice it when you select a field to set some filters or when you mouse over a chart.
+==== Empty fields improvements in Discover, Lens & ES|QL 
+
+Navigating through extensive data can often lead users to encounter numerous *Empty fields* within their field lists, making it challenging to identify and access valuable data efficiently. To address this issue, we’ve focused our efforts on enhancing the *Empty fields* category. Our solution simplifies the process of finding and accessing fields that contain meaningful data, ensuring a more streamlined and productive data exploration experience for our users. 
+
+In some cases this can have a huge impact on field lists that target indices with many fields, such as in the below example where the field list was reduced from 5,492 fields down to only 238.
 
 [role="screenshot"]
-image::images/long-field-names.png[A screenshot of the improved long field name handling in {kib}]
-
-[discrete]
-==== Improved search for field names by handling spaces like wildcards
-To improve data exploration, we improved the search within the field list by allowing users to do a more flexible search in the fields sidebar with terms containing spaces.
+image::images/empty-fields.png[An image of the available fields before the improvements.]
 
 [role="screenshot"]
-image::images/allow-spaces.png[A screenshot of the search within the field list allowing spaces, width=70%]
+image::images/empty-fields-results.png[An image of the improvements to the available fields.]
 
 [discrete]
-=== Machine Learning
+==== Discover enhancements
 
-[discrete]
-==== Unified inference API now integrates OpenAI and HuggingFace
-In 8.11 we introduced a unified inference API that abstracts away the complexity of performing inference on different models for different tasks. 
-
-We released an MVP iteration of this framework in technical preview which initially supported ELSER in an Elastic deployment and we hinted that in future releases, the inference API will support both internal and external models and will integrate with the LLM ecosystem.
-
-And so in 8.12 Elastic’s Inference API is extended to integrate with external models to perform AI search inference using: 
-
-* OpenAI embeddings 
-* HuggingFace embeddings and 
-* ELSER on HuggingFace
-
-AI search with embeddings achieves superior contextual relevance and captures user intent. Inference using these new capabilities involves external calls to the corresponding endpoints on OpenAI and HuggingFace. The power of the inference API lies in its simple, unified syntax that abstracts away the underlying complexity of using different internal and external models for different tasks. 
-
-Performing inference on the newly supported models and services is as simple as a call with the simple syntax introduced in 8.11:
-
-[source, bash]
-----
-PUT /_inference/<task_type>/<model_id>
-----
-
-Concretely, this is how this syntax shapes up for inference with OpenAI embeddings, showcasing the power of Elastic’s unified inference API:
-
-[source, bash]
-----
-PUT _inference/text_embedding/openai_embeddings
-----
-For a detailed example, see link:{ref}/semantic-search-inference.html[this tutorial]. Bear in mind that you will need an OpenAI account and the corresponding API key, as well as to choose the specific OpenAI embeddings that you want to use. 
-
-HuggingFace enables access to many open source models while also providing granular control over how the models are deployed. Tailor the deployment environment to your needs by configuring the number of replicas and whether to run the model on a CPU or GPU.
-
-We will continue enhancing Elastic’s inference API with more capabilities and support for more models and tasks for our users to have the most powerful AI effortlessly and seamlessly.
-
-[discrete]
-==== First-class support for E5 multilingual embeddings
-ELSER is Elastic’s text expansion language model for AI search in English. It offers superior relevance out of the box, without the need for retraining on in-domain data. ELSER is the AI search model of choice for the English language. ELSER v2 is Generally Available as of 8.11.
-
-For AI search in languages other than English, you can now use E5 multilingual embeddings straight from the Trained Models UI. Like ELSER, E5 has two versions: an Intel-optimized one and a cross-platform one (which runs on any hardware). The Model Management > Trained Models UI shows you which version of E5 is recommended to deploy based on your cluster’s hardware (also see the next section for the redesigned Trained Models UI). The supported model version of E5 is `multilingual-e5-small`. For more details, see our link:{ml-docs}/ml-nlp-e5.html[documentation]. Note that E5 is used under the MIT license.
-
-[discrete]
-==== A redesigned trained models UI that brings together our AI search capabilities
-In 8.12, we have redesigned the way you can add trained models to your deployment through the Trained Models UI for better guidance and usability. 
-
-The flyout to add a trained model includes a tab for ELSER and E5 which can be deployed with one click. The UI also guides you as to the recommended version of each model (Intel-optimized or cross-platform), depending on your underlying hardware. A second tab guides you through deploying any other model on Elastic using the Eland Python client.
+Improving the experience in Discover when users are exploring their data helps them find insights quickly. In 8.13 we added the *Auto Interval* to the Histogram, which allows users to quickly select a *Time Interval*. We also enhanced the UI by moving the count of documents to the table and new panel toggle buttons for toggling fields sidebar and histogram.
 
 [role="screenshot"]
-image::images/trained-models-ui.png[A screenshot of the redesigned trained models UI]
-
-[discrete]
-==== AIOps: Log Rate Analysis is GA
-Log Rate Analysis helps you investigate significant increases or decreases of your log rates fast and easy. It helps you identify the reasons behind these changes. Just click on a spike or dip and it will show you the fields (or combinations of fields) that contribute to these changes and, if it helps, continue your investigation by inspecting your selected field in Discover. We consistently enhanced Log Rate Analysis during the past few releases to support both spikes and dips analysis, support for text fields by leveraging Log Pattern Analysis, integration with Discover and more. In 8.12 we added the ability to easily create a categorization anomaly detection job from the pattern analysis flyout in Discover and importantly Log Rate Analysis becomes GA.
-
-[discrete]
-==== Alerts in Anomaly Explorer
-In 8.12 we have enhanced the Anomaly Explorer UI to include insights about alerts generated by rules that use your anomaly detection jobs. 
+image::images/auto-interval.png[An image of the new auto interval option, width=60%]
 
 [role="screenshot"]
-image::images/alerts-anomaly.png[A screenshot of the anomaly explorer UI]
+image::images/auto-interval-1.png[An image of the auto option.]
 
-These insights include: 
+[discrete]
+==== Cancellation of the {esql} long-running query
 
-* a line chart of the alerts count and their correlation with the anomalies detected, 
-* an alert context menu when an anomaly swimlane cell is selected, 
-* a summary section including the alert duration, start and recovery time and more information and a 
-* Details tab from which the user can select to open an alert’s detail page and attach an alert to a new or existing case.
+You can now cancel a long-running {esql} query from the UI.
 
 [role="screenshot"]
-image::images/alerts.png[A screenshot of details of the alerts]
+image::images/cancel-button.png[]
+
+
+[discrete]
+==== Better validation and autocomplete when writing ES|QL queries
+
+Autocomplete and validation are important tools to ensure the user’s ES|QL is correct and can be executed without errors. With these improvements, we are speeding up their workflow and increasing the quality of the improvements.
+
+[role="screenshot"]
+image::images/esql-validation.png[An image of {esql} validation in action.]
+
+[discrete]
+==== Color all terms in new color mapping
+
+In our latest update, based on early feedback, we've enhanced the user experience with our new color mapping feature introducing a more intuitive default option. Now users can either assign a single color or enable color looping for unassigned terms, providing greater flexibility and a cleaner interface for term assignments. Additionally we've eliminated the maximum limit on assignments, allowing for more comprehensive customization. It's important to note that looping colors or using more than 10 colors can be effective in certain scenarios. However, we recommend limiting the number of colors used to prevent potential misinterpretation of your charts. This update aims to make color mapping more user-friendly and adaptable to your needs.
+
+[role="screenshot"]
+image::images/color-mapping-enhanced.png[An image of the color mapping feature applied to a vertical bar chart.]
+
+[role="screenshot"]
+image::images/color-mapping-1.png[An image of the color palette options, width=60%]
+
+[discrete]
+==== Visualizing an {esql} query in Observability AI assistant
+
+The {observability} AI assistant in 8.13 comes with great improvements in query generation and performance. Users can now visualize the generated {esql} queries, edit them using the inline editing flyout, and embed them in a dashboard.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltd6737b8e5633e948/viz-esql.gif[A gif of an {esql} query in the AI assistant.]
+
+[discrete]
+==== Cross-cluster search support in {esql} and in {kib}
+
+Cross-cluster searches are now supported in {esql} and in {kib} the feature has been introduced for both validation and autocomplete. The autocomplete feature will show some documentation about the specific settings when navigating the suggestions.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt4b3db027b6c7951a/ccs-esql-queries.gif[A gif of an {esql} cross cluster query.]
+
+[discrete]
+==== Quick fix to help users write {esql}
+
+Quick fix helps users when they have misspelled a field, index, or policy name (maybe pasting a query from somewhere else) in {esql} mode.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt463edc257418dd71/esql-quickfix[A gif showing the quick fix feature in action.]
+
+[discrete]
+==== Create {esql} charts directly from a dashboard
+
+Now you can create {esql} charts directly from a dashboard, without the need to go through Discover. Previously, to add a chart to your dashboard, you had to first create it in Discover using {esql} and then save it to the dashboard. This update streamlines the process, allowing you to instantly add {esql} charts right from your dashboard! 
+
+[role="screenshot"]
+image::images/esql-charts-1.png[]
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt517f402fdeddd49f/ESQLcharts.gif[A gif of editing an {esql} query in the dashboard.]
+
+[discrete]
+==== {esql} in Maps
+
+You can now create a new documents layer in map using our recently launched https://www.elastic.co/blog/esql-elasticsearch-piped-query-language[ElasticSearch Query Language (ES|QL)]. You can query your data directly from Elasticsearch and leverage the benefits that {esql} brings such as speed and flexible data transformations to your maps. 
+
+[role="screenshot"]
+image::images/esql-maps.png[An image of the {esql} option for maps.]
+
+[role="screenshot"]
+image::images/esql-maps-example.png[An image of {esql} applied to a map.]
+
+[discrete]
+==== Controls configuration
+
+We added some improvements to controls for you to easily filter and interact with your dashboards.
+
+* You will be able to decide whether you want the global filters and time range to be applied to your controls narrowing down the available options or whether you prefer to display all possible values without considering them. You will find these options in the Controls settings.
+
+[role="screenshot"]
+image::images/controls-config.png[An image of the filtering control settings.]
+
+* If you have numeric fields displayed as range slider controls in your dashboard, you will now be able to decide what is the step that you want to be displayed between your values. 
+
+[role="screenshot"]
+image::images/controls-edit.png[An image of the range slider settings.]
 
 [discrete]
 === ResponseOps
 
 [discrete]
-==== Maintenance window filters
+==== Alert delay
 
-In 8.12 you can add KQL filters to your <<maintenance-windows,maintenance windows>> to further refine their scope:
-
-[role="screenshot"]
-image::images/maintenance-window-filter.png[A screenshot of the create maintenance window UI]
-
-[discrete]
-==== Case improvements
-The enhanced case view is now supported by any field filter and any change to the view is saved to local cache to ensure your data won't be lost.
+In order to reduce noise for alerting rules with low sensitivity and ensure created alerts will be actionable and reasonable, we want to allow users to define how many rule runs should match before creating the alert. For example, "Generate the alert after 3 threshold matches in a row".
 
 [role="screenshot"]
-image::images/cases.png[A screenshot of the enhanced case view]
-
-There is also a new {kib} <<setup-cases,sub-feature privilege>> that enables you to customize access to case settings.
-
-If you <<add-case-files,add files>> to cases, there is a new option to copy the file hash to your clipboard.
-File hashes are crucial for incident investigation and for verification of file integrity.
-The supported hash functions for case files are MD5, SHA-1, and SHA-256.
+image::images/alert-delay.png[]
 
 [discrete]
-==== Connector improvements
+==== Slack action message templating using Slack Block Kit
 
-PagerDuty alert action is now supported by 2 new fields `links` and `custom_details`. 
-ServiceNow ITSM alert action allows users to define incident resolution when alert is recovered to ensure bi-directional sync between the Elastic Alerts and ServiceNow Incidents. 
+By supporting the link:https://api.slack.com/reference/surfaces/formatting#rich-layouts[Slack Block Kit] with our {kibana-ref}/slack-action-type.html[Slack connector (Web API)], we unlock new message templates to allow users to enrich and format the messages that are sent to Slack channels. Read more about link:https://app.slack.com/block-kit-builder/T0CUZ52US#%7B%22blocks%22:%5B%7B%22type%22:%22section%22,%22text%22:%7B%22type%22:%22mrkdwn%22,%22text%22:%22You%20have%20a%20new%20request:%5Cn*%3Cgoogle.com%7CFred%20Enriquez%20-%20Time%20Off%20request%3E*%22%7D%7D,%7B%22type%22:%22section%22,%22text%22:%7B%22type%22:%22mrkdwn%22,%22text%22:%22*Type:*%5CnPaid%20time%20off%5Cn*When:*%5CnAug%2010-Aug%2013%5Cn*Hours:*%2016.0%20(2%20days)%5Cn*Remaining%20balance:*%2032.0%20hours%20(4%20days)%5Cn*Comments:*%20%5C%22Family%20in%20town,%20going%20camping!%5C%22%22%7D,%22accessory%22:%7B%22type%22:%22image%22,%22image_url%22:%22https://api.slack.com/img/blocks/bkb_template_images/approvalsNewDevice.png%22,%22alt_text%22:%22computer%20thumbnail%22%7D%7D,%7B%22type%22:%22actions%22,%22elements%22:%5B%7B%22type%22:%22button%22,%22text%22:%7B%22type%22:%22plain_text%22,%22emoji%22:true,%22text%22:%22Approve%22%7D,%22style%22:%22primary%22,%22value%22:%22click_me_123%22%7D,%7B%22type%22:%22button%22,%22text%22:%7B%22type%22:%22plain_text%22,%22emoji%22:true,%22text%22:%22Deny%22%7D,%22style%22:%22danger%22,%22value%22:%22click_me_123%22%7D%5D%7D%5D%7D[templates options with Slack Block Kit].
+
+[role="screenshot"]
+image::images/slack-api.png[An image of the Slack web api connector, width =60%]
+
+[role="screenshot"]
+image::images/slack-block.png[An image of the block kit builder.]
+
+[discrete]
+=== Machine Learning 
+
+[discrete]
+==== Unified inference API now integrates Cohere embeddings
+
+We continue enhancing Elastic's unified inference API which supports both internal and external models for seamless easy integration with the LLM ecosystem.
+
+In 8.13 we add support for Cohere embeddings. This enhances our offering which supports OpenAI and HuggingFace embeddings since 8.12.
+
+The power of the inference API lies in its simple, unified syntax that abstracts away the underlying complexity of using different internal and external models. 
+
+So, in 8.13 we also added support for inference against the E5 multilingual embeddings that were offered through the Trained Models UI since 8.12.
+
+As a reminder, performing inference on the newly supported models and services is as simple as a call with the simple syntax introduced in 8.11:
+
+[source,bash]
+----
+PUT /_inference/<task_type>/<model_id>
+----
+
+To start using Cohere embeddings with your Elastic deployment using the new inference API, https://www.elastic.co/guide/en/elasticsearch/reference/current/semantic-search-inference.html[please see this tutorial]. This functionality is in Technical Preview in 8.13.
+
+[discrete]
+==== {esql} support in the Data Visualizer
+
+preview:[] The Data Visualizer now supports {esql}, Elastic’s new piped query language that simplifies data investigation. Run your {esql} queries in the Data Visualizer to easily explore your datasets. Choose to explore and apply your query to the entire dataset or a subset of it for speed. In 8.13 this functionality is in Technical Preview and supports keyword, text, numeric, boolean, date, and ip fields.
+
+[role="screenshot"]
+image::images/data-visualizer.png[An image of the new Data Visualizer for {esql}.]
+
+[discrete]
+==== Embed Anomaly Detection Single Metric Viewer in Dashboards
+
+You can now easily add single metric anomaly detection charts to dashboards. Under the *Add panel* option in Dashboard’s edit mode, select Machine Learning and then the *Single metric viewer* option from the menu.
+
+[role="screenshot"]
+image::images/embed-detection.png[An image of the single metric viewer.]
+
+[discrete]
+==== AIOps: Usability enhancements 
+
+We have enhanced Pattern Analysis in AIOps so that you can expand a row and see the tokens, the regex and a few examples that give you a better sense of the pattern. In addition the syntax highlighting (font color) reflects the detected pattern. When you choose to filter a pattern in Discover’s main view, the highlighting is now consistent between the Pattern Analysis feature and Discover. 
+
+[role="screenshot"]
+image::images/usability.png[An image of expanded rows.]
+
+You can now run Log Rate Analysis from the Anomaly Explorer and the Single Metric Viewer. Click on the *Actions* cog and select *Run log rate analysis* from the menu. You will be directed to the Log Rate analysis UI in Machine Learning. 
+
+[role="screenshot"]
+image::images/usability-1.png[An image of the actions menu with an arrow to run log rate analysis.]
+
+From 8.13, you can achieve the same from the anomaly markers in the Single Metric Viewer. Click on them and the actions menu will appear.
+
+[role="screenshot"]
+image::images/single-metric-viewer.png[An image of the single metric viewer.]
+
+[discrete]
+==== Grok highlighting in the File Data Visualizer
+
+Uploading a file through the File Data Visualizer will display the first 5 lines with inline highlighting. Hovering the mouse over displays a tooltip with the field name and type. 
+
+[role="screenshot"]
+image::images/grok-highlighting.png[An image of grok highlighting.]
+
+[discrete]
+=== Security
+
+[discrete]
+==== UI improvements for managing API keys
+
+We’ve made some improvements to the API keys management page. Going forward, you can now easily sort columns in the API keys table, making it easier for you to navigate through API keys, especially when volume is high.
+
+We’ve also made the API key name a required field. This reduces previous bugs on this page that resulted in errors or inconsistent API key names being displayed.
+
+[discrete]
+=== Global Experience
+
+[discrete]
+==== Discover using {esql} without data views
+
+You can now utilize {esql} without creating a data view. To expand, if you have ingested data but have not created a data view, when you navigate to *Discover* you will see a screen prompting you to create a data view, as before. Now an option is available on that screen to *Try ES|QL*. 
+
+[discrete]
+==== Improved UX for Setup Guides
+
+The setup guides you see in Kibana are now organized by solution, making it much easier to find the guide you’re looking for. Additionally, a new card was added to *Connect to the Elasticsearch API* so users with API use cases don’t have to dig through the navigation and documentation to find the connection info.
+
+[role="screenshot"]
+image::images/set-up-improvements.png[A screenshot of the home page cards.]
+
+[discrete]
+==== Live chat available from the Elastic Cloud console
+
+You will now find live chat functionality available in the top right corner in the Elastic Cloud console, completing seamlessly availability from all locations within both Elastic Cloud and Kibana experiences. 
+
+[discrete]
+==== Faster deployment creation times
+
+In particular regions, deployment of a new cluster is nearly instantaneous, saving you about 3-5 minutes of waiting time to get started. The number of regions that provide this performance boost has increased by 5x as we strive to make this the standard experience. 
+
+
 
 
 

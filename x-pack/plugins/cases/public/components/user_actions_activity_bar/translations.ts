@@ -30,3 +30,10 @@ export const NEWEST = i18n.translate('xpack.cases.userActionsActivity.sort.newes
 export const SORT_BY = i18n.translate('xpack.cases.userActionsActivity.sort.sortBy', {
   defaultMessage: 'Sort by',
 });
+
+export const SORTED_BY_ARIA_LABEL = i18n.translate(
+  'xpack.cases.userActionsActivity.sort.sortBy.ariaLabel',
+  {
+    defaultMessage: '"Sort by" list',
+  }
+);

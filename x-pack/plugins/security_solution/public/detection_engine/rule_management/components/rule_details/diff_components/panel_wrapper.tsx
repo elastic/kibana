@@ -20,7 +20,7 @@ export const RuleDiffPanelWrapper = ({ fieldName, children }: RuleDiffPanelWrapp
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiSplitPanel.Outer hasBorder>
+    <EuiSplitPanel.Outer data-test-subj="ruleUpgradePerFieldDiffWrapper" hasBorder>
       <EuiAccordion
         initialIsOpen={true}
         css={css`
@@ -31,12 +31,14 @@ export const RuleDiffPanelWrapper = ({ fieldName, children }: RuleDiffPanelWrapp
         `}
         id={fieldName}
         buttonContent={
-          <EuiTitle size="xs">
+          <EuiTitle data-test-subj="ruleUpgradePerFieldDiffLabel" size="xs">
             <h5>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h5>
           </EuiTitle>
         }
       >
-        <EuiSplitPanel.Inner color="transparent">{children}</EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner data-test-subj="ruleUpgradePerFieldDiffContent" color="transparent">
+          {children}
+        </EuiSplitPanel.Inner>
       </EuiAccordion>
     </EuiSplitPanel.Outer>
   );

@@ -6,11 +6,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { combineLatest, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { startWith } from 'rxjs/operators';
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import { SingleMetricViewerEmbeddableInput } from '..';
-import type { TimeRangeBounds } from '../../application/util/time_buckets';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { SingleMetricViewerEmbeddableInput } from '..';
 
 export function useSingleMetricViewerInputResolver(
   embeddableInput: Observable<SingleMetricViewerEmbeddableInput>,

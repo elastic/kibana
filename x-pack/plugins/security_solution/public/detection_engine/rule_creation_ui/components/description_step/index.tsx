@@ -47,6 +47,7 @@ import {
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
   buildHighlightedFieldsOverrideDescription,
+  getQueryLabel,
 } from './helpers';
 import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
@@ -76,6 +77,7 @@ interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
   indexPatterns?: DataViewBase;
+  // @ts-expect-error upgrade typescript v4.9.5
   schema: FormSchema<T>;
 }
 
@@ -153,6 +155,7 @@ export const StepRuleDescription = memo(StepRuleDescriptionComponent);
 
 export const buildListItems = <T,>(
   data: unknown,
+  // @ts-expect-error upgrade typescript v4.9.5
   schema: FormSchema<T>,
   filterManager: FilterManager,
   license: LicenseService,
@@ -198,11 +201,14 @@ export const getDescriptionItem = (
     const query = get('queryBar.query.query', data);
     const savedId = get('queryBar.saved_id', data);
     const savedQueryName = get('queryBar.title', data);
+    const ruleType: Type = get('ruleType', data);
+    const queryLabel = getQueryLabel(ruleType);
     return buildQueryBarDescription({
       field,
       filters,
       filterManager,
       query,
+      queryLabel,
       savedId,
       savedQueryName,
       indexPatterns,

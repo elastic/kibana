@@ -12,7 +12,7 @@ import { pluginInitializerContextConfigMock } from '@kbn/core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
 
-import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
+import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import { errors } from '@elastic/elasticsearch';
 import { KbnSearchError } from '../../report_search_error';
 import { firstValueFrom } from 'rxjs';
@@ -156,7 +156,7 @@ describe('ES search strategy', () => {
       expect(e).toBeInstanceOf(KbnSearchError);
       expect(e.statusCode).toBe(404);
       expect(e.message).toBe(errResponse.message);
-      expect(e.errBody).toBe(indexNotFoundException);
+      expect(e.errBody).toEqual(indexNotFoundException);
     }
   });
 

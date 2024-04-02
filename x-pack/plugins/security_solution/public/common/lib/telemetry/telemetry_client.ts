@@ -26,6 +26,8 @@ import type {
   ReportAssistantSettingToggledParams,
   ReportRiskInputsExpandedFlyoutOpenedParams,
   ReportToggleRiskSummaryClickedParams,
+  ReportDetailsFlyoutOpenedParams,
+  ReportDetailsFlyoutTabClickedParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 import type { ReportAddRiskInputToTimelineClickedParams } from './events/entity_analytics/types';
@@ -142,5 +144,13 @@ export class TelemetryClient implements TelemetryClientStart {
     this.analytics.reportEvent(TelemetryEventTypes.BreadcrumbClicked, {
       title,
     });
+  };
+
+  public reportDetailsFlyoutOpened = (params: ReportDetailsFlyoutOpenedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, params);
+  };
+
+  public reportDetailsFlyoutTabClicked = (params: ReportDetailsFlyoutTabClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.DetailsFlyoutTabClicked, params);
   };
 }

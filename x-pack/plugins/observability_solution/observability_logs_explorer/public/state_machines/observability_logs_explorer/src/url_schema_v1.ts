@@ -17,7 +17,7 @@ export const getStateFromUrlValue = (
       breakdownField: urlValue.breakdownField,
     },
     controls: urlValue.controls,
-    datasetSelection: urlValue.datasetSelection,
+    dataSourceSelection: urlValue.datasetSelection,
     filters: urlValue.filters,
     grid: {
       columns: urlValue.columns,
@@ -38,7 +38,7 @@ export const getUrlValueFromState = (
     breakdownField: state.chart?.breakdownField,
     columns: state.grid?.columns,
     controls: state.controls,
-    datasetSelection: state.datasetSelection,
+    datasetSelection: state.dataSourceSelection,
     filters: state.filters,
     query: state.query,
     refreshInterval: state.refreshInterval,

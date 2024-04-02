@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, Fragment, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, Fragment, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
-import { useTimeBuckets } from '../../../../components/custom_hooks/use_time_buckets';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
@@ -33,7 +34,8 @@ import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useDataSource } from '../../../../contexts/ml';
 import { useMlKibana } from '../../../../contexts/kibana';
-import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
+import type { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { mlJobService } from '../../../../services/job_service';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
@@ -52,10 +54,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const timefilter = useTimefilter();
   const dataSourceContext = useDataSource();
   const {
-    services: { maps: mapsPlugin },
+    services: { maps: mapsPlugin, uiSettings },
   } = useMlKibana();
 
-  const chartInterval = useTimeBuckets();
+  const chartInterval = useTimeBuckets(uiSettings);
 
   const jobCreator = useMemo(
     () =>

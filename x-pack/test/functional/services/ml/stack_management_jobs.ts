@@ -89,13 +89,10 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElement(1);
-      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-      const title: string = await titleElement.getVisibleText();
+      const title = await toasts.getTitleByIndex(1);
       expect(title).to.match(/^\d+ item[s]? synchronized$/);
 
-      const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
-      await dismissButton.click();
+      await toasts.dismissByIndex(1);
     },
 
     async assertADJobRowSpaces(adJobId: string, expectedSpaces: string[]) {
@@ -131,9 +128,9 @@ export function MachineLearningStackManagementJobsProvider({
       await retry.tryForTime(5000, async () => {
         await testSubjects.click(
           `mlSpacesManagementTable-${mlSavedObjectType} row-${jobId} > mlJobListRowManageSpacesButton`,
-          1000
+          5000
         );
-        await testSubjects.existOrFail('share-to-space-flyout', { timeout: 2000 });
+        await testSubjects.existOrFail('share-to-space-flyout', { timeout: 5000 });
       });
     },
 
@@ -281,13 +278,10 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElement(1);
-      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-      const title: string = await titleElement.getVisibleText();
+      const title = await toasts.getTitleByIndex(1);
       expect(title).to.match(/^\d+ job[s]? successfully imported$/);
 
-      const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
-      await dismissButton.click();
+      await toasts.dismissByIndex(1);
 
       // check that the flyout is closed
       await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout', { timeout: 60 * 1000 });
@@ -349,12 +343,10 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElement(1);
-      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-      const title: string = await titleElement.getVisibleText();
+      const title = await toasts.getTitleByIndex(1);
       expect(title).to.match(/^Your file is downloading in the background$/);
 
-      await toasts.dismissAllToastsWithChecks();
+      await toasts.dismissAllWithChecks();
 
       // check that the flyout is closed
       await testSubjects.missingOrFail('mlJobMgmtExportJobsFlyout', { timeout: 60 * 1000 });

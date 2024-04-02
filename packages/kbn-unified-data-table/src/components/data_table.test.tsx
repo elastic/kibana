@@ -28,6 +28,7 @@ import {
   testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -368,12 +369,18 @@ describe('UnifiedDataTable', () => {
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
+              headerRowHeight="custom"
+              headerRowHeightLines={1}
+              onChangeRowHeight={[Function]}
+              onChangeRowHeightLines={[Function]}
               onChangeSampleSize={[MockFunction]}
+              rowHeight="custom"
+              rowHeightLines={3}
               sampleSize={150}
             />,
             "allowDensity": false,
             "allowResetButton": false,
-            "allowRowHeight": true,
+            "allowRowHeight": false,
           },
           "showFullScreenSelector": true,
           "showSortSelector": true,
@@ -393,8 +400,18 @@ describe('UnifiedDataTable', () => {
           "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
+            "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
+              headerRowHeight="custom"
+              headerRowHeightLines={1}
+              onChangeRowHeight={[Function]}
+              onChangeRowHeightLines={[Function]}
+              rowHeight="custom"
+              rowHeightLines={3}
+              sampleSize={200}
+            />,
             "allowDensity": false,
-            "allowRowHeight": true,
+            "allowResetButton": false,
+            "allowRowHeight": false,
           },
           "showFullScreenSelector": true,
           "showSortSelector": true,
@@ -515,7 +532,7 @@ describe('UnifiedDataTable', () => {
       },
       flattened: { test: jest.fn() },
     };
-    const columnTypesOverride = { testField: 'number ' };
+    const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
     const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
       <div data-test-subj="test-document-view">{hit.id}</div>
     ));
@@ -524,7 +541,7 @@ describe('UnifiedDataTable', () => {
       ...getProps(),
       expandedDoc,
       setExpandedDoc: jest.fn(),
-      columnTypes: columnTypesOverride,
+      columnsMeta: columnsMetaOverride,
       renderDocumentView: renderDocumentViewMock,
       externalControlColumns: [testLeadingControlColumn],
     });
@@ -535,7 +552,7 @@ describe('UnifiedDataTable', () => {
       expandedDoc,
       getProps().rows,
       ['_source'],
-      columnTypesOverride
+      columnsMetaOverride
     );
   });
 

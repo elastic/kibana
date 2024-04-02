@@ -12,7 +12,7 @@ import type {
   RouteValidationSpec,
   RouteValidationFunction,
   RouteValidatorConfig,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   RouteValidationResultFactory,
   RouteValidatorOptions,
 } from '@kbn/core-http-server';
@@ -34,7 +34,7 @@ type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> =
  */
 export class RouteValidator<P = {}, Q = {}, B = {}> {
   public static from<_P = {}, _Q = {}, _B = {}>(
-    opts: RouteValidator<_P, _Q, _B> | RouteValidatorFullConfig<_P, _Q, _B>
+    opts: RouteValidator<_P, _Q, _B> | RouteValidatorFullConfigRequest<_P, _Q, _B>
   ) {
     if (opts instanceof RouteValidator) {
       return opts;
@@ -127,8 +127,10 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     namespace?: string
   ): RouteValidationResultType<typeof validationRule> {
     if (isConfigSchema(validationRule)) {
+      // @ts-expect-error upgrade typescript v4.9.5
       return validationRule.validate(data, {}, namespace);
     } else if (typeof validationRule === 'function') {
+      // @ts-expect-error upgrade typescript v4.9.5
       return this.validateFunction(validationRule, data, namespace);
     } else {
       throw new ValidationError(

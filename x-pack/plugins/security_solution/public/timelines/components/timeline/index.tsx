@@ -8,7 +8,7 @@
 import { pick } from 'lodash/fp';
 import { EuiProgress } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, createContext } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
@@ -22,6 +22,7 @@ import { TimelineModalHeader } from '../modal/header';
 import type { TimelineId, RowRenderer, TimelineTabs } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import type { State } from '../../../common/store';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
@@ -50,6 +51,7 @@ export interface Props {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
+  openToggleRef: React.MutableRefObject<null | HTMLAnchorElement | HTMLButtonElement>;
 }
 
 const TimelineSavingProgressComponent: React.FC<{ timelineId: TimelineId }> = ({ timelineId }) => {
@@ -67,15 +69,17 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   renderCellValue,
   rowRenderers,
   timelineId,
+  openToggleRef,
 }) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
-  const {
-    selectedPatterns: selectedPatternsSourcerer,
-    selectedDataViewId: selectedDataViewIdSourcerer,
-  } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
+  const selectedPatternsSourcerer = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.timeline);
+  });
+  const selectedDataViewIdSourcerer = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, SourcererScopeName.timeline);
+  });
   const {
     dataViewId: selectedDataViewIdTimeline,
     indexNames: selectedPatternsTimeline,
@@ -233,7 +237,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
             $isVisible={!timelineFullScreen}
             data-test-subj="timeline-hide-show-container"
           >
-            <TimelineModalHeader timelineId={timelineId} />
+            <TimelineModalHeader timelineId={timelineId} openToggleRef={openToggleRef} />
           </HideShowContainer>
 
           <TabsContent

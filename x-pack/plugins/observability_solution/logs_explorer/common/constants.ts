@@ -36,8 +36,8 @@ export const ORCHESTRATOR_NAMESPACE_FIELD = 'orchestrator.namespace';
 export const CONTAINER_NAME_FIELD = 'container.name';
 export const CONTAINER_ID_FIELD = 'container.id';
 
-// Malformed Docs
-export const MALFORMED_DOCS_FIELD = 'ignored_field_values';
+// Degraded Docs
+export const DEGRADED_DOCS_FIELD = 'ignored_field_values';
 
 // Error Stacktrace
 export const ERROR_STACK_TRACE = 'error.stack_trace';
@@ -74,3 +74,23 @@ export const SMART_FALLBACK_FIELDS = {
 // UI preferences
 export const DEFAULT_COLUMNS = [RESOURCE_FIELD_CONFIGURATION, CONTENT_FIELD_CONFIGURATION];
 export const DEFAULT_ROWS_PER_PAGE = 100;
+
+// List of prefixes which needs to be filtered out for Display in Content Column
+export const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT = [
+  '_', // Filter fields like '_id', '_score'
+  '@timestamp',
+  'agent.',
+  'elastic_agent.',
+  'data_stream.',
+  'ecs.',
+  'host.',
+  'container.',
+  'cloud.',
+  'kubernetes.',
+  'orchestrator.',
+  'log.',
+  'service.',
+];
+
+export const DEFAULT_ALLOWED_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];
+export const DEFAULT_ALLOWED_LOGS_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];

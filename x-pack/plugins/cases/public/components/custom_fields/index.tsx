@@ -101,7 +101,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
         <EuiSpacer size="m" />
         {!customFields.length ? (
           <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="empty-custom-fields">
               {i18n.NO_CUSTOM_FIELDS}
               <EuiSpacer size="m" />
             </EuiFlexItem>

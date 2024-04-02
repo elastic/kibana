@@ -18,11 +18,11 @@ import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
 import { ControlColumns, CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
-import type { ValueToStringConverter, DataTableColumnTypes } from '../types';
+import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton } from './data_table_document_selection';
-import { defaultTimeColumnWidth } from '../constants';
+import { defaultTimeColumnWidth, ROWS_HEIGHT_OPTIONS } from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
@@ -78,6 +78,7 @@ export function getLeadControlColumns(canSetExpandedDoc: boolean) {
 }
 
 function buildEuiGridColumn({
+  numberOfColumns,
   columnName,
   columnWidth = 0,
   dataView,
@@ -92,11 +93,12 @@ function buildEuiGridColumn({
   editField,
   columnCellActions,
   visibleCellActions,
-  columnTypes,
+  columnsMeta,
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
 }: {
+  numberOfColumns: number;
   columnName: string;
   columnWidth: number | undefined;
   dataView: DataView;
@@ -111,7 +113,7 @@ function buildEuiGridColumn({
   editField?: (fieldName: string) => void;
   columnCellActions?: EuiDataGridColumnCellAction[];
   visibleCellActions?: number;
-  columnTypes?: DataTableColumnTypes;
+  columnsMeta?: DataTableColumnsMeta;
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -138,19 +140,19 @@ function buildEuiGridColumn({
       : [];
   }
 
-  const columnType = columnTypes?.[columnName] ?? dataViewField?.type;
+  const columnType = columnsMeta?.[columnName]?.type ?? dataViewField?.type;
 
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(columnType),
     isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
     display:
-      showColumnTokens || (headerRowHeight && headerRowHeight !== 1) ? (
+      showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
           dataView={dataView}
           columnName={columnName}
           columnDisplayName={columnDisplayName}
-          columnTypes={columnTypes}
+          columnsMeta={columnsMeta}
           showColumnTokens={showColumnTokens}
           headerRowHeight={headerRowHeight}
         />
@@ -199,7 +201,9 @@ function buildEuiGridColumn({
         headerRowHeight={headerRowHeight}
       />
     );
-    column.initialWidth = defaultTimeColumnWidth;
+    if (numberOfColumns > 1) {
+      column.initialWidth = defaultTimeColumnWidth;
+    }
   }
 
   if (columnWidth > 0) {
@@ -211,6 +215,16 @@ function buildEuiGridColumn({
   }
   return column;
 }
+
+export const deserializeHeaderRowHeight = (headerRowHeightLines: number) => {
+  if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.auto) {
+    return undefined;
+  } else if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.single) {
+    return 1;
+  }
+
+  return headerRowHeightLines;
+};
 
 export function getEuiGridColumns({
   columns,
@@ -227,9 +241,9 @@ export function getEuiGridColumns({
   onFilter,
   editField,
   visibleCellActions,
-  columnTypes,
+  columnsMeta,
   showColumnTokens,
-  headerRowHeight,
+  headerRowHeightLines,
   customGridColumnsConfiguration,
 }: {
   columns: string[];
@@ -249,15 +263,18 @@ export function getEuiGridColumns({
   onFilter: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   visibleCellActions?: number;
-  columnTypes?: DataTableColumnTypes;
+  columnsMeta?: DataTableColumnsMeta;
   showColumnTokens?: boolean;
-  headerRowHeight?: number;
+  headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
+  const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
+  const numberOfColumns = columns.length;
 
   return columns.map((column, columnIndex) =>
     buildEuiGridColumn({
+      numberOfColumns,
       columnName: column,
       columnCellActions: columnsCellActions?.[columnIndex],
       columnWidth: getColWidth(column),
@@ -272,7 +289,7 @@ export function getEuiGridColumns({
       onFilter,
       editField,
       visibleCellActions,
-      columnTypes,
+      columnsMeta,
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,
@@ -280,24 +297,36 @@ export function getEuiGridColumns({
   );
 }
 
-export function hasSourceTimeFieldValue(
+export function canPrependTimeFieldColumn(
   columns: string[],
-  dataView: DataView,
-  columnTypes: DataTableColumnTypes | undefined,
+  timeFieldName: string | undefined,
+  columnsMeta: DataTableColumnsMeta | undefined,
   showTimeCol: boolean,
   isPlainRecord: boolean
 ) {
-  const timeFieldName = dataView.timeFieldName;
-  if (!isPlainRecord || !columns.includes('_source') || !timeFieldName || !columnTypes) {
-    return showTimeCol;
+  if (!showTimeCol || !timeFieldName) {
+    return false;
   }
-  return timeFieldName in columnTypes;
+
+  if (isPlainRecord) {
+    return !!columnsMeta && timeFieldName in columnsMeta && columns.includes('_source');
+  }
+
+  return true;
 }
 
-export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
+export function getVisibleColumns(
+  columns: string[],
+  dataView: DataView,
+  shouldPrependTimeFieldColumn: boolean
+) {
   const timeFieldName = dataView.timeFieldName;
 
-  if (showTimeCol && timeFieldName && !columns.find((col) => col === timeFieldName)) {
+  if (
+    shouldPrependTimeFieldColumn &&
+    timeFieldName &&
+    !columns.find((col) => col === timeFieldName)
+  ) {
     return [timeFieldName, ...columns];
   }
 

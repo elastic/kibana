@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
-import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
+import type { EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';

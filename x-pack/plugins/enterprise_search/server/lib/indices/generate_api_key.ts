@@ -20,8 +20,7 @@ import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 export const generateApiKey = async (
   client: IScopedClusterClient,
   indexName: string,
-  isNative: boolean,
-  secretId: string | null
+  isNative: boolean
 ) => {
   const aclIndexName = `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexName}`;
 
@@ -49,7 +48,11 @@ export const generateApiKey = async (
     const apiKeyFields = isNative
       ? {
           api_key_id: apiKeyResult.id,
-          api_key_secret_id: await storeConnectorSecret(client, apiKeyResult.encoded, secretId),
+          api_key_secret_id: await storeConnectorSecret(
+            client,
+            apiKeyResult.encoded,
+            connector._source?.api_key_secret_id || null
+          ),
         }
       : {
           api_key_id: apiKeyResult.id,

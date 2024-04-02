@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiSpacer,
   EuiConfirmModal,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -65,8 +66,7 @@ export const ApiKeyConfig: React.FC<{
   hasApiKey: boolean;
   indexName: string;
   isNative: boolean;
-  secretId: string | null;
-}> = ({ hasApiKey, indexName, isNative, secretId }) => {
+}> = ({ hasApiKey, indexName, isNative }) => {
   const { makeRequest, apiReset } = useActions(GenerateConnectorApiKeyApiLogic);
   const { data, status } = useValues(GenerateConnectorApiKeyApiLogic);
   useEffect(() => {
@@ -78,7 +78,7 @@ export const ApiKeyConfig: React.FC<{
     if (hasApiKey || data) {
       setIsModalVisible(true);
     } else {
-      makeRequest({ indexName, isNative, secretId });
+      makeRequest({ indexName, isNative });
     }
   };
 
@@ -89,7 +89,7 @@ export const ApiKeyConfig: React.FC<{
   };
 
   const onConfirm = () => {
-    makeRequest({ indexName, isNative, secretId });
+    makeRequest({ indexName, isNative });
     setIsModalVisible(false);
   };
 
@@ -102,7 +102,7 @@ export const ApiKeyConfig: React.FC<{
             ? i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.apiKey.description',
                 {
-                  defaultMessage: `This native connector's API key {apiKeyName} is managed internally by Elasticsearch. The connector uses this API key to index documents into the {indexName} index. To rollover your API key, click "Generate API key".`,
+                  defaultMessage: `This native connector's API key {apiKeyName} is managed internally by Elasticsearch. The connector uses this API key to index documents into the {indexName} index. To refresh your API key, click "Generate API key".`,
                   values: {
                     apiKeyName: `${indexName}-connector`,
                     indexName,
@@ -122,10 +122,42 @@ export const ApiKeyConfig: React.FC<{
               )}
         </EuiText>
       </EuiFlexItem>
+      {!isNative || status === Status.LOADING ? (
+        <></>
+      ) : indexName === '' ? (
+        <EuiCallOut
+          iconType="iInCircle"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.nativeConnector.apiKey.waitingForAttachedIndex',
+            {
+              defaultMessage:
+                'An API key will be automatically generated when an index is attached to this connector.',
+            }
+          )}
+        />
+      ) : !hasApiKey ? (
+        <EuiCallOut
+          iconType="warning"
+          color="danger"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.nativeConnector.apiKey.missing',
+            {
+              defaultMessage: 'This connector is missing an API key.',
+            }
+          )}
+        />
+      ) : (
+        <></>
+      )}
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={clickGenerateApiKey} isLoading={status === Status.LOADING}>
+            <EuiButton
+              onClick={clickGenerateApiKey}
+              isLoading={status === Status.LOADING}
+              isDisabled={indexName.length === 0}
+              data-telemetry-id="entSearch-content-connector-generateApiKeyButton"
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.button.label',
                 {
@@ -137,11 +169,16 @@ export const ApiKeyConfig: React.FC<{
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      {data && (
+      {data && !isNative && (
         <>
           <EuiSpacer />
           <EuiFlexItem>
-            <ApiKey apiKey={data?.encoded} label="API Key" />
+            <ApiKey
+              apiKey={data?.encoded}
+              label={i18n.translate('xpack.enterpriseSearch.apiKeyConfig.apiKey.apiKeyLabel', {
+                defaultMessage: 'API Key',
+              })}
+            />
           </EuiFlexItem>
         </>
       )}

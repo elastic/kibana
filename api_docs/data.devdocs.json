@@ -7547,6 +7547,34 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.GetFieldsOptions.fieldTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.GetFieldsOptions.includeEmptyFields",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeEmptyFields",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9250,15 +9278,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ type: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IAggType",
-            "text": "IAggType"
-          },
-          "; id?: string | undefined; params?: {} | ",
+          "{ params?: {} | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -9266,7 +9286,15 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; type: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IAggType",
+            "text": "IAggType"
+          },
+          "; enabled?: boolean | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -12197,6 +12225,10 @@
           "trackAdoption": false,
           "references": [
             {
+              "plugin": "graph",
+              "path": "x-pack/plugins/graph/public/plugin.ts"
+            },
+            {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/data_view_select.tsx"
             },
@@ -12215,10 +12247,6 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
-            },
-            {
-              "plugin": "graph",
-              "path": "x-pack/plugins/graph/public/plugin.ts"
             },
             {
               "plugin": "inputControlVis",
@@ -13002,7 +13030,7 @@
               "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
             ],
             "signature": [
-              "() => Omit<",
+              "(params?: { keepFieldAttrs?: (\"customLabel\" | \"customDescription\")[] | undefined; } | undefined) => Omit<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -13015,7 +13043,35 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataView.toMinimalSpec.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.DataView.toMinimalSpec.$1.keepFieldAttrs",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "keepFieldAttrs",
+                    "description": [],
+                    "signature": [
+                      "(\"customLabel\" | \"customDescription\")[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
             "returnComment": []
           },
           {
@@ -13639,6 +13695,59 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataView.setFieldCustomDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "setFieldCustomDescription",
+            "description": [
+              "\nSet field custom description"
+            ],
+            "signature": [
+              "(fieldName: string, customDescription: string | null | undefined) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataView.setFieldCustomDescription.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [
+                  "name of field to set custom label on"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataView.setFieldCustomDescription.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "customDescription",
+                "description": [
+                  "custom description value. If undefined, custom description is removed"
+                ],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataView.setFieldCount",
             "type": "Function",
             "tags": [],
@@ -14214,6 +14323,38 @@
             ],
             "signature": [
               "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsService.getMetaFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetaFields",
+            "description": [],
+            "signature": [
+              "() => Promise<string[] | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsService.getShortDotsEnable",
+            "type": "Function",
+            "tags": [],
+            "label": "getShortDotsEnable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -15326,7 +15467,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; }) => Promise<{ fields: ",
+              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; fieldTypes?: string[] | undefined; includeEmptyFields?: boolean | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -15456,6 +15597,34 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "allowHidden",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.fieldTypes",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "fieldTypes",
+                    "description": [],
+                    "signature": [
+                      "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.includeEmptyFields",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "includeEmptyFields",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -15899,7 +16068,39 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  "{ create: { <TDocument = unknown>(this: That, params: ",
+                  "{ search: { <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument> | ",
                   "CreateRequest",
@@ -16003,41 +16204,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; }; helpers: ",
+                  ">; }; helpers: ",
                   "default",
-                  "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -16240,6 +16409,8 @@
                   ">; }; enrich: ",
                   "default",
                   "; eql: ",
+                  "default",
+                  "; esql: ",
                   "default",
                   "; exists: { (this: That, params: ",
                   "ExistsRequest",
@@ -16492,6 +16663,8 @@
                   " | undefined): Promise<",
                   "WriteResponseBase",
                   ">; }; indices: ",
+                  "default",
+                  "; inference: ",
                   "default",
                   "; info: { (this: That, params?: ",
                   "InfoRequest",
@@ -16747,7 +16920,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "AcknowledgedResponseBase",
-                  ">; }; rankEval: { (this: That, params: ",
+                  ">; }; queryRuleset: ",
+                  "default",
+                  "; rankEval: { (this: That, params: ",
                   "RankEvalRequest",
                   " | ",
                   "RankEvalRequest",
@@ -19240,7 +19415,7 @@
               "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
             ],
             "signature": [
-              "() => Omit<",
+              "(params?: { keepFieldAttrs?: (\"customLabel\" | \"customDescription\")[] | undefined; } | undefined) => Omit<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19253,7 +19428,35 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataView.toMinimalSpec.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.DataView.toMinimalSpec.$1.keepFieldAttrs",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "keepFieldAttrs",
+                    "description": [],
+                    "signature": [
+                      "(\"customLabel\" | \"customDescription\")[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
             "returnComment": []
           },
           {
@@ -19877,6 +20080,59 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataView.setFieldCustomDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "setFieldCustomDescription",
+            "description": [
+              "\nSet field custom description"
+            ],
+            "signature": [
+              "(fieldName: string, customDescription: string | null | undefined) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataView.setFieldCustomDescription.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [
+                  "name of field to set custom label on"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataView.setFieldCustomDescription.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "customDescription",
+                "description": [
+                  "custom description value. If undefined, custom description is removed"
+                ],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataView.setFieldCount",
             "type": "Function",
             "tags": [],
@@ -20038,7 +20294,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20272,6 +20528,38 @@
             "label": "customLabel",
             "description": [
               "\nSets custom label for field, or unsets if passed undefined."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.customDescription",
+            "type": "string",
+            "tags": [],
+            "label": "customDescription",
+            "description": [
+              "\nReturns custom description if set, otherwise undefined."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.customDescription",
+            "type": "string",
+            "tags": [],
+            "label": "customDescription",
+            "description": [
+              "\nSets custom description for field, or unsets if passed undefined."
             ],
             "signature": [
               "string | undefined"
@@ -20725,7 +21013,7 @@
                 "section": "def-common.IFieldSubType",
                 "text": "IFieldSubType"
               },
-              " | undefined; customLabel: string | undefined; defaultFormatter: string | undefined; }"
+              " | undefined; customLabel: string | undefined; customDescription: string | undefined; defaultFormatter: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -21350,6 +21638,38 @@
             ],
             "signature": [
               "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewsService.getMetaFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetaFields",
+            "description": [],
+            "signature": [
+              "() => Promise<string[] | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewsService.getShortDotsEnable",
+            "type": "Function",
+            "tags": [],
+            "label": "getShortDotsEnable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -23795,6 +24115,34 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.fieldTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.includeEmptyFields",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeEmptyFields",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -24866,7 +25214,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getFieldsForWildcard: (options: ",
+          " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getMetaFields: () => Promise<string[] | undefined>; getShortDotsEnable: () => Promise<boolean | undefined>; getFieldsForWildcard: (options: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25156,7 +25504,7 @@
           "\nField attributes that are stored on the data view"
         ],
         "signature": [
-          "{ customLabel?: string | undefined; count?: number | undefined; }"
+          "{ customLabel?: string | undefined; customDescription?: string | undefined; count?: number | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -25196,7 +25544,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

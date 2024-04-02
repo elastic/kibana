@@ -79,6 +79,7 @@ describe('addConnector lib function', () => {
         indexName: 'index_name',
         isNative: false,
         language: 'fr',
+        name: 'index_name',
       })
     ).resolves.toEqual(expect.objectContaining({ id: 'fakeId', index_name: 'index_name' }));
     expect(createConnector).toHaveBeenCalledWith(mockClient.asCurrentUser, {
@@ -123,6 +124,7 @@ describe('addConnector lib function', () => {
         indexName: 'index_name',
         isNative: true,
         language: 'ja',
+        name: 'index_name',
       })
     ).resolves.toEqual(expect.objectContaining({ id: 'fakeId', index_name: 'index_name' }));
     expect(createConnector).toHaveBeenCalledWith(mockClient.asCurrentUser, {
@@ -144,7 +146,7 @@ describe('addConnector lib function', () => {
     });
 
     // native connector should generate API key and update secrets storage
-    expect(generateApiKey).toHaveBeenCalledWith(mockClient, 'index_name', true, null);
+    expect(generateApiKey).toHaveBeenCalledWith(mockClient, 'index_name', true);
   });
 
   it('should reject if index already exists', async () => {
@@ -163,6 +165,7 @@ describe('addConnector lib function', () => {
         indexName: 'index_name',
         isNative: true,
         language: 'en',
+        name: '',
       })
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
@@ -180,6 +183,7 @@ describe('addConnector lib function', () => {
         indexName: 'index_name',
         isNative: false,
         language: 'en',
+        name: '',
       })
     ).rejects.toEqual(new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
@@ -201,6 +205,7 @@ describe('addConnector lib function', () => {
         indexName: 'index_name',
         isNative: false,
         language: 'en',
+        name: '',
       })
     ).rejects.toEqual(new Error(ErrorCode.CRAWLER_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
@@ -219,6 +224,7 @@ describe('addConnector lib function', () => {
         indexName: 'index_name',
         isNative: true,
         language: 'en',
+        name: '',
       })
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
@@ -246,6 +252,7 @@ describe('addConnector lib function', () => {
         indexName: 'index_name',
         isNative: true,
         language: null,
+        name: '',
       })
     ).resolves.toEqual(expect.objectContaining({ id: 'fakeId', index_name: 'index_name' }));
     expect(deleteConnectorById).toHaveBeenCalledWith(mockClient.asCurrentUser, 'connectorId');
@@ -254,7 +261,7 @@ describe('addConnector lib function', () => {
       indexName: 'index_name',
       isNative: true,
       language: null,
-      name: 'index_name',
+      name: '',
       pipeline: {
         extract_binary_content: true,
         name: 'ent-search-generic-ingestion',

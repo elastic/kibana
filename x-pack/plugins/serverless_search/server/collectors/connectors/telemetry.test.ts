@@ -7,16 +7,15 @@
 
 import { registerTelemetryUsageCollector } from './telemetry';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { collectConnectorStats } from '@kbn/search-connectors';
+import { ConnectorStats } from '../../../common/types';
 
-const indexNotFoundError = {
-  meta: {
-    body: {
-      error: {
-        type: 'index_not_found_exception',
-      },
-    },
-  },
-};
+jest.mock('@kbn/search-connectors', () => ({
+  collectConnectorStats: jest.fn(),
+}));
+
+const mockLogger = loggingSystemMock.createLogger().get();
 
 describe('Connectors Serverless Telemetry Usage Collector', () => {
   const makeUsageCollectorStub = jest.fn();
@@ -32,7 +31,7 @@ describe('Connectors Serverless Telemetry Usage Collector', () => {
 
   describe('registerTelemetryUsageCollector', () => {
     it('should make and register the usage collector', () => {
-      registerTelemetryUsageCollector(usageCollectionMock);
+      registerTelemetryUsageCollector(usageCollectionMock, mockLogger);
 
       expect(registerStub).toHaveBeenCalledTimes(1);
       expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
@@ -43,42 +42,30 @@ describe('Connectors Serverless Telemetry Usage Collector', () => {
 
   describe('fetchTelemetryMetrics', () => {
     it('should return telemetry data', async () => {
-      const fetchContextMock = createCollectorFetchContextMock();
-      fetchContextMock.esClient.count = jest.fn().mockImplementation((query: any) =>
-        Promise.resolve({
-          count: query.query.bool.filter[0].term.is_native ? 5 : 2,
-        })
-      );
-      registerTelemetryUsageCollector(usageCollectionMock);
+      const connectorStats: ConnectorStats = {
+        id: '1',
+        isDeleted: false,
+      };
+      (collectConnectorStats as jest.Mock).mockImplementation(() => [connectorStats]);
+      registerTelemetryUsageCollector(usageCollectionMock, mockLogger);
       const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch(
-        fetchContextMock
+        createCollectorFetchContextMock()
       );
 
       expect(telemetryMetrics).toEqual({
-        native: {
-          total: 5,
-        },
-        clients: {
-          total: 2,
-        },
+        connectors: [connectorStats],
       });
     });
-    it('should return default telemetry on index not found error', async () => {
-      const fetchContextMock = createCollectorFetchContextMock();
-      fetchContextMock.esClient.count = jest
-        .fn()
-        .mockImplementation(() => Promise.reject(indexNotFoundError));
-      registerTelemetryUsageCollector(usageCollectionMock);
+    it('should return default telemetry when collectConnectorStats raises error', async () => {
+      (collectConnectorStats as jest.Mock).mockImplementation(() => {
+        throw new Error();
+      });
+      registerTelemetryUsageCollector(usageCollectionMock, mockLogger);
       const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch(
-        fetchContextMock
+        createCollectorFetchContextMock()
       );
       expect(telemetryMetrics).toEqual({
-        native: {
-          total: 0,
-        },
-        clients: {
-          total: 0,
-        },
+        connectors: [],
       });
     });
   });

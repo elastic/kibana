@@ -39,6 +39,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     await appsMenu.clickLink(title);
     return browser.execute(() => {
       if (!('__RENDERING_SESSION__' in window)) {
+        // @ts-expect-error upgrade typescript v4.9.5
         window.__RENDERING_SESSION__ = [];
       }
 
@@ -101,6 +102,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
         'console.autocompleteDefinitions.endpointsAvailability (alternatives)',
+        'console.dev.enableMonaco (boolean)',
         'console.ui.enabled (boolean)',
         'console.ui.embeddedEnabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
@@ -159,6 +161,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean)',
         'monitoring.ui.min_interval_seconds (number)',
         'monitoring.ui.show_license_expiration (boolean)',
+        'navigation.solutionNavigation.featureOn (boolean)',
+        'navigation.solutionNavigation.enabled (boolean)',
+        'navigation.solutionNavigation.optInStatus (alternatives)',
+        'navigation.solutionNavigation.defaultSolution (alternatives)',
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',
@@ -171,6 +177,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildId (string)',
         'telemetry.labels.ciBuildJobId (string)',
         'telemetry.labels.ciBuildNumber (number)',
+        'telemetry.labels.environment (string)',
         'telemetry.labels.ftrConfig (string)',
         'telemetry.labels.gitRev (string)',
         'telemetry.labels.isPr (boolean)',
@@ -226,6 +233,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.base_url (string)',
         'xpack.cloud.cname (string)',
         'xpack.cloud.deployment_url (string)',
+        'xpack.cloud.deployments_url (string)',
         'xpack.cloud.is_elastic_staff_owned (boolean)',
         'xpack.cloud.trial_end_date (string)',
         'xpack.cloud_integrations.chat.chatURL (string)',
@@ -310,6 +318,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+        'xpack.security.roleManagementEnabled (any)',
         'xpack.spaces.maxSpaces (number)',
         'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
@@ -331,6 +340,19 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.thresholdRule.enabled (any)', // conditional, is actually a boolean
         'xpack.observability_onboarding.ui.enabled (boolean)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
+        'share.new_version.enabled (boolean)',
+        /**
+         * Rule form V2 feature flags
+         */
+        'discover.experimental.ruleFormV2Enabled (boolean)',
+        'xpack.infra.featureFlags.ruleFormV2Enabled (boolean)',
+        'xpack.legacy_uptime.experimental.ruleFormV2Enabled (boolean)',
+        'xpack.ml.experimental.ruleFormV2.enabled (boolean)',
+        'xpack.transform.experimental.ruleFormV2Enabled (boolean)',
+        'xpack.apm.featureFlags.ruleFormV2Enabled (boolean)',
+        'xpack.observability.unsafe.ruleFormV2.enabled (boolean)',
+        'xpack.slo.experimental.ruleFormV2.enabled (boolean)',
+        /**/
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
@@ -373,6 +395,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+        'xpack.security.roleManagementEnabled (any)',
 
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
@@ -381,6 +404,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildId (string)',
         'telemetry.labels.ciBuildJobId (string)',
         'telemetry.labels.ciBuildNumber (number)',
+        'telemetry.labels.environment (string)',
         'telemetry.labels.ftrConfig (string)',
         'telemetry.labels.gitRev (string)',
         'telemetry.labels.isPr (boolean)',

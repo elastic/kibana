@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 interface CreateApiIndexValue {
@@ -43,3 +43,8 @@ export const CreateApiIndexApiLogic = createApiLogic(
   ['create_api_index_api_logic'],
   createApiIndex
 );
+
+export type CreateApiIndexApiLogicActions = Actions<
+  CreateApiIndexApiLogicArgs,
+  CreateApiIndexApiLogicResponse
+>;

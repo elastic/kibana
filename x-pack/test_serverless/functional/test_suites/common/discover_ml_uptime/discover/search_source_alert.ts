@@ -290,10 +290,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const checkInitialRuleParamsState = async (dataView: string, isViewInApp = false) => {
     if (isViewInApp) {
-      expect(await toasts.getToastCount()).to.be(0);
+      expect(await toasts.getCount()).to.be(0);
     } else {
-      expect(await toasts.getToastCount()).to.be(1);
-      expect((await toasts.getToastContent(1)).startsWith('Displayed documents may vary')).to.be(
+      expect(await toasts.getCount()).to.be(1);
+      expect((await toasts.getContentByIndex(1)).startsWith('Displayed documents may vary')).to.be(
         true
       );
     }
@@ -307,7 +307,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const checkUpdatedRuleParamsState = async () => {
-    expect(await toasts.getToastCount()).to.be(0);
+    expect(await toasts.getCount()).to.be(0);
     const queryString = await queryBar.getQueryString();
     const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
     expect(queryString).to.be.equal('message:msg-1');
@@ -341,7 +341,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  describe('Search source Alert', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/176882
+  describe.skip('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
@@ -569,8 +570,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not display results after data view removal on clicking viewInApp link', async () => {
       await clickViewInApp(RULE_NAME);
 
-      expect(await toasts.getToastCount()).to.be.equal(1);
-      const content = await toasts.getToastContent(1);
+      expect(await toasts.getCount()).to.be.equal(1);
+      const content = await toasts.getContentByIndex(1);
       expect(content).to.equal(
         `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
       );

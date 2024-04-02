@@ -19,7 +19,7 @@
     "patterns": [
       "_index_template/_simulate_index/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-simulate-index.html",
     "availability": {
       "stack": true,
       "serverless": true

@@ -7,7 +7,7 @@
  */
 
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 interface SetupDeps {
@@ -24,7 +24,7 @@ export class LocatorExplorerPlugin implements Plugin<void, void, SetupDeps, Star
     core.application.register({
       id: 'locatorExplorer',
       title: 'Locator explorer',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./app');
         return renderApp(

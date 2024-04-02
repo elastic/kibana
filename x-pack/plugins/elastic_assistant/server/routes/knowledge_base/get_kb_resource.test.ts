@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaRequest } from '@kbn/core/server';
 import { getKbResource } from './get_kb_resource';
 
 describe('getKbResource', () => {
@@ -15,7 +16,13 @@ describe('getKbResource', () => {
   });
 
   it('returns undefined when params is undefined', () => {
-    const request = { params: undefined };
+    const request = { params: undefined } as unknown as KibanaRequest<
+      { resource?: string | undefined },
+      unknown,
+      unknown,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any
+    >;
 
     const result = getKbResource(request);
 
@@ -23,7 +30,13 @@ describe('getKbResource', () => {
   });
 
   it('returns undefined when resource is undefined', () => {
-    const request = { params: { resource: undefined } };
+    const request = { params: { resource: undefined } } as unknown as KibanaRequest<
+      { resource?: string | undefined },
+      unknown,
+      unknown,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any
+    >;
 
     const result = getKbResource(request);
 
@@ -31,7 +44,13 @@ describe('getKbResource', () => {
   });
 
   it('returns the decoded resource', () => {
-    const request = { params: { resource: 'esql%20query' } };
+    const request = { params: { resource: 'esql%20query' } } as unknown as KibanaRequest<
+      { resource?: string | undefined },
+      unknown,
+      unknown,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any
+    >;
 
     const result = getKbResource(request);
 

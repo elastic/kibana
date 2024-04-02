@@ -21,7 +21,8 @@
     "@kbn/apm-utils",
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/core-test-helpers-kbn-server"
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": [
     "target/**/*",

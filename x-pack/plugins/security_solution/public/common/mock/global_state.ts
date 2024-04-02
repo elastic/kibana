@@ -381,7 +381,6 @@ export const mockGlobalState: State = {
         isSaving: false,
         itemsPerPageOptions: [10, 25, 50, 100],
         savedSearchId: null,
-        isDiscoverSavedSearchLoaded: false,
         savedSearch: null,
         isDataProviderVisible: true,
       },
@@ -477,6 +476,16 @@ export const mockGlobalState: State = {
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
           SourcererScopeName.timeline,
+          mockSourcererState.signalIndexName,
+          true
+        ),
+      },
+      [SourcererScopeName.analyzer]: {
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.default,
           mockSourcererState.signalIndexName,
           true
         ),

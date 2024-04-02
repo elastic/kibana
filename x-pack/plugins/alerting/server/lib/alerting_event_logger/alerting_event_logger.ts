@@ -440,6 +440,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
         new: metrics.numberOfNewAlerts ? metrics.numberOfNewAlerts : 0,
         recovered: metrics.numberOfRecoveredAlerts ? metrics.numberOfRecoveredAlerts : 0,
       },
+      number_of_delayed_alerts: metrics.numberOfDelayedAlerts ? metrics.numberOfDelayedAlerts : 0,
       number_of_searches: metrics.numSearches ? metrics.numSearches : 0,
       es_search_duration_ms: metrics.esSearchDurationMs ? metrics.esSearchDurationMs : 0,
       total_search_duration_ms: metrics.totalSearchDurationMs ? metrics.totalSearchDurationMs : 0,

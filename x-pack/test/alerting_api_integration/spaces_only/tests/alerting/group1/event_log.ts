@@ -1855,6 +1855,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const NEW_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.new';
           const RECOVERED_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.recovered';
           const ACTION_PATH = 'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
+          const DELAYED_PATH = 'kibana.alert.rule.execution.metrics.number_of_delayed_alerts';
 
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
@@ -1933,6 +1934,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             expect(get(event, NEW_PATH)).to.be(0);
             expect(get(event, RECOVERED_PATH)).to.be(0);
             expect(get(event, ACTION_PATH)).to.be(0);
+            expect(get(event, DELAYED_PATH)).to.be(1);
           });
 
           // third executions creates the delayed active alert and triggers actions
@@ -1940,24 +1942,28 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           expect(get(executeEvents[2], NEW_PATH)).to.be(1);
           expect(get(executeEvents[2], RECOVERED_PATH)).to.be(0);
           expect(get(executeEvents[2], ACTION_PATH)).to.be(1);
+          expect(get(executeEvents[2], DELAYED_PATH)).to.be(0);
 
           // fourth execution
           expect(get(executeEvents[3], ACTIVE_PATH)).to.be(1);
           expect(get(executeEvents[3], NEW_PATH)).to.be(0);
           expect(get(executeEvents[3], RECOVERED_PATH)).to.be(0);
           expect(get(executeEvents[3], ACTION_PATH)).to.be(0);
+          expect(get(executeEvents[3], DELAYED_PATH)).to.be(0);
 
           // fifth recovered execution
           expect(get(executeEvents[4], ACTIVE_PATH)).to.be(0);
           expect(get(executeEvents[4], NEW_PATH)).to.be(0);
           expect(get(executeEvents[4], RECOVERED_PATH)).to.be(1);
           expect(get(executeEvents[4], ACTION_PATH)).to.be(0);
+          expect(get(executeEvents[4], DELAYED_PATH)).to.be(0);
 
           // sixth execution does not create the active alert
           expect(get(executeEvents[5], ACTIVE_PATH)).to.be(0);
           expect(get(executeEvents[5], NEW_PATH)).to.be(0);
           expect(get(executeEvents[5], RECOVERED_PATH)).to.be(0);
           expect(get(executeEvents[5], ACTION_PATH)).to.be(0);
+          expect(get(executeEvents[5], DELAYED_PATH)).to.be(1);
         });
       });
     }

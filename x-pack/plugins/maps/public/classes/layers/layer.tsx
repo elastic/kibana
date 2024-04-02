@@ -577,7 +577,10 @@ export class AbstractLayer implements ILayer {
 
   getGeoFieldNames(): string[] {
     const source = this.getSource();
-    return hasESSourceMethod(source, 'getGeoFieldName') ? [source.getGeoFieldName()] : [];
+    const geoFieldName = hasESSourceMethod(source, 'getGeoFieldName')
+      ? source.getGeoFieldName()
+      : undefined;
+    return geoFieldName ? [geoFieldName] : [];
   }
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {

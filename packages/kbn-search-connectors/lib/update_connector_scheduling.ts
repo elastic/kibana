@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { Result } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { isNotFoundException } from '../utils/identify_exceptions';
 
 import { SchedulingConfiguraton } from '../types/connectors';
-import { ConnectorsAPIUpdateResponse } from '../types/connectors_api';
 
 export const updateConnectorScheduling = async (
   client: ElasticsearchClient,
@@ -19,7 +19,7 @@ export const updateConnectorScheduling = async (
   scheduling: SchedulingConfiguraton
 ) => {
   try {
-    const result = await client.transport.request<ConnectorsAPIUpdateResponse>({
+    const result = await client.transport.request<Result>({
       method: 'PUT',
       path: `/_connector/${connectorId}/_scheduling`,
       body: {

@@ -17,8 +17,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { useActor } from '@xstate/react';
 import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 import {
-  malformedDocButtonLabelWhenNotPresent,
-  malformedDocButtonLabelWhenPresent,
+  degradedDocButtonLabelWhenNotPresent,
+  degradedDocButtonLabelWhenPresent,
   stacktraceAvailableControlButton,
   stacktraceNotAvailableControlButton,
 } from '../components/common/translations';
@@ -27,7 +27,7 @@ import { getStacktraceFields } from '../utils/get_stack_trace';
 import { LogDocument } from '../../common/document';
 import { ActionsColumnTooltip } from '../components/virtual_columns/column_tooltips/actions_column_tooltip';
 
-const ConnectedMalformedDocs = ({
+const ConnectedDegradedDocs = ({
   rowIndex,
   service,
 }: {
@@ -35,10 +35,8 @@ const ConnectedMalformedDocs = ({
   service: LogsExplorerControllerStateService;
 }) => {
   const [state] = useActor(service);
-
-  if (state.matches('initialized') && state.context.rows) {
-    const row = state.context.rows[rowIndex];
-    return <MalformedDocs row={row} rowIndex={rowIndex} />;
+  if (state.matches('initialized') && state.context.rows[rowIndex]) {
+    return <DegradedDocs row={state.context.rows[rowIndex]} rowIndex={rowIndex} />;
   }
 
   return null;
@@ -52,43 +50,41 @@ const ConnectedStacktraceDocs = ({
   service: LogsExplorerControllerStateService;
 }) => {
   const [state] = useActor(service);
-
-  if (state.matches('initialized') && state.context.rows) {
-    const row = state.context.rows[rowIndex];
-    return <Stacktrace row={row} rowIndex={rowIndex} />;
+  if (state.matches('initialized') && state.context.rows[rowIndex]) {
+    return <Stacktrace row={state.context.rows[rowIndex]} rowIndex={rowIndex} />;
   }
 
   return null;
 };
 
-const MalformedDocs = ({ row, rowIndex }: { row: DataTableRecord; rowIndex: number }) => {
-  const isMalformedDocumentExists = !!row.raw[constants.MALFORMED_DOCS_FIELD];
+const DegradedDocs = ({ row, rowIndex }: { row: DataTableRecord; rowIndex: number }) => {
+  const isDegradedDocumentExists = constants.DEGRADED_DOCS_FIELD in row.raw;
 
-  return isMalformedDocumentExists ? (
+  return isDegradedDocumentExists ? (
     <DataTableRowControl>
-      <EuiToolTip content={malformedDocButtonLabelWhenPresent} delay="long">
+      <EuiToolTip content={degradedDocButtonLabelWhenPresent} delay="long">
         <EuiButtonIcon
-          id={`malformedDocExists_${rowIndex}`}
+          id={`degradedDocExists_${rowIndex}`}
           size="xs"
           iconSize="s"
-          data-test-subj={'docTableMalformedDocExist'}
+          data-test-subj={'docTableDegradedDocExist'}
           color={'danger'}
-          aria-label={malformedDocButtonLabelWhenPresent}
+          aria-label={degradedDocButtonLabelWhenPresent}
           iconType={'indexClose'}
         />
       </EuiToolTip>
     </DataTableRowControl>
   ) : (
     <DataTableRowControl>
-      <EuiToolTip content={malformedDocButtonLabelWhenNotPresent} delay="long">
+      <EuiToolTip content={degradedDocButtonLabelWhenNotPresent} delay="long">
         <EuiButtonIcon
-          id={`malformedDocExists_${rowIndex}`}
+          id={`degradedDocExists_${rowIndex}`}
           size="xs"
           iconSize="s"
-          data-test-subj={'docTableMalformedDocDoesNotExist'}
+          data-test-subj={'docTableDegradedDocDoesNotExist'}
           color={'text'}
           iconType={'pagesSelect'}
-          aria-label={malformedDocButtonLabelWhenNotPresent}
+          aria-label={degradedDocButtonLabelWhenNotPresent}
         />
       </EuiToolTip>
     </DataTableRowControl>
@@ -137,7 +133,7 @@ export const createCustomControlColumnsConfiguration =
         return (
           <span>
             <ExpandButton rowIndex={rowIndex} setCellProps={setCellProps} {...rest} />
-            <ConnectedMalformedDocs rowIndex={rowIndex} service={service} />
+            <ConnectedDegradedDocs rowIndex={rowIndex} service={service} />
             <ConnectedStacktraceDocs rowIndex={rowIndex} service={service} />
           </span>
         );

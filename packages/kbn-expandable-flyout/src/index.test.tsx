@@ -18,7 +18,9 @@ import {
 } from './components/test_ids';
 import { type State } from './state';
 import { TestProvider } from './test/provider';
+import { REDUX_ID_FOR_MEMORY_STORAGE } from './constants';
 
+const id = REDUX_ID_FOR_MEMORY_STORAGE;
 const registeredPanels: Panel[] = [
   {
     key: 'key',
@@ -28,14 +30,12 @@ const registeredPanels: Panel[] = [
 
 describe('ExpandableFlyout', () => {
   it(`shouldn't render flyout if no panels`, () => {
-    const context = {
-      right: undefined,
-      left: undefined,
-      preview: [],
-    } as unknown as State;
+    const state: State = {
+      byId: {},
+    };
 
     const result = render(
-      <TestProvider state={context}>
+      <TestProvider state={state}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
       </TestProvider>
     );
@@ -44,16 +44,20 @@ describe('ExpandableFlyout', () => {
   });
 
   it('should render right section', () => {
-    const context = {
-      right: {
-        id: 'key',
+    const state = {
+      byId: {
+        [id]: {
+          right: {
+            id: 'key',
+          },
+          left: undefined,
+          preview: undefined,
+        },
       },
-      left: {},
-      preview: [],
-    } as unknown as State;
+    };
 
     const { getByTestId } = render(
-      <TestProvider state={context}>
+      <TestProvider state={state}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
       </TestProvider>
     );
@@ -62,16 +66,20 @@ describe('ExpandableFlyout', () => {
   });
 
   it('should render left section', () => {
-    const context = {
-      right: {},
-      left: {
-        id: 'key',
+    const state = {
+      byId: {
+        [id]: {
+          right: undefined,
+          left: {
+            id: 'key',
+          },
+          preview: undefined,
+        },
       },
-      preview: [],
-    } as unknown as State;
+    };
 
     const { getByTestId } = render(
-      <TestProvider state={context}>
+      <TestProvider state={state}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
       </TestProvider>
     );
@@ -80,18 +88,22 @@ describe('ExpandableFlyout', () => {
   });
 
   it('should render preview section', () => {
-    const context = {
-      right: {},
-      left: {},
-      preview: [
-        {
-          id: 'key',
+    const state = {
+      byId: {
+        [id]: {
+          right: undefined,
+          left: undefined,
+          preview: [
+            {
+              id: 'key',
+            },
+          ],
         },
-      ],
-    } as State;
+      },
+    };
 
     const { getByTestId } = render(
-      <TestProvider state={context}>
+      <TestProvider state={state}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
       </TestProvider>
     );

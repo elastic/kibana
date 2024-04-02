@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core-http-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
+import type { DarkModeValue } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
@@ -29,9 +30,10 @@ export interface RenderingMetadata {
   bootstrapScriptUrl: string;
   i18n: typeof i18n.translate;
   locale: string;
-  darkMode: boolean;
   themeVersion: ThemeVersion;
+  darkMode: DarkModeValue;
   stylesheetPaths: string[];
+  scriptPaths: string[];
   injectedMetadata: InjectedMetadata;
   customBranding: CustomBranding;
 }

@@ -70,6 +70,9 @@ jest.mock('react-router-dom', () => {
 });
 
 const mockDispatch = jest.fn();
+const mockRef = {
+  current: null,
+};
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -95,6 +98,7 @@ describe('StatefulTimeline', () => {
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
     timelineId: TimelineId.test,
+    openToggleRef: mockRef,
   };
 
   beforeEach(() => {
