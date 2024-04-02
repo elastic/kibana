@@ -62,6 +62,8 @@ export const getAddPanelActionMenuItems = (
           grouped[group.id] = {
             id: group.id,
             // @ts-expect-error
+            icon: group.getIconType(context),
+            // @ts-expect-error
             title: group.getDisplayName(context),
             items: [],
           };

@@ -310,8 +310,18 @@ export const EditorMenu = ({
             ],
           });
         } else if (addPanelGroup) {
+          const panelId = addPanelGroup.id;
+
+          initialPanelGroups.push({
+            'data-test-subj': `dashboardEditorMenu-${groupId}Group`,
+            name: addPanelGroup.title,
+            // @ts-expect-error
+            icon: addPanelGroup.icon,
+            panel: panelId,
+          });
+
           additionalPanels.push({
-            id: panelCount,
+            id: panelId,
             title: addPanelGroup.title,
             items: addPanelGroup.items,
           });
