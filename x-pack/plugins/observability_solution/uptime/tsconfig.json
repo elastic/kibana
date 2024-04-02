@@ -72,7 +72,8 @@
     "@kbn/actions-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/repo-info"
   ],
   "exclude": ["target/**/*"]
 }

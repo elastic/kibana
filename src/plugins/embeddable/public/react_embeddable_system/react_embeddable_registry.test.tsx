@@ -14,20 +14,23 @@ import {
 import { ReactEmbeddableFactory } from './types';
 
 describe('react embeddable registry', () => {
-  const testEmbeddableFactory: ReactEmbeddableFactory = {
-    deserializeState: jest.fn(),
-    getComponent: jest.fn(),
-  };
+  const getTestEmbeddableFactory = () =>
+    Promise.resolve({
+      type: 'test',
+      deserializeState: jest.fn(),
+      buildEmbeddable: jest.fn(),
+    } as ReactEmbeddableFactory);
 
   it('throws an error if requested embeddable factory type is not registered', () => {
-    expect(() => getReactEmbeddableFactory('notRegistered')).toThrowErrorMatchingInlineSnapshot(
-      `"No embeddable factory found for type: notRegistered"`
+    expect(() => getReactEmbeddableFactory('notRegistered')).rejects.toThrow(
+      'No embeddable factory found for type: notRegistered'
     );
   });
 
   it('can register and get an embeddable factory', () => {
-    registerReactEmbeddableFactory('test', testEmbeddableFactory);
-    expect(getReactEmbeddableFactory('test')).toBe(testEmbeddableFactory);
+    const returnedFactory = getTestEmbeddableFactory();
+    registerReactEmbeddableFactory('test', getTestEmbeddableFactory);
+    expect(getReactEmbeddableFactory('test')).toEqual(returnedFactory);
   });
 
   it('can check if a factory is registered', () => {

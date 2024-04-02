@@ -7,11 +7,12 @@
 
 import { BehaviorSubject, combineLatest, type Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
+import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { ChangePointsTable } from '../components/change_point_detection/change_points_table';
-import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '../../common/constants';
 import { ReloadContextProvider } from '../hooks/use_reload';
 import {
   type ChangePointAnnotation,
@@ -22,7 +23,7 @@ import type {
   EmbeddableChangePointChartInput,
   EmbeddableChangePointChartOutput,
 } from './embeddable_change_point_chart';
-import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
+import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 import { FilterQueryContextProvider, useFilterQueryUpdates } from '../hooks/use_filters_query';
 import { DataSourceContextProvider, useDataSource } from '../hooks/use_data_source';
 import { useAiopsAppContext } from '../hooks/use_aiops_app_context';

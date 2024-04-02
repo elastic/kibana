@@ -127,7 +127,7 @@ export function createTheme(
       'editor.background': backgroundColor ?? euiTheme.euiFormBackgroundColor,
       'editorLineNumber.foreground': euiTheme.euiColorDarkShade,
       'editorLineNumber.activeForeground': euiTheme.euiColorDarkShade,
-      'editorIndentGuide.background': euiTheme.euiColorLightShade,
+      'editorIndentGuide.background1': euiTheme.euiColorLightShade,
       'editor.selectionBackground': selectionBackgroundColor,
       'editorWidget.border': euiTheme.euiColorLightShade,
       'editorWidget.background': euiTheme.euiColorLightestShade,

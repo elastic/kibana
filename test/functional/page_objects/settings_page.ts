@@ -857,6 +857,9 @@ export class SettingsPageObject extends FtrService {
   async clickAddField() {
     this.log.debug('click Add Field');
     await this.testSubjects.click('addField');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('flyoutTitle');
+    });
   }
 
   async clickSaveField() {
@@ -872,8 +875,7 @@ export class SettingsPageObject extends FtrService {
 
   async setFieldType(type: string) {
     this.log.debug('set type = ' + type);
-    await this.testSubjects.setValue('typeField', type);
-    await this.browser.pressKeys(this.browser.keys.ENTER);
+    await this.comboBox.set('typeField', type);
   }
 
   async setFieldTypeComposite() {

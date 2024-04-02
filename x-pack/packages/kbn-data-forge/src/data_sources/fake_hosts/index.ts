@@ -91,6 +91,7 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
       '@timestamp': timestamp.toISOString(),
       host: {
         name: `host-${index}`,
+        mac: ['00-00-5E-00-53-23', '00-00-5E-00-53-24'],
         network: {
           name: `network-${index}`,
           ingress: {
@@ -134,6 +135,7 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
       '@timestamp': timestamp.toISOString(),
       host: {
         name: `host-${index}`,
+        mac: ['00-00-5E-00-53-23', '00-00-5E-00-53-24'],
         network: {
           name: `network-${index}`,
         },

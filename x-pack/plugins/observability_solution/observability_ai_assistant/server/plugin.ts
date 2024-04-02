@@ -26,19 +26,20 @@ import { registerServerRoutes } from './routes/register_routes';
 import { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
 import { ObservabilityAIAssistantService } from './service';
 import {
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantServerSetup,
+  ObservabilityAIAssistantServerStart,
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
 import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
+import { recallRankingEvent } from './analytics/recall_ranking';
 
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
-      ObservabilityAIAssistantPluginSetup,
-      ObservabilityAIAssistantPluginStart,
+      ObservabilityAIAssistantServerSetup,
+      ObservabilityAIAssistantServerStart,
       ObservabilityAIAssistantPluginSetupDependencies,
       ObservabilityAIAssistantPluginStartDependencies
     >
@@ -52,10 +53,10 @@ export class ObservabilityAIAssistantPlugin
   public setup(
     core: CoreSetup<
       ObservabilityAIAssistantPluginStartDependencies,
-      ObservabilityAIAssistantPluginStart
+      ObservabilityAIAssistantServerStart
     >,
     plugins: ObservabilityAIAssistantPluginSetupDependencies
-  ): ObservabilityAIAssistantPluginSetup {
+  ): ObservabilityAIAssistantServerSetup {
     plugins.features.registerKibanaFeature({
       id: OBSERVABILITY_AI_ASSISTANT_FEATURE_ID,
       name: i18n.translate('xpack.observabilityAiAssistant.featureRegistry.featureName', {
@@ -113,10 +114,23 @@ export class ObservabilityAIAssistantPlugin
         // Wait for the ML plugin's dependency on the internal saved objects client to be ready
         const [_, pluginsStart] = await core.getStartServices();
 
+        const { ml } = await core.plugins.onSetup('ml');
+
+        if (!ml.found) {
+          throw new Error('Could not find ML plugin');
+        }
+
         // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
         await firstValueFrom(pluginsStart.licensing.license$);
 
-        const elserModelDefinition = await plugins.ml
+        const elserModelDefinition = await (
+          ml.contract as {
+            trainedModelsProvider: (
+              request: {},
+              soClient: {}
+            ) => { getELSER: () => Promise<{ model_id: string }> };
+          }
+        )
           .trainedModelsProvider({} as any, {} as any) // request, savedObjectsClient (but we fake it to use the internal user)
           .getELSER();
 
@@ -149,12 +163,14 @@ export class ObservabilityAIAssistantPlugin
       },
     });
 
+    core.analytics.registerEventType(recallRankingEvent);
+
     return {
       service,
     };
   }
 
-  public start(): ObservabilityAIAssistantPluginStart {
+  public start(): ObservabilityAIAssistantServerStart {
     return {
       service: this.service!,
     };

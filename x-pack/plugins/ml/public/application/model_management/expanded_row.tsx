@@ -7,11 +7,11 @@
 
 import React, { type FC, useCallback, useMemo } from 'react';
 import { omit, pick } from 'lodash';
+import type { EuiDescriptionListProps, EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiBadge,
   EuiCodeBlock,
   EuiDescriptionList,
-  EuiDescriptionListProps,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +19,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiTitle,
   useEuiPaddingSize,
 } from '@elastic/eui';

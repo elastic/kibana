@@ -17,7 +17,10 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import type { CommonResponseActionMethodOptions } from '../../..';
+import type {
+  CommonResponseActionMethodOptions,
+  ProcessPendingActionsMethodOptions,
+} from '../../..';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { SentinelOneConnectorExecuteOptions } from './types';
 import { stringify } from '../../../../utils/stringify';
@@ -296,5 +299,15 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  async processPendingActions({
+    abortSignal,
+    addToQueue,
+  }: ProcessPendingActionsMethodOptions): Promise<void> {
+    // TODO:PT implement resolving of pending S1 actions
+    // if (abortSignal.aborted) {
+    //   return;
+    // }
   }
 }

@@ -29,22 +29,24 @@ export const getMarkdownRenderer =
     render(domNode, config, handlers) {
       const fontStyle = config.font ? config.font.spec : {};
 
-      ReactDOM.render(
-        <KibanaThemeProvider theme={{ theme$ }}>
-          <Markdown
-            className="canvasMarkdown"
-            style={fontStyle as CSSProperties}
-            openLinksInNewTab={config.openLinksInNewTab}
-            readOnly
-          >
-            {config.content}
-          </Markdown>
-        </KibanaThemeProvider>,
-        domNode,
-        () => handlers.done()
-      );
+      if (config.content) {
+        ReactDOM.render(
+          <KibanaThemeProvider theme={{ theme$ }}>
+            <Markdown
+              className="canvasMarkdown"
+              style={fontStyle as CSSProperties}
+              openLinksInNewTab={config.openLinksInNewTab}
+              readOnly
+            >
+              {config.content}
+            </Markdown>
+          </KibanaThemeProvider>,
+          domNode,
+          () => handlers.done()
+        );
 
-      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+        handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+      }
     },
   });
 

@@ -32,12 +32,9 @@ export function updateLayer(
   layer: UnwrapArray<State['layers']>,
   index: number
 ): State {
-  const newLayers = [...state.layers];
-  newLayers[index] = layer;
-
   return {
     ...state,
-    layers: newLayers,
+    layers: state.layers.map((l, i) => (i === index ? layer : l)),
   };
 }
 

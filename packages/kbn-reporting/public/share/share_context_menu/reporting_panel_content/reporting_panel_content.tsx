@@ -7,7 +7,6 @@
  */
 
 import React, { Component, ReactElement } from 'react';
-import url from 'url';
 
 import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
@@ -88,7 +87,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       props.reportType,
       this.props.apiClient.getDecoratedJobParams(this.props.getJobParams(true))
     );
-    return url.resolve(window.location.href, relativePath);
+    return new URL(relativePath, window.location.href).toString();
   };
 
   public componentDidUpdate(_prevProps: Props, prevState: State) {
@@ -324,15 +323,17 @@ class ReportingPanelContentUi extends Component<Props, State> {
         }
       })
       .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(error);
         this.props.toasts.addError(error, {
           title: intl.formatMessage({
             id: 'reporting.share.panelContent.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),
-          toastMessage: (
-            // eslint-disable-next-line react/no-danger
-            <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-          ) as unknown as string,
+          toastMessage: intl.formatMessage({
+            id: 'reporting.share.panelContent.notification.reportingErrorToastMessage',
+            defaultMessage: `We couldn't create a report at this time.`,
+          }),
         });
         if (this.mounted) {
           this.setState({ isCreatingReportJob: false });

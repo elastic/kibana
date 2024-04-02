@@ -59,7 +59,9 @@ export async function createSdfIcon({
   svgCanvas.width = size;
   svgCanvas.height = size;
   const svgCtx = svgCanvas.getContext('2d');
-  // @ts-expect-error upgrade typescript v4.9.5
+  if (!svgCtx) {
+    return null;
+  }
   const v = Canvg.fromString(svgCtx, svg, {
     ignoreDimensions: true,
     offsetX: buffer / 2,

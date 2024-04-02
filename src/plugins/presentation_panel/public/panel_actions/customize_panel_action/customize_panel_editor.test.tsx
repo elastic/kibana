@@ -159,12 +159,12 @@ describe('customize panel editor', () => {
 
   describe('local time range', () => {
     it('renders local time picker if API supports it', async () => {
-      api.localTimeRange = new BehaviorSubject<TimeRange | undefined>({
+      api.timeRange$ = new BehaviorSubject<TimeRange | undefined>({
         from: '',
         to: '',
       });
-      api.localFilters = new BehaviorSubject<Filter[] | undefined>([]);
-      api.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
+      api.filters$ = new BehaviorSubject<Filter[] | undefined>([]);
+      api.query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
       renderPanelEditor();
 
       const customTimeRangeComponent = await screen.findByTestId(
@@ -194,15 +194,15 @@ describe('customize panel editor', () => {
     });
 
     test('renders local filters, if provided', async () => {
-      api.localTimeRange = new BehaviorSubject<TimeRange | undefined>(undefined);
-      api.localFilters = new BehaviorSubject<Filter[] | undefined>([
+      api.timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
+      api.filters$ = new BehaviorSubject<Filter[] | undefined>([
         {
           meta: {},
           query: {},
           $state: {},
         },
       ] as Filter[]);
-      api.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
+      api.query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
 
       renderPanelEditor();
       const customPanelQuery = await screen.findByTestId('panelCustomFiltersRow');
@@ -210,9 +210,9 @@ describe('customize panel editor', () => {
     });
 
     test('renders a local query, if provided', async () => {
-      api.localTimeRange = new BehaviorSubject<TimeRange | undefined>(undefined);
-      api.localFilters = new BehaviorSubject<Filter[] | undefined>([]);
-      api.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>({
+      api.timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
+      api.filters$ = new BehaviorSubject<Filter[] | undefined>([]);
+      api.query$ = new BehaviorSubject<Query | AggregateQuery | undefined>({
         query: 'field : value',
         language: 'kql',
       });

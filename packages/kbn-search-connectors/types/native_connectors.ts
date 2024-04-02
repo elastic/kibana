@@ -93,6 +93,10 @@ const PORT_LABEL = i18n.translate('searchConnectors.nativeConnectors.portLabel',
   defaultMessage: 'Port',
 });
 
+const PERSONAL_ACCESS_TOKEN = 'personal_access_token';
+
+const GITHUB_APP = 'github_app';
+
 export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | undefined> = {
   azure_blob_storage: {
     configuration: {
@@ -232,6 +236,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: false },
         basic: { enabled: true },
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
       },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.azureBlobStorage.name', {
@@ -568,6 +575,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.confluence.name', {
       defaultMessage: 'Confluence',
@@ -688,6 +698,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: true },
         basic: { enabled: true },
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.dropbox.name', {
       defaultMessage: 'Dropbox',
@@ -701,7 +714,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.DROPDOWN,
         label: i18n.translate('searchConnectors.nativeConnectors.github.label', {
-          defaultMessage: 'GitHub data source',
+          defaultMessage: 'Data source',
         }),
         options: [
           {
@@ -736,7 +749,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.github.url.label', {
-          defaultMessage: 'GitHub URL',
+          defaultMessage: 'Server URL',
         }),
         options: [],
         order: 2,
@@ -748,15 +761,53 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
-      token: {
+      auth_method: {
         default_value: null,
         depends_on: [],
+        display: DisplayType.DROPDOWN,
+        label: i18n.translate('searchConnectors.nativeConnectors.github.authMethod.label', {
+          defaultMessage: 'Authentication method',
+        }),
+        options: [
+          {
+            label: i18n.translate(
+              'searchConnectors.nativeConnectors.github.options.personalAccessToken',
+              {
+                defaultMessage: 'Personal access token',
+              }
+            ),
+            value: PERSONAL_ACCESS_TOKEN,
+          },
+          {
+            label: i18n.translate('searchConnectors.nativeConnectors.github.options.githubApp', {
+              defaultMessage: 'GitHub App',
+            }),
+            value: GITHUB_APP,
+          },
+        ],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: PERSONAL_ACCESS_TOKEN,
+      },
+      token: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'auth_method',
+            value: PERSONAL_ACCESS_TOKEN,
+          },
+        ],
         display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.github.token.label', {
-          defaultMessage: 'GitHub Token',
+          defaultMessage: 'Token',
         }),
         options: [],
-        order: 3,
+        order: 4,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -786,7 +837,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             value: 'other',
           },
         ],
-        order: 4,
+        order: 5,
         required: true,
         sensitive: false,
         tooltip: i18n.translate('searchConnectors.nativeConnectors.github.repo_type', {
@@ -802,6 +853,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [
           {
+            field: 'auth_method',
+            value: PERSONAL_ACCESS_TOKEN,
+          },
+          {
             field: 'repo_type',
             value: 'organization',
           },
@@ -811,9 +866,53 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Organization Name',
         }),
         options: [],
-        order: 5,
+        order: 6,
         required: true,
         sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      app_id: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'auth_method',
+            value: GITHUB_APP,
+          },
+        ],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate('searchConnectors.nativeConnectors.github.appID.label', {
+          defaultMessage: 'App ID',
+        }),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      private_key: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'auth_method',
+            value: GITHUB_APP,
+          },
+        ],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate('searchConnectors.nativeConnectors.github.privateKey.label', {
+          defaultMessage: 'App private key',
+        }),
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: true,
         tooltip: null,
         type: FieldType.STRING,
         ui_restrictions: [],
@@ -828,7 +927,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'List of repositories',
         }),
         options: [],
-        order: 6,
+        order: 9,
         required: true,
         sensitive: false,
         tooltip: i18n.translate('searchConnectors.nativeConnectors.github.listOfRepos.tooltip', {
@@ -845,7 +944,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: ENABLE_SSL_LABEL,
         options: [],
-        order: 7,
+        order: 10,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -865,7 +964,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TEXTBOX,
         label: SSL_CERTIFICATE_LABEL,
         options: [],
-        order: 8,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -880,7 +979,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.NUMERIC,
         label: RETRIES_PER_REQUEST_LABEL,
         options: [],
-        order: 9,
+        order: 12,
         required: false,
         sensitive: false,
         tooltip: null,
@@ -895,7 +994,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 10,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
@@ -915,7 +1014,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 11,
+        order: 14,
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
@@ -934,7 +1033,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     name: i18n.translate('searchConnectors.nativeConnectors.github.name', {
       defaultMessage: 'Github',
     }),
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     serviceType: 'github',
   },
   gmail: {
@@ -1058,6 +1161,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.gmail.name', {
       defaultMessage: 'Gmail',
@@ -1065,7 +1171,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     serviceType: 'gmail',
   },
   google_cloud_storage: {
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     configuration: {
       buckets: {
         default_value: null,
@@ -1358,6 +1468,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
     },
@@ -1684,6 +1797,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
     },
@@ -2405,6 +2521,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: false },
         basic: { enabled: true },
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.networkDrive.name', {
       defaultMessage: 'Network drive',
@@ -2531,6 +2650,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     features: {
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
     },
@@ -3072,6 +3194,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: false },
         basic: { enabled: true },
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.outlook.name', {
       defaultMessage: 'Outlook',
@@ -3424,7 +3549,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     serviceType: 's3',
   },
   salesforce: {
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     configuration: {
       domain: {
         default_value: null,
@@ -3542,7 +3671,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       username: {
         default_value: null,
         depends_on: [],
-        display: DisplayType.TEXTAREA,
+        display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.servicenow.username.label', {
           defaultMessage: 'Username',
         }),
@@ -3663,6 +3792,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
       },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.servicenow.name', {

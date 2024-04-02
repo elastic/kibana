@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export const observabilityFeatureId = 'observability';
 export const observabilityAppId = 'observability-overview';
 export const casesFeatureId = 'observabilityCases';
 export const sloFeatureId = 'slo';
+
+// SLO alerts table in slo detail page
+export const SLO_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
+// Emebeddable SLO alerts table
+export const SLO_ALERTS_TABLE_CONFIG_ID = `${AlertConsumers.SLO}-embeddable-alerts-table`;
 
 export {
   CLOUD,

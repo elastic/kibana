@@ -18,6 +18,7 @@
       "logsShared",
       "observabilityAIAssistant",
       "observabilityShared",
+      "slo",
       "share",
       "kibanaUtils",
       "datasetQuality"
@@ -31,7 +32,8 @@
       "lens"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "triggersActionsUi"
     ],
     "extraPublicDirs": [
       "common",

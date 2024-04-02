@@ -6,6 +6,8 @@
  */
 import React, { ReactNode } from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiBadge,
   EuiFlexGrid,
@@ -20,23 +22,22 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector, ConnectorIndex } from '@kbn/search-connectors';
+import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { KibanaLogic } from '../../../shared/kibana';
+import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_helpers';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import {
   connectorStatusToColor,
   connectorStatusToText,
 } from '../../utils/connector_status_helpers';
 
-import { CONNECTORS } from '../search_index/connector/constants';
-
 import { ConnectorDetailTabId } from './connector_detail';
 
 export interface ConnectorStatsProps {
   connector: Connector;
-  indexData?: ConnectorIndex;
+  indexData?: ElasticsearchIndex;
 }
 
 export interface StatCardProps {
@@ -47,7 +48,7 @@ export interface StatCardProps {
 
 export const StatCard: React.FC<StatCardProps> = ({ title, content, footer }) => {
   return (
-    <EuiSplitPanel.Outer hasShadow={false} hasBorder>
+    <EuiSplitPanel.Outer hasShadow={false} hasBorder grow>
       <EuiSplitPanel.Inner>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -65,8 +66,30 @@ export const StatCard: React.FC<StatCardProps> = ({ title, content, footer }) =>
   );
 };
 
+const seeDocumentsLabel = i18n.translate(
+  'xpack.enterpriseSearch.connectors.connectorStats.seeDocumentsTextLabel',
+  {
+    defaultMessage: 'See documents',
+  }
+);
+
+const pipelinesLabel = i18n.translate(
+  'xpack.enterpriseSearch.connectors.connectorStats.managePipelines',
+  {
+    defaultMessage: 'Manage pipelines',
+  }
+);
+
+const configureLabel = i18n.translate(
+  'xpack.enterpriseSearch.connectors.connectorStats.configureLink',
+  {
+    defaultMessage: 'Configure',
+  }
+);
+
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, indexData }) => {
-  const connectorDefinition = CONNECTORS.find((c) => c.serviceType === connector.service_type);
+  const { connectorTypes } = useValues(KibanaLogic);
+  const connectorDefinition = connectorTypes.find((c) => c.serviceType === connector.service_type);
   return (
     <EuiFlexGrid columns={3} direction="row">
       <EuiFlexItem>
@@ -78,24 +101,27 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
             }
           )}
           content={
-            <EuiFlexGroup>
+            <EuiFlexGroup
+              gutterSize="m"
+              responsive={false}
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              {connectorDefinition && connectorDefinition.iconPath && (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={connectorDefinition.iconPath} size="xl" />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem>
-                <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-                  {connectorDefinition && connectorDefinition.icon && (
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type={connectorDefinition.icon} size="xl" />
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem>
-                    <EuiText>
-                      <p>{connectorDefinition?.name ?? '-'}</p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiText>
+                  <p>{connectorDefinition?.name ?? '-'}</p>
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color={connectorStatusToColor(connector?.status)}>
-                  {connectorStatusToText(connector?.status)}
+                <EuiBadge
+                  color={connectorStatusToColor(connector?.status, !!connector?.index_name)}
+                >
+                  {connectorStatusToText(connector?.status, !!connector?.index_name)}
                 </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -103,19 +129,19 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
           footer={
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" responsive={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiIcon type="documents" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText>
+                    <EuiText size="s">
                       <p>
                         {i18n.translate(
                           'xpack.enterpriseSearch.connectors.connectorStats.p.DocumentsLabel',
                           {
                             defaultMessage: '{documentAmount} Documents',
                             values: {
-                              documentAmount: indexData?.count ?? '-',
+                              documentAmount: indexData?.count ?? 0,
                             },
                           }
                         )}
@@ -124,22 +150,17 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiLinkTo
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmptyTo
+                  isDisabled={!(connector.index_name && indexData)}
+                  size="s"
                   to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
                     connectorId: connector.id,
                     tabId: ConnectorDetailTabId.DOCUMENTS,
                   })}
                 >
-                  <EuiText textAlign="right">
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectors.connectorStats.seeDocumentsTextLabel',
-                      {
-                        defaultMessage: 'See documents',
-                      }
-                    )}
-                  </EuiText>
-                </EuiLinkTo>
+                  {seeDocumentsLabel}
+                </EuiButtonEmptyTo>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -150,38 +171,61 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
           title="Index"
           content={
             connector.index_name ? (
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiBadge>{connector.index_name}</EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiHealth color="success" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              indexData ? (
+                <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>{connector.index_name}</EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiHealth color="success" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                <EuiText size="s" color="warning">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.connectors.connectorStats.indexDoesntExistLabel',
+                    {
+                      defaultMessage: "Index doesn't exist",
+                    }
+                  )}
+                </EuiText>
+              )
             ) : (
-              i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.noIndex', {
-                defaultMessage: 'No index related',
-              })
+              <EuiText size="s" color="danger">
+                {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.noIndexLabel', {
+                  defaultMessage: 'No index attached yet',
+                })}
+              </EuiText>
             )
           }
           footer={
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiLinkTo
-                  to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                    connectorId: connector.id,
-                    tabId: ConnectorDetailTabId.CONFIGURATION,
-                  })}
-                >
-                  <EuiText textAlign="right">
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectors.connectorStats.configureLink',
-                      {
-                        defaultMessage: 'Configure',
-                      }
-                    )}
-                  </EuiText>
-                </EuiLinkTo>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                {[ConnectorStatus.CONNECTED, ConnectorStatus.CONFIGURED].includes(
+                  connector.status
+                ) && connector.index_name ? (
+                  <EuiButtonEmptyTo
+                    size="s"
+                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                      connectorId: connector.id,
+                      tabId: ConnectorDetailTabId.CONFIGURATION,
+                    })}
+                  >
+                    {configureLabel}
+                  </EuiButtonEmptyTo>
+                ) : (
+                  <EuiButtonTo
+                    color="primary"
+                    size="s"
+                    fill
+                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                      connectorId: connector.id,
+                      tabId: ConnectorDetailTabId.CONFIGURATION,
+                    })}
+                  >
+                    {configureLabel}
+                  </EuiButtonTo>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -206,23 +250,18 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
             )
           }
           footer={
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiLinkTo
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmptyTo
+                  isDisabled={!connector.index_name}
+                  size="s"
                   to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
                     connectorId: connector.id,
                     tabId: ConnectorDetailTabId.PIPELINES,
                   })}
                 >
-                  <EuiText textAlign="right">
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectors.connectorStats.managePipelines',
-                      {
-                        defaultMessage: 'Manage pipelines',
-                      }
-                    )}
-                  </EuiText>
-                </EuiLinkTo>
+                  {pipelinesLabel}
+                </EuiButtonEmptyTo>
               </EuiFlexItem>
             </EuiFlexGroup>
           }

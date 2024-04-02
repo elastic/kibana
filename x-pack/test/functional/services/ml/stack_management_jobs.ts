@@ -128,9 +128,9 @@ export function MachineLearningStackManagementJobsProvider({
       await retry.tryForTime(5000, async () => {
         await testSubjects.click(
           `mlSpacesManagementTable-${mlSavedObjectType} row-${jobId} > mlJobListRowManageSpacesButton`,
-          1000
+          5000
         );
-        await testSubjects.existOrFail('share-to-space-flyout', { timeout: 2000 });
+        await testSubjects.existOrFail('share-to-space-flyout', { timeout: 5000 });
       });
     },
 

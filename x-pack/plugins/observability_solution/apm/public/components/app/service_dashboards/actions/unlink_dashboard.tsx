@@ -85,7 +85,7 @@ export function UnlinkDashboard({
       <EuiButtonEmpty
         color="danger"
         size="s"
-        iconType={'unlink'}
+        iconType="unlink"
         data-test-subj="apmUnLinkServiceDashboardMenu"
         onClick={() => setIsModalVisible(true)}
       >

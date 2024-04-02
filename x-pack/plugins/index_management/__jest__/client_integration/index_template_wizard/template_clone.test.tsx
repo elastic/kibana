@@ -38,7 +38,7 @@ const templateToClone = getComposableTemplate({
   name: TEMPLATE_NAME,
   indexPatterns: ['indexPattern1'],
   template: {},
-  allowAutoCreate: true,
+  allowAutoCreate: 'TRUE',
 });
 
 describe('<TemplateClone />', () => {

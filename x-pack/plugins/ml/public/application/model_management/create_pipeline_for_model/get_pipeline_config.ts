@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { InferecePipelineCreationState } from './state';
 
 export function getPipelineConfig(state: InferecePipelineCreationState): estypes.IngestPipeline {
@@ -15,6 +15,7 @@ export function getPipelineConfig(state: InferecePipelineCreationState): estypes
       ? initialPipelineConfig?.processors[0]
       : {};
 
+  // @ts-expect-error pipeline._meta is defined as mandatory
   return {
     description: pipelineDescription,
     processors: [

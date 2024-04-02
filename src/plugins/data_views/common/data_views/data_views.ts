@@ -12,8 +12,8 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { PersistenceAPI } from '../types';
+import { DEFAULT_DATA_VIEW_ID } from '../constants';
 
-import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
 import { DataView } from './data_view';
 import {
@@ -295,6 +295,9 @@ export interface DataViewsServicePublicMethods {
    * Returns whether a default data view exists.
    */
   defaultDataViewExists: () => Promise<boolean>;
+
+  getMetaFields: () => Promise<string[] | undefined>;
+  getShortDotsEnable: () => Promise<boolean | undefined>;
 }
 
 /**
@@ -319,7 +322,7 @@ export class DataViewsService {
    * @param key used to indicate uniqueness of the error
    */
   private onError: OnError;
-  private dataViewCache: ReturnType<typeof createDataViewCache>;
+  private dataViewCache: Map<string, Promise<DataView>>;
   /**
    * Can the user save advanced settings?
    */
@@ -355,7 +358,7 @@ export class DataViewsService {
     this.getCanSave = getCanSave;
     this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
-    this.dataViewCache = createDataViewCache();
+    this.dataViewCache = new Map();
     this.scriptedFieldsEnabled = scriptedFieldsEnabled;
   }
 
@@ -450,9 +453,9 @@ export class DataViewsService {
    */
   clearInstanceCache = (id?: string) => {
     if (id) {
-      this.dataViewCache.clear(id);
+      this.dataViewCache.delete(id);
     } else {
-      this.dataViewCache.clearAll();
+      this.dataViewCache.clear();
     }
   };
 
@@ -484,7 +487,7 @@ export class DataViewsService {
    * Get default index pattern id
    */
   getDefaultId = async (): Promise<string | null> => {
-    const defaultIndexPatternId = await this.config.get<string | null>('defaultIndex');
+    const defaultIndexPatternId = await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
     return defaultIndexPatternId ?? null;
   };
 
@@ -494,8 +497,8 @@ export class DataViewsService {
    * @param force set default data view even if there's an existing default
    */
   setDefault = async (id: string | null, force = false) => {
-    if (force || !(await this.config.get('defaultIndex'))) {
-      await this.config.set('defaultIndex', id);
+    if (force || !(await this.getDefaultId())) {
+      await this.config.set(DEFAULT_DATA_VIEW_ID, id);
     }
   };
 
@@ -506,13 +509,18 @@ export class DataViewsService {
     return this.apiClient.hasUserDataView();
   }
 
+  getMetaFields = async () => await this.config.get<string[]>(META_FIELDS);
+
+  getShortDotsEnable = async () =>
+    await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
+
   /**
    * Get field list by providing { pattern }.
    * @param options options for getting field list
    * @returns FieldSpec[]
    */
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
-    const metaFields = await this.config.get<string[]>(META_FIELDS);
+    const metaFields = await this.getMetaFields();
     const { fields } = await this.apiClient.getFieldsForWildcard({
       ...options,
       metaFields,
@@ -543,7 +551,7 @@ export class DataViewsService {
     dataView: DataView,
     forceRefresh: boolean = false
   ) => {
-    const metaFields = await this.config.get<string[]>(META_FIELDS);
+    const metaFields = await this.getMetaFields();
     return this.apiClient.getFieldsForWildcard({
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
@@ -556,7 +564,7 @@ export class DataViewsService {
   };
 
   private getFieldsAndIndicesForWildcard = async (options: GetFieldsOptions) => {
-    const metaFields = await this.config.get<string[]>(META_FIELDS);
+    const metaFields = await this.getMetaFields();
     return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
@@ -706,6 +714,7 @@ export class DataViewsService {
       collector[field.name] = {
         ...field,
         customLabel: fieldAttrs?.[field.name]?.customLabel,
+        customDescription: fieldAttrs?.[field.name]?.customDescription,
         count: fieldAttrs?.[field.name]?.count,
       };
       return collector;
@@ -791,7 +800,7 @@ export class DataViewsService {
       spec.title as string,
       {
         pattern: title as string,
-        metaFields: await this.config.get(META_FIELDS),
+        metaFields: await this.getMetaFields(),
         type,
         rollupIndex: typeMeta?.params?.rollup_index,
         allowNoIndex: spec.allowNoIndex,
@@ -889,6 +898,7 @@ export class DataViewsService {
         searchable: true,
         readFromDocValues: false,
         customLabel: fieldAttrs?.[name]?.customLabel,
+        customDescription: fieldAttrs?.[name]?.customDescription,
         count: fieldAttrs?.[name]?.count,
       };
 
@@ -930,13 +940,17 @@ export class DataViewsService {
       return dataView;
     });
 
-    const indexPatternPromise =
-      dataViewFromCache ||
-      this.dataViewCache.set(id, this.getSavedObjectAndInit(id, displayErrors));
+    let indexPatternPromise: Promise<DataView>;
+    if (dataViewFromCache) {
+      indexPatternPromise = dataViewFromCache;
+    } else {
+      indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors);
+      this.dataViewCache.set(id, indexPatternPromise);
+    }
 
     // don't cache failed requests
     indexPatternPromise.catch(() => {
-      this.dataViewCache.clear(id);
+      this.dataViewCache.delete(id);
     });
 
     return indexPatternPromise;
@@ -954,8 +968,8 @@ export class DataViewsService {
     skipFetchFields = false,
     displayErrors = true
   ): Promise<DataView> {
-    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
+    const shortDotsEnable = await this.getShortDotsEnable();
+    const metaFields = await this.getMetaFields();
 
     const spec = {
       id: id ?? uuidv4(),
@@ -999,11 +1013,16 @@ export class DataViewsService {
         return cachedDataView;
       }
 
-      return this.dataViewCache.set(spec.id, doCreate());
+      const dataViewPromise = doCreate();
+
+      this.dataViewCache.set(spec.id, dataViewPromise);
+
+      return dataViewPromise;
     }
 
     const dataView = await doCreate();
-    return this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
+    this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
+    return dataView;
   }
 
   /**
@@ -1162,7 +1181,7 @@ export class DataViewsService {
           indexPattern.version = samePattern.version;
 
           // Clear cache
-          this.dataViewCache.clear(indexPattern.id!);
+          this.dataViewCache.delete(indexPattern.id!);
 
           // Try the save again
           return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors, displayErrors);
@@ -1179,27 +1198,27 @@ export class DataViewsService {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPatternId);
     }
-    this.dataViewCache.clear(indexPatternId);
+    this.dataViewCache.delete(indexPatternId);
     return this.savedObjectsClient.delete(indexPatternId);
   }
 
   private async getDefaultDataViewId() {
     const patterns = await this.getIdsWithTitle();
-    let defaultId: string | undefined = await this.config.get('defaultIndex');
+    let defaultId: string | null = await this.getDefaultId();
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
 
     if (defaultId && !exists) {
       if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.remove('defaultIndex');
+        await this.config.remove(DEFAULT_DATA_VIEW_ID);
       }
 
-      defaultId = undefined;
+      defaultId = null;
     }
 
     if (!defaultId && patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
       defaultId = patterns[0].id;
       if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.set('defaultIndex', defaultId);
+        await this.config.set(DEFAULT_DATA_VIEW_ID, defaultId);
       }
     }
 

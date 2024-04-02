@@ -15,8 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const synthtraceApm = getService('apmSynthtraceEsClient');
   const synthtraceInfra = getService('infraSynthtraceEsClient');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176968
-  describe.skip('GET /assets', () => {
+  describe('GET /assets', () => {
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const to = new Date().toISOString();
 

@@ -9,7 +9,7 @@ import React, { useContext } from 'react';
 import isEqual from 'react-fast-compare';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { branch, compose, shouldUpdate, withProps } from 'recompose';
+import { branch, compose, shouldUpdate, withProps } from 'react-recompose';
 import { canUserWrite } from '../../state/selectors/app';
 import { getNodes, getPageById, isWriteable } from '../../state/selectors/workpad';
 import { not } from '../../lib/aeroelastic/functional';

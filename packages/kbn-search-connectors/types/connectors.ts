@@ -230,7 +230,9 @@ export interface Connector {
   last_access_control_sync_error: string | null;
   last_access_control_sync_scheduled_at: string | null;
   last_access_control_sync_status: SyncStatus | null;
+  last_deleted_document_count: number | null;
   last_incremental_sync_scheduled_at: string | null;
+  last_indexed_document_count: number | null;
   last_seen: string | null;
   last_sync_error: string | null;
   last_sync_scheduled_at: string | null;

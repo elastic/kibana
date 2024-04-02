@@ -35,22 +35,22 @@ describe('AssistantContext', () => {
     expect(result.current.http.fetch).toBeCalledWith(path);
   });
 
-  test('getConversationId defaults to provided id', async () => {
+  test('getLastConversationTitle defaults to provided id', async () => {
     const { result } = renderHook(useAssistantContext, { wrapper: TestProviders });
-    const id = result.current.getConversationId('123');
+    const id = result.current.getLastConversationTitle('123');
     expect(id).toEqual('123');
   });
 
-  test('getConversationId uses local storage id when no id is provided ', async () => {
+  test('getLastConversationTitle uses local storage id when no id is provided ', async () => {
     const { result } = renderHook(useAssistantContext, { wrapper: TestProviders });
-    const id = result.current.getConversationId();
+    const id = result.current.getLastConversationTitle();
     expect(id).toEqual('456');
   });
 
-  test('getConversationId defaults to Welcome when no local storage id and no id is provided ', async () => {
+  test('getLastConversationTitle defaults to Welcome when no local storage id and no id is provided ', async () => {
     (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]);
     const { result } = renderHook(useAssistantContext, { wrapper: TestProviders });
-    const id = result.current.getConversationId();
+    const id = result.current.getLastConversationTitle();
     expect(id).toEqual('Welcome');
   });
 });

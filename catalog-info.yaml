@@ -30,6 +30,16 @@ spec:
   lifecycle: production
 
 ---
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: kibana-buildkite-pipelines
+  description: A location re-routing file, pointing to individual buildkite pipeline definition files
+spec:
+  type: url
+  target: https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/locations.yml
+
+---
 
 apiVersion: backstage.io/v1alpha1
 kind: Resource

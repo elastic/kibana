@@ -60,9 +60,10 @@ import {
   updateSavedSearchId,
   updateSavedSearch,
   initializeSavedSearch,
-  setIsDiscoverSavedSearchLoaded,
   setDataProviderVisibility,
   setChanged,
+  setConfirmingNoteId,
+  deleteNoteFromEvent,
 } from './actions';
 
 import {
@@ -543,16 +544,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
-  .case(setIsDiscoverSavedSearchLoaded, (state, { id, isDiscoverSavedSearchLoaded }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [id]: {
-        ...state.timelineById[id],
-        isDiscoverSavedSearchLoaded,
-      },
-    },
-  }))
   .case(setDataProviderVisibility, (state, { id, isDataProviderVisible }) => {
     return {
       ...state,
@@ -572,6 +563,31 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         changed,
+      },
+    },
+  }))
+  .case(setConfirmingNoteId, (state, { id, confirmingNoteId }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        confirmingNoteId,
+      },
+    },
+  }))
+  .case(deleteNoteFromEvent, (state, { id, noteId, eventId }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        eventIdToNoteIds: {
+          ...state.timelineById[id].eventIdToNoteIds,
+          [eventId]: state.timelineById[id].eventIdToNoteIds[eventId].filter(
+            (note) => note !== noteId
+          ),
+        },
       },
     },
   }))

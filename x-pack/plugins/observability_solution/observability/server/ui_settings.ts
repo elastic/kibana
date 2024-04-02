@@ -42,6 +42,7 @@ import {
   enableInfrastructureProfilingIntegration,
   apmEnableTransactionProfiling,
   enableInfrastructureAssetCustomDashboards,
+  apmEnableServiceInventoryTableSearchBar,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -314,7 +315,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmEnableTableSearchBarDescription', {
       defaultMessage:
-        '{betaLabel} Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions and Errors',
+        '{betaLabel} Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Transactions and Errors',
       values: {
         betaLabel: `<em>[${betaLabel}]</em>`,
       },
@@ -322,6 +323,26 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.boolean(),
     value: true,
     requiresPageReload: true,
+    type: 'boolean',
+  },
+  [apmEnableServiceInventoryTableSearchBar]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableServiceInventoryTableSearchBar', {
+      defaultMessage: 'Service Inventory instant table search',
+    }),
+    description: i18n.translate(
+      'xpack.observability.apmEnableServiceInventoryTableSearchBarDescription',
+      {
+        defaultMessage:
+          '{technicalPreviewLabel} Enables faster searching in the APM Service inventory table by adding a handy search bar with live filtering.',
+        values: {
+          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        },
+      }
+    ),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: false,
     type: 'boolean',
   },
   [apmAWSLambdaPriceFactor]: {
@@ -528,7 +549,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.profilingAWSCostDiscountRateUiSettingName', {
       defaultMessage: 'AWS EDP discount rate (%)',
     }),
-    value: '0',
+    value: 0,
     schema: schema.number({ min: 0, max: 100 }),
     requiresPageReload: true,
     description: i18n.translate(
@@ -544,7 +565,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.profilingAzureCostDiscountRateUiSettingName', {
       defaultMessage: 'Azure discount rate (%)',
     }),
-    value: '0',
+    value: 0,
     schema: schema.number({ min: 0, max: 100 }),
     requiresPageReload: true,
     description: i18n.translate(
@@ -575,7 +596,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.apmEnableTransactionProfiling', {
       defaultMessage: 'Enable Universal Profiling on Transaction view',
     }),
-    value: false,
+    value: true,
     schema: schema.boolean(),
     requiresPageReload: true,
   },

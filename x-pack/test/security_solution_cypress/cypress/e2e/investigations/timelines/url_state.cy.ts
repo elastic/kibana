@@ -16,7 +16,7 @@ import { getNewRule } from '../../../objects/rule';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { TIMELINES_URL } from '../../../urls/navigation';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   let timelineSavedObjectId: string | null = null;

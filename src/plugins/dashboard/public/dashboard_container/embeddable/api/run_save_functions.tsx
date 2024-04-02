@@ -14,7 +14,6 @@ import {
   isReferenceOrValueEmbeddable,
   reactEmbeddableRegistryHasKey,
 } from '@kbn/embeddable-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
@@ -36,27 +35,15 @@ const serializeAllPanelState = async (
   dashboard: DashboardContainer
 ): Promise<{ panels: DashboardContainerInput['panels']; references: Reference[] }> => {
   const references: Reference[] = [];
-  const reactEmbeddableSavePromises: Array<
-    Promise<{ serializedState: SerializedPanelState; uuid: string }>
-  > = [];
   const panels = cloneDeep(dashboard.getInput().panels);
   for (const [uuid, panel] of Object.entries(panels)) {
     if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
     const api = dashboard.reactEmbeddableChildren.value[uuid];
     if (api) {
-      reactEmbeddableSavePromises.push(
-        new Promise((resolve) => {
-          api.serializeState().then((serializedState) => {
-            resolve({ serializedState, uuid });
-          });
-        })
-      );
+      const serializedState = api.serializeState();
+      panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
+      references.push(...prefixReferencesFromPanel(uuid, serializedState.references ?? []));
     }
-  }
-  const saveResults = await Promise.all(reactEmbeddableSavePromises);
-  for (const { serializedState, uuid } of saveResults) {
-    panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
-    references.push(...prefixReferencesFromPanel(uuid, serializedState.references ?? []));
   }
   return { panels, references };
 };
@@ -153,7 +140,7 @@ export function runSaveAs(this: DashboardContainer) {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
           this.dispatch.setLastSavedInput(dashboardStateToSave);
           if (this.controlGroup && persistableControlGroupInput) {
-            this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);
+            this.controlGroup.setSavedState(persistableControlGroupInput);
           }
         });
       }
@@ -214,7 +201,7 @@ export async function runQuickSave(this: DashboardContainer) {
   this.dispatch.setLastSavedInput(dashboardStateToSave);
   this.lastSavedState.next();
   if (this.controlGroup && persistableControlGroupInput) {
-    this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);
+    this.controlGroup.setSavedState(persistableControlGroupInput);
   }
 
   return saveResult;

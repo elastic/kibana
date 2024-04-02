@@ -60,6 +60,9 @@ export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
 export const CUSTOM_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
 
+export const QUERY_BAR_ADD_FILTER =
+  '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="addFilter"]';
+
 export const THREAT_MAPPING_COMBO_BOX_INPUT =
   '[data-test-subj="threatMatchInput"] [data-test-subj="fieldAutocompleteComboBox"]';
 
@@ -69,7 +72,7 @@ export const THREAT_MATCH_CUSTOM_QUERY_INPUT =
 export const THREAT_MATCH_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
 
-export const THREAT_MATCH_INDICATOR_INDEX =
+export const CUSTOM_INDEX_PATTERN_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
 
 export const THREAT_MATCH_INDICATOR_INDICATOR_INDEX =
@@ -113,6 +116,11 @@ export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loading"]';
 
 export const EQL_QUERY_VALIDATION_ERROR = '[data-test-subj="eql-validation-errors-popover-button"]';
+
+export const EQL_OPTIONS_POPOVER_TRIGGER = '[data-test-subj="eql-settings-trigger"]';
+
+export const EQL_OPTIONS_TIMESTAMP_INPUT =
+  '[data-test-subj="eql-timestamp-field"] [data-test-subj="comboBoxInput"]';
 
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';

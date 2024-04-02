@@ -66,6 +66,7 @@ import { NotificationsProvider } from './notifications';
 import { MlTableServiceProvider } from './common_table_service';
 import { MachineLearningFieldStatsFlyoutProvider } from './field_stats_flyout';
 import { MachineLearningDataDriftProvider } from './data_drift';
+import { TrainedModelsFlyoutProvider } from './add_trained_models_flyout';
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
   const commonUI = MachineLearningCommonUIProvider(context);
@@ -160,6 +161,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const alerting = MachineLearningAlertingProvider(context, api, commonUI);
   const swimLane = SwimLaneProvider(context);
   const trainedModels = TrainedModelsProvider(context, commonUI);
+  const trainedModelsFlyout = TrainedModelsFlyoutProvider(context);
   const trainedModelsTable = TrainedModelsTableProvider(context, commonUI, trainedModels);
   const deployDFAModelFlyout = DeployDFAModelFlyoutProvider(context, commonUI);
   const mlNodesPanel = MlNodesPanelProvider(context);
@@ -225,6 +227,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     testExecution,
     testResources,
     trainedModels,
+    trainedModelsFlyout,
     deployDFAModelFlyout,
     trainedModelsTable,
   };

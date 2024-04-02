@@ -6,10 +6,7 @@
  */
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  type Message,
-  MessageRole,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
@@ -25,53 +22,54 @@ export function ErrorSampleContextualInsight({
   transaction?: Transaction;
 }) {
   const {
-    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
+    observabilityAIAssistant: {
+      ObservabilityAIAssistantContextualInsight,
+      getContextualInsightMessages,
+    },
   } = useApmPluginContext();
 
   const [logStacktrace, setLogStacktrace] = useState('');
   const [exceptionStacktrace, setExceptionStacktrace] = useState('');
 
   const messages = useMemo<Message[]>(() => {
-    const now = new Date().toISOString();
-
     const serviceName = error.service.name;
     const languageName = error.service.language?.name ?? '';
     const runtimeName = error.service.runtime?.name ?? '';
     const runtimeVersion = error.service.runtime?.version ?? '';
     const transactionName = transaction?.transaction.name ?? '';
 
-    return [
-      {
-        '@timestamp': now,
-        message: {
-          role: MessageRole.User,
-          content: `I'm an SRE. I am looking at an exception and trying to understand what it means.
+    return getContextualInsightMessages({
+      message: `I'm looking at an exception and trying to understand what it means`,
+      instructions: `I'm an SRE. I am looking at an exception and trying to understand what it means.
 
-Your task is to describe what the error means and what it could be caused by.
-
-The error occurred on a service called ${serviceName}, which is a ${runtimeName} service written in ${languageName}. The
-runtime version is ${runtimeVersion}.
-
-The request it occurred for is called ${transactionName}.
-
-${
-  logStacktrace
-    ? `The log stacktrace:
-${logStacktrace}`
-    : ''
-}
-
-${
-  exceptionStacktrace
-    ? `The exception stacktrace:
-${exceptionStacktrace}`
-    : ''
-}
-`,
-        },
-      },
-    ];
-  }, [error, transaction, logStacktrace, exceptionStacktrace]);
+      Your task is to describe what the error means and what it could be caused by.
+      
+      The error occurred on a service called ${serviceName}, which is a ${runtimeName} service written in ${languageName}. The
+      runtime version is ${runtimeVersion}.
+      
+      The request it occurred for is called ${transactionName}.
+      
+      ${
+        logStacktrace
+          ? `The log stacktrace:
+      ${logStacktrace}`
+          : ''
+      }
+      
+      ${
+        exceptionStacktrace
+          ? `The exception stacktrace:
+      ${exceptionStacktrace}`
+          : ''
+      }`,
+    });
+  }, [
+    error,
+    transaction,
+    logStacktrace,
+    exceptionStacktrace,
+    getContextualInsightMessages,
+  ]);
 
   return ObservabilityAIAssistantContextualInsight && messages ? (
     <>

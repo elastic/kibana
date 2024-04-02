@@ -42,6 +42,7 @@ import {
   EuiErrorBoundary,
   EuiToolTip,
   EuiCallOut,
+  EuiAccordion,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { KibanaFeature } from '@kbn/features-plugin/public';
@@ -53,7 +54,7 @@ import {
 } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   RuleActionParam,
-  ALERTS_FEATURE_ID,
+  ALERTING_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
   RuleActionAlertsFilterProperty,
@@ -261,7 +262,7 @@ export const RuleForm = ({
           })
         )
         .filter((item) =>
-          rule.consumer === ALERTS_FEATURE_ID
+          rule.consumer === ALERTING_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
             : item.ruleType!.producer === rule.consumer
         );
@@ -437,7 +438,7 @@ export const RuleForm = ({
   const authorizedConsumers = useMemo(() => {
     // If the app context provides a consumer, we assume that consumer is
     // is what we set for all rules that is created in that context
-    if (rule.consumer !== ALERTS_FEATURE_ID) {
+    if (rule.consumer !== ALERTING_FEATURE_ID) {
       return [];
     }
 
@@ -835,44 +836,58 @@ export const RuleForm = ({
       )}
 
       <EuiFlexItem>
-        <EuiFormRow fullWidth data-test-subj="alertDelayFormRow" display="rowCompressed">
-          <EuiFieldNumber
-            fullWidth
-            min={1}
-            value={alertDelay || ''}
-            name="alertDelay"
-            data-test-subj="alertDelayInput"
-            prepend={[
-              i18n.translate('xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel', {
-                defaultMessage: 'Alert after',
-              }),
-              <EuiIconTip
-                position="right"
-                type="questionInCircle"
-                content={
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp"
-                    defaultMessage="An alert occurs only when the specified number of consecutive runs meet the rule conditions."
-                  />
+        <EuiAccordion
+          id="advancedOptionsAccordion"
+          data-test-subj="advancedOptionsAccordion"
+          buttonContent={
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.ruleForm.advancedOptionsLabel"
+                defaultMessage="Advanced options"
+              />
+            </EuiText>
+          }
+        >
+          <EuiSpacer size="s" />
+          <EuiFormRow fullWidth data-test-subj="alertDelayFormRow" display="rowCompressed">
+            <EuiFieldNumber
+              fullWidth
+              min={1}
+              value={alertDelay || ''}
+              name="alertDelay"
+              data-test-subj="alertDelayInput"
+              prepend={[
+                i18n.translate('xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel', {
+                  defaultMessage: 'Alert after',
+                }),
+                <EuiIconTip
+                  position="right"
+                  type="questionInCircle"
+                  content={
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp"
+                      defaultMessage="An alert occurs only when the specified number of consecutive runs meet the rule conditions."
+                    />
+                  }
+                />,
+              ]}
+              append={i18n.translate(
+                'xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldAppendLabel',
+                {
+                  defaultMessage: 'consecutive matches',
                 }
-              />,
-            ]}
-            append={i18n.translate(
-              'xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldAppendLabel',
-              {
-                defaultMessage: 'consecutive matches',
-              }
-            )}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === '' || INTEGER_REGEX.test(value)) {
-                const parsedValue = value === '' ? '' : parseInt(value, 10);
-                setAlertDelayProperty('active', parsedValue || 1);
-                setAlertDelay(parsedValue || undefined);
-              }
-            }}
-          />
-        </EuiFormRow>
+              )}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === '' || INTEGER_REGEX.test(value)) {
+                  const parsedValue = value === '' ? '' : parseInt(value, 10);
+                  setAlertDelayProperty('active', parsedValue || 1);
+                  setAlertDelay(parsedValue || undefined);
+                }
+              }}
+            />
+          </EuiFormRow>
+        </EuiAccordion>
       </EuiFlexItem>
       {shouldShowConsumerSelect && (
         <>
