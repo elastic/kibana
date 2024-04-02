@@ -37,14 +37,18 @@ export function DataViewList({
   return (
     <EuiPanel
       {...props}
-      data-test-subj="dataSourceSelectorIntegrationsList"
+      data-test-subj="dataSourceSelectorDataViewsList"
       paddingSize="none"
       hasShadow={false}
     >
       {children}
-      <SelectorList data-test-subj="dataSourceSelectorDataViewsList">
+      <SelectorList>
         <SelectorList.Header>
-          <SelectorList.SortableColumn onSort={handleNameSort} sortOrder={search.sortOrder}>
+          <SelectorList.SortableColumn
+            onSort={handleNameSort}
+            sortOrder={search.sortOrder}
+            data-test-subj="dataSourceSelectorDataViewNameHeader"
+          >
             <EuiText size="xs">
               <strong>{nameColumnLabel}</strong>
             </EuiText>

@@ -283,8 +283,8 @@ export function ObservabilityLogsExplorerPageObject({
       return testSubjects.find('integration-uncategorized-1.0.0');
     },
 
-    getDataViewsContextMenu() {
-      return testSubjects.find('dataViewsContextMenu');
+    getDataViewsListPanel() {
+      return testSubjects.find('dataSourceSelectorDataViewsList');
     },
 
     getDataViewsTab() {
@@ -367,6 +367,21 @@ export function ObservabilityLogsExplorerPageObject({
       };
     },
 
+    async getDataViews() {
+      const menu = await this.getDataViewsListPanel();
+
+      const nodes = await menu.findAllByCssSelector(
+        '[data-test-subj^="logsExplorerDataView"]',
+        2000
+      );
+      const dataViews = await Promise.all(nodes.map((node) => node.getVisibleText()));
+
+      return {
+        nodes,
+        dataViews,
+      };
+    },
+
     async openDataSourceSelector() {
       const button = await this.getDataSourceSelectorButton();
       return button.click();
@@ -399,7 +414,13 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     async sortIntegrationsByName() {
-      const nameColumn = await testSubjects.find('dataSourceSelectorNameHeader');
+      const nameColumn = await testSubjects.find('dataSourceSelectorIntegrationNameHeader');
+
+      return nameColumn.click();
+    },
+
+    async sortDataViewsByName() {
+      const nameColumn = await testSubjects.find('dataSourceSelectorDataViewNameHeader');
 
       return nameColumn.click();
     },

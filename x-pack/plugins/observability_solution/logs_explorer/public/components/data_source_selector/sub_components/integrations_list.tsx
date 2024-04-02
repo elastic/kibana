@@ -136,7 +136,7 @@ function Header({ onSortByName, search, ...props }: HeaderProps) {
         // @ts-expect-error This is an issue with EuiFlexItem not correctly inferring the props of the passed component. https://github.com/elastic/eui/issues/7612
         sortOrder={search.sortOrder}
         onSort={handleNameSort}
-        data-test-subj="dataSourceSelectorNameHeader"
+        data-test-subj="dataSourceSelectorIntegrationNameHeader"
       >
         <EuiText size="xs">
           <strong>{nameColumnLabel}</strong>

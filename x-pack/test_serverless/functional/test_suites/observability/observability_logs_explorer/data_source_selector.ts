@@ -386,96 +386,75 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should display a list of available data views', async () => {
-          const menu = await PageObjects.observabilityLogsExplorer.getDataViewsContextMenu();
-          const menuEntries = await PageObjects.observabilityLogsExplorer.getPanelEntries(menu);
+          await retry.try(async () => {
+            const { dataViews } = await PageObjects.observabilityLogsExplorer.getDataViews();
 
-          expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
-          expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
+            expect(dataViews).to.eql(expectedDataViews);
+          });
         });
 
         it('should filter the list of data views by type', async () => {
           await PageObjects.observabilityLogsExplorer.changeDataViewTypeFilter('Logs');
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu: WebElementWrapper) =>
-                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
-              );
+            const { dataViews } = await PageObjects.observabilityLogsExplorer.getDataViews();
 
-            expect(menuEntries.length).to.be(1);
-            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+            expect(dataViews.length).to.be(1);
+            expect(await dataViews[0]).to.be(sortedExpectedDataViews[0]);
           });
 
           // Test back all filter
           await PageObjects.observabilityLogsExplorer.changeDataViewTypeFilter('All');
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu: WebElementWrapper) =>
-                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
-              );
+            const { dataViews } = await PageObjects.observabilityLogsExplorer.getDataViews();
 
-            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
-            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(dataViews).to.eql(sortedExpectedDataViews);
           });
         });
 
         it('should sort the data views list by the clicked sorting option', async () => {
-          // Test descending order
-          await PageObjects.observabilityLogsExplorer.clickSortButtonBy('desc');
+          // Test ascending order
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+            const { dataViews } = await PageObjects.observabilityLogsExplorer.getDataViews();
+            expect(dataViews).to.eql(expectedDataViews);
+          });
 
-            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[1]);
-            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+          // Test descending order
+          await PageObjects.observabilityLogsExplorer.sortDataViewsByName();
+
+          await retry.try(async () => {
+            const { dataViews } = await PageObjects.observabilityLogsExplorer.getDataViews();
+            expect(dataViews).to.eql(expectedDataViews.slice().reverse());
           });
 
           // Test back ascending order
-          await PageObjects.observabilityLogsExplorer.clickSortButtonBy('asc');
-          await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+          await PageObjects.observabilityLogsExplorer.sortDataViewsByName();
 
-            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
-            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+          await retry.try(async () => {
+            const { dataViews } = await PageObjects.observabilityLogsExplorer.getDataViews();
+            expect(dataViews).to.eql(expectedDataViews);
           });
         });
 
         it('should filter the data views list by the typed data view name', async () => {
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
-
-            expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
-            expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
+            const { dataViews } = await PageObjects.observabilityLogsExplorer.getDataViews();
+            expect(dataViews).to.eql(expectedDataViews);
           });
 
           await PageObjects.observabilityLogsExplorer.typeSearchFieldWith('logs');
 
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+            const { dataViews } = await PageObjects.observabilityLogsExplorer.getDataViews();
 
-            expect(menuEntries.length).to.be(1);
-            expect(await menuEntries[0].getVisibleText()).to.be('logs-*');
+            expect(dataViews.length).to.be(1);
+            expect(dataViews[0]).to.be('logs-*');
           });
         });
 
         it('should load a data view allowed by the settings upon click', async () => {
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu: WebElementWrapper) =>
-                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
-              );
-
-            expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
-            menuEntries[0].click();
+            const { nodes } = await PageObjects.observabilityLogsExplorer.getDataViews();
+            nodes[0].click();
           });
 
           await retry.try(async () => {
@@ -493,12 +472,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should navigate to Discover and load a data view not allowed by the settings upon click', async () => {
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogsExplorer
-              .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
-
-            expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
-            menuEntries[1].click();
+            const { nodes } = await PageObjects.observabilityLogsExplorer.getDataViews();
+            nodes[1].click();
           });
 
           await retry.try(async () => {
