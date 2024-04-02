@@ -657,7 +657,7 @@ export function MachineLearningJobWizardCommonProvider(
       });
     },
 
-    async goBackToTimeRange() {
+    async goToTimeRangeStep() {
       await testSubjects.existOrFail('mlJobWizardTimeRangeStep', {
         timeout: 3_000,
       });
