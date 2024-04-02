@@ -59,7 +59,7 @@ describe('FieldName', function () {
         fieldMapping={
           {
             ...dataView.getFieldByName('bytes')!.spec,
-            customDescription: 'test description',
+            description: 'test description',
           } as DataViewField
         }
       />

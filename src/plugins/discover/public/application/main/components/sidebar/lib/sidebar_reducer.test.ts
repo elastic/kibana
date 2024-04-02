@@ -85,12 +85,15 @@ describe('sidebar reducer', function () {
       allFields: [
         ...stubDataViewWithoutTimeField.fields,
         // merging in unmapped fields
-        new DataViewField({
-          name: unmappedFieldName,
-          type: 'unknown',
-          aggregatable: false,
-          searchable: false,
-        }),
+        new DataViewField(
+          {
+            name: unmappedFieldName,
+            type: 'unknown',
+            aggregatable: false,
+            searchable: false,
+          },
+          undefined
+        ),
       ],
       fieldCounts,
       status: DiscoverSidebarReducerStatus.COMPLETED,

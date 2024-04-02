@@ -46,7 +46,7 @@ export class DataViewField implements DataViewFieldBase {
    * Returns the field list the DataViewField is part of
    * @private
    */
-  private readonly getParentFieldList: () => IIndexPatternFieldList | undefined;
+  private readonly getParentFieldList: (() => IIndexPatternFieldList) | undefined;
 
   /**
    * DataView constructor
@@ -58,7 +58,9 @@ export class DataViewField implements DataViewFieldBase {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
 
     this.kbnFieldType = getKbnFieldType(spec.type);
-    this.getParentFieldList = () => fieldList;
+    if (fieldList) {
+      this.getParentFieldList = () => fieldList;
+    }
   }
 
   // writable attrs
@@ -200,7 +202,7 @@ export class DataViewField implements DataViewFieldBase {
     if (this.spec.customDescription) {
       return this.spec.customDescription;
     }
-    if (this.getParentFieldList()?.hasEcsFields()) {
+    if (this.getParentFieldList && this.getParentFieldList().hasEcsFields()) {
       const { description } = EcsFlat[this.name as keyof typeof EcsFlat] ?? {};
       return description || '';
     }
