@@ -97,7 +97,7 @@ describe('AddLayerButton', () => {
     await waitForSeriesOptions();
 
     expect(getSeriesTypeOptions()).toEqual([
-      'Layer visualization type',
+      'Select visualization type',
       'Bar vertical',
       'Bar vertical stacked',
       'Bar vertical percentage',
