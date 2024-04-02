@@ -140,7 +140,7 @@ export const Chat = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     iconType="sparkles"
-                    disabled={chatMessages.length <= 1}
+                    disabled={chatMessages.length <= 1 || !!error}
                     onClick={regenerateMessages}
                   >
                     <FormattedMessage
@@ -152,7 +152,7 @@ export const Chat = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     iconType="refresh"
-                    disabled={chatMessages.length <= 1}
+                    disabled={chatMessages.length <= 1 || !!error}
                     onClick={() => {
                       setMessages([]);
                     }}
