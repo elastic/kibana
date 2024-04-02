@@ -121,7 +121,7 @@ const runCli: RunFn = async ({ log, flags }) => {
   ).data;
 
   // Avoid enrolling another VM with SentinelOne if we already have one running
-  const hostVm =
+  const s1HostVm =
     forceNewS1Host || runningS1VMs.length === 0
       ? await createVm({
           type: 'multipass',

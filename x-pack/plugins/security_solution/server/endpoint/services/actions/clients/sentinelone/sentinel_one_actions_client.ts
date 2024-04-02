@@ -16,7 +16,11 @@ import type {
   SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  SearchHit,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { NormalizedExternalConnectorClientExecuteOptions } from '../lib/normalized_external_connector_client';
 import { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
 import { SENTINEL_ONE_ACTIVITY_INDEX } from '../../../../../../common';
@@ -409,7 +413,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         bool: {
           must: [
             {
-              term: {
+              terms: {
                 // Activity Types can be retrieved from S1 via API: `/web/api/v2.1/activities/types`
                 'sentinel_one.activity.type':
                   command === 'isolate'
@@ -444,33 +448,36 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         },
       };
 
+      const searchRequestOptions: SearchRequest = {
+        index: SENTINEL_ONE_ACTIVITY_INDEX,
+        // ignore_unavailable: true,
+        query,
+        // There may be many documents for each host/agent, so we collapse it and only get back the
+        // first one that came in after the isolate request was sent
+        collapse: {
+          field: 'sentinel_one.activity.agent.id',
+          inner_hits: {
+            name: 'first_found',
+            size: 1,
+            sort: [{ 'sentinel_one.activity.updated_at': 'asc' }],
+          },
+        },
+        // we don't need the source. The document will be stored in `inner_hits.first_found`
+        // due to use of `collapse
+        _source: false,
+        sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
+        size: 1000,
+      };
+
       this.log.debug(
-        `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX}] index with query:\n${stringify(
-          query
+        `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX}] index with:\n${stringify(
+          searchRequestOptions,
+          15
         )}`
       );
 
       const searchResults = await this.options.esClient
-        .search<SentinelOneActivityEsDoc>({
-          index: SENTINEL_ONE_ACTIVITY_INDEX,
-          ignore_unavailable: true,
-          query,
-          // There may be many documents for each host/agent, so we collapse it and only get back the
-          // first one that came in after the isolate request was sent
-          collapse: {
-            field: 'sentinel_one.activity.agent.id',
-            inner_hits: {
-              name: 'first_found',
-              size: 1,
-              sort: [{ 'sentinel_one.activity.updated_at': 'asc' }],
-            },
-          },
-          // we don't need the source. The document will be stored in `inner_hits.first_found`
-          // due to use of `collapse
-          _source: false,
-          sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
-          size: 1000,
-        })
+        .search<SentinelOneActivityEsDoc>(searchRequestOptions)
         .catch(catchAndWrapError);
 
       this.log.debug(
