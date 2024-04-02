@@ -63,7 +63,6 @@ export async function handleState(
         `Executed state: ${currentStateName} with status: ${currentStatus} - nextState: ${currentState.nextState}`
       );
     } catch (error) {
-      console.log('## error', error);
       currentStatus = 'failed';
       const errorMessage = `Error during execution of state "${currentStateName}" with status "${currentStatus}": ${error.message}`;
       const latestStateWithError = {
