@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-purge-cloud-deployment
+  name: bk-kibana-purge-cloud-deployment
   description: Purge a cloud deployment
   links:
     - url: 'https://buildkite.com/elastic/kibana-purge-cloud-deployment'

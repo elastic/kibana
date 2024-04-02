@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-esql-grammar-sync
+  name: bk-kibana-esql-grammar-sync
   description: Opens a PR if anything changes in the ES|QL grammar in Elasticsearch
   links:
     - url: 'https://buildkite.com/elastic/kibana-esql-grammar-sync'
