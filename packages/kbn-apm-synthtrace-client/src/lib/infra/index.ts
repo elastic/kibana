@@ -9,11 +9,17 @@
 import { container, ContainerMetricsDocument } from './container';
 import { host, HostMetricsDocument } from './host';
 import { pod, PodMetricsDocument } from './pod';
+import { awsRds, AWSRdsMetricsDocument } from './aws/rds';
 
-export type InfraDocument = HostMetricsDocument | PodMetricsDocument | ContainerMetricsDocument;
+export type InfraDocument =
+  | HostMetricsDocument
+  | PodMetricsDocument
+  | ContainerMetricsDocument
+  | AWSRdsMetricsDocument;
 
 export const infra = {
   host,
   pod,
   container,
+  awsRds,
 };

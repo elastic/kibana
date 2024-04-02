@@ -11,7 +11,7 @@ import { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
 // Can I pull in types from asset-manager here?
-type AssetKind = 'host' | 'pod' | 'container' | 'service';
+type AssetKind = 'host' | 'pod' | 'container' | 'service' | 'aws_rds';
 
 export interface AssetKindDocument<T extends AssetKind> extends Fields {
   'asset.kind': T;
@@ -46,10 +46,13 @@ export class PodAsset extends Asset<'pod'> {}
 
 export class ContainerAsset extends Asset<'container'> {}
 
+export class AWSRedisAsset extends Asset<'aws_rds'> {}
+
 export class ServiceAsset extends Asset<'service'> {}
 
 export type AssetDocument =
   | AssetKindDocument<'host'>
   | AssetKindDocument<'pod'>
   | AssetKindDocument<'container'>
-  | AssetKindDocument<'service'>;
+  | AssetKindDocument<'service'>
+  | AssetKindDocument<'aws_rds'>;
