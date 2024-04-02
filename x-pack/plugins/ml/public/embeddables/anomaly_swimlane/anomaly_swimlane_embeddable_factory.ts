@@ -15,11 +15,8 @@ import { PLUGIN_ID, PLUGIN_ICON, ML_APP_NAME } from '../../../common/constants/a
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneEmbeddableServices,
-} from '..';
+import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableServices } from '..';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput>
@@ -59,7 +56,12 @@ export class AnomalySwimlaneEmbeddableFactory
 
     try {
       const { resolveAnomalySwimlaneUserInput } = await import('./anomaly_swimlane_setup_flyout');
-      return await resolveAnomalySwimlaneUserInput(coreStart, deps.data.dataViews);
+      const userInput = await resolveAnomalySwimlaneUserInput(coreStart, deps.data.dataViews);
+
+      return {
+        ...userInput,
+        title: userInput.panelTitle,
+      };
     } catch (e) {
       return Promise.reject();
     }

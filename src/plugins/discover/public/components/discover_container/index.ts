@@ -10,9 +10,6 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { lazy } from 'react';
 import type { DiscoverContainerInternalProps } from './discover_container';
 
-export type DiscoverContainerProps = Omit<
-  DiscoverContainerInternalProps,
-  'isDev' | 'getDiscoverServices'
->;
+export type DiscoverContainerProps = Omit<DiscoverContainerInternalProps, 'getDiscoverServices'>;
 
 export const DiscoverContainerInternal = withSuspense(lazy(() => import('./discover_container')));

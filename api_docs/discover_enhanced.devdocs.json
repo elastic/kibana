@@ -311,9 +311,7 @@
           },
           " extends ",
           "AbstractExploreDataAction",
-          "<",
-          "ExploreDataChartActionContext",
-          "> implements ",
+          " implements ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -463,7 +461,7 @@
           },
           " extends ",
           "AbstractExploreDataAction",
-          "<EmbeddableQueryContext> implements ",
+          " implements ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -471,7 +469,15 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<EmbeddableQueryContext>"
+          "<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          ">"
         ],
         "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
         "deprecated": false,
@@ -518,40 +524,6 @@
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discoverEnhanced",
-            "id": "def-public.ExploreDataContextMenuAction.getLocation",
-            "type": "Function",
-            "tags": [],
-            "label": "getLocation",
-            "description": [],
-            "signature": [
-              "(context: EmbeddableQueryContext) => Promise<",
-              "KibanaLocation",
-              "<object>>"
-            ],
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "discoverEnhanced",
-                "id": "def-public.ExploreDataContextMenuAction.getLocation.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "EmbeddableQueryContext"
-                ],
-                "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false

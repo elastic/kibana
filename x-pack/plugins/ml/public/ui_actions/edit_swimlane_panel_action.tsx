@@ -6,29 +6,36 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { MlCoreSetup } from '../plugin';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, EditSwimlanePanelContext } from '../embeddables';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
+import type { MlCoreSetup } from '../plugin';
+import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
+export type EditSwimlanePanelActionContext = EmbeddableApiContext & {
+  embeddable: AnomalySwimLaneEmbeddableApi;
+};
+
 export function createEditSwimlanePanelAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<EditSwimlanePanelContext> {
+): UiActionsActionDefinition<EditSwimlanePanelActionContext> {
   return {
     id: 'edit-anomaly-swimlane',
     type: EDIT_SWIMLANE_PANEL_ACTION,
-    getIconType(context): string {
+    order: 50,
+    getIconType(): string {
       return 'pencil';
     },
     getDisplayName: () =>
       i18n.translate('xpack.ml.actions.editSwimlaneTitle', {
         defaultMessage: 'Edit swim lane',
       }),
-    async execute({ embeddable }) {
-      if (!embeddable) {
-        throw new Error('Not possible to execute an action without the embeddable context');
+    async execute(context) {
+      if (!isSwimLaneEmbeddableContext(context)) {
+        throw new IncompatibleActionError();
       }
 
       const [coreStart, deps] = await getStartServices();
@@ -38,20 +45,24 @@ export function createEditSwimlanePanelAction(
           '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
         );
 
-        const result = await resolveAnomalySwimlaneUserInput(
-          coreStart,
-          deps.data.dataViews,
-          embeddable.getInput()
-        );
-        embeddable.updateInput(result);
+        const { jobIds, viewBy, swimlaneType, panelTitle } = context.embeddable;
+
+        const result = await resolveAnomalySwimlaneUserInput(coreStart, deps.data.dataViews, {
+          jobIds: jobIds.getValue(),
+          swimlaneType: swimlaneType.getValue(),
+          viewBy: viewBy.getValue(),
+          title: panelTitle?.getValue(),
+        });
+
+        context.embeddable.updateUserInput(result);
+        context.embeddable.setPanelTitle(result.panelTitle);
       } catch (e) {
         return Promise.reject();
       }
     },
-    async isCompatible({ embeddable }) {
+    async isCompatible(context: EmbeddableApiContext) {
       return (
-        embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE &&
-        embeddable.getInput().viewMode === ViewMode.EDIT
+        isSwimLaneEmbeddableContext(context) && context.embeddable.viewMode?.getValue() === 'edit'
       );
     },
   };

@@ -69,7 +69,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
   return (
     <EuiEmptyPrompt
       data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED}
-      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
+      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="" role="presentation" />}
       title={
         <h2>
           <FormattedHTMLMessage

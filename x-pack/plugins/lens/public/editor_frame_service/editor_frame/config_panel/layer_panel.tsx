@@ -24,7 +24,7 @@ import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-dro
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
-import { LayerSettings } from './layer_settings';
+import { LayerHeader } from './layer_header';
 import { LayerPanelProps } from './types';
 import { DimensionContainer } from './dimension_container';
 import { EmptyDimensionButton } from './buttons/empty_dimension_button';
@@ -49,8 +49,6 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const [isPanelSettingsOpen, setPanelSettingsOpen] = useState(false);
 
-  const [hideTooltip, setHideTooltip] = useState<boolean>(false);
-
   const {
     framePublicAPI,
     layerId,
@@ -61,6 +59,8 @@ export function LayerPanel(props: LayerPanelProps) {
     registerNewLayerRef,
     layerIndex,
     activeVisualization,
+    visualizationMap,
+    datasourceMap,
     updateVisualization,
     updateDatasource,
     toggleFullscreen,
@@ -71,7 +71,10 @@ export function LayerPanel(props: LayerPanelProps) {
     core,
     onDropToDimension,
     setIsInlineFlyoutVisible,
+    onlyAllowSwitchToSubtypes,
   } = props;
+
+  const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
   const isSaveable = useLensSelector((state) => state.lens.isSaveable);
 
@@ -363,7 +366,7 @@ export function LayerPanel(props: LayerPanelProps) {
           <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
-                <LayerSettings
+                <LayerHeader
                   layerConfigProps={{
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
@@ -374,7 +377,10 @@ export function LayerPanel(props: LayerPanelProps) {
                         visualizationId: activeVisualization.id,
                       }),
                   }}
-                  activeVisualization={activeVisualization}
+                  activeVisualizationId={activeVisualization.id}
+                  visualizationMap={visualizationMap}
+                  datasourceMap={datasourceMap}
+                  onlyAllowSwitchToSubtypes={onlyAllowSwitchToSubtypes}
                 />
               </EuiFlexItem>
               {props.displayLayerSettings && (
@@ -428,7 +434,7 @@ export function LayerPanel(props: LayerPanelProps) {
             .map((group, groupIndex) => {
               let errorText: string = '';
 
-              if (!isEmptyLayer) {
+              if (!isEmptyLayer || isInlineEditing) {
                 if (
                   group.requiredMinDimensionCount &&
                   group.requiredMinDimensionCount > group.accessors.length
@@ -544,8 +550,6 @@ export function LayerPanel(props: LayerPanelProps) {
                               state={layerDatasourceState}
                               layerDatasource={layerDatasource}
                               datasourceLayers={framePublicAPI.datasourceLayers}
-                              onDragStart={() => setHideTooltip(true)}
-                              onDragEnd={() => setHideTooltip(false)}
                               onDrop={onDrop}
                               indexPatterns={dataViews.indexPatterns}
                             >
@@ -583,7 +587,6 @@ export function LayerPanel(props: LayerPanelProps) {
                                     {activeVisualization?.DimensionTriggerComponent?.({
                                       columnId,
                                       label: columnLabelMap?.[columnId] ?? '',
-                                      hideTooltip,
                                     })}
                                   </>
                                 )}
@@ -653,7 +656,7 @@ export function LayerPanel(props: LayerPanelProps) {
           handleClose={() => {
             setPanelSettingsOpen(false);
           }}
-          isInlineEditing={Boolean(props?.setIsInlineFlyoutVisible)}
+          isInlineEditing={isInlineEditing}
         >
           <div id={layerId}>
             <div className="lnsIndexPatternDimensionEditor--padded">
@@ -720,7 +723,7 @@ export function LayerPanel(props: LayerPanelProps) {
         isOpen={isDimensionPanelOpen}
         isFullscreen={isFullscreen}
         label={openColumnGroup?.dimensionEditorGroupLabel ?? (openColumnGroup?.groupLabel || '')}
-        isInlineEditing={Boolean(props?.setIsInlineFlyoutVisible)}
+        isInlineEditing={isInlineEditing}
         handleClose={closeDimensionEditor}
         panel={
           <>
@@ -780,7 +783,7 @@ export function LayerPanel(props: LayerPanelProps) {
                         addLayer: props.addLayer,
                         removeLayer: props.onRemoveLayer,
                         panelRef,
-                        isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
+                        isInlineEditing,
                       }}
                     />
                   </div>

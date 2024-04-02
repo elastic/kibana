@@ -44,9 +44,10 @@ import {
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
 import {
-  ObservabilityAIAssistantPluginStart,
-  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -59,7 +60,7 @@ export interface ApmPluginSetupDeps {
   licensing: LicensingPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -71,10 +72,11 @@ export interface ApmPluginStartDeps {
   inspector: InspectorPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   exploratoryView: ExploratoryViewPublicStart;
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
+  spaces?: SpacesPluginStart;
 }
 
 async function getDataStartPlugin(core: CoreSetup) {
@@ -201,12 +203,17 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
           core.getStartServices(),
         ]);
 
+        const activeSpace = await (
+          corePlugins as ApmPluginStartDeps
+        ).spaces?.getActiveSpace();
+
         return renderApp({
           isDev,
           core: coreStart,
           deps: pluginSetupDeps,
           appMountParameters,
           corePlugins: corePlugins as ApmPluginStartDeps,
+          spaceId: activeSpace?.id || 'default',
         });
       },
     });

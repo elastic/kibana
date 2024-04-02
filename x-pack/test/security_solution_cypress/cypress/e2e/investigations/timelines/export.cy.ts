@@ -13,7 +13,7 @@ import {
 } from '../../../tasks/timelines';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 import { TOASTER } from '../../../screens/alerts_detection_rules';

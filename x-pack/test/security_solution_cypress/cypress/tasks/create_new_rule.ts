@@ -105,7 +105,7 @@ import {
   THREAT_MAPPING_COMBO_BOX_INPUT,
   THREAT_MATCH_AND_BUTTON,
   THREAT_MATCH_CUSTOM_QUERY_INPUT,
-  THREAT_MATCH_INDICATOR_INDEX,
+  CUSTOM_INDEX_PATTERN_INPUT,
   THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
   THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
@@ -122,6 +122,7 @@ import {
   RULE_INDICES,
   ALERTS_INDEX_BUTTON,
   INVESTIGATIONS_INPUT,
+  QUERY_BAR_ADD_FILTER,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -408,7 +409,7 @@ export const removeAlertsIndex = () => {
   });
 };
 
-export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
+export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   if (rule.data_view_id !== undefined) {
     cy.get(DATA_VIEW_OPTION).click();
     cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.data_view_id}{enter}`);
@@ -416,6 +417,10 @@ export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
     .type(rule.query || '');
+};
+
+export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
+  fillDefineCustomRule(rule);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
@@ -652,7 +657,7 @@ export const fillIndexAndIndicatorIndexPattern = (
 ) => {
   getIndexPatternClearButton().click();
 
-  getIndicatorIndex().type(`${indexPattern}{enter}`);
+  getRuleIndexInput().type(`${indexPattern}{enter}`);
   getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
 };
 
@@ -689,9 +694,9 @@ export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 /** Returns the continue button on the step of define */
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
 
-/** Returns the indicator index pattern */
-export const getIndicatorIndex = () => {
-  return cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
+/** Returns the custom rule index pattern input */
+export const getRuleIndexInput = () => {
+  return cy.get(CUSTOM_INDEX_PATTERN_INPUT).eq(0);
 };
 
 /** Returns the indicator's indicator index */
@@ -877,4 +882,8 @@ export const checkLoadQueryDynamically = () => {
 export const uncheckLoadQueryDynamically = () => {
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true });
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('not.be.checked');
+};
+
+export const openAddFilterPopover = () => {
+  cy.get(QUERY_BAR_ADD_FILTER).click();
 };

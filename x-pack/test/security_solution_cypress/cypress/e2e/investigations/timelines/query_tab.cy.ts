@@ -14,7 +14,7 @@ import {
   TIMELINE_QUERY,
   NOTE_CARD_CONTENT,
 } from '../../../screens/timeline';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 

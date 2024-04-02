@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
-import React, { ReactNode, useCallback, useMemo } from 'react';
-import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
+import type { ReactNode } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { useUrlState } from '@kbn/ml-url-state';
 import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';

@@ -122,6 +122,7 @@ enabled:
   - test/functional/apps/home/config.ts
   - test/functional/apps/kibana_overview/config.ts
   - test/functional/apps/management/config.ts
+  - test/functional/apps/navigation/config.ts
   - test/functional/apps/saved_objects_management/config.ts
   - test/functional/apps/sharing/config.ts
   - test/functional/apps/status_page/config.ts
@@ -305,6 +306,7 @@ enabled:
   - x-pack/test/functional/apps/ml/stack_management_jobs/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
   - x-pack/test/functional/apps/observability_logs_explorer/config.ts
+  - x-pack/test/functional/apps/dataset_quality/config.ts
   - x-pack/test/functional/apps/painless_lab/config.ts
   - x-pack/test/functional/apps/remote_clusters/config.ts
   - x-pack/test/functional/apps/reporting_management/config.ts
@@ -445,24 +447,25 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group4.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group5.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group6.ts
-  - x-pack/performance/journeys/ecommerce_dashboard.ts
-  - x-pack/performance/journeys/ecommerce_dashboard_map_only.ts
-  - x-pack/performance/journeys/flight_dashboard.ts
-  - x-pack/performance/journeys/login.ts
-  - x-pack/performance/journeys/many_fields_discover.ts
-  - x-pack/performance/journeys/many_fields_lens_editor.ts
-  - x-pack/performance/journeys/many_fields_transform.ts
-  - x-pack/performance/journeys/tsdb_logs_data_visualizer.ts
-  - x-pack/performance/journeys/promotion_tracking_dashboard.ts
-  - x-pack/performance/journeys/web_logs_dashboard.ts
-  - x-pack/performance/journeys/data_stress_test_lens.ts
-  - x-pack/performance/journeys/ecommerce_dashboard_saved_search_only.ts
-  - x-pack/performance/journeys/ecommerce_dashboard_tsvb_gauge_only.ts
-  - x-pack/performance/journeys/dashboard_listing_page.ts
-  - x-pack/performance/journeys/tags_listing_page.ts
-  - x-pack/performance/journeys/cloud_security_dashboard.ts
-  - x-pack/performance/journeys/apm_service_inventory.ts
-  - x-pack/performance/journeys/infra_hosts_view.ts
+  - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
+  - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
+  - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts
+  - x-pack/performance/journeys_e2e/flight_dashboard.ts
+  - x-pack/performance/journeys_e2e/login.ts
+  - x-pack/performance/journeys_e2e/many_fields_discover.ts
+  - x-pack/performance/journeys_e2e/many_fields_lens_editor.ts
+  - x-pack/performance/journeys_e2e/many_fields_transform.ts
+  - x-pack/performance/journeys_e2e/tsdb_logs_data_visualizer.ts
+  - x-pack/performance/journeys_e2e/promotion_tracking_dashboard.ts
+  - x-pack/performance/journeys_e2e/web_logs_dashboard.ts
+  - x-pack/performance/journeys_e2e/data_stress_test_lens.ts
+  - x-pack/performance/journeys_e2e/ecommerce_dashboard_saved_search_only.ts
+  - x-pack/performance/journeys_e2e/ecommerce_dashboard_tsvb_gauge_only.ts
+  - x-pack/performance/journeys_e2e/dashboard_listing_page.ts
+  - x-pack/performance/journeys_e2e/tags_listing_page.ts
+  - x-pack/performance/journeys_e2e/cloud_security_dashboard.ts
+  - x-pack/performance/journeys_e2e/apm_service_inventory.ts
+  - x-pack/performance/journeys_e2e/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/ess.config.ts

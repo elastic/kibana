@@ -51,6 +51,14 @@ const summarySchema = t.type({
 
 const groupingsSchema = t.record(t.string, t.union([t.string, t.number]));
 
+const metaSchema = t.partial({
+  synthetics: t.type({
+    monitorId: t.string,
+    locationId: t.string,
+    configId: t.string,
+  }),
+});
+
 const groupSummarySchema = t.type({
   total: t.number,
   worst: t.type({
@@ -132,6 +140,7 @@ export {
   previewDataSchema,
   statusSchema,
   summarySchema,
+  metaSchema,
   groupSummarySchema,
   kqlWithFiltersSchema,
   querySchema,

@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import styled, { css } from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiButtonEmpty } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { CaseStatuses } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
 import { CaseMetricsFeature } from '../../../common/types/api';
@@ -30,19 +30,6 @@ export interface CaseActionBarProps {
   onUpdateField: (args: OnUpdateFields) => void;
 }
 
-const EuiFlexItemSeparated = styled(EuiFlexItem)`
-  ${({ theme }) => css`
-    & {
-      padding-right: ${theme.eui.euiSizeL};
-      border-right: ${theme.eui.euiBorderThin};
-      @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
-        padding-right: 0;
-        border-right: 0;
-      }
-    }
-  `}
-`;
-
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   caseData,
   isLoading,
@@ -50,6 +37,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
 }) => {
   const { permissions } = useCasesContext();
   const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
+  const { euiTheme } = useEuiTheme();
 
   const { data: caseConnectors } = useGetCaseConnectors(caseData.id);
 
@@ -81,7 +69,17 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
-      <EuiFlexItemSeparated grow={false}>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          padding-right: ${euiTheme.size.l};
+          border-right: ${euiTheme.border.thin};
+          @media only screen and (max-width: ${euiTheme.breakpoint.m}) {
+            padding-right: 0;
+            border-right: 0;
+          }
+        `}
+      >
         <ActionBarStatusItem title={i18n.STATUS} data-test-subj="case-view-status">
           <StatusContextMenu
             currentStatus={caseData.status}
@@ -90,7 +88,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             onStatusChanged={onStatusChanged}
           />
         </ActionBarStatusItem>
-      </EuiFlexItemSeparated>
+      </EuiFlexItem>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         {!metricsFeatures.includes(CaseMetricsFeature.LIFESPAN) ? (
           <EuiFlexItem grow={false}>

@@ -3,7 +3,8 @@
 == Rule types
 
 A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the {stack} and rules registered by one of the {kib} apps.
-You can create most rules types in <<create-and-manage-rules,{stack-manage-app} > {rules-ui}>>. For information on creating security rules, refer to {security-guide}/rules-ui-create.html[Create a detection rule].
+You can create most rules types in <<create-and-manage-rules,{stack-manage-app} > {rules-ui}>>.
+Security rules must be defined in the Security app. For more information, refer to the documentation about {security-guide}/rules-ui-create.html[creating a detection rule].
 
 [NOTE]
 ==============================================
@@ -39,34 +40,13 @@ see {subscriptions}[the subscription page].
 [[observability-rules]]
 === {observability} rules
 
-{observability} rules are categorized into APM and {user-experience}, Logs, Metrics, {stack-monitor-app}, and Uptime.
+{observability} rules detect complex conditions in your observability data and create alerts when a rule's conditions are met. For example, you can create a rule that detects when the value of a metric exceeds a specified threshold or when an anomaly occurs on a system or service you are monitoring. For more information, refer to {observability-guide}/create-alerts.html[Alerting].
 
 [NOTE]
 ==============================================
 If you create a rule in the {observability} app, its alerts are not visible in
 *{stack-manage-app} > {rules-ui}*. They are visible only in the {observability} app.
 ==============================================
-
-[cols="2*<"]
-|===
-
-
-| <<apm-alerts, APM and User Experience>>
-| Detect complex conditions in *APM* data and trigger built-in actions when the conditions are met.
-
-| {observability-guide}/logs-threshold-alert.html[Logs rules]
-| Detect complex conditions in the {logs-app}.
-
-| {observability-guide}/metrics-threshold-alert.html[Metrics rules]
-| Detect complex conditions in the {metrics-app}.
-
-| {observability-guide}/slo-burn-rate-alert.html[SLO burn rate rule]
-| Detect when the burn rate is above a defined threshold.
-
-| {observability-guide}/monitor-status-alert.html[Uptime rules]
-| Detect complex conditions in the {uptime-app}.
-
-|===
 
 [float]
 [[ml-rules]]

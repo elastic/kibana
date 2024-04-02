@@ -41,5 +41,7 @@ export const register = <Config extends ActionTypeConfig, Secrets extends Action
     executor,
     renderParameterTemplates: connector.renderParameterTemplates,
     isSystemActionType: connector.isSystemActionType,
+    getService: connector.getService,
+    getKibanaPrivileges: connector.getKibanaPrivileges,
   });
 };

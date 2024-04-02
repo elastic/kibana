@@ -227,6 +227,66 @@ export const getDefaultAwsCredentialsType = (
 
   return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
 };
+
+export const getDefaultAzureCredentialsType = (
+  packageInfo: PackageInfo,
+  setupTechnology?: SetupTechnology
+): string => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return 'service_principal_with_client_secret';
+  }
+
+  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
+  if (hasArmTemplateUrl) {
+    return 'arm_template';
+  }
+
+  return 'managed_identity';
+};
+
+export const getDefaultGcpHiddenVars = (
+  packageInfo: PackageInfo,
+  setupTechnology?: SetupTechnology
+): Record<string, PackagePolicyConfigRecordEntry> => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return {
+      'gcp.credentials.type': {
+        value: 'credentials-json',
+        type: 'text',
+      },
+      setup_access: {
+        value: 'manual',
+        type: 'text',
+      },
+    };
+  }
+
+  const hasCloudShellUrl = !!getCspmCloudShellDefaultValue(packageInfo);
+  if (hasCloudShellUrl) {
+    return {
+      'gcp.credentials.type': {
+        value: 'credentials-none',
+        type: 'text',
+      },
+      setup_access: {
+        value: 'google_cloud_shell',
+        type: 'text',
+      },
+    };
+  }
+
+  return {
+    'gcp.credentials.type': {
+      value: 'credentials-file',
+      type: 'text',
+    },
+    setup_access: {
+      value: 'manual',
+      type: 'text',
+    },
+  };
+};
+
 /**
  * Input vars that are hidden from the user
  */
@@ -234,7 +294,7 @@ export const getPostureInputHiddenVars = (
   inputType: PostureInput,
   packageInfo: PackageInfo,
   setupTechnology: SetupTechnology
-) => {
+): Record<string, PackagePolicyConfigRecordEntry> | undefined => {
   switch (inputType) {
     case 'cloudbeat/cis_aws':
       return {
@@ -243,6 +303,15 @@ export const getPostureInputHiddenVars = (
           type: 'text',
         },
       };
+    case 'cloudbeat/cis_azure':
+      return {
+        'azure.credentials.type': {
+          value: getDefaultAzureCredentialsType(packageInfo, setupTechnology),
+          type: 'text',
+        },
+      };
+    case 'cloudbeat/cis_gcp':
+      return getDefaultGcpHiddenVars(packageInfo, setupTechnology);
     case 'cloudbeat/cis_eks':
       return { 'aws.credentials.type': { value: DEFAULT_EKS_VARS_GROUP, type: 'text' } };
     default:

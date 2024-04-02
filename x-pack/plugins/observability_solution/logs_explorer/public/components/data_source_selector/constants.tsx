@@ -15,12 +15,16 @@ export const UNCATEGORIZED_TAB_ID = 'data-source-selector-uncategorized-tab';
 export const DATA_VIEWS_PANEL_ID = 'data-source-selector-data-views-panel';
 export const DATA_VIEWS_TAB_ID = 'data-source-selector-data-views-tab';
 
-export const DATA_SOURCE_SELECTOR_WIDTH = 400;
+export const DATA_SOURCE_SELECTOR_WIDTH = 520;
 
 export const showAllLogsLabel = i18n.translate(
   'xpack.logsExplorer.dataSourceSelector.showAllLogs',
   { defaultMessage: 'Show all logs' }
 );
+
+export const addDataLabel = i18n.translate('xpack.logsExplorer.dataSourceSelector.addDataLabel', {
+  defaultMessage: 'Add data',
+});
 
 export const integrationsLabel = i18n.translate(
   'xpack.logsExplorer.dataSourceSelector.integrations',
@@ -90,6 +94,21 @@ export const tryEsql = i18n.translate('xpack.logsExplorer.dataSourceSelector.Try
 export const technicalPreview = i18n.translate('xpack.logsExplorer.TechPreview', {
   defaultMessage: 'Technical preview',
 });
+
+export const selectDataViewTypeLabel = i18n.translate(
+  'xpack.logsExplorer.dataSourceSelector.dataViewFilter.selectDataViewType',
+  { defaultMessage: 'Select type' }
+);
+
+export const allDataViewTypesLabel = i18n.translate(
+  'xpack.logsExplorer.dataSourceSelector.dataViewFilter.allDataViewTypes',
+  { defaultMessage: 'Show all' }
+);
+
+export const logsDataViewTypeLabel = i18n.translate(
+  'xpack.logsExplorer.dataSourceSelector.dataViewFilter.logsDataViewType',
+  { defaultMessage: 'Logs-only' }
+);
 
 export const sortOptions = [
   {

@@ -15,7 +15,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/std",
-    "@kbn/alerts-as-data-utils",
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
   ],

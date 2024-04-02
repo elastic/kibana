@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import {
   EuiCallOut,
   EuiFormRow,
@@ -18,13 +19,11 @@ import {
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { FieldSelectionItem } from '@kbn/ml-data-frame-analytics-utils';
 import { useFieldStatsTrigger } from '../../../../../components/field_stats_flyout/use_field_stats_trigger';
-import {
-  FieldForStats,
-  FieldStatsInfoButton,
-} from '../../../../../components/field_stats_flyout/field_stats_info_button';
+import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+import { FieldStatsInfoButton } from '../../../../../components/field_stats_flyout/field_stats_info_button';
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
 

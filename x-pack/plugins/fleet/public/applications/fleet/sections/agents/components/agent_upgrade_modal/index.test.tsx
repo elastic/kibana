@@ -11,7 +11,11 @@ import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { sendGetAgentsAvailableVersions, sendPostBulkAgentUpgrade } from '../../../../hooks';
+import {
+  sendGetAllFleetServerAgents,
+  sendGetAgentsAvailableVersions,
+  sendPostBulkAgentUpgrade,
+} from '../../../../hooks';
 
 import { AgentUpgradeAgentModal } from '.';
 import type { AgentUpgradeAgentModalProps } from '.';
@@ -30,12 +34,20 @@ jest.mock('../../../../hooks', () => {
     sendPostBulkAgentUpgrade: jest.fn(),
     useAgentVersion: jest.fn().mockReturnValue('8.10.2'),
     useKibanaVersion: jest.fn().mockReturnValue('8.10.2'),
+    sendGetAllFleetServerAgents: jest.fn(),
+  };
+});
+
+jest.mock('./hooks', () => {
+  return {
+    ...jest.requireActual('./hooks'),
   };
 });
 
 const mockSendPostBulkAgentUpgrade = sendPostBulkAgentUpgrade as jest.Mock;
 
 const mockSendGetAgentsAvailableVersions = sendGetAgentsAvailableVersions as jest.Mock;
+const mockSendAllFleetServerAgents = sendGetAllFleetServerAgents as jest.Mock;
 
 function renderAgentUpgradeAgentModal(props: Partial<AgentUpgradeAgentModalProps>) {
   const renderer = createFleetTestRendererMock();
@@ -43,7 +55,6 @@ function renderAgentUpgradeAgentModal(props: Partial<AgentUpgradeAgentModalProps
   const utils = renderer.render(
     <AgentUpgradeAgentModal agents="" agentCount={12} onClose={() => {}} {...props} />
   );
-
   return { utils };
 }
 
@@ -180,10 +191,113 @@ describe('AgentUpgradeAgentModal', () => {
       );
       expect(optionList.textContent).toEqual(['8.10.4', '8.10.2+build123456789'].join(''));
     });
+
+    it('should disable submit button and display a warning for a single agent when version is greater than maxFleetServerVersion', async () => {
+      mockSendGetAgentsAvailableVersions.mockClear();
+      mockSendGetAgentsAvailableVersions.mockResolvedValue({
+        data: {
+          items: ['8.10.4', '8.10.2', '8.9.0', '8.8.0'],
+        },
+      });
+      mockSendAllFleetServerAgents.mockResolvedValue({
+        allFleetServerAgents: [
+          { id: 'fleet-server', local_metadata: { elastic: { agent: { version: '8.9.0' } } } },
+        ] as any,
+      });
+
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: {
+              elastic: {
+                agent: { version: '8.8.0', upgradeable: true },
+              },
+              host: { hostname: 'host00001' },
+            },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+        const input = within(container).getByRole<HTMLInputElement>('combobox');
+        expect(input?.value).toEqual('8.10.2');
+        expect(
+          utils.queryAllByText(
+            /This action will upgrade the agent running on 'host00001' to version 8.10.2. This action can not be undone. Are you sure you wish to continue?/
+          )
+        );
+        expect(
+          utils.queryByText(
+            /Cannot upgrade to version 8.10.2 because it is higher than the latest fleet server version 8.9.0./
+          )
+        ).toBeInTheDocument();
+        const el = utils.getByTestId('confirmModalConfirmButton');
+        expect(el).toBeDisabled();
+      });
+    });
+
+    it('should display a warning for multiple agents when version is greater than maxFleetServerVersion and not disable submit button', async () => {
+      mockSendGetAgentsAvailableVersions.mockClear();
+      mockSendGetAgentsAvailableVersions.mockResolvedValue({
+        data: {
+          items: ['8.10.4', '8.10.2', '8.9.0', '8.8.0'],
+        },
+      });
+      mockSendAllFleetServerAgents.mockResolvedValue({
+        allFleetServerAgents: [
+          { id: 'fleet-server', local_metadata: { elastic: { agent: { version: '8.9.0' } } } },
+        ] as any,
+      });
+
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: {
+              elastic: {
+                agent: { version: '8.8.0', upgradeable: true },
+              },
+              host: { hostname: 'host00001' },
+            },
+          },
+          {
+            id: 'agent2',
+            local_metadata: {
+              elastic: {
+                agent: { version: '8.8.1', upgradeable: true },
+              },
+              host: { hostname: 'host00002' },
+            },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+        const input = within(container).getByRole<HTMLInputElement>('combobox');
+        expect(input?.value).toEqual('8.10.2');
+        expect(
+          utils.queryAllByText(
+            /This action will upgrade multiple agents to version 8.10.2. This action can not be undone. Are you sure you wish to continue?/
+          )
+        );
+        expect(
+          utils.queryByText(
+            /Please choose another version. Cannot upgrade to version 8.10.2 because it is higher than the latest fleet server version 8.9.0./
+          )
+        ).toBeInTheDocument();
+        const el = utils.getByTestId('confirmModalConfirmButton');
+        expect(el).not.toBeDisabled();
+      });
+    });
   });
 
   describe('restart upgrade', () => {
-    it('should restart uprade on updating agents if some agents in updating', async () => {
+    it('should restart upgrade on updating agents if some agents in updating', async () => {
       const { utils } = renderAgentUpgradeAgentModal({
         agents: [
           { status: 'updating', upgrade_started_at: '2022-11-21T12:27:24Z', id: 'agent1' },
@@ -266,10 +380,9 @@ describe('AgentUpgradeAgentModal', () => {
       agentCount: 2,
     });
     await waitFor(() => {
-      expect(utils.queryByText(/The selected agent is not upgradeable/)).toBeInTheDocument();
       expect(
         utils.queryByText(
-          /Reason: agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service./
+          /The selected agent is not upgradeable: agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service./
         )
       ).toBeInTheDocument();
       const el = utils.getByTestId('confirmModalConfirmButton');

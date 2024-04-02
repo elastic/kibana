@@ -14,6 +14,7 @@ import type { ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
 import { createOrUpdateIndexTemplate } from './utils/create_or_update_index_template';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
+import { CustomThresholdLocators } from './lib/rules/custom_threshold/custom_threshold_executor';
 import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
@@ -51,13 +52,15 @@ const configSchema = schema.object({
         traditional: schema.boolean({ defaultValue: false }),
       }),
     }),
+    ruleFormV2: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
   customThresholdRule: schema.object({
     groupByPageSize: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
   createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
-  sloOrphanSummaryCleanUpTaskEnabled: schema.boolean({ defaultValue: true }),
 });
 
 export const config: PluginConfigDescriptor = {
@@ -85,7 +88,12 @@ export const plugin = async (initContext: PluginInitializerContext) => {
   return new ObservabilityPlugin(initContext);
 };
 
-export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
+export type {
+  Mappings,
+  ObservabilityPluginSetup,
+  ScopedAnnotationsClient,
+  CustomThresholdLocators,
+};
 export {
   createOrUpdateIndex,
   createOrUpdateIndexTemplate,

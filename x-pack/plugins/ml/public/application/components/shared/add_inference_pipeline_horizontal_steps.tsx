@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiStepsHorizontal, type EuiStepsHorizontalProps } from '@elastic/eui';

@@ -37,8 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const DASHBOARD_NAME = 'Test Links panel';
   const LINKS_PANEL_NAME = 'Some links';
 
-  // Failing: See https://github.com/elastic/kibana/issues/177675
-  describe.skip('links panel create and edit', () => {
+  describe('links panel create and edit', () => {
     describe('creation', async () => {
       before(async () => {
         await dashboard.navigateToApp();
@@ -99,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboard.clickUnsavedChangesContinueEditing(DASHBOARD_NAME);
 
           await dashboard.waitForRenderComplete();
-          await dashboardPanelActions.saveToLibrary('Some more links');
+          await dashboardPanelActions.legacySaveToLibrary('Some more links');
           await testSubjects.existOrFail('addPanelToLibrarySuccess');
         });
 
@@ -116,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
-        await dashboardLinks.expectFlyoutIsOpen();
+        await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
         // Move the third link up one step
         await dashboardLinks.reorderLinks('link003', 3, 1, true);
@@ -136,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
-        await dashboardLinks.expectFlyoutIsOpen();
+        await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
         await dashboardLinks.editLinkByIndex(5);
         await testSubjects.exists('links--linkEditor--flyout');
@@ -155,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
-        await dashboardLinks.expectFlyoutIsOpen();
+        await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
         await dashboardLinks.deleteLinkByIndex(5);
         await dashboardLinks.clickPanelEditorSaveButton();

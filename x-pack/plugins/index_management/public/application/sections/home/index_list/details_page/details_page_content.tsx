@@ -181,7 +181,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       >
         <DetailsPageTab tabs={tabs} tab={tab} index={index} />
       </div>
-      {consolePlugin?.renderEmbeddableConsole?.() ?? <></>}
+      {consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null}
     </>
   );
 };

@@ -885,7 +885,7 @@ export class Embeddable
           navigateToLensEditor={
             !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
           }
-          displayFlyoutHeader={true}
+          displayFlyoutHeader
           canEditTextBasedQuery={this.isTextBasedLanguage()}
           isNewPanel={isNewPanel}
           deletePanel={deletePanel}
