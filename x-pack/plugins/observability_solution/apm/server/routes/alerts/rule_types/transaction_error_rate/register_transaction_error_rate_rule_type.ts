@@ -113,7 +113,7 @@ export function registerTransactionErrorRateRuleType({
 }: RegisterRuleDependencies) {
   if (!alerting) {
     throw new Error(
-      'Cannot register the transaction error rate rule type. Both the actions and alerting plugins need to be enabled.'
+      'Cannot register the transaction error rate rule type. The alerting plugin need to be enabled.'
     );
   }
 

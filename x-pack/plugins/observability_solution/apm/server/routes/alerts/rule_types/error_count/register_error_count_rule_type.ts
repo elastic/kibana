@@ -14,7 +14,6 @@ import {
   RuleTypeState,
   RuleExecutorOptions,
   AlertsClientError,
-  IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
@@ -308,10 +307,7 @@ export function registerErrorCountRuleType({
 
       return { state: {} };
     },
-    alerts: {
-      ...ApmRuleTypeAlertDefinition,
-      shouldWrite: true,
-    } as IRuleTypeAlerts<ErrorCountAlert>,
+    alerts: ApmRuleTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

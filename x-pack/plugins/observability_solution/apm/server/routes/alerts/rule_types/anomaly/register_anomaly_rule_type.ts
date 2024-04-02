@@ -14,7 +14,6 @@ import {
   RuleTypeState,
   RuleExecutorOptions,
   AlertsClientError,
-  IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
 import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
@@ -381,10 +380,7 @@ export function registerAnomalyRuleType({
 
       return { state: {} };
     },
-    alerts: {
-      ...ApmRuleTypeAlertDefinition,
-      shouldWrite: true,
-    } as IRuleTypeAlerts<AnomalyAlert>,
+    alerts: ApmRuleTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });
