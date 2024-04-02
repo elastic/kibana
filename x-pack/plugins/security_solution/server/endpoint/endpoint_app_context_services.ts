@@ -23,9 +23,9 @@ import type {
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
-import { EndpointError } from '../../common/endpoint/errors';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { ResponseActionsClient } from './services';
-import { EndpointActionsClient } from './services';
+import { getResponseActionsClient } from './services';
 import {
   getAgentPolicyCreateCallback,
   getAgentPolicyUpdateCallback,
@@ -54,7 +54,6 @@ import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
-
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
   cloud: CloudSetup;
@@ -83,6 +82,7 @@ export interface EndpointAppContextServiceStartContract {
   esClient: ElasticsearchClient;
   productFeaturesService: ProductFeaturesService;
   savedObjectsClient: SavedObjectsClientContract;
+  connectorActions: ActionsPluginStartContract;
 }
 
 /**
@@ -276,34 +276,57 @@ export class EndpointAppContextService {
   public getInternalResponseActionsClient({
     agentType = 'endpoint',
     username = 'elastic',
+    taskId,
+    taskType,
   }: {
     agentType?: ResponseActionAgentType;
     username?: string;
+    /** Used with background task and needed for `UnsecuredActionsClient`  */
+    taskId?: string;
+    /** Used with background task and needed for `UnsecuredActionsClient`  */
+    taskType?: string;
   }): ResponseActionsClient {
     if (!this.startDependencies?.esClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    if (agentType !== `endpoint`) {
-      throw new EndpointError(
-        `Agent type [${agentType}] does not support usage of response actions via non-HTTP requests!`
-      );
+    let connectorActionsClient =
+      this.startDependencies.connectorActions.getUnsecuredActionsClient();
+
+    // If we have a task id and type, then call is coming from a background task and we need to use those
+    // values with the Action's plugin `UnsecuredActionsClient`'s `.execute()` method. To do so in a
+    // transparent way to the existing response action client, we create a Proxy here and trap the
+    // `GET execute` property and wrap it a function that will automatically inject this data into
+    // `execute()` calls
+    if (taskId && taskType) {
+      connectorActionsClient = new Proxy(connectorActionsClient, {
+        get(target, prop, receiver) {
+          if (prop === 'execute') {
+            return function (execArgs: Parameters<typeof connectorActionsClient['execute']>[0]) {
+              return target.execute({
+                ...execArgs,
+                relatedSavedObjects: [
+                  ...(execArgs.relatedSavedObjects ?? []),
+                  {
+                    id: taskId,
+                    type: taskType,
+                  },
+                ],
+              });
+            };
+          }
+
+          return Reflect.get(target, prop, receiver);
+        },
+      });
     }
 
-    // TODO:PT switch to using `getResponseActionsClient()` instead once we support getting internal versions of connectorsActions
-    // return getResponseActionsClient(agentType, {
-    //   endpointService: this,
-    //   esClient: this.startDependencies.esClient,
-    //   username: 'elastic',
-    //   isAutomated: true,
-    //   connectorActions: undefined, // FIXME:PT get internal client here
-    // });
-
-    return new EndpointActionsClient({
-      username,
-      esClient: this.startDependencies.esClient,
+    return getResponseActionsClient(agentType, {
       endpointService: this,
+      esClient: this.startDependencies.esClient,
+      username,
       isAutomated: true,
+      connectorActions: connectorActionsClient,
     });
   }
 

@@ -41,6 +41,16 @@ export const testUsers: {
     username: 'fleet_minimal_all_only',
     password: 'changeme',
   },
+  fleet_minimal_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['minimal_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_minimal_read_only',
+    password: 'changeme',
+  },
   fleet_agents_read_only: {
     permissions: {
       feature: {
@@ -51,6 +61,16 @@ export const testUsers: {
     username: 'fleet_agents_read_only',
     password: 'changeme',
   },
+  fleet_agents_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agents_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agents_all_only',
+    password: 'changeme',
+  },
   fleet_settings_read_only: {
     permissions: {
       feature: {
@@ -59,6 +79,36 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'fleet_settings_read_only',
+    password: 'changeme',
+  },
+  fleet_settings_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['settings_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_settings_all_only',
+    password: 'changeme',
+  },
+  fleet_agent_policies_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agent_policies_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agent_policies_read_only',
+    password: 'changeme',
+  },
+  fleet_agent_policies_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agent_policies_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agent_policies_all_only',
     password: 'changeme',
   },
   setup: {
