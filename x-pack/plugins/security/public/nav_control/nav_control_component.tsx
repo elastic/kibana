@@ -179,19 +179,18 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       panelPaddingSize="none"
       buffer={0}
     >
-      <div data-test-subj="userMenu">
-        <EuiContextMenu
-          className="chrNavControl__userMenu"
-          initialPanelId={0}
-          panels={[
-            {
-              id: 0,
-              title: displayName,
-              content: <ContextMenuContent items={items} />,
-            },
-          ]}
-        />
-      </div>
+      <EuiContextMenu
+        className="chrNavControl__userMenu"
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            title: displayName,
+            content: <ContextMenuContent items={items} />,
+          },
+        ]}
+        data-test-subj="userMenu"
+      />
     </EuiPopover>
   );
 };

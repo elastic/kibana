@@ -18,7 +18,6 @@
     "@kbn/navigation-plugin",
     "@kbn/url-forwarding-plugin",
     "@kbn/visualizations-plugin",
-    "@kbn/dashboard-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/ui-actions-enhanced-plugin",
     "@kbn/share-plugin",
@@ -109,7 +108,10 @@
     "@kbn/text-based-editor",
     "@kbn/managed-content-badge",
     "@kbn/sort-predicates",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/unified-data-table",
+    "@kbn/shared-ux-markdown"
   ],
   "exclude": ["target/**/*"]
 }

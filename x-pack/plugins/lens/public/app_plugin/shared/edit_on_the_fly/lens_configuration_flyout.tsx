@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiAccordion,
   useEuiTheme,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
@@ -69,6 +70,7 @@ export function LensEditConfigurationFlyout({
   hidesSuggestions,
   onApplyCb,
   onCancelCb,
+  hideTimeFilterInfo,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
@@ -80,6 +82,7 @@ export function LensEditConfigurationFlyout({
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
+  const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
 
@@ -200,34 +203,36 @@ export function LensEditConfigurationFlyout({
   ]);
 
   const onApply = useCallback(() => {
+    const dsStates = Object.fromEntries(
+      Object.entries(datasourceStates).map(([id, ds]) => {
+        const dsState = ds.state;
+        return [id, dsState];
+      })
+    );
+    const references = extractReferencesFromState({
+      activeDatasources: Object.keys(datasourceStates).reduce(
+        (acc, id) => ({
+          ...acc,
+          [id]: datasourceMap[id],
+        }),
+        {}
+      ),
+      datasourceStates,
+      visualizationState: visualization.state,
+      activeVisualization,
+    });
+    const attrs = {
+      ...attributes,
+      state: {
+        ...attributes.state,
+        visualization: visualization.state,
+        datasourceStates: dsStates,
+      },
+      references,
+      visualizationType: visualization.activeId,
+      title: visualization.activeId ?? '',
+    };
     if (savedObjectId) {
-      const dsStates = Object.fromEntries(
-        Object.entries(datasourceStates).map(([id, ds]) => {
-          const dsState = ds.state;
-          return [id, dsState];
-        })
-      );
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, id) => ({
-            ...acc,
-            [id]: datasourceMap[id],
-          }),
-          {}
-        ),
-        datasourceStates,
-        visualizationState: visualization.state,
-        activeVisualization,
-      });
-      const attrs = {
-        ...attributes,
-        state: {
-          ...attributes.state,
-          visualization: visualization.state,
-          datasourceStates: dsStates,
-        },
-        references,
-      };
       saveByRef?.(attrs);
       updateByRefInput?.(savedObjectId);
     }
@@ -245,7 +250,7 @@ export function LensEditConfigurationFlyout({
       trackUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCb?.();
+    onApplyCb?.(attrs as TypedLensByValueInput['attributes']);
     closeFlyout?.();
   }, [
     visualization.activeId,
@@ -256,9 +261,9 @@ export function LensEditConfigurationFlyout({
     visualization.state,
     activeVisualization,
     attributes,
+    datasourceMap,
     saveByRef,
     updateByRefInput,
-    datasourceMap,
   ]);
 
   const { getUserMessages } = useApplicationUserMessages({
@@ -277,20 +282,22 @@ export function LensEditConfigurationFlyout({
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
   const runQuery = useCallback(
-    async (q) => {
+    async (q, abortController) => {
       const attrs = await getSuggestions(
         q,
         startDependencies,
         datasourceMap,
         visualizationMap,
         adHocDataViews,
-        setErrors
+        setErrors,
+        abortController
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
         setErrors([]);
         updateSuggestion?.(attrs);
       }
+      setIsVisualizationLoading(false);
     },
     [
       startDependencies,
@@ -356,11 +363,13 @@ export function LensEditConfigurationFlyout({
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
-        isScrollable={true}
+        isScrollable
         isNewPanel={isNewPanel}
         isSaveable={isSaveable}
       >
         <LayerConfiguration
+          // TODO: remove this once we support switching to any chart in Discover
+          onlyAllowSwitchToSubtypes
           getUserMessages={getUserMessages}
           attributes={attributes}
           coreStart={coreStart}
@@ -368,7 +377,7 @@ export function LensEditConfigurationFlyout({
           visualizationMap={visualizationMap}
           datasourceMap={datasourceMap}
           datasourceId={datasourceId}
-          hasPadding={true}
+          hasPadding
           framePublicAPI={framePublicAPI}
           setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
         />
@@ -408,6 +417,7 @@ export function LensEditConfigurationFlyout({
               ${euiScrollBarStyles(euiTheme)}
               padding-left: ${euiThemeVars.euiFormMaxWidth};
               margin-left: -${euiThemeVars.euiFormMaxWidth};
+
               .euiAccordion-isOpen & {
                 block-size: auto !important;
                 flex: 1;
@@ -428,6 +438,7 @@ export function LensEditConfigurationFlyout({
                 expandCodeEditor={(status: boolean) => {}}
                 isCodeEditorExpanded
                 detectTimestamp={Boolean(adHocDataViews?.[0]?.timeFieldName)}
+                hideTimeFilterInfo={hideTimeFilterInfo}
                 errors={errors}
                 warning={
                   suggestsLimitedColumns
@@ -440,21 +451,21 @@ export function LensEditConfigurationFlyout({
                 hideMinimizeButton
                 editorIsInline
                 hideRunQueryText
-                disableSubmitAction={isEqual(query, prevQuery.current)}
-                onTextLangQuerySubmit={(q) => {
+                onTextLangQuerySubmit={async (q, a) => {
                   if (q) {
-                    runQuery(q);
+                    setIsVisualizationLoading(true);
+                    await runQuery(q, a);
                   }
                 }}
                 isDisabled={false}
+                allowQueryCancellation
+                isLoading={isVisualizationLoading}
               />
             </EuiFlexItem>
           )}
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
-                padding-left: ${euiThemeVars.euiSize};
-                padding-right: ${euiThemeVars.euiSize};
                 .euiAccordion__childWrapper {
                   flex: ${isLayerAccordionOpen ? 1 : 'none'}
                 }
@@ -462,6 +473,11 @@ export function LensEditConfigurationFlyout({
             `}
           >
             <EuiAccordion
+              css={css`
+                .euiAccordion__triggerWrapper {
+                  padding: 0 ${euiThemeVars.euiSize};
+                }
+              `}
               id="layer-configuration"
               buttonContent={
                 <EuiTitle
@@ -472,8 +488,8 @@ export function LensEditConfigurationFlyout({
             `}
                 >
                   <h5>
-                    {i18n.translate('xpack.lens.config.layerConfigurationLabel', {
-                      defaultMessage: 'Layer configuration',
+                    {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
+                      defaultMessage: 'Visualization configuration',
                     })}
                   </h5>
                 </EuiTitle>
@@ -490,17 +506,20 @@ export function LensEditConfigurationFlyout({
                 setIsLayerAccordionOpen(!isLayerAccordionOpen);
               }}
             >
-              <LayerConfiguration
-                attributes={attributes}
-                getUserMessages={getUserMessages}
-                coreStart={coreStart}
-                startDependencies={startDependencies}
-                visualizationMap={visualizationMap}
-                datasourceMap={datasourceMap}
-                datasourceId={datasourceId}
-                framePublicAPI={framePublicAPI}
-                setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-              />
+              <>
+                <LayerConfiguration
+                  attributes={attributes}
+                  getUserMessages={getUserMessages}
+                  coreStart={coreStart}
+                  startDependencies={startDependencies}
+                  visualizationMap={visualizationMap}
+                  datasourceMap={datasourceMap}
+                  datasourceId={datasourceId}
+                  framePublicAPI={framePublicAPI}
+                  setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+                />
+                <EuiSpacer />
+              </>
             </EuiAccordion>
           </EuiFlexItem>
 

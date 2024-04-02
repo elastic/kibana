@@ -11,20 +11,18 @@ import { RESULTS_ROUTE_PATH, INTERNAL_API_VERSION } from '../../../common/consta
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { GetResultQuery } from '../../schemas/result';
-import type { Result, ResultDocument } from '../../schemas/result';
+import type { ResultDocument } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
-import { createResultFromDocument } from './parser';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
+import { checkIndicesPrivileges } from './privileges';
 
-export const getQuery = (patterns: string[]) => ({
+export const getQuery = (indexName: string[]) => ({
   size: 0,
-  query: {
-    bool: { filter: [{ terms: { 'rollup.pattern': patterns } }] },
-  },
+  query: { bool: { filter: [{ terms: { indexName } }] } },
   aggs: {
     latest: {
-      terms: { field: 'rollup.pattern', size: 10000 }, // big enough to get all patterns, but under `index.max_terms_count` (default 65536)
+      terms: { field: 'indexName', size: 10000 }, // big enough to get all indexNames, but under `index.max_terms_count` (default 65536)
       aggs: { latest_doc: { top_hits: { size: 1, sort: [{ '@timestamp': { order: 'desc' } }] } } },
     },
   },
@@ -51,10 +49,6 @@ export const getResultsRoute = (
         validate: { request: { query: buildRouteValidation(GetResultQuery) } },
       },
       async (context, request, response) => {
-        // TODO: https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
-        return response.ok({ body: [] });
-
-        // eslint-disable-next-line no-unreachable
         const services = await context.resolve(['core', 'dataQualityDashboard']);
         const resp = buildResponse(response);
 
@@ -70,38 +64,71 @@ export const getResultsRoute = (
         }
 
         try {
-          // Confirm user has authorization for the requested patterns
-          const { patterns } = request.query;
-          const userEsClient = services.core.elasticsearch.client.asCurrentUser;
-          const privileges = await userEsClient.security.hasPrivileges({
-            index: [
-              { names: patterns.split(','), privileges: ['all', 'read', 'view_index_metadata'] },
-            ],
+          const { client } = services.core.elasticsearch;
+          const { pattern } = request.query;
+
+          // Discover all indices for the pattern using internal user
+          const indicesResponse = await client.asInternalUser.indices.get({
+            index: pattern,
+            features: 'aliases', // omit 'settings' and 'mappings' to reduce response size
           });
-          const authorizedPatterns = Object.keys(privileges.index).filter((pattern) =>
-            Object.values(privileges.index[pattern]).some((v) => v === true)
-          );
-          if (authorizedPatterns.length === 0) {
+
+          // map data streams to their backing indices and collect indices to authorize
+          const indicesToAuthorize: string[] = [];
+          const dataStreamIndices: Record<string, string[]> = {};
+          Object.entries(indicesResponse).forEach(([indexName, { data_stream: dataStream }]) => {
+            if (dataStream) {
+              if (!dataStreamIndices[dataStream]) {
+                dataStreamIndices[dataStream] = [];
+              }
+              dataStreamIndices[dataStream].push(indexName);
+            } else {
+              indicesToAuthorize.push(indexName);
+            }
+          });
+          indicesToAuthorize.push(...Object.keys(dataStreamIndices));
+          if (indicesToAuthorize.length === 0) {
             return response.ok({ body: [] });
           }
 
-          // Get the latest result of each pattern
-          const query = { index, ...getQuery(authorizedPatterns) };
-          const internalEsClient = services.core.elasticsearch.client.asInternalUser;
+          // check privileges for indices or data streams
+          const hasIndexPrivileges = await checkIndicesPrivileges({
+            client,
+            indices: indicesToAuthorize,
+          });
 
-          const { aggregations } = await internalEsClient.search<
+          // filter out unauthorized indices, and expand data streams backing indices
+          const authorizedIndexNames = Object.entries(hasIndexPrivileges).reduce<string[]>(
+            (acc, [indexName, authorized]) => {
+              if (authorized) {
+                if (dataStreamIndices[indexName]) {
+                  acc.push(...dataStreamIndices[indexName]);
+                } else {
+                  acc.push(indexName);
+                }
+              }
+              return acc;
+            },
+            []
+          );
+          if (authorizedIndexNames.length === 0) {
+            return response.ok({ body: [] });
+          }
+
+          // Get the latest result for each indexName
+          const query = { index, ...getQuery(authorizedIndexNames) };
+          const { aggregations } = await client.asInternalUser.search<
             ResultDocument,
             Record<string, { buckets: LatestAggResponseBucket[] }>
           >(query);
 
-          const results: Result[] =
-            aggregations?.latest?.buckets.map((bucket) =>
-              createResultFromDocument(bucket.latest_doc.hits.hits[0]._source)
-            ) ?? [];
+          const results: ResultDocument[] =
+            aggregations?.latest?.buckets.map((bucket) => bucket.latest_doc.hits.hits[0]._source) ??
+            [];
 
           return response.ok({ body: results });
         } catch (err) {
-          logger.error(JSON.stringify(err));
+          logger.error(err.message);
 
           return resp.error({
             body: err.message ?? API_DEFAULT_ERROR_MESSAGE,

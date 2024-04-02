@@ -189,18 +189,28 @@ const getTypesFilterInitialState = (
   // v8.13 onwards
   // for showing agent types and action types in the same filter
   if (isSentinelOneV1Enabled) {
+    if (!isFlyout) {
+      return [
+        {
+          label: FILTER_NAMES.agentTypes,
+          isGroupLabel: true,
+        },
+        ...RESPONSE_ACTION_AGENT_TYPE.map((type) =>
+          getFilterOptions({
+            key: type,
+            label: getAgentTypeName(type),
+            checked: !isFlyout && agentTypes?.includes(type) ? 'on' : undefined,
+          })
+        ),
+        {
+          label: FILTER_NAMES.actionTypes,
+          isGroupLabel: true,
+        },
+        ...defaultFilterOptions,
+      ];
+    }
+
     return [
-      {
-        label: FILTER_NAMES.agentTypes,
-        isGroupLabel: true,
-      },
-      ...RESPONSE_ACTION_AGENT_TYPE.map((type) =>
-        getFilterOptions({
-          key: type,
-          label: getAgentTypeName(type),
-          checked: !isFlyout && agentTypes?.includes(type) ? 'on' : undefined,
-        })
-      ),
       {
         label: FILTER_NAMES.actionTypes,
         isGroupLabel: true,
@@ -336,7 +346,10 @@ export const useActionsLogFilter = ({
     () => items.filter((item) => item.checked === 'on').length,
     [items]
   );
-  const numFilters = useMemo(() => items.filter((item) => item.checked !== 'on').length, [items]);
+  const numFilters = useMemo(
+    () => items.filter((item) => item.key && item.checked !== 'on').length,
+    [items]
+  );
 
   return {
     areHostsSelectedOnMount,

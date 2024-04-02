@@ -29,9 +29,9 @@ import { pick } from 'lodash';
 import React, { type FC, useCallback, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { PanelHeaderItems } from '../../components/collapsible_panel';
-import { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
+import type { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_TIMESTAMP,

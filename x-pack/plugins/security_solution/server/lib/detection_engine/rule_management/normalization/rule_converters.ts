@@ -139,6 +139,7 @@ export const typeSpecificSnakeToCamel = (
         threatIndicatorPath: params.threat_indicator_path ?? DEFAULT_INDICATOR_SOURCE_PATH,
         concurrentSearches: params.concurrent_searches,
         itemsPerSearch: params.items_per_search,
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'query': {
@@ -255,6 +256,8 @@ const patchThreatMatchParams = (
     threatIndicatorPath: params.threat_indicator_path ?? existingRule.threatIndicatorPath,
     concurrentSearches: params.concurrent_searches ?? existingRule.concurrentSearches,
     itemsPerSearch: params.items_per_search ?? existingRule.itemsPerSearch,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -582,6 +585,7 @@ export const typeSpecificCamelToSnake = (
         threat_indicator_path: params.threatIndicatorPath,
         concurrent_searches: params.concurrentSearches,
         items_per_search: params.itemsPerSearch,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'query': {

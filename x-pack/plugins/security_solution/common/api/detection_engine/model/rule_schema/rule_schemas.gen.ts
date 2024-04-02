@@ -63,6 +63,7 @@ import {
   DataViewId,
   RuleFilterArray,
   SavedQueryId,
+  AlertSuppression,
   KqlQueryLanguage,
 } from './common_attributes.gen';
 import { RuleExecutionSummary } from '../../rule_monitoring/model/execution_summary.gen';
@@ -72,7 +73,6 @@ import {
   TimestampField,
 } from './specific_attributes/eql_attributes.gen';
 import { ResponseAction } from '../rule_response_actions/response_actions.gen';
-import { AlertSuppression } from './specific_attributes/query_attributes.gen';
 import {
   Threshold,
   ThresholdAlertSuppression,
@@ -418,6 +418,7 @@ export const ThreatMatchRuleOptionalFields = z.object({
   threat_language: KqlQueryLanguage.optional(),
   concurrent_searches: ConcurrentSearches.optional(),
   items_per_search: ItemsPerSearch.optional(),
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type ThreatMatchRuleDefaultableFields = z.infer<typeof ThreatMatchRuleDefaultableFields>;

@@ -51,7 +51,8 @@ export const useUserRelatedHosts = ({
     abort: skip,
   });
 
-  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
+  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
+    useIsNewRiskScoreModuleInstalled();
 
   const userRelatedHostsResponse = useMemo(
     () => ({
@@ -76,10 +77,10 @@ export const useUserRelatedHosts = ({
   );
 
   useEffect(() => {
-    if (!skip) {
+    if (!skip && !riskScoreStatusLoading) {
       search(userRelatedHostsRequest);
     }
-  }, [userRelatedHostsRequest, search, skip]);
+  }, [userRelatedHostsRequest, search, skip, riskScoreStatusLoading]);
 
   return userRelatedHostsResponse;
 };

@@ -73,6 +73,7 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
+import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -832,6 +833,7 @@ class OutputService {
       target.round_robin = null;
       target.hash = null;
       target.topics = null;
+      target.topic = null;
       target.headers = null;
       target.timeout = null;
       target.broker_timeout = null;
@@ -1028,6 +1030,8 @@ class OutputService {
       }
     }
 
+    patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
+
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: outputIdToUuid(id),
@@ -1081,10 +1085,23 @@ class OutputService {
   }
 
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {
+    const lastUpdateTime = await this.getOutputLastUpdateTime(id);
+
+    const mustFilter = [];
+    if (lastUpdateTime) {
+      mustFilter.push({
+        range: {
+          '@timestamp': {
+            gte: lastUpdateTime,
+          },
+        },
+      });
+    }
+
     const response = await esClient.search(
       {
         index: OUTPUT_HEALTH_DATA_STREAM,
-        query: { bool: { filter: { term: { output: id } } } },
+        query: { bool: { filter: { term: { output: id } }, must: mustFilter } },
         sort: { '@timestamp': 'desc' },
         size: 1,
       },
@@ -1104,6 +1121,24 @@ class OutputService {
       message: latestHit.message ?? '',
       timestamp: latestHit['@timestamp'],
     };
+  }
+
+  async getOutputLastUpdateTime(id: string): Promise<string | undefined> {
+    const outputSO = await this.encryptedSoClient.get<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      outputIdToUuid(id)
+    );
+
+    if (outputSO.error) {
+      appContextService
+        .getLogger()
+        .debug(
+          `Error getting output ${id} SO, using updated_at:undefined, cause: ${outputSO.error.message}`
+        );
+      return undefined;
+    }
+
+    return outputSO.updated_at;
   }
 }
 

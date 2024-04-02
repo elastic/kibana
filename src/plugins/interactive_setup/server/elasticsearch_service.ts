@@ -393,7 +393,7 @@ export class ElasticsearchService {
         log: this.logger,
         kibanaVersion: this.kibanaVersion,
         ignoreVersionMismatch: false,
-        esVersionCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
+        healthCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
       })
     );
   }

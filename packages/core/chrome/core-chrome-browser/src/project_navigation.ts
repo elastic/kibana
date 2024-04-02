@@ -25,6 +25,9 @@ import type {
   AppId as ObservabilityApp,
   DeepLinkId as ObservabilityLink,
 } from '@kbn/deeplinks-observability';
+import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
+import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
+import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
 
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
@@ -37,7 +40,10 @@ export type AppId =
   | MlApp
   | ManagementApp
   | SearchApp
-  | ObservabilityApp;
+  | ObservabilityApp
+  | SecurityApp
+  | FleetApp
+  | SharedApp;
 
 /** @public */
 export type AppDeepLinkId =
@@ -46,14 +52,26 @@ export type AppDeepLinkId =
   | MlLink
   | ManagementLink
   | SearchLink
-  | ObservabilityLink;
+  | ObservabilityLink
+  | SecurityLink
+  | FleetLink
+  | SharedLink;
 
 /** @public */
-export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
+export type CloudLinkId =
+  | 'userAndRoles'
+  | 'performance'
+  | 'billingAndSub'
+  | 'deployment'
+  | 'deployments'
+  | 'projects';
 
 export interface CloudURLs {
+  baseUrl?: string;
   billingUrl?: string;
+  deploymentsUrl?: string;
   deploymentUrl?: string;
+  projectsUrl?: string;
   performanceUrl?: string;
   usersAndRolesUrl?: string;
 }
@@ -372,4 +390,32 @@ export interface NavigationTreeDefinition<
 export interface NavigationTreeDefinitionUI {
   body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
   footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+}
+
+/**
+ * @public
+ *
+ * Definition for a solution navigation in stateful Kibana.
+ *
+ * This definition is used to register a solution navigation in the Chrome service
+ * for the side navigation evolution to align with the Serverless UX.
+ */
+
+export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = AppDeepLinkId> {
+  /** Unique id for the solution navigation. */
+  id: string;
+  /** Title for the solution navigation. */
+  title: string;
+  /** The navigation tree definition */
+  navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
+  /** Optional icon for the solution navigation to render in the select dropdown. */
+  icon?: IconType;
+  /** React component to render in the side nav for the navigation */
+  sideNavComponent?: SideNavComponent;
+  /** The page to navigate to when switching to this solution navigation. */
+  homePage?: LinkId;
+}
+
+export interface SolutionNavigationDefinitions {
+  [id: string]: SolutionNavigationDefinition;
 }

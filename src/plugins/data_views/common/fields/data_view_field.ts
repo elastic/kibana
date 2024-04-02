@@ -69,6 +69,10 @@ export class DataViewField implements DataViewFieldBase {
     this.spec.count = count;
   }
 
+  public get defaultFormatter() {
+    return this.spec.defaultFormatter;
+  }
+
   /**
    * Returns runtime field definition or undefined if field is not runtime field.
    */
@@ -129,6 +133,22 @@ export class DataViewField implements DataViewFieldBase {
    */
   public set customLabel(customLabel) {
     this.spec.customLabel = customLabel;
+  }
+
+  /**
+   * Returns custom description if set, otherwise undefined.
+   */
+
+  public get customDescription() {
+    return this.spec.customDescription;
+  }
+
+  /**
+   * Sets custom description for field, or unsets if passed undefined.
+   * @param customDescription custom label value
+   */
+  public set customDescription(customDescription) {
+    this.spec.customDescription = customDescription;
   }
 
   /**
@@ -370,6 +390,8 @@ export class DataViewField implements DataViewFieldBase {
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
       customLabel: this.customLabel,
+      customDescription: this.customDescription,
+      defaultFormatter: this.defaultFormatter,
     };
   }
 
@@ -396,6 +418,7 @@ export class DataViewField implements DataViewFieldBase {
       subType: this.subType,
       format: getFormatterForField ? getFormatterForField(this).toJSON() : undefined,
       customLabel: this.customLabel,
+      customDescription: this.customDescription,
       shortDotsEnable: this.spec.shortDotsEnable,
       runtimeField: this.runtimeField,
       isMapped: this.isMapped,
@@ -403,6 +426,7 @@ export class DataViewField implements DataViewFieldBase {
       timeSeriesMetric: this.spec.timeSeriesMetric,
       timeZone: this.spec.timeZone,
       fixedInterval: this.spec.fixedInterval,
+      defaultFormatter: this.defaultFormatter,
     };
 
     // Filter undefined values from the spec

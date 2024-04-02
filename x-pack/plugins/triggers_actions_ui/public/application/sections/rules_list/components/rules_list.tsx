@@ -36,7 +36,7 @@ import { useHistory } from 'react-router-dom';
 
 import {
   RuleExecutionStatus,
-  ALERTS_FEATURE_ID,
+  ALERTING_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
@@ -363,8 +363,7 @@ export const RulesList = ({
   } = useBulkEditSelect({
     totalItemCount: rulesState.totalItemCount,
     items: tableItems,
-    ...filters,
-    typesFilter: rulesTypesFilter,
+    filters: { ...filters, types: rulesTypesFilter },
   });
 
   const handleUpdateFiltersEffect = useCallback(
@@ -555,8 +554,8 @@ export const RulesList = ({
   };
 
   const onDisableRule = useCallback(
-    (rule: RuleTableItem) => {
-      return bulkDisableRules({ http, ids: [rule.id] });
+    (rule: RuleTableItem, untrack: boolean) => {
+      return bulkDisableRules({ http, ids: [rule.id], untrack });
     },
     [bulkDisableRules]
   );
@@ -701,12 +700,12 @@ export const RulesList = ({
     onClearSelection();
   };
 
-  const onDisable = async () => {
+  const onDisable = async (untrack: boolean) => {
     setIsDisablingRules(true);
 
     const { errors, total } = isAllSelected
-      ? await bulkDisableRules({ http, filter: getFilter() })
-      : await bulkDisableRules({ http, ids: selectedIds });
+      ? await bulkDisableRules({ http, filter: getFilter(), untrack })
+      : await bulkDisableRules({ http, ids: selectedIds, untrack });
 
     setIsDisablingRules(false);
     showToast({ action: 'DISABLE', errors, total });
@@ -1000,7 +999,7 @@ export const RulesList = ({
         {ruleFlyoutVisible && (
           <Suspense fallback={<div />}>
             <RuleAdd
-              consumer={ALERTS_FEATURE_ID}
+              consumer={ALERTING_FEATURE_ID}
               onClose={() => {
                 setRuleFlyoutVisibility(false);
               }}

@@ -75,7 +75,7 @@ When defining actions in a rule, you specify:
 
 Rather than repeatedly entering connection information and credentials for each action, {kib} simplifies action setup using <<action-types,connectors>>. For example if four rules send email notifications via the same SMTP service, they can all reference the same SMTP connector.
 
-The _action frequency_ defines when the action runs (for example, only when the alert status changes or at specific time intervals). Each rule type also has a set of the _action groups_ that affects when the action runs (for example, when the threshold is met or when the alert is recovered). If you want to reduce the number of notifications you receive without affecting their timeliness, some rule types support alert summaries. You can set the action frequency such that you receive notifications that summarize the new, ongoing, and recovered alerts at your preferred time intervals.
+The _action frequency_ defines when the action runs (for example, only when the alert status changes or at specific time intervals). Each rule type also has a set of the _action groups_ that affects when the action runs (for example, when the threshold is met or when the alert is recovered). If you want to reduce the number of notifications you receive without affecting their timeliness, set the action frequency to a summary of alerts. You will receive notifications that summarize the new, ongoing, and recovered alerts at your preferred time intervals.
 
 Some types of rules enable you to further refine the conditions under which actions run.
 For example, you can specify that actions run only when an alert occurs within a specific time frame or when it matches a KQL query.

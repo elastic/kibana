@@ -18,8 +18,8 @@ import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_i
 import { useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
-import { TemplateTypeIndicator } from '../components';
-import { getTemplateDetailsLink } from '../../../../services/routing';
+import { getComponentTemplatesLink, getTemplateDetailsLink } from '../../../../services/routing';
+import { TemplateTypeIndicator, TemplateDeprecatedBadge } from '../components';
 
 interface Props {
   templates: TemplateListItem[];
@@ -61,6 +61,13 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             >
               {name}
             </EuiLink>{' '}
+            {item.deprecated && (
+              <>
+                &nbsp;
+                <TemplateDeprecatedBadge />
+              </>
+            )}
+            &nbsp;
             <TemplateTypeIndicator templateType={item._kbnMeta.type} />
           </span>
         );
@@ -78,12 +85,24 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     {
       field: 'composedOf',
       name: i18n.translate('xpack.idxMgmt.templateList.table.componentsColumnTitle', {
-        defaultMessage: 'Components',
+        defaultMessage: 'Component templates',
       }),
+      width: '100px',
       truncateText: true,
-      sortable: true,
-      width: '20%',
-      render: (composedOf: string[] = []) => <span>{composedOf.join(', ')}</span>,
+      sortable: (template) => {
+        return template.composedOf?.length;
+      },
+      render: (composedOf: string[] = [], item: TemplateListItem) =>
+        composedOf.length === 0 ? (
+          <span>0</span>
+        ) : (
+          <EuiLink
+            data-test-subj="componentTemplatesLink"
+            {...reactRouterNavigate(history, getComponentTemplatesLink(item.name))}
+          >
+            {composedOf.length}
+          </EuiLink>
+        ),
     },
     {
       name: i18n.translate('xpack.idxMgmt.templateList.table.dataStreamColumnTitle', {

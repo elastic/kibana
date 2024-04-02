@@ -10,9 +10,8 @@ import type { EuiTourStepProps } from '@elastic/eui';
 import { GuidedOnboardingTourStep, SecurityTourStep } from './tour_step';
 import { AlertsCasesTourSteps, SecurityStepId } from './tour_config';
 import { useTourContext } from './tour';
-import { mockGlobalState, TestProviders } from '../../mock';
+import { mockGlobalState, TestProviders, createMockStore } from '../../mock';
 import { TimelineId } from '../../../../common/types';
-import { createMockStore } from '../../mock/test_providers';
 
 jest.mock('./tour');
 const mockTourStep = jest

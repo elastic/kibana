@@ -1165,8 +1165,10 @@ describe('PluginsService', () => {
   });
 
   describe('plugin initialization', () => {
+    let prebootPlugins: PluginWrapper[];
+    let standardPlugins: PluginWrapper[];
     beforeEach(() => {
-      const prebootPlugins = [
+      prebootPlugins = [
         createPlugin('plugin-1-preboot', {
           type: PluginType.preboot,
           path: 'path-1-preboot',
@@ -1178,7 +1180,7 @@ describe('PluginsService', () => {
           version: 'version-2',
         }),
       ];
-      const standardPlugins = [
+      standardPlugins = [
         createPlugin('plugin-1-standard', {
           path: 'path-1-standard',
           version: 'version-1',

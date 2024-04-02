@@ -12,6 +12,7 @@ import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
 import * as selectors from './selectors';
 import * as nodeEventsInCategoryModel from './node_events_in_category_model';
 import * as nodeDataModel from '../../models/node_data';
+import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import { initialAnalyzerState, immerCase } from '../helpers';
 import { appReceivedNewExternalProperties } from '../actions';
 import {
@@ -29,6 +30,7 @@ import {
   appRequestedCurrentRelatedEventData,
   serverReturnedCurrentRelatedEventData,
   serverFailedToReturnCurrentRelatedEventData,
+  userOverrodeDateRange,
 } from './action';
 
 export const dataReducer = reducerWithInitialState(initialAnalyzerState)
@@ -244,6 +246,28 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
         loading: true,
         data: null,
       };
+      return draft;
+    })
+  )
+  .withHandling(
+    immerCase(userOverrodeDateRange, (draft, { id, timeRange: { from, to } }) => {
+      if (from && to) {
+        const state: Draft<DataState> = draft[id].data;
+        if (state.tree?.currentParameters !== undefined) {
+          state.tree = {
+            ...state.tree,
+            currentParameters: {
+              ...state.tree.currentParameters,
+              filters: {
+                from,
+                to,
+              },
+            },
+          };
+        }
+        const normalizedTimeRange = normalizeTimeRange({ from, to });
+        draft[id].data.overriddenTimeBounds = normalizedTimeRange;
+      }
       return draft;
     })
   )

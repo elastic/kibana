@@ -38,6 +38,15 @@
     "@kbn/xstate-utils",
     "@kbn/router-utils",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/observability-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/shared-ux-prompt-not-found",
+    "@kbn/slo-plugin",
   ],
   "exclude": [
     "target/**/*"

@@ -9,14 +9,15 @@ import type { Logger } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
-import { TELEMETRY_CHANNEL_TIMELINE, TASK_METRICS_CHANNEL } from '../constants';
-import { createTaskMetric, ranges, TelemetryTimelineFetcher, tlog } from '../helpers';
+import type { ITaskMetricsService } from '../task_metrics.types';
+import { TELEMETRY_CHANNEL_TIMELINE } from '../constants';
+import { ranges, TelemetryTimelineFetcher, newTelemetryLogger } from '../helpers';
 
 export function createTelemetryTimelineTaskConfig() {
   const taskName = 'Security Solution Timeline telemetry';
-
+  const taskType = 'security:telemetry-timelines';
   return {
-    type: 'security:telemetry-timelines',
+    type: taskType,
     title: taskName,
     interval: '1h',
     timeout: '15m',
@@ -26,14 +27,16 @@ export function createTelemetryTimelineTaskConfig() {
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
+      taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      tlog(
-        logger,
+      const log = newTelemetryLogger(logger.get('timelines'));
+      const fetcher = new TelemetryTimelineFetcher(receiver);
+      const trace = taskMetricsService.start(taskType);
+
+      log.l(
         `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
       );
-
-      const fetcher = new TelemetryTimelineFetcher(receiver);
 
       try {
         let counter = 0;
@@ -46,7 +49,7 @@ export function createTelemetryTimelineTaskConfig() {
         }
         const alerts = await receiver.fetchTimelineAlerts(alertsIndex, rangeFrom, rangeTo);
 
-        tlog(logger, `found ${alerts.length} alerts to process`);
+        log.l(`found ${alerts.length} alerts to process`);
 
         for (const alert of alerts) {
           const result = await fetcher.fetchTimeline(alert);
@@ -67,21 +70,17 @@ export function createTelemetryTimelineTaskConfig() {
             sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
             counter += 1;
           } else {
-            tlog(logger, 'no events in timeline');
+            log.l('no events in timeline');
           }
         }
 
-        tlog(logger, `sent ${counter} timelines. Concluding timeline task.`);
+        log.l(`sent ${counter} timelines. Concluding timeline task.`);
 
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, true, fetcher.startTime),
-        ]);
+        taskMetricsService.end(trace);
 
         return counter;
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, false, fetcher.startTime, err.message),
-        ]);
+        taskMetricsService.end(trace, err);
         return 0;
       }
     },

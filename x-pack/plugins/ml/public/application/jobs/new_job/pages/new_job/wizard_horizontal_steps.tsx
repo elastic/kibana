@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiStepsHorizontal, EuiStepStatus } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
+import { EuiStepsHorizontal } from '@elastic/eui';
 import { WIZARD_STEPS } from '../components/step_types';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 

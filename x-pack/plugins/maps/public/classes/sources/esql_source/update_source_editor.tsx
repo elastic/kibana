@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
+import { getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 import { getFields } from './esql_utils';
@@ -35,11 +36,13 @@ export function UpdateSourceEditor(props: Props) {
 
   useEffect(() => {
     let ignore = false;
-    getFields(props.sourceDescriptor.esql)
-      .then((fields) => {
+    getIndexPatternService()
+      .get(props.sourceDescriptor.dataViewId)
+      .then((dataView) => {
         if (ignore) {
           return;
         }
+        const fields = getFields(dataView);
         setDateFields(fields.dateFields);
         setGeoFields(fields.geoFields);
         setIsInitialized(true);
@@ -79,6 +82,7 @@ export function UpdateSourceEditor(props: Props) {
               setGeoFields(change.geoFields);
               const changes: OnSourceChangeArgs[] = [
                 { propName: 'columns', value: change.columns },
+                { propName: 'dataViewId', value: change.adhocDataViewId },
                 { propName: 'esql', value: change.esql },
               ];
               function ensureField(key: 'dateField' | 'geoField', fields: string[]) {
@@ -128,7 +132,7 @@ export function UpdateSourceEditor(props: Props) {
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate('xpack.maps.esqlSource.narrowByGlobalSearchLabel', {
-                defaultMessage: `Narrow ES|QL statement by global search`,
+                defaultMessage: `Apply global search to ES|QL statement`,
               })}
               checked={props.sourceDescriptor.narrowByGlobalSearch}
               onChange={(event: EuiSwitchEvent) => {

@@ -52,6 +52,7 @@ export interface GroupingProps<T> {
     count?: number | undefined
   ) => void;
   unit?: (n: number) => string;
+  groupsUnit?: (n: number, parentSelectedGroup: string, hasNullGroup: boolean) => string;
 }
 
 const GroupingComponent = <T,>({
@@ -74,6 +75,7 @@ const GroupingComponent = <T,>({
   takeActionItems,
   tracker,
   unit = defaultUnit,
+  groupsUnit = GROUPS_UNIT,
 }: GroupingProps<T>) => {
   const [trigger, setTrigger] = useState<Record<string, { state: 'open' | 'closed' | undefined }>>(
     {}
@@ -85,10 +87,14 @@ const GroupingComponent = <T,>({
   }, [unitCount, unit]);
 
   const groupCount = useMemo(() => data?.groupsCount?.value ?? 0, [data?.groupsCount?.value]);
-  const groupCountText = useMemo(
-    () => `${groupCount.toLocaleString()} ${GROUPS_UNIT(groupCount)}`,
-    [groupCount]
-  );
+  const groupCountText = useMemo(() => {
+    const hasNullGroup =
+      data?.groupByFields?.buckets?.some(
+        (groupBucket: GroupingBucket<T>) => groupBucket.isNullGroup
+      ) || false;
+
+    return `${groupsUnit(groupCount, selectedGroup, hasNullGroup)}`;
+  }, [data?.groupByFields?.buckets, groupCount, groupsUnit, selectedGroup]);
 
   const groupPanels = useMemo(
     () =>

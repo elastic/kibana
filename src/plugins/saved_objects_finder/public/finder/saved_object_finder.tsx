@@ -77,6 +77,7 @@ interface BaseSavedObjectFinder {
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
   helpText?: string;
+  getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -288,7 +289,7 @@ export class SavedObjectFinderUi extends React.Component<
             ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
             : `${item.name} (${currentSavedObjectMetaData!.name})`;
 
-          return (
+          const link = (
             <EuiLink
               onClick={
                 onChoose
@@ -302,6 +303,16 @@ export class SavedObjectFinderUi extends React.Component<
             >
               {item.name}
             </EuiLink>
+          );
+
+          const tooltipText = this.props.getTooltipText?.(item);
+
+          return tooltipText ? (
+            <EuiToolTip position="left" content={tooltipText}>
+              {link}
+            </EuiToolTip>
+          ) : (
+            link
           );
         },
       },

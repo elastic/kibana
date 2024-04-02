@@ -21,7 +21,8 @@
       "kibanaReact",
       "kibanaUtils",
       "imageEmbeddable",
-      "presentationUtil"
+      "presentationUtil",
+      "uiActions"
     ]
   }
 }

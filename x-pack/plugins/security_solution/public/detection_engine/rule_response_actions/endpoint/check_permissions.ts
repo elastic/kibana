@@ -10,6 +10,7 @@ import type { RuleResponseAction } from '../../../../common/api/detection_engine
 import { getRbacControl } from '../../../../common/endpoint/service/response_actions/utils';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
+// returns false if the user does have the required privileges to execute the action, returns true if the user does not have the required privileges
 export const useCheckEndpointPermissions = (action: RuleResponseAction) => {
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
 

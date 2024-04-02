@@ -35,7 +35,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/profiling_cypress.sh
-    label: 'Profling Cypress Tests'
+    label: 'Profiling Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -54,7 +54,7 @@ steps:
     depends_on: build
     timeout_in_minutes: 120
     artifact_paths:
-      - 'x-pack/plugins/synthetics/e2e/.journeys/**/*'
+      - 'x-pack/plugins/observability_solution/synthetics/e2e/.journeys/**/*'
     retry:
       automatic:
         - exit_status: '-1'
@@ -68,10 +68,10 @@ steps:
       queue: n2-4-virt
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 10
+    parallelism: 20
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
@@ -80,8 +80,8 @@ steps:
       queue: n2-4-virt
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 14
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1

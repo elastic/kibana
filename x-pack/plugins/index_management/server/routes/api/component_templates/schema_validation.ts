@@ -26,4 +26,5 @@ export const componentTemplateSchema = schema.object({
     usedBy: schema.arrayOf(schema.string()),
     isManaged: schema.boolean(),
   }),
+  deprecated: schema.maybe(schema.boolean()),
 });

@@ -17,20 +17,7 @@ import { isValidDateMath } from '@kbn/zod-helpers';
  *   version: not applicable
  */
 
-/**
- * A string that is not empty and does not contain only whitespace
- */
-export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z
-  .string()
-  .min(1)
-  .regex(/^(?! *$).+$/);
-
-/**
- * A universally unique identifier
- */
-export type UUID = z.infer<typeof UUID>;
-export const UUID = z.string().uuid();
+import { UUID, NonEmptyString } from '../../../model/primitives.gen';
 
 export type RuleObjectId = z.infer<typeof RuleObjectId>;
 export const RuleObjectId = UUID;
@@ -441,4 +428,34 @@ export type AlertSuppressionDuration = z.infer<typeof AlertSuppressionDuration>;
 export const AlertSuppressionDuration = z.object({
   value: z.number().int().min(1),
   unit: z.enum(['s', 'm', 'h']),
+});
+
+/**
+  * Describes how alerts will be generated for documents with missing suppress by fields:
+doNotSuppress - per each document a separate alert will be created
+suppress - only alert will be created per suppress by bucket
+  */
+export type AlertSuppressionMissingFieldsStrategy = z.infer<
+  typeof AlertSuppressionMissingFieldsStrategy
+>;
+export const AlertSuppressionMissingFieldsStrategy = z.enum(['doNotSuppress', 'suppress']);
+export type AlertSuppressionMissingFieldsStrategyEnum =
+  typeof AlertSuppressionMissingFieldsStrategy.enum;
+export const AlertSuppressionMissingFieldsStrategyEnum = AlertSuppressionMissingFieldsStrategy.enum;
+
+export type AlertSuppressionGroupBy = z.infer<typeof AlertSuppressionGroupBy>;
+export const AlertSuppressionGroupBy = z.array(z.string()).min(1).max(3);
+
+export type AlertSuppression = z.infer<typeof AlertSuppression>;
+export const AlertSuppression = z.object({
+  group_by: AlertSuppressionGroupBy,
+  duration: AlertSuppressionDuration.optional(),
+  missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
+});
+
+export type AlertSuppressionCamel = z.infer<typeof AlertSuppressionCamel>;
+export const AlertSuppressionCamel = z.object({
+  groupBy: AlertSuppressionGroupBy,
+  duration: AlertSuppressionDuration.optional(),
+  missingFieldsStrategy: AlertSuppressionMissingFieldsStrategy.optional(),
 });

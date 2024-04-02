@@ -19,3 +19,5 @@ export const APM_APP_ID = 'apm';
 export const SYNTHETICS_APP_ID = 'synthetics';
 
 export const OBSERVABILITY_ONBOARDING_APP_ID = 'observabilityOnboarding';
+
+export const SLO_APP_ID = 'slo';

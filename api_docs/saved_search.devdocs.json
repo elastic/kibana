@@ -1472,6 +1472,20 @@
           },
           {
             "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.headerRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "headerRowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
             "id": "def-common.SavedSearch.isTextBasedQuery",
             "type": "CompoundType",
             "tags": [],

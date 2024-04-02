@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiButton,
@@ -21,6 +22,7 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { isFullLicense } from '../license';
@@ -181,6 +183,12 @@ export const DatavisualizerSelector: FC = () => {
                         />
                       }
                       tooltipPosition={'right'}
+                      aria-label={i18n.translate(
+                        'xpack.ml.datavisualizer.selector.technicalPreviewBadge.ariaLabel',
+                        {
+                          defaultMessage: 'ES|QL is in technical preview.',
+                        }
+                      )}
                     />
                   </>
                 </EuiTextAlign>

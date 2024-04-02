@@ -80,6 +80,10 @@ export interface FieldConfiguration {
    */
   customLabel?: string;
   /**
+   * Custom description
+   */
+  customDescription?: string;
+  /**
    * Popularity - used for discover
    */
   popularity?: number;
@@ -183,6 +187,10 @@ export type FieldAttrSet = {
    * Custom field label
    */
   customLabel?: string;
+  /**
+   * Custom field description
+   */
+  customDescription?: string;
   /**
    * Popularity count - used for discover
    */
@@ -315,6 +323,8 @@ export interface GetFieldsOptions {
   fields?: string[];
   allowHidden?: boolean;
   forceRefresh?: boolean;
+  fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
@@ -424,6 +434,10 @@ export type FieldSpec = DataViewFieldBase & {
    */
   customLabel?: string;
   /**
+   * Custom description for field, used for display in kibana
+   */
+  customDescription?: string;
+  /**
    * Runtime field definition
    */
   runtimeField?: RuntimeFieldSpec;
@@ -462,6 +476,8 @@ export type FieldSpec = DataViewFieldBase & {
    * Name of parent field for composite runtime field subfields.
    */
   parentName?: string;
+
+  defaultFormatter?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;

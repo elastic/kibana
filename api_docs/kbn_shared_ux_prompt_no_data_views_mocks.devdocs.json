@@ -143,6 +143,92 @@
                     ]
                   }
                 ]
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                "id": "def-public.StorybookMock.serviceArguments.esqlDocLink",
+                "type": "Object",
+                "tags": [],
+                "label": "esqlDocLink",
+                "description": [],
+                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.esqlDocLink.options",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "options",
+                    "description": [],
+                    "signature": [
+                      "(string | undefined)[]"
+                    ],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.esqlDocLink.control",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "control",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                        "id": "def-public.StorybookMock.serviceArguments.esqlDocLink.control.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                "id": "def-public.StorybookMock.serviceArguments.canTryEsql",
+                "type": "Object",
+                "tags": [],
+                "label": "canTryEsql",
+                "description": [],
+                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.canTryEsql.control",
+                    "type": "string",
+                    "tags": [],
+                    "label": "control",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.canTryEsql.defaultValue",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "defaultValue",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ]
           },
@@ -282,7 +368,7 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "{ canCreateNewDataView: any; dataViewsDocLink: any; }"
+          "{ canCreateNewDataView: any; dataViewsDocLink: any; esqlDocLink: any; canTryEsql: any; }"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
         "deprecated": false,

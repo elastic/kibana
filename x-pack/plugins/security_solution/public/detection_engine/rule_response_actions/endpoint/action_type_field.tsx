@@ -13,6 +13,7 @@ import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/componen
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getRbacControl } from '../../../../common/endpoint/service/response_actions/utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { CHOOSE_FROM_THE_LIST, LEARN_MORE } from './translations';
@@ -44,14 +45,29 @@ const ActionTypeFieldComponent = ({
     },
   } = useKibana().services;
 
+  const automatedProcessActionsEnabled = useIsExperimentalFeatureEnabled(
+    'automatedProcessActionsEnabled'
+  );
+
+  const enabledActions = useMemo(
+    () =>
+      [
+        ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
+        ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
+      ] as ['isolate', 'kill-process', 'suspend-process'],
+    [automatedProcessActionsEnabled]
+  );
+
   const fieldOptions = useMemo(
     () =>
-      ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.map((name) => {
+      enabledActions.map((name) => {
         const missingRbac = !getRbacControl({
           commandName: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[name],
           privileges: endpointPrivileges,
         });
-        const commandAlreadyExists = map(data.responseActions, 'params.command').includes(name);
+        const currentActions = map(data.responseActions, 'params.command');
+        // we enable just one instance of each action
+        const commandAlreadyExists = currentActions.includes(name);
         const isDisabled = commandAlreadyExists || missingRbac;
 
         return {
@@ -62,7 +78,7 @@ const ActionTypeFieldComponent = ({
           'data-test-subj': `command-type-${name}`,
         };
       }),
-    [data.responseActions, endpointPrivileges]
+    [data.responseActions, enabledActions, endpointPrivileges]
   );
 
   return (

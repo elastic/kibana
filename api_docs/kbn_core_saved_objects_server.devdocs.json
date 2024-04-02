@@ -6153,6 +6153,10 @@
           },
           {
             "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
           },
           {
@@ -6178,10 +6182,6 @@
           {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
             "plugin": "alerting",
@@ -10408,7 +10408,9 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObjectsType.migrations",
             "type": "CompoundType",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "migrations",
             "description": [
               "\nAn optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type."
@@ -10432,14 +10434,706 @@
               ") | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/build_active_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/build_active_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/build_active_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/object_types/registration.ts"
+              },
+              {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/saved_objects/ui_settings.ts"
+              },
+              {
+                "plugin": "@kbn/core-usage-data-server-internal",
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/saved_objects/core_usage_stats.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/plugins/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/saved_objects/data_views.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/saved_objects/query.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/saved_objects/search_telemetry.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/saved_objects/search_session.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/server/saved_objects.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/server/saved_object_types/cases/cases.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/server/saved_object_types/configure.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/server/saved_object_types/comments.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/server/saved_object_types/user_actions.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts"
+              },
+              {
+                "plugin": "apmDataAccess",
+                "path": "x-pack/plugins/observability_solution/apm_data_access/server/saved_objects/apm_indices.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/server/saved_objects/search.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/saved_objects/workpad.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/saved_objects/custom_element.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/saved_objects/workpad_template.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_benchmark_rule.ts"
+              },
+              {
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/saved_objects/exception_list.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/saved_objects/exception_list.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/server/saved_objects/setup_saved_objects.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/sources/saved_object_type.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/timelines.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/notes.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/pinned_events.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_saved_object_mappings.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/saved_object_mappings.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/observability_solution/apm/server/saved_objects/apm_service_groups.ts"
+              },
+              {
+                "plugin": "slo",
+                "path": "x-pack/plugins/observability_solution/slo/server/saved_objects/slo.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/server/saved_objects.ts"
+              },
+              {
+                "plugin": "links",
+                "path": "src/plugins/links/server/saved_objects/links.ts"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/server/services/management.test.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/plugins/share/server/url_service/saved_objects/register_url_service_saved_object_type.test.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/plugins/share/server/url_service/saved_objects/register_url_service_saved_object_type.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/mocks/kibana_migrator.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_type_registry.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_type_registry.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_type_registry.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_type_registry.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/run_resilient_migrator.fixtures.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/run_resilient_migrator.fixtures.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository_create_repository.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository_create_repository.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository_create_repository.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/build_index_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/build_active_migrations.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/build_active_migrations.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/build_active_migrations.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/build_active_migrations.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/build_active_migrations.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/build_active_migrations.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/build_active_migrations.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/build_active_migrations.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/zdt/utils/generate_additive_mapping_diff.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/zdt/utils/outdated_documents_query.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/zdt/utils/outdated_documents_query.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/zdt/utils/outdated_documents_query.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/zdt/utils/outdated_documents_query.test.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObjectsType.schemas",
             "type": "CompoundType",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "schemas",
             "description": [
               "\nAn optional schema that can be used to validate the attributes of the type.\n\nWhen provided, calls to {@link SavedObjectsClient.create | create} will be validated against this schema.\n\nSee {@link SavedObjectsValidationMap} for more details."
@@ -10463,8 +11157,162 @@
               ") | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/helpers/validation.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/helpers/validation.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/helpers/validation.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/saved_objects/query.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/saved_objects/kql_telemetry.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/saved_objects/search_telemetry.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/saved_objects/search_session.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/server/saved_objects/search.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_benchmark_rule.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_settings.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-test-helpers-so-type-serializer",
+                "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/helpers/validation_fixtures.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/helpers/validation_fixtures.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/helpers/validation_fixtures.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -10553,10 +11401,6 @@
                 "path": "x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/plugins/saved_objects_tagging/server/saved_objects/tag.ts"
-              },
-              {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
               },
@@ -10571,6 +11415,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/saved_objects/custom_element.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/plugins/saved_objects_tagging/server/saved_objects/tag.ts"
               },
               {
                 "plugin": "graph",
@@ -10771,7 +11619,7 @@
             "tags": [],
             "label": "switchToModelVersionAt",
             "description": [
-              "\nAllows to opt-in to the new model version API.\n\nMust be a valid semver version (with the patch version being necessarily 0)\n\nWhen specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}\nto use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.\n\nOnce opted in, it will no longer be possible to use the legacy migration API after the specified version.\n"
+              "\nAllows to opt-in to the model version API.\n\nMust be a valid semver version (with the patch version being necessarily 0)\n\nWhen specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}\nto use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.\n\nOnce opted in, it will no longer be possible to use the legacy migration API after the specified version.\n"
             ],
             "signature": [
               "string | undefined"

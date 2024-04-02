@@ -236,6 +236,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
       staticAssets: {
+        prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
@@ -283,6 +284,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    security: {
+      registerSecurityApi: (api) => deps.security.registerSecurityApi(api),
+    },
   };
 }
 
@@ -329,6 +333,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
       staticAssets: {
+        prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
@@ -357,6 +362,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     coreUsageData: deps.coreUsageData,
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+    },
+    security: {
+      authc: deps.security.authc,
     },
   };
 }

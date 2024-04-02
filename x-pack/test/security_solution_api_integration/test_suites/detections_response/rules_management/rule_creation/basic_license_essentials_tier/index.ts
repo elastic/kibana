@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Rules Management  - Rule Creation APIs', function () {
     loadTestFile(require.resolve('./create_rules'));
+    loadTestFile(require.resolve('./create_rules_bulk'));
     loadTestFile(require.resolve('./create_ml_rules_privileges'));
   });
 }

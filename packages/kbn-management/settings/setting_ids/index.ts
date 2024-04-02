@@ -123,6 +123,8 @@ export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID =
   'observability:enableInfrastructureHostsView';
+export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =
+  'observability:enableInfrastructureAssetCustomDashboards';
 export const OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID = 'observability:enableInspectEsQueries';
 export const OBSERVABILITY_MAX_SUGGESTIONS_ID = 'observability:maxSuggestions';
 export const OBSERVABILITY_PROFILING_ELASTICSEARCH_PLUGIN_ID =
@@ -132,8 +134,11 @@ export const OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID =
   'observability:apmEnableContinuousRollups';
 export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =
   'observability:apmEnableProfilingIntegration';
-
 export const OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR = 'observability:apmEnableTableSearchBar';
+export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
+  'observability:apmEnableServiceInventoryTableSearchBar';
+export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
+  'observability:logsExplorer:allowedDataViews';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';
@@ -172,6 +177,9 @@ export const SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING =
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
+/** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
+export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
+  'securitySolution:enableAssetCriticality' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';

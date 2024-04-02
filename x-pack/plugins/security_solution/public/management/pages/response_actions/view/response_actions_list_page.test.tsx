@@ -437,7 +437,7 @@ describe('Response actions history page', () => {
       }, []);
 
       expect(selectedFilterOptions.length).toEqual(1);
-      expect(selectedFilterOptions).toEqual(['Endpoint. Checked option.']);
+      expect(selectedFilterOptions).toEqual(['Elastic Defend. Checked option.']);
       expect(history.location.search).toEqual('?agentTypes=endpoint');
     });
   });
@@ -664,26 +664,6 @@ describe('Response actions history page', () => {
       });
 
       expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
-
-      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
-      clearAllButton.style.pointerEvents = 'all';
-      userEvent.click(clearAllButton);
-      expect(history.location.search).toEqual('');
-    });
-
-    it('should clear `actionTypes` selected options on `types` filter', () => {
-      const filterPrefix = 'types-filter';
-      render();
-      const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
-      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
-
-      allFilterOptions.forEach((option) => {
-        option.style.pointerEvents = 'all';
-        userEvent.click(option);
-      });
-
-      expect(history.location.search).toEqual('?types=automated%2Cmanual');
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       clearAllButton.style.pointerEvents = 'all';

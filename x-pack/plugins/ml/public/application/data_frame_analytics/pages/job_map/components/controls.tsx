@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useContext, useCallback, useMemo } from 'react';
-import cytoscape from 'cytoscape';
+import type { FC } from 'react';
+import React, { useEffect, useState, useContext, useCallback, useMemo } from 'react';
+import type cytoscape from 'cytoscape';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
+import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCodeBlock,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiDescriptionList,
-  EuiDescriptionListProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -39,13 +40,13 @@ import {
   useMlKibana,
 } from '../../../../contexts/kibana';
 import { useEnabledFeatures } from '../../../../contexts/ml';
-import { getDataViewIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
   useDeleteAction,
   DeleteActionModal,
 } from '../../analytics_management/components/action_delete';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
+import { useMlIndexUtils } from '../../../../util/index_service';
 
 interface Props {
   details: Record<string, any>;
@@ -115,6 +116,7 @@ export const Controls: FC<Props> = React.memo(
         application: { navigateToUrl, capabilities },
       },
     } = useMlKibana();
+    const { getDataViewIdFromName } = useMlIndexUtils();
 
     const hasIngestPipelinesCapabilities =
       capabilities.management?.ingest?.ingest_pipelines === true;

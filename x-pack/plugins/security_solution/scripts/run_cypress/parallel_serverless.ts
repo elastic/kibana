@@ -33,10 +33,22 @@ interface ProductType {
   product_tier: string;
 }
 
+interface OverrideEntry {
+  docker_image: string;
+}
+
+interface ProductOverrides {
+  kibana?: OverrideEntry;
+  elasticsearch?: OverrideEntry;
+  fleet?: OverrideEntry;
+  cluster?: OverrideEntry;
+}
+
 interface CreateProjectRequestBody {
   name: string;
   region_id: string;
   product_types?: ProductType[];
+  overrides?: ProductOverrides;
 }
 
 interface Project {
@@ -61,7 +73,7 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
-const BASE_ENV_URL = 'https://console.qa.cld.elstc.co';
+const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 let log: ToolingLog;
 const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
@@ -96,6 +108,22 @@ async function createSecurityProject(
     product_types: productTypes,
   };
 
+  log.info(`Kibana override flag equals to ${process.env.KIBANA_MKI_USE_LATEST_COMMIT}!`);
+  if (
+    process.env.KIBANA_MKI_USE_LATEST_COMMIT &&
+    process.env.KIBANA_MKI_USE_LATEST_COMMIT === '1'
+  ) {
+    const kibanaOverrideImage = `${process.env.BUILDKITE_COMMIT?.substring(0, 12)}`;
+    log.info(
+      `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`
+    );
+    body.overrides = {
+      kibana: {
+        docker_image: `docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`,
+      },
+    };
+  }
+
   try {
     const response = await axios.post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
       headers: {
@@ -112,7 +140,8 @@ async function createSecurityProject(
     };
   } catch (error) {
     if (error instanceof AxiosError) {
-      log.error(`${error.response?.status}:${error.response?.data}`);
+      const errorData = JSON.stringify(error.response?.data);
+      log.error(`${error.response?.status}:${errorData}`);
     } else {
       log.error(`${error.message}`);
     }
@@ -151,7 +180,7 @@ async function resetCredentials(
 
   const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
     const response = await axios.post(
-      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-credentials`,
+      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-internal-credentials`,
       {},
       {
         headers: {
@@ -171,7 +200,7 @@ async function resetCredentials(
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
         log.info('Project is not reachable. A retry will be triggered soon..');
       } else {
-        log.info(error);
+        log.error(`${error.message}`);
       }
     },
     retries: 100,
@@ -195,6 +224,7 @@ function waitForProjectInitialized(projectId: string, apiKey: string): Promise<v
       }
     );
     if (response.data.phase !== 'initialized') {
+      log.info(response.data);
       throw new Error('Project is not initialized. A retry will be triggered soon...');
     } else {
       log.info('Project is initialized');
@@ -205,7 +235,7 @@ function waitForProjectInitialized(projectId: string, apiKey: string): Promise<v
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
         log.info('Project is not reachable. A retry will be triggered soon...');
       } else {
-        log.info(error);
+        log.error(`${error.message}`);
       }
     },
     retries: 100,
@@ -266,7 +296,7 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
           `${runnerId}: The Kibana URL is not yet reachable. A retry will be triggered soon...`
         );
       } else {
-        log.info(`${runnerId}: ${error}`);
+        log.info(`${runnerId}: ${error.message}`);
       }
     },
     retries: 50,
@@ -322,7 +352,7 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
         log.info('Project is not reachable. A retry will be triggered soon...');
       } else {
-        log.info(error);
+        log.error(`${error.message}`);
       }
     },
     retries: 100,
@@ -495,150 +525,171 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         return process.exit(0);
       }
 
-      const results = await pMap(
-        files,
-        async (filePath) => {
-          let result:
-            | CypressCommandLine.CypressRunResult
-            | CypressCommandLine.CypressFailedRunResult
-            | undefined;
-          await withProcRunner(log, async (procs) => {
-            const id = crypto.randomBytes(8).toString('hex');
-            const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
+      const failedSpecFilePaths: string[] = [];
 
-            const productTypes = isOpen
-              ? getProductTypes(tier, endpointAddon, cloudAddon)
-              : (parseTestFileConfig(filePath).productTypes as ProductType[]);
+      const runSpecs = (filePaths: string[]) =>
+        pMap(
+          filePaths,
+          async (filePath) => {
+            let result:
+              | CypressCommandLine.CypressRunResult
+              | CypressCommandLine.CypressFailedRunResult
+              | undefined;
+            await withProcRunner(log, async (procs) => {
+              const id = crypto.randomBytes(8).toString('hex');
+              const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
 
-            if (!API_KEY) {
-              log.info('API KEY to create project could not be retrieved.');
-              // eslint-disable-next-line no-process-exit
-              return process.exit(1);
-            }
+              const productTypes = isOpen
+                ? getProductTypes(tier, endpointAddon, cloudAddon)
+                : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
-            log.info(`${id}: Creating project ${PROJECT_NAME}...`);
-            // Creating project for the test to run
-            const project = await createSecurityProject(PROJECT_NAME, API_KEY, productTypes);
+              if (!API_KEY) {
+                log.info('API KEY to create project could not be retrieved.');
+                // eslint-disable-next-line no-process-exit
+                return process.exit(1);
+              }
 
-            if (!project) {
-              log.info('Failed to create project.');
-              // eslint-disable-next-line no-process-exit
-              return process.exit(1);
-            }
+              log.info(`${id}: Creating project ${PROJECT_NAME}...`);
+              // Creating project for the test to run
+              const project = await createSecurityProject(PROJECT_NAME, API_KEY, productTypes);
 
-            context.addCleanupTask(() => {
-              const command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
-              exec(command);
-            });
+              if (!project) {
+                log.info('Failed to create project.');
+                // eslint-disable-next-line no-process-exit
+                return process.exit(1);
+              }
 
-            // Reset credentials for elastic user
-            const credentials = await resetCredentials(project.id, id, API_KEY);
+              context.addCleanupTask(() => {
+                const command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
+                exec(command);
+              });
 
-            if (!credentials) {
-              log.info('Credentials could not be reset.');
-              // eslint-disable-next-line no-process-exit
-              return process.exit(1);
-            }
+              // Reset credentials for elastic user
+              const credentials = await resetCredentials(project.id, id, API_KEY);
 
-            // Wait for project to be initialized
-            await waitForProjectInitialized(project.id, API_KEY);
+              if (!credentials) {
+                log.info('Credentials could not be reset.');
+                // eslint-disable-next-line no-process-exit
+                return process.exit(1);
+              }
 
-            // Base64 encode the credentials in order to invoke ES and KB APIs
-            const auth = btoa(`${credentials.username}:${credentials.password}`);
+              // Wait for project to be initialized
+              await waitForProjectInitialized(project.id, API_KEY);
 
-            // Wait for elasticsearch status to go green.
-            await waitForEsStatusGreen(project.es_url, auth, id);
+              // Base64 encode the credentials in order to invoke ES and KB APIs
+              const auth = btoa(`${credentials.username}:${credentials.password}`);
 
-            // Wait until Kibana is available
-            await waitForKibanaAvailable(project.kb_url, auth, id);
+              // Wait for elasticsearch status to go green.
+              await waitForEsStatusGreen(project.es_url, auth, id);
 
-            // Wait for Elasticsearch to be accessible
-            await waitForEsAccess(project.es_url, auth, id);
+              // Wait until Kibana is available
+              await waitForKibanaAvailable(project.kb_url, auth, id);
 
-            // Wait until application is ready
-            await waitForKibanaLogin(project.kb_url, credentials);
+              // Wait for Elasticsearch to be accessible
+              await waitForEsAccess(project.es_url, auth, id);
 
-            // Normalized the set of available env vars in cypress
-            const cyCustomEnv = {
-              CYPRESS_BASE_URL: project.kb_url,
+              // Wait until application is ready
+              await waitForKibanaLogin(project.kb_url, credentials);
 
-              ELASTICSEARCH_URL: project.es_url,
-              ELASTICSEARCH_USERNAME: credentials.username,
-              ELASTICSEARCH_PASSWORD: credentials.password,
+              // Normalized the set of available env vars in cypress
+              const cyCustomEnv = {
+                CYPRESS_BASE_URL: project.kb_url,
 
-              KIBANA_URL: project.kb_url,
-              KIBANA_USERNAME: credentials.username,
-              KIBANA_PASSWORD: credentials.password,
+                ELASTICSEARCH_URL: project.es_url,
+                ELASTICSEARCH_USERNAME: credentials.username,
+                ELASTICSEARCH_PASSWORD: credentials.password,
 
-              CLOUD_SERVERLESS: true,
-              IS_SERVERLESS: true,
-            };
+                KIBANA_URL: project.kb_url,
+                KIBANA_USERNAME: credentials.username,
+                KIBANA_PASSWORD: credentials.password,
 
-            if (process.env.DEBUG && !process.env.CI) {
-              log.info(`
+                // Both CLOUD_SERVERLESS and IS_SERVERLESS are used by the cypress tests.
+                CLOUD_SERVERLESS: true,
+                IS_SERVERLESS: true,
+                // TEST_CLOUD is used by SvlUserManagerProvider to define if testing against cloud.
+                TEST_CLOUD: 1,
+              };
+
+              if (process.env.DEBUG && !process.env.CI) {
+                log.info(`
               ----------------------------------------------
               Cypress run ENV for file: ${filePath}:
               ----------------------------------------------
               ${JSON.stringify(cyCustomEnv, null, 2)}
               ----------------------------------------------
               `);
-            }
-            process.env.TEST_CLOUD_HOST_NAME = new URL(BASE_ENV_URL).hostname;
+              }
+              process.env.TEST_CLOUD_HOST_NAME = new URL(BASE_ENV_URL).hostname;
 
-            if (isOpen) {
-              await cypress.open({
-                configFile: cypressConfigFilePath,
-                config: {
-                  e2e: {
-                    baseUrl: project.kb_url,
-                  },
-                  env: cyCustomEnv,
-                },
-              });
-            } else {
-              try {
-                result = await cypress.run({
-                  browser: 'electron',
-                  spec: filePath,
+              if (isOpen) {
+                await cypress.open({
                   configFile: cypressConfigFilePath,
-                  reporter: argv.reporter as string,
-                  reporterOptions: argv.reporterOptions,
-                  headed: argv.headed as boolean,
                   config: {
                     e2e: {
                       baseUrl: project.kb_url,
                     },
-                    numTestsKeptInMemory: 0,
                     env: cyCustomEnv,
                   },
                 });
-                // Delete serverless project
-                log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
-                await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
-              } catch (error) {
-                result = error;
+              } else {
+                try {
+                  result = await cypress.run({
+                    browser: 'electron',
+                    spec: filePath,
+                    configFile: cypressConfigFilePath,
+                    reporter: argv.reporter as string,
+                    reporterOptions: argv.reporterOptions,
+                    headed: argv.headed as boolean,
+                    config: {
+                      e2e: {
+                        baseUrl: project.kb_url,
+                      },
+                      numTestsKeptInMemory: 0,
+                      env: cyCustomEnv,
+                    },
+                  });
+                  // Delete serverless project
+                  log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
+                  await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
+                } catch (error) {
+                  result = error;
+                }
               }
-            }
+              return result;
+            });
             return result;
-          });
-          return result;
-        },
-        {
-          concurrency: PARALLEL_COUNT,
-        }
-      );
-
-      if (results) {
-        renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
-        const hasFailedTests = _.some(
-          results,
-          (result) =>
-            (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-            (result as CypressCommandLine.CypressRunResult)?.totalFailed
+          },
+          {
+            concurrency: PARALLEL_COUNT,
+          }
         );
-        if (hasFailedTests) {
-          throw createFailError('Not all tests passed');
-        }
+
+      const initialResults = await runSpecs(files);
+      // If there are failed tests, retry them
+      const retryResults = await runSpecs([...failedSpecFilePaths]);
+
+      renderSummaryTable([
+        // Don't include failed specs from initial run in results
+        ..._.filter(
+          initialResults,
+          (initialResult: CypressCommandLine.CypressRunResult) =>
+            initialResult?.runs &&
+            _.some(
+              initialResult?.runs,
+              (runResult) => !failedSpecFilePaths.includes(runResult.spec.absolute)
+            )
+        ),
+        ...retryResults,
+      ] as CypressCommandLine.CypressRunResult[]);
+      const hasFailedTests = _.some(
+        // only fail the job if retry failed as well
+        retryResults,
+        (result) =>
+          (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+          (result as CypressCommandLine.CypressRunResult)?.totalFailed
+      );
+      if (hasFailedTests) {
+        throw createFailError('Not all tests passed');
       }
     },
     {

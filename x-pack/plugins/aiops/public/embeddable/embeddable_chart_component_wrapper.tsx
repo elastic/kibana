@@ -7,12 +7,12 @@
 
 import { BehaviorSubject, combineLatest, type Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import React, { FC, useEffect, useMemo, useState } from 'react';
-import { useTimefilter } from '@kbn/ml-date-picker';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
+import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { ChangePointsTable } from '../components/change_point_detection/change_points_table';
-import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '../../common/constants';
 import { ReloadContextProvider } from '../hooks/use_reload';
 import {
   type ChangePointAnnotation,
@@ -23,11 +23,10 @@ import type {
   EmbeddableChangePointChartInput,
   EmbeddableChangePointChartOutput,
 } from './embeddable_change_point_chart';
-import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
-import { FilterQueryContextProvider, useFilerQueryUpdates } from '../hooks/use_filters_query';
+import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
+import { FilterQueryContextProvider, useFilterQueryUpdates } from '../hooks/use_filters_query';
 import { DataSourceContextProvider, useDataSource } from '../hooks/use_data_source';
 import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
-import { useTimeBuckets } from '../hooks/use_time_buckets';
 import { createMergedEsQuery } from '../application/utils/search_utils';
 import { useChangePointResults } from '../components/change_point_detection/use_change_point_agg_request';
 import { ChartsGrid } from '../components/change_point_detection/charts_grid';
@@ -85,8 +84,8 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
   return (
     <ReloadContextProvider reload$={resultObservable$}>
       <DataSourceContextProvider dataViewId={input.dataViewId}>
-        <ChangePointDetectionControlsContextProvider>
-          <FilterQueryContextProvider timeRange={input.timeRange}>
+        <FilterQueryContextProvider timeRange={input.timeRange}>
+          <ChangePointDetectionControlsContextProvider>
             <ChartGridEmbeddableWrapper
               viewType={input.viewType}
               timeRange={input.timeRange}
@@ -102,8 +101,8 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
               onChange={input.onChange}
               emptyState={input.emptyState}
             />
-          </FilterQueryContextProvider>
-        </ChangePointDetectionControlsContextProvider>
+          </ChangePointDetectionControlsContextProvider>
+        </FilterQueryContextProvider>
       </DataSourceContextProvider>
     </ReloadContextProvider>
   );
@@ -139,7 +138,7 @@ export const ChartGridEmbeddableWrapper: FC<
   onChange,
   emptyState,
 }) => {
-  const { filters, query, timeRange } = useFilerQueryUpdates();
+  const { filters, query, searchBounds, interval } = useFilterQueryUpdates();
 
   const fieldConfig = useMemo(() => {
     return { fn, metricField, splitField };
@@ -147,14 +146,6 @@ export const ChartGridEmbeddableWrapper: FC<
 
   const { dataView } = useDataSource();
   const { uiSettings } = useAiopsAppContext();
-  const timeBuckets = useTimeBuckets();
-  const timefilter = useTimefilter();
-
-  const interval = useMemo(() => {
-    timeBuckets.setInterval('auto');
-    timeBuckets.setBounds(timefilter.calculateBounds(timeRange));
-    return timeBuckets.getInterval().expression;
-  }, [timeRange, timeBuckets, timefilter]);
 
   const combinedQuery = useMemo(() => {
     const mergedQuery = createMergedEsQuery(query, filters, dataView, uiSettings);
@@ -168,8 +159,9 @@ export const ChartGridEmbeddableWrapper: FC<
     mergedQuery.bool!.filter.push({
       range: {
         [dataView.timeFieldName!]: {
-          from: timeRange.from,
-          to: timeRange.to,
+          from: searchBounds.min?.valueOf(),
+          to: searchBounds.max?.valueOf(),
+          format: 'epoch_millis',
         },
       },
     });
@@ -183,16 +175,7 @@ export const ChartGridEmbeddableWrapper: FC<
     }
 
     return mergedQuery;
-  }, [
-    dataView,
-    fieldConfig.splitField,
-    filters,
-    partitions,
-    query,
-    timeRange.from,
-    timeRange.to,
-    uiSettings,
-  ]);
+  }, [dataView, fieldConfig.splitField, filters, partitions, query, searchBounds, uiSettings]);
 
   const requestParams = useMemo<ChangePointDetectionRequestParams>(() => {
     return { interval } as ChangePointDetectionRequestParams;

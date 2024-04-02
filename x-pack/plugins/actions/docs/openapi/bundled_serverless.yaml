@@ -539,6 +539,34 @@ components:
             - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_resilient'
+    create_connector_request_sentinelone:
+      title: Create SentinelOne connector request
+      description: |
+        The SentinelOne connector communicates with SentinelOne Management Console via REST API. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      x-technical-preview: true
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_sentinelone'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .sentinelone
+          examples:
+            - .sentinelone
+        name:
+          type: string
+          description: The display name for the connector.
+          examples:
+            - my-connector
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_sentinelone'
     create_connector_request_serverlog:
       title: Create server log connector request
       description: This connector writes an entry to the Kibana server log.
@@ -642,13 +670,15 @@ components:
           $ref: '#/components/schemas/secrets_properties_servicenow'
     create_connector_request_slack_api:
       title: Create Slack connector request
-      description: The Slack connector uses Slack Incoming Webhooks.
+      description: The Slack connector uses an API method to send Slack messages.
       type: object
       required:
         - connector_type_id
         - name
         - secrets
       properties:
+        config:
+          $ref: '#/components/schemas/config_properties_slack_api'
         connector_type_id:
           type: string
           description: The type of connector.
@@ -857,7 +887,7 @@ components:
           type: string
           description: |
             The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.
-          default: anthropic.claude-v2
+          default: anthropic.claude-3-sonnet-20240229-v1:0
     secrets_properties_bedrock:
       title: Connector secrets properties for an Amazon Bedrock connector
       description: Defines secrets for connectors when type is `.bedrock`.
@@ -1041,7 +1071,7 @@ components:
           type: boolean
         host:
           description: |
-            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
+            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
           type: string
         oauthTokenUrl:
           type:
@@ -1049,7 +1079,7 @@ components:
             - 'null'
         port:
           description: |
-            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
+            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
           type: integer
         secure:
           description: |
@@ -1266,6 +1296,27 @@ components:
         apiKeySecret:
           type: string
           description: The authentication key secret for HTTP Basic authentication.
+    config_properties_sentinelone:
+      title: Connector request properties for a SentinelOne connector
+      required:
+        - url
+      description: Defines properties for connectors when type is `.sentinelone`.
+      type: object
+      properties:
+        url:
+          description: |
+            The SentinelOne tenant URL. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
+          type: string
+    secrets_properties_sentinelone:
+      title: Connector secrets properties for a SentinelOne connector
+      description: Defines secrets for connectors when type is `.sentinelone`.
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          description: The A SentinelOne API token.
+          type: string
     config_properties_servicenow:
       title: Connector request properties for a ServiceNow ITSM connector
       required:
@@ -1345,6 +1396,30 @@ components:
           description: |
             The identifier to use for OAuth authentication. This identifier should be the user field you selected when you created an OAuth JWT API endpoint for external clients in your ServiceNow instance. For example, if the selected user field is `Email`, the user identifier should be the user's email address. This property is required when `isOAuth` is `true`.
           type: string
+    config_properties_slack_api:
+      title: Connector request properties for a Slack connector
+      description: Defines properties for connectors when type is `.slack_api`.
+      type: object
+      properties:
+        allowedChannels:
+          type: array
+          description: A list of valid Slack channels.
+          items:
+            type: object
+            required:
+              - id
+              - name
+            maxItems: 25
+            properties:
+              id:
+                type: string
+                description: The Slack channel ID.
+                example: C123ABC456
+                minLength: 1
+              name:
+                type: string
+                description: The Slack channel name.
+                minLength: 1
     secrets_properties_slack_api:
       title: Connector secrets properties for a Web API Slack connector
       description: Defines secrets for connectors when type is `.slack`.
@@ -1732,6 +1807,7 @@ components:
         - $ref: '#/components/schemas/create_connector_request_opsgenie'
         - $ref: '#/components/schemas/create_connector_request_pagerduty'
         - $ref: '#/components/schemas/create_connector_request_resilient'
+        - $ref: '#/components/schemas/create_connector_request_sentinelone'
         - $ref: '#/components/schemas/create_connector_request_serverlog'
         - $ref: '#/components/schemas/create_connector_request_servicenow'
         - $ref: '#/components/schemas/create_connector_request_servicenow_itom'
@@ -1757,6 +1833,7 @@ components:
           .opsgenie: '#/components/schemas/create_connector_request_opsgenie'
           .pagerduty: '#/components/schemas/create_connector_request_pagerduty'
           .resilient: '#/components/schemas/create_connector_request_resilient'
+          .sentinelone: '#/components/schemas/create_connector_request_sentinelone'
           .server-log: '#/components/schemas/create_connector_request_serverlog'
           .servicenow: '#/components/schemas/create_connector_request_servicenow'
           .servicenow-itom: '#/components/schemas/create_connector_request_servicenow_itom'
@@ -2098,6 +2175,39 @@ components:
           description: The display name for the connector.
         referenced_by_count:
           $ref: '#/components/schemas/referenced_by_count'
+    connector_response_properties_sentinelone:
+      title: Connector response properties for a SentinelOne connector
+      type: object
+      required:
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_sentinelone'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .sentinelone
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
+        name:
+          type: string
+          description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_serverlog:
       title: Connector response properties for a server log connector
       type: object
@@ -2242,6 +2352,8 @@ components:
         - is_preconfigured
         - name
       properties:
+        config:
+          $ref: '#/components/schemas/config_properties_slack_api'
         connector_type_id:
           type: string
           description: The type of connector.
@@ -2505,7 +2617,7 @@ components:
     is_preconfigured:
       type: boolean
       description: |
-        Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. 
+        Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.
       examples:
         - false
     is_system_action:
@@ -2533,6 +2645,7 @@ components:
         - $ref: '#/components/schemas/connector_response_properties_opsgenie'
         - $ref: '#/components/schemas/connector_response_properties_pagerduty'
         - $ref: '#/components/schemas/connector_response_properties_resilient'
+        - $ref: '#/components/schemas/connector_response_properties_sentinelone'
         - $ref: '#/components/schemas/connector_response_properties_serverlog'
         - $ref: '#/components/schemas/connector_response_properties_servicenow'
         - $ref: '#/components/schemas/connector_response_properties_servicenow_itom'
@@ -2558,6 +2671,7 @@ components:
           .opsgenie: '#/components/schemas/connector_response_properties_opsgenie'
           .pagerduty: '#/components/schemas/connector_response_properties_pagerduty'
           .resilient: '#/components/schemas/connector_response_properties_resilient'
+          .sentinelone: '#/components/schemas/connector_response_properties_sentinelone'
           .server-log: '#/components/schemas/connector_response_properties_serverlog'
           .servicenow: '#/components/schemas/connector_response_properties_servicenow'
           .servicenow-itom: '#/components/schemas/connector_response_properties_servicenow_itom'
@@ -2701,6 +2815,21 @@ components:
           description: The display name for the connector.
         secrets:
           $ref: '#/components/schemas/secrets_properties_resilient'
+    update_connector_request_sentinelone:
+      title: Update SentinelOne connector request
+      type: object
+      required:
+        - config
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_sentinelone'
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_sentinelone'
     update_connector_request_serverlog:
       title: Update server log connector request
       type: object
@@ -2747,6 +2876,8 @@ components:
         - name
         - secrets
       properties:
+        config:
+          $ref: '#/components/schemas/config_properties_slack_api'
         name:
           type: string
           description: The display name for the connector.
@@ -2867,6 +2998,7 @@ components:
         - $ref: '#/components/schemas/update_connector_request_opsgenie'
         - $ref: '#/components/schemas/update_connector_request_pagerduty'
         - $ref: '#/components/schemas/update_connector_request_resilient'
+        - $ref: '#/components/schemas/update_connector_request_sentinelone'
         - $ref: '#/components/schemas/update_connector_request_serverlog'
         - $ref: '#/components/schemas/update_connector_request_servicenow'
         - $ref: '#/components/schemas/update_connector_request_servicenow_itom'
@@ -2903,6 +3035,7 @@ components:
         - .opsgenie
         - .pagerduty
         - .resilient
+        - .sentinelone
         - .servicenow
         - .servicenow-itom
         - .servicenow-sir

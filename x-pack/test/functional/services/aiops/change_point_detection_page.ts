@@ -252,6 +252,12 @@ export function ChangePointDetectionPageProvider(
       await this.completeSaveToDashboardForm({ createNew: true });
     },
 
+    async assertFiltersApplied() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('filter-items-group');
+      });
+    },
+
     getTable(index: number) {
       return tableService.getServiceInstance(
         'ChangePointResultsTable',

@@ -199,7 +199,7 @@ describe('Initializing the store', () => {
       expect(store.getState()).toEqual({
         lens: expect.objectContaining({
           visualization: {
-            state: { newState: 'newState' }, // new vis gets initialized
+            state: 'testVis initial state', // new vis gets initialized
             activeId: 'testVis',
           },
           activeDatasourceId: 'testDatasource2', // resets to first on the list

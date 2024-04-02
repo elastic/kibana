@@ -30,6 +30,7 @@ import {
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
+import { type TaskInstanceFields } from '@kbn/reporting-common/types';
 import { zipObject } from 'lodash';
 
 import { CONTENT_TYPE_CSV } from '../constants';
@@ -58,6 +59,7 @@ export class CsvESQLGenerator {
   constructor(
     private job: JobParamsCsvESQL,
     private config: ReportingConfigType['csv'],
+    private taskInstanceFields: TaskInstanceFields,
     private clients: Clients,
     private cancellationToken: CancellationToken,
     private logger: Logger,
@@ -67,6 +69,7 @@ export class CsvESQLGenerator {
   public async generateData(): Promise<TaskRunResult> {
     const settings = await getExportSettings(
       this.clients.uiSettings,
+      this.taskInstanceFields,
       this.config,
       this.job.browserTimezone,
       this.logger
@@ -111,7 +114,7 @@ export class CsvESQLGenerator {
           strategy: ESQL_SEARCH_STRATEGY,
           abortSignal: abortController.signal,
           transport: {
-            requestTimeout: settings.scroll.duration,
+            requestTimeout: settings.scroll.duration(this.taskInstanceFields),
           },
         })
       );

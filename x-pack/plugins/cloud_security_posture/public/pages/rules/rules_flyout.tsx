@@ -17,16 +17,26 @@ import {
   EuiFlexGroup,
   EuiSwitch,
   EuiFlyoutFooter,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { FormattedMessage } from '@kbn/i18n-react';
+import { HttpSetup } from '@kbn/core/public';
+import { useKibana } from '../../common/hooks/use_kibana';
+import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleState } from './change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
-import { TakeAction } from '../../components/take_action';
+import {
+  showChangeBenchmarkRuleStatesSuccessToast,
+  TakeAction,
+} from '../../components/take_action';
+import { useFetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
+import { createDetectionRuleFromBenchmarkRule } from '../configurations/utils/create_detection_rule_from_benchmark';
 
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 
@@ -58,8 +68,11 @@ type RuleTab = typeof tabs[number]['id'];
 export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
   const postRequestChangeRulesStates = useChangeCspRuleState();
+  const { data: rulesData } = useFetchDetectionRulesByTags(
+    getFindingsDetectionRuleSearchTags(rule.metadata)
+  );
   const isRuleMuted = rule?.state === 'muted';
-
+  const { notifications } = useKibana().services;
   const switchRuleStates = async () => {
     if (rule.metadata.benchmark.rule_number) {
       const rulesObjectRequest = {
@@ -71,8 +84,16 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
       const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
       await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
       await refetchRulesStates();
+      await showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
+        numberOfRules: 1,
+        numberOfDetectionRules: rulesData?.total || 0,
+      });
     }
   };
+
+  const createMisconfigurationRuleFn = async (http: HttpSetup) =>
+    await createDetectionRuleFromBenchmarkRule(http, rule.metadata);
+
   return (
     <EuiFlyout
       ownFocus={false}
@@ -113,9 +134,17 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
         <EuiFlexGroup gutterSize="none" direction="rowReverse">
           <EuiFlexItem grow={false}>
             {isRuleMuted ? (
-              <TakeAction enableBenchmarkRuleFn={switchRuleStates} />
+              <TakeAction
+                enableBenchmarkRuleFn={switchRuleStates}
+                createRuleFn={createMisconfigurationRuleFn}
+                isCreateDetectionRuleDisabled={true}
+              />
             ) : (
-              <TakeAction disableBenchmarkRuleFn={switchRuleStates} />
+              <TakeAction
+                disableBenchmarkRuleFn={switchRuleStates}
+                createRuleFn={createMisconfigurationRuleFn}
+                isCreateDetectionRuleDisabled={false}
+              />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -136,7 +165,7 @@ const RuleOverviewTab = ({
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
       <EuiDescriptionList
-        listItems={[...ruleState(ruleData, switchRuleStates), ...getRuleList(rule)]}
+        listItems={[...ruleState(ruleData, switchRuleStates), ...getRuleList(rule, ruleData.state)]}
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -144,9 +173,32 @@ const RuleOverviewTab = ({
 
 const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Promise<void>) => [
   {
-    title: i18n.translate('xpack.csp.rules.rulesFlyout.ruleState', {
-      defaultMessage: 'Enabled',
-    }),
+    title: (
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="xpack.csp.rules.rulesFlyout.ruleStateSwitchTitle"
+            defaultMessage="Enabled"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={{
+            '.euiToolTipAnchor': {
+              display: 'flex', // needed to align the icon with the title
+            },
+          }}
+        >
+          <EuiToolTip
+            content={i18n.translate('xpack.csp.rules.rulesFlyout.ruleStateSwitchTooltip', {
+              defaultMessage: `Disabling a rule will also disable its associated detection rules and alerts. Enabling it again does not automatically re-enable them`,
+            })}
+          >
+            <EuiIcon size="m" color="subdued" type="iInCircle" />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
     description: (
       <>
         <EuiSwitch

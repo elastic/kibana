@@ -30,7 +30,8 @@ import type {
   EsAssetReference,
   ExperimentalDataStreamFeature,
 } from '../../../../types';
-import { loadFieldsFromYaml, processFields } from '../../fields/field';
+import type { Fields } from '../../fields/field';
+import { loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
@@ -55,6 +56,7 @@ import {
   getTemplatePriority,
 } from './template';
 import { buildDefaultSettings } from './default_settings';
+import { isUserSettingsTemplate } from './utils';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
 
@@ -287,11 +289,25 @@ function putComponentTemplate(
   };
 }
 
-type TemplateBaseName = string;
-type UserSettingsTemplateName = `${TemplateBaseName}${typeof USER_SETTINGS_TEMPLATE_SUFFIX}`;
+const DEFAULT_FIELD_LIMIT = 1000;
+const MAX_FIELD_LIMIT = 10000;
+const FIELD_LIMIT_THRESHOLD = 500;
 
-const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
-  name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX);
+/**
+ * The total field limit is set to 1000 by default, but can be increased to 10000 if the field count is higher than 500.
+ * An explicit limit always overrides the default.
+ *
+ * This can be replaced by a static limit of 1000 once a new major version of the package spec is released which clearly documents the field limit.
+ */
+function getFieldsLimit(fieldCount: number | undefined, explicitLimit: number | undefined) {
+  if (explicitLimit) {
+    return explicitLimit;
+  }
+  if (typeof fieldCount !== 'undefined' && fieldCount > FIELD_LIMIT_THRESHOLD) {
+    return MAX_FIELD_LIMIT;
+  }
+  return DEFAULT_FIELD_LIMIT;
+}
 
 export function buildComponentTemplates(params: {
   mappings: IndexTemplateMappings;
@@ -302,6 +318,7 @@ export function buildComponentTemplates(params: {
   defaultSettings: IndexTemplate['template']['settings'];
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
   lifecycle?: IndexTemplate['template']['lifecycle'];
+  fieldCount?: number;
 }) {
   const {
     templateName,
@@ -312,6 +329,7 @@ export function buildComponentTemplates(params: {
     pipelineName,
     experimentalDataStreamFeature,
     lifecycle,
+    fieldCount,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -370,8 +388,10 @@ export function buildComponentTemplates(params: {
           mapping: {
             ...templateSettings.index?.mapping,
             total_fields: {
-              ...templateSettings.index?.mapping?.total_fields,
-              limit: '10000',
+              limit: getFieldsLimit(
+                fieldCount,
+                templateSettings.index?.mapping?.total_fields?.limit
+              ),
             },
           },
         },
@@ -419,26 +439,13 @@ async function installDataStreamComponentTemplates({
 }) {
   await Promise.all(
     Object.entries(componentTemplates).map(async ([name, body]) => {
+      // @custom component template should be lazily created by user
       if (isUserSettingsTemplate(name)) {
-        try {
-          // Attempt to create custom component templates, ignore if they already exist
-          const { clusterPromise } = putComponentTemplate(esClient, logger, {
-            body,
-            name,
-            create: true,
-          });
-          return await clusterPromise;
-        } catch (e) {
-          if (e?.statusCode === 400 && e.body?.error?.reason.includes('already exists')) {
-            // ignore
-          } else {
-            throw e;
-          }
-        }
-      } else {
-        const { clusterPromise } = putComponentTemplate(esClient, logger, { body, name });
-        return clusterPromise;
+        return;
       }
+
+      const { clusterPromise } = putComponentTemplate(esClient, logger, { body, name });
+      return clusterPromise;
     })
   );
 }
@@ -517,6 +524,19 @@ export async function ensureAliasHasWriteIndex(opts: {
   }
 }
 
+function countFields(fields: Fields): number {
+  return fields.reduce((acc, field) => {
+    let subCount = 1;
+    if (field.fields) {
+      subCount += countFields(field.fields);
+    }
+    if (field.multi_fields) {
+      subCount += countFields(field.multi_fields);
+    }
+    return subCount + acc;
+  }, 0);
+}
+
 export function prepareTemplate({
   packageInstallContext,
   dataStream,
@@ -527,7 +547,7 @@ export function prepareTemplate({
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = packageInstallContext.packageInfo;
-  const fields = loadFieldsFromYaml(packageInstallContext, dataStream.path);
+  const fields = loadDatastreamsFieldsFromYaml(packageInstallContext, dataStream.path);
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
@@ -546,9 +566,6 @@ export function prepareTemplate({
   const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
 
   const defaultSettings = buildDefaultSettings({
-    templateName,
-    packageName,
-    fields: validFields,
     type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
   });
@@ -562,6 +579,7 @@ export function prepareTemplate({
     registryElasticsearch: dataStream.elasticsearch,
     experimentalDataStreamFeature,
     lifecycle: lifecyle,
+    fieldCount: countFields(validFields),
   });
 
   const template = getTemplate({
@@ -624,6 +642,7 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,
       }));
+
     return indexTemplates.concat(componentTemplates);
   });
 }

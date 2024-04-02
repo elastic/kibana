@@ -635,7 +635,9 @@
               },
               "[] | undefined; refreshInterval?: number | undefined; iconType?: ",
               "IconType",
-              " | undefined; dataTestSubj?: string | undefined; showSaveQuery?: boolean | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; filtersForSuggestions?: ",
+              " | undefined; dataTestSubj?: string | undefined; showSaveQuery?: boolean | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; additionalQueryBarMenuItems?: ",
+              "AdditionalQueryBarMenuItems",
+              " | undefined; filtersForSuggestions?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -717,7 +719,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              "; }) => void) | undefined; onRefreshChange?: (((options: { isPaused: boolean; refreshInterval: number; }) => void) & ((options: { isPaused: boolean; refreshInterval: number; }) => void)) | undefined; indicateNoData?: boolean | undefined; isAutoRefreshDisabled?: boolean | undefined; nonKqlMode?: \"text\" | \"lucene\" | undefined; disableQueryLanguageSwitcher?: boolean | undefined; displayStyle?: \"inPage\" | \"detached\" | undefined; fillSubmitButton?: boolean | undefined; dataViewPickerComponentProps?: ",
+              "; }) => void) | undefined; onCancel?: (() => void) | undefined; onRefreshChange?: (((options: { isPaused: boolean; refreshInterval: number; }) => void) & ((options: { isPaused: boolean; refreshInterval: number; }) => void)) | undefined; indicateNoData?: boolean | undefined; isAutoRefreshDisabled?: boolean | undefined; nonKqlMode?: \"text\" | \"lucene\" | undefined; disableQueryLanguageSwitcher?: boolean | undefined; displayStyle?: \"inPage\" | \"detached\" | undefined; fillSubmitButton?: boolean | undefined; dataViewPickerComponentProps?: ",
               {
                 "pluginId": "unifiedSearch",
                 "scope": "public",
@@ -725,7 +727,7 @@
                 "section": "def-public.DataViewPickerProps",
                 "text": "DataViewPickerProps"
               },
-              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; hideTextBasedRunQueryLabel?: boolean | undefined; onTextBasedSavedAndExit?: (({ onSave }: ",
+              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; onTextBasedSavedAndExit?: (({ onSave }: ",
               "OnSaveTextLanguageQueryProps",
               ") => void) | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"full\" | \"auto\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",
@@ -1132,7 +1134,13 @@
               "\nList of the supported text based languages (SQL, ESQL) etc.\nDefined per application, if not provided, no text based languages\nwill be available."
             ],
             "signature": [
-              "TextBasedLanguages",
+              {
+                "pluginId": "@kbn/esql-utils",
+                "scope": "common",
+                "docId": "kibKbnEsqlUtilsPluginApi",
+                "section": "def-common.TextBasedLanguages",
+                "text": "TextBasedLanguages"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
@@ -1174,6 +1182,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.shouldShowTextBasedLanguageTransitionModal",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shouldShowTextBasedLanguageTransitionModal",
+            "description": [
+              "\nDetermines if the text based language transition\nmodal should be shown when switching data views"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -1568,6 +1592,78 @@
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
                 "section": "def-common.HttpSetup",
                 "text": "HttpSetup"
+              }
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.OptInConfig",
+                "text": "OptInConfig"
+              },
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.TelemetryCounter",
+                "text": "TelemetryCounter"
+              },
+              ">; }"
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.i18n",
+            "type": "Object",
+            "tags": [],
+            "label": "i18n",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-i18n-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nBrowserPluginApi",
+                "section": "def-common.I18nStart",
+                "text": "I18nStart"
+              }
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
               }
             ],
             "path": "src/plugins/unified_search/public/types.ts",

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Replacements } from '../../schemas';
 import { getAnonymizedData } from '../get_anonymized_data';
 import { getAnonymizedValues } from '../get_anonymized_values';
 import { getCsvFromData } from '../get_csv_from_data';
@@ -19,7 +20,7 @@ export const transformRawData = ({
 }: {
   allow: string[];
   allowReplacement: string[];
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacements | undefined;
   getAnonymizedValue: ({
     currentReplacements,
     rawValue,
@@ -27,7 +28,7 @@ export const transformRawData = ({
     currentReplacements: Record<string, string> | undefined;
     rawValue: string;
   }) => string;
-  onNewReplacements?: (replacements: Record<string, string>) => void;
+  onNewReplacements?: (replacements: Replacements) => void;
   rawData: string | Record<string, unknown[]>;
 }): string => {
   if (typeof rawData === 'string') {

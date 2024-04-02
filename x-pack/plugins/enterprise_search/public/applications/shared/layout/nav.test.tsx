@@ -9,6 +9,10 @@ jest.mock('./nav_link_helpers', () => ({
   generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
 
+jest.mock('../../enterprise_search_content/components/search_index/indices/indices_nav', () => ({
+  useIndicesNav: () => [],
+}));
+
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { EuiSideNavItemType } from '@elastic/eui';
@@ -38,7 +42,7 @@ const baseNavItems = [
       {
         href: '/app/enterprise_search/content/search_indices',
         id: 'search_indices',
-        items: undefined,
+        items: [],
         name: 'Indices',
       },
       {
@@ -54,10 +58,10 @@ const baseNavItems = [
         name: 'Web crawlers',
       },
       {
-        href: '/app/enterprise_search/content/settings',
-        id: 'settings',
+        href: '/app/enterprise_search/content/playground',
+        id: 'playground',
         items: undefined,
-        name: 'Settings',
+        name: 'Playground',
       },
     ],
     name: 'Content',
@@ -362,15 +366,12 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
 
   it('returns basic nav all params are empty', () => {
     const navItems = useEnterpriseSearchAnalyticsNav();
-    // filter out settings item because we're setting hasDefaultIngestPipeline to false
     expect(navItems).toEqual(
       baseNavItems.map((item) =>
         item.id === 'content'
           ? {
               ...item,
-              items: item.items?.filter(
-                (contentItem: { id: string }) => contentItem.id !== 'settings'
-              ),
+              items: item.items,
             }
           : item
       )
@@ -378,16 +379,13 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
   });
 
   it('returns basic nav if only name provided', () => {
-    // filter out settings item because we're setting hasDefaultIngestPipeline to false
     const navItems = useEnterpriseSearchAnalyticsNav('my-test-collection');
     expect(navItems).toEqual(
       baseNavItems.map((item) =>
         item.id === 'content'
           ? {
               ...item,
-              items: item.items?.filter(
-                (contentItem: { id: string }) => contentItem.id !== 'settings'
-              ),
+              items: item.items,
             }
           : item
       )

@@ -29,13 +29,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
     });
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('ingestPipelines');
-    });
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('Loads the app', async () => {
@@ -62,7 +59,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Displays the test pipeline in the list of pipelines', async () => {
         log.debug('Checking that the test pipeline is in the pipelines list.');
         await pageObjects.ingestPipelines.increasePipelineListPageSize();
-        const pipelines = await pageObjects.ingestPipelines.getPipelinesList();
+        const pipelines = await pageObjects.ingestPipelines.getPipelinesList({
+          searchFor: TEST_PIPELINE_NAME,
+        });
         expect(pipelines).to.contain(TEST_PIPELINE_NAME);
       });
 
@@ -86,7 +85,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.ingestPipelines.closePipelineDetailsFlyout();
         await pageObjects.ingestPipelines.increasePipelineListPageSize();
-        const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
+        const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList({
+          searchFor: TEST_PIPELINE_NAME,
+        });
         const newPipelineExists = Boolean(
           pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
         );
@@ -99,7 +100,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.ingestPipelines.closePipelineDetailsFlyout();
         await pageObjects.ingestPipelines.increasePipelineListPageSize();
-        const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
+        const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList({
+          searchFor: TEST_PIPELINE_NAME,
+        });
         const newPipelineExists = Boolean(
           pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
         );

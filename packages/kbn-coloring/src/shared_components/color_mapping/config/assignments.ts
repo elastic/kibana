@@ -7,41 +7,35 @@
  */
 
 import type { ColorMapping } from '.';
-import { MAX_ASSIGNABLE_COLORS } from '../components/container/container';
-import { getPalette, NeutralPalette } from '../palettes';
-import { DEFAULT_NEUTRAL_PALETTE_INDEX } from './default_color_mapping';
+import { getPalette } from '../palettes';
 
 export function updateAssignmentsPalette(
   assignments: ColorMapping.Config['assignments'],
-  assignmentMode: ColorMapping.Config['assignmentMode'],
   colorMode: ColorMapping.Config['colorMode'],
   paletteId: string,
   getPaletteFn: ReturnType<typeof getPalette>,
   preserveColorChanges: boolean
 ): ColorMapping.Config['assignments'] {
   const palette = getPaletteFn(paletteId);
-  const maxColors = palette.type === 'categorical' ? palette.colorCount : MAX_ASSIGNABLE_COLORS;
-  return assignmentMode === 'auto'
-    ? []
-    : assignments.map(({ rule, color, touched }, index) => {
-        if (preserveColorChanges && touched) {
-          return { rule, color, touched };
-        } else {
-          const newColor: ColorMapping.Config['assignments'][number]['color'] =
-            colorMode.type === 'categorical'
-              ? {
-                  type: 'categorical',
-                  paletteId: index < maxColors ? paletteId : NeutralPalette.id,
-                  colorIndex: index < maxColors ? index : 0,
-                }
-              : { type: 'gradient' };
-          return {
-            rule,
-            color: newColor,
-            touched: false,
-          };
-        }
-      });
+  return assignments.map(({ rule, color, touched }, index) => {
+    if (preserveColorChanges && touched) {
+      return { rule, color, touched };
+    } else {
+      const newColor: ColorMapping.Config['assignments'][number]['color'] =
+        colorMode.type === 'categorical'
+          ? {
+              type: 'categorical',
+              paletteId,
+              colorIndex: index % palette.colorCount,
+            }
+          : { type: 'gradient' };
+      return {
+        rule,
+        color: newColor,
+        touched: false,
+      };
+    }
+  });
 }
 
 export function updateColorModePalette(
@@ -60,32 +54,4 @@ export function updateColorModePalette(
         }),
         sort: colorMode.sort,
       };
-}
-
-export function getUnusedColorForNewAssignment(
-  palette: ColorMapping.CategoricalPalette,
-  colorMode: ColorMapping.Config['colorMode'],
-  assignments: ColorMapping.Config['assignments']
-): ColorMapping.Config['assignments'][number]['color'] {
-  if (colorMode.type === 'categorical') {
-    // TODO: change the type of color assignment depending on palette
-    // compute the next unused color index in the palette.
-    const maxColors = palette.type === 'categorical' ? palette.colorCount : MAX_ASSIGNABLE_COLORS;
-    const colorIndices = new Set(Array.from({ length: maxColors }, (d, i) => i));
-    assignments.forEach(({ color }) => {
-      if (color.type === 'categorical' && color.paletteId === palette.id) {
-        colorIndices.delete(color.colorIndex);
-      }
-    });
-    const paletteForNextUnusedColorIndex = colorIndices.size > 0 ? palette.id : NeutralPalette.id;
-    const nextUnusedColorIndex =
-      colorIndices.size > 0 ? [...colorIndices][0] : DEFAULT_NEUTRAL_PALETTE_INDEX;
-    return {
-      type: 'categorical',
-      paletteId: paletteForNextUnusedColorIndex,
-      colorIndex: nextUnusedColorIndex,
-    };
-  } else {
-    return { type: 'gradient' };
-  }
 }

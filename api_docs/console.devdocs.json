@@ -25,7 +25,23 @@
             "section": "def-common.Plugin",
             "text": "Plugin"
           },
-          "<void, void, ",
+          "<",
+          {
+            "pluginId": "console",
+            "scope": "public",
+            "docId": "kibConsolePluginApi",
+            "section": "def-public.ConsolePluginSetup",
+            "text": "ConsolePluginSetup"
+          },
+          ", ",
+          {
+            "pluginId": "console",
+            "scope": "public",
+            "docId": "kibConsolePluginApi",
+            "section": "def-public.ConsolePluginStart",
+            "text": "ConsolePluginStart"
+          },
+          ", ",
           {
             "pluginId": "console",
             "scope": "public",
@@ -471,118 +487,6 @@
       },
       {
         "parentPluginId": "console",
-        "id": "def-public.ConsolePluginSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "ConsolePluginSetup",
-        "description": [
-          "\nConsole plugin's setup service object"
-        ],
-        "path": "src/plugins/console/public/types/plugin_dependencies.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "console",
-            "id": "def-public.ConsolePluginSetup.locator",
-            "type": "Object",
-            "tags": [],
-            "label": "locator",
-            "description": [
-              "\nPublic locator for the console UI"
-            ],
-            "signature": [
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
-              },
-              "<",
-              {
-                "pluginId": "console",
-                "scope": "public",
-                "docId": "kibConsolePluginApi",
-                "section": "def-public.ConsoleUILocatorParams",
-                "text": "ConsoleUILocatorParams"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "console",
-        "id": "def-public.ConsolePluginStart",
-        "type": "Interface",
-        "tags": [],
-        "label": "ConsolePluginStart",
-        "description": [
-          "\nConsole plugin's start service object"
-        ],
-        "path": "src/plugins/console/public/types/plugin_dependencies.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "console",
-            "id": "def-public.ConsolePluginStart.renderEmbeddableConsole",
-            "type": "Function",
-            "tags": [],
-            "label": "renderEmbeddableConsole",
-            "description": [
-              "\nrenderEmbeddableConsole is available if the console UI is enabled. This function can be called to\nrender an embeddable version of the developer console on the page."
-            ],
-            "signature": [
-              "((props?: ",
-              {
-                "pluginId": "console",
-                "scope": "public",
-                "docId": "kibConsolePluginApi",
-                "section": "def-public.EmbeddableConsoleProps",
-                "text": "EmbeddableConsoleProps"
-              },
-              " | undefined) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) | undefined"
-            ],
-            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "console",
-                "id": "def-public.ConsolePluginStart.renderEmbeddableConsole.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "console",
-                    "scope": "public",
-                    "docId": "kibConsolePluginApi",
-                    "section": "def-public.EmbeddableConsoleProps",
-                    "text": "EmbeddableConsoleProps"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/plugins/console/public/types/plugin_dependencies.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "console",
         "id": "def-public.ConsoleUILocatorParams",
         "type": "Interface",
         "tags": [],
@@ -661,7 +565,148 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "console",
+      "id": "def-public.ConsolePluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ConsolePluginSetup",
+      "description": [
+        "\nConsole plugin's setup service object"
+      ],
+      "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "console",
+          "id": "def-public.ConsolePluginSetup.locator",
+          "type": "Object",
+          "tags": [],
+          "label": "locator",
+          "description": [
+            "\nPublic locator for the console UI"
+          ],
+          "signature": [
+            {
+              "pluginId": "share",
+              "scope": "common",
+              "docId": "kibSharePluginApi",
+              "section": "def-common.LocatorPublic",
+              "text": "LocatorPublic"
+            },
+            "<",
+            {
+              "pluginId": "console",
+              "scope": "public",
+              "docId": "kibConsolePluginApi",
+              "section": "def-public.ConsoleUILocatorParams",
+              "text": "ConsoleUILocatorParams"
+            },
+            "> | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "console",
+      "id": "def-public.ConsolePluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ConsolePluginStart",
+      "description": [
+        "\nConsole plugin's start service object"
+      ],
+      "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "console",
+          "id": "def-public.ConsolePluginStart.isEmbeddedConsoleAvailable",
+          "type": "Function",
+          "tags": [],
+          "label": "isEmbeddedConsoleAvailable",
+          "description": [
+            "\nisEmbeddedConsoleAvailable is available if the embedded console can be rendered. Returns true when\ncalled if the Embedded Console is currently rendered."
+          ],
+          "signature": [
+            "(() => boolean) | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "console",
+          "id": "def-public.ConsolePluginStart.openEmbeddedConsole",
+          "type": "Function",
+          "tags": [],
+          "label": "openEmbeddedConsole",
+          "description": [
+            "\nopenEmbeddedConsole is available if the embedded console can be rendered. Calling\nthis function will open the embedded console on the page if it is currently rendered."
+          ],
+          "signature": [
+            "((content?: string | undefined) => void) | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "console",
+              "id": "def-public.ConsolePluginStart.openEmbeddedConsole.$1",
+              "type": "string",
+              "tags": [],
+              "label": "content",
+              "description": [],
+              "signature": [
+                "string | undefined"
+              ],
+              "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "console",
+          "id": "def-public.ConsolePluginStart.EmbeddableConsole",
+          "type": "Function",
+          "tags": [],
+          "label": "EmbeddableConsole",
+          "description": [
+            "\nEmbeddableConsole is a functional component used to render a portable version of the dev tools console on any page in Kibana"
+          ],
+          "signature": [
+            "React.FC<",
+            {
+              "pluginId": "console",
+              "scope": "public",
+              "docId": "kibConsolePluginApi",
+              "section": "def-public.EmbeddableConsoleProps",
+              "text": "EmbeddableConsoleProps"
+            },
+            "> | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],

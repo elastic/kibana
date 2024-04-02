@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, from, Observable, of, Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, of, Subscription } from 'rxjs';
 import {
   switchMap,
   map,
@@ -22,7 +23,8 @@ import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 // FIXME get rid of the static import
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
-import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
   ExplorerJob,
@@ -39,7 +41,6 @@ import {
 // FIXME get rid of the static import
 import { mlJobService } from '../services/job_service';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
-import type { TimeBucketsInterval } from '../util/time_buckets';
 import type { Refresh } from '../routing/use_refresh';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';

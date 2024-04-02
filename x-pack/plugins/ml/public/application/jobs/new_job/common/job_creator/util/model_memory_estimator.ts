@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest, of, Subject, Subscription } from 'rxjs';
 import { isEqual, cloneDeep } from 'lodash';
 import {
   catchError,
@@ -26,9 +27,10 @@ import { type MLHttpFetchError, extractErrorMessage } from '@kbn/ml-error-utils'
 
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
-import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
+import type { JobValidator } from '../../job_validator/job_validator';
+import { VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { JobCreator } from '../job_creator';
+import type { JobCreator } from '../job_creator';
 
 export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];
 

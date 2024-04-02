@@ -19,6 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177245
   registry.when('Diagnostics: Data streams', { config: 'basic', archives: [] }, () => {
     describe('When there is no data', () => {
       before(async () => {

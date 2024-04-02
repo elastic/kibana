@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiFlexGroup, EuiFlexItem, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 
-import { Filter, FilterStateStore, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -26,7 +29,6 @@ import {
   windowParametersToAppState,
   type LogRateAnalysisPageUrlState,
 } from '../../application/url_state/log_rate_analysis';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
 import { SearchPanel } from '../search_panel';
 import { useLogRateAnalysisResultsTableRowContext } from '../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
@@ -172,7 +174,6 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
             embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
             esSearchQuery={searchQuery}
             onWindowParametersChange={onWindowParametersHandler}
-            setGlobalState={setGlobalState}
             stickyHistogram={stickyHistogram}
           />
         </EuiFlexGroup>
