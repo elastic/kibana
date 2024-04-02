@@ -6,12 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const getAliasActionsMock = jest.fn();
-
-jest.doMock('../../utils', () => {
-  const realModule = jest.requireActual('../../utils');
-  return {
-    ...realModule,
-    getAliasActions: getAliasActionsMock,
-  };
-});
+export { SolutionNavUserProfileToggle } from './solution_nav_userprofile_toggle';
