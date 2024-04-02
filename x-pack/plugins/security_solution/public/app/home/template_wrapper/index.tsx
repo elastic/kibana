@@ -61,12 +61,15 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
       getTimelineShowStatus(state, TimelineId.active)
     );
     const [routeProps] = useRouteSpy();
-    const isNotEmpty = !rest.isEmptyState;
     const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
     const { euiTheme, colorMode: globalColorMode } = useEuiTheme();
+
+    // There is some logic in the StyledKibanaPageTemplate that checks for children presence, and we dont even need to render the children
+    // here if isEmptyState is set
+    const isNotEmpty = !rest.isEmptyState;
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
