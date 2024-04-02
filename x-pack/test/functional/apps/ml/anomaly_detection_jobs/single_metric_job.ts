@@ -405,7 +405,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Feb 11, 2016 @ 23:59:54.000'
       );
 
-      await ml.jobWizardCommon.goBackToTimeRange();
+      await ml.jobWizardCommon.goToTimeRangeStep();
 
       await ml.jobWizardCommon.assertShortDurationTimeRange();
 
@@ -418,7 +418,7 @@ export default function ({ getService }: FtrProviderContext) {
         'mlValidationCallout-warning-The selected or available time',
       ]);
 
-      await ml.jobWizardCommon.goBackToTimeRange();
+      await ml.jobWizardCommon.goToTimeRangeStep();
       await ml.jobWizardCommon.clickUseFullDataButton(
         'Feb 7, 2016 @ 00:00:00.000',
         'Feb 11, 2016 @ 23:59:54.000'
