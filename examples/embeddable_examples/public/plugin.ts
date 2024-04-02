@@ -16,7 +16,6 @@ import {
   registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import {
