@@ -8,17 +8,17 @@
 import { i18n } from '@kbn/i18n';
 
 export const GREATER_THAN_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxSignalsFieldGreaterThanError',
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldGreaterThanError',
   {
-    defaultMessage: 'Max signals must be greater than 0.',
+    defaultMessage: 'Max alerts must be greater than 0.',
   }
 );
 
 export const LESS_THAN_ERROR = (maxNumber: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxSignalsFieldLessThanError',
+    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldLessThanError',
     {
       values: { maxNumber },
-      defaultMessage: 'Max signals must be less than {maxNumber}.',
+      defaultMessage: 'Max alerts must be less than {maxNumber}.',
     }
   );

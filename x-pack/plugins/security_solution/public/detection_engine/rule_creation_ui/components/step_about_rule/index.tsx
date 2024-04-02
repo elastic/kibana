@@ -316,7 +316,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiFormRow>
             <EuiSpacer size="l" />
-            <EuiFormRow label={I18n.MAX_SIGNALS} fullWidth>
+            <EuiFormRow fullWidth>
               <CommonUseField
                 path="maxSignals"
                 component={MaxSignals}

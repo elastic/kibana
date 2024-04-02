@@ -90,10 +90,3 @@ export const ADD_RULE_NOTE_HELP_TEXT = i18n.translate(
     defaultMessage: 'Add rule investigation guide...',
   }
 );
-
-export const MAX_SIGNALS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.maxSignalsLabel',
-  {
-    defaultMessage: 'Max signals',
-  }
-);

@@ -102,8 +102,14 @@ export const schema: FormSchema<AboutStepRule> = {
   },
   maxSignals: {
     type: FIELD_TYPES.NUMBER,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.fieldMaxAlertsLabel',
+      {
+        defaultMessage: 'Max alerts',
+      }
+    ),
     helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMaxSignalsHelpText',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMaxAlertsHelpText',
       {
         defaultMessage:
           'The maximum number of alerts a rule will create per execution. Defaults to 100.',

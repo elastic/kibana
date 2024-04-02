@@ -344,8 +344,8 @@ export const FROM_FIELD_LABEL = i18n.translate(
 );
 
 export const MAX_SIGNALS_FIELD_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.maxSignalsFieldLabel',
+  'xpack.securitySolution.detectionEngine.ruleDetails.maxAlertsFieldLabel',
   {
-    defaultMessage: 'Max signals',
+    defaultMessage: 'Max alerts',
   }
 );
