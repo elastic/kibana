@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { map, mergeMap, catchError } from 'rxjs/operators';
+import { map, mergeMap, catchError } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { from, of } from 'rxjs';

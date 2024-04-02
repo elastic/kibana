@@ -9,7 +9,7 @@
 import Url from 'url';
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { filter, take, map } from 'rxjs/operators';
+import { filter, take, map } from 'rxjs';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { Lifecycle } from '../lifecycle';
