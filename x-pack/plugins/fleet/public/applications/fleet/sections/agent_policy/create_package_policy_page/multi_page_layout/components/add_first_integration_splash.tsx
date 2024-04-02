@@ -98,12 +98,12 @@ const AddIntegrationStepsIllustrations = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText textAlign="center">
-              <h4>
+              <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.installAgentStepTitle"
                   defaultMessage="Install Elastic Agent"
                 />
-              </h4>
+              </h2>
             </EuiText>
             <SubtitleText>
               <FormattedMessage
@@ -134,12 +134,12 @@ const AddIntegrationStepsIllustrations = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText textAlign="center">
-              <h4>
+              <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.addIntegrationStepTitle"
                   defaultMessage="Add the integration"
                 />
-              </h4>
+              </h2>
             </EuiText>
             <SubtitleText>
               <FormattedMessage
@@ -170,12 +170,12 @@ const AddIntegrationStepsIllustrations = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText textAlign="center">
-              <h4>
+              <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.confirmDataStepTitle"
                   defaultMessage="Confirm incoming data"
                 />
-              </h4>
+              </h2>
             </EuiText>
             <SubtitleText>
               <FormattedMessage
