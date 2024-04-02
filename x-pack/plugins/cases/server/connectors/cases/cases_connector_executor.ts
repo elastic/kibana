@@ -764,7 +764,10 @@ export class CasesConnectorExecutor {
   }
 
   private getGroupingAsTags(grouping: GroupedAlerts['grouping']) {
-    return Object.entries(grouping).map(([key, value]) => `${key}:${convertValueToString(value)}`);
+    const flattenGrouping = getFlattenedObject(grouping);
+    return Object.entries(flattenGrouping).map(
+      ([key, value]) => `${key}:${convertValueToString(value)}`
+    );
   }
 
   private async handleClosedCases(

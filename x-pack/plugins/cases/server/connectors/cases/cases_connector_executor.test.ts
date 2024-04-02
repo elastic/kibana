@@ -760,7 +760,7 @@ describe('CasesConnectorExecutor', () => {
             'auto-generated',
             'rule:rule-test-id',
             'foo:["bar",1,true,{}]',
-            'bar:{"foo":"test"}',
+            'bar.foo:test',
             'baz:my value',
             'rule',
             'test',
