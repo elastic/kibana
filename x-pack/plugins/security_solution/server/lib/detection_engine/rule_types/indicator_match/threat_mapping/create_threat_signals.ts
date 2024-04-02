@@ -34,6 +34,8 @@ import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning } from '../../utils/utils';
 import { getFieldsForWildcard } from '../../utils/get_fields_for_wildcard';
 
+export const MAX_CLAUSE_DEFAULT_VALUE = Number.NEGATIVE_INFINITY;
+
 export const createThreatSignals = async ({
   alertId,
   bulkCreate,
@@ -189,7 +191,7 @@ export const createThreatSignals = async ({
       // uncomment this line..
       // const maxClauseCountValue = -1;
 
-      // and comment out the reduce function below to force the
+      // and comment out the below reduce function to force the
       // max clause count error to re-appear.
       const maxClauseCountValue = searchesPerformed.reduce<number>((acc, search) => {
         const failureMessage: string | undefined = search.errors.find((err) =>
@@ -197,11 +199,21 @@ export const createThreatSignals = async ({
         );
 
         const regex = /[0-9]/g;
-        const found = failureMessage?.match(regex);
+        const foundMaxClauseCountValue = failureMessage?.match(regex);
 
-        if (!isEmpty(found) && found != null) {
-          // minus 1 since it needs to be one less than the max provided by elasticsearch error message.
-          const val = parseInt(found.join(''), 10) - 1;
+        if (!isEmpty(foundMaxClauseCountValue) && foundMaxClauseCountValue != null) {
+          const tempVal = parseInt(foundMaxClauseCountValue.join(''), 10);
+          let val = MAX_CLAUSE_DEFAULT_VALUE;
+          if (tempVal === 0) {
+            // if the resulting max clause count error is 0, don't subtract 1 from that.
+            // rare case that really should not happen unless ES claims heap size is 0.
+            // ref: https://github.com/elastic/elasticsearch/issues/86136
+            val = tempVal;
+          } else {
+            // minus 1 since it needs to be one less than the max
+            // provided by elasticsearch error message.
+            val = tempVal - 1;
+          }
           ruleExecutionLogger.warn(
             `maxClauseCount error received from elasticsearch, setting IM rule page size to ${val}`
           );
@@ -209,9 +221,9 @@ export const createThreatSignals = async ({
         } else {
           return acc;
         }
-      }, -1);
+      }, MAX_CLAUSE_DEFAULT_VALUE);
 
-      if (maxClauseCountValue > 0) {
+      if (maxClauseCountValue > MAX_CLAUSE_DEFAULT_VALUE) {
         // parse the error message to acquire the number of maximum possible clauses
         // allowed by elasticsearch. The sliced chunk is used in createSignal to generate
         // threat filters.
@@ -270,7 +282,7 @@ export const createThreatSignals = async ({
         break;
       }
       ruleExecutionLogger.debug(`Documents items left to check are ${documentCount}`);
-      if (maxClauseCountValue > 0) {
+      if (maxClauseCountValue > MAX_CLAUSE_DEFAULT_VALUE) {
         ruleExecutionLogger.debug(`Re-running search since we hit max clause count error`);
 
         // re-run search with smaller max clause count;
