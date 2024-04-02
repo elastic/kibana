@@ -42,8 +42,6 @@ disabled:
   - x-pack/test/osquery_cypress/visual_config.ts
   - x-pack/test/security_solution_cypress/cli_config.ts
   - x-pack/test/security_solution_cypress/config.ts
-  - x-pack/test/threat_intelligence_cypress/cli_config_parallel.ts
-  - x-pack/test/threat_intelligence_cypress/config.ts
   - x-pack/test/functional_enterprise_search/visual_config.ts
   - x-pack/test/functional_enterprise_search/cli_config.ts
   - x-pack/test_serverless/functional/test_suites/security/cypress/security_config.ts

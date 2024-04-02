@@ -300,7 +300,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
         /^packages\/kbn-securitysolution-io-ts-list-types/,
         /^x-pack\/plugins\/threat_intelligence/,
         /^x-pack\/packages\/security-solution/,
-        /^x-pack\/test\/threat_intelligence_cypress/,
+        /^x-pack\/test\/security_solution_cypress/,
         /^x-pack\/plugins\/cases/,
         /^x-pack\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui/,

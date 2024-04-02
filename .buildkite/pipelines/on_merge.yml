@@ -284,8 +284,8 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
-    label: 'Threat Intelligence Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_solution_threat_intelligence.sh
+    label: 'Investigations - Security Solution Threat Intelligence Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
