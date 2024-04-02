@@ -42,15 +42,15 @@ export async function fetchApi({
 
   const apiRequest = typeof api === 'string' ? fetch(api, requestInit) : api(requestInit);
 
-  const apiResponse = await apiRequest.catch((error) => {
+  const apiResponse = await apiRequest.catch(async (error) => {
     handleFailure();
-    throw error;
+    let errorMessage = 'Failed to fetch the chat messages';
+    if (error.response) {
+      errorMessage =
+        (await error.response?.json())?.message ?? 'Failed to fetch the chat response.';
+    }
+    throw new Error(errorMessage);
   });
-
-  if (!apiResponse.ok) {
-    handleFailure();
-    throw new Error((await apiResponse.text()) || 'Failed to fetch the chat response.');
-  }
 
   if (!apiResponse.body) {
     throw new Error('The response body is empty.');
