@@ -380,7 +380,7 @@ describe('SystemPrompt', () => {
         },
         title: 'second',
         messages: [],
-        replacements: [],
+        replacements: {},
       };
       const localMockConversations: Record<string, Conversation> = {
         [DEFAULT_CONVERSATION_TITLE]: BASE_CONVERSATION,
