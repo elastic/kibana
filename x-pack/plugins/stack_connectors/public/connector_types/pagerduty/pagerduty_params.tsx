@@ -370,10 +370,10 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               }}
               onBlur={() => {
                 if (!customDetails) {
-                  editAction('customDetails', '', index);
+                  editAction('customDetails', '{}', index);
                 }
               }}
-              data-test-subj="customDetailsJsonEditor"
+              dataTestSubj="customDetailsJsonEditor"
             />
           </EuiFormRow>
           <LinksList

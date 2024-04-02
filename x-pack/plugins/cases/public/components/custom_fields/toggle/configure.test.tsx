@@ -30,24 +30,65 @@ describe('Configure ', () => {
     expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 
-  it('updates field options correctly', async () => {
+  it('updates field options correctly when not required', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Configure />
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
-
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toBeCalledWith(
         {
-          options: {
-            required: true,
-          },
+          defaultValue: false,
+        },
+        true
+      );
+    });
+  });
+
+  it('updates field options correctly when required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Configure />
+      </FormTestComponent>
+    );
+
+    userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
+    userEvent.click(await screen.findByTestId('toggle-custom-field-default-value'));
+    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toBeCalledWith(
+        {
+          required: true,
+          defaultValue: true,
+        },
+        true
+      );
+    });
+  });
+
+  it('default value is "false" when required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Configure />
+      </FormTestComponent>
+    );
+
+    userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
+    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toBeCalledWith(
+        {
+          required: true,
+          defaultValue: false,
         },
         true
       );

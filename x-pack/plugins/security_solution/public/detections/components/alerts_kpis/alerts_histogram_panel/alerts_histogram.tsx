@@ -95,6 +95,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
                 yScaleType={ScaleType.Linear}
                 xAccessor="x"
                 yAccessors={yAccessors}
+                stackAccessors={['true']}
                 splitSeriesAccessors={splitSeriesAccessors}
                 data={data}
               />

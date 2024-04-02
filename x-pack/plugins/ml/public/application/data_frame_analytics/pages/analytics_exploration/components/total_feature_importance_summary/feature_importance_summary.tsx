@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
+import type { RecursivePartial, AxisStyle, PartialTheme, BarSeriesProps } from '@elastic/charts';
 import {
   Chart,
   Settings,
@@ -15,10 +17,7 @@ import {
   ScaleType,
   Position,
   BarSeries,
-  RecursivePartial,
-  AxisStyle,
-  PartialTheme,
-  BarSeriesProps,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -295,8 +294,9 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
               >
                 <Settings
                   rotation={90}
-                  // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                   theme={theme}
+                  // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                  baseTheme={LEGACY_LIGHT_THEME}
                   showLegend={showLegend}
                   locale={i18n.getLocale()}
                 />

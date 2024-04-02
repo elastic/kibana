@@ -18,6 +18,7 @@ import {
   EphemeralTask,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
+import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
@@ -166,6 +167,37 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleAdHocTaskTimingOut: {
+        title: 'Sample Ad-Hoc Task that Times Out',
+        description: 'A sample task that times out.',
+        maxAttempts: 3,
+        timeout: '1s',
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+          let isCancelled: boolean = false;
+          return {
+            async run() {
+              // wait for 15 seconds
+              await new Promise((r) => setTimeout(r, 15000));
+
+              if (!isCancelled) {
+                const [{ elasticsearch }] = await core.getStartServices();
+                await elasticsearch.client.asInternalUser.index({
+                  index: '.kibana_task_manager_test_result',
+                  body: {
+                    type: 'task',
+                    taskType: 'sampleAdHocTaskTimingOut',
+                    taskId: taskInstance.id,
+                  },
+                  refresh: true,
+                });
+              }
+            },
+            async cancel() {
+              isCancelled = true;
+            },
+          };
+        },
+      },
       sampleRecurringTaskWhichHangs: {
         title: 'Sample Recurring Task that Hangs for a minute',
         description: 'A sample task that Hangs for a minute on each run.',
@@ -187,52 +219,6 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
-      sampleRecurringTaskWithInvalidIndirectParam: {
-        title: 'Sample Recurring Task that has invalid indirect params',
-        description: 'A sample task that returns invalid params in loadIndirectParams all the time',
-        maxAttempts: 1,
-        createTaskRunner: () => ({
-          async loadIndirectParams() {
-            return { data: { indirectParams: { baz: 'foo' } } }; // invalid
-          },
-          async run() {
-            return { state: {}, schedule: { interval: '1s' }, hasError: true };
-          },
-        }),
-        indirectParamsSchema: schema.object({
-          param: schema.string(),
-        }),
-      },
-      sampleOneTimeTaskWithInvalidIndirectParam: {
-        title: 'Sample One Time Task that has invalid indirect params',
-        description:
-          'A sample task that returns invalid params in loadIndirectParams all the time and throws error in the run method',
-        maxAttempts: 1,
-        createTaskRunner: () => ({
-          async loadIndirectParams() {
-            return { data: { indirectParams: { baz: 'foo' } } }; // invalid
-          },
-          async run() {
-            throwRetryableError(new Error('Retry'), true);
-          },
-        }),
-        indirectParamsSchema: schema.object({
-          param: schema.string(),
-        }),
-      },
-      sampleTaskWithParamsSchema: {
-        title: 'Sample Task That has paramsSchema',
-        description: 'A sample task that has paramsSchema to validate params',
-        maxAttempts: 1,
-        paramsSchema: schema.object({
-          param: schema.string(),
-        }),
-        createTaskRunner: () => ({
-          async run() {
-            throwRetryableError(new Error('Retry'), true);
-          },
-        }),
-      },
       taskToDisable: {
         title: 'Task used for testing it being disabled',
         description: '',
@@ -240,6 +226,36 @@ export class SampleTaskManagerFixturePlugin
         paramsSchema: schema.object({}),
         createTaskRunner: () => ({
           async run() {},
+        }),
+      },
+      lowPriorityTask: {
+        title: 'Task used for testing priority claiming',
+        priority: TaskPriority.Low,
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state, schedule } = taskInstance;
+            const prevState = state || { count: 0 };
+
+            const count = (prevState.count || 0) + 1;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              body: {
+                type: 'task',
+                taskType: 'lowPriorityTask',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: { count },
+              schedule,
+            };
+          },
         }),
       },
     });

@@ -60,6 +60,8 @@ export const BASE_MODEL = {
   threadsPerAllocation: 0,
   isPlaceholder: false,
   hasStats: false,
+  types: [],
+  inputFieldNames: [],
 };
 
 export const ELSER_MODEL_PLACEHOLDER: MlModel = {
@@ -87,7 +89,7 @@ export const E5_MODEL_PLACEHOLDER: MlModel = {
   title: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
   description: i18n.translate('xpack.enterpriseSearch.modelCard.e5Placeholder.description', {
     defaultMessage:
-      'E5 is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries.',
+      'E5 is a third party NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries.',
   }),
   licenseType: 'mit',
   modelDetailsPageUrl: 'https://ela.st/multilingual-e5-small',

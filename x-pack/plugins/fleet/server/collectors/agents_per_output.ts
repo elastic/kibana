@@ -83,7 +83,9 @@ export async function getAgentsPerOutput(
     if (!outputTypeSupportPresets(output.type)) {
       return;
     }
-
+    if (!outputTypes[output.type]) {
+      return;
+    }
     const outputTelemetryRecord = outputTypes[output.type];
 
     if (!outputTelemetryRecord.preset_counts) {

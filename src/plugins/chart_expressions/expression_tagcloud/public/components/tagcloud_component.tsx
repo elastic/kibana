@@ -12,7 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
 import { IconChartTagcloud } from '@kbn/chart-icons';
-import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
+import {
+  Chart,
+  Settings,
+  Wordcloud,
+  RenderChangeListener,
+  LEGACY_LIGHT_THEME,
+} from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import {
   PaletteRegistry,
@@ -234,6 +240,8 @@ export const TagCloudChart = ({
         <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
           <Chart size="100%" {...getOverridesFor(overrides, 'chart')}>
             <Settings
+              // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+              baseTheme={LEGACY_LIGHT_THEME}
               onElementClick={handleWordClick}
               onRenderChange={onRenderChange}
               ariaLabel={visParams.ariaLabel}

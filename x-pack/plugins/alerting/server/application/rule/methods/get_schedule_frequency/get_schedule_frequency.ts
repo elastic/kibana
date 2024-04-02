@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { RuleDomain } from '../../types';
 import { convertDurationToFrequency } from '../../../../../common/parse_duration';
@@ -41,7 +42,7 @@ export const getScheduleFrequency = async (
     RuleDomain,
     SchedulesIntervalAggregationResult
   >({
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     filter: 'alert.attributes.enabled: true',
     namespaces: ['*'],
     aggs: {

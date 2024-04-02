@@ -7,29 +7,28 @@
 
 import React from 'react';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../shared/doc_links';
+import { EndpointsHeaderAction } from '../../../shared/layout/endpoints_header_action';
 
 export const SearchApplicationHeaderDocsAction: React.FC = () => (
-  <EuiFlexGroup gutterSize="s">
-    <EuiFlexItem>
-      <EuiButtonEmpty
-        data-telemetry-id="entSearchApplications-searchApplicationHeader-documentationLink"
-        data-test-subj="search-applications-documentation-link"
-        href={docLinks.searchApplications}
-        target="_blank"
-        iconType="documents"
-      >
-        {i18n.translate(
-          'xpack.enterpriseSearch.searchApplications.searchApplication.header.searchApplicationsDoc',
-          {
-            defaultMessage: 'Search Applications Doc',
-          }
-        )}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <EndpointsHeaderAction>
+    <EuiButtonEmpty
+      data-telemetry-id="entSearchApplications-searchApplicationHeader-documentationLink"
+      data-test-subj="search-applications-documentation-link"
+      href={docLinks.searchApplications}
+      target="_blank"
+      iconType="documents"
+    >
+      {i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.searchApplication.header.searchApplicationsDoc',
+        {
+          defaultMessage: 'Search Applications Doc',
+        }
+      )}
+    </EuiButtonEmpty>
+  </EndpointsHeaderAction>
 );

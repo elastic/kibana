@@ -46,7 +46,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   context('Opening alerts', () => {
@@ -158,7 +158,8 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
         });
     });
   });
-  context('Closing alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/173597
+  context.skip('Closing alerts', () => {
     beforeEach(() => {
       login();
       deleteAlertsAndRules();

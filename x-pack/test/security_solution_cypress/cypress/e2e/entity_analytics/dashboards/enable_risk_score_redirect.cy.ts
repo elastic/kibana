@@ -18,7 +18,6 @@ import { RiskScoreEntity } from '../../../tasks/risk_scores/common';
 import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 import { PAGE_TITLE } from '../../../screens/entity_analytics_management';
 
-// FLAKY: https://github.com/elastic/kibana/issues/165644
 describe('Enable risk scores from dashboard', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();

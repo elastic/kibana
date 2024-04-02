@@ -197,15 +197,17 @@ export function MachineLearningDataDriftProvider({
       await this.assertDocCountContent('Comparison');
     },
 
-    async assertHistogramBrushesExist() {
+    async assertHistogramBrushesExist(id: 'Reference' | 'Comparison' = 'Reference') {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`aiopsHistogramBrushes`);
-        // As part of the interface for the histogram brushes, the button to clear the selection should be present
-        await testSubjects.existOrFail(`aiopsClearSelectionBadge`);
+        await testSubjects.existOrFail(`dataDriftBrush-${id}`);
       });
     },
 
-    async clickDocumentCountChart(dataTestSubj: string, chartClickCoordinates: [number, number]) {
+    async clickDocumentCountChart(
+      id: 'Reference' | 'Comparison',
+      chartClickCoordinates: [number, number]
+    ) {
+      const dataTestSubj = `dataDriftDocCountChart-${id}`;
       await elasticChart.waitForRenderComplete();
       const el = await elasticChart.getCanvas(dataTestSubj);
 
@@ -215,16 +217,26 @@ export function MachineLearningDataDriftProvider({
         .click()
         .perform();
 
-      await this.assertHistogramBrushesExist();
+      await this.assertHistogramBrushesExist(id);
     },
 
     async assertDataDriftTableExists() {
       await testSubjects.existOrFail(`mlDataDriftTable`);
     },
 
-    async runAnalysis() {
+    async assertRunAnalysisButtonState(disabled: boolean) {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.click(`aiopsRerunAnalysisButton`);
+        const isDisabled = !(await testSubjects.isEnabled('runDataDriftAnalysis'));
+        expect(isDisabled).to.equal(
+          disabled,
+          `Expect runDataDriftAnalysis button disabled state to be ${disabled} (got ${isDisabled})`
+        );
+      });
+    },
+
+    async runAnalysis() {
+      await retry.tryForTime(10000, async () => {
+        await testSubjects.click(`runDataDriftAnalysis`);
         await this.assertDataDriftTableExists();
       });
     },

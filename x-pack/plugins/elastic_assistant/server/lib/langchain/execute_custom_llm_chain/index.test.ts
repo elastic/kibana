@@ -7,6 +7,7 @@
 
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -32,7 +33,7 @@ jest.mock('langchain/chains', () => ({
 const mockCall = jest.fn();
 jest.mock('langchain/agents', () => ({
   initializeAgentExecutorWithOptions: jest.fn().mockImplementation(() => ({
-    call: mockCall,
+    call: mockCall.mockReturnValueOnce({ output: mockActionResponse.message }),
   })),
 }));
 
@@ -55,29 +56,28 @@ const mockRequest: KibanaRequest<unknown, unknown, any, any> = {} as KibanaReque
 
 const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
 const mockLogger = loggerMock.create();
+const mockTelemetry = coreMock.createSetup().analytics;
 const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-
+const defaultProps = {
+  actions: mockActions,
+  isEnabledKnowledgeBase: true,
+  connectorId: mockConnectorId,
+  esClient: esClientMock,
+  langChainMessages,
+  logger: mockLogger,
+  onNewReplacements: jest.fn(),
+  request: mockRequest,
+  kbResource: ESQL_RESOURCE,
+  telemetry: mockTelemetry,
+  replacements: {},
+};
 describe('callAgentExecutor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    ActionsClientLlm.prototype.getActionResultData = jest
-      .fn()
-      .mockReturnValueOnce(mockActionResponse);
   });
 
   it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
-    await callAgentExecutor({
-      actions: mockActions,
-      assistantLangChain: true,
-      connectorId: mockConnectorId,
-      esClient: esClientMock,
-      langChainMessages,
-      logger: mockLogger,
-      onNewReplacements: jest.fn(),
-      request: mockRequest,
-      kbResource: ESQL_RESOURCE,
-    });
+    await callAgentExecutor(defaultProps);
 
     expect(ActionsClientLlm).toHaveBeenCalledWith({
       actions: mockActions,
@@ -88,17 +88,7 @@ describe('callAgentExecutor', () => {
   });
 
   it('kicks off the chain with (only) the last message', async () => {
-    await callAgentExecutor({
-      actions: mockActions,
-      assistantLangChain: true,
-      connectorId: mockConnectorId,
-      esClient: esClientMock,
-      langChainMessages,
-      logger: mockLogger,
-      onNewReplacements: jest.fn(),
-      request: mockRequest,
-      kbResource: ESQL_RESOURCE,
-    });
+    await callAgentExecutor(defaultProps);
 
     // We don't care about the `config` argument, so we use `expect.anything()`
     expect(mockCall).toHaveBeenCalledWith(
@@ -113,15 +103,8 @@ describe('callAgentExecutor', () => {
     const onlyOneMessage = [langChainMessages[0]];
 
     await callAgentExecutor({
-      actions: mockActions,
-      assistantLangChain: true,
-      connectorId: mockConnectorId,
-      esClient: esClientMock,
+      ...defaultProps,
       langChainMessages: onlyOneMessage,
-      logger: mockLogger,
-      onNewReplacements: jest.fn(),
-      request: mockRequest,
-      kbResource: ESQL_RESOURCE,
     });
 
     // We don't care about the `config` argument, so we use `expect.anything()`
@@ -134,22 +117,13 @@ describe('callAgentExecutor', () => {
   });
 
   it('returns the expected response body', async () => {
-    const result: ResponseBody = await callAgentExecutor({
-      actions: mockActions,
-      assistantLangChain: true,
-      connectorId: mockConnectorId,
-      esClient: esClientMock,
-      langChainMessages,
-      logger: mockLogger,
-      onNewReplacements: jest.fn(),
-      request: mockRequest,
-      kbResource: ESQL_RESOURCE,
-    });
+    const result: ResponseBody = await callAgentExecutor(defaultProps);
 
     expect(result).toEqual({
       connector_id: 'mock-connector-id',
-      data: mockActionResponse,
+      data: mockActionResponse.message,
       status: 'ok',
+      replacements: {},
     });
   });
 });

@@ -8,21 +8,22 @@
 import { pick } from 'lodash/fp';
 import { EuiProgress } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, createContext } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { timelineActions, timelineSelectors } from '../../store/timeline';
-import { timelineDefaults } from '../../store/timeline/defaults';
+import { timelineActions, timelineSelectors } from '../../store';
+import { timelineDefaults } from '../../store/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { FlyoutHeaderPanel } from '../flyout/header';
-import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
+import { TimelineModalHeader } from '../modal/header';
+import type { TimelineId, RowRenderer, TimelineTabs } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { activeTimeline } from '../../containers/active_timeline_context';
+import type { State } from '../../../common/store';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
@@ -32,6 +33,7 @@ import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_ful
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
 import { TimelineTour } from './tour';
+import { defaultUdtHeaders } from './unified_components/default_headers';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -40,11 +42,18 @@ const TimelineTemplateBadge = styled.div`
   font-size: 0.8em;
 `;
 
+const TimelineBody = styled.div`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
 export const TimelineContext = createContext<{ timelineId: string | null }>({ timelineId: null });
 export interface Props {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
+  openToggleRef: React.MutableRefObject<null | HTMLAnchorElement | HTMLButtonElement>;
 }
 
 const TimelineSavingProgressComponent: React.FC<{ timelineId: TimelineId }> = ({ timelineId }) => {
@@ -62,15 +71,22 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   renderCellValue,
   rowRenderers,
   timelineId,
+  openToggleRef,
 }) => {
   const dispatch = useDispatch();
+
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
+
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
-  const {
-    selectedPatterns: selectedPatternsSourcerer,
-    selectedDataViewId: selectedDataViewIdSourcerer,
-  } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
+  const selectedPatternsSourcerer = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.timeline);
+  });
+  const selectedDataViewIdSourcerer = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, SourcererScopeName.timeline);
+  });
   const {
     dataViewId: selectedDataViewIdTimeline,
     indexNames: selectedPatternsTimeline,
@@ -82,6 +98,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     initialized,
     show: isOpen,
     isLoading,
+    activeTab,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -95,6 +112,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'initialized',
         'show',
         'isLoading',
+        'activeTab',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
@@ -111,10 +129,9 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
-          columns: defaultHeaders,
+          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
           dataViewId: selectedDataViewIdSourcerer,
           indexNames: selectedPatternsSourcerer,
-          expandedDetail: activeTimeline.getExpandedDetail(),
           show: false,
         })
       );
@@ -195,6 +212,18 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const showTimelineTour = isOpen && !isLoading && canEditTimeline;
 
+  const handleSwitchToTab = useCallback(
+    (tab: TimelineTabs) => {
+      dispatch(
+        timelineActions.setActiveTabTimeline({
+          id: timelineId,
+          activeTab: tab,
+        })
+      );
+    },
+    [timelineId, dispatch]
+  );
+
   return (
     <TimelineContext.Provider value={timelineContext}>
       <TimelineContainer
@@ -204,7 +233,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         ref={containerElement}
       >
         <TimelineSavingProgress timelineId={timelineId} />
-        <div className="timeline-body" data-test-subj="timeline-body">
+        <TimelineBody data-test-subj="timeline-body">
           {timelineType === TimelineType.template && (
             <TimelineTemplateBadge className="timeline-template-badge">
               {i18n.TIMELINE_TEMPLATE}
@@ -215,7 +244,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
             $isVisible={!timelineFullScreen}
             data-test-subj="timeline-hide-show-container"
           >
-            <FlyoutHeaderPanel timelineId={timelineId} />
+            <TimelineModalHeader timelineId={timelineId} openToggleRef={openToggleRef} />
           </HideShowContainer>
 
           <TabsContent
@@ -228,9 +257,15 @@ const StatefulTimelineComponent: React.FC<Props> = ({
             timelineDescription={description}
             timelineFullScreen={timelineFullScreen}
           />
-        </div>
+        </TimelineBody>
       </TimelineContainer>
-      {showTimelineTour ? <TimelineTour /> : null}
+      {showTimelineTour ? (
+        <TimelineTour
+          activeTab={activeTab}
+          switchToTab={handleSwitchToTab}
+          timelineType={timelineType}
+        />
+      ) : null}
     </TimelineContext.Provider>
   );
 };

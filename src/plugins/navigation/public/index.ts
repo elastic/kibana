@@ -16,7 +16,12 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export type { TopNavMenuData, TopNavMenuProps, TopNavMenuBadgeProps } from './top_nav_menu';
 export { TopNavMenu, TopNavMenuItems, TopNavMenuBadges } from './top_nav_menu';
 
-export type { NavigationPublicPluginSetup, NavigationPublicPluginStart } from './types';
+export type {
+  NavigationPublicSetup as NavigationPublicPluginSetup,
+  NavigationPublicStart as NavigationPublicPluginStart,
+  SolutionNavigationOptInStatus,
+  SolutionType,
+} from './types';
 
 // Export plugin after all other imports
 import { NavigationPublicPlugin } from './plugin';

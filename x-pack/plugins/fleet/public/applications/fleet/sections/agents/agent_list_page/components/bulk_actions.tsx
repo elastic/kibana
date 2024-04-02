@@ -35,26 +35,24 @@ import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
 export interface Props {
-  shownAgents: number;
-  inactiveShownAgents: number;
+  nAgentsInTable: number;
   totalManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
-  visibleAgents: Agent[];
+  agentsOnCurrentPage: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   allTags: string[];
   agentPolicies: AgentPolicy[];
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
-  shownAgents,
-  inactiveShownAgents,
+  nAgentsInTable,
   totalManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
-  visibleAgents,
+  agentsOnCurrentPage,
   refreshAgents,
   allTags,
   agentPolicies,
@@ -85,25 +83,17 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${totalManagedAgentIds
         .map((id) => `"${id}"`)
         .join(' or ')})`;
-      return `${currentQuery} AND NOT (${excludedKuery})`;
+      return `(${currentQuery}) AND NOT (${excludedKuery})`;
     } else {
       return currentQuery;
     }
   }, [currentQuery, totalManagedAgentIds]);
 
-  // Check if user is working with only inactive agents
-  const atLeastOneActiveAgentSelected =
-    selectionMode === 'manual'
-      ? !!selectedAgents.find((agent) => agent.active)
-      : shownAgents > inactiveShownAgents;
-  const totalActiveAgents = shownAgents - inactiveShownAgents;
-
+  const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
   const agentCount =
     selectionMode === 'manual'
       ? selectedAgents.length
-      : totalActiveAgents - totalManagedAgentIds?.length;
-
-  const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
+      : nAgentsInTable - totalManagedAgentIds?.length;
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
   const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
@@ -118,7 +108,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="tag" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected,
       onClick: (event: any) => {
         setTagsPopoverButton((event.target as Element).closest('button')!);
         setIsTagAddVisible(!isTagAddVisible);
@@ -133,7 +122,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="pencil" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected,
       onClick: () => {
         closeMenu();
         setIsReassignFlyoutOpen(true);
@@ -151,7 +139,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="trash" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected,
       onClick: () => {
         closeMenu();
         setIsUnenrollModalOpen(true);
@@ -169,7 +156,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="refresh" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected,
       onClick: () => {
         closeMenu();
         setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: false });
@@ -187,7 +173,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="timeRefresh" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected || !isLicenceAllowingScheduleUpgrade,
+      disabled: !isLicenceAllowingScheduleUpgrade,
       onClick: () => {
         closeMenu();
         setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
@@ -207,7 +193,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       />
     ),
     icon: <EuiIcon type="refresh" size="m" />,
-    disabled: !atLeastOneActiveAgentSelected,
     onClick: () => {
       closeMenu();
       setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
@@ -227,7 +212,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="download" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected,
       onClick: () => {
         closeMenu();
         setIsRequestDiagnosticsModalOpen(true);
@@ -243,8 +227,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   ];
 
   const getSelectedTagsFromAgents = useMemo(
-    () => getCommonTags(agents, visibleAgents ?? [], agentPolicies),
-    [agents, visibleAgents, agentPolicies]
+    () => getCommonTags(agents, agentsOnCurrentPage ?? [], agentPolicies),
+    [agents, agentsOnCurrentPage, agentPolicies]
   );
 
   return (

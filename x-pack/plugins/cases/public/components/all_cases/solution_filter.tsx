@@ -43,37 +43,6 @@ export const SolutionFilterComponent = ({
   const options = mapToMultiSelectOption(hasOwner ? owner : availableSolutions);
   const solutions = availableSolutions.map((solution) => mapToReadableSolutionName(solution));
 
-  /**
-   * If the user selects and deselects all solutions then the owner is set to an empty array.
-   * This results in fetching all cases the user has access to including
-   * the ones with read access. We want to show only the cases the user has full access to.
-   * For that reason we fallback to availableSolutions if the owner is empty.
-   *
-   * If the consumer of cases has passed an owner we fallback to the provided owner
-   */
-  const _onChange = ({
-    filterId,
-    selectedOptionKeys: newOptions,
-  }: {
-    filterId: string;
-    selectedOptionKeys: string[];
-  }) => {
-    if (hasOwner) {
-      onChange({
-        filterId,
-        selectedOptionKeys: newOptions.length === 0 ? owner : newOptions,
-      });
-    } else {
-      onChange({
-        filterId,
-        selectedOptionKeys: newOptions.length === 0 ? availableSolutions : newOptions,
-      });
-    }
-  };
-
-  const selectedOptionsInFilter =
-    selectedOptionKeys.length === availableSolutions.length ? [] : selectedOptionKeys;
-
   const renderOption = (option: EuiSelectableOption) => {
     const solution = solutions.find((solutionData) => solutionData.id === option.label) as Solution;
     return (
@@ -90,10 +59,11 @@ export const SolutionFilterComponent = ({
     <MultiSelectFilter
       buttonLabel={i18n.SOLUTION}
       id={'owner'}
-      onChange={_onChange}
+      onChange={onChange}
       options={options}
       renderOption={renderOption}
-      selectedOptionKeys={selectedOptionsInFilter}
+      selectedOptionKeys={selectedOptionKeys}
+      isLoading={false}
     />
   );
 };

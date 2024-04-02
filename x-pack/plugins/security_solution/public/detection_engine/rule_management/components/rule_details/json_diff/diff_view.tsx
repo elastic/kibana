@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import classNames from 'classnames';
 import { css, Global } from '@emotion/react';
 import {
   Diff,
@@ -23,9 +24,16 @@ import type {
   HunkTokens,
 } from 'react-diff-view';
 import unidiff from 'unidiff';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, COLOR_MODES_STANDARD } from '@elastic/eui';
 import { Hunks } from './hunks';
 import { markEdits, DiffMethod } from './mark_edits';
+import {
+  TABLE_CLASS_NAME,
+  CODE_CLASS_NAME,
+  GUTTER_CLASS_NAME,
+  DARK_THEME_CLASS_NAME,
+  COLORS,
+} from './constants';
 
 interface UseExpandReturn {
   expandRange: (start: number, end: number) => void;
@@ -137,53 +145,73 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
   return diffFile;
 };
 
-const TABLE_CLASS_NAME = 'rule-update-diff-table';
-const CODE_CLASS_NAME = 'rule-update-diff-code';
-const GUTTER_CLASS_NAME = 'rule-update-diff-gutter';
-
 const CustomStyles: React.FC = ({ children }) => {
   const { euiTheme } = useEuiTheme();
 
   const customCss = css`
-    .${TABLE_CLASS_NAME} .diff-gutter-col {
-      width: ${euiTheme.size.xl};
-    }
-
-    .${CODE_CLASS_NAME}.diff-code, .${GUTTER_CLASS_NAME}.diff-gutter {
-      background: transparent;
-    }
-
-    .${GUTTER_CLASS_NAME}:nth-child(3) {
-      border-left: 1px solid ${euiTheme.colors.mediumShade};
-    }
-
-    .${GUTTER_CLASS_NAME}.diff-gutter-delete {
-      color: ${euiTheme.colors.dangerText};
-      font-weight: bold;
-    }
-
-    .${GUTTER_CLASS_NAME}.diff-gutter-insert {
-      color: ${euiTheme.colors.successText};
-      font-weight: bold;
-    }
-
     .${CODE_CLASS_NAME}.diff-code {
       padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.m};
     }
 
-    .${CODE_CLASS_NAME}.diff-code-delete .diff-code-edit,
-    .${CODE_CLASS_NAME}.diff-code-insert .diff-code-edit {
-      background: transparent;
+    .${TABLE_CLASS_NAME} .diff-gutter-col {
+      width: ${euiTheme.size.xl};
     }
 
+    /* Vertical line separating two sides of the diff view */
+    .${GUTTER_CLASS_NAME}:nth-child(3) {
+      border-left: 1px solid ${euiTheme.colors.mediumShade};
+    }
+
+    /* Gutter of a line with deletions */
+    .${GUTTER_CLASS_NAME}.diff-gutter-delete {
+      font-weight: bold;
+      background: ${COLORS.light.gutterBackground.deletion};
+    }
+    .${DARK_THEME_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-delete {
+      background: ${COLORS.dark.gutterBackground.deletion};
+    }
+
+    /* Gutter of a line with insertions */
+    .${GUTTER_CLASS_NAME}.diff-gutter-insert {
+      font-weight: bold;
+      background: ${COLORS.light.gutterBackground.insertion};
+    }
+    .${DARK_THEME_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-insert {
+      background: ${COLORS.dark.gutterBackground.insertion};
+    }
+
+    /* Background of a line with deletions */
+    .${CODE_CLASS_NAME}.diff-code-delete {
+      background: ${COLORS.light.lineBackground.deletion};
+    }
+    .${DARK_THEME_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-delete {
+      background: ${COLORS.dark.lineBackground.deletion};
+    }
+
+    /* Background of a line with insertions */
+    .${CODE_CLASS_NAME}.diff-code-insert {
+      background: ${COLORS.light.lineBackground.insertion};
+    }
+    .${DARK_THEME_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-insert {
+      background: ${COLORS.dark.lineBackground.insertion};
+    }
+
+    /* Accented background of removed characters / words */
     .${CODE_CLASS_NAME}.diff-code-delete .diff-code-edit {
-      color: ${euiTheme.colors.dangerText};
-      text-decoration: line-through;
+      font-weight: 700;
+      background: ${COLORS.light.characterBackground.deletion};
+    }
+    .${DARK_THEME_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-delete .diff-code-edit {
+      background: ${COLORS.dark.characterBackground.deletion};
     }
 
+    /* Accented background of inserted characters / words */
     .${CODE_CLASS_NAME}.diff-code-insert .diff-code-edit {
-      color: ${euiTheme.colors.successText};
-      text-decoration: underline;
+      font-weight: 700;
+      background: ${COLORS.light.characterBackground.insertion};
+    }
+    .${DARK_THEME_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-insert .diff-code-edit {
+      background: ${COLORS.dark.characterBackground.insertion};
     }
   `;
 
@@ -229,6 +257,12 @@ export const DiffView = ({
   */
   const tokens = useTokens(hunks, diffMethod, oldSource);
 
+  const { colorMode } = useEuiTheme();
+
+  const tableClassName = classNames(TABLE_CLASS_NAME, {
+    [DARK_THEME_CLASS_NAME]: colorMode === COLOR_MODES_STANDARD.dark,
+  });
+
   return (
     <CustomStyles>
       <Diff
@@ -240,7 +274,7 @@ export const DiffView = ({
         hunks={hunks}
         renderGutter={renderGutter}
         tokens={tokens}
-        className={TABLE_CLASS_NAME}
+        className={tableClassName}
         gutterClassName={GUTTER_CLASS_NAME}
         codeClassName={CODE_CLASS_NAME}
       >

@@ -245,9 +245,9 @@ describe('dimension editor', () => {
         userEvent.type(customPrefixTextbox, prefix);
       };
       return {
-        settingNone: screen.getByLabelText(/none/i),
-        settingAuto: screen.getByLabelText(/auto/i),
-        settingCustom: screen.getByLabelText(/custom/i),
+        settingNone: screen.getByTitle(/none/i),
+        settingAuto: screen.getByTitle(/auto/i),
+        settingCustom: screen.getByTitle(/custom/i),
         customPrefixTextbox,
         typePrefix,
         ...rtlRender,
@@ -276,9 +276,9 @@ describe('dimension editor', () => {
             state: localState,
           });
 
-        expect(settingAuto).toBeChecked();
-        expect(settingNone).not.toBeChecked();
-        expect(settingCustom).not.toBeChecked();
+        expect(settingAuto).toHaveAttribute('aria-pressed', 'true');
+        expect(settingNone).toHaveAttribute('aria-pressed', 'false');
+        expect(settingCustom).toHaveAttribute('aria-pressed', 'false');
         expect(customPrefixTextbox).not.toBeInTheDocument();
       });
 
@@ -286,9 +286,9 @@ describe('dimension editor', () => {
         const { settingAuto, settingCustom, settingNone, customPrefixTextbox } =
           renderSecondaryMetricEditor({ state: { ...localState, secondaryPrefix: NONE_PREFIX } });
 
-        expect(settingNone).toBeChecked();
-        expect(settingAuto).not.toBeChecked();
-        expect(settingCustom).not.toBeChecked();
+        expect(settingNone).toHaveAttribute('aria-pressed', 'true');
+        expect(settingAuto).toHaveAttribute('aria-pressed', 'false');
+        expect(settingCustom).toHaveAttribute('aria-pressed', 'false');
         expect(customPrefixTextbox).not.toBeInTheDocument();
       });
 
@@ -297,9 +297,9 @@ describe('dimension editor', () => {
         const { settingAuto, settingCustom, settingNone, customPrefixTextbox } =
           renderSecondaryMetricEditor({ state: customPrefixState });
 
-        expect(settingAuto).not.toBeChecked();
-        expect(settingNone).not.toBeChecked();
-        expect(settingCustom).toBeChecked();
+        expect(settingAuto).toHaveAttribute('aria-pressed', 'false');
+        expect(settingNone).toHaveAttribute('aria-pressed', 'false');
+        expect(settingCustom).toHaveAttribute('aria-pressed', 'true');
         expect(customPrefixTextbox).toHaveValue(customPrefixState.secondaryPrefix);
       });
 
@@ -454,11 +454,10 @@ describe('dimension editor', () => {
       );
 
       const supportingVisOptions = {
-        none: screen.queryByLabelText(/none/i),
+        none: screen.queryByTitle(/none/i),
         // in eui when bar or line become disabled they change from input to button so we have to do this weird check
-        bar: screen.queryByLabelText(/bar/i) || screen.queryByRole('button', { name: /bar/i }),
-        trendline:
-          screen.queryByLabelText(/line/i) || screen.queryByRole('button', { name: /line/i }),
+        bar: screen.queryByTitle(/bar/i) || screen.queryByRole('button', { name: /bar/i }),
+        trendline: screen.queryByTitle(/line/i) || screen.queryByRole('button', { name: /line/i }),
       };
 
       const clickOnSupportingVis = (type: SupportingVisType) => {
@@ -472,8 +471,8 @@ describe('dimension editor', () => {
       return {
         progressDirectionShowing: screen.queryByTestId('lnsMetric_progress_direction_buttons'),
         progressOptions: {
-          vertical: screen.queryByLabelText(/vertical/i),
-          horizontal: screen.queryByLabelText(/horizontal/i),
+          vertical: screen.queryByTitle(/vertical/i),
+          horizontal: screen.queryByTitle(/horizontal/i),
         },
         supportingVisOptions,
         clickOnSupportingVis,
@@ -501,21 +500,21 @@ describe('dimension editor', () => {
           const { supportingVisOptions } = renderAdditionalSectionEditor({
             state: { ...stateWOTrend, showBar: false, maxAccessor: undefined },
           });
-          expect(supportingVisOptions.none).toBeChecked();
+          expect(supportingVisOptions.none).toHaveAttribute('aria-pressed', 'true');
         });
 
         it('when `showBar` is true and maximum value is not defined, bar should be selected', () => {
           const { supportingVisOptions } = renderAdditionalSectionEditor({
             state: { ...stateWOTrend, showBar: true },
           });
-          expect(supportingVisOptions.bar).toBeChecked();
+          expect(supportingVisOptions.bar).toHaveAttribute('aria-pressed', 'true');
         });
 
         it('when `showBar` is true and trendline is defined, line should be selected', () => {
           const { supportingVisOptions } = renderAdditionalSectionEditor({
             state: metricAccessorState,
           });
-          expect(supportingVisOptions.trendline).toBeChecked();
+          expect(supportingVisOptions.trendline).toHaveAttribute('aria-pressed', 'true');
         });
 
         it('should enable bar when max dimension exists', () => {
@@ -633,10 +632,10 @@ describe('dimension editor', () => {
             state: metricAccessorState,
           });
 
-          expect(progressOptions.vertical).toBeChecked();
-          expect(progressOptions.horizontal).not.toBeChecked();
+          expect(progressOptions.vertical).toHaveAttribute('aria-pressed', 'true');
+          expect(progressOptions.horizontal).toHaveAttribute('aria-pressed', 'false');
           if (progressOptions.horizontal === null) {
-            throw new Error('horizontal radio button not found');
+            throw new Error('horizontal button not found');
           }
 
           userEvent.click(progressOptions.horizontal);

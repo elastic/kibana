@@ -14,6 +14,12 @@ import type { AgentSelection } from '../../agents/types';
 
 const checkAgentsLength = (agentsSelection: AgentSelection) => {
   if (!isEmpty(agentsSelection)) {
+    if (agentsSelection.offlineAgentsSelected) {
+      return i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryAgentsOfflineErrorMessage', {
+        defaultMessage: 'Some agents are offline',
+      });
+    }
+
     const isValid = !!(
       agentsSelection.allAgentsSelected ||
       agentsSelection.agents?.length ||

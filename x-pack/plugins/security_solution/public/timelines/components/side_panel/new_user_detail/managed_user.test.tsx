@@ -19,6 +19,7 @@ describe('ManagedUser', () => {
     contextID: '',
     scopeId: '',
     isDraggable: false,
+    openDetailsPanel: () => {},
   };
 
   it('renders', () => {

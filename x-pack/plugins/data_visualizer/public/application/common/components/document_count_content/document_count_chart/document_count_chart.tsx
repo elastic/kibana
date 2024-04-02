@@ -5,24 +5,20 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  Axis,
-  HistogramBarSeries,
+import type {
   BrushEndListener,
-  Chart,
   ElementClickListener,
-  Position,
-  ScaleType,
-  Settings,
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
+import { Axis, HistogramBarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import moment from 'moment';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import type { LogRateHistogramItem } from '@kbn/aiops-utils';
+import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
 
 import { EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
@@ -58,7 +54,6 @@ export const DocumentCountChart: FC<Props> = ({
     services: { data, uiSettings, fieldFormats, charts },
   } = useDataVisualizerKibana();
 
-  const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
@@ -136,7 +131,6 @@ export const DocumentCountChart: FC<Props> = ({
           <Settings
             onBrushEnd={onBrushEnd as BrushEndListener}
             onElementClick={onElementClick}
-            theme={chartTheme}
             baseTheme={chartBaseTheme}
             locale={i18n.getLocale()}
           />

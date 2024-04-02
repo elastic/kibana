@@ -20,8 +20,8 @@ import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public'
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
 import {
+  ControlGroupComponentState,
   ControlGroupInput,
-  ControlGroupSettings,
   CONTROL_GROUP_TYPE,
   FieldFilterPredicate,
 } from '../types';
@@ -57,7 +57,7 @@ export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition
   public create = async (
     initialInput: ControlGroupInput,
     parent?: Container,
-    settings?: ControlGroupSettings,
+    initialComponentState?: ControlGroupComponentState,
     fieldFilterPredicate?: FieldFilterPredicate
   ) => {
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
@@ -66,7 +66,7 @@ export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition
       reduxEmbeddablePackage,
       initialInput,
       parent,
-      settings,
+      initialComponentState,
       fieldFilterPredicate
     );
   };

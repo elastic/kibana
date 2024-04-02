@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NewChatById } from '@kbn/elastic-assistant';
+import { NewChatByTitle } from '@kbn/elastic-assistant';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isEmpty } from 'lodash/fp';
 import {
@@ -24,6 +24,7 @@ import styled from 'styled-components';
 
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 import { Assignees } from '../../../../flyout/document_details/right/components/assignees';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
@@ -107,6 +108,11 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
       _index: eventIndex,
       timestamp,
     });
+    const urlModifier = (value: string) => {
+      // this is actually only needed for when users click on the Share Alert button and then enable the expandable flyout
+      // (for the old (non-expandable) flyout, we do not need to save anything in the url as we automatically open the flyout here: x-pack/plugins/security_solution/public/detections/pages/alerts/alert_details_redirect.tsx
+      return `${value}&${URL_PARAM_KEY.flyout}=(preview:!(),right:(id:document-details-right,params:(id:'${eventId}',indexName:${eventIndex},scopeId:${scopeId})))`;
+    };
 
     const { refetch } = useRefetchByScope({ scopeId });
     const alertAssignees = useMemo(
@@ -150,8 +156,8 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
               <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
                 {hasAssistantPrivilege && promptContextId != null && (
                   <EuiFlexItem grow={false}>
-                    <NewChatById
-                      conversationId={
+                    <NewChatByTitle
+                      conversationTitle={
                         isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
                       }
                       promptContextId={promptContextId}
@@ -160,7 +166,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
                 )}
                 {isAlert && alertDetailsLink && (
                   <EuiFlexItem grow={false}>
-                    <EuiCopy textToCopy={alertDetailsLink}>
+                    <EuiCopy textToCopy={urlModifier(alertDetailsLink)}>
                       {(copy) => (
                         <EuiButtonEmpty
                           onClick={copy}
@@ -175,7 +181,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {scopeId !== TableId.rulePreview && (
+            {isAlert && scopeId !== TableId.rulePreview && (
               <EuiFlexItem grow={false}>
                 <Assignees
                   eventId={eventId}

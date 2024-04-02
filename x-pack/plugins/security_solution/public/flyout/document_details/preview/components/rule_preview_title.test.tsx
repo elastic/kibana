@@ -9,8 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { RulePreviewTitleProps } from './rule_preview_title';
 import { RulePreviewTitle } from './rule_preview_title';
-import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { TestProvider as ExpandableFlyoutTestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { TestProviders } from '../../../../common/mock';
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import {
@@ -28,9 +27,9 @@ const defaultProps = {
 const renderRulePreviewTitle = (props: RulePreviewTitleProps) =>
   render(
     <TestProviders>
-      <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
+      <ExpandableFlyoutTestProvider>
         <RulePreviewTitle {...props} />
-      </ExpandableFlyoutContext.Provider>
+      </ExpandableFlyoutTestProvider>
     </TestProviders>
   );
 

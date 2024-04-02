@@ -12,6 +12,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -24,6 +25,8 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { migrateLegacyActions } from '../lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -71,8 +74,11 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -84,7 +90,7 @@ describe('delete()', () => {
   let rulesClient: RulesClient;
   const existingAlert = {
     id: '1',
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       alertTypeId: 'myType',
       consumer: 'myApp',
@@ -132,7 +138,7 @@ describe('delete()', () => {
   test('successfully removes an alert', async () => {
     const result = await rulesClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
-    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
     expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
@@ -140,9 +146,13 @@ describe('delete()', () => {
       expect.any(Object),
       expect.any(Object)
     );
-    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
-      namespace: 'default',
-    });
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        namespace: 'default',
+      }
+    );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
 
@@ -151,10 +161,10 @@ describe('delete()', () => {
 
     const result = await rulesClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
-    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
     expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to load API key to invalidate on alert 1: Fail'
     );
@@ -298,7 +308,7 @@ describe('delete()', () => {
             action: 'rule_delete',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -316,7 +326,7 @@ describe('delete()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {

@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   };
 
   registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
-    before(async () => {
+    before(() => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -68,14 +68,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
-      await synthtraceEsClient.index(events);
+      return synthtraceEsClient.index(events);
     });
 
     after(async () => {
       await synthtraceEsClient.clean();
     });
 
-    describe('create rule for opbeans-java without kql filter', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176996
+    describe.skip('create rule for opbeans-java without kql filter', () => {
       let ruleId: string;
       let actionId: string;
       let alerts: ApmAlertFields[];
@@ -187,11 +188,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('create rule for opbeans-node using kql filter', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/177061
+    describe.skip('create rule for opbeans-node using kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 
-      before(async () => {
+      beforeEach(async () => {
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.TransactionDuration,
@@ -212,7 +214,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
-      after(async () => {
+      afterEach(async () => {
         await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 

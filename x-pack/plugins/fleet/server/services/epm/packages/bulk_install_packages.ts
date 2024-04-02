@@ -19,7 +19,10 @@ import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
-  packagesToInstall: Array<string | { name: string; version?: string; prerelease?: boolean }>;
+  packagesToInstall: Array<
+    | string
+    | { name: string; version?: string; prerelease?: boolean; skipDataStreamRollover?: boolean }
+  >;
   esClient: ElasticsearchClient;
   force?: boolean;
   spaceId: string;
@@ -48,10 +51,18 @@ export async function bulkInstallPackages({
           name: pkgRes.name,
           version: pkgRes.version,
           prerelease: undefined,
+          skipDataStreamRollover: undefined,
         }));
       }
       if (pkg.version !== undefined) {
-        return Promise.resolve(pkg as { name: string; version: string; prerelease?: boolean });
+        return Promise.resolve(
+          pkg as {
+            name: string;
+            version: string;
+            prerelease?: boolean;
+            skipDataStreamRollover?: boolean;
+          }
+        );
       }
 
       return Registry.fetchFindLatestPackageOrThrow(pkg.name, {
@@ -60,6 +71,7 @@ export async function bulkInstallPackages({
         name: pkgRes.name,
         version: pkgRes.version,
         prerelease: pkg.prerelease,
+        skipDataStreamRollover: pkg.skipDataStreamRollover,
       }));
     })
   );
@@ -98,7 +110,7 @@ export async function bulkInstallPackages({
           result: {
             assets: [...installedEs, ...installedKibana],
             status: 'already_installed',
-            installType: installedPackageResult.installType,
+            installType: 'unknown',
           } as InstallResult,
         };
       }
@@ -114,6 +126,7 @@ export async function bulkInstallPackages({
         force,
         prerelease: prerelease || ('prerelease' in pkgKeyProps && pkgKeyProps.prerelease),
         authorizationHeader,
+        skipDataStreamRollover: pkgKeyProps.skipDataStreamRollover,
       });
 
       if (installResult.error) {

@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/router-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/router-utils",
+        "id": "def-common.getRouterLinkProps",
+        "type": "Function",
+        "tags": [],
+        "label": "getRouterLinkProps",
+        "description": [
+          "\n\ngetRouterLinkProps is an util that enable HTML elements, such buttons, to\nbehave as links."
+        ],
+        "signature": [
+          "({ href, onClick }: GetRouterLinkPropsDeps) => { href: string | undefined; onClick: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void; }"
+        ],
+        "path": "packages/kbn-router-utils/src/get_router_link_props/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/router-utils",
+            "id": "def-common.getRouterLinkProps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ href, onClick }",
+            "description": [],
+            "signature": [
+              "GetRouterLinkPropsDeps"
+            ],
+            "path": "packages/kbn-router-utils/src/get_router_link_props/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object that contains an href and a guardedClick handler that will\nmanage behaviours such as leftClickEvent and event with modifiers (Ctrl, Shift, etc)"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

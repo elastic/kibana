@@ -14,6 +14,7 @@ export const createTelemetryClientMock = (): jest.Mocked<TelemetryClientStart> =
   reportAssistantInvoked: jest.fn(),
   reportAssistantMessageSent: jest.fn(),
   reportAssistantQuickPrompt: jest.fn(),
+  reportAssistantSettingToggled: jest.fn(),
   reportEntityDetailsClicked: jest.fn(),
   reportEntityAlertsClicked: jest.fn(),
   reportEntityRiskFiltered: jest.fn(),
@@ -23,4 +24,9 @@ export const createTelemetryClientMock = (): jest.Mocked<TelemetryClientStart> =
   reportDataQualityIndexChecked: jest.fn(),
   reportDataQualityCheckAllCompleted: jest.fn(),
   reportBreadcrumbClicked: jest.fn(),
+  reportToggleRiskSummaryClicked: jest.fn(),
+  reportRiskInputsExpandedFlyoutOpened: jest.fn(),
+  reportAddRiskInputToTimelineClicked: jest.fn(),
+  reportDetailsFlyoutOpened: jest.fn(),
+  reportDetailsFlyoutTabClicked: jest.fn(),
 });

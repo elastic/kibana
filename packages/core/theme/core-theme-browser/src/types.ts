@@ -22,12 +22,21 @@ export interface CoreTheme {
  * @public
  */
 export interface ThemeServiceSetup {
+  /**
+   * An observable of the currently active theme.
+   * Note that the observable has a replay effect, so it will emit once during subscriptions.
+   */
   theme$: Observable<CoreTheme>;
+
+  /**
+   * Returns the theme currently in use.
+   * Note that when possible, using the `theme$` observable instead is strongly encouraged, as
+   * it will allow to react to dynamic theme switch (even if those are not implemented at the moment)
+   */
+  getTheme(): CoreTheme;
 }
 
 /**
  * @public
  */
-export interface ThemeServiceStart {
-  theme$: Observable<CoreTheme>;
-}
+export type ThemeServiceStart = ThemeServiceSetup;

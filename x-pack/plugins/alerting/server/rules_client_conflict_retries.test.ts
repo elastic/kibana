@@ -12,6 +12,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
@@ -24,6 +25,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 
 jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
@@ -31,7 +34,7 @@ jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
 
 let rulesClient: RulesClient;
 
-const MockAlertId = 'alert-id';
+const MockRuleId = 'rule-id';
 
 const ConflictAfterRetries = RetryForConflictsAttempts + 1;
 
@@ -68,6 +71,9 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -114,8 +120,10 @@ describe('rules_client_conflict_retries', () => {
 
 async function update(success: boolean) {
   try {
+    rulesClientParams.uiSettings.asScopedToClient =
+      uiSettingsServiceMock.createStartContract().asScopedToClient;
     await rulesClient.update({
-      id: MockAlertId,
+      id: MockRuleId,
       data: {
         schedule: { interval: '1m' },
         name: 'cba',
@@ -128,18 +136,18 @@ async function update(success: boolean) {
     });
   } catch (err) {
     // only checking the warn messages in this test
-    expect(logger.warn).lastCalledWith(`rulesClient.update('alert-id') conflict, exceeded retries`);
+    expect(logger.warn).lastCalledWith(`rulesClient.update('rule-id') conflict, exceeded retries`);
     return expectConflict(success, err, 'create');
   }
   expectSuccess(success, 2, 'create');
 
   // only checking the debug messages in this test
-  expect(logger.debug).nthCalledWith(1, `rulesClient.update('alert-id') conflict, retrying ...`);
+  expect(logger.debug).nthCalledWith(1, `rulesClient.update('rule-id') conflict, retrying ...`);
 }
 
 async function updateApiKey(success: boolean) {
   try {
-    await rulesClient.updateApiKey({ id: MockAlertId });
+    await rulesClient.updateApiKey({ id: MockRuleId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -148,10 +156,10 @@ async function updateApiKey(success: boolean) {
 }
 
 async function enable(success: boolean) {
-  setupRawAlertMocks({}, { enabled: false });
+  setupRawRuleMocks({}, { enabled: false });
 
   try {
-    await rulesClient.enable({ id: MockAlertId });
+    await rulesClient.enable({ id: MockRuleId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -163,7 +171,7 @@ async function enable(success: boolean) {
 
 async function disable(success: boolean) {
   try {
-    await rulesClient.disable({ id: MockAlertId });
+    await rulesClient.disable({ id: MockRuleId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -173,7 +181,7 @@ async function disable(success: boolean) {
 
 async function muteAll(success: boolean) {
   try {
-    await rulesClient.muteAll({ id: MockAlertId });
+    await rulesClient.muteAll({ id: MockRuleId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -183,7 +191,7 @@ async function muteAll(success: boolean) {
 
 async function unmuteAll(success: boolean) {
   try {
-    await rulesClient.unmuteAll({ id: MockAlertId });
+    await rulesClient.unmuteAll({ id: MockRuleId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -193,7 +201,7 @@ async function unmuteAll(success: boolean) {
 
 async function muteInstance(success: boolean) {
   try {
-    await rulesClient.muteInstance({ alertId: MockAlertId, alertInstanceId: 'instance-id' });
+    await rulesClient.muteInstance({ alertId: MockRuleId, alertInstanceId: 'instance-id' });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -202,9 +210,9 @@ async function muteInstance(success: boolean) {
 }
 
 async function unmuteInstance(success: boolean) {
-  setupRawAlertMocks({}, { mutedInstanceIds: ['instance-id'] });
+  setupRawRuleMocks({}, { mutedInstanceIds: ['instance-id'] });
   try {
-    await rulesClient.unmuteInstance({ alertId: MockAlertId, alertInstanceId: 'instance-id' });
+    await rulesClient.unmuteInstance({ alertId: MockRuleId, alertInstanceId: 'instance-id' });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -227,8 +235,8 @@ function expectSuccess(
 // tests to run when the method is expected to fail
 function expectConflict(success: boolean, err: Error, method: 'update' | 'create' = 'update') {
   const conflictErrorMessage = SavedObjectsErrorHelpers.createConflictError(
-    'alert',
-    MockAlertId
+    RULE_SAVED_OBJECT_TYPE,
+    MockRuleId
   ).message;
 
   expect(`${err}`).toBe(`Error: ${conflictErrorMessage}`);
@@ -248,8 +256,8 @@ function testFn(fn: (success: boolean) => unknown, success: boolean) {
 function mockSavedObjectUpdateConflictErrorTimes(times: number) {
   // default success value
   const mockUpdateValue = {
-    id: MockAlertId,
-    type: 'alert',
+    id: MockRuleId,
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       actions: [],
       scheduledTaskId: 'scheduled-task-id',
@@ -263,22 +271,22 @@ function mockSavedObjectUpdateConflictErrorTimes(times: number) {
   // queue up specified number of errors before a success call
   for (let i = 0; i < times; i++) {
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(
-      SavedObjectsErrorHelpers.createConflictError('alert', MockAlertId)
+      SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, MockRuleId)
     );
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(
-      SavedObjectsErrorHelpers.createConflictError('alert', MockAlertId)
+      SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, MockRuleId)
     );
   }
 }
 
 // set up mocks needed to get the tested methods to run
-function setupRawAlertMocks(
+function setupRawRuleMocks(
   overrides: Record<string, unknown> = {},
   attributeOverrides: Record<string, unknown> = {}
 ) {
-  const rawAlert = {
-    id: MockAlertId,
-    type: 'alert',
+  const rawRule = {
+    id: MockRuleId,
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       enabled: true,
       tags: ['foo'],
@@ -297,10 +305,10 @@ function setupRawAlertMocks(
     version: '123',
     ...overrides,
   };
-  const decryptedRawAlert = {
-    ...rawAlert,
+  const decryptedRawRule = {
+    ...rawRule,
     attributes: {
-      ...rawAlert.attributes,
+      ...rawRule.attributes,
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
   };
@@ -310,11 +318,11 @@ function setupRawAlertMocks(
 
   // splitting this out as it's easier to set a breakpoint :-)
   unsecuredSavedObjectsClient.get.mockImplementation(async () => {
-    return cloneDeep(rawAlert);
+    return cloneDeep(rawRule);
   });
 
   encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(async () => {
-    return cloneDeep(decryptedRawAlert);
+    return cloneDeep(decryptedRawRule);
   });
 }
 
@@ -400,5 +408,5 @@ beforeEach(() => {
 
   rulesClient = new RulesClient(rulesClientParams);
 
-  setupRawAlertMocks();
+  setupRawRuleMocks();
 });

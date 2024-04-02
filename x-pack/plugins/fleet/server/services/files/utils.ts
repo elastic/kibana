@@ -14,6 +14,7 @@ import {
   FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN,
 } from '../../../common/constants';
 
+import { FleetError } from '../../errors';
 interface ParsedFileStorageIndex {
   index: string;
   integration: string;
@@ -55,7 +56,7 @@ export const parseFileStorageIndex = (index: string): ParsedFileStorageIndex => 
         .at(integrationPosition);
 
       if (!integration) {
-        throw new Error(`Index name ${index} does not seem to be a File storage index`);
+        throw new FleetError(`Index name ${index} does not seem to be a File storage index`);
       }
 
       response.direction = isDeliveryToHost ? 'to-host' : 'from-host';
@@ -69,7 +70,7 @@ export const parseFileStorageIndex = (index: string): ParsedFileStorageIndex => 
     }
   }
 
-  throw new Error(
+  throw new FleetError(
     `Unable to parse index [${index}]. Does not match a known index pattern: [${fileStorageIndexPatterns.join(
       ' | '
     )}]`

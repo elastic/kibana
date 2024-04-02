@@ -42,7 +42,11 @@
     "@kbn/core-doc-links-browser",
     "@kbn/core-lifecycle-browser",
     "@kbn/ml-string-hash",
-    "@kbn/calculate-width-from-char-count"
+    "@kbn/code-editor",
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/react-kibana-context-render",
+    "@kbn/data-view-utils",
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

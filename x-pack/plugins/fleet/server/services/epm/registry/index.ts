@@ -26,16 +26,16 @@ import type {
   PackageVerificationResult,
   ArchivePackage,
   BundledPackage,
+  AssetsMap,
 } from '../../../types';
 import {
-  getArchiveFilelist,
   getPathParts,
-  unpackBufferToCache,
   setVerificationResult,
-  getVerificationResult,
   getPackageInfo,
   setPackageInfo,
   generatePackageInfoFromArchiveBuffer,
+  unpackBufferToAssetsMap,
+  getVerificationResult,
 } from '../archive';
 import { streamToBuffer, streamToString } from '../streams';
 import { appContextService } from '../..';
@@ -94,16 +94,8 @@ async function _fetchFindLatestPackage(
 
     const bundledPackage = await getBundledPackageByName(packageName);
 
-    // temporary workaround to allow synthetics package beta version until there is a GA available
-    // needed because synthetics is installed by default on kibana startup
-    const prereleaseAllowedExceptions = ['synthetics'];
-
-    const prereleaseEnabled = prerelease || prereleaseAllowedExceptions.includes(packageName);
-
     const registryUrl = getRegistryUrl();
-    const url = new URL(
-      `${registryUrl}/search?package=${packageName}&prerelease=${prereleaseEnabled}`
-    );
+    const url = new URL(`${registryUrl}/search?package=${packageName}&prerelease=${prerelease}`);
 
     if (!ignoreConstraints) {
       setConstraints(url);
@@ -319,16 +311,15 @@ export async function getPackage(
 ): Promise<{
   paths: string[];
   packageInfo: ArchivePackage;
+  assetsMap: AssetsMap;
   verificationResult?: PackageVerificationResult;
 }> {
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
-  let paths = getArchiveFilelist({ name, version });
-  let packageInfo = getPackageInfo({ name, version });
-  let verificationResult = verifyPackage ? getVerificationResult({ name, version }) : undefined;
+  let packageInfo: ArchivePackage | undefined = getPackageInfo({ name, version });
+  let verificationResult: PackageVerificationResult | undefined = verifyPackage
+    ? getVerificationResult({ name, version })
+    : undefined;
 
-  if (paths && packageInfo) {
-    return { paths, packageInfo, verificationResult };
-  }
   const {
     archiveBuffer,
     archivePath,
@@ -346,22 +337,19 @@ export async function getPackage(
     verificationResult = latestVerificationResult;
     setVerificationResult({ name, version }, latestVerificationResult);
   }
-  if (!paths || paths.length === 0) {
-    paths = await withPackageSpan('Unpack archive', () =>
-      unpackBufferToCache({
-        name,
-        version,
-        archiveBuffer,
-        contentType: ensureContentType(archivePath),
-      })
-    );
-  }
+
+  const { assetsMap, paths } = await unpackBufferToAssetsMap({
+    name,
+    version,
+    archiveBuffer,
+    contentType: ensureContentType(archivePath),
+  });
 
   if (!packageInfo) {
     packageInfo = await getPackageInfoFromArchiveOrCache(name, version, archiveBuffer, archivePath);
   }
 
-  return { paths, packageInfo, verificationResult };
+  return { paths, packageInfo, assetsMap, verificationResult };
 }
 
 function ensureContentType(archivePath: string) {

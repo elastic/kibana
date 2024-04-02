@@ -4,11 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 
-import type { SideNavComponent } from '@kbn/core-chrome-browser';
-import { SecuritySideNavigation } from './lazy';
-import { withServicesProvider, type Services } from '../../common/services';
+import { type Services } from '../../common/services';
 
-export const getSecuritySideNavComponent = (services: Services): SideNavComponent =>
-  React.memo(withServicesProvider(SecuritySideNavigation, services));
+export const initSideNavigation = (services: Services) => {
+  import('./project_navigation').then(({ init }) => {
+    const { navigationTree$, panelContentProvider, dataTestSubj } = init(services);
+    services.serverless.initNavigation('security', navigationTree$, {
+      panelContentProvider,
+      dataTestSubj,
+    });
+  });
+};

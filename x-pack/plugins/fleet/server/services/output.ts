@@ -57,6 +57,7 @@ import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
   OutputUnauthorizedError,
+  FleetError,
 } from '../errors';
 
 import type { OutputType } from '../types';
@@ -70,7 +71,9 @@ import {
   deleteSecrets,
   extractAndUpdateOutputSecrets,
   extractAndWriteOutputSecrets,
+  isOutputSecretStorageEnabled,
 } from './secrets';
+import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -119,12 +122,6 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output 
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
   };
-}
-
-function isOutputSecretsEnabled() {
-  const { outputSecretsStorage } = appContextService.getExperimentalFeatures();
-
-  return !!outputSecretsStorage;
 }
 
 async function getAgentPoliciesPerOutput(
@@ -436,14 +433,10 @@ class OutputService {
       secretHashes?: Record<string, any>;
     }
   ): Promise<Output> {
+    const logger = appContextService.getLogger();
+    logger.debug(`Creating new output`);
+
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
-    if (output.type === outputType.RemoteElasticsearch) {
-      if (data.is_default) {
-        throw new OutputInvalidError(
-          'Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.'
-        );
-      }
-    }
 
     if (outputTypeSupportPresets(data.type)) {
       if (
@@ -584,7 +577,8 @@ class OutputService {
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
-    if (isOutputSecretsEnabled()) {
+    // Store secret values if enabled; if not, store plain text values
+    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
         esClient,
@@ -592,6 +586,26 @@ class OutputService {
       });
 
       if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
+    } else {
+      if (output.type === outputType.Logstash && data.type === outputType.Logstash) {
+        if (!output.ssl?.key && output.secrets?.ssl?.key) {
+          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
+        }
+      } else if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
+        if (!output.password && output.secrets?.password) {
+          data.password = output.secrets?.password as string;
+        }
+        if (!output.ssl?.key && output.secrets?.ssl?.key) {
+          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
+        }
+      } else if (
+        output.type === outputType.RemoteElasticsearch &&
+        data.type === outputType.RemoteElasticsearch
+      ) {
+        if (!output.service_token && output.secrets?.service_token) {
+          data.service_token = output.secrets?.service_token as string;
+        }
+      }
     }
 
     auditLoggingService.writeCustomSoAuditLog({
@@ -604,7 +618,7 @@ class OutputService {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id,
     });
-
+    logger.debug(`Created new output ${id}`);
     return outputSavedObjectToOutput(newSo);
   }
 
@@ -694,7 +708,7 @@ class OutputService {
     });
 
     if (outputSO.error) {
-      throw new Error(outputSO.error.message);
+      throw new FleetError(outputSO.error.message);
     }
 
     return outputSavedObjectToOutput(outputSO);
@@ -707,6 +721,9 @@ class OutputService {
       fromPreconfiguration: false,
     }
   ) {
+    const logger = appContextService.getLogger();
+    logger.debug(`Deleting output ${id}`);
+
     const originalOutput = await this.get(soClient, id);
 
     if (originalOutput.is_preconfigured && !fromPreconfiguration) {
@@ -741,7 +758,7 @@ class OutputService {
       esClient: appContextService.getInternalUserESClient(),
       output: originalOutput,
     });
-
+    logger.debug(`Deleted output ${id}`);
     return soDeleteResult;
   }
 
@@ -757,13 +774,8 @@ class OutputService {
       fromPreconfiguration: false,
     }
   ) {
-    if (data.type === outputType.RemoteElasticsearch) {
-      if (data.is_default) {
-        throw new OutputInvalidError(
-          'Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.'
-        );
-      }
-    }
+    const logger = appContextService.getLogger();
+    logger.debug(`Updating output ${id}`);
 
     let secretsToDelete: PolicySecretReference[] = [];
     const originalOutput = await this.get(soClient, id);
@@ -792,17 +804,7 @@ class OutputService {
         );
       }
     }
-    if (isOutputSecretsEnabled()) {
-      const secretsRes = await extractAndUpdateOutputSecrets({
-        oldOutput: originalOutput,
-        outputUpdate: data,
-        esClient,
-        secretHashes: data.is_preconfigured ? secretHashes : undefined,
-      });
 
-      updateData.secrets = secretsRes.outputUpdate.secrets;
-      secretsToDelete = secretsRes.secretsToDelete;
-    }
     const mergedType = data.type ?? originalOutput.type;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
     await validateTypeChanges(
@@ -831,6 +833,7 @@ class OutputService {
       target.round_robin = null;
       target.hash = null;
       target.topics = null;
+      target.topic = null;
       target.headers = null;
       target.timeout = null;
       target.broker_timeout = null;
@@ -968,6 +971,15 @@ class OutputService {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
+    if (
+      data.type === outputType.RemoteElasticsearch &&
+      updateData.type === outputType.RemoteElasticsearch
+    ) {
+      if (!data.service_token) {
+        updateData.service_token = null;
+      }
+    }
+
     if (!data.preset && data.type === outputType.Elasticsearch) {
       updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', safeLoad);
     }
@@ -985,6 +997,41 @@ class OutputService {
       }
     }
 
+    // Store secret values if enabled; if not, store plain text values
+    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+      const secretsRes = await extractAndUpdateOutputSecrets({
+        oldOutput: originalOutput,
+        outputUpdate: data,
+        esClient,
+        secretHashes: data.is_preconfigured ? secretHashes : undefined,
+      });
+
+      updateData.secrets = secretsRes.outputUpdate.secrets;
+      secretsToDelete = secretsRes.secretsToDelete;
+    } else {
+      if (data.type === outputType.Logstash && updateData.type === outputType.Logstash) {
+        if (!data.ssl?.key && data.secrets?.ssl?.key) {
+          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
+        }
+      } else if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
+        if (!data.password && data.secrets?.password) {
+          updateData.password = data.secrets?.password as string;
+        }
+        if (!data.ssl?.key && data.secrets?.ssl?.key) {
+          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
+        }
+      } else if (
+        data.type === outputType.RemoteElasticsearch &&
+        updateData.type === outputType.RemoteElasticsearch
+      ) {
+        if (!data.service_token && data.secrets?.service_token) {
+          updateData.service_token = data.secrets?.service_token as string;
+        }
+      }
+    }
+
+    patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
+
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: outputIdToUuid(id),
@@ -998,18 +1045,17 @@ class OutputService {
     );
 
     if (outputSO.error) {
-      throw new Error(outputSO.error.message);
+      throw new FleetError(outputSO.error.message);
     }
 
     if (secretsToDelete.length) {
       try {
         await deleteSecrets({ esClient, ids: secretsToDelete.map((s) => s.id) });
       } catch (err) {
-        appContextService
-          .getLogger()
-          .warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
+        logger.warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
       }
     }
+    logger.debug(`Updated output ${id}`);
   }
 
   public async backfillAllOutputPresets(
@@ -1039,10 +1085,23 @@ class OutputService {
   }
 
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {
+    const lastUpdateTime = await this.getOutputLastUpdateTime(id);
+
+    const mustFilter = [];
+    if (lastUpdateTime) {
+      mustFilter.push({
+        range: {
+          '@timestamp': {
+            gte: lastUpdateTime,
+          },
+        },
+      });
+    }
+
     const response = await esClient.search(
       {
         index: OUTPUT_HEALTH_DATA_STREAM,
-        query: { bool: { filter: { term: { output: id } } } },
+        query: { bool: { filter: { term: { output: id } }, must: mustFilter } },
         sort: { '@timestamp': 'desc' },
         size: 1,
       },
@@ -1062,6 +1121,24 @@ class OutputService {
       message: latestHit.message ?? '',
       timestamp: latestHit['@timestamp'],
     };
+  }
+
+  async getOutputLastUpdateTime(id: string): Promise<string | undefined> {
+    const outputSO = await this.encryptedSoClient.get<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      outputIdToUuid(id)
+    );
+
+    if (outputSO.error) {
+      appContextService
+        .getLogger()
+        .debug(
+          `Error getting output ${id} SO, using updated_at:undefined, cause: ${outputSO.error.message}`
+        );
+      return undefined;
+    }
+
+    return outputSO.updated_at;
   }
 }
 

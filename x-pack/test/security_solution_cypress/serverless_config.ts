@@ -34,9 +34,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           { product_line: 'endpoint', product_tier: 'complete' },
           { product_line: 'cloud', product_tier: 'complete' },
         ])}`,
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForThresholdRuleEnabled',
-        ])}`,
       ],
     },
     testRunner: SecuritySolutionConfigurableCypressTestRunner,

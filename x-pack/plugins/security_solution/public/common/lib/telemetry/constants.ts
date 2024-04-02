@@ -44,14 +44,20 @@ export enum TelemetryEventTypes {
   AssistantInvoked = 'Assistant Invoked',
   AssistantMessageSent = 'Assistant Message Sent',
   AssistantQuickPrompt = 'Assistant Quick Prompt',
+  AssistantSettingToggled = 'Assistant Setting Toggled',
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
   MLJobUpdate = 'ML Job Update',
+  AddRiskInputToTimelineClicked = 'Add Risk Input To Timeline Clicked',
+  ToggleRiskSummaryClicked = 'Toggle Risk Summary Clicked',
+  RiskInputsExpandedFlyoutOpened = 'Risk Inputs Expanded Flyout Opened',
   CellActionClicked = 'Cell Action Clicked',
   AnomaliesCountClicked = 'Anomalies Count Clicked',
   DataQualityIndexChecked = 'Data Quality Index Checked',
   DataQualityCheckAllCompleted = 'Data Quality Check All Completed',
+  DetailsFlyoutOpened = 'Details Flyout Opened',
+  DetailsFlyoutTabClicked = 'Details Flyout Tabs Clicked',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {

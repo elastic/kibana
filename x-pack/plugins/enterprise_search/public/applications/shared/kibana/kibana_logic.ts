@@ -11,6 +11,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
   ApplicationStart,
   Capabilities,
@@ -19,13 +20,19 @@ import {
   IUiSettingsClient,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { IndexMappingProps } from '@kbn/index-management-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
+import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
+import { ESConfig } from '../../../plugin';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
@@ -39,9 +46,13 @@ export interface KibanaLogicProps {
   charts: ChartsPluginStart;
   cloud?: CloudSetup;
   config: ClientConfigType;
+  connectorTypes: ConnectorDefinition[];
+  console?: ConsolePluginStart;
   data: DataPublicPluginStart;
+  esConfig: ESConfig;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
+  indexMappingComponent: React.FC<IndexMappingProps>;
   isSidebarEnabled: boolean;
   lens: LensPublicStart;
   ml: MlPluginStart;
@@ -49,6 +60,7 @@ export interface KibanaLogicProps {
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchPlayground: SearchPlaygroundPluginStart;
   security: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -58,8 +70,9 @@ export interface KibanaLogicProps {
   user: AuthenticatedUser | null;
 }
 
-export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
+export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud' | 'console'> {
   cloud: Partial<CloudSetup>;
+  consolePlugin: Partial<ConsolePluginStart>;
   data: DataPublicPluginStart;
   isCloud: boolean;
   lens: LensPublicStart;
@@ -74,9 +87,13 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
     config: [props.config || {}, {}],
+    connectorTypes: [props.connectorTypes || [], {}],
+    consolePlugin: [props.console || {}, {}],
     data: [props.data, {}],
+    esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
+    indexMappingComponent: [props.indexMappingComponent || null, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
     lens: [props.lens, {}],
     ml: [props.ml, {}],
@@ -91,6 +108,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productAccess: [props.productAccess, {}],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
+    searchPlayground: [props.searchPlayground || {}, {}],
     security: [props.security, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],

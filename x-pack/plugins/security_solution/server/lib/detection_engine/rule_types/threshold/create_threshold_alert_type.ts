@@ -41,6 +41,9 @@ export const createThresholdAlertType = (
         },
       },
     },
+    schemas: {
+      params: { type: 'zod', schema: ThresholdRuleParams },
+    },
     actionGroups: [
       {
         id: 'default',
@@ -62,7 +65,7 @@ export const createThresholdAlertType = (
           completeRule,
           tuple,
           wrapHits,
-          ruleDataReader,
+          ruleDataClient,
           inputIndex,
           runtimeMappings,
           primaryTimestamp,
@@ -88,7 +91,7 @@ export const createThresholdAlertType = (
         state,
         bulkCreate,
         wrapHits,
-        ruleDataReader,
+        ruleDataClient,
         inputIndex,
         runtimeMappings,
         primaryTimestamp,

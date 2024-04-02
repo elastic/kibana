@@ -11,6 +11,7 @@ import {
   SavedObjectsClientContract,
   PluginInitializerContext,
   ISavedObjectsRepository,
+  UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
@@ -21,17 +22,20 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
+import { DistributiveOmit } from '@elastic/eui';
 import { RegistryRuleType } from '../rule_type_registry';
 import {
   RuleTypeRegistry,
-  RuleAction,
   IntervalSchedule,
   SanitizedRule,
   RuleSnoozeSchedule,
   RawRuleAlertsFilter,
+  RuleSystemAction,
+  RuleAction,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { GetAlertIndicesAlias } from '../lib';
 import { AlertsService } from '../alerts_service';
 
@@ -76,19 +80,32 @@ export interface RulesClientContext {
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
+  readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;
+  readonly isSystemAction: (actionId: string) => boolean;
+  readonly uiSettings: UiSettingsServiceStart;
 }
 
-export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
+export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;
+export type NormalizedSystemAction = Omit<RuleSystemAction, 'actionTypeId'>;
 
-export type NormalizedAlertActionWithGeneratedValues = Omit<
-  NormalizedAlertAction,
-  'uuid' | 'alertsFilter'
+export type NormalizedAlertDefaultActionWithGeneratedValues = Omit<
+  RuleAction,
+  'uuid' | 'alertsFilter' | 'actionTypeId'
 > & {
   uuid: string;
   alertsFilter?: RawRuleAlertsFilter;
 };
+
+export type NormalizedAlertSystemActionWithGeneratedValues = Omit<
+  RuleSystemAction,
+  'uuid' | 'actionTypeId'
+> & { uuid: string };
+
+export type NormalizedAlertActionWithGeneratedValues =
+  | NormalizedAlertDefaultActionWithGeneratedValues
+  | NormalizedAlertSystemActionWithGeneratedValues;
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -125,7 +142,6 @@ export interface IndexType {
   [key: string]: unknown;
 }
 
-// TODO: remove once all mute endpoints have been migrated to RuleMuteAlertOptions
 export interface MuteOptions extends IndexType {
   alertId: string;
   alertInstanceId: string;
@@ -164,3 +180,11 @@ export interface RuleBulkOperationAggregation {
     }>;
   };
 }
+
+export type DenormalizedAction = DistributiveOmit<
+  NormalizedAlertActionWithGeneratedValues,
+  'id'
+> & {
+  actionRef: string;
+  actionTypeId: string;
+};

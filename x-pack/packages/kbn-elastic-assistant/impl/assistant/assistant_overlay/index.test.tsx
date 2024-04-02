@@ -15,6 +15,7 @@ const assistantTelemetry = {
   reportAssistantInvoked,
   reportAssistantMessageSent: () => {},
   reportAssistantQuickPrompt: () => {},
+  reportAssistantSettingToggled: () => {},
 };
 describe('AssistantOverlay', () => {
   beforeEach(() => {

@@ -13,7 +13,6 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiText,
-  EuiTitle,
   EuiFieldSearch,
   EuiFormRow,
 } from '@elastic/eui';
@@ -163,64 +162,66 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           <EuiSpacer />
         </Fragment>
       ) : null}
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.threshold.ui.selectIndex"
             defaultMessage="Select indices"
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <IndexSelectPopover
-        index={indexArray}
-        data-test-subj="indexSelectPopover"
-        esFields={esFields}
-        timeField={timeField}
-        errors={errors}
-        onIndexChange={async (indices: string[]) => {
-          setRuleParams('index', indices);
-
-          // reset expression fields if indices are deleted
-          if (indices.length === 0) {
-            setRuleProperty('params', {
-              ...ruleParams,
-              index: indices,
-              aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-              termSize: DEFAULT_VALUES.TERM_SIZE,
-              thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-              timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-              timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-              groupBy: DEFAULT_VALUES.GROUP_BY,
-              threshold: DEFAULT_VALUES.THRESHOLD,
-              timeField: '',
-            });
-          } else {
-            await refreshEsFields(indices);
-          }
-        }}
-        onTimeFieldChange={(updatedTimeField: string) =>
-          setRuleParams('timeField', updatedTimeField)
         }
-      />
+      >
+        <IndexSelectPopover
+          index={indexArray}
+          data-test-subj="indexSelectPopover"
+          esFields={esFields}
+          timeField={timeField}
+          errors={errors}
+          onIndexChange={async (indices: string[]) => {
+            setRuleParams('index', indices);
+
+            // reset expression fields if indices are deleted
+            if (indices.length === 0) {
+              setRuleProperty('params', {
+                ...ruleParams,
+                index: indices,
+                aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+                termSize: DEFAULT_VALUES.TERM_SIZE,
+                thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+                timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+                groupBy: DEFAULT_VALUES.GROUP_BY,
+                threshold: DEFAULT_VALUES.THRESHOLD,
+                timeField: '',
+              });
+            } else {
+              await refreshEsFields(indices);
+            }
+          }}
+          onTimeFieldChange={(updatedTimeField: string) =>
+            setRuleParams('timeField', updatedTimeField)
+          }
+        />
+      </EuiFormRow>
       <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.threshold.ui.conditionPrompt"
             defaultMessage="Define the condition"
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <WhenExpression
-        display="fullWidth"
-        data-test-subj="whenExpression"
-        aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
-        onChangeSelectedAggType={(selectedAggType: string) =>
-          setRuleParams('aggType', selectedAggType)
         }
-      />
+      >
+        <WhenExpression
+          display="fullWidth"
+          data-test-subj="whenExpression"
+          aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
+          onChangeSelectedAggType={(selectedAggType: string) =>
+            setRuleParams('aggType', selectedAggType)
+          }
+        />
+      </EuiFormRow>
       {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
         <OfExpression
           aggField={aggField}

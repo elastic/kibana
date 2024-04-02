@@ -15,8 +15,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
-import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
-import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 
 import { IndicesTable } from './indices_table';
 
@@ -54,8 +52,6 @@ describe('SearchIndices', () => {
       expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(1);
       expect(wrapper.find(IndicesTable)).toHaveLength(0);
 
-      expect(wrapper.find(GettingStartedSteps)).toHaveLength(1);
-      expect(wrapper.find(ElasticsearchResources)).toHaveLength(1);
       expect(mockActions.setIsFirstRequest).toHaveBeenCalled();
     });
   });
@@ -68,9 +64,6 @@ describe('SearchIndices', () => {
 
     expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(0);
     expect(wrapper.find(IndicesTable)).toHaveLength(1);
-
-    expect(wrapper.find(GettingStartedSteps)).toHaveLength(0);
-    expect(wrapper.find(ElasticsearchResources)).toHaveLength(0);
 
     expect(mockActions.fetchIndices).toHaveBeenCalled();
   });

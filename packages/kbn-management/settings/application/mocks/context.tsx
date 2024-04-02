@@ -16,7 +16,12 @@ import { I18nStart } from '@kbn/core-i18n-browser';
 
 import { createFormServicesMock } from '@kbn/management-settings-components-form/mocks';
 import { Subscription } from 'rxjs';
-import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
+import {
+  getGlobalSettingsMock,
+  getSettingsMock,
+} from '@kbn/management-settings-utilities/mocks/settings.mock';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import { SettingsApplicationProvider, SettingsApplicationServices } from '../services';
 
 const createRootMock = () => {
@@ -32,13 +37,20 @@ const createRootMock = () => {
   };
 };
 
-export const createSettingsApplicationServicesMock = (): SettingsApplicationServices => ({
+export const createSettingsApplicationServicesMock = (
+  hasGlobalSettings?: boolean
+): SettingsApplicationServices => ({
   ...createFormServicesMock(),
-  getAllowlistedSettings: () => getSettingsMock(),
+  getAllowlistedSettings: (scope: UiSettingsScope) =>
+    scope === 'namespace' ? getSettingsMock() : hasGlobalSettings ? getGlobalSettingsMock() : {},
+  getSections: () => [],
+  getCapabilities: getSettingsCapabilitiesMock,
+  setBadge: jest.fn(),
   isCustomSetting: () => false,
   isOverriddenSetting: () => false,
   subscribeToUpdates: () => new Subscription(),
   addUrlToHistory: jest.fn(),
+  getToastsService: jest.fn(),
 });
 
 export const TestWrapper = ({

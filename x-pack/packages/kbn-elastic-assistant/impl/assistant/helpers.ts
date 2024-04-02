@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { FetchConnectorExecuteResponse } from './api';
+import { merge } from 'lodash/fp';
+import { AIConnector } from '../connectorland/connector_selector';
+import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
 import type { Message } from '../assistant_context/types';
 import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
@@ -32,6 +33,20 @@ export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResp
       isError: true,
     };
   }
+};
+
+export const mergeBaseWithPersistedConversations = (
+  baseConversations: Record<string, Conversation>,
+  conversationsData: FetchConversationsResponse
+): Record<string, Conversation> => {
+  const userConversations = (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
+    (transformed, conversation) => {
+      transformed[conversation.title] = conversation;
+      return transformed;
+    },
+    {}
+  );
+  return merge(baseConversations, userConversations);
 };
 
 export const getBlockBotConversation = (
@@ -63,66 +78,36 @@ export const getBlockBotConversation = (
  * @param connectors
  */
 export const getDefaultConnector = (
-  connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> | undefined
-): ActionConnector<Record<string, unknown>, Record<string, unknown>> | undefined =>
-  connectors?.length === 1 ? connectors[0] : undefined;
-
-/**
- * When `content` is a JSON string, prefixed with "```json\n"
- * and suffixed with "\n```", this function will attempt to parse it and return
- * the `action_input` property if it exists.
- */
-export const getFormattedMessageContent = (content: string): string => {
-  const formattedContentMatch = content.match(/```json\n([\s\S]+)\n```/);
-
-  if (formattedContentMatch) {
-    try {
-      const parsedContent = JSON.parse(formattedContentMatch[1]);
-
-      return parsedContent.action_input ?? content;
-    } catch {
-      // we don't want to throw an error here, so we'll fall back to the original content
-    }
-  }
-
-  return content;
-};
+  connectors: AIConnector[] | undefined
+): AIConnector | undefined => (connectors?.length === 1 ? connectors[0] : undefined);
 
 interface OptionalRequestParams {
   alertsIndexPattern?: string;
   allow?: string[];
   allowReplacement?: string[];
-  replacements?: Record<string, string>;
   size?: number;
 }
 
 export const getOptionalRequestParams = ({
-  alerts,
+  isEnabledRAGAlerts,
   alertsIndexPattern,
   allow,
   allowReplacement,
-  ragOnAlerts,
-  replacements,
   size,
 }: {
-  alerts: boolean;
+  isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
   allow?: string[];
   allowReplacement?: string[];
-  ragOnAlerts: boolean;
-  replacements?: Record<string, string>;
   size?: number;
 }): OptionalRequestParams => {
   const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
   const optionalAllow = allow ? { allow } : undefined;
   const optionalAllowReplacement = allowReplacement ? { allowReplacement } : undefined;
-  const optionalReplacements = replacements ? { replacements } : undefined;
   const optionalSize = size ? { size } : undefined;
 
-  if (
-    !ragOnAlerts || // the feature flag must be enabled
-    !alerts // the settings toggle must also be enabled
-  ) {
+  // the settings toggle must be enabled:
+  if (!isEnabledRAGAlerts) {
     return {}; // don't send any optional params
   }
 
@@ -130,17 +115,6 @@ export const getOptionalRequestParams = ({
     ...optionalAlertsIndexPattern,
     ...optionalAllow,
     ...optionalAllowReplacement,
-    ...optionalReplacements,
     ...optionalSize,
   };
 };
-
-export const hasParsableResponse = ({
-  alerts,
-  assistantLangChain,
-  ragOnAlerts,
-}: {
-  alerts: boolean;
-  assistantLangChain: boolean;
-  ragOnAlerts: boolean;
-}): boolean => assistantLangChain || (ragOnAlerts && alerts);

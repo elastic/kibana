@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { basicCase } from '../../containers/mock';
+import { basicCase, basicCaseClosed } from '../../containers/mock';
 import type { CaseActionBarProps } from '.';
 import { CaseActionBar } from '.';
 import {
@@ -74,6 +74,18 @@ describe('CaseActionBar', () => {
     );
   });
 
+  it('should show the status as closed when the case is closed', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} caseData={basicCaseClosed} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toBe(
+      'Closed'
+    );
+  });
+
   it('should show the correct date', () => {
     const wrapper = mount(
       <TestProviders>
@@ -81,9 +93,12 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).prop('value')).toBe(
-      basicCase.createdAt
-    );
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-action-bar-status-date"]`)
+        .find('FormattedRelativePreferenceDate')
+        .prop('value')
+    ).toBe(basicCase.createdAt);
   });
 
   it('invalidates the queryClient cache onRefresh', () => {

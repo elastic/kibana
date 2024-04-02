@@ -57,6 +57,7 @@ export const LICENSE_ALLOWED = [
   '(MIT OR CC0-1.0)',
   'MIT',
   'MIT*',
+  'MIT-0',
   'MIT/X11',
   'new BSD, and MIT',
   '(OFL-1.1 AND MIT)',
@@ -73,7 +74,7 @@ export const LICENSE_ALLOWED = [
 
 // The following list only applies to licenses that
 // we wanna allow in packages only used as dev dependencies
-export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0'];
+export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0', '(MPL-2.0 OR Apache-2.0)'];
 
 // there are some licenses which should not be globally allowed
 // but can be brought in on a per-package basis
@@ -85,7 +86,8 @@ export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
   '@elastic/ems-client@8.5.1': ['Elastic License 2.0'],
-  '@elastic/eui@90.0.1-backport.0': ['SSPL-1.0 OR Elastic License 2.0'],
+  '@elastic/eui@93.5.2': ['SSPL-1.0 OR Elastic License 2.0'],
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
   'buffers@0.1.1': ['MIT'], // license in importing module https://www.npmjs.com/package/binary
+  '@bufbuild/protobuf@1.2.1': ['Apache-2.0'], // license (Apache-2.0 AND BSD-3-Clause)
 };

@@ -17,7 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { compressToEncodedURIComponent } from 'lz-string';
 import React, { useCallback } from 'react';
-import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { InspectorPluginStartDeps } from '../../../../plugin';
 
 interface RequestCodeViewerProps {

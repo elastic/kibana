@@ -138,6 +138,7 @@ export type {
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
   BulkGetAgentPoliciesResponse,
+  RegistryPolicyIntegrationTemplate,
 } from '../../common/types';
 export {
   entries,

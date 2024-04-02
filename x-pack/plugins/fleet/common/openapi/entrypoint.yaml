@@ -42,6 +42,8 @@ paths:
     $ref: 'paths/epm@packages@{pkgkey}_deprecated.yaml'
   '/epm/packages/{pkgName}/{pkgVersion}':
     $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}.yaml'
+  '/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize':
+    $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}@transforms@authorize.yaml'
   '/epm/packages/{pkgName}/{pkgVersion}/{filePath}':
     $ref: paths/epm@get_file.yaml
   '/epm/packages/{pkgName}/stats':

@@ -75,7 +75,10 @@ const loadFakeResponses = (() => {
 })();
 
 const makeMockExec = (id: string) => {
-  console.warn("--- Using mock exec, don't use this on CI. ---");
+  if (process.env?.CI?.match(/(1|true)/i)) {
+    throw new Error(`Mock exec is not supported in CI - your commands won't be executed.`);
+  }
+
   const callStorage = getCallStorage();
   const calls = callStorage[id];
 

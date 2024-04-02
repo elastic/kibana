@@ -5344,6 +5344,81 @@
           }
         }
       },
+      "user_comment_response_properties": {
+        "title": "Case response properties for user comments",
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "comment": {
+            "type": "string",
+            "examples": [
+              "A new comment."
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "examples": [
+              "2022-05-13T09:16:17.416Z"
+            ]
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/case_response_created_by_properties"
+          },
+          "id": {
+            "type": "string",
+            "examples": [
+              "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owners"
+          },
+          "pushed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "examples": [
+              null
+            ]
+          },
+          "pushed_by": {
+            "$ref": "#/components/schemas/case_response_pushed_by_properties"
+          },
+          "type": {
+            "type": "string",
+            "examples": [
+              "user"
+            ],
+            "enum": [
+              "user"
+            ]
+          },
+          "updated_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "examples": [
+              null
+            ]
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/case_response_updated_by_properties"
+          },
+          "version": {
+            "type": "string",
+            "examples": [
+              "WzIwNDMxLDFd"
+            ]
+          }
+        }
+      },
       "case_response_created_by_properties": {
         "title": "Case response properties for created_by",
         "type": "object",
@@ -5482,81 +5557,6 @@
           "username"
         ]
       },
-      "user_comment_response_properties": {
-        "title": "Case response properties for user comments",
-        "type": "object",
-        "required": [
-          "type"
-        ],
-        "properties": {
-          "comment": {
-            "type": "string",
-            "examples": [
-              "A new comment."
-            ]
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "examples": [
-              "2022-05-13T09:16:17.416Z"
-            ]
-          },
-          "created_by": {
-            "$ref": "#/components/schemas/case_response_created_by_properties"
-          },
-          "id": {
-            "type": "string",
-            "examples": [
-              "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
-            ]
-          },
-          "owner": {
-            "$ref": "#/components/schemas/owners"
-          },
-          "pushed_at": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time",
-            "examples": [
-              null
-            ]
-          },
-          "pushed_by": {
-            "$ref": "#/components/schemas/case_response_pushed_by_properties"
-          },
-          "type": {
-            "type": "string",
-            "examples": [
-              "user"
-            ],
-            "enum": [
-              "user"
-            ]
-          },
-          "updated_at": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time",
-            "examples": [
-              null
-            ]
-          },
-          "updated_by": {
-            "$ref": "#/components/schemas/case_response_updated_by_properties"
-          },
-          "version": {
-            "type": "string",
-            "examples": [
-              "WzIwNDMxLDFd"
-            ]
-          }
-        }
-      },
       "external_service": {
         "type": [
           "object",
@@ -5687,9 +5687,6 @@
             "type": "array",
             "maxItems": 10000,
             "items": {
-              "discriminator": {
-                "propertyName": "type"
-              },
               "oneOf": [
                 {
                   "$ref": "#/components/schemas/alert_comment_response_properties"
@@ -5697,14 +5694,18 @@
                 {
                   "$ref": "#/components/schemas/user_comment_response_properties"
                 }
-              ]
+              ],
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "alert": "#/components/schemas/alert_comment_response_properties",
+                  "user": "#/components/schemas/user_comment_response_properties"
+                }
+              }
             }
           },
           "connector": {
             "title": "Case response properties for connectors",
-            "discriminator": {
-              "propertyName": "type"
-            },
             "oneOf": [
               {
                 "$ref": "#/components/schemas/connector_properties_none"
@@ -5727,7 +5728,19 @@
               {
                 "$ref": "#/components/schemas/connector_properties_swimlane"
               }
-            ]
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                ".none": "#/components/schemas/connector_properties_none",
+                ".cases-webhook": "#/components/schemas/connector_properties_cases_webhook",
+                ".jira": "#/components/schemas/connector_properties_jira",
+                ".resilient": "#/components/schemas/connector_properties_resilient",
+                ".servicenow": "#/components/schemas/connector_properties_servicenow",
+                ".servicenow-sir": "#/components/schemas/connector_properties_servicenow_sir",
+                ".swimlane": "#/components/schemas/connector_properties_swimlane"
+              }
+            }
           },
           "created_at": {
             "type": "string",
@@ -6265,65 +6278,6 @@
           }
         }
       },
-      "alert_identifiers": {
-        "title": "Alert identifiers",
-        "description": "The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "oneOf": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 1000
-          }
-        ],
-        "x-technical-preview": true,
-        "examples": [
-          "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
-        ]
-      },
-      "alert_indices": {
-        "title": "Alert indices",
-        "description": "The alert indices. It is required only when `type` is `alert`. If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array.  This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "oneOf": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 1000
-          }
-        ],
-        "x-technical-preview": true
-      },
-      "rule": {
-        "title": "Alerting rule",
-        "description": "The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "type": "object",
-        "x-technical-preview": true,
-        "properties": {
-          "id": {
-            "description": "The rule identifier.",
-            "type": "string",
-            "examples": [
-              "94d80550-aaf4-11ec-985f-97e55adae8b9"
-            ]
-          },
-          "name": {
-            "description": "The rule name.",
-            "type": "string",
-            "examples": [
-              "security_rule"
-            ]
-          }
-        }
-      },
       "add_alert_comment_request_properties": {
         "title": "Add case comment request properties for alerts",
         "required": [
@@ -6393,12 +6347,68 @@
           "type"
         ]
       },
+      "alert_identifiers": {
+        "title": "Alert identifiers",
+        "description": "The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 1000
+          }
+        ],
+        "x-technical-preview": true,
+        "examples": [
+          "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
+        ]
+      },
+      "alert_indices": {
+        "title": "Alert indices",
+        "description": "The alert indices. It is required only when `type` is `alert`. If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array.  This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 1000
+          }
+        ],
+        "x-technical-preview": true
+      },
+      "rule": {
+        "title": "Alerting rule",
+        "description": "The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "type": "object",
+        "x-technical-preview": true,
+        "properties": {
+          "id": {
+            "description": "The rule identifier.",
+            "type": "string",
+            "examples": [
+              "94d80550-aaf4-11ec-985f-97e55adae8b9"
+            ]
+          },
+          "name": {
+            "description": "The rule name.",
+            "type": "string",
+            "examples": [
+              "security_rule"
+            ]
+          }
+        }
+      },
       "add_case_comment_request": {
         "title": "Add case comment request",
         "description": "The add comment to case API request body varies depending on whether you are adding an alert or a comment.",
-        "discriminator": {
-          "propertyName": "type"
-        },
         "oneOf": [
           {
             "$ref": "#/components/schemas/add_alert_comment_request_properties"
@@ -6406,7 +6416,14 @@
           {
             "$ref": "#/components/schemas/add_user_comment_request_properties"
           }
-        ]
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "alert": "#/components/schemas/add_alert_comment_request_properties",
+            "user": "#/components/schemas/add_user_comment_request_properties"
+          }
+        }
       },
       "update_alert_comment_request_properties": {
         "title": "Update case comment request properties for alerts",
@@ -6512,9 +6529,6 @@
       "update_case_comment_request": {
         "title": "Update case comment request",
         "description": "The update case comment API request body varies depending on whether you are updating an alert or a comment.",
-        "discriminator": {
-          "propertyName": "type"
-        },
         "oneOf": [
           {
             "$ref": "#/components/schemas/update_alert_comment_request_properties"
@@ -6522,7 +6536,14 @@
           {
             "$ref": "#/components/schemas/update_user_comment_request_properties"
           }
-        ]
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "alert": "#/components/schemas/update_alert_comment_request_properties",
+            "user": "#/components/schemas/update_user_comment_request_properties"
+          }
+        }
       },
       "actions": {
         "type": "string",

@@ -36,8 +36,21 @@ export type SaveModalContainerProps = {
   runSave?: (saveProps: SaveProps, options: { saveToLibrary: boolean }) => void;
   isSaveable?: boolean;
   getAppNameFromId?: () => string | undefined;
-  lensServices: LensAppServices;
+  lensServices: Pick<
+    LensAppServices,
+    | 'attributeService'
+    | 'savedObjectsTagging'
+    | 'application'
+    | 'notifications'
+    | 'http'
+    | 'chrome'
+    | 'overlays'
+    | 'stateTransfer'
+    | 'savedObjectStore'
+  >;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  // is this visualization managed by the system?
+  managed?: boolean;
 } & ExtraProps;
 
 export function SaveModalContainer({
@@ -56,6 +69,7 @@ export function SaveModalContainer({
   lastKnownDoc: initLastKnownDoc,
   lensServices,
   initialContext,
+  managed,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
@@ -82,7 +96,7 @@ export function SaveModalContainer({
     });
   }
 
-  const { attributeService, savedObjectsTagging, application, dashboardFeatureFlag } = lensServices;
+  const { attributeService, savedObjectsTagging, application } = lensServices;
 
   useEffect(() => {
     setLastKnownDoc(initLastKnownDoc);
@@ -155,7 +169,6 @@ export function SaveModalContainer({
       originatingApp={originatingApp}
       getOriginatingPath={getOriginatingPath}
       savingToLibraryPermitted={savingToLibraryPermitted}
-      allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
       savedObjectsTagging={savedObjectsTagging}
       tagsIds={tagsIds}
       onSave={(saveProps, options) => {
@@ -168,6 +181,7 @@ export function SaveModalContainer({
       savedObjectId={savedObjectId}
       returnToOriginSwitchLabel={returnToOriginSwitchLabel}
       returnToOrigin={redirectToOrigin != null}
+      managed={Boolean(managed)}
     />
   );
 }
@@ -204,7 +218,16 @@ export const runSaveLensVisualization = async (
     switchDatasource?: () => void;
     savedObjectStore: SavedObjectIndexStore;
   } & ExtraProps &
-    LensAppServices,
+    Pick<
+      LensAppServices,
+      | 'application'
+      | 'chrome'
+      | 'overlays'
+      | 'notifications'
+      | 'stateTransfer'
+      | 'attributeService'
+      | 'savedObjectsTagging'
+    >,
   saveProps: SaveProps,
   options: { saveToLibrary: boolean }
 ): Promise<Partial<LensAppState> | undefined> => {
@@ -222,7 +245,6 @@ export const runSaveLensVisualization = async (
     redirectToOrigin,
     onAppLeave,
     redirectTo,
-    dashboardFeatureFlag,
     textBasedLanguageSave,
     switchDatasource,
     application,
@@ -312,7 +334,6 @@ export const runSaveLensVisualization = async (
         embeddableInput: newInput,
         dashboardId: saveProps.dashboardId,
         stateTransfer,
-        dashboardFeatureFlag,
         originatingApp: props.originatingApp,
         getOriginatingPath: props.getOriginatingPath,
       });

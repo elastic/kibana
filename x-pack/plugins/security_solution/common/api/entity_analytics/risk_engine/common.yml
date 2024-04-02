@@ -1,4 +1,10 @@
 openapi: 3.0.0
+info:
+  title: Risk Engine Common Schema
+  description: Common schema for Risk Engine APIs
+  version: 1.0.0
+
+paths: { }
 
 components:
   schemas:
@@ -103,11 +109,27 @@ components:
         category_1_score:
           type: number
           format: double
-          description: The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
+          description: The contribution of Category 1 to the overall risk score (`calculated_score_norm`). Category 1 contains Detection Engine Alerts.
         category_1_count:
           type: number
           format: integer
           description: The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
+        category_2_score:
+          type: number
+          format: double
+          description: The contribution of Category 2 to the overall risk score (`calculated_score_norm`). Category 2 contains context from external sources.
+        category_2_count:
+          type: number
+          format: integer
+          description: The number of risk input documents that contributed to the Category 2 score (`category_2_score`).
+        criticality_level:
+          type: string
+          example: extreme_impact
+          description: The designated criticality level of the entity. Possible values are `low_impact`, `medium_impact`, `high_impact`, and `extreme_impact`.
+        criticality_modifier:
+          type: number
+          format: double
+          description: The numeric modifier corresponding to the criticality level of the entity, which is used as an input to the risk score calculation.
         inputs:
           type: array
           description: A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.

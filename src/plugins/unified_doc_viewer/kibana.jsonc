@@ -7,7 +7,7 @@
     "id": "unifiedDocViewer",
     "server": false,
     "browser": true,
-    "requiredBundles": ["kibanaUtils", "kibanaReact"],
+    "requiredBundles": ["kibanaUtils"],
     "requiredPlugins": ["data", "fieldFormats"],
   }
 }

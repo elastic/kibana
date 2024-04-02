@@ -10,10 +10,14 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../doc_links';
 
+import { INDEX_NAME_PLACEHOLDER } from './constants';
+
 import { ingestKeysToJSON } from './helpers';
 
 export const curlDefinition: LanguageDefinition = {
-  buildSearchQuery: ({ indexName }) => `curl -X POST "\$\{ES_URL\}/${indexName}/_search?pretty" \\
+  buildSearchQuery: ({
+    indexName = INDEX_NAME_PLACEHOLDER,
+  }) => `curl -X POST "\$\{ES_URL\}/${indexName}/_search?pretty" \\
   -H "Authorization: ApiKey "\$\{API_KEY\}"" \\
   -H "Content-Type: application/json" \\
   -d'
@@ -35,7 +39,11 @@ export API_KEY="${apiKey}"`,
   },
   iconType: 'curl.svg',
   id: Languages.CURL,
-  ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
+  ingestData: ({
+    indexName = INDEX_NAME_PLACEHOLDER,
+    ingestPipeline,
+    extraIngestDocumentValues,
+  }) => {
     const ingestDocumentKeys = ingestPipeline ? ingestKeysToJSON(extraIngestDocumentValues) : '';
     return `curl -X POST "\$\{ES_URL\}/_bulk?pretty${
       ingestPipeline ? `&pipeline=${ingestPipeline}` : ''
@@ -67,7 +75,7 @@ brew install curl`,
     defaultMessage: 'cURL',
   }),
   languageStyling: 'shell',
-  testConnection: ({ indexName }) => `curl "\$\{ES_URL\}/${indexName}" \\
+  testConnection: ({ indexName = INDEX_NAME_PLACEHOLDER }) => `curl "\$\{ES_URL\}/${indexName}" \\
   -H "Authorization: ApiKey "\$\{API_KEY\}"" \\
   -H "Content-Type: application/json"`,
 };

@@ -22,11 +22,10 @@ export interface TextBasedField {
 }
 
 export interface TextBasedLayer {
-  index: string;
-  query: AggregateQuery | undefined;
+  index?: string;
+  query?: AggregateQuery | undefined;
   table?: Datatable;
   columns: TextBasedLayerColumn[];
-  allColumns: TextBasedLayerColumn[];
   timeField?: string;
   errors?: Error[];
 }
@@ -34,7 +33,6 @@ export interface TextBasedLayer {
 export interface TextBasedPersistedState {
   layers: Record<string, TextBasedLayer>;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
-  fieldList?: DatatableColumn[];
 }
 
 export type TextBasedPrivateState = TextBasedPersistedState & {

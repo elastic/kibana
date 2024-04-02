@@ -1,0 +1,297 @@
+{
+  "type": "index",
+  "value": {
+    "index": "risk-score.risk-score-latest-default",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "risk": {
+              "properties": {
+                "calculated_level": {
+                  "type": "keyword"
+                },
+                "calculated_score": {
+                  "type": "float"
+                },
+                "calculated_score_norm": {
+                  "type": "float"
+                },
+                "category_1_count": {
+                  "type": "long"
+                },
+                "category_1_score": {
+                  "type": "float"
+                },
+                "category_2_count": {
+                  "type": "long"
+                },
+                "category_2_score": {
+                  "type": "float"
+                },
+                "criticality_level": {
+                  "type": "keyword"
+                },
+                "id_field": {
+                  "type": "keyword"
+                },
+                "id_value": {
+                  "type": "keyword"
+                },
+                "inputs": {
+                  "properties": {
+                    "category": {
+                      "type": "keyword"
+                    },
+                    "description": {
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "index": {
+                      "type": "keyword"
+                    },
+                    "risk_score": {
+                      "type": "float"
+                    },
+                    "timestamp": {
+                      "type": "date"
+                    }
+                  }
+                },
+                "notes": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "user": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "risk": {
+              "properties": {
+                "calculated_level": {
+                  "type": "keyword"
+                },
+                "calculated_score": {
+                  "type": "float"
+                },
+                "calculated_score_norm": {
+                  "type": "float"
+                },
+                "category_1_count": {
+                  "type": "long"
+                },
+                "category_1_score": {
+                  "type": "float"
+                },
+                "category_2_count": {
+                  "type": "long"
+                },
+                "category_2_score": {
+                  "type": "float"
+                },
+                "criticality_level": {
+                  "type": "keyword"
+                },
+                "id_field": {
+                  "type": "keyword"
+                },
+                "id_value": {
+                  "type": "keyword"
+                },
+                "inputs": {
+                  "properties": {
+                    "category": {
+                      "type": "keyword"
+                    },
+                    "description": {
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "index": {
+                      "type": "keyword"
+                    },
+                    "risk_score": {
+                      "type": "float"
+                    },
+                    "timestamp": {
+                      "type": "date"
+                    }
+                  }
+                },
+                "notes": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "risk-score.risk-score-default",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "namespace": "default"
+      },
+      "data_stream": {
+        "hidden": true
+      },
+      "index_patterns": [
+        "risk-score.risk-score-default"
+      ],
+      "name": "risk-score.risk-score-default-index-template",
+      "template": {
+        "mappings": {
+          "dynamic": false,
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "host": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "risk": {
+                  "properties": {
+                    "calculated_level": {
+                      "type": "keyword"
+                    },
+                    "calculated_score": {
+                      "type": "float"
+                    },
+                    "calculated_score_norm": {
+                      "type": "float"
+                    },
+                    "category_1_count": {
+                      "type": "long"
+                    },
+                    "category_1_score": {
+                      "type": "float"
+                    },
+                    "id_field": {
+                      "type": "keyword"
+                    },
+                    "id_value": {
+                      "type": "keyword"
+                    },
+                    "inputs": {
+                      "properties": {
+                        "category": {
+                          "type": "keyword"
+                        },
+                        "description": {
+                          "type": "keyword"
+                        },
+                        "id": {
+                          "type": "keyword"
+                        },
+                        "index": {
+                          "type": "keyword"
+                        },
+                        "risk_score": {
+                          "type": "float"
+                        },
+                        "timestamp": {
+                          "type": "date"
+                        }
+                      }
+                    },
+                    "notes": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "user": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "risk": {
+                  "properties": {
+                    "calculated_level": {
+                      "type": "keyword"
+                    },
+                    "calculated_score": {
+                      "type": "float"
+                    },
+                    "calculated_score_norm": {
+                      "type": "float"
+                    },
+                    "category_1_count": {
+                      "type": "long"
+                    },
+                    "category_1_score": {
+                      "type": "float"
+                    },
+                    "id_field": {
+                      "type": "keyword"
+                    },
+                    "id_value": {
+                      "type": "keyword"
+                    },
+                    "inputs": {
+                      "properties": {
+                        "category": {
+                          "type": "keyword"
+                        },
+                        "description": {
+                          "type": "keyword"
+                        },
+                        "id": {
+                          "type": "keyword"
+                        },
+                        "index": {
+                          "type": "keyword"
+                        },
+                        "risk_score": {
+                          "type": "float"
+                        },
+                        "timestamp": {
+                          "type": "date"
+                        }
+                      }
+                    },
+                    "notes": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

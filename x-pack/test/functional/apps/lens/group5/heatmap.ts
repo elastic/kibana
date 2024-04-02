@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should reflect stop colors change on the chart', async () => {
       await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
-      await PageObjects.lens.openPalettePanel('lnsHeatmap');
+      await PageObjects.lens.openPalettePanel();
       await PageObjects.common.sleep(1000);
       await retry.try(async () => {
         await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '10', {

@@ -150,7 +150,6 @@ export class PluginsService
     const config = await firstValueFrom(this.config$);
     if (config.initialize) {
       await this.prebootPluginsSystem.setupPlugins(deps);
-      this.registerPluginStaticDirs(deps, this.prebootUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `preboot` plugins since plugin initialization is disabled.'
@@ -166,7 +165,6 @@ export class PluginsService
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
       contracts = await this.standardPluginsSystem.setupPlugins(deps);
-      this.registerPluginStaticDirs(deps, this.standardUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `standard` plugins since plugin initialization is disabled.'
@@ -327,10 +325,19 @@ export class PluginsService
     }
 
     // Add the plugins to the Plugin System if enabled and its dependencies are met
+    const disabledPlugins = [];
+    const disabledDependants = [];
+    const disabledDependantsCauses = new Set<string>();
+    const pluginEnablementCache = new Map<PluginName, PluginEnablementResult>();
+
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
       this.validatePluginDependencies(plugin, pluginEnableStatuses);
 
-      const pluginEnablement = this.shouldEnablePlugin(pluginName, pluginEnableStatuses);
+      const pluginEnablement = shouldEnablePlugin({
+        pluginName,
+        pluginEnableStatuses,
+        cache: pluginEnablementCache,
+      });
 
       if (pluginEnablement.enabled) {
         if (plugin.manifest.type === PluginType.preboot) {
@@ -339,17 +346,26 @@ export class PluginsService
           this.standardPluginsSystem.addPlugin(plugin);
         }
       } else if (isEnabled) {
-        this.log.info(
-          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [${pluginEnablement.missingOrIncompatibleDependencies.join(
-            ', '
-          )}]`
+        disabledDependants.push(pluginName);
+        pluginEnablement.missingOrIncompatibleDependencies.forEach((dependency) =>
+          disabledDependantsCauses.add(dependency)
         );
       } else {
-        this.log.info(`Plugin "${pluginName}" is disabled.`);
+        disabledPlugins.push(pluginName);
       }
     }
 
     this.log.debug(`Discovered ${pluginEnableStatuses.size} plugins.`);
+    if (disabledPlugins.length) {
+      this.log.info(`The following plugins are disabled: "${disabledPlugins}".`);
+    }
+    if (disabledDependants.length) {
+      this.log.info(
+        `Plugins "${disabledDependants}" have been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [${Array.from(
+          disabledDependantsCauses
+        )}].`
+      );
+    }
   }
 
   /** Throws an error if the plugin's dependencies are invalid. */
@@ -393,52 +409,63 @@ export class PluginsService
       }
     }
   }
+}
 
-  private shouldEnablePlugin(
-    pluginName: PluginName,
-    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>,
-    parents: PluginName[] = []
-  ): { enabled: true } | { enabled: false; missingOrIncompatibleDependencies: string[] } {
-    const pluginInfo = pluginEnableStatuses.get(pluginName);
+type PluginEnablementResult =
+  | { enabled: true }
+  | { enabled: false; missingOrIncompatibleDependencies: string[] };
 
-    if (pluginInfo === undefined || !pluginInfo.isEnabled) {
-      return {
-        enabled: false,
-        missingOrIncompatibleDependencies: [],
-      };
-    }
+function shouldEnablePlugin({
+  pluginName,
+  pluginEnableStatuses,
+  cache,
+  parents = [],
+}: {
+  pluginName: PluginName;
+  pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>;
+  cache: Map<PluginName, PluginEnablementResult>;
+  parents?: PluginName[];
+}): PluginEnablementResult {
+  const cachedValue = cache.get(pluginName);
+  if (cachedValue) {
+    return cachedValue;
+  }
 
+  const pluginInfo = pluginEnableStatuses.get(pluginName);
+
+  let result: PluginEnablementResult;
+  if (pluginInfo === undefined || !pluginInfo.isEnabled) {
+    result = {
+      enabled: false,
+      missingOrIncompatibleDependencies: [],
+    };
+  } else {
     const missingOrIncompatibleDependencies = pluginInfo.plugin.requiredPlugins
       .filter((dep) => !parents.includes(dep))
       .filter(
         (dependencyName) =>
           pluginEnableStatuses.get(dependencyName)?.plugin.manifest.type !==
             pluginInfo.plugin.manifest.type ||
-          !this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
-            .enabled
+          !shouldEnablePlugin({
+            pluginName: dependencyName,
+            pluginEnableStatuses,
+            parents: [...parents, pluginName],
+            cache,
+          }).enabled
       );
 
     if (missingOrIncompatibleDependencies.length === 0) {
-      return {
+      result = {
         enabled: true,
       };
-    }
-
-    return {
-      enabled: false,
-      missingOrIncompatibleDependencies,
-    };
-  }
-
-  private registerPluginStaticDirs(
-    deps: PluginsServiceSetupDeps | PluginsServicePrebootSetupDeps,
-    uiPluginInternalInfo: Map<PluginName, InternalPluginInfo>
-  ) {
-    for (const [pluginName, pluginInfo] of uiPluginInternalInfo) {
-      deps.http.registerStaticDir(
-        `/plugins/${pluginName}/assets/{path*}`,
-        pluginInfo.publicAssetsDir
-      );
+    } else {
+      result = {
+        enabled: false,
+        missingOrIncompatibleDependencies,
+      };
     }
   }
+
+  cache.set(pluginName, result);
+  return result;
 }

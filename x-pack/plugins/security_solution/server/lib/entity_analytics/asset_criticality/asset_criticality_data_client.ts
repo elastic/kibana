@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ESFilter } from '@kbn/es-types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
+import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
-import { assetCriticalityFieldMap } from './configurations';
+import { assetCriticalityFieldMap } from './constants';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -25,7 +27,11 @@ interface AssetCriticalityUpsert {
 
 type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue'>;
 
+const MAX_CRITICALITY_RESPONSE_SIZE = 100_000;
+const DEFAULT_CRITICALITY_RESPONSE_SIZE = 1_000;
+
 const createId = ({ idField, idValue }: AssetCriticalityIdParts) => `${idField}:${idValue}`;
+
 export class AssetCriticalityDataClient {
   constructor(private readonly options: AssetCriticalityClientOpts) {}
   /**
@@ -41,6 +47,29 @@ export class AssetCriticalityDataClient {
         mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
       },
     });
+  }
+
+  /**
+   *
+   * A general method for searching asset criticality records.
+   * @param query an ESL query to filter criticality results
+   * @param size the maximum number of records to return. Cannot exceed {@link MAX_CRITICALITY_RESPONSE_SIZE}. If unspecified, will default to {@link DEFAULT_CRITICALITY_RESPONSE_SIZE}.
+   * @returns criticality records matching the query
+   */
+  public async search({
+    query,
+    size,
+  }: {
+    query: ESFilter;
+    size?: number;
+  }): Promise<SearchResponse<AssetCriticalityRecord>> {
+    const response = await this.options.esClient.search<AssetCriticalityRecord>({
+      index: this.getIndex(),
+      ignore_unavailable: true,
+      body: { query },
+      size: Math.min(size ?? DEFAULT_CRITICALITY_RESPONSE_SIZE, MAX_CRITICALITY_RESPONSE_SIZE),
+    });
+    return response;
   }
 
   private getIndex() {

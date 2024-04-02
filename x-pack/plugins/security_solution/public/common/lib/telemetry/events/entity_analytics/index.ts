@@ -53,3 +53,49 @@ export const entityRiskFilteredEvent: TelemetryEvent = {
     },
   },
 };
+
+export const toggleRiskSummaryClickedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.ToggleRiskSummaryClicked,
+  schema: {
+    entity: {
+      type: 'keyword',
+      _meta: {
+        description: 'Entity name (host|user)',
+        optional: false,
+      },
+    },
+    action: {
+      type: 'keyword',
+      _meta: {
+        description: 'It defines if the section is opening or closing (show|hide)',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const RiskInputsExpandedFlyoutOpenedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.RiskInputsExpandedFlyoutOpened,
+  schema: {
+    entity: {
+      type: 'keyword',
+      _meta: {
+        description: 'Entity name (host|user)',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const addRiskInputToTimelineClickedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.AddRiskInputToTimelineClicked,
+  schema: {
+    quantity: {
+      type: 'integer',
+      _meta: {
+        description: 'Quantity of alerts added to timeline',
+        optional: false,
+      },
+    },
+  },
+};

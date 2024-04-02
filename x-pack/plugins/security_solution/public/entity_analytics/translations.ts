@@ -98,6 +98,13 @@ export const EA_DOCS_ENTITY_RISK_SCORE = i18n.translate(
   }
 );
 
+export const PREVIEW_MISSING_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.missingPermissionsCallout.title',
+  {
+    defaultMessage: 'Insifficient index privileges to preview data',
+  }
+);
+
 export const PREVIEW = i18n.translate('xpack.securitySolution.riskScore.riskScorePreview.preview', {
   defaultMessage: 'Preview',
 });
@@ -279,5 +286,19 @@ export const NEED_TO_HAVE = i18n.translate(
   'xpack.securitySolution.riskScore.errors.privileges.needToHave',
   {
     defaultMessage: 'You need to have:',
+  }
+);
+
+export const RISK_SCORE_MODULE_TURNED_ON = i18n.translate(
+  'xpack.securitySolution.riskScore.moduleTurnedOn',
+  {
+    defaultMessage: 'Entity risk score has been turned on',
+  }
+);
+
+export const RISK_SCORE_MODULE_TURNED_OFF = i18n.translate(
+  'xpack.securitySolution.riskScore.moduleTurnedOff',
+  {
+    defaultMessage: 'Entity risk score has been turned off',
   }
 );

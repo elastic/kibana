@@ -4,7 +4,7 @@
 enterpriseSearch.enabled: false
 xpack.apm.enabled: false
 xpack.infra.enabled: false
-xpack.observabilityLogExplorer.enabled: false
+xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 
 ## Cloud settings
@@ -16,10 +16,10 @@ xpack.securitySolutionServerless.productTypes:
   [
     { product_line: 'security', product_tier: 'complete' },
     { product_line: 'endpoint', product_tier: 'complete' },
+    { product_line: 'cloud', product_tier: 'complete' },
   ]
 
 xpack.securitySolution.offeringSettings: {
-    sideNavEnabled: false, # Internal security side navigation disabled, the serverless global chrome navigation is used instead
     ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
     ESQLEnabled: false, # ES|QL disabled, not supported by serverless Elasticsearch
   }
@@ -65,3 +65,6 @@ xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
 xpack.ml.nlp.enabled: false
 xpack.ml.compatibleModuleType: 'security'
+
+# Disable the embedded Dev Console
+console.ui.embeddedEnabled: false

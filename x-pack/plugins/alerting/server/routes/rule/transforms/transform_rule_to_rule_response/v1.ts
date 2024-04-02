@@ -38,6 +38,56 @@ const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
   };
 };
 
+export const transformRuleActions = (
+  actions: Rule['actions'],
+  systemActions: Rule['systemActions'] = []
+): RuleResponseV1['actions'] => {
+  return [
+    ...actions.map((action) => {
+      const {
+        group,
+        id,
+        actionTypeId,
+        params,
+        frequency,
+        uuid,
+        alertsFilter,
+        useAlertDataForTemplate,
+      } = action;
+
+      return {
+        group,
+        id,
+        params,
+        connector_type_id: actionTypeId,
+        ...(frequency
+          ? {
+              frequency: {
+                summary: frequency.summary,
+                notify_when: frequency.notifyWhen,
+                throttle: frequency.throttle,
+              },
+            }
+          : {}),
+        ...(uuid && { uuid }),
+        ...(alertsFilter && { alerts_filter: alertsFilter }),
+        ...(useAlertDataForTemplate !== undefined && {
+          use_alert_data_for_template: useAlertDataForTemplate,
+        }),
+      };
+    }),
+    ...systemActions.map((sActions) => {
+      const { id, actionTypeId, params, uuid } = sActions;
+      return {
+        id,
+        params,
+        uuid,
+        connector_type_id: actionTypeId,
+      };
+    }),
+  ];
+};
+
 export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   rule: Rule<Params>
 ): RuleResponseV1<RuleParamsV1> => ({
@@ -48,37 +98,7 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   rule_type_id: rule.alertTypeId,
   consumer: rule.consumer,
   schedule: rule.schedule,
-  actions: rule.actions.map(
-    ({
-      group,
-      id,
-      actionTypeId,
-      params,
-      frequency,
-      uuid,
-      alertsFilter,
-      useAlertDataForTemplate,
-    }) => ({
-      group,
-      id,
-      params,
-      connector_type_id: actionTypeId,
-      ...(typeof useAlertDataForTemplate !== 'undefined'
-        ? { use_alert_data_for_template: useAlertDataForTemplate }
-        : {}),
-      ...(frequency
-        ? {
-            frequency: {
-              summary: frequency.summary,
-              notify_when: frequency.notifyWhen,
-              throttle: frequency.throttle,
-            },
-          }
-        : {}),
-      ...(uuid && { uuid }),
-      ...(alertsFilter && { alerts_filter: alertsFilter }),
-    })
-  ),
+  actions: transformRuleActions(rule.actions, rule.systemActions ?? []),
   params: rule.params,
   ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),
   ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
@@ -119,4 +139,5 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   ...(rule.viewInAppRelativeUrl !== undefined
     ? { view_in_app_relative_url: rule.viewInAppRelativeUrl }
     : {}),
+  ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
 });

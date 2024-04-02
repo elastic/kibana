@@ -12,14 +12,9 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiWrappingPopover,
+  IconType,
 } from '@elastic/eui';
-import {
-  AppNavLinkStatus,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  SimpleSavedObject,
-} from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { noop } from 'lodash';
@@ -49,7 +44,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount() {
         plugins.discover?.locator?.navigate(
           { profile: 'customization-examples' },
@@ -213,7 +208,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       {currentSavedSearch.title ?? 'None selected'}
                     </EuiButton>
                   }
-                  anchorClassName="eui-fullWidth"
                   isOpen={isPopoverOpen}
                   panelPaddingSize="none"
                   closePopover={closePopover}
@@ -280,7 +274,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       {currentSavedSearch.title ?? 'None selected'}
                     </EuiButton>
                   }
-                  anchorClassName="eui-fullWidth"
                   isOpen={isPopoverOpen}
                   panelPaddingSize="none"
                   closePopover={closePopover}
@@ -400,6 +393,28 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 />
               </EuiFlexItem>
             );
+          },
+        });
+
+        customizations.set({
+          id: 'flyout',
+          size: '60%',
+          title: 'Example custom flyout',
+          actions: {
+            getActionItems: () =>
+              Array.from({ length: 5 }, (_, i) => {
+                const index = i + 1;
+                return {
+                  id: `action-item-${index}`,
+                  enabled: true,
+                  label: `Action ${index}`,
+                  iconType: ['faceHappy', 'faceNeutral', 'faceSad', 'infinity', 'bell'].at(
+                    i
+                  ) as IconType,
+                  dataTestSubj: `customActionItem${index}`,
+                  onClick: () => alert(index),
+                };
+              }),
           },
         });
 

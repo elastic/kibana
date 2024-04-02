@@ -20,6 +20,7 @@ jest.mock('./create_filter', () => ({
 
 const fieldName = 'user.name';
 const value = 'the value';
+const dataViewId = 'mockDataViewId';
 
 const mockWarningToast = jest.fn();
 
@@ -96,6 +97,7 @@ describe('createFilterInActionFactory', () => {
         key: fieldName,
         value: [value],
         negate: false,
+        dataViewId,
       });
     });
 
@@ -113,6 +115,7 @@ describe('createFilterInActionFactory', () => {
         key: fieldName,
         value: [value],
         negate: false,
+        dataViewId,
       });
     });
 
@@ -126,7 +129,12 @@ describe('createFilterInActionFactory', () => {
           },
         ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [], negate: true });
+      expect(mockCreateFilter).toHaveBeenCalledWith({
+        key: fieldName,
+        value: [],
+        negate: true,
+        dataViewId,
+      });
     });
 
     it('should create negate filter query with undefined value', async () => {
@@ -143,6 +151,7 @@ describe('createFilterInActionFactory', () => {
         key: fieldName,
         value: [],
         negate: true,
+        dataViewId,
       });
     });
 
@@ -156,7 +165,12 @@ describe('createFilterInActionFactory', () => {
           },
         ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [''], negate: true });
+      expect(mockCreateFilter).toHaveBeenCalledWith({
+        key: fieldName,
+        value: [''],
+        negate: true,
+        dataViewId,
+      });
     });
 
     it('should create negate filter query with empty array value', async () => {
@@ -169,7 +183,12 @@ describe('createFilterInActionFactory', () => {
           },
         ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [], negate: true });
+      expect(mockCreateFilter).toHaveBeenCalledWith({
+        key: fieldName,
+        value: [],
+        negate: true,
+        dataViewId,
+      });
     });
 
     it('should notify the user when value type is unsupported', async () => {

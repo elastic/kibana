@@ -203,6 +203,7 @@ export const buildOSSFeatures = ({
               'visualization',
               'canvas-workpad',
               'lens',
+              'links',
               'map',
               'tag',
             ],
@@ -220,6 +221,7 @@ export const buildOSSFeatures = ({
               'visualization',
               'canvas-workpad',
               'lens',
+              'links',
               'map',
               'dashboard',
               'query',
@@ -603,7 +605,7 @@ const reportingFeatures: {
           {
             id: 'download_csv_report',
             name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSV', {
-              defaultMessage: 'Download CSV reports from Saved Search panels',
+              defaultMessage: 'Generate CSV reports from Saved Search panels',
             }),
             includeIn: 'all',
             savedObject: { all: [], read: [] },

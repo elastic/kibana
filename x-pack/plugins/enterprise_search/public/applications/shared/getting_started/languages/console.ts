@@ -7,10 +7,14 @@
 
 import { LanguageDefinition } from '@kbn/search-api-panels';
 
+import { INDEX_NAME_PLACEHOLDER } from './constants';
+
 import { ingestKeysToJSON } from './helpers';
 
 export const consoleDefinition: Partial<LanguageDefinition> = {
-  buildSearchQuery: ({ indexName }) => `POST /${indexName ?? 'books'}/_search?pretty
+  buildSearchQuery: ({ indexName = INDEX_NAME_PLACEHOLDER }) => `POST /${
+    indexName ?? 'books'
+  }/_search?pretty
   {
     "query": {
       "query_string": {
@@ -18,7 +22,11 @@ export const consoleDefinition: Partial<LanguageDefinition> = {
       }
     }
   }`,
-  ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
+  ingestData: ({
+    indexName = INDEX_NAME_PLACEHOLDER,
+    ingestPipeline,
+    extraIngestDocumentValues,
+  }) => {
     const ingestDocumentKeys = ingestPipeline ? ingestKeysToJSON(extraIngestDocumentValues) : '';
     return `POST _bulk?pretty${ingestPipeline ? `&pipeline=${ingestPipeline}` : ''}
     { "index" : { "_index" : "${indexName}" } }

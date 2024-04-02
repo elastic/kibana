@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
-import { from, Subscription, Observable } from 'rxjs';
+import type { Subscription, Observable } from 'rxjs';
+import { from } from 'rxjs';
 import { mergeMap, last, map, toArray } from 'rxjs/operators';
 import { chunk } from 'lodash';
 import type {
@@ -17,28 +18,32 @@ import type {
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
 import { useDataVisualizerKibana } from '../../kibana_context';
-import {
+import type {
   AggregatableFieldOverallStats,
+  NonAggregatableFieldOverallStats,
+} from '../search_strategy/requests/overall_stats';
+import {
   checkAggregatableFieldsExistRequest,
   checkNonAggregatableFieldExistsRequest,
   getSampleOfDocumentsForNonAggregatableFields,
   isAggregatableFieldOverallStats,
   isNonAggregatableFieldOverallStats,
   isNonAggregatableSampledDocs,
-  NonAggregatableFieldOverallStats,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
 import type { OverallStats } from '../types/overall_stats';
-import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
-import {
+import type {
   DataStatsFetchProgress,
-  isRandomSamplingOption,
   OverallStatsSearchStrategyParams,
 } from '../../../../common/types/field_stats';
+import { isRandomSamplingOption } from '../../../../common/types/field_stats';
 import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
-import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+import {
+  getDefaultPageState,
+  MAX_CONCURRENT_REQUESTS,
+} from '../constants/index_data_visualizer_viewer';
 import { displayError } from '../../common/util/display_error';
 
 /**
@@ -66,6 +71,7 @@ export function rateLimitingForkJoin<T>(
 }
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
+  esql = false,
   searchStrategyParams: TParams | undefined,
   lastRefresh: number,
   probability?: number | null

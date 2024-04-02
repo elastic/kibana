@@ -47,7 +47,11 @@ import type {
 } from '../types';
 
 import { FleetError } from '../errors';
-import { SECRETS_ENDPOINT_PATH, SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../constants';
+import {
+  OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  SECRETS_ENDPOINT_PATH,
+  SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+} from '../constants';
 
 import { retryTransientEsErrors } from './epm/elasticsearch/retry';
 
@@ -241,10 +245,11 @@ export async function extractAndWriteSecrets(opts: {
     values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
-  const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicy));
-  secretsToCreate.forEach((secretPath, i) => {
-    set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(secrets[i].id));
-  });
+  const policyWithSecretRefs = getPolicyWithSecretReferences(
+    secretsToCreate,
+    secrets,
+    packagePolicy
+  );
 
   return {
     packagePolicy: policyWithSecretRefs,
@@ -406,15 +411,17 @@ export async function extractAndUpdateSecrets(opts: {
   const { toCreate, toDelete, noChange } = diffSecretPaths(oldSecretPaths, updatedSecretPaths);
 
   const secretsToCreate = toCreate.filter((secretPath) => !!secretPath.value.value);
+
   const createdSecrets = await createSecrets({
     esClient,
     values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
-  const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicyUpdate));
-  secretsToCreate.forEach((secretPath, i) => {
-    set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(createdSecrets[i].id));
-  });
+  const policyWithSecretRefs = getPolicyWithSecretReferences(
+    secretsToCreate,
+    createdSecrets,
+    packagePolicyUpdate
+  );
 
   const secretReferences = [
     ...noChange.map((secretPath) => ({ id: secretPath.value.value.id })),
@@ -450,7 +457,7 @@ export async function extractAndUpdateOutputSecrets(opts: {
 }> {
   const { oldOutput, outputUpdate, esClient, secretHashes } = opts;
   const outputType = outputUpdate.type || oldOutput.type;
-  const oldSecretPaths = getOutputSecretPaths(outputType, oldOutput);
+  const oldSecretPaths = getOutputSecretPaths(oldOutput.type, oldOutput);
   const updatedSecretPaths = getOutputSecretPaths(outputType, outputUpdate);
 
   if (!oldSecretPaths.length && !updatedSecretPaths.length) {
@@ -517,14 +524,14 @@ export function diffSecretPaths(
   const toCreate: SecretPath[] = [];
   const toDelete: SecretPath[] = [];
   const noChange: SecretPath[] = [];
-  const newPathsByPath = keyBy(newPaths, 'path');
+  const newPathsByPath = keyBy(newPaths, (x) => x.path.join('.'));
 
   for (const oldPath of oldPaths) {
-    if (!newPathsByPath[oldPath.path]) {
+    if (!newPathsByPath[oldPath.path.join('.')]) {
       toDelete.push(oldPath);
     }
 
-    const newPath = newPathsByPath[oldPath.path];
+    const newPath = newPathsByPath[oldPath.path.join('.')];
     if (newPath && newPath.value.value) {
       const newValue = newPath.value?.value;
       if (!newValue?.isSecretRef) {
@@ -533,7 +540,7 @@ export function diffSecretPaths(
       } else {
         noChange.push(newPath);
       }
-      delete newPathsByPath[oldPath.path];
+      delete newPathsByPath[oldPath.path.join('.')];
     }
   }
 
@@ -643,6 +650,65 @@ export async function isSecretStorageEnabled(
   return false;
 }
 
+export async function isOutputSecretStorageEnabled(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+): Promise<boolean> {
+  const logger = appContextService.getLogger();
+
+  // first check if the feature flag is enabled, if not output secrets are disabled
+  const { outputSecretsStorage: outputSecretsStorageEnabled } =
+    appContextService.getExperimentalFeatures();
+  if (!outputSecretsStorageEnabled) {
+    logger.debug('Output secrets storage is disabled by feature flag');
+    return false;
+  }
+
+  // if serverless then output secrets will always be supported
+  const isFleetServerStandalone =
+    appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
+
+  if (isFleetServerStandalone) {
+    logger.trace('Output secrets storage is enabled as fleet server is standalone');
+    return true;
+  }
+
+  // now check the flag in settings to see if the fleet server requirement has already been met
+  // once the requirement has been met, output secrets are always on
+  const settings = await settingsService.getSettingsOrUndefined(soClient);
+
+  if (settings && settings.output_secret_storage_requirements_met) {
+    logger.debug('Output secrets storage requirements already met, turned on in settings');
+    return true;
+  }
+
+  // otherwise check if we have the minimum fleet server version and enable secrets if so
+  if (
+    await allFleetServerVersionsAreAtLeast(
+      esClient,
+      soClient,
+      OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION
+    )
+  ) {
+    logger.debug('Enabling output secrets storage as minimum fleet server version has been met');
+    try {
+      await settingsService.saveSettings(soClient, {
+        output_secret_storage_requirements_met: true,
+      });
+    } catch (err) {
+      // we can suppress this error as it will be retried on the next function call
+      logger.warn(`Failed to save settings after enabling output secrets storage: ${err.message}`);
+    }
+
+    return true;
+  }
+
+  logger.info(
+    'Output secrets storage is disabled as minimum fleet server version has not been met'
+  );
+  return false;
+}
+
 function _getPackageLevelSecretPaths(
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
@@ -655,7 +721,7 @@ function _getPackageLevelSecretPaths(
     if (packageSecretVarsByName[name]) {
       vars.push({
         value: configEntry,
-        path: `vars.${name}`,
+        path: ['vars', name],
       });
     }
     return vars;
@@ -687,7 +753,7 @@ function _getInputSecretPaths(
       inputVars.forEach(([name, configEntry]) => {
         if (inputSecretVarDefsByPolicyTemplateAndType[inputKey]?.[name]) {
           currentInputVarPaths.push({
-            path: `inputs[${inputIndex}].vars.${name}`,
+            path: ['inputs', inputIndex.toString(), 'vars', name],
             value: configEntry,
           });
         }
@@ -702,7 +768,14 @@ function _getInputSecretPaths(
           Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
             if (streamVarDefs[name]) {
               currentInputVarPaths.push({
-                path: `inputs[${inputIndex}].streams[${streamIndex}].vars.${name}`,
+                path: [
+                  'inputs',
+                  inputIndex.toString(),
+                  'streams',
+                  streamIndex.toString(),
+                  'vars',
+                  name,
+                ],
                 value: configEntry,
               });
             }
@@ -758,4 +831,35 @@ function _getInputSecretVarDefsByPolicyTemplateAndType(packageInfo: PackageInfo)
     },
     {}
   );
+}
+
+/**
+ * Given an array of secret paths, existing secrets, and a package policy, generates a
+ * new package policy object that includes resolved secret reference values at each
+ * provided path.
+ */
+function getPolicyWithSecretReferences(
+  secretPaths: SecretPath[],
+  secrets: Secret[],
+  packagePolicy: NewPackagePolicy
+) {
+  const result = JSON.parse(JSON.stringify(packagePolicy));
+
+  secretPaths.forEach((secretPath, secretPathIndex) => {
+    secretPath.path.reduce((acc, val, secretPathComponentIndex) => {
+      if (!acc[val]) {
+        acc[val] = {};
+      }
+
+      const isLast = secretPathComponentIndex === secretPath.path.length - 1;
+
+      if (isLast) {
+        acc[val].value = toVarSecretRef(secrets[secretPathIndex].id);
+      }
+
+      return acc[val];
+    }, result);
+  });
+
+  return result;
 }

@@ -21,9 +21,9 @@ import type { TimelineArgs } from '../../../../timelines/containers';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import type { State } from '../../../../common/store/types';
-import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
-import { timelineActions } from '../../../../timelines/store/timeline';
-import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
+import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
+import { timelineActions } from '../../../../timelines/store';
+import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
@@ -142,11 +142,13 @@ export const useAddBulkToTimelineAction = ({
     [dispatch]
   );
 
+  const updateTimeline = useUpdateTimeline();
+
   const createTimeline = useCallback(
-    ({ timeline, ruleNote, timeline: { filters: eventIdFilters } }: CreateTimelineProps) => {
-      clearActiveTimeline();
+    async ({ timeline, ruleNote, timeline: { filters: eventIdFilters } }: CreateTimelineProps) => {
+      await clearActiveTimeline();
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
-      dispatchUpdateTimeline(dispatch)({
+      updateTimeline({
         duplicate: true,
         from,
         id: TimelineId.active,
@@ -159,9 +161,9 @@ export const useAddBulkToTimelineAction = ({
         },
         to,
         ruleNote,
-      })();
+      });
     },
-    [dispatch, updateTimelineIsLoading, clearActiveTimeline, from, to]
+    [updateTimeline, updateTimelineIsLoading, clearActiveTimeline, from, to]
   );
 
   const sendBulkEventsToTimelineHandler = useCallback(

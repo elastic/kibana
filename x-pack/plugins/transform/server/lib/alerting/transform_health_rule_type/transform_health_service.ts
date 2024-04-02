@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, memoize, partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { FIELD_FORMAT_IDS, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { TransformStats } from '../../../../common/types/transform_stats';
-import { TransformHealthRuleParams } from './schema';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { TransformStats } from '../../../../common/types/transform_stats';
+import type { TransformHealthRuleParams } from './schema';
 import {
   ALL_TRANSFORMS_SELECTION,
   TRANSFORM_HEALTH_CHECK_NAMES,
@@ -154,6 +155,7 @@ export function transformHealthServiceProvider({
     },
     /**
      * Returns report about transforms that contain error messages
+     * @deprecated This health check is no longer in use
      * @param transformIds
      */
     async getErrorMessagesReport(

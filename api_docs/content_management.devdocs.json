@@ -1283,7 +1283,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string, options?: object | undefined) => Promise<{ item: T; } | { item: T; meta: any; }>"
+              ", id: string, options?: object | undefined) => Promise<{ item: T; meta?: undefined; } | { item: T; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1361,7 +1361,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", ids: string[], options?: object | undefined) => Promise<{ hits: ({ item: T; } | { item: T; meta: any; })[]; }>"
+              ", ids: string[], options?: object | undefined) => Promise<{ hits: ({ item: T; meta?: undefined; } | { item: T; meta: any; })[]; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1439,7 +1439,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", data: object, options?: object | undefined) => Promise<{ item: T; } | { item: T; meta: any; }>"
+              ", data: object, options?: object | undefined) => Promise<{ item: T; meta?: undefined; } | { item: T; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1517,7 +1517,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string, data: object, options?: object | undefined) => Promise<{ item: U; } | { item: U; meta: any; }>"
+              ", id: string, data: object, options?: object | undefined) => Promise<{ item: U; meta?: undefined; } | { item: U; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1941,7 +1941,9 @@
             "type": "Object",
             "tags": [],
             "label": "requestHandlerContext",
-            "description": [],
+            "description": [
+              "The Core HTTP request handler context"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
@@ -2833,7 +2835,7 @@
         "label": "CreateResult",
         "description": [],
         "signature": [
-          "M extends void ? { item: T; } : { item: T; meta: M; }"
+          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/plugins/content_management/common/rpc/create.ts",
         "deprecated": false,
@@ -2848,7 +2850,7 @@
         "label": "GetResult",
         "description": [],
         "signature": [
-          "M extends void ? { item: T; } : { item: T; meta: M; }"
+          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/plugins/content_management/common/rpc/get.ts",
         "deprecated": false,
@@ -2914,7 +2916,7 @@
         "label": "ProcedureName",
         "description": [],
         "signature": [
-          "\"create\" | \"update\" | \"get\" | \"delete\" | \"search\" | \"bulkGet\" | \"mSearch\""
+          "\"search\" | \"create\" | \"update\" | \"get\" | \"delete\" | \"bulkGet\" | \"mSearch\""
         ],
         "path": "src/plugins/content_management/common/rpc/constants.ts",
         "deprecated": false,
@@ -2944,7 +2946,7 @@
         "label": "UpdateResult",
         "description": [],
         "signature": [
-          "M extends void ? { item: T; } : { item: T; meta: M; }"
+          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/plugins/content_management/common/rpc/update.ts",
         "deprecated": false,

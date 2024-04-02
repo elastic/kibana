@@ -25,6 +25,7 @@ export interface Pipeline {
   _meta?: { [key: string]: any };
   on_failure?: Processor[];
   isManaged?: boolean;
+  deprecated?: boolean;
 }
 
 export interface PipelinesByName {

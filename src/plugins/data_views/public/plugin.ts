@@ -8,6 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import { getIndexPatternLoad } from './expressions';
 import type { ClientConfigType } from '../common/types';
 import {
@@ -15,6 +16,7 @@ import {
   DataViewsPublicPluginStart,
   DataViewsPublicSetupDependencies,
   DataViewsPublicStartDependencies,
+  UserIdGetter,
 } from './types';
 
 import { DataViewsApiClient } from '.';
@@ -41,6 +43,7 @@ export class DataViewsPublicPlugin
 {
   private readonly hasData = new HasData();
   private rollupsEnabled: boolean = false;
+  private userIdGetter: UserIdGetter = async () => undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -58,6 +61,18 @@ export class DataViewsPublicPlugin
       name: i18n.translate('dataViews.contentManagementType', {
         defaultMessage: 'Data view',
       }),
+    });
+
+    core.plugins.onStart<{ security: SecurityPluginStart }>('security').then(({ security }) => {
+      if (security.found) {
+        const getUserId = async function getUserId(): Promise<string | undefined> {
+          const currentUser = await security.contract.authc.getCurrentUser();
+          return currentUser?.profile_uid;
+        };
+        this.userIdGetter = getUserId;
+      } else {
+        throw new Error('Security plugin is not available, but is required for Data Views plugin');
+      }
     });
 
     return {
@@ -86,7 +101,7 @@ export class DataViewsPublicPlugin
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
-      apiClient: new DataViewsApiClient(http),
+      apiClient: new DataViewsApiClient(http, () => this.userIdGetter()),
       fieldFormats,
       http,
       onNotification: (toastInputFields, key) => {

@@ -33,6 +33,7 @@ import {
 import {
   sendGetAgentUploads,
   sendPostRequestDiagnostics,
+  useAuthz,
   useLink,
   useStartServices,
 } from '../../../../../hooks';
@@ -51,6 +52,7 @@ export interface AgentDiagnosticsProps {
 }
 
 export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps> = ({ agent }) => {
+  const authz = useAuthz();
   const { notifications } = useStartServices();
   const { getAbsolutePath } = useLink();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -225,7 +227,9 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       fill
       size="m"
       onClick={onSubmit}
-      disabled={isSubmitting || !isAgentRequestDiagnosticsSupported(agent)}
+      disabled={
+        isSubmitting || !isAgentRequestDiagnosticsSupported(agent) || !authz.fleet.readAgents
+      }
     >
       <FormattedMessage
         id="xpack.fleet.agentList.diagnosticsOneButton"

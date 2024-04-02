@@ -63,7 +63,14 @@
     "@kbn/core-application-common",
     "@kbn/core-saved-objects-api-server",
     "@kbn/alerts-ui-shared",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-ui-settings-server-mocks",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-execution-context-server-mocks"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

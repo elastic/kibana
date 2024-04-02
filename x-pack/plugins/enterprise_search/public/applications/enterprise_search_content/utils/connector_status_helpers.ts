@@ -8,7 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import { ConnectorStatus } from '@kbn/search-connectors';
 
-export function connectorStatusToText(connectorStatus: ConnectorStatus): string {
+const incompleteText = i18n.translate(
+  'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',
+  { defaultMessage: 'Incomplete' }
+);
+
+export function connectorStatusToText(
+  connectorStatus: ConnectorStatus,
+  hasIndexName: boolean
+): string {
   if (
     connectorStatus === ConnectorStatus.CREATED ||
     connectorStatus === ConnectorStatus.NEEDS_CONFIGURATION
@@ -24,22 +32,32 @@ export function connectorStatusToText(connectorStatus: ConnectorStatus): string 
       { defaultMessage: 'Connector Failure' }
     );
   }
+  if (!hasIndexName) {
+    return incompleteText;
+  }
   if (connectorStatus === ConnectorStatus.CONFIGURED) {
     return i18n.translate(
       'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.configured.label',
       { defaultMessage: 'Configured' }
     );
   }
+  if (connectorStatus === ConnectorStatus.CONNECTED) {
+    return i18n.translate(
+      'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connected.label',
+      { defaultMessage: 'Connected' }
+    );
+  }
 
-  return i18n.translate(
-    'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',
-    { defaultMessage: 'Incomplete' }
-  );
+  return incompleteText;
 }
 
 export function connectorStatusToColor(
-  connectorStatus: ConnectorStatus
+  connectorStatus: ConnectorStatus,
+  hasIndexName: boolean
 ): 'warning' | 'danger' | 'success' {
+  if (!hasIndexName) {
+    return 'warning';
+  }
   if (connectorStatus === ConnectorStatus.CONNECTED) {
     return 'success';
   }

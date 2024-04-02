@@ -35,7 +35,7 @@ import {
   startSelector,
   toStrSelector,
 } from './selectors';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions } from '../../../timelines/store';
 import { useKibana } from '../../lib/kibana';
 import { usersActions } from '../../../explore/users/store';
 import { hostsActions } from '../../../explore/hosts/store';

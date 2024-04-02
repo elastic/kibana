@@ -11,7 +11,13 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
+import { css } from '@emotion/css';
 
+import type { BrowserField } from '../../../../../common/containers/source';
+import {
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
+} from '../../../../../../common/field_maps/field_names';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
 import { SentinelOneAgentStatus } from '../../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
@@ -44,9 +50,17 @@ import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { UserName } from './user_name';
+import { AssetCriticalityLevel } from './asset_criticality_level';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
+
+// Offset top-aligned tooltips so that cell actions are more visible
+const dataGridToolTipOffset = css`
+  &[data-position='top'] {
+    margin-block-start: -8px;
+  }
+`;
 
 const FormattedFieldValueComponent: React.FC<{
   asPlainText?: boolean;
@@ -56,7 +70,9 @@ const FormattedFieldValueComponent: React.FC<{
   eventId: string;
   isAggregatable?: boolean;
   isObjectArray?: boolean;
+  isUnifiedDataTable?: boolean;
   fieldFormat?: string;
+  fieldFromBrowserField?: BrowserField;
   fieldName: string;
   fieldType?: string;
   isButton?: boolean;
@@ -74,8 +90,10 @@ const FormattedFieldValueComponent: React.FC<{
   eventId,
   fieldFormat,
   isAggregatable = false,
+  isUnifiedDataTable,
   fieldName,
   fieldType = '',
+  fieldFromBrowserField,
   isButton,
   isObjectArray = false,
   isDraggable = true,
@@ -109,6 +127,17 @@ const FormattedFieldValueComponent: React.FC<{
     return <>{value}</>;
   } else if (fieldType === DATE_FIELD_TYPE) {
     const classNames = truncate ? 'eui-textTruncate eui-alignMiddle' : undefined;
+    const date = (
+      <FormattedDate
+        className={classNames}
+        fieldName={fieldName}
+        value={value}
+        tooltipProps={
+          isUnifiedDataTable ? undefined : { position: 'bottom', className: dataGridToolTipOffset }
+        }
+      />
+    );
+    if (isUnifiedDataTable) return date;
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
@@ -119,10 +148,10 @@ const FormattedFieldValueComponent: React.FC<{
         tooltipContent={null}
         value={`${value}`}
       >
-        <FormattedDate className={classNames} fieldName={fieldName} value={value} />
+        {date}
       </DefaultDraggable>
     ) : (
-      <FormattedDate className={classNames} fieldName={fieldName} value={value} />
+      date
     );
   } else if (PORT_NAMES.some((portName) => fieldName === portName)) {
     return (
@@ -240,6 +269,23 @@ const FormattedFieldValueComponent: React.FC<{
         iconSide={isButton ? 'right' : undefined}
       />
     );
+  } else if (
+    fieldName === SENTINEL_ONE_AGENT_ID_FIELD ||
+    fieldFromBrowserField?.name === SENTINEL_ONE_AGENT_ID_FIELD
+  ) {
+    return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
+  } else if (fieldName === ALERT_HOST_CRITICALITY || fieldName === ALERT_USER_CRITICALITY) {
+    return (
+      <AssetCriticalityLevel
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
+        isDraggable={isDraggable}
+        value={value}
+      />
+    );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
     return (
       <EndpointAgentStatusById
@@ -247,8 +293,6 @@ const FormattedFieldValueComponent: React.FC<{
         data-test-subj="endpointHostAgentStatus"
       />
     );
-  } else if (fieldName === SENTINEL_ONE_AGENT_ID_FIELD) {
-    return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
   } else if (
     [
       RULE_REFERENCE_FIELD_NAME,
@@ -269,11 +313,13 @@ const FormattedFieldValueComponent: React.FC<{
       title,
       value,
     });
-  } else if (columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
+  } else if (isUnifiedDataTable || columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
         <EuiToolTip
           data-test-subj="message-tool-tip"
+          position="bottom"
+          className={dataGridToolTipOffset}
           content={
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -292,6 +338,7 @@ const FormattedFieldValueComponent: React.FC<{
       <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
     );
   } else {
+    // This should not be reached for the unified data table
     const contentValue = getOrEmptyTagFromValue(value);
     const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
     return (

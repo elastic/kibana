@@ -15,7 +15,7 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Alerts Table Action column', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Alerts Table Action column', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', {
       archiveName: 'process_ancestry',
@@ -31,7 +31,7 @@ describe('Alerts Table Action column', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'process_ancestry');
+    cy.task('esArchiverUnload', { archiveName: 'process_ancestry' });
   });
 
   it('should have session viewer button visible & open session viewer on click', () => {

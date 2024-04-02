@@ -14,7 +14,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
 import { DatasourcePublicAPI, Datasource, FramePublicAPI } from '../../types';
-
 jest.mock('../../id_generator');
 
 const fieldsOne = [
@@ -81,6 +80,36 @@ const dateRange = {
   toDate: '2022-04-17T08:25:00.000Z',
 };
 
+const queryBaseState = {
+  layers: {
+    a: {
+      columns: [
+        {
+          columnId: 'a',
+          fieldName: 'Test 1',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          columnId: 'b',
+          fieldName: 'Test 2',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      query: { esql: 'FROM foo' },
+      index: '1',
+    },
+  },
+  indexPatternRefs: [
+    { id: '1', title: 'foo' },
+    { id: '2', title: 'my-fake-restricted-pattern' },
+    { id: '3', title: 'my-compatible-pattern' },
+  ],
+} as unknown as TextBasedPrivateState;
+
 describe('Textbased Data Source', () => {
   let baseState: TextBasedPrivateState;
   let TextBasedDatasource: Datasource<TextBasedPrivateState, TextBasedPersistedState>;
@@ -106,28 +135,10 @@ describe('Textbased Data Source', () => {
               },
             },
           ],
-          allColumns: [
-            {
-              columnId: 'col1',
-              fieldName: 'Test 1',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
           index: 'foo',
           query: { esql: 'FROM foo' },
         },
       },
-      fieldList: [
-        {
-          id: 'col1',
-          name: 'Test 1',
-          meta: {
-            type: 'number',
-          },
-        },
-      ],
     } as unknown as TextBasedPrivateState;
   });
 
@@ -217,15 +228,6 @@ describe('Textbased Data Source', () => {
         layers: {
           a: {
             columns: [],
-            allColumns: [
-              {
-                columnId: 'col1',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'string',
-                },
-              },
-            ],
             query: { esql: 'FROM foo' },
             index: 'foo',
           },
@@ -262,15 +264,6 @@ describe('Textbased Data Source', () => {
           newLayer: {
             index: 'foo',
             query: { esql: 'FROM foo' },
-            allColumns: [
-              {
-                columnId: 'col1',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
           },
         },
@@ -287,15 +280,6 @@ describe('Textbased Data Source', () => {
           layers: {
             a: {
               columns: [],
-              allColumns: [
-                {
-                  columnId: 'col1',
-                  fieldName: 'Test 1',
-                  meta: {
-                    type: 'number',
-                  },
-                },
-              ],
               query: { esql: 'FROM foo' },
               index: 'foo',
             },
@@ -308,7 +292,6 @@ describe('Textbased Data Source', () => {
   describe('#createEmptyLayer', () => {
     it('creates state with empty layers', () => {
       expect(TextBasedDatasource.createEmptyLayer('index-pattern-id')).toEqual({
-        fieldList: [],
         layers: {},
         indexPatternRefs: [],
       });
@@ -322,22 +305,6 @@ describe('Textbased Data Source', () => {
           layers: {
             a: {
               columns: [
-                {
-                  columnId: 'a',
-                  fieldName: 'Test 1',
-                  meta: {
-                    type: 'number',
-                  },
-                },
-                {
-                  columnId: 'b',
-                  fieldName: 'Test 2',
-                  meta: {
-                    type: 'number',
-                  },
-                },
-              ],
-              allColumns: [
                 {
                   columnId: 'a',
                   fieldName: 'Test 1',
@@ -385,7 +352,7 @@ describe('Textbased Data Source', () => {
         layers: {},
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
-          query: { sql: 'SELECT * FROM "foo"' },
+          query: { esql: 'FROM "foo"' },
           dataViewSpec: {
             title: 'foo',
             id: '1',
@@ -402,7 +369,6 @@ describe('Textbased Data Source', () => {
       expect(suggestions[0].state).toEqual({
         ...state,
         initialContext: undefined,
-        fieldList: textBasedQueryColumns,
         indexPatternRefs: [
           {
             id: '1',
@@ -412,23 +378,6 @@ describe('Textbased Data Source', () => {
         ],
         layers: {
           newid: {
-            allColumns: [
-              {
-                columnId: 'bytes',
-                fieldName: 'bytes',
-                inMetricDimension: true,
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'dest',
-                fieldName: 'dest',
-                meta: {
-                  type: 'string',
-                },
-              },
-            ],
             columns: [
               {
                 columnId: 'bytes',
@@ -448,7 +397,7 @@ describe('Textbased Data Source', () => {
             ],
             index: '1',
             query: {
-              sql: 'SELECT * FROM "foo"',
+              esql: 'FROM "foo"',
             },
           },
         },
@@ -554,7 +503,6 @@ describe('Textbased Data Source', () => {
       expect(suggestions[0].state).toEqual({
         ...state,
         initialContext: undefined,
-        fieldList: textBasedQueryColumns,
         indexPatternRefs: [
           {
             id: '1',
@@ -564,24 +512,6 @@ describe('Textbased Data Source', () => {
         ],
         layers: {
           newid: {
-            allColumns: [
-              {
-                columnId: '@timestamp',
-                fieldName: '@timestamp',
-                inMetricDimension: true,
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                columnId: 'dest',
-                fieldName: 'dest',
-                inMetricDimension: true,
-                meta: {
-                  type: 'string',
-                },
-              },
-            ],
             columns: [
               {
                 columnId: '@timestamp',
@@ -635,80 +565,12 @@ describe('Textbased Data Source', () => {
     });
   });
 
-  describe('#suggestsLimitedColumns', () => {
-    it('should return true if query returns big number of columns', () => {
-      const fieldList = [
-        {
-          id: 'a',
-          name: 'Test 1',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'b',
-          name: 'Test 2',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'c',
-          name: 'Test 3',
-          meta: {
-            type: 'date',
-          },
-        },
-        {
-          id: 'd',
-          name: 'Test 4',
-          meta: {
-            type: 'string',
-          },
-        },
-        {
-          id: 'e',
-          name: 'Test 5',
-          meta: {
-            type: 'string',
-          },
-        },
-      ];
-      const state = {
-        fieldList,
-        layers: {
-          a: {
-            query: { esql: 'from foo' },
-            index: 'foo',
-          },
-        },
-      } as unknown as TextBasedPrivateState;
-      expect(TextBasedDatasource?.suggestsLimitedColumns?.(state)).toBeTruthy();
-    });
-  });
-
   describe('#getUserMessages', () => {
     it('should use the results of getUserMessages directly when single layer', () => {
       const state = {
         layers: {
           a: {
             columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
-            allColumns: [
               {
                 columnId: 'a',
                 fieldName: 'Test 1',
@@ -791,22 +653,6 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            allColumns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             query: { esql: 'FROM foo' },
             index: '1',
           },
@@ -823,22 +669,6 @@ describe('Textbased Data Source', () => {
         layers: {
           a: {
             columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
-            allColumns: [
               {
                 columnId: 'a',
                 fieldName: 'Test 1',
@@ -877,52 +707,6 @@ describe('Textbased Data Source', () => {
     });
 
     it('should generate an expression for an SQL query', async () => {
-      const queryBaseState = {
-        layers: {
-          a: {
-            columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
-            allColumns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
-            query: { esql: 'FROM foo' },
-            index: '1',
-          },
-        },
-        indexPatternRefs: [
-          { id: '1', title: 'foo' },
-          { id: '2', title: 'my-fake-restricted-pattern' },
-          { id: '3', title: 'my-compatible-pattern' },
-        ],
-      } as unknown as TextBasedPrivateState;
-
       expect(
         TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange, new Date())
       ).toMatchInlineSnapshot(`
@@ -1009,22 +793,6 @@ describe('Textbased Data Source', () => {
               index: 'foo',
             },
           },
-          fieldList: [
-            {
-              id: 'col1',
-              name: 'Test 1',
-              meta: {
-                type: 'number',
-              },
-            },
-            {
-              id: 'col2',
-              name: 'Test 2',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
         } as unknown as TextBasedPrivateState;
 
         publicAPI = TextBasedDatasource.getPublicAPI({
@@ -1039,25 +807,17 @@ describe('Textbased Data Source', () => {
       });
 
       it('should return only the columns that exist on the query', () => {
-        const state = {
-          ...baseState,
-          fieldList: [
-            {
-              id: 'col2',
-              name: 'Test 2',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
-        } as unknown as TextBasedPrivateState;
-
         publicAPI = TextBasedDatasource.getPublicAPI({
-          state,
+          state: baseState,
           layerId: 'a',
           indexPatterns,
         });
-        expect(publicAPI.getTableSpec()).toEqual([]);
+        expect(publicAPI.getTableSpec()).toEqual([
+          {
+            columnId: 'col1',
+            fields: ['Test 1'],
+          },
+        ]);
       });
     });
 
@@ -1081,6 +841,83 @@ describe('Textbased Data Source', () => {
       it('should basically return the datasource internal id', () => {
         expect(publicAPI.getSourceId()).toEqual('foo');
       });
+    });
+  });
+  describe('#getDatasourceSuggestionsFromCurrentState', () => {
+    test('should return unchanged suggestion only for one numeric column', () => {
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsFromCurrentState(baseState);
+      expect(suggestions.length).toEqual(1);
+      expect(suggestions[0].table.changeType).toEqual('unchanged');
+    });
+    test('should return unchanged suggestion and reduced suggestion for one bucketed and one numeric column', () => {
+      baseState.layers.a.columns.push({
+        columnId: 'c',
+        fieldName: 'Test 3',
+        meta: {
+          type: 'string',
+        },
+      });
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsFromCurrentState(baseState);
+      expect(suggestions.length).toEqual(2);
+      expect(suggestions.map((s) => s.table.changeType)).toEqual(['unchanged', 'reduced']);
+    });
+    test('should return unchanged suggestion and 2 reduced suggestions for two numeric columns (converting one to bucket)', () => {
+      const suggestions =
+        TextBasedDatasource.getDatasourceSuggestionsFromCurrentState(queryBaseState);
+
+      expect(suggestions.length).toEqual(3);
+      expect(suggestions.map((s) => s.table.changeType)).toEqual([
+        'unchanged',
+        'reduced',
+        'reduced',
+      ]);
+    });
+    test('should return unchanges suggestion and 3 reduced suggestions for many columns', () => {
+      baseState.layers.a.columns.push(
+        {
+          columnId: 'b',
+          fieldName: 'Test 3',
+          meta: {
+            type: 'string',
+          },
+        },
+        {
+          columnId: 'c',
+          fieldName: 'Test 4',
+          meta: {
+            type: 'string',
+          },
+        },
+        {
+          columnId: 'd',
+          fieldName: 'Test 5',
+          meta: {
+            type: 'string',
+          },
+        },
+        {
+          columnId: 'e',
+          fieldName: 'Test 6',
+          meta: {
+            type: 'string',
+          },
+        },
+        {
+          columnId: 'f',
+          fieldName: 'Test 7',
+          meta: {
+            type: 'string',
+          },
+        }
+      );
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsFromCurrentState(baseState);
+      expect(suggestions.length).toEqual(4);
+      expect(suggestions.map((s) => s.table.changeType)).toEqual([
+        'unchanged',
+        'reduced',
+        'reduced',
+        'reduced',
+      ]);
     });
   });
 });

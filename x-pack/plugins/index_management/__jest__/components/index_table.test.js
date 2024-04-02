@@ -277,7 +277,7 @@ describe('index table', () => {
     snapshot(indicesInTable);
 
     // Enable "Show hidden indices"
-    const switchControl = findTestSubject(rendered, 'indexTableIncludeHiddenIndicesToggle');
+    const switchControl = findTestSubject(rendered, 'checkboxToggles-includeHiddenIndices');
     switchControl.simulate('click');
 
     // We do expect now the `.admin1` and `.admin3` indices to be in the list

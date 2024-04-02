@@ -6,9 +6,10 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
-import { Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -19,14 +20,14 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { processTopValues } from './utils';
 import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
-import { SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {
   Aggs,
   Field,
   FieldStatsCommonRequestParams,
   StringFieldStats,
+  FieldStatsError,
 } from '../../../../../common/types/field_stats';
-import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 
 export const getStringFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
@@ -71,7 +72,6 @@ export const fetchStringFieldsStats = (
   fields: Field[],
   options: ISearchOptions
 ): Observable<StringFieldStats[] | FieldStatsError> => {
-  const { samplerShardSize } = params;
   const request: estypes.SearchRequest = getStringFieldStatsRequest(params, fields);
 
   return dataSearch
@@ -85,6 +85,7 @@ export const fetchStringFieldsStats = (
       ),
       map((resp) => {
         if (!isIKibanaSearchResponse(resp)) return resp;
+
         const aggregations = resp.rawResponse.aggregations;
 
         const aggsPath = ['sample'];
@@ -94,15 +95,14 @@ export const fetchStringFieldsStats = (
           const safeFieldName = field.safeFieldName;
 
           const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
-          if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-            topAggsPath.push('top');
-          }
 
           const fieldAgg = get(aggregations, [...topAggsPath], {});
 
           const { topValuesSampleSize, topValues } = processTopValues(
             fieldAgg,
-            get(aggregations, ['sample', 'doc_count'])
+            get(aggregations, ['sample', 'probability']) < 1
+              ? get(aggregations, ['sample', 'doc_count'])
+              : undefined
           );
           const stats = {
             fieldName: field.fieldName,

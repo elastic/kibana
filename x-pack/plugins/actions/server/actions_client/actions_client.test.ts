@@ -8,7 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-
+import {
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../../common';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../action_type_registry';
 import { ActionsClient } from './actions_client';
 import { ExecutorType, ActionType } from '../types';
@@ -51,6 +55,7 @@ import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_cr
 import { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
+import { estypes } from '@elastic/elasticsearch';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -595,6 +600,9 @@ describe('create()', () => {
         proxyVerificationMode: 'full',
       },
       enableFooterInEmail: true,
+      microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+      microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+      microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
     });
 
     const localActionTypeRegistryParams = {
@@ -2789,7 +2797,7 @@ describe('execute()', () => {
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: '.cases',
         operation: 'execute',
         additionalPrivileges: ['test/create'],
       });
@@ -2922,7 +2930,7 @@ describe('execute()', () => {
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: '.cases',
         operation: 'execute',
         additionalPrivileges: ['test/create'],
       });
@@ -3419,6 +3427,10 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         executionUuidCardinality: { doc_count: 5, executionUuidCardinality: { value: 5 } },
       },
     },
+    hits: {
+      total: { value: 5, relation: 'eq' },
+      hits: [],
+    } as estypes.SearchHitsMetadata<unknown>,
   };
   describe('authorization', () => {
     test('ensures user is authorised to access logs', async () => {
@@ -3474,6 +3486,10 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         },
       },
     },
+    hits: {
+      total: { value: 5, relation: 'eq' },
+      hits: [],
+    } as estypes.SearchHitsMetadata<unknown>,
   };
   describe('authorization', () => {
     test('ensures user is authorised to access kpi', async () => {

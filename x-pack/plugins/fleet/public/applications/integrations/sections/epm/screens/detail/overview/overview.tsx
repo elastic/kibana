@@ -107,7 +107,7 @@ const UnverifiedCallout: React.FC = () => {
   );
 };
 
-const PrereleaseCallout: React.FC<{
+export const PrereleaseCallout: React.FC<{
   packageName: string;
   latestGAVersion?: string;
   packageTitle: string;
@@ -328,7 +328,7 @@ export const OverviewPage: React.FC<Props> = memo(
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem className="eui-textBreakWord">
-              <Details packageInfo={packageInfo} />
+              <Details packageInfo={packageInfo} integrationInfo={integrationInfo} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

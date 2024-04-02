@@ -17,6 +17,8 @@ import { getRulesStats } from './rules_stats_collector';
 import { getInstallationStats } from './installation_stats_collector';
 import { getAlertsStats } from './alert_stats_collector';
 import { getAllCloudAccountsStats } from './cloud_accounts_stats_collector';
+import { getMutedRulesStats } from './muted_rules_stats_collector';
+import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 
 export function registerCspmUsageCollector(
   logger: Logger,
@@ -42,6 +44,7 @@ export function registerCspmUsageCollector(
       ) => {
         try {
           const val = await promise;
+          logger.info(`Cloud Security telemetry: ${taskName} payload was sent successfully`);
           return val;
         } catch (error) {
           logger.error(`${taskName} task failed: ${error.message}`);
@@ -52,6 +55,10 @@ export function registerCspmUsageCollector(
 
       const esClient = collectorFetchContext.esClient;
       const soClient = collectorFetchContext.soClient;
+      const encryptedSoClient = (await coreServices)[0].savedObjects.createInternalRepository([
+        INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
+      ]);
+
       const [
         indicesStats,
         accountsStats,
@@ -60,6 +67,7 @@ export function registerCspmUsageCollector(
         installationStats,
         alertsStats,
         cloudAccountStats,
+        mutedRulesStats,
       ] = await Promise.all([
         awaitPromiseSafe('Indices', getIndicesStats(esClient, soClient, coreServices, logger)),
         awaitPromiseSafe('Accounts', getAccountsStats(esClient, logger)),
@@ -70,7 +78,11 @@ export function registerCspmUsageCollector(
           getInstallationStats(esClient, soClient, coreServices, logger)
         ),
         awaitPromiseSafe('Alerts', getAlertsStats(esClient, logger)),
-        awaitPromiseSafe('Cloud Accounts', getAllCloudAccountsStats(esClient, logger)),
+        awaitPromiseSafe(
+          'Cloud Accounts',
+          getAllCloudAccountsStats(esClient, encryptedSoClient, logger)
+        ),
+        awaitPromiseSafe('Muted Rules', getMutedRulesStats(soClient, encryptedSoClient, logger)),
       ]);
       return {
         indices: indicesStats,
@@ -80,6 +92,7 @@ export function registerCspmUsageCollector(
         installation_stats: installationStats,
         alerts_stats: alertsStats,
         cloud_account_stats: cloudAccountStats,
+        muted_rules_stats: mutedRulesStats,
       };
     },
     schema: cspmUsageSchema,

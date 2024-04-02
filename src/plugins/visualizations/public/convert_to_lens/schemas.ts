@@ -8,7 +8,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { IAggConfig, METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
-import { AggBasedColumn, PercentageModeConfig, SchemaConfig } from '../../common';
+import { AggBasedColumn, PercentageModeConfig, SchemaConfig, VisParams } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import {
   getAggIdAndValue,
@@ -133,8 +133,8 @@ const createLayer = (
   };
 };
 
-export const getColumnsFromVis = <T>(
-  vis: Vis<T>,
+export const getColumnsFromVis = <TVisParams extends VisParams>(
+  vis: Vis<TVisParams>,
   timefilter: TimefilterContract,
   dataView: DataView,
   {

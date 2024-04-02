@@ -21,13 +21,6 @@ export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
   // Content Reducers
   // ------------------------------------------------------------------------------
-  setControlGroupState: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerInput['controlGroupInput']>
-  ) => {
-    state.explicitInput.controlGroupInput = action.payload;
-  },
-
   setPanels: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardContainerInput['panels']>

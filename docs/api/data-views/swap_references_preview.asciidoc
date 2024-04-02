@@ -1,0 +1,74 @@
+[[data-views-api-swap-references-preview]]
+=== Swap references preview data view API
+++++
+<titleabbrev>Swap references preview</titleabbrev>
+++++
+
+Swap saved object references preview
+
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/src/plugins/data_views/docs/openapi[open API specification].
+====
+
+[[data-views-api-swap-references-preview-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/data_views/swap_references/_preview`
+
+`POST <kibana host>:<port>/s/<space_id>/api/data_views/swap_references/_preview`
+
+
+[[data-views-api-swap-references-preview-request-body]]
+==== Request body
+
+`fromId`::
+(Required, string) Saved object reference to change.
+
+`toId`::
+(Required, string) New saved object reference value to replace the old.
+
+`delete`::
+ (Optional, boolean) Deletes referenced saved object if all references are removed.
+
+`fromType`::
+ (Optional, string) Specify the type of the saved object reference to alter. Default is `index-pattern` for data view.
+
+`forId`::
+(Optional, string or string[]) Limit the affected saved objects to one or more by IDs.
+
+`forType`::
+ (Optional, string) Limit the affected saved objects by type.
+
+[[data-views-api-swap-references-preview-errors-codes]]
+==== Response code
+
+`200`::
+Indicates a successful call.
+
+[[data-views-api-swap-references-preview-example]]
+==== Examples
+
+Preview swapping references to data view id "abcd-efg" with "xyz-123":
+
+[source,sh]
+--------------------------------------------------
+$ curl -X api/data_views/swap_references/_preview
+{
+     "fromId" : "abcd-efg",
+     "toId" : "xyz-123"
+}
+
+--------------------------------------------------
+// KIBANA
+
+The API returns a list of affected saved objects:
+
+[source,sh]
+--------------------------------------------------
+{
+  result: [{ id: "123", type: "visualization" }],
+}
+--------------------------------------------------
+

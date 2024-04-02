@@ -13,7 +13,7 @@ import { FileServiceFactory } from './file_service/file_service_factory';
 /**
  * Files plugin setup contract
  */
-export interface FilesSetup {
+export interface FilesServerSetup {
   /**
    * Register a {@link FileKind} which allows for specifying details about the files
    * that will be uploaded.
@@ -25,23 +25,23 @@ export interface FilesSetup {
   registerFileKind(fileKind: FileKind): void;
 }
 
-export interface FilesPluginSetupDependencies {
-  security?: SecurityPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-}
-
-export interface FilesPluginStartDependencies {
-  security?: SecurityPluginStart;
-}
-
 /**
  * Files plugin start contract
  */
-export interface FilesStart {
+export interface FilesServerStart {
   /**
    * Create an instance of {@link FileServiceStart}.
    *
    * @track-adoption
    */
   fileServiceFactory: FileServiceFactory;
+}
+
+export interface FilesServerSetupDependencies {
+  security?: SecurityPluginSetup;
+  usageCollection?: UsageCollectionSetup;
+}
+
+export interface FilesServerStartDependencies {
+  security?: SecurityPluginStart;
 }

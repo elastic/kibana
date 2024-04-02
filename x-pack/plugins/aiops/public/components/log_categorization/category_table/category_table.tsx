@@ -5,32 +5,29 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import moment from 'moment';
 
+import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 import {
   useEuiBackgroundColor,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiCode,
-  EuiText,
-  EuiTableSelectionType,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { useTableState } from '@kbn/ml-in-memory-table';
-
-import moment from 'moment';
-import type { CategorizationAdditionalFilter } from '../../../../common/api/log_categorization/create_category_request';
-import {
-  type QueryMode,
-  QUERY_MODE,
-} from '../../../../common/api/log_categorization/get_category_query';
-import type { Category } from '../../../../common/api/log_categorization/types';
+import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import { type QueryMode, QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
 import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
@@ -42,6 +39,8 @@ import type { EventRate } from '../use_categorize_request';
 
 import { getLabels } from './labels';
 import { TableHeader } from './table_header';
+import { ExpandedRow } from './expanded_row';
+import { FormattedPatternExamples, FormattedTokens } from '../format_category';
 
 interface Props {
   categories: Category[];
@@ -59,6 +58,7 @@ interface Props {
   enableRowActions?: boolean;
   additionalFilter?: CategorizationAdditionalFilter;
   navigateToDiscover?: boolean;
+  displayExamples?: boolean;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -77,12 +77,16 @@ export const CategoryTable: FC<Props> = ({
   enableRowActions = true,
   additionalFilter,
   navigateToDiscover = true,
+  displayExamples = true,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { openInDiscoverWithFilter } = useDiscoverLinks();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
+    {}
+  );
 
   const labels = useMemo(() => {
     const isFlyout = onAddFilter !== undefined && onClose !== undefined;
@@ -132,7 +136,44 @@ export const CategoryTable: FC<Props> = ({
     );
   };
 
+  const toggleDetails = useCallback(
+    (category: Category) => {
+      const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+      if (itemIdToExpandedRowMapValues[category.key]) {
+        delete itemIdToExpandedRowMapValues[category.key];
+      } else {
+        itemIdToExpandedRowMapValues[category.key] = (
+          <ExpandedRow category={category} displayExamples={displayExamples} />
+        );
+      }
+      setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    },
+    [displayExamples, itemIdToExpandedRowMap]
+  );
+
   const columns: Array<EuiBasicTableColumn<Category>> = [
+    {
+      align: 'left',
+      width: '40px',
+      isExpander: true,
+      render: (item: Category) => (
+        <EuiButtonIcon
+          data-test-subj="aiopsLogPatternsColumnsButton"
+          onClick={() => toggleDetails(item)}
+          aria-label={
+            itemIdToExpandedRowMap[item.key]
+              ? i18n.translate('xpack.aiops.logCategorization.column.collapseRow', {
+                  defaultMessage: 'Collapse',
+                })
+              : i18n.translate('xpack.aiops.logCategorization.column.expandRow', {
+                  defaultMessage: 'Expand',
+                })
+          }
+          iconType={itemIdToExpandedRowMap[item.key] ? 'arrowDown' : 'arrowRight'}
+        />
+      ),
+      'data-test-subj': 'aiopsLogPatternsExpandRowToggle',
+    },
     {
       field: 'count',
       name: i18n.translate('xpack.aiops.logCategorization.column.count', {
@@ -142,22 +183,11 @@ export const CategoryTable: FC<Props> = ({
       width: '80px',
     },
     {
-      field: 'examples',
       name: i18n.translate('xpack.aiops.logCategorization.column.examples', {
         defaultMessage: 'Examples',
       }),
       sortable: true,
-      render: (examples: string[]) => (
-        <>
-          {examples.map((e) => (
-            <EuiText size="s" key={e}>
-              <EuiCode language="log" transparentBackground css={{ paddingInline: '0px' }}>
-                {e}
-              </EuiCode>
-            </EuiText>
-          ))}
-        </>
-      ),
+      render: (item: Category) => <FormattedPatternExamples category={item} count={1} />,
     },
     {
       name: i18n.translate('xpack.aiops.logCategorization.column.actions', {
@@ -186,8 +216,31 @@ export const CategoryTable: FC<Props> = ({
     },
   ] as Array<EuiBasicTableColumn<Category>>;
 
+  if (displayExamples === false) {
+    // on the rare occasion that examples are not available, replace the examples column with tokens
+    columns.splice(2, 1, {
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.aiops.logCategorization.column.tokens.tooltip', {
+            defaultMessage:
+              'If the selected field is an alias, example documents cannot be displayed. Showing pattern tokens instead.',
+          })}
+        >
+          <>
+            {i18n.translate('xpack.aiops.logCategorization.column.tokens', {
+              defaultMessage: 'Tokens',
+            })}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      render: (item: Category) => <FormattedTokens category={item} count={1} />,
+    });
+  }
+
   if (showSparkline === true) {
-    columns.splice(1, 0, {
+    columns.splice(2, 0, {
       field: 'sparkline',
       name: i18n.translate('xpack.aiops.logCategorization.column.logRate', {
         defaultMessage: 'Log rate',
@@ -271,6 +324,8 @@ export const CategoryTable: FC<Props> = ({
         pagination={pagination}
         sorting={sorting}
         data-test-subj="aiopsLogPatternsTable"
+        isExpandable={true}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         rowProps={(category) => {
           return enableRowActions
             ? {

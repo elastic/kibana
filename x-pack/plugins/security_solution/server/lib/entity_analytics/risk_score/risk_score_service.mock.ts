@@ -7,16 +7,21 @@
 
 import type { RiskScoreService } from './risk_score_service';
 import type { RiskScore } from '../../../../common/entity_analytics/risk_engine';
+import { RiskLevels } from '../../../../common/entity_analytics/risk_engine';
 
 const createRiskScoreMock = (overrides: Partial<RiskScore> = {}): RiskScore => ({
   '@timestamp': '2023-02-15T00:15:19.231Z',
   id_field: 'host.name',
   id_value: 'hostname',
-  calculated_level: 'High',
+  calculated_level: RiskLevels.high,
   calculated_score: 149,
   calculated_score_norm: 85.332,
   category_1_score: 85,
   category_1_count: 12,
+  category_2_count: 0,
+  category_2_score: 0,
+  criticality_level: 'high_impact',
+  criticality_modifier: 2,
   notes: [],
   inputs: [],
   ...overrides,
@@ -25,7 +30,7 @@ const createRiskScoreMock = (overrides: Partial<RiskScore> = {}): RiskScore => (
 const createRiskScoreServiceMock = (): jest.Mocked<RiskScoreService> => ({
   calculateScores: jest.fn(),
   calculateAndPersistScores: jest.fn(),
-  getConfiguration: jest.fn(),
+  getConfigurationWithDefaults: jest.fn(),
   getRiskInputsIndex: jest.fn(),
   scheduleLatestTransformNow: jest.fn(),
 });

@@ -1312,6 +1312,109 @@
         }
       }
     },
+    "/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
+      "post": {
+        "summary": "Authorize transforms",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "transformId": {
+                            "type": "string"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          },
+                          "error": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "transformId",
+                          "error"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "reauthorize-transforms",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgName",
+            "in": "path",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgVersion",
+            "in": "path",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "prerelease",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to include prerelease packages in categories count (e.g. beta, rc, preview)"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "transforms": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "transformId": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
       "get": {
         "summary": "Get package file",
@@ -1466,6 +1569,14 @@
           },
           "name": "format",
           "description": "Format of response - json or yaml",
+          "in": "query"
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "prerelease",
+          "description": "Specify if version is prerelease",
           "in": "query"
         }
       ]
@@ -5075,6 +5186,9 @@
                   "is_default": {
                     "type": "boolean"
                   },
+                  "is_internal": {
+                    "type": "boolean"
+                  },
                   "host_urls": {
                     "type": "array",
                     "items": {
@@ -5185,6 +5299,9 @@
                     "type": "string"
                   },
                   "is_default": {
+                    "type": "boolean"
+                  },
+                  "is_internal": {
                     "type": "boolean"
                   },
                   "host_urls": {
@@ -6857,6 +6974,10 @@
           "force": {
             "type": "boolean",
             "description": "Force upgrade, skipping validation (should be used with caution)"
+          },
+          "skipRateLimitCheck": {
+            "type": "boolean",
+            "description": "Skip rate limit check for upgrade"
           }
         },
         "required": [
@@ -6921,6 +7042,10 @@
           "force": {
             "type": "boolean",
             "description": "Force upgrade, skipping validation (should be used with caution)"
+          },
+          "skipRateLimitCheck": {
+            "type": "boolean",
+            "description": "Skip rate limit check for upgrade"
           }
         },
         "required": [
@@ -7268,6 +7393,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -7340,6 +7469,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -7663,8 +7796,8 @@
           },
           "namespace": {
             "type": "string",
-            "description": "namespace by default \"default\"",
-            "example": "default"
+            "description": "The package policy namespace. Leave blank to inherit the agent policy's namespace.",
+            "example": "customnamespace"
           },
           "policy_id": {
             "type": "string",
@@ -7928,6 +8061,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8027,6 +8163,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8169,7 +8308,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",
@@ -8178,6 +8322,8 @@
                   "type": "string"
                 },
                 "when": {
+                  "deprecated": true,
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {
@@ -8250,6 +8396,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8358,6 +8507,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8426,6 +8578,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8529,6 +8684,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8671,7 +8829,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",
@@ -8680,6 +8843,8 @@
                   "type": "string"
                 },
                 "when": {
+                  "deprecated": true,
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {
@@ -8732,6 +8897,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8873,6 +9041,9 @@
             "type": "string"
           },
           "is_default": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "is_preconfigured": {

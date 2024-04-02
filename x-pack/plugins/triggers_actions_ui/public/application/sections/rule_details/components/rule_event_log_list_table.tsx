@@ -19,6 +19,7 @@ import {
   OnTimeChangeProps,
   EuiSwitch,
   EuiDataGridColumn,
+  EuiCallOut,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -150,7 +151,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   });
 
   // Date related states
-  const [dateStart, setDateStart] = useState<string>('now-24h');
+  const [dateStart, setDateStart] = useState<string>('now-15m');
   const [dateEnd, setDateEnd] = useState<string>('now');
   const [dateFormat] = useState(() => uiSettings?.get('dateFormat'));
   const [commonlyUsedRanges] = useState(() => {
@@ -197,6 +198,9 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
 
   const onError = useCallback(
     (e) => {
+      if (e.body.statusCode === 413) {
+        return;
+      }
       notifications.toasts.addDanger({
         title: API_FAILED_MESSAGE,
         text: e.body?.message ?? e,
@@ -205,7 +209,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     [notifications]
   );
 
-  const { data, isLoading, loadEventLogs } = useLoadRuleEventLogs({
+  const { data, isLoading, hasExceedLogs, loadEventLogs } = useLoadRuleEventLogs({
     id: ruleId,
     sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
     outcomeFilter: filter,
@@ -724,7 +728,19 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         <EuiSpacer />
       </EuiFlexItem>
       <EuiFlexItem>
-        {renderList()}
+        {hasExceedLogs && (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.exceedLog.refineSearch.prompt"
+                defaultMessage="Results are limited to 10,000 documents, refine your search to see others."
+              />
+            }
+            data-test-subj="exceedLimitLogsCallout"
+            size="m"
+          />
+        )}
+        {!hasExceedLogs && renderList()}
         {isOnLastPage && (
           <RefineSearchPrompt
             documentSize={actualTotalItemCount}

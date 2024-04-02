@@ -9,6 +9,7 @@ import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { TelemetryEvent } from '../../../telemetry/types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { SignalSource, SignalSourceHit } from '../types';
+import { TelemetryChannel } from '../../../telemetry/types';
 
 interface SearchResultSource {
   _source: SignalSource;
@@ -70,7 +71,7 @@ export function sendAlertTelemetryEvents(
     selectedEvents = enrichEndpointAlertsSignalID(selectedEvents, signalIdMap);
   }
   try {
-    eventsTelemetry.queueTelemetryEvents(selectedEvents);
+    eventsTelemetry.sendAsync(TelemetryChannel.ENDPOINT_ALERTS, selectedEvents);
   } catch (exc) {
     ruleExecutionLogger.error(`Queuing telemetry events failed: ${exc}`);
   }

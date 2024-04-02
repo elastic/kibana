@@ -2550,6 +2550,23 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.runCheckFtrCodeOwnersCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCheckFtrCodeOwnersCli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_test_runner/run_check_ftr_code_owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.runCheckFtrConfigsCli",
         "type": "Function",
         "tags": [],
@@ -3286,7 +3303,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"host\" | \"tag\" | \"image\" | \"resources\" | \"kibanaUrl\"> | undefined"
+              ", \"host\" | \"tag\" | \"image\" | \"resources\" | \"kibanaUrl\" | \"projectType\"> | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
@@ -5004,6 +5021,20 @@
             "tags": [],
             "label": "isCloud",
             "description": [],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManagerOptions.supportedRoles",
+            "type": "Array",
+            "tags": [],
+            "label": "supportedRoles",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false

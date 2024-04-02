@@ -11,4 +11,5 @@ export const METRIC_ID = 'lnsMetric';
 
 export const METRIC_TREND_LINE_ID = 'metricTrendline';
 export const XY_REFERENCE_LINE_ID = 'referenceLine';
+export const XY_ANNOTATIONS_ID = 'annotations';
 export const XY_DATA_ID = 'data';

@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import type { WebElementWrapper } from '../../../../../../../test/functional/services/lib/web_element_wrapper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
@@ -22,8 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Index component templates', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
-      // Navigate to the index management page
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
     });
 
     beforeEach(async () => {
@@ -31,10 +30,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Navigate to the index templates tab
       await pageObjects.indexManagement.changeTabs('component_templatesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the component templates tab', async () => {

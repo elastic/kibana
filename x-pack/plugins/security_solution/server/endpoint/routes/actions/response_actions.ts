@@ -7,8 +7,11 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
+import { stringify } from '../../utils/stringify';
+import { getResponseActionsClient } from '../../services';
+import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { EndpointActionsClient } from '../../services/actions/clients';
 import type {
   NoParametersRequestSchema,
   ResponseActionsRequestBody,
@@ -290,50 +293,77 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   const logger = endpointContext.logFactory.get('responseActionsHandler');
 
   return async (context, req, res) => {
+    logger.debug(`response action [${command}]:\n${stringify(req.body)}`);
+
+    // Note:  because our API schemas are defined as module static variables (as opposed to a
+    //        `getter` function), we need to include this additional validation here, since
+    //        `agent_type` is included in the schema independent of the feature flag
+    if (
+      req.body.agent_type === 'sentinel_one' &&
+      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled
+    ) {
+      return errorHandler(
+        logger,
+        res,
+        new CustomHttpRequestError(`[request body.agent_type]: feature is disabled`, 400)
+      );
+    }
+
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
-    const actionsClient = new EndpointActionsClient({
-      esClient,
-      casesClient,
-      endpointContext,
-      username: user?.username ?? 'unknown',
-    });
+    const connectorActions = (await context.actions).getActionsClient();
+    const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
+      req.body.agent_type || 'endpoint',
+      {
+        esClient,
+        casesClient,
+        endpointService: endpointContext.service,
+        username: user?.username || 'unknown',
+        connectorActions,
+      }
+    );
 
     try {
       let action: ActionDetails;
 
       switch (command) {
         case 'isolate':
-          action = await actionsClient.isolate(req.body);
+          action = await responseActionsClient.isolate(req.body);
           break;
 
         case 'unisolate':
-          action = await actionsClient.release(req.body);
+          action = await responseActionsClient.release(req.body);
           break;
 
         case 'running-processes':
-          action = await actionsClient.runningProcesses(req.body);
+          action = await responseActionsClient.runningProcesses(req.body);
           break;
 
         case 'execute':
-          action = await actionsClient.execute(req.body as ExecuteActionRequestBody);
+          action = await responseActionsClient.execute(req.body as ExecuteActionRequestBody);
           break;
 
         case 'suspend-process':
-          action = await actionsClient.suspendProcess(req.body as KillOrSuspendProcessRequestBody);
+          action = await responseActionsClient.suspendProcess(
+            req.body as KillOrSuspendProcessRequestBody
+          );
           break;
 
         case 'kill-process':
-          action = await actionsClient.killProcess(req.body as KillOrSuspendProcessRequestBody);
+          action = await responseActionsClient.killProcess(
+            req.body as KillOrSuspendProcessRequestBody
+          );
           break;
 
         case 'get-file':
-          action = await actionsClient.getFile(req.body as ResponseActionGetFileRequestBody);
+          action = await responseActionsClient.getFile(
+            req.body as ResponseActionGetFileRequestBody
+          );
           break;
 
         case 'upload':
-          action = await actionsClient.upload(req.body as UploadActionApiRequestBody);
+          action = await responseActionsClient.upload(req.body as UploadActionApiRequestBody);
           break;
 
         default:
@@ -345,9 +375,16 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
       const { action: actionId, ...data } = action;
 
+      // `action` is deprecated, but still returned in order to ensure backwards compatibility
+      const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
+        ? {
+            action: actionId ?? data.id ?? '',
+          }
+        : {};
+
       return res.ok({
         body: {
-          action: actionId,
+          ...legacyResponseData,
           data,
         },
       });

@@ -3020,7 +3020,7 @@
         "label": "CreateListSchemaDecoded",
         "description": [],
         "signature": [
-          "{ type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; id: string | undefined; name: string; serializer: string | undefined; description: string; meta: object | undefined; deserializer: string | undefined; } & { version: number; }"
+          "{ id: string | undefined; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; name: string; serializer: string | undefined; meta: object | undefined; description: string; deserializer: string | undefined; } & { version: number; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_schema/index.ts",
         "deprecated": false,
@@ -4446,6 +4446,21 @@
         "description": [],
         "signature": [
           "\"excluded\" | \"included\""
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/list_operator/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.ListOperatorType",
+        "type": "Type",
+        "tags": [],
+        "label": "ListOperatorType",
+        "description": [],
+        "signature": [
+          "\"match\" | \"wildcard\" | \"nested\" | \"list\" | \"exists\" | \"match_any\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/list_operator/index.ts",
         "deprecated": false,
@@ -9977,6 +9992,22 @@
         "signature": [
           "KeyofC",
           "<{ excluded: null; included: null; }>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/list_operator/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.listOperatorType",
+        "type": "Object",
+        "tags": [],
+        "label": "listOperatorType",
+        "description": [],
+        "signature": [
+          "KeyofC",
+          "<{ nested: null; match: null; match_any: null; wildcard: null; exists: null; list: null; }>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/list_operator/index.ts",
         "deprecated": false,

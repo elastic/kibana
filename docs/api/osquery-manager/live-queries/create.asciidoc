@@ -49,6 +49,8 @@ experimental[] Create live queries.
 
 `metadata`:: (Optional, object) Custom metadata object associated to the live query.
 
+`timeout`:: (Optional, number) A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is `60`. The maximum supported value is `900`.
+
 
 [[osquery-manager-live-queries-api-create-request-codes]]
 ==== Response code
@@ -69,13 +71,13 @@ Run a live query on all supported agents:
 $ curl -X POST api/osquery/live_queries \
 {
   "query": "select * from uptime;",
-
   "ecs_mapping": {
     "host.uptime": {
       "field": "total_seconds"
     }
   },
   "agent_all": true,
+  "timeout": 120
 }
 
 --------------------------------------------------
@@ -110,6 +112,7 @@ The API returns the live query object:
         "action_id": "609c4c66-ba3d-43fa-afdd-53e244577aa0", # unique ID of the query, use it when querying the live query API to get the single query results
         "id": "6724a474-cbba-41ef-a1aa-66aebf0879e2", # ID of the query, doesn't have to be unique
         "query": "select * from uptime;",
+        "timeout": 120,
         "ecs_mapping": {
           "host.uptime": {
             "field": "total_seconds"

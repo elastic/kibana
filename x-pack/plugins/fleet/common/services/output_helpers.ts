@@ -19,19 +19,32 @@ import {
   RESERVED_CONFIG_YML_KEYS,
 } from '../constants';
 
+const sameClusterRestrictedPackages = [
+  FLEET_SERVER_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+  FLEET_APM_PACKAGE,
+];
+
 /**
  * Return allowed output type for a given agent policy,
  * Fleet Server and APM cannot use anything else than same cluster ES
  */
-export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy) {
+export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy): string[] {
   const isRestrictedToSameClusterES =
     agentPolicy.package_policies &&
     agentPolicy.package_policies.some(
-      (p) =>
-        p.package?.name === FLEET_APM_PACKAGE ||
-        p.package?.name === FLEET_SERVER_PACKAGE ||
-        p.package?.name === FLEET_SYNTHETICS_PACKAGE
+      (p) => p.package?.name && sameClusterRestrictedPackages.includes(p.package?.name)
     );
+
+  if (isRestrictedToSameClusterES) {
+    return [outputType.Elasticsearch];
+  }
+
+  return Object.values(outputType);
+}
+
+export function getAllowedOutputTypesForIntegration(packageName: string): string[] {
+  const isRestrictedToSameClusterES = sameClusterRestrictedPackages.includes(packageName);
 
   if (isRestrictedToSameClusterES) {
     return [outputType.Elasticsearch];

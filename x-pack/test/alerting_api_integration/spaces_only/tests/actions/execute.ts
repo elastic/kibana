@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -30,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
+
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
@@ -131,6 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
         message: 'an error occurred while running the action',
         service_message: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
         retry: true,
+        errorSource: TaskErrorSource.USER,
       });
 
       await validateEventLog({
@@ -326,16 +329,25 @@ export default function ({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
           retry: true,
+          errorSource: TaskErrorSource.USER,
         });
       });
     });
 
+    /**
+     * The test are using a test endpoint that calls the actions client.
+     * The route is defined here x-pack/test/alerting_api_integration/common/plugins/alerts/server/routes.ts.
+     * The public execute API does not allows the execution of system actions. We use the
+     * test route to test the execution of system actions
+     */
     it('should execute system actions correctly', async () => {
       const connectorId = 'system-connector-test.system-action';
       const name = 'System action: test.system-action';
 
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${connectorId}/_execute`)
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/${connectorId}/_execute_connector`
+        )
         .set('kbn-xsrf', 'foo')
         .send({
           params: {},
@@ -355,12 +367,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    /**
+     * The test are using a test endpoint that calls the actions client.
+     * The route is defined here x-pack/test/alerting_api_integration/common/plugins/alerts/server/routes.ts.
+     * The public execute API does not allows the execution of system actions. We use the
+     * test route to test the execution of system actions
+     */
     it('should execute system actions with kibana privileges correctly', async () => {
       const connectorId = 'system-connector-test.system-action-kibana-privileges';
       const name = 'System action: test.system-action-kibana-privileges';
 
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${connectorId}/_execute`)
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/${connectorId}/_execute_connector`
+        )
         .set('kbn-xsrf', 'foo')
         .send({
           params: {},
@@ -378,6 +398,21 @@ export default function ({ getService }: FtrProviderContext) {
         source: ActionExecutionSourceType.HTTP_REQUEST,
         spaceAgnostic: true,
       });
+    });
+
+    /**
+     * The public execute API does not allows the execution of system actions.
+     */
+    it('should not allow the execution of system actions through the public execute endpoint', async () => {
+      const connectorId = 'system-connector-test.system-action-kibana-privileges';
+
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${connectorId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {},
+        })
+        .expect(400);
     });
   });
 

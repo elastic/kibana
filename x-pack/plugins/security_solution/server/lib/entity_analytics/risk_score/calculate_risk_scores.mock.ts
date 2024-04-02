@@ -9,7 +9,8 @@ import {
   ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
+import { RiskCategories, RiskLevels } from '../../../../common/entity_analytics/risk_engine';
+import type { RiskScore } from '../../../../common/entity_analytics/risk_engine';
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresResponse,
@@ -19,45 +20,46 @@ import type {
 const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({
   key: { 'user.name': 'username' },
   doc_count: 2,
-  risk_details: {
-    value: {
-      score: 20,
-      normalized_score: 30.0,
-      level: 'Unknown',
-      notes: [],
-      category_1_score: 30,
-      category_1_count: 1,
-    },
-  },
-  inputs: {
-    took: 17,
-    timed_out: false,
-    _shards: {
-      total: 1,
-      successful: 1,
-      skipped: 0,
-      failed: 0,
-    },
-    hits: {
-      total: {
-        value: 1,
-        relation: 'eq',
+  top_inputs: {
+    risk_details: {
+      value: {
+        score: 20,
+        normalized_score: 30.0,
+        notes: [],
+        category_1_score: 30,
+        category_1_count: 1,
       },
-      hits: [
-        {
-          _id: '_id',
-          _index: '_index',
-          fields: {
-            '@timestamp': ['2023-07-20T20:31:24.896Z'],
-            [ALERT_RISK_SCORE]: [21],
-            [ALERT_RULE_NAME]: ['Rule Name'],
-          },
-          sort: [21],
-        },
-      ],
     },
+    inputs: {
+      took: 17,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: 1,
+          relation: 'eq',
+        },
+        hits: [
+          {
+            _id: '_id',
+            _index: '_index',
+            fields: {
+              '@timestamp': ['2023-07-20T20:31:24.896Z'],
+              [ALERT_RISK_SCORE]: [21],
+              [ALERT_RULE_NAME]: ['Rule Name'],
+            },
+            sort: [21],
+          },
+        ],
+      },
+    },
+    doc_count: 2,
   },
-
   ...overrides,
 });
 
@@ -88,11 +90,15 @@ const buildResponseMock = (
         '@timestamp': '2021-08-19T20:55:59.000Z',
         id_field: 'host.name',
         id_value: 'hostname',
-        calculated_level: 'Unknown',
+        criticality_level: 'high_impact',
+        criticality_modifier: 1.5,
+        calculated_level: RiskLevels.unknown,
         calculated_score: 20,
         calculated_score_norm: 30,
         category_1_score: 30,
         category_1_count: 12,
+        category_2_score: 0,
+        category_2_count: 0,
         notes: [],
         inputs: [
           {
@@ -111,8 +117,12 @@ const buildResponseMock = (
   ...overrides,
 });
 
+const buildResponseWithOneScoreMock = () =>
+  buildResponseMock({ scores: { host: [{} as RiskScore] } });
+
 export const calculateRiskScoresMock = {
   buildResponse: buildResponseMock,
+  buildResponseWithOneScore: buildResponseWithOneScoreMock,
   buildAggregationResponse: buildAggregationResponseMock,
   buildRiskScoreBucket: buildRiskScoreBucketMock,
 };

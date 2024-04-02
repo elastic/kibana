@@ -195,7 +195,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
             {...(!hasNextPage
               ? {
                   css: css`
-                    margin-top: 24px;
+                    margin-top: ${euiTheme.size.l};
                   `,
                 }
               : {})}

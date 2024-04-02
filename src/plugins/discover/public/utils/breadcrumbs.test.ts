@@ -43,14 +43,12 @@ describe('Breadcrumbs', () => {
   });
 
   test('should set breadcrumbs with profile root path', () => {
+    const history = createMemoryHistory<HistoryLocationState>({});
+    history.push('/p/my-profile');
     setBreadcrumbs({
       services: {
         ...discoverServiceMock,
-        history: () => {
-          const history = createMemoryHistory<HistoryLocationState>({});
-          history.push('/p/my-profile');
-          return history;
-        },
+        history,
       },
       titleBreadcrumbText: 'Saved Search',
     });

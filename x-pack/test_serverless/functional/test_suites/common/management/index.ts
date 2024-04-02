@@ -9,11 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Serverless Common UI - Management', function () {
-    loadTestFile(require.resolve('./index_management/index_templates'));
-    loadTestFile(require.resolve('./index_management/indices'));
-    loadTestFile(require.resolve('./index_management/create_enrich_policy'));
-    loadTestFile(require.resolve('./index_management/enrich_policies'));
-    loadTestFile(require.resolve('./index_management/component_templates'));
+    loadTestFile(require.resolve('./index_management'));
     loadTestFile(require.resolve('./transforms/search_bar_features'));
     loadTestFile(require.resolve('./transforms/transform_list'));
     loadTestFile(require.resolve('./advanced_settings'));

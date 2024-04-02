@@ -15,10 +15,12 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 import { coreServices } from '../services/kibana_services';
 import { Link } from '../../common/content_management';
 import { LinkEditor } from '../components/editor/link_editor';
+import { focusMainFlyout } from './links_editor_tools';
 
 export interface LinksEditorProps {
   link?: Link;
   parentDashboard?: DashboardContainer;
+  mainFlyoutId: string;
   ref: React.RefObject<HTMLDivElement>;
 }
 
@@ -34,6 +36,7 @@ export type UnorderedLink = Omit<Link, 'order'>;
 export async function openLinkEditorFlyout({
   ref,
   link,
+  mainFlyoutId, // used to manage the focus of this flyout after inidividual link editor flyout is closed
   parentDashboard,
 }: LinksEditorProps): Promise<UnorderedLink | undefined> {
   const unmountFlyout = async () => {
@@ -44,6 +47,7 @@ export async function openLinkEditorFlyout({
       // wait for close animation before unmounting
       setTimeout(() => {
         if (ref.current) ReactDOM.unmountComponentAtNode(ref.current);
+        focusMainFlyout(mainFlyoutId);
       }, 180);
     });
   };

@@ -41,6 +41,7 @@ describe('getRulePreviewLensAttributes', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
+          extraOptions: { showLegend: false },
           getLensAttributes: getRulePreviewLensAttributes,
           stackByField: 'event.category',
         }),

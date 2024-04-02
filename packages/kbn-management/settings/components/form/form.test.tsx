@@ -14,7 +14,7 @@ import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
 
-import { Form } from './form';
+import { Form, FormProps } from './form';
 import { wrap, createFormServicesMock, uiSettingsClientMock } from './mocks';
 import { DATA_TEST_SUBJ_SAVE_BUTTON, DATA_TEST_SUBJ_CANCEL_BUTTON } from './bottom_bar/bottom_bar';
 import { FormServices } from './types';
@@ -24,22 +24,35 @@ const fields: FieldDefinition[] = getFieldDefinitions(settingsMock, uiSettingsCl
 const categoryCounts = {};
 const onClearQuery = jest.fn();
 
+const defaultFormParams: FormProps = {
+  fields,
+  isSavingEnabled: true,
+  categoryCounts,
+  onClearQuery,
+  scope: 'namespace',
+};
+
 describe('Form', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders without errors', () => {
-    const { container } = render(
-      wrap(<Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />)
-    );
+    const { container } = render(wrap(<Form {...defaultFormParams} />));
 
     expect(container).toBeInTheDocument();
   });
 
   it('renders as read only if saving is disabled', () => {
     const { getByTestId } = render(
-      wrap(<Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />)
+      wrap(
+        <Form
+          {...{
+            ...defaultFormParams,
+            isSavingEnabled: false,
+          }}
+        />
+      )
     );
 
     (Object.keys(settingsMock) as SettingType[]).forEach((type) => {
@@ -58,9 +71,7 @@ describe('Form', () => {
   });
 
   it('renders bottom bar when a field is changed', () => {
-    const { getByTestId, queryByTestId } = render(
-      wrap(<Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />)
-    );
+    const { getByTestId, queryByTestId } = render(wrap(<Form {...defaultFormParams} />));
 
     expect(queryByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).not.toBeInTheDocument();
     expect(queryByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON)).not.toBeInTheDocument();
@@ -75,9 +86,7 @@ describe('Form', () => {
 
   it('fires saveChanges when Save button is clicked', async () => {
     const services: FormServices = createFormServicesMock();
-    const { getByTestId } = render(
-      wrap(<Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />, services)
-    );
+    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />, services));
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
@@ -89,16 +98,17 @@ describe('Form', () => {
     });
 
     await waitFor(() => {
-      expect(services.saveChanges).toHaveBeenCalledWith({
-        string: { type: 'string', unsavedValue: 'test' },
-      });
+      expect(services.saveChanges).toHaveBeenCalledWith(
+        {
+          string: { type: 'string', unsavedValue: 'test' },
+        },
+        'namespace'
+      );
     });
   });
 
   it('clears changes when Cancel button is clicked', async () => {
-    const { getByTestId } = render(
-      wrap(<Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />)
-    );
+    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />));
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
@@ -121,12 +131,7 @@ describe('Form', () => {
     });
     const testServices = { ...services, saveChanges: saveChangesWithError };
 
-    const { getByTestId } = render(
-      wrap(
-        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />,
-        testServices
-      )
-    );
+    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />, testServices));
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
@@ -157,6 +162,7 @@ describe('Form', () => {
             isSavingEnabled: false,
             categoryCounts,
             onClearQuery,
+            scope: 'namespace',
           }}
         />,
         services

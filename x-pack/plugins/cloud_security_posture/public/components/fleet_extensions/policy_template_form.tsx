@@ -21,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -57,7 +58,7 @@ import {
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-import { gcpField, getInputVarsFields } from './gcp_credential_form';
+import { gcpField, getInputVarsFields } from './gcp_credentials_form/gcp_credential_form';
 import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 
@@ -424,29 +425,34 @@ const AzureAccountTypeSelect = ({
   updatePolicy,
   disabled,
   packageInfo,
+  setupTechnology,
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   disabled: boolean;
   packageInfo: PackageInfo;
+  setupTechnology: SetupTechnology;
 }) => {
   const isAzureOrganizationDisabled = isBelowMinVersion(
     packageInfo.version,
     AZURE_ORG_MINIMUM_PACKAGE_VERSION
   );
   const azureAccountTypeOptions = getAzureAccountTypeOptions(isAzureOrganizationDisabled);
+  const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
 
   useEffect(() => {
     if (!getAzureAccountType(input)) {
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'azure.account_type': {
-            value: AZURE_SINGLE_ACCOUNT,
+            value: isAzureOrganizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
             type: 'text',
           },
           'azure.credentials.type': {
-            value: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
+            value: isAgentless
+              ? 'service_principal_with_client_secret'
+              : AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
             type: 'text',
           },
         })
@@ -544,7 +550,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       agentPolicy,
       agentlessPolicy,
       handleSetupTechnologyChange,
+      isEditPage,
     });
+    const shouldRenderAgentlessSelector =
+      (!isEditPage && isAgentlessAvailable) ||
+      (isEditPage && setupTechnology === SetupTechnology.AGENTLESS);
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
@@ -558,11 +568,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
      */
     const setEnabledPolicyInput = useCallback(
       (inputType: PostureInput) => {
-        const inputVars = getPostureInputHiddenVars(inputType, packageInfo);
+        const inputVars = getPostureInputHiddenVars(inputType, packageInfo, setupTechnology);
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [newPolicy, updatePolicy, packageInfo]
+      [setupTechnology, packageInfo, newPolicy, updatePolicy]
     );
 
     // search for non null fields of the validation?.vars object
@@ -600,6 +610,15 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
+
+    useEffect(() => {
+      if (isEditPage) {
+        return;
+      }
+
+      setEnabledPolicyInput(input.type);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setupTechnology]);
 
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
 
@@ -729,6 +748,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             updatePolicy={updatePolicy}
             packageInfo={packageInfo}
             disabled={isEditPage}
+            setupTechnology={setupTechnology}
           />
         )}
 
@@ -739,8 +759,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
 
-        {isAgentlessAvailable && (
+        {shouldRenderAgentlessSelector && (
           <SetupTechnologySelector
+            disabled={isEditPage}
             setupTechnology={setupTechnology}
             onSetupTechnologyChange={setSetupTechnology}
           />
@@ -755,6 +776,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           onChange={onChange}
           setIsValid={setIsValid}
           disabled={isEditPage}
+          setupTechnology={setupTechnology}
         />
         <EuiSpacer />
       </>

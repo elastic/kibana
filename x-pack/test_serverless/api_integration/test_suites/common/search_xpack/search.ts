@@ -222,28 +222,6 @@ export default function ({ getService }: FtrProviderContext) {
         verifyErrorResponse(resp.body, 400, 'Request must contain a kbn-xsrf header.');
       });
 
-      it('should return 400 when unknown index type is provided', async () => {
-        const resp = await supertest
-          .post(`/internal/search/ese`)
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
-          .set('kbn-xsrf', 'foo')
-          .send({
-            indexType: 'baad',
-            params: {
-              body: {
-                query: {
-                  match_all: {},
-                },
-              },
-            },
-          })
-          .expect(400);
-
-        verifyErrorResponse(resp.body, 400, 'Unknown indexType');
-      });
-
       it('should return 400 if invalid id is provided', async () => {
         const resp = await supertest
           .post(`/internal/search/ese/123`)

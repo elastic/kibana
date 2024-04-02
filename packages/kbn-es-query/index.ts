@@ -51,12 +51,10 @@ export {
   migrateFilter,
   fromCombinedFilter,
   isOfQueryType,
+  isOfEsqlQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
   getLanguageDisplayName,
-  cleanupESQLQueryForLensSuggestions,
 } from './src/es_query';
 
 export {

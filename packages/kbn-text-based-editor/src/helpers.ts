@@ -53,8 +53,10 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
         // if there's line number encoded in the message use it as new positioning
         // and replace the actual message without it
         if (/Line (\d+):(\d+):/.test(warningMessage)) {
-          const [encodedLine, encodedColumn, innerMessage] = warningMessage.split(':');
-          warningMessage = innerMessage;
+          const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+            warningMessage.split(':');
+          // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
+          warningMessage = additionalInfoMessage ?? innerMessage;
           if (!Number.isNaN(Number(encodedColumn))) {
             startColumn = Number(encodedColumn);
             startLineNumber = Number(encodedLine.replace('Line ', ''));
@@ -116,6 +118,17 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
         endLineNumber: Number(lineNumber),
         severity: monaco.MarkerSeverity.Error,
       };
+    } else if (error.message.includes('expression was aborted')) {
+      return {
+        message: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.aborted', {
+          defaultMessage: 'Request was aborted',
+        }),
+        startColumn: 1,
+        startLineNumber: 1,
+        endColumn: 10,
+        endLineNumber: 1,
+        severity: monaco.MarkerSeverity.Warning,
+      };
     } else {
       // unknown error message
       return {
@@ -136,26 +149,6 @@ export const getDocumentationSections = async (language: string) => {
     description?: string;
     items: Array<{ label: string; description?: JSX.Element }>;
   }> = [];
-  if (language === 'sql') {
-    const {
-      comparisonOperators,
-      logicalOperators,
-      mathOperators,
-      initialSection,
-      aggregateFunctions,
-    } = await import('./sql_documentation_sections');
-    groups.push({
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.howItWorks', {
-        defaultMessage: 'How it works',
-      }),
-      items: [],
-    });
-    groups.push(comparisonOperators, logicalOperators, mathOperators, aggregateFunctions);
-    return {
-      groups,
-      initialSection,
-    };
-  }
   if (language === 'esql') {
     const {
       sourceCommands,

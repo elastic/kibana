@@ -6,16 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { AggregateQuery, Query } from '@kbn/es-query';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
-import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { Observable } from 'rxjs';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 
-export interface NavigationPublicPluginSetup {
+import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
+import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+
+export interface NavigationPublicSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
 }
 
-export interface NavigationPublicPluginStart {
+export type SolutionNavigation = Omit<SolutionNavigationDefinition, 'sideNavComponentGetter'>;
+
+export interface NavigationPublicStart {
   ui: {
     TopNavMenu: (props: TopNavMenuProps<Query>) => React.ReactElement;
     AggregateQueryTopNavMenu: (props: TopNavMenuProps<AggregateQuery>) => React.ReactElement;
@@ -24,8 +31,32 @@ export interface NavigationPublicPluginStart {
       customExtensions?: RegisteredTopNavMenuData[]
     ) => ReturnType<typeof createTopNav>;
   };
+  /** Add a solution navigation to the header nav switcher. */
+  addSolutionNavigation: (solutionNavigation: SolutionNavigation) => void;
+  /** Flag to indicate if the solution navigation is enabled.*/
+  isSolutionNavEnabled$: Observable<boolean>;
 }
 
-export interface NavigationPluginStartDependencies {
+export interface NavigationPublicSetupDependencies {
+  cloud?: CloudSetup;
+  security?: SecurityPluginSetup;
+}
+
+export interface NavigationPublicStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  cloud?: CloudStart;
+  security?: SecurityPluginStart;
+}
+
+export type SolutionNavigationOptInStatus = 'visible' | 'hidden' | 'ask';
+
+export type SolutionType = 'es' | 'oblt' | 'security';
+
+export interface ConfigSchema {
+  solutionNavigation: {
+    featureOn: boolean;
+    enabled: boolean;
+    optInStatus: SolutionNavigationOptInStatus;
+    defaultSolution: SolutionType | 'ask';
+  };
 }

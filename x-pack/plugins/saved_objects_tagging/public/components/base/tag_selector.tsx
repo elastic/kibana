@@ -131,11 +131,13 @@ export const TagSelector: FC<TagSelectorProps> = ({
   // we append the 'create' option if user is allowed to create tags
   const options: TagComboBoxOption[] = useMemo(() => {
     return [
-      ...tags.map((tag) => ({
-        label: tag.name,
-        color: tag.color,
-        value: tag,
-      })),
+      ...tags
+        .filter((tag) => !tag.managed)
+        .map((tag) => ({
+          label: tag.name,
+          color: tag.color,
+          value: tag,
+        })),
       ...(allowCreate ? [createTagOption] : []),
     ];
   }, [allowCreate, tags, createTagOption]);

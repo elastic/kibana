@@ -11,7 +11,7 @@ import type { Moment } from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
@@ -40,8 +40,6 @@ export interface LogRateAnalysisContentWrapperProps {
   stickyHistogram?: boolean;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
-  /** On global timefilter update */
-  setGlobalState?: any;
   /** Timestamp for start of initial analysis */
   initialAnalysisStart?: number | WindowParameters;
   /** Optional time range */
@@ -66,7 +64,6 @@ export interface LogRateAnalysisContentWrapperProps {
 export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
   dataView,
   appDependencies,
-  setGlobalState,
   initialAnalysisStart,
   timeRange,
   esSearchQuery,
@@ -100,7 +97,6 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
               <DatePickerContextProvider {...datePickerDeps}>
                 <LogRateAnalysisContent
                   dataView={dataView}
-                  setGlobalState={setGlobalState}
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}
                   esSearchQuery={esSearchQuery}

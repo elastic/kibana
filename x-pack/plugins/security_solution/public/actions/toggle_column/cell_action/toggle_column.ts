@@ -15,8 +15,8 @@ import {
 import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../common/store';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import { timelineSelectors } from '../../../timelines/store';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';

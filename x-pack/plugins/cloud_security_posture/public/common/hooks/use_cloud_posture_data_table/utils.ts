@@ -7,7 +7,7 @@
 
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
 
-type TablePagination = NonNullable<EuiBasicTableProps<unknown>['pagination']>;
+type TablePagination = NonNullable<EuiBasicTableProps<object>['pagination']>;
 
 export const getPaginationTableParams = (
   params: TablePagination & Pick<Required<TablePagination>, 'pageIndex' | 'pageSize'>,

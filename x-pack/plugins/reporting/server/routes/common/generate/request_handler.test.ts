@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-jest.mock(
-  'puid',
-  () =>
-    class MockPuid {
-      generate() {
-        return 'mock-report-id';
-      }
-    }
-);
+jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
 
 import rison from '@kbn/rison';
 
@@ -123,6 +115,7 @@ describe('Handle request to generate', () => {
           "attempts": 0,
           "completed_at": undefined,
           "created_by": "testymcgee",
+          "error": undefined,
           "execution_time_ms": undefined,
           "jobtype": "printable_pdf_v2",
           "kibana_id": undefined,
@@ -218,10 +211,10 @@ describe('Handle request to generate', () => {
     test('disallows invalid export type', async () => {
       expect(await requestHandler.handleGenerateRequest('neanderthals', mockJobParams))
         .toMatchInlineSnapshot(`
-      Object {
-        "body": "Invalid export-type of neanderthals",
-      }
-    `);
+              Object {
+                "body": "Invalid export-type of neanderthals",
+              }
+          `);
     });
 
     test('disallows unsupporting license', async () => {
@@ -234,10 +227,10 @@ describe('Handle request to generate', () => {
 
       expect(await requestHandler.handleGenerateRequest('csv_searchsource', mockJobParams))
         .toMatchInlineSnapshot(`
-      Object {
-        "body": "seeing this means the license isn't supported",
-      }
-    `);
+              Object {
+                "body": "seeing this means the license isn't supported",
+              }
+          `);
     });
 
     test('disallows invalid browser timezone', async () => {

@@ -13,6 +13,7 @@ import {
   savedObjectsServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -26,6 +27,8 @@ import { AlertingAuthorization } from './authorization';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
@@ -46,8 +49,6 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   ruleTypeRegistry: ruleTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   internalSavedObjectsRepository,
@@ -57,6 +58,10 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   kibanaVersion: '7.10.0',
   authorization:
     alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 const actionsAuthorization = actionsAuthorizationMock.create();
@@ -69,6 +74,8 @@ beforeEach(() => {
   ).getActionsAuthorizationWithRequest.mockReturnValue(actionsAuthorization);
   rulesClientFactoryParams.getSpaceId.mockReturnValue('default');
   rulesClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
+  rulesClientFactoryParams.uiSettings.asScopedToClient =
+    uiSettingsServiceMock.createStartContract().asScopedToClient;
 });
 
 test('creates a rules client with proper constructor arguments when security is enabled', async () => {
@@ -85,7 +92,7 @@ test('creates a rules client with proper constructor arguments when security is 
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
-    includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
+    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'api_key_pending_invalidation'],
   });
 
   expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
@@ -114,8 +121,11 @@ test('creates a rules client with proper constructor arguments when security is 
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+    isSystemAction: expect.any(Function),
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
+    uiSettings: rulesClientFactoryParams.uiSettings,
   });
 });
 
@@ -133,7 +143,7 @@ test('creates a rules client with proper constructor arguments', async () => {
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
-    includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
+    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'api_key_pending_invalidation'],
   });
 
   expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
@@ -158,8 +168,11 @@ test('creates a rules client with proper constructor arguments', async () => {
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+    isSystemAction: expect.any(Function),
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
+    uiSettings: rulesClientFactoryParams.uiSettings,
   });
 });
 

@@ -62,29 +62,6 @@ export const LinksList: React.FC<LinksListProps> = ({
                 <EuiFlexItem>
                   <EuiFormRow
                     label={i18n.translate(
-                      'xpack.stackConnectors.components.pagerDuty.linkURLFieldLabel',
-                      {
-                        defaultMessage: 'URL',
-                      }
-                    )}
-                    fullWidth
-                  >
-                    <TextFieldWithMessageVariables
-                      index={index}
-                      editAction={(key, value, actionIndex) => {
-                        const newLinks = [...links];
-                        newLinks[currentLinkIndex] = { text: link.text, href: value };
-                        editAction('links', newLinks, actionIndex);
-                      }}
-                      messageVariables={messageVariables}
-                      paramsProperty={'linksHref'}
-                      inputTargetValue={link.href}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFormRow
-                    label={i18n.translate(
                       'xpack.stackConnectors.components.pagerDuty.linkTextFieldLabel',
                       {
                         defaultMessage: 'Label',
@@ -102,6 +79,29 @@ export const LinksList: React.FC<LinksListProps> = ({
                       messageVariables={messageVariables}
                       paramsProperty={'linksText'}
                       inputTargetValue={link.text}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.stackConnectors.components.pagerDuty.linkURLFieldLabel',
+                      {
+                        defaultMessage: 'URL',
+                      }
+                    )}
+                    fullWidth
+                  >
+                    <TextFieldWithMessageVariables
+                      index={index}
+                      editAction={(key, value, actionIndex) => {
+                        const newLinks = [...links];
+                        newLinks[currentLinkIndex] = { text: link.text, href: value };
+                        editAction('links', newLinks, actionIndex);
+                      }}
+                      messageVariables={messageVariables}
+                      paramsProperty={'linksHref'}
+                      inputTargetValue={link.href}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>

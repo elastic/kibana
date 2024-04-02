@@ -10,9 +10,33 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { ControlWidth } from '../../types';
-import { ControlGroupInput, ControlGroupReduxState } from '../types';
+import { ControlGroupComponentState, ControlGroupInput, ControlGroupReduxState } from '../types';
 
 export const controlGroupReducers = {
+  setControlWithInvalidSelectionsId: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupComponentState['controlWithInvalidSelectionsId']>
+  ) => {
+    state.componentState.controlWithInvalidSelectionsId = action.payload;
+  },
+  setLastSavedInput: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupComponentState['lastSavedInput']>
+  ) => {
+    state.componentState.lastSavedInput = action.payload;
+  },
+  setLastSavedFilters: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupComponentState['lastSavedFilters']>
+  ) => {
+    state.componentState.lastSavedFilters = action.payload;
+  },
+  setUnpublishedFilters: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupComponentState['unpublishedFilters']>
+  ) => {
+    state.componentState.unpublishedFilters = action.payload;
+  },
   setControlStyle: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['controlStyle']>

@@ -6,8 +6,8 @@
  */
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiText, EuiTitle, EuiSpacer, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiText, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { CONSOLE_COMMANDS } from '../../../management/common/translations';
 import type { EnabledAutomatedResponseActionsCommands } from '../../../../common/endpoint/service/response_actions/constants';
 
 interface EndpointActionTextProps {
@@ -20,11 +20,11 @@ const EndpointActionTextComponent = ({ name, isDisabled }: EndpointActionTextPro
 
   const content = (
     <>
-      <EuiTitle size="xs">
-        <EuiText>{title}</EuiText>
-      </EuiTitle>
+      <EuiText size="s">
+        <b>{title}</b>
+      </EuiText>
       <EuiSpacer size="xs" />
-      <EuiText>{description}</EuiText>
+      <EuiText size="xs">{description}</EuiText>
     </>
   );
   if (isDisabled) {
@@ -43,24 +43,21 @@ const useGetCommandText = (
   switch (name) {
     case 'isolate':
       return {
-        title: (
-          <FormattedMessage
-            id="xpack.securitySolution.responseActions.endpoint.isolate"
-            defaultMessage="Isolate"
-          />
-        ),
-        description: (
-          <FormattedMessage
-            id="xpack.securitySolution.responseActions.endpoint.isolateDescription"
-            defaultMessage="Quarantine a host from the network to prevent further spread of threats and limit potential damage"
-          />
-        ),
-        tooltip: (
-          <FormattedMessage
-            id="xpack.securitySolution.responseActions.endpoint.isolateTooltip"
-            defaultMessage="Insufficient privileges to isolate hosts. Contact your Kibana administrator if you think you should have this permission."
-          />
-        ),
+        title: CONSOLE_COMMANDS.isolate.title,
+        description: CONSOLE_COMMANDS.isolate.about,
+        tooltip: CONSOLE_COMMANDS.isolate.privileges,
+      };
+    case 'kill-process':
+      return {
+        title: CONSOLE_COMMANDS.killProcess.title,
+        description: CONSOLE_COMMANDS.killProcess.about,
+        tooltip: CONSOLE_COMMANDS.killProcess.privileges,
+      };
+    case 'suspend-process':
+      return {
+        title: CONSOLE_COMMANDS.suspendProcess.title,
+        description: CONSOLE_COMMANDS.suspendProcess.about,
+        tooltip: CONSOLE_COMMANDS.suspendProcess.privileges,
       };
     default:
       return {

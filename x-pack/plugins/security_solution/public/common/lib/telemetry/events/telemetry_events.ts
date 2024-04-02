@@ -15,13 +15,21 @@ import {
   entityAlertsClickedEvent,
   entityClickedEvent,
   entityRiskFilteredEvent,
+  addRiskInputToTimelineClickedEvent,
+  RiskInputsExpandedFlyoutOpenedEvent,
+  toggleRiskSummaryClickedEvent,
 } from './entity_analytics';
 import {
   assistantInvokedEvent,
+  assistantSettingToggledEvent,
   assistantMessageSentEvent,
   assistantQuickPrompt,
 } from './ai_assistant';
 import { dataQualityIndexCheckedEvent, dataQualityCheckAllClickedEvent } from './data_quality';
+import {
+  DocumentDetailsFlyoutOpenedEvent,
+  DocumentDetailsTabClickedEvent,
+} from './document_details';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -138,13 +146,19 @@ export const telemetryEvents = [
   assistantInvokedEvent,
   assistantMessageSentEvent,
   assistantQuickPrompt,
+  assistantSettingToggledEvent,
   entityClickedEvent,
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,
+  toggleRiskSummaryClickedEvent,
+  RiskInputsExpandedFlyoutOpenedEvent,
+  addRiskInputToTimelineClickedEvent,
   mlJobUpdateEvent,
   cellActionClickedEvent,
   anomaliesCountClickedEvent,
   dataQualityIndexCheckedEvent,
   dataQualityCheckAllClickedEvent,
   breadCrumbClickedEvent,
+  DocumentDetailsFlyoutOpenedEvent,
+  DocumentDetailsTabClickedEvent,
 ];

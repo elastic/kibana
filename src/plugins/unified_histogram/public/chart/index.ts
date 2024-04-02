@@ -7,3 +7,4 @@
  */
 
 export { Chart } from './chart';
+export { checkChartAvailability } from './check_chart_availability';

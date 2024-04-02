@@ -11,7 +11,9 @@ import { PainlessLang } from './painless';
 import { SQLLang } from './sql';
 import { monaco } from './monaco_imports';
 import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
+import { YAML_LANG_ID } from './yaml';
 import { registerLanguage, registerTheme } from './helpers';
+import { ConsoleLang, CONSOLE_THEME_ID, buildConsoleTheme } from './console';
 
 export const DEFAULT_WORKER_ID = 'default';
 const langSpecificWorkerIds = [
@@ -19,7 +21,8 @@ const langSpecificWorkerIds = [
   PainlessLang.ID,
   ESQLLang.ID,
   monaco.languages.json.jsonDefaults.languageId,
-  'yaml',
+  YAML_LANG_ID,
+  ConsoleLang.ID,
 ];
 
 /**
@@ -29,17 +32,18 @@ registerLanguage(XJsonLang);
 registerLanguage(PainlessLang);
 registerLanguage(SQLLang);
 registerLanguage(ESQLLang);
+registerLanguage(ConsoleLang);
 
 /**
  * Register custom themes
  */
 registerTheme(ESQL_THEME_ID, buildESQlTheme());
+registerTheme(CONSOLE_THEME_ID, buildConsoleTheme());
 
 const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 
-// @ts-ignore
 window.MonacoEnvironment = {
-  // needed for functional tests so that we can get value from 'editor'
+  // @ts-expect-error needed for functional tests so that we can get value from 'editor'
   monaco,
   getWorkerUrl: monacoBundleDir
     ? (_: string, languageId: string) => {
@@ -48,5 +52,5 @@ window.MonacoEnvironment = {
           : DEFAULT_WORKER_ID;
         return `${monacoBundleDir}${workerId}.editor.worker.js`;
       }
-    : () => undefined,
+    : () => '',
 };

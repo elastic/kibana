@@ -158,10 +158,23 @@ describe('IndexPatterns', () => {
 
   test('force field refresh', async () => {
     const id = '1';
+    // make sure initial load and subsequent reloads use same params
+    const args = {
+      allowHidden: undefined,
+      allowNoIndex: true,
+      indexFilter: undefined,
+      metaFields: false,
+      pattern: 'something',
+      rollupIndex: undefined,
+      type: undefined,
+    };
+
     await indexPatterns.get(id);
     expect(apiClient.getFieldsForWildcard).toBeCalledTimes(1);
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith(args);
     await indexPatterns.get(id, undefined, true);
     expect(apiClient.getFieldsForWildcard).toBeCalledTimes(2);
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith(args);
   });
 
   test('getFieldsForWildcard called with allowNoIndex set to true as default ', async () => {

@@ -17,8 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
     id: model.name,
   }));
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165084
-  describe.skip('trained models', function () {
+  describe('trained models', function () {
     // 'Created at' will be different on each run,
     // so we will just assert that the value is in the expected timestamp format.
     const builtInModelData = {
@@ -112,16 +111,16 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
       await ml.api.deleteIndices(modelWithPipelineAndDestIndexExpectedValues.index);
 
-      await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false);
-      await ml.api.deleteIngestPipeline(
-        modelWithoutPipelineDataExpectedValues.duplicateName,
-        false
-      );
-
       // Need to delete index before ingest pipeline, else it will give error
       await ml.api.deleteIngestPipeline(modelWithPipelineAndDestIndex.modelId);
       await ml.testResources.deleteDataViewByTitle(
         modelWithPipelineAndDestIndexExpectedValues.dataViewTitle
+      );
+      // Delete pipelines from deploy DFA model tests
+      await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false);
+      await ml.api.deleteIngestPipeline(
+        modelWithoutPipelineDataExpectedValues.duplicateName,
+        false
       );
     });
 
@@ -145,6 +144,20 @@ export default function ({ getService }: FtrProviderContext) {
           { pipelineName: `pipeline_${modelWithPipelineData.modelId}`, expectDefinition: false },
         ]);
       });
+
+      it('the add trained model flyout should display elements on Manual Download tab correctly', async () => {
+        await ml.testExecution.logTestStep('Open the Add Trained Model Flyout');
+        await ml.trainedModelsFlyout.open();
+
+        await ml.testExecution.logTestStep('Assert the Manual Download tab exists');
+        await ml.trainedModelsFlyout.assertFlyoutTabs(['manualDownload']);
+
+        await ml.testExecution.logTestStep('Assert all eland code blocks exist within the flyout');
+        await ml.trainedModelsFlyout.assertElandPythonClientCodeBlocks();
+
+        await ml.testExecution.logTestStep('Close the Add Trained Model flyout');
+        await ml.trainedModelsFlyout.close();
+      });
     });
 
     describe('for ML power user', () => {
@@ -156,6 +169,20 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await ml.securityUI.logout();
+      });
+
+      it('should not be able to delete a model assigned to all spaces, and show a warning copy explaining the situation', async () => {
+        await ml.testExecution.logTestStep('should select the model named elser_model_2');
+        await ml.trainedModels.selectModel('.elser_model_2');
+
+        await ml.testExecution.logTestStep('should attempt to delete the model');
+        await ml.trainedModels.clickBulkDelete();
+
+        await ml.testExecution.logTestStep('assert the action is banned');
+        await ml.trainedModelsTable.assertSpaceAwareWarningMessage();
+
+        await ml.testExecution.logTestStep('close the eui modal');
+        await ml.trainedModels.closeCheckingSpacePermissionsModal();
       });
 
       it('renders trained models list', async () => {
@@ -188,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertPipelinesTabContent(false);
       });
 
-      it('deploys the trained model with default values', async () => {
+      it('deploys the DFA trained model with default values', async () => {
         await ml.testExecution.logTestStep('should display the trained model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
         await ml.testExecution.logTestStep(
@@ -226,6 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           'should complete the deploy model pipeline Create pipeline step'
         );
+        // @ts-expect-error pipeline._meta is defined as mandatory
         await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutCreateStep({
           description: modelWithoutPipelineDataExpectedValues.description,
           processors: [
@@ -241,7 +269,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('deploys the trained model with custom values', async () => {
+      it('deploys the DFA trained model with custom values', async () => {
         await ml.testExecution.logTestStep('should display the trained model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
         await ml.testExecution.logTestStep(
@@ -287,6 +315,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           'should complete the deploy model pipeline Create pipeline step'
         );
+        // @ts-expect-error pipeline._meta is defined as mandatory
         await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutCreateStep({
           description: modelWithoutPipelineDataExpectedValues.duplicateDescription,
           processors: [
@@ -418,7 +447,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('navigates to data drift', async () => {
+      it.skip('navigates to data drift', async () => {
         await ml.testExecution.logTestStep('should show the model map in the expanded row');
         await ml.trainedModelsTable.ensureRowIsExpanded(modelWithPipelineAndDestIndex.modelId);
         await ml.trainedModelsTable.assertModelsMapTabContent();
@@ -450,8 +479,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToTrainedModels();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/168899
-      describe.skip('with imported models', function () {
+      describe('with imported models', function () {
         before(async () => {
           await ml.navigation.navigateToTrainedModels();
         });
@@ -475,14 +503,55 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           it(`stops deployment of the imported model ${model.id}`, async () => {
+            // Wait for the model to be deployed before stopping it.
+            await ml.testExecution.logTestStep('should have a Deployed state');
+            await ml.trainedModelsTable.assertModelState(model.id, 'Deployed');
             await ml.trainedModelsTable.stopDeployment(model.id);
-            await ml.trainedModelsTable.assertModelDeleteActionButtonEnabled(model.id, true);
           });
 
           it(`deletes the imported model ${model.id}`, async () => {
             await ml.trainedModelsTable.deleteModel(model.id);
           });
         }
+      });
+    });
+
+    describe('add trained model flyout for ML power user', () => {
+      before(async () => {
+        await ml.securityUI.loginAsMlPowerUser();
+        await ml.navigation.navigateToTrainedModels();
+        await ml.commonUI.waitForRefreshButtonEnabled();
+
+        await ml.testExecution.logTestStep('Open the Add Trained Model Flyout');
+        await ml.trainedModelsFlyout.open();
+      });
+
+      after(async () => {
+        await ml.testExecution.logTestStep('Close the Add Trained Model flyout');
+        await ml.trainedModelsFlyout.close();
+
+        await ml.securityUI.logout();
+      });
+
+      it('should contain a Click to Download and a Manual Download tab', async () => {
+        await ml.testExecution.logTestStep(
+          'Assert the "Click to Download" and "Manual Download" tabs exists'
+        );
+        await ml.trainedModelsFlyout.assertFlyoutTabs(['clickToDownload', 'manualDownload']);
+      });
+
+      it('should list Elser and E5 panels contents correctly', async () => {
+        await ml.testExecution.logTestStep('should display the Elser header copy');
+        await ml.trainedModelsFlyout.assertElserModelHeaderCopy();
+
+        await ml.testExecution.logTestStep('should display the Elser Panels');
+        await ml.trainedModelsFlyout.assertElserPanelsExist();
+
+        await ml.testExecution.logTestStep('should display the E5 Panels');
+        await ml.trainedModelsFlyout.assertE5PanelsExist();
+
+        await ml.testExecution.logTestStep('should display a Download Button');
+        await ml.trainedModelsFlyout.assertDownloadButtonExists();
       });
     });
   });

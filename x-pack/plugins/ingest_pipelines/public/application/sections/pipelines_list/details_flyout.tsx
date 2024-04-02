@@ -26,10 +26,12 @@ import {
   EuiButton,
   EuiBadge,
   EuiCodeBlock,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 
+import { deprecatedPipelineBadge } from './table';
 import { PipelineDetailsJsonBlock } from './details_json_block';
 import { stringifyJson } from '../../lib/utils';
 
@@ -120,6 +122,16 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
               <h2>{pipeline.name}</h2>
             </EuiTitle>
           </EuiFlexItem>
+          {pipeline.deprecated ? (
+            <EuiFlexItem grow={false}>
+              {' '}
+              <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
+                <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
+                  {deprecatedPipelineBadge.badge}
+                </EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+          ) : null}
           {pipeline.isManaged ? (
             <EuiFlexItem grow={false}>
               {' '}

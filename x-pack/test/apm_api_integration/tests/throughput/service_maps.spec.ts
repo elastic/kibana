@@ -119,6 +119,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(() => synthtraceEsClient.clean());
 
+      // FLAKY: https://github.com/elastic/kibana/issues/176984
       describe('compare throughput value between service inventory and service maps', () => {
         before(async () => {
           [throughputTransactionValues, throughputMetricValues] = await Promise.all([
@@ -135,6 +136,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
+      // FLAKY: https://github.com/elastic/kibana/issues/176987
       describe('when calling service maps transactions stats api', () => {
         let serviceMapsNodeThroughput: number | null | undefined;
         before(async () => {

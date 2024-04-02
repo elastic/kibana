@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { RuleExecutorOptions } from '../../types';
 import {
   canSkipBoundariesFetch,
@@ -45,6 +46,11 @@ export async function executor({
     boundaryNameField: params.boundaryNameField,
     boundaryIndexQuery: params.boundaryIndexQuery,
   };
+
+  if (!services.alertsClient) {
+    throw new AlertsClientError();
+  }
+
   const { shapesFilters, shapesIdsNamesMap } =
     state.shapesFilters &&
     canSkipBoundariesFetch(boundariesRequestMeta, state.boundariesRequestMeta)
@@ -82,14 +88,13 @@ export async function executor({
   const { activeEntities, inactiveEntities } = getEntitiesAndGenerateAlerts(
     prevLocationMap,
     currLocationMap,
-    services.alertFactory,
+    services.alertsClient,
     shapesIdsNamesMap,
     windowEnd
   );
 
-  const { getRecoveredAlerts } = services.alertFactory.done();
-  for (const recoveredAlert of getRecoveredAlerts()) {
-    const recoveredAlertId = recoveredAlert.getId();
+  for (const recoveredAlert of services.alertsClient.getRecoveredAlerts()) {
+    const recoveredAlertId = recoveredAlert.alert.getId();
     try {
       const context = getRecoveredAlertContext({
         alertId: recoveredAlertId,
@@ -98,7 +103,10 @@ export async function executor({
         windowEnd,
       });
       if (context) {
-        recoveredAlert.setContext(context);
+        services.alertsClient?.setAlertData({
+          id: recoveredAlertId,
+          context,
+        });
       }
     } catch (e) {
       logger.warn(`Unable to set alert context for recovered alert, error: ${e.message}`);

@@ -18,13 +18,14 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
+  mapToFormula,
 } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 
 function getAccessorName(type: 'x' | 'y') {
-  return `${ACCESSOR}_${type}`;
+  return `${type}_${ACCESSOR}`;
 }
 
 function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizationState {
@@ -66,17 +67,10 @@ function buildFormulaLayer(
   layer: LensHeatmapConfig,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   const defaultLayer = {
-    ...getFormulaColumn(
-      ACCESSOR,
-      {
-        value: layer.value,
-      },
-      dataView,
-      formulaAPI
-    ),
+    ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
   };
 
   if (layer.xAxis) {

@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
+import { useEuiTheme } from '@elastic/eui';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import {
   IsolateHostPanel,
@@ -24,13 +25,12 @@ import { PreviewPanel, DocumentDetailsPreviewPanelKey } from './document_details
 import { PreviewPanelProvider } from './document_details/preview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
-import type { RiskInputsExpandableFlyoutProps } from './entity_details/risk_inputs_left';
-import { RiskInputsPanel, RiskInputsPanelKey } from './entity_details/risk_inputs_left';
-import type { AssetDocumentLeftPanelProps } from './entity_details/asset_document_left';
-import {
-  AssetDocumentLeftPanel,
-  AssetDocumentLeftPanelKey,
-} from './entity_details/asset_document_left';
+import type { UserDetailsPanelProps } from './entity_details/user_details_left';
+import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
+import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
+import { HostPanel, HostPanelKey } from './entity_details/host_right';
+import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
+import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -42,14 +42,6 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <RightPanelProvider {...(props as RightPanelProps).params}>
         <RightPanel path={props.path as RightPanelProps['path']} />
-      </RightPanelProvider>
-    ),
-  },
-  {
-    key: AssetDocumentLeftPanelKey,
-    component: (props) => (
-      <RightPanelProvider {...(props as RightPanelProps).params}>
-        <AssetDocumentLeftPanel {...(props as AssetDocumentLeftPanelProps)} />
       </RightPanelProvider>
     ),
   },
@@ -82,15 +74,47 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} />,
   },
   {
-    key: RiskInputsPanelKey,
+    key: UserDetailsPanelKey,
     component: (props) => (
-      <RiskInputsPanel {...(props as RiskInputsExpandableFlyoutProps).params} />
+      <UserDetailsPanel {...({ ...props.params, path: props.path } as UserDetailsPanelProps)} />
+    ),
+  },
+  {
+    key: HostPanelKey,
+    component: (props) => <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} />,
+  },
+  {
+    key: HostDetailsPanelKey,
+    component: (props) => (
+      <HostDetailsPanel {...(props as HostDetailsExpandableFlyoutProps).params} />
     ),
   },
 ];
 
+/**
+ * Flyout used for the Security Solution application
+ * We keep the default EUI 1000 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1001)
+ */
 export const SecuritySolutionFlyout = memo(() => (
   <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />
 ));
 
 SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
+
+/**
+ * Flyout used in Timeline
+ * We set the z-index to 1002 to ensure it is always rendered above Timeline (which has a z-index of 1001)
+ */
+export const TimelineFlyout = memo(() => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <ExpandableFlyout
+      registeredPanels={expandableFlyoutDocumentsPanels}
+      paddingSize="none"
+      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
+    />
+  );
+});
+
+TimelineFlyout.displayName = 'TimelineFlyout';

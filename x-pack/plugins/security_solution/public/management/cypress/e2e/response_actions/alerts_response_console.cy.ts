@@ -9,6 +9,7 @@ import { closeAllToasts } from '../../tasks/toasts';
 import {
   getAlertsTableRows,
   openAlertDetailsView,
+  openAlertDetailsViewFromTimeline,
   openInvestigateInTimelineView,
   openResponderFromEndpointAlertDetails,
 } from '../../screens/alerts';
@@ -26,60 +27,59 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 
-describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-  let policy: PolicyData;
-  let createdHost: CreateAndEnrollEndpointHostResponse;
+describe(
+  'Response console: From Alerts',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
+    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+    let policy: PolicyData;
+    let createdHost: CreateAndEnrollEndpointHostResponse;
 
-  beforeEach(() => {
-    login();
-  });
-
-  before(() => {
-    getEndpointIntegrationVersion().then((version) =>
-      createAgentPolicyTask(version).then((data) => {
-        indexedPolicy = data;
-        policy = indexedPolicy.integrationPolicies[0];
-
-        return enableAllPolicyProtections(policy.id).then(() => {
-          // Create and enroll a new Endpoint host
-          return createEndpointHost(policy.policy_id).then((host) => {
-            createdHost = host as CreateAndEnrollEndpointHostResponse;
-          });
-        });
-      })
-    );
-  });
-
-  after(() => {
-    if (createdHost) {
-      cy.task('destroyEndpointHost', createdHost);
-    }
-
-    if (indexedPolicy) {
-      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
-    }
-
-    if (createdHost) {
-      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
-    }
-  });
-
-  describe('From Alerts', () => {
     let ruleId: string;
     let ruleName: string;
+    beforeEach(() => {
+      login();
+    });
 
     before(() => {
-      loadRule(
-        { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
-        false
-      ).then((data) => {
-        ruleId = data.id;
-        ruleName = data.name;
-      });
+      getEndpointIntegrationVersion()
+        .then((version) =>
+          createAgentPolicyTask(version).then((data) => {
+            indexedPolicy = data;
+            policy = indexedPolicy.integrationPolicies[0];
+
+            return enableAllPolicyProtections(policy.id).then(() => {
+              // Create and enroll a new Endpoint host
+              return createEndpointHost(policy.policy_id).then((host) => {
+                createdHost = host as CreateAndEnrollEndpointHostResponse;
+              });
+            });
+          })
+        )
+        .then(() => {
+          loadRule(
+            { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
+            false
+          ).then((data) => {
+            ruleId = data.id;
+            ruleName = data.name;
+          });
+        });
     });
 
     after(() => {
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost);
+      }
+
+      if (indexedPolicy) {
+        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+      }
+
       if (ruleId) {
         cleanupRule(ruleId);
       }
@@ -105,11 +105,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
 
       getAlertsTableRows().should('have.length.greaterThan', 0);
       openInvestigateInTimelineView();
-      cy.getByTestSubj('timeline-flyout').within(() => {
-        openAlertDetailsView();
-      });
+      openAlertDetailsViewFromTimeline();
       openResponderFromEndpointAlertDetails();
       ensureOnResponder();
     });
-  });
-});
+  }
+);

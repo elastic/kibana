@@ -19,6 +19,7 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
@@ -60,8 +61,9 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const { application } = useStartServices();
-  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
-  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
+  const authz = useAuthz();
+  const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
+  const canReadIntegrationPolicies = authz.integrations.readIntegrationPolicies;
   const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
 
@@ -79,7 +81,6 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         if (packagePolicy.namespace) {
           namespacesValues.add(packagePolicy.namespace);
         }
-
         const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
 
         return {
@@ -95,7 +96,6 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     const namespaceFilterOptions = [...namespacesValues]
       .sort(stringSortAscending)
       .map(toFilterOption);
-
     return [mappedPackagePolicies, namespaceFilterOptions];
   }, [originalPackagePolicies, isPackagePolicyUpgradable]);
 
@@ -225,7 +225,19 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           }
         ),
         render: (namespace: InMemoryPackagePolicy['namespace']) => {
-          return namespace ? <EuiBadge color="hollow">{namespace}</EuiBadge> : '';
+          return namespace ? (
+            <EuiBadge color="hollow">{namespace}</EuiBadge>
+          ) : (
+            <>
+              <EuiBadge color="default">{agentPolicy.namespace}</EuiBadge>
+              <EuiIconTip
+                content="Namespace defined in parent agent policy"
+                position="right"
+                type="iInCircle"
+                color="subdued"
+              />
+            </>
+          );
         },
       },
       {
@@ -238,6 +250,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               return canWriteIntegrationPolicies ? (
                 <PackagePolicyActionsMenu
                   agentPolicy={agentPolicy}
+                  from={'fleet-policy-list'}
                   packagePolicy={packagePolicy}
                   upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {
                     policyId: agentPolicy.id,

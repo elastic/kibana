@@ -4,13 +4,17 @@
 enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.infra.enabled: true
+xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
+
+## Enable the slo plugin
+xpack.slo.enabled: true
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
 
 ## Enable the Serverless Observability plugin
-xpack.serverless.observability.enabled: true
+xpack.serverless.observability.enabled: true 
 
 ## Configure plugins
 
@@ -34,8 +38,12 @@ xpack.observability.createO11yGenericFeatureId: true
 ## APM Serverless Onboarding flow
 xpack.apm.serverlessOnboarding: true
 
+# Synthetics mTLS cert locations
+xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
+xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
+
 # Fleet specific configuration
-xpack.fleet.internal.registry.capabilities: ['apm', 'observability']
+xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.spec.max: '3.0'
 # Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
@@ -46,10 +54,6 @@ xpack.fleet.internal.registry.excludePackages: [
     'beaconing',
     'osquery_manager',
 
-    # synthetics is not enabled yet
-    'synthetics',
-    'synthetics_dashboards',
-
     # Removed in 8.11 integrations
     'cisco',
     'microsoft',
@@ -58,12 +62,13 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # ML integrations
     'dga',
+
+    # Profiling integrations
+    'profiler_agent',
   ]
 
-## Required for force installation of APM Package
+## Required for force installation of integration packages
 xpack.fleet.packages:
-  - name: apm
-    version: latest
   # fleet_server package installed to publish agent metrics
   - name: fleet_server
     version: latest
@@ -83,3 +88,6 @@ xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: false
 xpack.ml.compatibleModuleType: 'observability'
+
+# Disable the embedded Dev Console
+console.ui.embeddedEnabled: false

@@ -74,3 +74,7 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({ indexName }) => 
     />
   );
 };
+
+// Default Export is needed to lazy load this react component
+// eslint-disable-next-line import/no-default-export
+export default IndexDocuments;

@@ -11,7 +11,7 @@ import { isActiveTimeline } from '../../../../helpers';
 
 export interface UseFetchRelatedAlertsByAncestryParams {
   /**
-   * Value of the kibana.alert.ancestors.id field
+   * Id of the document
    */
   documentId: string;
   /**

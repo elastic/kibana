@@ -12,7 +12,7 @@ describe('checkForParseErrors', function () {
   it('returns error from bad JSON', function () {
     const json = '{"foo": {"bar": {"baz": "buzz}}}';
     const result = checkForParseErrors(json);
-    expect(result.error.message).to.be(`Unexpected end of JSON input`);
+    expect(result.error.message).to.be(`Unterminated string in JSON at position 32`);
   });
 
   it('returns parsed value from good JSON', function () {

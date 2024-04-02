@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import type { FilterOptions } from '../../../../common/ui';
 import type { CaseStatuses } from '../../../../common/types/domain';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../../common/constants';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../multi_select_filter';
@@ -28,7 +27,6 @@ interface UseFilterConfigProps {
   countOpenCases: number | null;
   currentUserProfile: CurrentUserProfile;
   hiddenStatuses?: CaseStatuses[];
-  initialFilterOptions: Partial<FilterOptions>;
   isLoading: boolean;
   isSelectorView?: boolean;
   onFilterOptionsChange: FilterChangeHandler;
@@ -44,7 +42,6 @@ export const getSystemFilterConfig = ({
   countOpenCases,
   currentUserProfile,
   hiddenStatuses,
-  initialFilterOptions,
   isLoading,
   isSelectorView,
   onFilterOptionsChange,
@@ -69,7 +66,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          severity: initialFilterOptions.severity || [],
+          severity: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -86,7 +83,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          status: initialFilterOptions.status || [],
+          status: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -107,7 +104,7 @@ export const getSystemFilterConfig = ({
       isAvailable: caseAssignmentAuthorized && !isSelectorView,
       getEmptyOptions: () => {
         return {
-          assignees: initialFilterOptions.assignees || [],
+          assignees: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => {
@@ -128,7 +125,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          tags: initialFilterOptions.tags || [],
+          tags: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -140,6 +137,7 @@ export const getSystemFilterConfig = ({
           onChange={onSystemFilterChange}
           options={mapToMultiSelectOption(tags)}
           selectedOptionKeys={filterOptions?.tags}
+          isLoading={isLoading}
         />
       ),
     },
@@ -150,7 +148,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          category: initialFilterOptions.category || [],
+          category: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -162,6 +160,7 @@ export const getSystemFilterConfig = ({
           onChange={onSystemFilterChange}
           options={mapToMultiSelectOption(categories)}
           selectedOptionKeys={filterOptions?.category}
+          isLoading={isLoading}
         />
       ),
     },
@@ -172,7 +171,7 @@ export const getSystemFilterConfig = ({
       isAvailable: availableSolutions.length > 1,
       getEmptyOptions: () => {
         return {
-          owner: initialFilterOptions.owner || [],
+          owner: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -195,7 +194,6 @@ export const useSystemFilterConfig = ({
   countOpenCases,
   currentUserProfile,
   hiddenStatuses,
-  initialFilterOptions,
   isLoading,
   isSelectorView,
   onFilterOptionsChange,
@@ -210,7 +208,6 @@ export const useSystemFilterConfig = ({
     countOpenCases,
     currentUserProfile,
     hiddenStatuses,
-    initialFilterOptions,
     isLoading,
     isSelectorView,
     onFilterOptionsChange,

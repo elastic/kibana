@@ -6,7 +6,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import dateMath from '@kbn/datemath';
-import { fetchRiskScorePreview } from '../api';
+import { useEntityAnalyticsRoutes } from '../api';
 import type { RiskScorePreviewRequestSchema } from '../../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
 
 export const useRiskScorePreview = ({
@@ -14,9 +14,10 @@ export const useRiskScorePreview = ({
   range,
   filter,
 }: RiskScorePreviewRequestSchema) => {
+  const { fetchRiskScorePreview } = useEntityAnalyticsRoutes();
+
   return useQuery(['POST', 'FETCH_PREVIEW_RISK_SCORE', range, filter], async ({ signal }) => {
     const params: RiskScorePreviewRequestSchema = { data_view_id: dataViewId };
-
     if (range) {
       const startTime = dateMath.parse(range.start)?.utc().toISOString();
       const endTime = dateMath

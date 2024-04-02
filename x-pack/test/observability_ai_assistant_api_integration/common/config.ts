@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { Config, FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { ObservabilityAIAssistantFtrConfigName } from '../configs';
-import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
+import { InheritedServices } from './ftr_provider_context';
 import {
   createObservabilityAIAssistantApiClient,
   ObservabilityAIAssistantAPIClient,
@@ -34,19 +34,69 @@ export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 export interface CreateTest {
   testFiles: string[];
   servers: any;
-  servicesRequiredForTestAnalysis: string[];
   services: InheritedServices & {
-    observabilityAIAssistantAPIClient: (context: InheritedFtrProviderContext) => Promise<{
+    observabilityAIAssistantAPIClient: () => Promise<{
       readUser: ObservabilityAIAssistantAPIClient;
       writeUser: ObservabilityAIAssistantAPIClient;
     }>;
-    observabilityAIAssistantFtrConfig: (
-      context: InheritedFtrProviderContext
-    ) => ObservabilityAIAssistantFtrConfig;
   };
   junit: { reportName: string };
   esTestCluster: any;
   kbnTestServer: any;
+}
+
+export function createObservabilityAIAssistantAPIConfig({
+  config,
+  license,
+  name,
+  kibanaConfig,
+}: {
+  config: Config;
+  license: 'basic' | 'trial';
+  name: string;
+  kibanaConfig?: Record<string, any>;
+}): Omit<CreateTest, 'testFiles'> {
+  const services = config.get('services') as InheritedServices;
+  const servers = config.get('servers');
+  const kibanaServer = servers.kibana as UrlObject;
+
+  const createTest: Omit<CreateTest, 'testFiles'> = {
+    ...config.getAll(),
+    servers,
+    services: {
+      ...services,
+      observabilityAIAssistantAPIClient: async () => {
+        return {
+          readUser: await getObservabilityAIAssistantAPIClient({
+            kibanaServer,
+          }),
+          writeUser: await getObservabilityAIAssistantAPIClient({
+            kibanaServer,
+          }),
+        };
+      },
+    },
+    junit: {
+      reportName: `Observability AI Assistant API Integration tests (${name})`,
+    },
+    esTestCluster: {
+      ...config.get('esTestCluster'),
+      license,
+    },
+    kbnTestServer: {
+      ...config.get('kbnTestServer'),
+      serverArgs: [
+        ...config.get('kbnTestServer.serverArgs'),
+        ...(kibanaConfig
+          ? Object.entries(kibanaConfig).map(([key, value]) =>
+              Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
+            )
+          : []),
+      ],
+    },
+  };
+
+  return createTest;
 }
 
 export function createTestConfig(
@@ -59,49 +109,15 @@ export function createTestConfig(
       require.resolve('../../api_integration/config.ts')
     );
 
-    const services = xPackAPITestsConfig.get('services') as InheritedServices;
-    const servers = xPackAPITestsConfig.get('servers');
-    const kibanaServer = servers.kibana as UrlObject;
-
-    const createTest: CreateTest = {
-      testFiles: [require.resolve('../tests')],
-      servers,
-      servicesRequiredForTestAnalysis: ['observabilityAIAssistantFtrConfig', 'registry'],
-      services: {
-        ...services,
-        observabilityAIAssistantFtrConfig: () => config,
-        observabilityAIAssistantAPIClient: async (_: InheritedFtrProviderContext) => {
-          return {
-            readUser: await getObservabilityAIAssistantAPIClient({
-              kibanaServer,
-            }),
-            writeUser: await getObservabilityAIAssistantAPIClient({
-              kibanaServer,
-            }),
-          };
-        },
-      },
-      junit: {
-        reportName: `Observability AI Assistant API Integration tests (${name})`,
-      },
-      esTestCluster: {
-        ...xPackAPITestsConfig.get('esTestCluster'),
+    return {
+      ...createObservabilityAIAssistantAPIConfig({
+        config: xPackAPITestsConfig,
+        name,
         license,
-      },
-      kbnTestServer: {
-        ...xPackAPITestsConfig.get('kbnTestServer'),
-        serverArgs: [
-          ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-          ...(kibanaConfig
-            ? Object.entries(kibanaConfig).map(([key, value]) =>
-                Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
-              )
-            : []),
-        ],
-      },
+        kibanaConfig,
+      }),
+      testFiles: [require.resolve('../tests')],
     };
-
-    return createTest;
   };
 }
 

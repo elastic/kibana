@@ -20,7 +20,7 @@ import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { setActiveTabTimeline } from '../../../../timelines/store/timeline/actions';
+import { setActiveTabTimeline } from '../../../../timelines/store/actions';
 import { getScopedActions } from '../../../../helpers';
 
 const timelineId = 'timeline-1';

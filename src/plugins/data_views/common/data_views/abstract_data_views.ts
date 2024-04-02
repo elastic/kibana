@@ -24,6 +24,7 @@ import type {
   RuntimeField,
 } from '../types';
 import { removeFieldAttrs } from './utils';
+import { metaUnitsToFormatter } from './meta_units_to_formatter';
 
 import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 
@@ -71,7 +72,7 @@ export abstract class AbstractDataView {
    */
   public timeFieldName: string | undefined;
   /**
-   * Type is used to identify rollup index patterns.
+   * Type is used to identify rollup index patterns or ES|QL data views.
    */
   public type: string | undefined;
   /**
@@ -251,6 +252,11 @@ export abstract class AbstractDataView {
       return fieldFormat;
     }
 
+    const fmt = field.defaultFormatter ? metaUnitsToFormatter[field.defaultFormatter] : undefined;
+    if (fmt) {
+      return this.fieldFormats.getInstance(fmt.id, fmt.params);
+    }
+
     return this.fieldFormats.getDefaultInstance(
       field.type as KBN_FIELD_TYPES,
       field.esTypes as ES_FIELD_TYPES[]
@@ -294,6 +300,23 @@ export abstract class AbstractDataView {
 
   protected setFieldCustomLabelInternal(fieldName: string, customLabel: string | undefined | null) {
     this.setFieldAttrs(fieldName, 'customLabel', customLabel === null ? undefined : customLabel);
+  }
+
+  /**
+   * Set field custom description
+   * @param fieldName name of field to set custom description on
+   * @param customDescription custom description value. If undefined, custom description is removed
+   */
+
+  protected setFieldCustomDescriptionInternal(
+    fieldName: string,
+    customDescription: string | undefined | null
+  ) {
+    this.setFieldAttrs(
+      fieldName,
+      'customDescription',
+      customDescription === null ? undefined : customDescription
+    );
   }
 
   /**

@@ -61,6 +61,25 @@ export class ESTestIndexTool {
               group: {
                 type: 'keyword',
               },
+              host: {
+                properties: {
+                  hostname: {
+                    type: 'text',
+                    fields: {
+                      keyword: {
+                        type: 'keyword',
+                        ignore_above: 256,
+                      },
+                    },
+                  },
+                  id: {
+                    type: 'keyword',
+                  },
+                  name: {
+                    type: 'keyword',
+                  },
+                },
+              },
             },
           },
         },

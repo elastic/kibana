@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Cloud Security Posture', function () {
+    loadTestFile(require.resolve('./rules'));
     loadTestFile(require.resolve('./findings_onboarding'));
     loadTestFile(require.resolve('./findings'));
     loadTestFile(require.resolve('./findings_grouping'));
@@ -18,5 +19,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./vulnerability_dashboard'));
     loadTestFile(require.resolve('./cis_integration'));
     loadTestFile(require.resolve('./findings_old_data'));
+    loadTestFile(require.resolve('./vulnerabilities'));
+    loadTestFile(require.resolve('./vulnerabilities_grouping'));
   });
 }

@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
@@ -29,7 +29,7 @@ const DEFAULT_TO = 'now';
 export const PrevalenceOverview: FC = () => {
   const { eventId, indexName, dataFormattedForFieldBrowser, scopeId, investigationFields } =
     useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goPrevalenceTab = useCallback(() => {
     openLeftPanel({

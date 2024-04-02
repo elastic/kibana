@@ -10,8 +10,8 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
 const ACTIVE_ALERTS_CELL_COUNT = 78;
-const RECOVERED_ALERTS_CELL_COUNT = 180;
-const TOTAL_ALERTS_CELL_COUNT = 240;
+const RECOVERED_ALERTS_CELL_COUNT = 330;
+const TOTAL_ALERTS_CELL_COUNT = 440;
 
 const DISABLED_ALERTS_CHECKBOX = 6;
 const ENABLED_ALERTS_CHECKBOX = 4;
@@ -107,8 +107,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('Correctly applies date picker selections', async () => {
           await retry.try(async () => {
+            await observability.alerts.common.submitQuery('kibana.alert.status: recovered');
             await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
-            // We shouldn't expect any data for the last 15 minutes
+            // We shouldn't expect any recovered alert for the last 15 minutes
             await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
             await observability.alerts.common.getNoDataStateOrFail();
           });
@@ -128,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         describe('When open', async () => {
           before(async () => {
-            await observability.alerts.common.openAlertsFlyout();
+            await observability.alerts.common.openAlertsFlyout(20);
           });
 
           after(async () => {

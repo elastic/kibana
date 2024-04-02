@@ -12,27 +12,36 @@ import type {
   RegistryPolicyTemplate,
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import merge from 'lodash/merge';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import {
   CLOUDBEAT_AWS,
-  CLOUDBEAT_EKS,
-  CLOUDBEAT_VANILLA,
-  CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_GCP,
+  CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
-  SUPPORTED_POLICY_TEMPLATES,
-  SUPPORTED_CLOUDBEAT_INPUTS,
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
+  SUPPORTED_CLOUDBEAT_INPUTS,
+  SUPPORTED_POLICY_TEMPLATES,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import { getDefaultAwsVarsGroup } from './aws_credentials_form/aws_credentials_form';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types_old';
+import type {
+  AwsCredentialsType,
+  PostureInput,
+  CloudSecurityPolicyTemplate,
+} from '../../../common/types_old';
 import { cloudPostureIntegrations } from '../../common/constants';
 import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
+import {
+  DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
+  DEFAULT_AWS_CREDENTIALS_TYPE,
+  DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
+} from './aws_credentials_form/get_aws_credentials_form_options';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -203,15 +212,106 @@ export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): stri
   return armTemplateUrl;
 };
 
+export const getDefaultAwsCredentialsType = (
+  packageInfo: PackageInfo,
+  setupTechnology?: SetupTechnology
+): AwsCredentialsType => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
+  }
+
+  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
+  if (hasCloudFormationTemplate) {
+    return DEFAULT_AWS_CREDENTIALS_TYPE;
+  }
+
+  return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
+};
+
+export const getDefaultAzureCredentialsType = (
+  packageInfo: PackageInfo,
+  setupTechnology?: SetupTechnology
+): string => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return 'service_principal_with_client_secret';
+  }
+
+  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
+  if (hasArmTemplateUrl) {
+    return 'arm_template';
+  }
+
+  return 'managed_identity';
+};
+
+export const getDefaultGcpHiddenVars = (
+  packageInfo: PackageInfo,
+  setupTechnology?: SetupTechnology
+): Record<string, PackagePolicyConfigRecordEntry> => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return {
+      'gcp.credentials.type': {
+        value: 'credentials-json',
+        type: 'text',
+      },
+      setup_access: {
+        value: 'manual',
+        type: 'text',
+      },
+    };
+  }
+
+  const hasCloudShellUrl = !!getCspmCloudShellDefaultValue(packageInfo);
+  if (hasCloudShellUrl) {
+    return {
+      'gcp.credentials.type': {
+        value: 'credentials-none',
+        type: 'text',
+      },
+      setup_access: {
+        value: 'google_cloud_shell',
+        type: 'text',
+      },
+    };
+  }
+
+  return {
+    'gcp.credentials.type': {
+      value: 'credentials-file',
+      type: 'text',
+    },
+    setup_access: {
+      value: 'manual',
+      type: 'text',
+    },
+  };
+};
+
 /**
  * Input vars that are hidden from the user
  */
-export const getPostureInputHiddenVars = (inputType: PostureInput, packageInfo: PackageInfo) => {
+export const getPostureInputHiddenVars = (
+  inputType: PostureInput,
+  packageInfo: PackageInfo,
+  setupTechnology: SetupTechnology
+): Record<string, PackagePolicyConfigRecordEntry> | undefined => {
   switch (inputType) {
     case 'cloudbeat/cis_aws':
       return {
-        'aws.credentials.type': { value: getDefaultAwsVarsGroup(packageInfo), type: 'text' },
+        'aws.credentials.type': {
+          value: getDefaultAwsCredentialsType(packageInfo, setupTechnology),
+          type: 'text',
+        },
       };
+    case 'cloudbeat/cis_azure':
+      return {
+        'azure.credentials.type': {
+          value: getDefaultAzureCredentialsType(packageInfo, setupTechnology),
+          type: 'text',
+        },
+      };
+    case 'cloudbeat/cis_gcp':
+      return getDefaultGcpHiddenVars(packageInfo, setupTechnology);
     case 'cloudbeat/cis_eks':
       return { 'aws.credentials.type': { value: DEFAULT_EKS_VARS_GROUP, type: 'text' } };
     default:
@@ -266,6 +366,10 @@ export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string 
 
   return cloudShellUrl;
 };
+
+export const getAwsCredentialsType = (
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
+): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
 
 export const isBelowMinVersion = (version: string, minVersion: string) => {
   const semanticVersion = semverValid(version);

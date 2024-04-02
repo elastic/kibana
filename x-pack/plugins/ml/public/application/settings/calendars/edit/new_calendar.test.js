@@ -117,6 +117,11 @@ const props = {
           },
         },
       },
+      notifications: {
+        toasts: {
+          addDanger: () => {},
+        },
+      },
     },
   },
 };

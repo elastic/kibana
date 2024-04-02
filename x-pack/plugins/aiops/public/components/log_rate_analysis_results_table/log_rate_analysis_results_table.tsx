@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
   useEuiBackgroundColor,
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiCode,
   EuiIcon,
   EuiIconTip,
   EuiText,
-  EuiTableSortingType,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
-import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
+import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
@@ -136,6 +136,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
                   key,
                   count,
                   examples: [],
+                  regex: '',
                 },
               ]);
         return (

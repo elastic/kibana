@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { isEmpty } from 'lodash/fp';
-import styled from 'styled-components';
 import {
   EuiDescriptionList,
   EuiText,
@@ -15,7 +14,6 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiLoadingSpinner,
-  EuiBadge,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import type {
@@ -25,9 +23,10 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { FieldIcon } from '@kbn/react-field';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
+import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   RequiredFieldArray,
@@ -36,9 +35,9 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import * as descriptionStepI18n from '../../../../detections/components/rules/description_step/translations';
+import * as descriptionStepI18n from '../../../rule_creation_ui/components/description_step/translations';
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
-import { AlertSuppressionTechnicalPreviewBadge } from '../../../../detections/components/rules/description_step/alert_suppression_technical_preview_badge';
+import { AlertSuppressionTechnicalPreviewBadge } from '../../../rule_creation_ui/components/description_step/alert_suppression_technical_preview_badge';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
@@ -46,16 +45,20 @@ import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import type { Duration } from '../../../../detections/pages/detection_engine/rules/types';
 import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
-import { MlJobsDescription } from '../../../../detections/components/rules/ml_jobs_description/ml_jobs_description';
-import { MlJobLink } from '../../../../detections/components/rules/ml_job_link/ml_job_link';
+import { MlJobsDescription } from '../../../rule_creation/components/ml_jobs_description/ml_jobs_description';
+import { MlJobLink } from '../../../rule_creation/components/ml_job_link/ml_job_link';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { TechnicalPreviewBadge } from '../../../../detections/components/rules/technical_preview_badge';
+import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { useAlertSuppression } from '../../logic/use_alert_suppression';
+import {
+  filtersStyles,
+  queryStyles,
+  useRequiredFieldsStyles,
+} from './rule_definition_section.styles';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -67,12 +70,6 @@ const SavedQueryName = ({ savedQueryName }: SavedQueryNameProps) => (
   </EuiText>
 );
 
-const EuiBadgeWrap = styled(EuiBadge)`
-  .euiBadge__text {
-    white-space: pre-wrap !important;
-  }
-`;
-
 interface FiltersProps {
   filters: Filter[];
   dataViewId?: string;
@@ -81,48 +78,42 @@ interface FiltersProps {
 }
 
 const Filters = ({ filters, dataViewId, index, 'data-test-subj': dataTestSubj }: FiltersProps) => {
+  const flattenedFilters = mapAndFlattenFilters(filters);
+
   const { indexPattern } = useRuleIndexPattern({
     dataSourceType: dataViewId ? DataSourceType.DataView : DataSourceType.IndexPatterns,
     index: index ?? [],
     dataViewId,
   });
 
-  const flattenedFilters = mapAndFlattenFilters(filters);
+  const styles = filtersStyles;
 
   return (
-    <EuiFlexGroup wrap responsive={false} gutterSize="xs" data-test-subj={dataTestSubj}>
-      {flattenedFilters.map((filter, idx) => (
-        <EuiFlexItem
-          grow={false}
-          key={`filter-${idx}`}
-          css={{ width: '100%' }}
-          data-test-subj={`filterItem-${filter.meta.key}`}
-        >
-          <EuiBadgeWrap color="hollow">
-            {indexPattern != null ? (
-              <FilterBadgeGroup filters={[filter]} dataViews={[indexPattern]} />
-            ) : (
-              <EuiLoadingSpinner size="m" />
-            )}
-          </EuiBadgeWrap>
-        </EuiFlexItem>
-      ))}
+    <EuiFlexGroup
+      data-test-subj={dataTestSubj}
+      className={styles.flexGroup}
+      wrap
+      responsive={false}
+      gutterSize="xs"
+    >
+      <FilterItems filters={flattenedFilters} indexPatterns={[indexPattern as DataView]} readOnly />
     </EuiFlexGroup>
   );
 };
-
-const QueryContent = styled.div`
-  white-space: pre-wrap;
-`;
 
 interface QueryProps {
   query: string;
   'data-test-subj'?: string;
 }
 
-const Query = ({ query, 'data-test-subj': dataTestSubj = 'query' }: QueryProps) => (
-  <QueryContent data-test-subj={dataTestSubj}>{query}</QueryContent>
-);
+const Query = ({ query, 'data-test-subj': dataTestSubj = 'query' }: QueryProps) => {
+  const styles = queryStyles;
+  return (
+    <div data-test-subj={dataTestSubj} className={styles.content}>
+      {query}
+    </div>
+  );
+};
 
 interface IndexProps {
   index: string[];
@@ -258,42 +249,40 @@ const RuleType = ({ type }: RuleTypeProps) => (
   <EuiText size="s">{getRuleTypeDescription(type)}</EuiText>
 );
 
-const StyledFieldTypeText = styled(EuiText)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-  display: inline;
-`;
-
 interface RequiredFieldsProps {
   requiredFields: RequiredFieldArray;
 }
 
-const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => (
-  <EuiFlexGrid gutterSize={'s'} data-test-subj="requiredFieldsPropertyValue">
-    {requiredFields.map((rF, index) => (
-      <EuiFlexItem grow={false} key={rF.name}>
-        <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
-          <EuiFlexItem grow={false}>
-            <FieldIcon
-              data-test-subj="field-type-icon"
-              type={castEsToKbnFieldTypeName(rF.type)}
-              label={rF.type}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <StyledFieldTypeText
-              grow={false}
-              size={'s'}
-              data-test-subj="requiredFieldsPropertyValueItem"
-            >
-              {` ${rF.name}${index + 1 !== requiredFields.length ? ', ' : ''}`}
-            </StyledFieldTypeText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGrid>
-);
+const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
+  const styles = useRequiredFieldsStyles();
+  return (
+    <EuiFlexGrid data-test-subj="requiredFieldsPropertyValue" gutterSize={'s'}>
+      {requiredFields.map((rF, index) => (
+        <EuiFlexItem grow={false} key={rF.name}>
+          <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
+            <EuiFlexItem grow={false}>
+              <FieldIcon
+                data-test-subj="field-type-icon"
+                type={castEsToKbnFieldTypeName(rF.type)}
+                label={rF.type}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText
+                data-test-subj="requiredFieldsPropertyValueItem"
+                className={styles.fieldNameText}
+                grow={false}
+                size="xs"
+              >
+                {` ${rF.name}${index + 1 !== requiredFields.length ? ', ' : ''}`}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
+  );
+};
 
 interface TimelineTitleProps {
   timelineTitle: string;
@@ -427,7 +416,7 @@ const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
-  { alertSuppressionForThresholdRuleEnabled }: Partial<ExperimentalFeatures>
+  isSuppressionEnabled: boolean
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -657,7 +646,7 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if ('alert_suppression' in rule && rule.alert_suppression) {
+  if (isSuppressionEnabled && 'alert_suppression' in rule && rule.alert_suppression) {
     if ('group_by' in rule.alert_suppression) {
       definitionSectionListItems.push({
         title: (
@@ -669,16 +658,14 @@ const prepareDefinitionSectionListItems = (
       });
     }
 
-    if (rule.type !== 'threshold' || alertSuppressionForThresholdRuleEnabled) {
-      definitionSectionListItems.push({
-        title: (
-          <span data-test-subj="alertSuppressionDurationPropertyTitle">
-            <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
-          </span>
-        ),
-        description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
-      });
-    }
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="alertSuppressionDurationPropertyTitle">
+          <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
+        </span>
+      ),
+      description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
+    });
 
     if ('missing_fields_strategy' in rule.alert_suppression) {
       definitionSectionListItems.push({
@@ -741,15 +728,13 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
-  const alertSuppressionForThresholdRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForThresholdRuleEnabled'
-  );
+  const { isSuppressionEnabled } = useAlertSuppression(rule.type);
 
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
     isInteractive,
     savedQuery,
-    { alertSuppressionForThresholdRuleEnabled }
+    isSuppressionEnabled
   );
 
   return (

@@ -6,7 +6,11 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
-import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -14,6 +18,7 @@ import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { RecoveredActionGroup } from '../../../../../common';
@@ -24,12 +29,18 @@ import {
   enabledRuleForBulkOps1,
   enabledRuleForBulkOps2,
   enabledRuleForBulkOps3,
-  returnedRuleForBulkDelete1,
-  returnedRuleForBulkDelete2,
-  returnedRuleForBulkDelete3,
+  returnedRuleForBulkOps1,
+  returnedRuleForBulkOps2,
+  returnedRuleForBulkOps3,
   siemRuleForBulkOps1,
+  enabledRuleForBulkOpsWithActions1,
+  enabledRuleForBulkOpsWithActions2,
+  returnedRuleForBulkEnableWithActions1,
+  returnedRuleForBulkEnableWithActions2,
 } from '../../../../rules_client/tests/test_helpers';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -79,13 +90,16 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
   id: 'id2',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   success: false,
   error: {
     error: '',
@@ -103,11 +117,12 @@ setGlobalDate();
 
 describe('bulkDelete', () => {
   let rulesClient: RulesClient;
+  let actionsClient: jest.Mocked<ActionsClient>;
 
   const mockCreatePointInTimeFinderAsInternalUser = (
     response = {
       saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2, enabledRuleForBulkOps3],
-    }
+    } as unknown
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -159,14 +174,56 @@ describe('bulkDelete', () => {
       },
       validLegacyConsumers: [],
     });
+
+    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action:id');
+    rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
+  });
+
+  test('should successfully delete two rule and return right actions', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+    });
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
+    });
+
+    const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith(
+      [enabledRuleForBulkOps1, enabledRuleForBulkOps2].map(({ id }) => ({
+        id,
+        type: 'alert',
+      })),
+      undefined
+    );
+
+    expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id2']);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
+      expect.anything(),
+      expect.anything()
+    );
+    expect(result).toStrictEqual({
+      rules: [returnedRuleForBulkEnableWithActions1, returnedRuleForBulkEnableWithActions2],
+      errors: [],
+      total: 2,
+      taskIdsFailedToBeDeleted: [],
+    });
   });
 
   test('should try to delete rules, two successful and one with 500 error', async () => {
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [
-        { id: 'id1', type: 'alert', success: true },
+        { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
         getBulkOperationStatusErrorResponse(500),
-        { id: 'id3', type: 'alert', success: true },
+        { id: 'id3', type: RULE_SAVED_OBJECT_TYPE, success: true },
       ],
     });
 
@@ -176,7 +233,7 @@ describe('bulkDelete', () => {
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith(
       [enabledRuleForBulkOps1, enabledRuleForBulkOps2, enabledRuleForBulkOps3].map(({ id }) => ({
         id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
       })),
       undefined
     );
@@ -190,7 +247,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRuleForBulkDelete1, returnedRuleForBulkDelete3],
+      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps3],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -201,7 +258,7 @@ describe('bulkDelete', () => {
     unsecuredSavedObjectsClient.bulkDelete
       .mockResolvedValueOnce({
         statuses: [
-          { id: 'id1', type: 'alert', success: true },
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
           getBulkOperationStatusErrorResponse(409),
         ],
       })
@@ -254,7 +311,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRuleForBulkDelete1],
+      rules: [returnedRuleForBulkOps1],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -265,7 +322,7 @@ describe('bulkDelete', () => {
     unsecuredSavedObjectsClient.bulkDelete
       .mockResolvedValueOnce({
         statuses: [
-          { id: 'id1', type: 'alert', success: true },
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
           getBulkOperationStatusErrorResponse(409),
         ],
       })
@@ -273,7 +330,7 @@ describe('bulkDelete', () => {
         statuses: [
           {
             id: 'id2',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             success: true,
           },
         ],
@@ -312,7 +369,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRuleForBulkDelete1, returnedRuleForBulkDelete2],
+      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2],
       errors: [],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -356,9 +413,9 @@ describe('bulkDelete', () => {
   test('should not mark API keys for invalidation if the user is authenticated using an api key', async () => {
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [
-        { id: 'id3', type: 'alert', success: true },
-        { id: 'id1', type: 'alert', success: true },
-        { id: 'id2', type: 'alert', success: true },
+        { id: 'id3', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true },
       ],
     });
 
@@ -376,15 +433,15 @@ describe('bulkDelete', () => {
     test('should return task id if deleting task failed', async () => {
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
         statuses: [
-          { id: 'id1', type: 'alert', success: true },
-          { id: 'id2', type: 'alert', success: true },
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true },
         ],
       });
       taskManager.bulkRemove.mockImplementation(async () => ({
         statuses: [
           {
             id: 'id1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             success: true,
           },
           getBulkOperationStatusErrorResponse(500),
@@ -404,8 +461,8 @@ describe('bulkDelete', () => {
     test('should not throw an error if taskManager throw an error', async () => {
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
         statuses: [
-          { id: 'id1', type: 'alert', success: true },
-          { id: 'id2', type: 'alert', success: true },
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true },
         ],
       });
       taskManager.bulkRemove.mockImplementation(() => {
@@ -424,20 +481,20 @@ describe('bulkDelete', () => {
       mockCreatePointInTimeFinderAsInternalUser();
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
         statuses: [
-          { id: 'id1', type: 'alert', success: true },
-          { id: 'id2', type: 'alert', success: true },
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true },
         ],
       });
       taskManager.bulkRemove.mockImplementation(async () => ({
         statuses: [
           {
             id: 'id1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             success: true,
           },
           {
             id: 'id2',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             success: true,
           },
         ],
@@ -468,9 +525,9 @@ describe('bulkDelete', () => {
 
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
         statuses: [
-          { id: enabledRuleForBulkOps1.id, type: 'alert', success: true },
-          { id: enabledRuleForBulkOps2.id, type: 'alert', success: true },
-          { id: siemRuleForBulkOps1.id, type: 'alert', success: true },
+          { id: enabledRuleForBulkOps1.id, type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: enabledRuleForBulkOps2.id, type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: siemRuleForBulkOps1.id, type: RULE_SAVED_OBJECT_TYPE, success: true },
         ],
       });
 
@@ -501,8 +558,8 @@ describe('bulkDelete', () => {
     test('logs audit event when deleting rules', async () => {
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
         statuses: [
-          { id: 'id1', type: 'alert', success: true },
-          { id: 'id2', type: 'alert', success: true },
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true },
         ],
       });
 
@@ -511,12 +568,12 @@ describe('bulkDelete', () => {
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[0][0]?.kibana).toEqual({
-        saved_object: { id: 'id1', type: 'alert' },
+        saved_object: { id: 'id1', type: RULE_SAVED_OBJECT_TYPE },
       });
       expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[1][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[1][0]?.kibana).toEqual({
-        saved_object: { id: 'id2', type: 'alert' },
+        saved_object: { id: 'id2', type: RULE_SAVED_OBJECT_TYPE },
       });
     });
 
@@ -525,7 +582,7 @@ describe('bulkDelete', () => {
         throw new Error('Unauthorized');
       });
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
-        statuses: [{ id: 'id1', type: 'alert', success: true }],
+        statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
       });
 
       await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrowError(
@@ -541,7 +598,7 @@ describe('bulkDelete', () => {
         throw new Error('Error');
       });
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
-        statuses: [{ id: 'id1', type: 'alert', success: true }],
+        statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
       });
 
       await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrowError(

@@ -18,3 +18,4 @@ export * from './netflow';
 export * from './test_providers';
 export * from './timeline_results';
 export * from './utils';
+export * from './create_store';

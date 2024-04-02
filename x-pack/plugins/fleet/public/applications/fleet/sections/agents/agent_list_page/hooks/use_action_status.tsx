@@ -47,10 +47,6 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
     if (refreshAgentActivity) {
       refreshActions();
     }
-    return () => {
-      setCurrentActions([]);
-      setIsFirstLoading(true);
-    };
   }, [refreshActions, refreshAgentActivity]);
 
   const abortUpgrade = useCallback(

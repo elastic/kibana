@@ -14,7 +14,7 @@ import path from 'path';
 import type { JobType, MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 type SyncFlyoutObjectType =
@@ -89,13 +89,10 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElement(1);
-      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-      const title: string = await titleElement.getVisibleText();
+      const title = await toasts.getTitleByIndex(1);
       expect(title).to.match(/^\d+ item[s]? synchronized$/);
 
-      const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
-      await dismissButton.click();
+      await toasts.dismissByIndex(1);
     },
 
     async assertADJobRowSpaces(adJobId: string, expectedSpaces: string[]) {
@@ -131,9 +128,9 @@ export function MachineLearningStackManagementJobsProvider({
       await retry.tryForTime(5000, async () => {
         await testSubjects.click(
           `mlSpacesManagementTable-${mlSavedObjectType} row-${jobId} > mlJobListRowManageSpacesButton`,
-          1000
+          5000
         );
-        await testSubjects.existOrFail('share-to-space-flyout', { timeout: 2000 });
+        await testSubjects.existOrFail('share-to-space-flyout', { timeout: 5000 });
       });
     },
 
@@ -142,27 +139,22 @@ export function MachineLearningStackManagementJobsProvider({
       await testSubjects.missingOrFail('share-to-space-flyout', { timeout: 2000 });
     },
 
-    async selectShareToSpacesMode(inputTestSubj: 'shareToExplicitSpacesId' | 'shareToAllSpacesId') {
-      // The input element can not be clicked directly.
-      // Instead, we need to click the parent label
-      const getInputLabel = async () => {
-        const input = await testSubjects.find(inputTestSubj, 1000);
-        return await input.findByXpath('./../../..'); // Clicks the parent label 3 levels up
-      };
+    async selectShareToSpacesMode(
+      buttonTestSubj: 'shareToExplicitSpacesId' | 'shareToAllSpacesId'
+    ) {
       await retry.tryForTime(5000, async () => {
-        const labelElement = await getInputLabel();
-        await labelElement.click();
+        const button = await testSubjects.find(buttonTestSubj, 1000);
+        await button.click();
 
-        const checked = await testSubjects.getAttribute(inputTestSubj, 'checked', 1000);
-        expect(checked).to.eql('true', `Input '${inputTestSubj}' should be checked`);
+        const isPressed = await button.getAttribute('aria-pressed');
+        expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
 
-        // sometimes the checked attribute of the input is set but it's not actually
+        // sometimes the aria-pressed attribute of the button is set but it's not actually
         // selected, so we're also checking the class of the corresponding label
-        const updatedLabelElement = await getInputLabel();
-        const labelClasses = await updatedLabelElement.getAttribute('class');
+        const labelClasses = await button.getAttribute('class');
         expect(labelClasses).to.contain(
           'euiButtonGroupButton-isSelected',
-          `Label for '${inputTestSubj}' should be selected`
+          `Label for '${buttonTestSubj}' should be selected`
         );
       });
     },
@@ -286,13 +278,10 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElement(1);
-      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-      const title: string = await titleElement.getVisibleText();
+      const title = await toasts.getTitleByIndex(1);
       expect(title).to.match(/^\d+ job[s]? successfully imported$/);
 
-      const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
-      await dismissButton.click();
+      await toasts.dismissByIndex(1);
 
       // check that the flyout is closed
       await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout', { timeout: 60 * 1000 });
@@ -354,12 +343,10 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElement(1);
-      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-      const title: string = await titleElement.getVisibleText();
+      const title = await toasts.getTitleByIndex(1);
       expect(title).to.match(/^Your file is downloading in the background$/);
 
-      await toasts.dismissAllToastsWithChecks();
+      await toasts.dismissAllWithChecks();
 
       // check that the flyout is closed
       await testSubjects.missingOrFail('mlJobMgmtExportJobsFlyout', { timeout: 60 * 1000 });

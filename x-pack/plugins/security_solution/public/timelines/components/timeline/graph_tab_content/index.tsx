@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { timelineSelectors } from '../../../store/timeline';
+import { timelineSelectors } from '../../../store';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import type { TimelineId } from '../../../../../common/types/timeline';
 import { GraphOverlay } from '../../graph_overlay';

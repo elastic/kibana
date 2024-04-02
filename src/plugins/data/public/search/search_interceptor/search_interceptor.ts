@@ -50,13 +50,7 @@ import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plug
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { BfetchRequestError } from '@kbn/bfetch-error';
-import {
-  EsError,
-  isEsError,
-  isPainlessError,
-  PainlessError,
-  renderSearchError,
-} from '@kbn/search-errors';
+import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -238,9 +232,15 @@ export class SearchInterceptor {
           }
         );
       };
-      return isPainlessError(e)
-        ? new PainlessError(e, openInInspector, options?.indexPattern)
-        : new EsError(e, openInInspector);
+      return createEsError(
+        e,
+        openInInspector,
+        {
+          application: this.application,
+          docLinks: this.docLinks,
+        },
+        options?.indexPattern
+      );
     }
 
     return e instanceof Error ? e : new Error(e.message);
@@ -585,10 +585,7 @@ export class SearchInterceptor {
       return;
     }
 
-    const searchErrorDisplay = renderSearchError({
-      error: e,
-      application: this.application,
-    });
+    const searchErrorDisplay = renderSearchError(e);
 
     if (searchErrorDisplay) {
       this.deps.toasts.addDanger({

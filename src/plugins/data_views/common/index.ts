@@ -11,6 +11,7 @@ export {
   DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
+  MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
 } from './constants';
 
 export { LATEST_VERSION } from './content_management/v1/constants';

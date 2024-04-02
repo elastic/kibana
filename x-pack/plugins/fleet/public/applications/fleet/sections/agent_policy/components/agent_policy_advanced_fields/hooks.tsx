@@ -16,7 +16,7 @@ import {
   useGetDownloadSources,
   useGetFleetServerHosts,
 } from '../../../../hooks';
-import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../../../../../common/constants';
+import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
 import {
   getAllowedOutputTypeForPolicy,
   policyHasFleetServer,
@@ -99,28 +99,27 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
 
     return [
       getDefaultOutput(defaultOutputName, defaultOutputDisabled, defaultOutputDisabledMessage),
-      ...outputsRequest.data.items
-        .filter((item) => item.type !== outputType.RemoteElasticsearch)
-        .map((item) => {
-          const isOutputTypeUnsupported = !allowedOutputTypes.includes(item.type);
+      ...outputsRequest.data.items.map((item) => {
+        const isOutputTypeUnsupported = !allowedOutputTypes.includes(item.type);
+        const isInternalOutput = !!item.is_internal;
 
-          return {
-            value: item.id,
-            inputDisplay: getOutputLabel(
-              item.name,
-              isOutputTypeUnsupported ? (
-                <FormattedMessage
-                  id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
-                  defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
-                  values={{
-                    outputType: item.type,
-                  }}
-                />
-              ) : undefined
-            ),
-            disabled: !isPolicyPerOutputAllowed || isOutputTypeUnsupported,
-          };
-        }),
+        return {
+          value: item.id,
+          inputDisplay: getOutputLabel(
+            item.name,
+            isOutputTypeUnsupported ? (
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
+                values={{
+                  outputType: item.type,
+                }}
+              />
+            ) : undefined
+          ),
+          disabled: !isPolicyPerOutputAllowed || isOutputTypeUnsupported || isInternalOutput,
+        };
+      }),
     ];
   }, [outputsRequest, isPolicyPerOutputAllowed, allowedOutputTypes]);
 
@@ -135,10 +134,12 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     return [
       getDefaultOutput(defaultOutputName),
       ...outputsRequest.data.items.map((item) => {
+        const isInternalOutput = !!item.is_internal;
+
         return {
           value: item.id,
           inputDisplay: item.name,
-          disabled: !isPolicyPerOutputAllowed,
+          disabled: !isPolicyPerOutputAllowed || isInternalOutput,
         };
       }),
     ];
@@ -223,9 +224,12 @@ export function useFleetServerHostsOptions(agentPolicy: Partial<NewAgentPolicy |
       ...fleetServerHostsRequest.data.items
         .filter((item) => !item.is_default)
         .map((item) => {
+          const isInternalFleetServerHost = !!item.is_internal;
+
           return {
             value: item.id,
             inputDisplay: item.name,
+            disabled: isInternalFleetServerHost,
           };
         }),
     ];

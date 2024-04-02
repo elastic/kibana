@@ -15,7 +15,7 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 
 * *PNG Reports* &mdash; Generate and download PNG files of dashboards and visualizations. PNG reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
-* *CSV Reports* &mdash; Generate and download CSV files of saved searches.
+* *CSV Reports* &mdash; Generate CSV reports of saved searches. <<csv-limitations,Certain limitations apply>>.
 
 * *CSV Download* &mdash; Generate and download CSV files of *Lens* visualizations.
 
@@ -71,6 +71,12 @@ NOTE: Reports are stored in {es} and managed by the `kibana-reporting` {ilm}
 ({ilm-init}) policy. By default, the policy stores reports forever. To learn
 more about {ilm-init} policies, refer to the {es}
 {ref}/index-lifecycle-management.html[{ilm-init} documentation].
+
+[float]
+[[csv-limitations]]
+=== CSV reports limitations
+
+include::reporting-csv-limitations.asciidoc[]
 
 [float]
 [[share-a-direct-link]]

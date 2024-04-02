@@ -22,6 +22,29 @@ const formattedRollingTime = (date: string, duration: string, modulate: boolean)
   ).format(format);
 
 describe('getNextRollingTime', () => {
+  describe('DST', () => {
+    it('returns the correct date when entering DST', () => {
+      expect(formattedRollingTime('2023-03-11 23:59:59:999', '24h', true)).toEqual(
+        '2023-03-12 00:00:00:000'
+      );
+    });
+    it('returns the correct date within DST', () => {
+      expect(formattedRollingTime('2023-06-15 23:59:59:999', '24h', true)).toEqual(
+        '2023-06-16 00:00:00:000'
+      );
+    });
+    it('returns the correct date when exiting DST', () => {
+      expect(formattedRollingTime('2023-11-05 23:59:59:999', '24h', true)).toEqual(
+        '2023-11-06 00:00:00:000'
+      );
+    });
+    it('returns the correct date outside of DST', () => {
+      expect(formattedRollingTime('2023-01-07 23:59:59:999', '24h', true)).toEqual(
+        '2023-01-08 00:00:00:000'
+      );
+    });
+  });
+
   describe('when `modulate` is false', () => {
     it('increments the current time by the interval', () => {
       expect(formattedRollingTime('2010-10-20 04:27:12:000', '15m', false)).toEqual(

@@ -45,6 +45,13 @@ describe('<ToolbarButton />', () => {
       component.find('button').simulate('click');
       expect(mockHandler).toHaveBeenCalled();
     });
+
+    test('accepts an onBlur handler', () => {
+      const mockHandler = jest.fn();
+      const component = mountWithIntl(<ToolbarButton label="Create chart" onBlur={mockHandler} />);
+      component.find('button').simulate('blur');
+      expect(mockHandler).toHaveBeenCalled();
+    });
   });
 
   describe('iconButton', () => {

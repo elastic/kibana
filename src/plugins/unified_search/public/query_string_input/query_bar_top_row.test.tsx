@@ -114,6 +114,7 @@ describe('QueryBarTopRowTopRow', () => {
   const QUERY_INPUT_SELECTOR = 'QueryStringInputUI';
   const TIMEPICKER_SELECTOR = 'Memo(EuiSuperDatePicker)';
   const REFRESH_BUTTON_SELECTOR = 'EuiSuperUpdateButton';
+  const CANCEL_BUTTON_SELECTOR = '[data-test-subj="queryCancelButton"]';
   const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
   const TEXT_BASED_EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
 
@@ -346,41 +347,6 @@ describe('QueryBarTopRowTopRow', () => {
     `);
   });
 
-  it('should render query input bar with hideRunQueryText when configured', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        query: sqlQuery,
-        isDirty: false,
-        screenTitle: 'SQL Screen',
-        timeHistory: mockTimeHistory,
-        indexPatterns: [stubIndexPattern],
-        showDatePicker: true,
-        dateRangeFrom: 'now-7d',
-        dateRangeTo: 'now',
-        hideTextBasedRunQueryLabel: true,
-      })
-    );
-
-    expect(component.find(TEXT_BASED_EDITOR).prop('hideRunQueryText')).toBe(true);
-  });
-
-  it('should render query input bar with hideRunQueryText as undefined if not configured', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        query: sqlQuery,
-        isDirty: false,
-        screenTitle: 'SQL Screen',
-        timeHistory: mockTimeHistory,
-        indexPatterns: [stubIndexPattern],
-        showDatePicker: true,
-        dateRangeFrom: 'now-7d',
-        dateRangeTo: 'now',
-      })
-    );
-
-    expect(component.find(TEXT_BASED_EDITOR).prop('hideRunQueryText')).toBe(undefined);
-  });
-
   it('Should render custom data view picker', () => {
     const dataViewPickerOverride = <div data-test-subj="dataViewPickerOverride" />;
     const { getByTestId } = render(
@@ -395,6 +361,42 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     expect(getByTestId('dataViewPickerOverride')).toBeInTheDocument();
+  });
+
+  it('Should render cancel button when loading', () => {
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        isLoading: true,
+        onCancel: () => {},
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        showDatePicker: true,
+        showSubmitButton: true,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+        timeHistory: mockTimeHistory,
+      })
+    );
+
+    expect(component.find(CANCEL_BUTTON_SELECTOR).length).not.toBe(0);
+  });
+
+  it('Should NOT render cancel button when not loading', () => {
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        isLoading: false,
+        onCancel: () => {},
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        showDatePicker: true,
+        showSubmitButton: true,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+        timeHistory: mockTimeHistory,
+      })
+    );
+
+    expect(component.find(CANCEL_BUTTON_SELECTOR).length).toBe(0);
   });
 });
 

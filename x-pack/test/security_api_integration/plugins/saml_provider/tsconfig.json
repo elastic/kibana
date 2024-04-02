@@ -11,6 +11,7 @@
     "target/**/*",
   ],
   "kbn_references": [
+    "@kbn/cloud-plugin",
     "@kbn/core",
     "@kbn/security-api-integration-helpers",
   ]

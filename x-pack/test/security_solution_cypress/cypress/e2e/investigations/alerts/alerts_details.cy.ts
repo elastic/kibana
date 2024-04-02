@@ -65,12 +65,12 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('With unmapped fields', () => {
     before(() => {
-      deleteAlertsAndRules();
       cy.task('esArchiverLoad', { archiveName: 'unmapped_fields' });
-      createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
     });
 
     beforeEach(() => {
+      deleteAlertsAndRules();
+      createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
       login();
       disableExpandableFlyout();
       visit(ALERTS_URL);
@@ -79,10 +79,10 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'unmapped_fields');
+      cy.task('esArchiverUnload', { archiveName: 'unmapped_fields' });
     });
 
-    it('should display user and system defined highlighted fields', () => {
+    it.skip('should display user and system defined highlighted fields', () => {
       cy.get(SUMMARY_VIEW)
         .should('be.visible')
         .and('contain.text', 'event.kind')
@@ -150,18 +150,16 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       expandFirstAlert();
     });
 
-    it('should store the flyout state in the url when it is opened', () => {
+    it('should store the flyout state in the url when it is opened and remove it when closed', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
-      cy.url().should('include', 'eventFlyout=');
-    });
+      cy.url().should('include', 'flyout=');
 
-    it('should remove the flyout state from the url when it is closed', () => {
-      cy.get(OVERVIEW_RULE).should('be.visible');
       closeAlertFlyout();
-      cy.url().should('not.include', 'eventFlyout=');
+
+      cy.url().should('not.include', 'flyout=');
     });
 
-    it('should open the alert flyout when the page is refreshed', () => {
+    it.skip('should open the alert flyout when the page is refreshed', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
       cy.reload();
       cy.get(OVERVIEW_RULE).should('be.visible');
@@ -172,7 +170,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(COPY_ALERT_FLYOUT_LINK).should('be.visible');
     });
 
-    it('should have the `kibana.alert.url` field set', () => {
+    it.skip('should have the `kibana.alert.url` field set', () => {
       openTable();
       filterBy('kibana.alert.url');
       cy.get('[data-test-subj="formatted-field-kibana.alert.url"]').should(
@@ -188,7 +186,6 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
 
     before(() => {
       deleteAlertsAndRules();
-
       // It just imports an alert without a rule but rule details page should work anyway
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });

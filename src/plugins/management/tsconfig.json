@@ -25,10 +25,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
     "@kbn/serverless",
-    "@kbn/management-settings-application",
-    "@kbn/react-kibana-context-render",
-    "@kbn/shared-ux-utility",
-    "@kbn/shared-ux-error-boundary"
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/deeplinks-management",
   ],
   "exclude": [
     "target/**/*"

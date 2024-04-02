@@ -36,7 +36,7 @@ export const DocumentsOverview: React.FC<DocumentsProps> = ({
         <EuiFlexItem>
           <EuiFlexGroup direction="row" alignItems="center">
             <EuiFlexItem className="enterpriseSearchDocumentsHeader" grow={false}>
-              <EuiTitle>
+              <EuiTitle size="s">
                 <h2>
                   {i18n.translate('searchIndexDocuments.documents.title', {
                     defaultMessage: 'Browse documents',

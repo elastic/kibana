@@ -11,6 +11,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { fromKueryExpression } from '@kbn/es-query';
@@ -25,6 +26,8 @@ import { SavedObject } from '@kbn/core/server';
 import { RawRule } from '../../types';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -59,8 +62,11 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -74,7 +80,7 @@ const RuleIntervalSeconds = 1;
 
 const BaseRuleSavedObject: SavedObject<RawRule> = {
   id: '1',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
     enabled: true,
     name: 'rule-name',
@@ -139,7 +145,7 @@ const findResults = {
           },
           {
             rel: 'primary',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
             type_id: 'example.always-firing',
           },
@@ -188,7 +194,7 @@ const findResults = {
           },
           {
             rel: 'primary',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
             type_id: 'example.always-firing',
           },
@@ -237,7 +243,7 @@ const findResults = {
           },
           {
             rel: 'primary',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
             type_id: 'example.always-firing',
           },
@@ -286,7 +292,7 @@ const findResults = {
           },
           {
             rel: 'primary',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
             type_id: 'example.always-firing',
           },
@@ -335,7 +341,7 @@ const findResults = {
           },
           {
             rel: 'primary',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
             type_id: 'example.always-firing',
           },
@@ -450,7 +456,7 @@ describe('getActionErrorLog()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         page: 1,
@@ -480,7 +486,7 @@ describe('getActionErrorLog()', () => {
 
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         page: 3,
@@ -554,7 +560,7 @@ describe('getActionErrorLog()', () => {
             action: 'rule_get_action_error_log',
             outcome: 'success',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -576,7 +582,7 @@ describe('getActionErrorLog()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {

@@ -1543,7 +1543,7 @@
             "label": "isProjectEnabled",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\") => boolean"
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\") => boolean"
             ],
             "path": "src/plugins/presentation_util/public/services/labs/types.ts",
             "deprecated": false,
@@ -1557,7 +1557,7 @@
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs/types.ts",
                 "deprecated": false,
@@ -1575,7 +1575,7 @@
             "label": "getProjectIDs",
             "description": [],
             "signature": [
-              "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:canvas:byValueEmbeddable\", \"labs:dashboard:linksPanel\"]"
+              "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:canvas:byValueEmbeddable\"]"
             ],
             "path": "src/plugins/presentation_util/public/services/labs/types.ts",
             "deprecated": false,
@@ -1591,7 +1591,7 @@
             "label": "getProject",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\") => ",
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\") => ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -1612,7 +1612,7 @@
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs/types.ts",
                 "deprecated": false,
@@ -1630,7 +1630,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"canvas\" | \"dashboard\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\", ",
+              "(solutions?: (\"canvas\" | \"dashboard\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -1670,7 +1670,7 @@
             "label": "setProjectStatus",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
             ],
             "path": "src/plugins/presentation_util/public/services/labs/types.ts",
             "deprecated": false,
@@ -1684,7 +1684,7 @@
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs/types.ts",
                 "deprecated": false,
@@ -1858,8 +1858,8 @@
             "label": "store",
             "description": [],
             "signature": [
-              "EnhancedStore",
-              "<ReduxEmbeddableStateType, ",
+              "ToolkitStore",
+              "<ReduxEmbeddableStateType & {}, ",
               "AnyAction",
               ", Middlewares<ReduxEmbeddableStateType>>"
             ],
@@ -1937,7 +1937,7 @@
             "label": "getState",
             "description": [],
             "signature": [
-              "() => ReduxEmbeddableStateType"
+              "() => ReduxEmbeddableStateType & {}"
             ],
             "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
             "deprecated": false,
@@ -2027,8 +2027,8 @@
             "label": "store",
             "description": [],
             "signature": [
-              "EnhancedStore",
-              "<ReduxStateType, ",
+              "ToolkitStore",
+              "<ReduxStateType & {}, ",
               "AnyAction",
               ", Middlewares<ReduxStateType>>"
             ],
@@ -2106,7 +2106,7 @@
             "label": "getState",
             "description": [],
             "signature": [
-              "() => ReduxStateType"
+              "() => ReduxStateType & {}"
             ],
             "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
             "deprecated": false,
@@ -2542,6 +2542,20 @@
                 "text": "SaveModalState"
               },
               ") => React.ReactNode)"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.mustCopyOnSaveMessage",
+            "type": "string",
+            "tags": [],
+            "label": "mustCopyOnSaveMessage",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
             "deprecated": false,
@@ -3079,7 +3093,7 @@
         "label": "getProjectIDs",
         "description": [],
         "signature": [
-          "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:canvas:byValueEmbeddable\", \"labs:dashboard:linksPanel\"]"
+          "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:canvas:byValueEmbeddable\"]"
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -3381,7 +3395,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\""
+              "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\""
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false,
@@ -3595,7 +3609,7 @@
         "label": "ProjectID",
         "description": [],
         "signature": [
-          "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\""
+          "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -3688,7 +3702,7 @@
         "label": "projectIDs",
         "description": [],
         "signature": [
-          "readonly [\"labs:dashboard:deferBelowFold\", \"labs:canvas:byValueEmbeddable\", \"labs:dashboard:linksPanel\"]"
+          "readonly [\"labs:dashboard:deferBelowFold\", \"labs:canvas:byValueEmbeddable\"]"
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -3800,111 +3814,6 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DEFER_BELOW_FOLD.solutions",
-                "type": "Array",
-                "tags": [],
-                "label": "solutions",
-                "description": [],
-                "signature": [
-                  "\"dashboard\"[]"
-                ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-common.projects.DASHBOARD_LINKS_PANEL",
-            "type": "Object",
-            "tags": [],
-            "label": "[DASHBOARD_LINKS_PANEL]",
-            "description": [],
-            "path": "src/plugins/presentation_util/common/labs.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "\"labs:dashboard:linksPanel\""
-                ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.isActive",
-                "type": "boolean",
-                "tags": [],
-                "label": "isActive",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.isDisplayed",
-                "type": "boolean",
-                "tags": [],
-                "label": "isDisplayed",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.environments",
-                "type": "Array",
-                "tags": [],
-                "label": "environments",
-                "description": [],
-                "signature": [
-                  "(\"kibana\" | \"browser\" | \"session\")[]"
-                ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.solutions",
                 "type": "Array",
                 "tags": [],
                 "label": "solutions",

@@ -21,7 +21,7 @@ module.exports = () => ({
         // TECHNICALLY stage 2, but for all intents and purposes it's stage 3
         //
         // See https://github.com/babel/proposals/issues/12 for progress
-        require.resolve('@babel/plugin-proposal-class-properties'),
+        require.resolve('@babel/plugin-transform-class-properties'),
 
         // Optional Chaining proposal is stage 4 (https://github.com/tc39/proposal-optional-chaining)
         // Need this since we are using TypeScript 3.7+
@@ -58,5 +58,17 @@ module.exports = () => ({
         allowDeclareFields: true,
       },
     ],
+
+    // need to run before the typescript preset, else the param decorators
+    // are stripped from the imports
+    {
+      plugins: [
+        // Required for TypeScript decorators support
+        require.resolve('babel-plugin-transform-typescript-metadata'),
+
+        // Required for TypeScript decorators support
+        [require.resolve('@babel/plugin-proposal-decorators'), { version: 'legacy' }],
+      ],
+    },
   ],
 });

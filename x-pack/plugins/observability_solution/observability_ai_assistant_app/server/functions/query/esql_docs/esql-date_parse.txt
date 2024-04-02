@@ -1,0 +1,18 @@
+DATE_PARSE
+
+Syntax
+DATE_PARSE([format,] date_string)
+Parameters
+format
+The date format. Refer to the
+DateTimeFormatter
+documentation for the syntax. If null, the function returns null.
+date_string
+Date expression as a string. If null or an empty string, the function returns
+null.
+DescriptionReturns a date by parsing the second argument using the format specified in the
+first argument.Example
+```esql
+ROW date_string = "2022-05-06"
+| EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
+```

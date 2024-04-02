@@ -30,20 +30,24 @@
             "pluginId": "navigation",
             "scope": "public",
             "docId": "kibNavigationPluginApi",
-            "section": "def-public.NavigationPublicPluginSetup",
-            "text": "NavigationPublicPluginSetup"
+            "section": "def-public.NavigationPublicSetup",
+            "text": "NavigationPublicSetup"
           },
           ", ",
           {
             "pluginId": "navigation",
             "scope": "public",
             "docId": "kibNavigationPluginApi",
-            "section": "def-public.NavigationPublicPluginStart",
-            "text": "NavigationPublicPluginStart"
+            "section": "def-public.NavigationPublicStart",
+            "text": "NavigationPublicStart"
           },
-          ", object, object>"
+          ", ",
+          "NavigationPublicSetupDependencies",
+          ", ",
+          "NavigationPublicStartDependencies",
+          ">"
         ],
-        "path": "src/plugins/navigation/public/plugin.ts",
+        "path": "src/plugins/navigation/public/plugin.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +61,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -76,9 +80,11 @@
                     "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<object>"
+                  "<",
+                  "ConfigSchema",
+                  ">"
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -94,7 +100,7 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "(core: ",
+              "(_core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "common",
@@ -107,11 +113,11 @@
                 "pluginId": "navigation",
                 "scope": "public",
                 "docId": "kibNavigationPluginApi",
-                "section": "def-public.NavigationPublicPluginSetup",
-                "text": "NavigationPublicPluginSetup"
+                "section": "def-public.NavigationPublicSetup",
+                "text": "NavigationPublicSetup"
               }
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -120,7 +126,7 @@
                 "id": "def-public.NavigationPublicPlugin.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "core",
+                "label": "_core",
                 "description": [],
                 "signature": [
                   {
@@ -132,7 +138,7 @@
                   },
                   "<object, unknown>"
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -156,18 +162,18 @@
                 "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              ", { unifiedSearch }: ",
-              "NavigationPluginStartDependencies",
+              ", depsStart: ",
+              "NavigationPublicStartDependencies",
               ") => ",
               {
                 "pluginId": "navigation",
                 "scope": "public",
                 "docId": "kibNavigationPluginApi",
-                "section": "def-public.NavigationPublicPluginStart",
-                "text": "NavigationPublicPluginStart"
+                "section": "def-public.NavigationPublicStart",
+                "text": "NavigationPublicStart"
               }
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -187,7 +193,7 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -197,12 +203,12 @@
                 "id": "def-public.NavigationPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ unifiedSearch }",
+                "label": "depsStart",
                 "description": [],
                 "signature": [
-                  "NavigationPluginStartDependencies"
+                  "NavigationPublicStartDependencies"
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -220,7 +226,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -808,6 +814,36 @@
     "misc": [
       {
         "parentPluginId": "navigation",
+        "id": "def-public.SolutionNavigationOptInStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "SolutionNavigationOptInStatus",
+        "description": [],
+        "signature": [
+          "\"hidden\" | \"visible\" | \"ask\""
+        ],
+        "path": "src/plugins/navigation/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-public.SolutionType",
+        "type": "Type",
+        "tags": [],
+        "label": "SolutionType",
+        "description": [],
+        "signature": [
+          "\"security\" | \"es\" | \"oblt\""
+        ],
+        "path": "src/plugins/navigation/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
         "id": "def-public.TopNavMenuBadgeProps",
         "type": "Type",
         "tags": [],
@@ -883,10 +919,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "navigation",
-      "id": "def-public.NavigationPublicPluginSetup",
+      "id": "def-public.NavigationPublicSetup",
       "type": "Interface",
       "tags": [],
-      "label": "NavigationPublicPluginSetup",
+      "label": "NavigationPublicSetup",
       "description": [],
       "path": "src/plugins/navigation/public/types.ts",
       "deprecated": false,
@@ -894,7 +930,7 @@
       "children": [
         {
           "parentPluginId": "navigation",
-          "id": "def-public.NavigationPublicPluginSetup.registerMenuItem",
+          "id": "def-public.NavigationPublicSetup.registerMenuItem",
           "type": "Function",
           "tags": [],
           "label": "registerMenuItem",
@@ -911,7 +947,7 @@
           "children": [
             {
               "parentPluginId": "navigation",
-              "id": "def-public.NavigationPublicPluginSetup.registerMenuItem.$1",
+              "id": "def-public.NavigationPublicSetup.registerMenuItem.$1",
               "type": "Object",
               "tags": [],
               "label": "menuItem",
@@ -931,10 +967,10 @@
     },
     "start": {
       "parentPluginId": "navigation",
-      "id": "def-public.NavigationPublicPluginStart",
+      "id": "def-public.NavigationPublicStart",
       "type": "Interface",
       "tags": [],
-      "label": "NavigationPublicPluginStart",
+      "label": "NavigationPublicStart",
       "description": [],
       "path": "src/plugins/navigation/public/types.ts",
       "deprecated": false,
@@ -942,7 +978,7 @@
       "children": [
         {
           "parentPluginId": "navigation",
-          "id": "def-public.NavigationPublicPluginStart.ui",
+          "id": "def-public.NavigationPublicStart.ui",
           "type": "Object",
           "tags": [],
           "label": "ui",
@@ -1027,6 +1063,62 @@
           "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "navigation",
+          "id": "def-public.NavigationPublicStart.addSolutionNavigation",
+          "type": "Function",
+          "tags": [],
+          "label": "addSolutionNavigation",
+          "description": [
+            "Add a solution navigation to the header nav switcher."
+          ],
+          "signature": [
+            "(solutionNavigation: ",
+            "SolutionNavigation",
+            ") => void"
+          ],
+          "path": "src/plugins/navigation/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "navigation",
+              "id": "def-public.NavigationPublicStart.addSolutionNavigation.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "solutionNavigation",
+              "description": [],
+              "signature": [
+                "SolutionNavigation"
+              ],
+              "path": "src/plugins/navigation/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "navigation",
+          "id": "def-public.NavigationPublicStart.isSolutionNavigationEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "isSolutionNavigationEnabled",
+          "description": [
+            "\nUse this handler verify if the solution navigation is enabled."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "src/plugins/navigation/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": [
+            "true if the solution navigation is enabled, false otherwise."
+          ]
         }
       ],
       "lifecycle": "start",
@@ -1046,7 +1138,53 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "navigation",
+        "id": "def-common.DEFAULT_SOLUTION_NAV_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_SOLUTION_NAV_UI_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"solutionNav:default\""
+        ],
+        "path": "src/plugins/navigation/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-common.ENABLE_SOLUTION_NAV_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_SOLUTION_NAV_UI_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"solutionNav:enable\""
+        ],
+        "path": "src/plugins/navigation/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-common.OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"solutionNav:optInStatus\""
+        ],
+        "path": "src/plugins/navigation/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

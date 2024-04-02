@@ -80,6 +80,10 @@ export interface FieldConfiguration {
    */
   customLabel?: string;
   /**
+   * Custom description
+   */
+  customDescription?: string;
+  /**
    * Popularity - used for discover
    */
   popularity?: number;
@@ -183,6 +187,10 @@ export type FieldAttrSet = {
    * Custom field label
    */
   customLabel?: string;
+  /**
+   * Custom field description
+   */
+  customDescription?: string;
   /**
    * Popularity count - used for discover
    */
@@ -314,6 +322,9 @@ export interface GetFieldsOptions {
   includeUnmapped?: boolean;
   fields?: string[];
   allowHidden?: boolean;
+  forceRefresh?: boolean;
+  fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
@@ -322,6 +333,7 @@ export interface GetFieldsOptions {
 export interface FieldsForWildcardResponse {
   fields: FieldSpec[];
   indices: string[];
+  etag?: string;
 }
 
 /**
@@ -406,6 +418,10 @@ export type FieldSpec = DataViewFieldBase & {
    */
   aggregatable: boolean;
   /**
+   * True if field is empty
+   */
+  isNull?: boolean;
+  /**
    * True if can be read from doc values
    */
   readFromDocValues?: boolean;
@@ -417,6 +433,10 @@ export type FieldSpec = DataViewFieldBase & {
    * Custom label for field, used for display in kibana
    */
   customLabel?: string;
+  /**
+   * Custom description for field, used for display in kibana
+   */
+  customDescription?: string;
   /**
    * Runtime field definition
    */
@@ -456,6 +476,8 @@ export type FieldSpec = DataViewFieldBase & {
    * Name of parent field for composite runtime field subfields.
    */
   parentName?: string;
+
+  defaultFormatter?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
@@ -542,4 +564,6 @@ export interface HasDataService {
 
 export interface ClientConfigType {
   scriptedFieldsEnabled?: boolean;
+  dataTiersExcludedForFields?: string;
+  fieldListCachingEnabled?: boolean;
 }

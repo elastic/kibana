@@ -7,6 +7,10 @@
 
 import * as rt from 'io-ts';
 
-export const deleteTimelinesSchema = rt.type({
+const searchId = rt.partial({ searchIds: rt.array(rt.string) });
+
+const baseDeleteTimelinesSchema = rt.type({
   savedObjectIds: rt.array(rt.string),
 });
+
+export const deleteTimelinesSchema = rt.intersection([baseDeleteTimelinesSchema, searchId]);

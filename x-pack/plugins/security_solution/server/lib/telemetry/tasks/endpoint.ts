@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import type { ITelemetryEventsSender } from '../sender';
 import type {
@@ -16,9 +17,11 @@ import type {
   EndpointMetadataDocument,
   ESClusterInfo,
   ESLicense,
+  Nullable,
 } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
+import type { ITaskMetricsService } from '../task_metrics.types';
 import {
   addDefaultAdvancedPolicyConfigSettings,
   batchTelemetryRecords,
@@ -26,11 +29,10 @@ import {
   extractEndpointPolicyConfig,
   getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
-  tlog,
-  createTaskMetric,
+  newTelemetryLogger,
 } from '../helpers';
 import type { PolicyData } from '../../../../common/endpoint/types';
-import { TELEMETRY_CHANNEL_ENDPOINT_META, TASK_METRICS_CHANNEL } from '../constants';
+import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
 
 // Endpoint agent uses this Policy ID while it's installing.
 const DefaultEndpointPolicyIdToIgnore = '00000000-0000-0000-0000-000000000000';
@@ -45,9 +47,11 @@ const EmptyFleetAgentResponse = {
 const usageLabelPrefix: string[] = ['security_telemetry', 'endpoint_task'];
 
 export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
+  const taskName = 'Security Solution Telemetry Endpoint Metrics and Info task';
+  const taskType = 'security:endpoint-meta-telemetry';
   return {
-    type: 'security:endpoint-meta-telemetry',
-    title: 'Security Solution Telemetry Endpoint Metrics and Info task',
+    type: taskType,
+    title: taskName,
     interval: '24h',
     timeout: '5m',
     version: '1.0.0',
@@ -57,10 +61,16 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
+      taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const startTime = Date.now();
-      const taskName = 'Security Solution Telemetry Endpoint Metrics and Info task';
+      const log = newTelemetryLogger(logger.get('endpoint'));
+      const trace = taskMetricsService.start(taskType);
+
+      log.l(
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
+
       try {
         if (!taskExecutionPeriod.last) {
           throw new Error('last execution timestamp is required');
@@ -93,10 +103,8 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          * a metric document(s) exists for an EP agent we map to fleet agent and policy
          */
         if (endpointData.endpointMetrics === undefined) {
-          tlog(logger, `no endpoint metrics to report`);
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, true, startTime),
-          ]);
+          log.l('no endpoint metrics to report');
+          taskMetricsService.end(trace);
           return 0;
         }
 
@@ -105,10 +113,8 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         };
 
         if (endpointMetricsResponse.aggregations === undefined) {
-          tlog(logger, `no endpoint metrics to report`);
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, true, startTime),
-          ]);
+          log.l(`no endpoint metrics to report`);
+          taskMetricsService.end(trace);
           return 0;
         }
 
@@ -141,10 +147,8 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         const agentsResponse = endpointData.fleetAgentsResponse;
 
         if (agentsResponse === undefined) {
-          tlog(logger, 'no fleet agent information available');
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, true, startTime),
-          ]);
+          log.l('no fleet agent information available');
+          taskMetricsService.end(trace);
           return 0;
         }
 
@@ -167,7 +171,12 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             policyInfo !== undefined &&
             !endpointPolicyCache.has(policyInfo)
           ) {
-            const agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
+            let agentPolicy: Nullable<AgentPolicy>;
+            try {
+              agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
+            } catch (err) {
+              log.l(`error fetching policy config due to ${err?.message}`);
+            }
             const packagePolicies = agentPolicy?.package_policies;
 
             if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
@@ -227,7 +236,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          * a metadata document(s) exists for an EP agent we map to fleet agent and policy
          */
         if (endpointData.endpointMetadata === undefined) {
-          tlog(logger, `no endpoint metadata to report`);
+          log.l(`no endpoint metadata to report`);
         }
 
         const { body: endpointMetadataResponse } = endpointData.endpointMetadata as unknown as {
@@ -235,7 +244,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         };
 
         if (endpointMetadataResponse.aggregations === undefined) {
-          tlog(logger, `no endpoint metadata to report`);
+          log.l(`no endpoint metadata to report`);
         }
 
         const endpointMetadata =
@@ -347,21 +356,15 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           for (const batch of batches) {
             await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, batch);
           }
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, true, startTime),
-          ]);
+          taskMetricsService.end(trace);
           return telemetryPayloads.length;
         } catch (err) {
           logger.warn(`could not complete endpoint alert telemetry task due to ${err?.message}`);
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, false, startTime, err.message),
-          ]);
+          taskMetricsService.end(trace, err);
           return 0;
         }
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, false, startTime, err.message),
-        ]);
+        taskMetricsService.end(trace, err);
         return 0;
       }
     },

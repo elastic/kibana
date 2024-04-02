@@ -8,6 +8,9 @@
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+
+import type { Logger } from '@kbn/core/server';
 
 import type { DownloadSourceSOAttributes } from '../types';
 
@@ -132,9 +135,13 @@ function getMockedSoClient(options: { defaultDownloadSourceId?: string; sameName
 
   return soClient;
 }
-
+let mockedLogger: jest.Mocked<Logger>;
 describe('Download Service', () => {
   beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+  afterEach(() => {
     mockedAgentPolicyService.list.mockClear();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
     mockedAgentPolicyService.removeDefaultSourceFromAll.mockReset();

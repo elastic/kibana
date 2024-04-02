@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import Boom from '@hapi/boom';
 
-import type { ValueOf } from '@elastic/eui';
+import { isEqual } from 'lodash';
 
-import { outputType } from '../../../common/constants';
+import { SERVERLESS_DEFAULT_OUTPUT_ID, outputType } from '../../../common/constants';
 
 import type {
   DeleteOutputRequestSchema,
@@ -26,7 +26,6 @@ import type {
   GetOneOutputResponse,
   GetOutputsResponse,
   Output,
-  OutputType,
   PostLogstashApiKeyResponse,
 } from '../../../common/types';
 import { outputService } from '../../services/output';
@@ -105,7 +104,7 @@ export const putOutputHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const outputUpdate = request.body;
   try {
-    validateOutputServerless(outputUpdate.type);
+    await validateOutputServerless(outputUpdate, soClient, request.params.outputId);
     ensureNoDuplicateSecrets(outputUpdate);
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
     const output = await outputService.get(soClient, request.params.outputId);
@@ -141,7 +140,7 @@ export const postOutputHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     const { id, ...newOutput } = request.body;
-    validateOutputServerless(newOutput.type);
+    await validateOutputServerless(newOutput, soClient);
     ensureNoDuplicateSecrets(newOutput);
     const output = await outputService.create(soClient, esClient, newOutput, { id });
     if (output.is_default || output.is_default_monitoring) {
@@ -158,10 +157,33 @@ export const postOutputHandler: RequestHandler<
   }
 };
 
-function validateOutputServerless(type?: ValueOf<OutputType>): void {
+async function validateOutputServerless(
+  output: Partial<Output>,
+  soClient: SavedObjectsClientContract,
+  outputId?: string
+): Promise<void> {
   const cloudSetup = appContextService.getCloud();
-  if (cloudSetup?.isServerlessEnabled && type === outputType.RemoteElasticsearch) {
+  if (!cloudSetup?.isServerlessEnabled) {
+    return;
+  }
+  if (output.type === outputType.RemoteElasticsearch) {
     throw Boom.badRequest('Output type remote_elasticsearch not supported in serverless');
+  }
+  // Elasticsearch outputs must have the default host URL in serverless.
+  // No need to validate on update if hosts are not passed.
+  if (outputId && !output.hosts) {
+    return;
+  }
+  const defaultOutput = await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
+  let originalOutput;
+  if (outputId) {
+    originalOutput = await outputService.get(soClient, outputId);
+  }
+  const type = output.type || originalOutput?.type;
+  if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
+    throw Boom.badRequest(
+      `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
+    );
   }
 }
 
@@ -212,7 +234,7 @@ export const postLogstashApiKeyHandler: RequestHandler = async (context, request
 export const getLatestOutputHealth: RequestHandler<
   TypeOf<typeof GetLatestOutputHealthRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
     const outputHealth = await outputService.getLatestOutputHealth(
       esClient,

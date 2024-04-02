@@ -57,7 +57,7 @@ import {
   USER,
 } from '@kbn/lists-plugin/common/constants.mock';
 import { of } from 'rxjs';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
@@ -453,8 +453,9 @@ describe('alert actions', () => {
             version: null,
             savedSearchId: null,
             savedSearch: null,
-            isDiscoverSavedSearchLoaded: false,
             isDataProviderVisible: false,
+            rowHeight: 3,
+            sampleSize: 500,
           },
           to: '2018-11-05T19:03:25.937Z',
           ruleNote: '# this is some markdown documentation',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IS_SERVERLESS, CLOUD_SERVERLESS } from '../env_var_names_constants';
 import { getDataTestSubjectSelector } from '../helpers/common';
 import { GLOBAL_FILTERS_CONTAINER } from './date_picker';
 
@@ -89,8 +90,6 @@ export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu
 export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-case-action"]';
 
 export const ATTACH_TO_NEW_CASE_BUTTON = '[data-test-subj="add-to-new-case-action"]';
-
-export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
 
 export const HOST_RISK_HEADER_COLUMN =
   '[data-test-subj="dataGridHeaderCell-host.risk.calculated_level"]';
@@ -199,14 +198,23 @@ export const ALERT_UNASSIGN_CONTEXT_MENU_ITEM =
   '[data-test-subj="remove-alert-assignees-menu-item"]';
 
 export const ALERT_ASSIGNEES_SELECT_PANEL =
-  '[data-test-subj="securitySolutionAssigneesApplyPanel"]';
+  '[data-test-subj="securitySolutionAssigneesSelectable"]';
 
 export const ALERT_ASSIGNEES_UPDATE_BUTTON =
   '[data-test-subj="securitySolutionAssigneesApplyButton"]';
 
-export const ALERT_USER_AVATAR = (assignee: string) =>
-  `[data-test-subj="securitySolutionUsersAvatar-${assignee}"][title='${assignee}']`;
+export const ALERT_ASSIGNEES_SELECTABLE_OPTIONS =
+  '[data-test-subj="securitySolutionAssigneesSelectable"] .euiSelectableListItem[role="option"]';
 
+export const ALERT_USER_AVATAR = (assignee: string) => {
+  let expectedAssignee = assignee;
+
+  if (Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
+    expectedAssignee = `test ${expectedAssignee}`;
+  }
+
+  return `[data-test-subj^="securitySolutionUsersAvatar-"][title='${expectedAssignee}']`;
+};
 export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatarsPanel"]';
 
 export const ALERT_ASIGNEES_COLUMN =
@@ -221,3 +229,6 @@ export const ALERT_DETAILS_ASSIGN_BUTTON =
   '[data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"]';
 
 export const ALERT_DETAILS_TAKE_ACTION_BUTTON = '[data-test-subj="take-action-dropdown-btn"]';
+
+export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
+export const TOOLTIP = '[data-test-subj="message-tool-tip"]';

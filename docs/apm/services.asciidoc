@@ -33,9 +33,14 @@ image::apm/images/apm-service-group.png[Example view of service group in the APM
 To enable Service groups, open {kib} and navigate to **Stack Management** > **Advanced Settings** > **Observability**,
 and enable the **Service groups feature**.
 
-To create a service group, navigate to **Observability** > **APM** > **Services** and select **Create group**.
-Specify a name, color, and description.
-Then, using the <<kuery-query, Kibana Query Language (KQL)>>, specify a query to select services for the group.
+To create a service group:
+
+. Navigate to **Observability** > **APM** > **Services**.
+. Switch to **Service groups**.
+. Click **Create group**.
+. Specify a name, color, and description.
+. Click **Select services**.
+. Specify a <<kuery-query, Kibana Query Language (KQL)>> query to select services for the group.
 Services that match the query within the last 24 hours will be assigned to the group.
 
 [NOTE]
@@ -54,4 +59,3 @@ Not sure where to get started? Here are some sample queries you can build from:
 
 * Group services by environment--in this example, "production": `service.environment : "production"`
 * Group services by name--this example groups those that end in "beat": `service.name : *beat` (matches services named "Auditbeat", "Heartbeat", "Filebeat", etc.)
-* Group services with a high transaction duration in the last 24 hours: `transaction.duration.us >= 50000000`

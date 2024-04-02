@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSortedCspBenchmarkRulesTemplates } from './v1';
+import { getSortedCspBenchmarkRulesTemplates } from './utils';
 import { CspBenchmarkRule } from '../../../../common/types/latest';
 
 describe('getSortedCspBenchmarkRules', () => {
@@ -20,7 +20,7 @@ describe('getSortedCspBenchmarkRules', () => {
       { metadata: { benchmark: {} } },
     ] as CspBenchmarkRule[];
 
-    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
+    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules, 'asc');
 
     expect(sortedCspBenchmarkRules).toEqual([
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
@@ -36,7 +36,7 @@ describe('getSortedCspBenchmarkRules', () => {
   it('edge case - returns empty array if input is empty', () => {
     const cspBenchmarkRules: CspBenchmarkRule[] = [];
 
-    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
+    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules, 'asc');
 
     expect(sortedCspBenchmarkRules).toEqual([]);
   });
@@ -46,7 +46,7 @@ describe('getSortedCspBenchmarkRules', () => {
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
     ] as CspBenchmarkRule[];
 
-    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
+    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules, 'asc');
 
     expect(sortedCspBenchmarkRules).toEqual([
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
@@ -61,7 +61,7 @@ describe('getSortedCspBenchmarkRules', () => {
       { metadata: { benchmark: { rule_number: null } } },
     ] as CspBenchmarkRule[];
 
-    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
+    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules, 'asc');
 
     expect(sortedCspBenchmarkRules).toEqual([
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
@@ -78,7 +78,7 @@ describe('getSortedCspBenchmarkRules', () => {
       { metadata: { benchmark: { rule_number: '3.0.0' } } },
     ] as CspBenchmarkRule[];
 
-    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
+    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules, 'asc');
 
     expect(sortedCspBenchmarkRules).toEqual([
       { metadata: { benchmark: { rule_number: '1.0.0' } } },

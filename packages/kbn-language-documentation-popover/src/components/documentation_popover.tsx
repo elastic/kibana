@@ -7,7 +7,13 @@
  */
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiToolTip, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiButtonIconProps,
+  EuiOutsideClickDetector,
+} from '@elastic/eui';
 import {
   type LanguageDocumentationSections,
   LanguageDocumentationPopoverContent,
@@ -18,6 +24,7 @@ interface DocumentationPopoverProps {
   sections?: LanguageDocumentationSections;
   buttonProps?: Omit<EuiButtonIconProps, 'iconType'>;
   searchInDescription?: boolean;
+  linkToDocumentation?: string;
 }
 
 function DocumentationPopover({
@@ -25,6 +32,7 @@ function DocumentationPopover({
   sections,
   buttonProps,
   searchInDescription,
+  linkToDocumentation,
 }: DocumentationPopoverProps) {
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
 
@@ -33,35 +41,42 @@ function DocumentationPopover({
   }, [isHelpOpen]);
 
   return (
-    <EuiPopover
-      panelClassName="documentation__docs--overlay"
-      panelPaddingSize="none"
-      isOpen={isHelpOpen}
-      closePopover={() => setIsHelpOpen(false)}
-      button={
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('languageDocumentationPopover.tooltip', {
-            defaultMessage: '{lang} reference',
-            values: {
-              lang: language,
-            },
-          })}
-        >
-          <EuiButtonIcon
-            iconType="documentation"
-            onClick={toggleDocumentationPopover}
-            {...buttonProps}
-          />
-        </EuiToolTip>
-      }
+    <EuiOutsideClickDetector
+      onOutsideClick={() => {
+        setIsHelpOpen(false);
+      }}
     >
-      <LanguageDocumentationPopoverContent
-        language={language}
-        sections={sections}
-        searchInDescription={searchInDescription}
-      />
-    </EuiPopover>
+      <EuiPopover
+        panelClassName="documentation__docs--overlay"
+        panelPaddingSize="none"
+        isOpen={isHelpOpen}
+        closePopover={() => setIsHelpOpen(false)}
+        button={
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('languageDocumentationPopover.tooltip', {
+              defaultMessage: '{lang} reference',
+              values: {
+                lang: language,
+              },
+            })}
+          >
+            <EuiButtonIcon
+              iconType="documentation"
+              onClick={toggleDocumentationPopover}
+              {...buttonProps}
+            />
+          </EuiToolTip>
+        }
+      >
+        <LanguageDocumentationPopoverContent
+          language={language}
+          sections={sections}
+          searchInDescription={searchInDescription}
+          linkToDocumentation={linkToDocumentation}
+        />
+      </EuiPopover>
+    </EuiOutsideClickDetector>
   );
 }
 

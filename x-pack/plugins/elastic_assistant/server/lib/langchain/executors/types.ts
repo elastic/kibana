@@ -11,26 +11,31 @@ import { BaseMessage } from 'langchain/schema';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { LangChainTracer } from 'langchain/callbacks';
-import { RequestBody, ResponseBody } from '../types';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { ExecuteConnectorRequestBody, Replacements } from '@kbn/elastic-assistant-common';
+import { ResponseBody } from '../types';
+import type { AssistantTool } from '../../../types';
 
 export interface AgentExecutorParams {
   alertsIndexPattern?: string;
   actions: ActionsPluginStart;
   allow?: string[];
   allowReplacement?: string[];
-  assistantLangChain: boolean;
+  isEnabledKnowledgeBase: boolean;
+  assistantTools?: AssistantTool[];
   connectorId: string;
   esClient: ElasticsearchClient;
   kbResource: string | undefined;
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
-  onNewReplacements?: (newReplacements: Record<string, string>) => void;
-  replacements?: Record<string, string>;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
+  onNewReplacements?: (newReplacements: Replacements) => void;
+  replacements: Replacements;
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   size?: number;
   elserId?: string;
   traceOptions?: TraceOptions;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export type AgentExecutorResponse = Promise<ResponseBody>;

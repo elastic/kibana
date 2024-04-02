@@ -18,12 +18,14 @@ export {
   type RawControlGroupAttributes,
   type PersistableControlGroupInput,
   type SerializableControlGroupInput,
+  persistableControlGroupInputKeys,
 } from './control_group/types';
 export {
   controlGroupInputToRawControlGroupAttributes,
   rawControlGroupAttributesToControlGroupInput,
   rawControlGroupAttributesToSerializable,
   serializableToRawControlGroupAttributes,
+  getDefaultControlGroupPersistableInput,
   persistableControlGroupInputIsEqual,
   getDefaultControlGroupInput,
   generateNewControlIds,

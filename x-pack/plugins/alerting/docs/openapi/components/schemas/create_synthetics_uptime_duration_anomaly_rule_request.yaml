@@ -12,6 +12,8 @@ required:
 properties:
   actions:
     $ref: 'actions.yaml'
+  alert_delay:
+    $ref: 'alert_delay.yaml'
   consumer:
     $ref: 'consumer.yaml'
   enabled:

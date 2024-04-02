@@ -7,12 +7,14 @@
  */
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { MetricsTracker } from '../types';
 
 const APP_TRACKER_NAME = 'console';
 
-export const createUsageTracker = (usageCollection?: UsageCollectionSetup): MetricsTracker => {
+export const createUsageTracker = (
+  usageCollection?: UsageCollectionSetup | UsageCollectionStart
+): MetricsTracker => {
   const track = (type: UiCounterMetricType, name: string) =>
     usageCollection?.reportUiCounter(APP_TRACKER_NAME, type, name);
 

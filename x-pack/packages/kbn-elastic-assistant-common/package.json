@@ -2,5 +2,11 @@
   "name": "@kbn/elastic-assistant-common",
   "private": true,
   "version": "1.0.0",
-  "license": "Elastic License 2.0"
+  "license": "Elastic License 2.0",
+  "sideEffects": false,
+  "scripts": {
+    "openapi:generate": "node scripts/openapi/generate",
+    "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate",
+    "openapi:bundle": "node scripts/openapi/bundle"
+  }
 }

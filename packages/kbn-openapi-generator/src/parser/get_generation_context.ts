@@ -12,10 +12,12 @@ import { getComponents } from './lib/get_components';
 import { getImportsMap, ImportsMap } from './lib/get_imports_map';
 import { normalizeSchema } from './lib/normalize_schema';
 import { NormalizedOperation, OpenApiDocument } from './openapi_types';
+import { getInfo } from './lib/get_info';
 
 export interface GenerationContext {
   components: OpenAPIV3.ComponentsObject | undefined;
   operations: NormalizedOperation[];
+  info: OpenAPIV3.InfoObject;
   imports: ImportsMap;
 }
 
@@ -24,11 +26,13 @@ export function getGenerationContext(document: OpenApiDocument): GenerationConte
 
   const components = getComponents(normalizedDocument);
   const operations = getApiOperationsList(normalizedDocument);
+  const info = getInfo(normalizedDocument);
   const imports = getImportsMap(normalizedDocument);
 
   return {
     components,
     operations,
+    info,
     imports,
   };
 }

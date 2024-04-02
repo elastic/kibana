@@ -59,6 +59,7 @@ export function OperatorInput<TParams = unknown>({
       singleSelection={{ asPlainText: true }}
       isClearable={false}
       data-test-subj="filterOperatorList"
+      inputPopoverProps={{ panelMinWidth: 180 }}
     />
   );
 }

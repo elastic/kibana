@@ -282,7 +282,7 @@ describe('RiskScoreDataClient', () => {
         options: {
           index: `risk-score.risk-score-latest-default`,
           mappings: {
-            dynamic: 'strict',
+            dynamic: false,
             properties: {
               '@timestamp': {
                 ignore_malformed: false,
@@ -450,6 +450,17 @@ describe('RiskScoreDataClient', () => {
           `Error initializing risk engine resources: ${error.message}`
         );
       }
+    });
+  });
+  describe('upgrade process', () => {
+    it('upserts the configuration for the latest risk score index when upgrading', async () => {
+      await riskScoreDataClient.upgradeIfNeeded();
+
+      expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dynamic: 'false',
+        })
+      );
     });
   });
 });

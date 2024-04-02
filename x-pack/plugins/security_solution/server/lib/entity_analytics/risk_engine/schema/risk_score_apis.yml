@@ -103,6 +103,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RiskEnginePrivilegesResponse'
+  /engine/settings:
+    get:
+      summary: Get the settings of the Risk Engine
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineSettingsResponse'
 
 
 components:
@@ -468,3 +478,8 @@ components:
           has_all_required:
             description: If true then the user has full access to the risk engine
             type: boolean
+    RiskEngineSettingsResponse:
+      type: object
+        properties:
+          range:
+            $ref: '#/components/schemas/DateRange'

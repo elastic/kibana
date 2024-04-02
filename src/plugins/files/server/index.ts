@@ -23,7 +23,7 @@ export { createEsFileClient } from './file_client';
 
 export { createFileHashTransform } from './file_client/stream_transforms/file_hash_transform';
 
-export type { FilesSetup, FilesStart } from './types';
+export type { FilesServerSetup as FilesSetup, FilesServerStart as FilesStart } from './types';
 export type {
   FileShareServiceStart,
   CreateShareArgs,

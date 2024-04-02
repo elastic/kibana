@@ -386,6 +386,12 @@ Bucket aggregations group, or bucket, documents based on the aggregation type. T
 | &check;
 | &check;
 
+| IP prefix
+| Use filters
+| Use filters
+| &check;
+| &check;
+
 | IP range
 | Use filters
 | Use filters

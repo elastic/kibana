@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { decode } from '@kbn/rison';
 
-import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -24,6 +25,17 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
   return {
     async assertTimeRangeSelectorSectionExists() {
       await testSubjects.existOrFail('aiopsTimeRangeSelectorSection');
+    },
+
+    async assertUrlState(expectedGlogalState: object, expectedAppState: object) {
+      const currentUrl = await browser.getCurrentUrl();
+      const parsedUrl = new URL(currentUrl);
+
+      const stateG = decode(parsedUrl.searchParams.get('_g') ?? '');
+      const stateA = decode(parsedUrl.searchParams.get('_a') ?? '');
+
+      expect(stateG).to.eql(expectedGlogalState);
+      expect(stateA).to.eql(expectedAppState);
     },
 
     async assertTotalDocumentCount(expectedFormattedTotalDocCount: string) {
@@ -96,6 +108,10 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       await testSubjects.existOrFail(`aiopsSearchPanel`);
     },
 
+    async assertChangePointDetectedPromptExists() {
+      await testSubjects.existOrFail(`aiopsChangePointDetectedPrompt`);
+    },
+
     async assertNoWindowParametersEmptyPromptExists() {
       await testSubjects.existOrFail(`aiopsNoWindowParametersEmptyPrompt`);
     },
@@ -152,9 +168,8 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
     },
 
     async clickLogRateAnalysisResultsGroupSwitchOn() {
-      await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsLogRateAnalysisGroupSwitchOn');
-
       await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsLogRateAnalysisGroupSwitchOn');
         await testSubjects.existOrFail('aiopsLogRateAnalysisGroupSwitch checked');
       });
     },
@@ -245,7 +260,8 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
 
     async assertAnalysisComplete(
       analysisType: LogRateAnalysisType,
-      dataGenerator: LogRateAnalysisDataGenerator
+      dataGenerator: LogRateAnalysisDataGenerator,
+      noResults = false
     ) {
       const dataGeneratorParts = dataGenerator.split('_');
       const zeroDocsFallback = dataGeneratorParts.includes('zerodocsfallback');
@@ -253,6 +269,11 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
         await testSubjects.existOrFail('aiopsAnalysisComplete');
         const currentProgressTitle = await testSubjects.getVisibleText('aiopsAnalysisComplete');
         expect(currentProgressTitle).to.be('Analysis complete');
+
+        if (noResults) {
+          await testSubjects.existOrFail('aiopsNoResultsFoundEmptyPrompt');
+          return;
+        }
 
         await testSubjects.existOrFail('aiopsAnalysisTypeCalloutTitle');
         const currentAnalysisTypeCalloutTitle = await testSubjects.getVisibleText(

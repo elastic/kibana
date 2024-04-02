@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { SearchFilterConfig } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -20,22 +22,21 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
-  SearchFilterConfig,
 } from '@elastic/eui';
 import { groupBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
-import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import type { DeploymentState } from '@kbn/ml-trained-models-utils';
 import {
   BUILT_IN_MODEL_TAG,
   BUILT_IN_MODEL_TYPE,
   DEPLOYMENT_STATE,
-  DeploymentState,
   ELASTIC_MODEL_DEFINITIONS,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
@@ -51,7 +52,8 @@ import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
-import { ModelsBarStats, StatsBar } from '../components/stats_bar';
+import type { ModelsBarStats } from '../components/stats_bar';
+import { StatsBar } from '../components/stats_bar';
 import { useMlKibana } from '../contexts/kibana';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type {
@@ -62,14 +64,14 @@ import type {
 } from '../../../common/types/trained_models';
 import { DeleteModelsModal } from './delete_models_modal';
 import { ML_PAGES } from '../../../common/constants/locator';
-import { ListingPageUrlState } from '../../../common/types/common';
+import type { ListingPageUrlState } from '../../../common/types/common';
 import { ExpandedRow } from './expanded_row';
 import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
-import { TestTrainedModelFlyout } from './test_models';
+import { TestModelAndPipelineCreationFlyout } from './test_models';
 import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { useEnabledFeatures } from '../contexts/ml';
@@ -305,7 +307,7 @@ export const ModelsList: FC<Props> = ({
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
-          defaultMessage: 'Models fetch failed',
+          defaultMessage: 'Error loading trained models',
         })
       );
     }
@@ -383,7 +385,7 @@ export const ModelsList: FC<Props> = ({
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
-          defaultMessage: 'Fetch model stats failed',
+          defaultMessage: 'Error loading trained models statistics',
         })
       );
       return false;
@@ -648,7 +650,11 @@ export const ModelsList: FC<Props> = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton color="danger" onClick={setModelsToDelete.bind(null, selectedModels)}>
+          <EuiButton
+            color="danger"
+            onClick={setModelsToDelete.bind(null, selectedModels)}
+            data-test-subj="mlTrainedModelsDeleteSelectedModelsButton"
+          >
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel"
               defaultMessage="Delete"
@@ -743,6 +749,7 @@ export const ModelsList: FC<Props> = ({
             iconType={'plusInCircle'}
             color={'primary'}
             onClick={setIsAddModelFlyoutVisible.bind(null, true)}
+            data-test-subj="mlModelsAddTrainedModelButton"
           >
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.addModelButtonLabel"
@@ -819,7 +826,15 @@ export const ModelsList: FC<Props> = ({
         />
       )}
       {modelToTest === null ? null : (
-        <TestTrainedModelFlyout model={modelToTest} onClose={setModelToTest.bind(null, null)} />
+        <TestModelAndPipelineCreationFlyout
+          model={modelToTest}
+          onClose={(refreshList?: boolean) => {
+            setModelToTest(null);
+            if (refreshList) {
+              fetchModelsData();
+            }
+          }}
+        />
       )}
       {dfaModelToTest === null ? null : (
         <TestDfaModelsFlyout model={dfaModelToTest} onClose={setDfaModelToTest.bind(null, null)} />

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   EuiFlyout,
@@ -19,17 +20,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 
-import { ModelItem } from '../../model_management/models_list';
+import type { ModelItem } from '../../model_management/models_list';
 import type { AddInferencePipelineSteps } from './types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
-import { AddInferencePipelineFooter } from './components/add_inference_pipeline_footer';
-import { AddInferencePipelineHorizontalSteps } from './components/add_inference_pipeline_horizontal_steps';
+import { AddInferencePipelineFooter } from '../shared';
+import { AddInferencePipelineHorizontalSteps } from '../shared';
 import { getInitialState, getModelType } from './state';
 import { PipelineDetails } from './components/pipeline_details';
 import { ProcessorConfiguration } from './components/processor_configuration';
-import { OnFailureConfiguration } from './components/on_failure_configuration';
+import { OnFailureConfiguration } from '../shared';
 import { TestPipeline } from './components/test_pipeline';
-import { ReviewAndCreatePipeline } from './components/review_and_create_pipeline';
+import { ReviewAndCreatePipeline } from '../shared';
 import { useMlApiContext } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
 import { validateInferencePipelineConfigurationStep } from './validation';
@@ -60,6 +61,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
   const createPipeline = async () => {
     setFormState({ ...formState, creatingPipeline: true });
     try {
+      // @ts-expect-error pipeline._meta is defined as mandatory
       await createInferencePipeline(formState.pipelineName, getPipelineConfig(formState));
       setFormState({
         ...formState,
@@ -122,6 +124,8 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
           setStep={setStep}
           isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
           isConfigureProcessorStepValid={hasUnsavedChanges === false}
+          hasProcessorStep
+          pipelineCreated={formState.pipelineCreated}
         />
         <EuiSpacer size="m" />
         {step === ADD_INFERENCE_PIPELINE_STEPS.DETAILS && (
@@ -165,6 +169,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
           <ReviewAndCreatePipeline
+            // @ts-expect-error pipeline._meta is defined as mandatory
             inferencePipeline={getPipelineConfig(formState)}
             modelType={modelType}
             pipelineName={formState.pipelineName}
@@ -184,6 +189,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
           isConfigureProcessorStepValid={hasUnsavedChanges === false}
           pipelineCreated={formState.pipelineCreated}
           creatingPipeline={formState.creatingPipeline}
+          hasProcessorStep
         />
       </EuiFlyoutFooter>
     </EuiFlyout>

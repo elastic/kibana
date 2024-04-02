@@ -27,11 +27,9 @@ export type {
 } from '@kbn/data-views-plugin/common';
 export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
-export {
-  createKibanaReactContext,
-  toMountPoint,
-  CodeEditor,
-} from '@kbn/kibana-react-plugin/public';
+export { createKibanaReactContext, toMountPoint } from '@kbn/kibana-react-plugin/public';
+
+export { CodeEditor } from '@kbn/code-editor';
 
 export type { FieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
@@ -58,6 +56,7 @@ export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 export {
   TextField,
+  TextAreaField,
   ToggleField,
   NumericField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';

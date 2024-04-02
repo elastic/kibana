@@ -19,7 +19,7 @@ import {
   EuiTab,
   EuiText,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { EmptyPrompt } from './empty_prompt';
 import type { TileRequest } from '../types';
 import { TileRequestTab } from './tile_request_tab';

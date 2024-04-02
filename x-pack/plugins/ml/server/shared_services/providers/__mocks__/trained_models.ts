@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TrainedModels } from '../../../shared';
+import type { TrainedModels } from '../../../shared';
 
 const trainedModelsServiceMock = {
   getTrainedModels: jest.fn().mockResolvedValue([]),
@@ -18,6 +18,7 @@ const trainedModelsServiceMock = {
   putTrainedModel: jest.fn(),
   getELSER: jest.fn().mockResolvedValue({ model_id: '.elser_model_2' }),
   getCuratedModelConfig: jest.fn().mockResolvedValue({ model_id: '.elser_model_2' }),
+  installElasticModel: jest.fn(),
 } as jest.Mocked<TrainedModels>;
 
 export const createTrainedModelsProviderMock = () =>

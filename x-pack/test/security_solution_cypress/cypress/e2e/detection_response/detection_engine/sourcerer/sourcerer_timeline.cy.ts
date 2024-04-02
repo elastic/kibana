@@ -32,15 +32,14 @@ import {
 } from '../../../../tasks/sourcerer';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
 import { SOURCERER } from '../../../../screens/sourcerer';
-import { createTimeline } from '../../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../../tasks/api_calls/timelines';
 import { getTimeline, getTimelineModifiedSourcerer } from '../../../../objects/timeline';
 import { closeTimeline, openTimelineById } from '../../../../tasks/timeline';
 
 const siemDataViewTitle = 'Security Default Data View';
-const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
+const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     login();
@@ -58,7 +57,8 @@ describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServer
     isNotSourcererOption(`${DEFAULT_ALERTS_INDEX}-default`);
   });
 
-  describe('Modified badge', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/173854
+  describe.skip('Modified badge', () => {
     it('Selecting new data view does not add a modified badge', () => {
       openTimelineUsingToggle();
       cy.get(SOURCERER.badgeModified).should(`not.exist`);
@@ -78,12 +78,8 @@ describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServer
     it('shows modified badge when index patterns change and removes when reset', () => {
       openTimelineUsingToggle();
       openSourcerer('timeline');
-      openDataViewSelection();
-      cy.get(SOURCERER.selectListOption).contains(dataViews[1]).click();
-      isDataViewSelection(dataViews[1]);
       openAdvancedSettings();
-      const patterns = dataViews[1].split(',');
-      deselectSourcererOptions([patterns[0]]);
+      deselectSourcererOptions(['.alerts-security.alerts-default']);
       saveSourcerer();
       cy.get(SOURCERER.badgeModified).should(`exist`);
       openSourcerer('timeline');
@@ -97,23 +93,21 @@ describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServer
     });
   });
   describe('Alerts checkbox', () => {
-    before(() => {
+    beforeEach(() => {
       login();
+      deleteTimelines();
       createTimeline(getTimeline()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
       createTimeline(getTimelineModifiedSourcerer()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('auditbeatTimelineId')
       );
-    });
-
-    beforeEach(() => {
-      login();
       visitWithTimeRange(TIMELINES_URL);
       refreshUntilAlertsIndexExists();
     });
 
     it('Modifies timeline to alerts only, and switches to different saved timeline without issue', function () {
+      closeTimeline();
       openTimelineById(this.timelineId).then(() => {
         cy.get(SOURCERER.badgeAlerts).should(`not.exist`);
         cy.get(SOURCERER.badgeModified).should(`not.exist`);

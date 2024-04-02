@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { PLUGIN_ID } from '../common';
+import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import { isActiveLicense } from './lib/license';
-import {
+import type {
   AiopsLicense,
   AiopsPluginSetup,
   AiopsPluginStart,
@@ -39,7 +45,7 @@ export class AiopsPlugin
     plugins: AiopsPluginSetupDeps
   ) {
     this.logger.debug('aiops: Setup');
-    this.usageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(AIOPS_PLUGIN_ID);
 
     // Subscribe to license changes and store the current license in `currentLicense`.
     // This way we can pass on license changes to the route factory having always

@@ -65,6 +65,7 @@ export const ExternalLinkComponent = ({
   return (
     <EuiListGroupItem
       size="s"
+      external
       color="text"
       isDisabled={!link.destination || !isValidUrl}
       className={'linksPanelLink'}

@@ -167,15 +167,19 @@ export function useUpgradePackagePoliciesMutation() {
     UpgradePackagePolicyDryRunResponse,
     RequestError,
     { packagePolicyIds: string[] }
-  >(({ packagePolicyIds }) =>
-    sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
-      path: packagePolicyRouteService.getUpgradePath(),
-      method: 'post',
-      version: API_VERSIONS.public.v1,
-      body: JSON.stringify({
-        packagePolicyIds,
+  >(
+    ({ packagePolicyIds }) =>
+      sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
+        path: packagePolicyRouteService.getUpgradePath(),
+        method: 'post',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify({
+          packagePolicyIds,
+        }),
       }),
-    })
+    {
+      retry: false,
+    }
   );
 }
 

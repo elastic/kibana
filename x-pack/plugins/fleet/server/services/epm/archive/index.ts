@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import type { AssetParts } from '../../../../common/types';
-import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
-
+import type { AssetParts, AssetsMap } from '../../../../common/types';
 import {
-  getArchiveEntry,
-  setArchiveEntry,
-  deleteArchiveEntry,
-  getArchiveFilelist,
-  setArchiveFilelist,
-  deleteArchiveFilelist,
-  deletePackageInfo,
-  clearPackageFileCache,
-} from './cache';
+  PackageInvalidArchiveError,
+  PackageUnsupportedMediaTypeError,
+  PackageNotFoundError,
+} from '../../../errors';
+
+import { deletePackageInfo } from './cache';
 import type { SharedKey } from './cache';
 import { getBufferExtractor } from './extract';
 
@@ -30,7 +25,7 @@ export interface ArchiveEntry {
   buffer?: Buffer;
 }
 
-export async function unpackBufferToCache({
+export async function unpackBufferToAssetsMap({
   name,
   version,
   contentType,
@@ -40,22 +35,20 @@ export async function unpackBufferToCache({
   version: string;
   contentType: string;
   archiveBuffer: Buffer;
-}): Promise<string[]> {
-  // Make sure any buffers from previous installations from registry or upload are deleted first
-  clearPackageFileCache({ name, version });
-
-  const entries = await unpackBufferEntries(archiveBuffer, contentType);
+}): Promise<{ paths: string[]; assetsMap: AssetsMap }> {
+  const assetsMap = new Map<string, Buffer | undefined>();
   const paths: string[] = [];
+  const entries = await unpackBufferEntries(archiveBuffer, contentType);
+
   entries.forEach((entry) => {
     const { path, buffer } = entry;
     if (buffer) {
-      setArchiveEntry(path, buffer);
+      assetsMap.set(path, buffer);
       paths.push(path);
     }
   });
-  setArchiveFilelist({ name, version }, paths);
 
-  return paths;
+  return { assetsMap, paths };
 }
 
 export async function unpackBufferEntries(
@@ -90,16 +83,6 @@ export async function unpackBufferEntries(
 }
 
 export const deletePackageCache = ({ name, version }: SharedKey) => {
-  // get cached archive filelist
-  const paths = getArchiveFilelist({ name, version });
-
-  // delete cached archive filelist
-  deleteArchiveFilelist({ name, version });
-
-  // delete cached archive files
-  // this has been populated in unpackBufferToCache()
-  paths?.forEach(deleteArchiveEntry);
-
   deletePackageInfo({ name, version });
 };
 
@@ -147,9 +130,9 @@ export function getPathParts(path: string): AssetParts {
   } as AssetParts;
 }
 
-export function getAsset(key: string) {
-  const buffer = getArchiveEntry(key);
-  if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
+export function getAssetFromAssetsMap(assetsMap: AssetsMap, key: string) {
+  const buffer = assetsMap.get(key);
+  if (buffer === undefined) throw new PackageNotFoundError(`Cannot find asset ${key}`);
 
   return buffer;
 }

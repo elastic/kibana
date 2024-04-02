@@ -24,7 +24,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { testLeadingControlColumn } from '../../__mocks__/external_control_columns';
+import {
+  testLeadingControlColumn,
+  testTrailingControlColumns,
+} from '../../__mocks__/external_control_columns';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -69,6 +73,9 @@ function getProps(): UnifiedDataTableProps {
       storage: services.storage as unknown as Storage,
       data: services.data,
       theme: services.theme,
+    },
+    cellActionsMetadata: {
+      someKey: 'someValue',
     },
   };
 }
@@ -250,13 +257,16 @@ describe('UnifiedDataTable', () => {
         columns: ['message'],
         onFieldEdited: jest.fn(),
       });
-      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          triggerId: undefined,
-          getCellValue: expect.any(Function),
-          fields: undefined,
-        })
-      );
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
+        triggerId: undefined,
+        getCellValue: expect.any(Function),
+        fields: undefined,
+        dataGridRef: expect.any(Object),
+        metadata: {
+          dataViewId: 'the-data-view-id',
+          someKey: 'someValue',
+        },
+      });
     });
 
     it('should call useDataGridColumnsCellActions properly when cellActionsTriggerId defined', async () => {
@@ -266,16 +276,19 @@ describe('UnifiedDataTable', () => {
         onFieldEdited: jest.fn(),
         cellActionsTriggerId: 'test',
       });
-      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          triggerId: 'test',
-          getCellValue: expect.any(Function),
-          fields: [
-            dataViewMock.getFieldByName('@timestamp')?.toSpec(),
-            dataViewMock.getFieldByName('message')?.toSpec(),
-          ],
-        })
-      );
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
+        triggerId: 'test',
+        getCellValue: expect.any(Function),
+        fields: [
+          dataViewMock.getFieldByName('@timestamp')?.toSpec(),
+          dataViewMock.getFieldByName('message')?.toSpec(),
+        ],
+        dataGridRef: expect.any(Object),
+        metadata: {
+          dataViewId: 'the-data-view-id',
+          someKey: 'someValue',
+        },
+      });
     });
   });
 
@@ -308,7 +321,7 @@ describe('UnifiedDataTable', () => {
         columns: ['message'],
       });
 
-      expect(component.find(EuiDataGrid).prop('sorting')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
         Object {
           "columns": Array [
             Object {
@@ -332,7 +345,7 @@ describe('UnifiedDataTable', () => {
         columns: ['bytes', 'message'],
       });
 
-      expect(component.find(EuiDataGrid).prop('sorting')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
         Object {
           "columns": Array [
             Object {
@@ -359,18 +372,24 @@ describe('UnifiedDataTable', () => {
         onUpdateRowHeight: jest.fn(),
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
+              headerRowHeight="custom"
+              headerRowHeightLines={1}
+              onChangeRowHeight={[Function]}
+              onChangeRowHeightLines={[Function]}
               onChangeSampleSize={[MockFunction]}
+              rowHeight="custom"
+              rowHeightLines={3}
               sampleSize={150}
             />,
             "allowDensity": false,
             "allowResetButton": false,
-            "allowRowHeight": true,
+            "allowRowHeight": false,
           },
           "showFullScreenSelector": true,
           "showSortSelector": true,
@@ -385,13 +404,23 @@ describe('UnifiedDataTable', () => {
         onUpdateRowHeight: jest.fn(),
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
+            "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
+              headerRowHeight="custom"
+              headerRowHeightLines={1}
+              onChangeRowHeight={[Function]}
+              onChangeRowHeightLines={[Function]}
+              rowHeight="custom"
+              rowHeightLines={3}
+              sampleSize={200}
+            />,
             "allowDensity": false,
-            "allowRowHeight": true,
+            "allowResetButton": false,
+            "allowRowHeight": false,
           },
           "showFullScreenSelector": true,
           "showSortSelector": true,
@@ -406,7 +435,7 @@ describe('UnifiedDataTable', () => {
         onUpdateSampleSize: undefined,
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
@@ -415,6 +444,69 @@ describe('UnifiedDataTable', () => {
           "showSortSelector": true,
         }
       `);
+    });
+  });
+
+  describe('customControlColumnsConfiguration', () => {
+    const customControlColumnsConfiguration = jest.fn();
+    it('should be able to customise the leading control column', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        expandedDoc: {
+          id: 'test',
+          raw: {
+            _index: 'test_i',
+            _id: 'test',
+          },
+          flattened: { test: jest.fn() },
+        },
+        setExpandedDoc: jest.fn(),
+        renderDocumentView: jest.fn(),
+        externalControlColumns: [testLeadingControlColumn],
+        customControlColumnsConfiguration: customControlColumnsConfiguration.mockImplementation(
+          () => {
+            return {
+              leadingControlColumns: [testLeadingControlColumn, testTrailingControlColumns[0]],
+              trailingControlColumns: [],
+            };
+          }
+        ),
+      });
+
+      expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
+      expect(
+        findTestSubject(component, 'test-trailing-column-popover-button').exists()
+      ).toBeTruthy();
+    });
+
+    it('should be able to customise the trailing control column', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        expandedDoc: {
+          id: 'test',
+          raw: {
+            _index: 'test_i',
+            _id: 'test',
+          },
+          flattened: { test: jest.fn() },
+        },
+        setExpandedDoc: jest.fn(),
+        renderDocumentView: jest.fn(),
+        externalControlColumns: [testLeadingControlColumn],
+        customControlColumnsConfiguration: customControlColumnsConfiguration.mockImplementation(
+          () => {
+            return {
+              leadingControlColumns: [],
+              trailingControlColumns: [testLeadingControlColumn, testTrailingControlColumns[0]],
+            };
+          }
+        ),
+      });
+
+      expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
+      expect(
+        findTestSubject(component, 'test-trailing-column-popover-button').exists()
+      ).toBeTruthy();
     });
   });
 
@@ -449,7 +541,7 @@ describe('UnifiedDataTable', () => {
       },
       flattened: { test: jest.fn() },
     };
-    const columnTypesOverride = { testField: 'number ' };
+    const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
     const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
       <div data-test-subj="test-document-view">{hit.id}</div>
     ));
@@ -458,7 +550,7 @@ describe('UnifiedDataTable', () => {
       ...getProps(),
       expandedDoc,
       setExpandedDoc: jest.fn(),
-      columnTypes: columnTypesOverride,
+      columnsMeta: columnsMetaOverride,
       renderDocumentView: renderDocumentViewMock,
       externalControlColumns: [testLeadingControlColumn],
     });
@@ -469,7 +561,7 @@ describe('UnifiedDataTable', () => {
       expandedDoc,
       getProps().rows,
       ['_source'],
-      columnTypesOverride
+      columnsMetaOverride
     );
   });
 

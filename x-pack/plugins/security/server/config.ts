@@ -301,13 +301,15 @@ export const ConfigSchema = schema.object({
       )
     ),
   }),
-  enabled: schema.boolean({ defaultValue: true }),
+
+  roleManagementEnabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+  }),
 
   // Setting only allowed in the Serverless offering
   ui: offeringBasedSchema({
     serverless: schema.object({
       userManagementEnabled: schema.boolean({ defaultValue: true }),
-      roleManagementEnabled: schema.boolean({ defaultValue: true }),
       roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
     }),
   }),

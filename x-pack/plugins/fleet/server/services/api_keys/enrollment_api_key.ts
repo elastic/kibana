@@ -16,12 +16,14 @@ import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
-import { FleetError } from '../../errors';
+import { FleetError, EnrollmentKeyNameExistsError, EnrollmentKeyNotFoundError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
 import { auditLoggingService } from '../audit_logging';
+
+import { appContextService } from '../app_context';
 
 import { invalidateAPIKeys } from './security';
 
@@ -90,7 +92,7 @@ export async function getEnrollmentAPIKey(
     return esDocToEnrollmentApiKey(body);
   } catch (e) {
     if (e instanceof errors.ResponseError && e.statusCode === 404) {
-      throw Boom.notFound(`Enrollment api key ${id} not found`);
+      throw new EnrollmentKeyNotFoundError(`Enrollment api key ${id} not found`);
     }
 
     throw e;
@@ -106,6 +108,9 @@ export async function deleteEnrollmentApiKey(
   id: string,
   forceDelete = false
 ) {
+  const logger = appContextService.getLogger();
+  logger.debug(`Deleting enrollment API key ${id}`);
+
   const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id);
 
   auditLoggingService.writeCustomAuditLog({
@@ -132,6 +137,9 @@ export async function deleteEnrollmentApiKey(
       refresh: 'wait_for',
     });
   }
+  logger.debug(
+    `Deleted enrollment API key ${enrollmentApiKey.id} [api_key_id=${enrollmentApiKey.api_key_id}`
+  );
 }
 
 export async function deleteEnrollmentApiKeyForAgentPolicyId(
@@ -169,6 +177,9 @@ export async function generateEnrollmentAPIKey(
 ): Promise<EnrollmentAPIKey> {
   const id = uuidv4();
   const { name: providedKeyName, forceRecreate } = data;
+  const logger = appContextService.getLogger();
+  logger.debug(`Creating enrollment API key ${data}`);
+
   if (data.agentPolicyId) {
     await validateAgentPolicyId(soClient, data.agentPolicyId);
   }
@@ -199,7 +210,7 @@ export async function generateEnrollmentAPIKey(
         k.name?.replace(providedKeyName, '').trim().match(uuidRegex)
       )
     ) {
-      throw new FleetError(
+      throw new EnrollmentKeyNameExistsError(
         i18n.translate('xpack.fleet.serverError.enrollmentKeyDuplicate', {
           defaultMessage:
             'An enrollment key named {providedKeyName} already exists for agent policy {agentPolicyId}',
@@ -217,6 +228,7 @@ export async function generateEnrollmentAPIKey(
   auditLoggingService.writeCustomAuditLog({
     message: `User creating enrollment API key [name=${name}] [policy_id=${agentPolicyId}]`,
   });
+  logger.debug(`Creating enrollment API key [name=${name}] [policy_id=${agentPolicyId}]`);
 
   const key = await esClient.security
     .createApiKey({
@@ -245,11 +257,11 @@ export async function generateEnrollmentAPIKey(
       },
     })
     .catch((err) => {
-      throw new Error(`Impossible to create an api key: ${err.message}`);
+      throw new FleetError(`Impossible to create an api key: ${err.message}`);
     });
 
   if (!key) {
-    throw new Error(
+    throw new FleetError(
       i18n.translate('xpack.fleet.serverError.unableToCreateEnrollmentKey', {
         defaultMessage: 'Unable to create an enrollment api key',
       })
@@ -332,9 +344,9 @@ export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, api
   const [enrollmentAPIKey] = res.hits.hits.map(esDocToEnrollmentApiKey);
 
   if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
-    throw new Error(
+    throw new FleetError(
       i18n.translate('xpack.fleet.serverError.returnedIncorrectKey', {
-        defaultMessage: 'find enrollmentKeyById returned an incorrect key',
+        defaultMessage: 'Find enrollmentKeyById returned an incorrect key',
       })
     );
   }

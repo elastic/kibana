@@ -69,8 +69,9 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 const MlAnomalyDetectionAlertRequired = rt.type({
   'kibana.alert.job_id': schemaString,
 });
+// prettier-ignore
 const MlAnomalyDetectionAlertOptional = rt.partial({
-  'kibana.alert.anomaly_score': schemaNumber,
+  'kibana.alert.anomaly_score': schemaNumberArray,
   'kibana.alert.anomaly_timestamp': schemaDate,
   'kibana.alert.is_interim': schemaBoolean,
   'kibana.alert.top_influencers': rt.array(

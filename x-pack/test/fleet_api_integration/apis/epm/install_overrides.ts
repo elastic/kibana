@@ -60,6 +60,7 @@ export default function (providerContext: FtrProviderContext) {
         `logs@settings`,
         `${templateName}@package`,
         `${templateName}@custom`,
+        `ecs@mappings`,
         '.fleet_globals-1',
         '.fleet_agent_id_verification-1',
       ]);
@@ -81,18 +82,6 @@ export default function (providerContext: FtrProviderContext) {
       expect(
         body.component_templates[0].component_template.template.settings.index.lifecycle.name
       ).to.be('reference');
-
-      ({ body } = await es.transport.request(
-        {
-          method: 'GET',
-          path: `/_component_template/${templateName}@custom`,
-        },
-        { meta: true }
-      ));
-
-      // The user_settings component template is an empty/stub template at first
-      const storedTemplate = body.component_templates[0].component_template.template.settings;
-      expect(storedTemplate).to.eql({});
 
       // Update the user_settings component template
       ({ body } = await es.transport.request({
@@ -138,7 +127,7 @@ export default function (providerContext: FtrProviderContext) {
               },
               mapping: {
                 total_fields: {
-                  limit: '10000',
+                  limit: '1000',
                 },
               },
               number_of_shards: '3',

@@ -42,7 +42,7 @@ properties:
       are using the `xpack.actions.allowedHosts setting`, add the hostname to
       the allowed hosts.
     examples:
-      - https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment
+      - https://example.com/issue/{{{external.system.id}}}/comment
   createIncidentJson:
     type: string
     description: >
@@ -68,7 +68,7 @@ properties:
     default: post
   createIncidentResponseKey:
     type: string
-    description: The JSON key in the create case response that contains the external case ID.
+    description: The JSON key in the create external case response that contains the case ID.
   createIncidentUrl:
     type: string
     description: >
@@ -76,7 +76,7 @@ properties:
       using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
   getIncidentResponseExternalTitleKey:
     type: string
-    description: The JSON key in get case response that contains the external case title.
+    description: The JSON key in get external case response that contains the case title.
   getIncidentUrl:
     type: string
     description: >
@@ -90,7 +90,7 @@ properties:
       JSON is valid, disregarding the Mustache variables, so the later
       validation will pass.
     examples:
-      - https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}
+      - https://example.com/issue/{{{external.system.id}}}
   hasAuth:
     type: boolean
     description: If true, a username and password for login type authentication must be provided.
@@ -130,7 +130,7 @@ properties:
       can use a variable to add the external system ID to the URL. If you are
       using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
     examples:
-      - https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.ID}}}
+      - https://example.com/issue/{{{external.system.ID}}}
   viewIncidentUrl:
     type: string
     description: >

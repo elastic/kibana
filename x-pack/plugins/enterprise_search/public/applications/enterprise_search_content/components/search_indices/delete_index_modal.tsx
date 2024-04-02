@@ -16,9 +16,12 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ingestionMethodToText } from '../../utils/indices';
 
@@ -112,15 +115,19 @@ export const DeleteIndexModal: React.FC = () => {
           <EuiSpacer />
         </>
       )}
-      <p>
-        {i18n.translate(
-          'xpack.enterpriseSearch.content.searchIndices.deleteModal.syncsWarning.indexNameDescription',
-          {
-            defaultMessage: 'This action cannot be undone. Please type {indexName} to confirm.',
-            values: { indexName },
-          }
-        )}
-      </p>
+      <EuiText>
+        <FormattedMessage
+          id="xpack.enterpriseSearch.content.searchIndices.deleteModal.syncsWarning.indexNameDescription"
+          defaultMessage="This action cannot be undone. Please type {indexName} to confirm."
+          values={{
+            indexName: (
+              <strong>
+                <EuiTextColor color="danger">{indexName}</EuiTextColor>
+              </strong>
+            ),
+          }}
+        />
+      </EuiText>
       <EuiForm>
         <EuiFormRow
           label={i18n.translate(

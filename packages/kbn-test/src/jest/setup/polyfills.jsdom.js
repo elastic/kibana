@@ -28,3 +28,22 @@ if (!global.hasOwnProperty('TextEncoder')) {
 //
 // https://github.com/jsdom/jsdom/issues/2555
 global.Blob = require('blob-polyfill').Blob;
+
+if (!global.hasOwnProperty('ResizeObserver')) {
+  global.ResizeObserver = require('resize-observer-polyfill');
+}
+
+if (!global.hasOwnProperty('Worker')) {
+  class Worker {
+    constructor(stringUrl) {
+      this.url = stringUrl;
+      this.onmessage = () => {};
+    }
+
+    postMessage(msg) {
+      this.onmessage(msg);
+    }
+  }
+
+  global.Worker = Worker;
+}

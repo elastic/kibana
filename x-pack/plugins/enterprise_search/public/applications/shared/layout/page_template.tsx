@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 
 import classNames from 'classnames';
 import { useValues } from 'kea';
@@ -47,6 +47,7 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   setPageChrome?: React.ReactNode;
   solutionNavIcon?: string;
   useEndpointHeaderActions?: boolean;
+  hideEmbeddedConsole?: boolean;
 };
 
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
@@ -61,20 +62,24 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   solutionNav,
   solutionNavIcon,
   useEndpointHeaderActions = true,
+  hideEmbeddedConsole = false,
   ...pageTemplateProps
 }) => {
   const { readOnlyMode } = useValues(HttpLogic);
-  const { renderHeaderActions } = useValues(KibanaLogic);
+  const { renderHeaderActions, consolePlugin } = useValues(KibanaLogic);
 
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
 
   const navIcon = solutionNavIcon ?? 'logoEnterpriseSearch';
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (useEndpointHeaderActions) {
       renderHeaderActions(EndpointsHeaderAction);
     }
+    return () => {
+      renderHeaderActions(undefined);
+    };
   }, []);
   return (
     <KibanaPageTemplate
@@ -114,6 +119,11 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
         children
       ) : (
         <KibanaPageTemplate.Section>{children}</KibanaPageTemplate.Section>
+      )}
+      {!hideEmbeddedConsole && consolePlugin?.EmbeddableConsole !== undefined ? (
+        <consolePlugin.EmbeddableConsole />
+      ) : (
+        <></>
       )}
     </KibanaPageTemplate>
   );

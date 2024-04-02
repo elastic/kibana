@@ -7251,27 +7251,123 @@ export const subtechniques: MitreSubTechnique[] = [
 ];
 
 /**
- * A full object of Mitre Attack Threat data that is taken directly from the `mitre_tactics_techniques.ts` file
+ * An array of full Mitre Attack Threat objects that are taken directly from the `mitre_tactics_techniques.ts` file
  *
  * Is built alongside and sampled from the data in the file so to always be valid with the most up to date MITRE ATT&CK data
  */
-export const getMockThreatData = () => ({
-  tactic: {
-    name: 'Credential Access',
-    id: 'TA0006',
-    reference: 'https://attack.mitre.org/tactics/TA0006',
+export const getMockThreatData = () => [
+  {
+    tactic: {
+      name: 'Credential Access',
+      id: 'TA0006',
+      reference: 'https://attack.mitre.org/tactics/TA0006',
+    },
+    technique: {
+      name: 'OS Credential Dumping',
+      id: 'T1003',
+      reference: 'https://attack.mitre.org/techniques/T1003',
+      tactics: ['credential-access'],
+    },
+    subtechnique: {
+      name: '/etc/passwd and /etc/shadow',
+      id: 'T1003.008',
+      reference: 'https://attack.mitre.org/techniques/T1003/008',
+      tactics: ['credential-access'],
+      techniqueId: 'T1003',
+    },
   },
-  technique: {
-    name: 'OS Credential Dumping',
-    id: 'T1003',
-    reference: 'https://attack.mitre.org/techniques/T1003',
-    tactics: ['credential-access'],
+  {
+    tactic: {
+      name: 'Credential Access',
+      id: 'TA0006',
+      reference: 'https://attack.mitre.org/tactics/TA0006',
+    },
+    technique: {
+      name: 'Steal or Forge Kerberos Tickets',
+      id: 'T1558',
+      reference: 'https://attack.mitre.org/techniques/T1558',
+      tactics: ['credential-access'],
+    },
+    subtechnique: {
+      name: 'AS-REP Roasting',
+      id: 'T1558.004',
+      reference: 'https://attack.mitre.org/techniques/T1558/004',
+      tactics: ['credential-access'],
+      techniqueId: 'T1558',
+    },
   },
-  subtechnique: {
-    name: '/etc/passwd and /etc/shadow',
-    id: 'T1003.008',
-    reference: 'https://attack.mitre.org/techniques/T1003/008',
-    tactics: ['credential-access'],
-    techniqueId: 'T1003',
+  {
+    tactic: {
+      name: 'Persistence',
+      id: 'TA0003',
+      reference: 'https://attack.mitre.org/tactics/TA0003',
+    },
+    technique: {
+      name: 'Boot or Logon Autostart Execution',
+      id: 'T1547',
+      reference: 'https://attack.mitre.org/techniques/T1547',
+      tactics: ['persistence', 'privilege-escalation'],
+    },
+    subtechnique: {
+      name: 'Active Setup',
+      id: 'T1547.014',
+      reference: 'https://attack.mitre.org/techniques/T1547/014',
+      tactics: ['persistence', 'privilege-escalation'],
+      techniqueId: 'T1547',
+    },
   },
-});
+  {
+    tactic: {
+      name: 'Persistence',
+      id: 'TA0003',
+      reference: 'https://attack.mitre.org/tactics/TA0003',
+    },
+    technique: {
+      name: 'Account Manipulation',
+      id: 'T1098',
+      reference: 'https://attack.mitre.org/techniques/T1098',
+      tactics: ['persistence'],
+    },
+    subtechnique: {
+      name: 'Additional Cloud Credentials',
+      id: 'T1098.001',
+      reference: 'https://attack.mitre.org/techniques/T1098/001',
+      tactics: ['persistence'],
+      techniqueId: 'T1098',
+    },
+  },
+];
+
+/**
+ * An array of specifically chosen Mitre Attack Threat objects that is taken directly from the `mitre_tactics_techniques.ts` file
+ *
+ * These objects have identical technique fields but are assigned to different tactics
+ */
+export const getDuplicateTechniqueThreatData = () => [
+  {
+    tactic: {
+      name: 'Privilege Escalation',
+      id: 'TA0004',
+      reference: 'https://attack.mitre.org/tactics/TA0004',
+    },
+    technique: {
+      name: 'Event Triggered Execution',
+      id: 'T1546',
+      reference: 'https://attack.mitre.org/techniques/T1546',
+      tactics: ['privilege-escalation', 'persistence'],
+    },
+  },
+  {
+    tactic: {
+      name: 'Persistence',
+      id: 'TA0003',
+      reference: 'https://attack.mitre.org/tactics/TA0003',
+    },
+    technique: {
+      name: 'Event Triggered Execution',
+      id: 'T1546',
+      reference: 'https://attack.mitre.org/techniques/T1546',
+      tactics: ['privilege-escalation', 'persistence'],
+    },
+  },
+];

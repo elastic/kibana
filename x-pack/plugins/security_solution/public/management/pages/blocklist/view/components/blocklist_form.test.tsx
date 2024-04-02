@@ -368,7 +368,7 @@ describe('blocklist form', () => {
 
   it('should default to global policy', () => {
     render();
-    expect(screen.getByTestId('globalPolicy')).toBeEnabled();
+    expect(screen.getByTestId('blocklist-form-effectedPolicies-global')).toBeEnabled();
   });
 
   it('should correctly edit policies', () => {
@@ -383,7 +383,7 @@ describe('blocklist form', () => {
       },
     ] as PolicyData[];
     render(createProps({ policies }));
-    const byPolicyButton = screen.getByTestId('perPolicy');
+    const byPolicyButton = screen.getByTestId('blocklist-form-effectedPolicies-perPolicy');
     userEvent.click(byPolicyButton);
     expect(byPolicyButton).toBeEnabled();
 
@@ -408,9 +408,9 @@ describe('blocklist form', () => {
       },
     ] as PolicyData[];
     render(createProps({ policies, item: createItem({ tags: [`policy:${policies[1].id}`] }) }));
-    expect(screen.getByTestId('globalPolicy')).toBeEnabled();
+    expect(screen.getByTestId('blocklist-form-effectedPolicies-global')).toBeEnabled();
 
-    const byPolicyButton = screen.getByTestId('perPolicy');
+    const byPolicyButton = screen.getByTestId('blocklist-form-effectedPolicies-perPolicy');
     userEvent.click(byPolicyButton);
     expect(byPolicyButton).toBeEnabled();
     userEvent.click(screen.getByText(policies[0].name));

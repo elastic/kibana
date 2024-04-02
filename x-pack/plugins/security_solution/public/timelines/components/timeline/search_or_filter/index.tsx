@@ -25,12 +25,12 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { State, inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import type { KqlMode, TimelineModel } from '../../../store/timeline/model';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineActions, timelineSelectors } from '../../../store';
+import type { KqlMode, TimelineModel } from '../../../store/model';
+import { timelineDefaults } from '../../../store/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
-import { setDataProviderVisibility } from '../../../store/timeline/actions';
+import { setDataProviderVisibility } from '../../../store/actions';
 import * as i18n from './translations';
 
 const FilterItemsContainer = styled(EuiFlexGroup)``;

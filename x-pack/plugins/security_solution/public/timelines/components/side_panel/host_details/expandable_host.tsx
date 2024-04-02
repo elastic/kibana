@@ -35,7 +35,7 @@ const StyledTitle = styled.h4`
 
 export const ExpandableHostDetailsTitle = ({ hostName }: ExpandableHostProps) => (
   <EuiTitle size="s">
-    <StyledTitle>
+    <StyledTitle data-test-subj="host-details-header">
       {i18n.translate('xpack.securitySolution.timeline.sidePanel.hostDetails.title', {
         defaultMessage: 'Host details',
       })}

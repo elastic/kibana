@@ -131,6 +131,42 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       );
     },
 
+    async assertAnomalyActionDiscoverButtonExists(rowIndex: number) {
+      await this.ensureAnomalyActionsMenuOpen(rowIndex);
+      await testSubjects.existOrFail('mlAnomaliesListRowAction_viewInDiscoverButton');
+    },
+
+    async assertAnomalyActionDiscoverButtonNotExists(rowIndex: number) {
+      await this.ensureAnomalyActionsMenuOpen(rowIndex);
+      await testSubjects.missingOrFail('mlAnomaliesListRowAction_viewInDiscoverButton');
+    },
+
+    async ensureAnomalyActionDiscoverButtonClicked(rowIndex: number) {
+      await retry.tryForTime(10 * 1000, async () => {
+        await this.ensureAnomalyActionsMenuOpen(rowIndex);
+        await testSubjects.click('mlAnomaliesListRowAction_viewInDiscoverButton');
+        await testSubjects.existOrFail('discoverLayoutResizableContainer');
+      });
+    },
+
+    async assertAnomalyActionLogRateAnalysisButtonExists(rowIndex: number) {
+      await this.ensureAnomalyActionsMenuOpen(rowIndex);
+      await testSubjects.existOrFail('mlAnomaliesListRowAction_runLogRateAnalysisButton');
+    },
+
+    async assertAnomalyActionLogRateAnalysisButtonNotExists(rowIndex: number) {
+      await this.ensureAnomalyActionsMenuOpen(rowIndex);
+      await testSubjects.missingOrFail('mlAnomaliesListRowAction_runLogRateAnalysisButton');
+    },
+
+    async ensureAnomalyActionLogRateAnalysisButtonClicked(rowIndex: number) {
+      await retry.tryForTime(10 * 1000, async () => {
+        await this.ensureAnomalyActionsMenuOpen(rowIndex);
+        await testSubjects.click('mlAnomaliesListRowAction_runLogRateAnalysisButton');
+        await testSubjects.existOrFail('aiopsLogRateAnalysisPage');
+      });
+    },
+
     /**
      * Asserts selected number of rows per page on the pagination control.
      * @param rowsNumber

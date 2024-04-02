@@ -12,7 +12,9 @@ export const RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_transform',
 ] as ClusterPrivilege[];
 
+export const RISK_SCORE_INDEX_PATTERN = 'risk-score.risk-score-*';
+
 type RiskEngineIndexPrivilege = 'read' | 'write';
 export const RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES = Object.freeze({
-  'risk-score.risk-score-*': ['read', 'write'] as RiskEngineIndexPrivilege[],
+  [RISK_SCORE_INDEX_PATTERN]: ['read', 'write'] as RiskEngineIndexPrivilege[],
 });

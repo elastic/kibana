@@ -13,27 +13,40 @@ import { transformRule } from './common_transformations';
 
 type RuleUpdatesBody = Pick<
   RuleUpdates,
-  'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'throttle' | 'notifyWhen'
+  'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'throttle' | 'notifyWhen' | 'alertDelay'
 >;
-const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...res }): any => ({
+const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
+  actions,
+  alertDelay,
+  ...res
+}): any => ({
   ...res,
-  actions: actions.map(
-    ({ group, id, params, frequency, uuid, alertsFilter, useAlertDataForTemplate }) => ({
-      group,
+  actions: actions.map((action) => {
+    const { id, params, uuid } = action;
+    return {
+      ...('group' in action ? { group: action.group } : {}),
       id,
       params,
-      frequency: {
-        notify_when: frequency!.notifyWhen,
-        throttle: frequency!.throttle,
-        summary: frequency!.summary,
-      },
-      alerts_filter: alertsFilter,
-      ...(typeof useAlertDataForTemplate !== 'undefined'
-        ? { use_alert_data_for_template: useAlertDataForTemplate }
+      ...('frequency' in action
+        ? {
+            frequency: action.frequency
+              ? {
+                  notify_when: action.frequency!.notifyWhen,
+                  throttle: action.frequency!.throttle,
+                  summary: action.frequency!.summary,
+                }
+              : undefined,
+          }
+        : {}),
+      ...('alertsFilter' in action ? { alerts_filter: action.alertsFilter } : {}),
+      ...('useAlertDataForTemplate' in action &&
+      typeof action.useAlertDataForTemplate !== 'undefined'
+        ? { use_alert_data_for_template: action.useAlertDataForTemplate }
         : {}),
       ...(uuid && { uuid }),
-    })
-  ),
+    };
+  }),
+  ...(alertDelay ? { alert_delay: alertDelay } : {}),
 });
 
 export async function updateRule({
@@ -42,14 +55,16 @@ export async function updateRule({
   id,
 }: {
   http: HttpSetup;
-  rule: Pick<RuleUpdates, 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
+  rule: Pick<RuleUpdates, 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'alertDelay'>;
   id: string;
 }): Promise<Rule> {
   const res = await http.put<AsApiContract<Rule>>(
     `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`,
     {
       body: JSON.stringify(
-        rewriteBodyRequest(pick(rule, ['name', 'tags', 'schedule', 'params', 'actions']))
+        rewriteBodyRequest(
+          pick(rule, ['name', 'tags', 'schedule', 'params', 'actions', 'alertDelay'])
+        )
       ),
     }
   );

@@ -1416,10 +1416,10 @@
               "\nOptional error"
             ],
             "signature": [
-              "Boom",
-              "<any> | ",
               "ErrorResponseBase",
-              " | undefined"
+              " | ",
+              "Boom",
+              "<any> | undefined"
             ],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
@@ -2215,7 +2215,7 @@
           "\nUnion type of DFA anlaysis config types"
         ],
         "signature": [
-          "\"classification\" | \"outlier_detection\" | \"regression\""
+          "\"outlier_detection\" | \"regression\" | \"classification\""
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,

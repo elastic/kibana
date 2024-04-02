@@ -11,7 +11,7 @@ import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react
 import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
   EmbeddableComponentProps,
@@ -20,13 +20,14 @@ import type {
   LensSuggestionsApi,
   Suggestion,
 } from '@kbn/lens-plugin/public';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
 import {
   ResizableLayout,
   ResizableLayoutMode,
   ResizableLayoutDirection,
 } from '@kbn/resizable-layout';
-import { Chart } from '../chart';
+import { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
+import { Chart, checkChartAvailability } from '../chart';
 import type {
   UnifiedHistogramChartContext,
   UnifiedHistogramServices,
@@ -38,6 +39,11 @@ import type {
   UnifiedHistogramInput$,
 } from '../types';
 import { useLensSuggestions } from './hooks/use_lens_suggestions';
+import { shouldDisplayHistogram } from './helpers';
+
+const ChartMemoized = React.memo(Chart);
+
+const chartSpacer = <EuiSpacer size="s" />;
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
   /**
@@ -107,9 +113,9 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   topPanelHeight?: number;
   /**
-   * Append a custom element to the right of the hits count
+   * This element would replace the default chart toggle buttons
    */
-  appendHitsCounter?: ReactElement;
+  renderCustomChartToggleActions?: () => ReactElement | undefined;
   /**
    * Disable automatic refetching based on props changes, and instead wait for a `refetch` message
    */
@@ -175,6 +181,9 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Allows users to enable/disable default actions
    */
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+
+  table?: Datatable;
+  abortController?: AbortController;
 }
 
 export const UnifiedHistogramLayout = ({
@@ -197,12 +206,13 @@ export const UnifiedHistogramLayout = ({
   breakdown,
   container,
   topPanelHeight,
-  appendHitsCounter,
+  renderCustomChartToggleActions,
   disableAutoFetching,
   disableTriggers,
   disabledActions,
   lensSuggestionsApi,
   input$,
+  table,
   onTopPanelHeightChange,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -214,6 +224,7 @@ export const UnifiedHistogramLayout = ({
   onBrushEnd,
   children,
   withDefaultActions,
+  abortController,
 }: UnifiedHistogramLayoutProps) => {
   const {
     allSuggestions,
@@ -233,7 +244,39 @@ export const UnifiedHistogramLayout = ({
     onSuggestionChange,
   });
 
+  // apply table to current suggestion
+  const usedSuggestion = useMemo(() => {
+    if (
+      currentSuggestion &&
+      table &&
+      query &&
+      isOfAggregateQueryType(query) &&
+      !shouldDisplayHistogram(query)
+    ) {
+      const { layers } = currentSuggestion.datasourceState as TextBasedPersistedState;
+
+      const newState = {
+        ...currentSuggestion,
+        datasourceState: {
+          ...(currentSuggestion.datasourceState as TextBasedPersistedState),
+          layers: {} as Record<string, unknown>,
+        },
+      };
+
+      for (const key of Object.keys(layers)) {
+        const newLayer = { ...layers[key], table };
+        newState.datasourceState.layers[key] = newLayer;
+      }
+
+      return newState;
+    } else {
+      return currentSuggestion;
+    }
+  }, [currentSuggestion, query, table]);
+
   const chart = suggestionUnsupported ? undefined : originalChart;
+  const isChartAvailable = checkChartAvailability({ chart, dataView, isPlainRecord });
+
   const [topPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
@@ -263,17 +306,12 @@ export const UnifiedHistogramLayout = ({
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
 
-  const onResetChartHeight = useMemo(() => {
-    return currentTopPanelHeight !== defaultTopPanelHeight &&
-      panelsMode === ResizableLayoutMode.Resizable
-      ? () => onTopPanelHeightChange?.(undefined)
-      : undefined;
-  }, [currentTopPanelHeight, defaultTopPanelHeight, onTopPanelHeightChange, panelsMode]);
-
   return (
     <>
       <InPortal node={topPanelNode}>
-        <Chart
+        <ChartMemoized
+          abortController={abortController}
+          isChartAvailable={isChartAvailable}
           className={chartClassName}
           services={services}
           dataView={dataView}
@@ -283,19 +321,18 @@ export const UnifiedHistogramLayout = ({
           relativeTimeRange={relativeTimeRange}
           request={request}
           hits={hits}
-          currentSuggestion={currentSuggestion}
+          currentSuggestion={usedSuggestion}
           isChartLoading={isChartLoading}
           allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
-          appendHitsCounter={appendHitsCounter}
-          appendHistogram={<EuiSpacer size="s" />}
+          renderCustomChartToggleActions={renderCustomChartToggleActions}
+          appendHistogram={chartSpacer}
           disableAutoFetching={disableAutoFetching}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           input$={input$}
-          onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}
@@ -311,7 +348,12 @@ export const UnifiedHistogramLayout = ({
           withDefaultActions={withDefaultActions}
         />
       </InPortal>
-      <InPortal node={mainPanelNode}>{children}</InPortal>
+      <InPortal node={mainPanelNode}>
+        {React.isValidElement(children)
+          ? // @ts-expect-error upgrade typescript v4.9.5
+            React.cloneElement(children, { isChartAvailable })
+          : children}
+      </InPortal>
       <ResizableLayout
         className={className}
         mode={panelsMode}

@@ -39,6 +39,7 @@ import { DashboardUsageCollectionService } from './usage_collection/types';
 import { DashboardVisualizationsService } from './visualizations/types';
 import { DashboardServerlessService } from './serverless/types';
 import { NoDataPageService } from './no_data_page/types';
+import { DashboardUiActionsService } from './ui_actions/types';
 
 export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardStartDependencies> & {
   initContext: PluginInitializerContext; // need a custom type so that initContext is a required parameter for initializerContext
@@ -74,4 +75,5 @@ export interface DashboardServices {
   contentManagement: ContentManagementPublicStart;
   serverless: DashboardServerlessService; // TODO: make this optional in follow up
   noDataPage: NoDataPageService;
+  uiActions: DashboardUiActionsService;
 }

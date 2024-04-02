@@ -19,7 +19,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Connector } from '@kbn/search-connectors';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
-import { useShowErrorToast } from '../../hooks/use_error_toast';
 import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditServiceTypeProps {
@@ -28,16 +27,18 @@ interface EditServiceTypeProps {
 
 export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) => {
   const { http } = useKibanaServices();
-  const { data: connectorTypes } = useConnectorTypes();
-  const showErrorToast = useShowErrorToast();
+  const connectorTypes = useConnectorTypes();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
 
   const options =
-    connectorTypes?.connectors.map((connectorType) => ({
+    connectorTypes.map((connectorType) => ({
       inputDisplay: (
         <EuiFlexGroup direction="row" alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem
+            grow={false}
+            data-test-subj={`serverlessSearchConnectorServiceType-${connectorType.serviceType}`}
+          >
             <EuiIcon
               size="l"
               title={connectorType.name}
@@ -59,13 +60,6 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
       });
       return inputServiceType;
     },
-    onError: (error) =>
-      showErrorToast(
-        error,
-        i18n.translate('xpack.serverlessSearch.connectors.config.connectorServiceTypeError', {
-          defaultMessage: 'Error updating service type',
-        })
-      ),
     onSuccess: (successData) => {
       queryClient.setQueryData(queryKey, {
         connector: { ...connector, service_type: successData },
@@ -76,12 +70,13 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
 
   return (
     <EuiForm>
-      <EuiFormLabel>
+      <EuiFormLabel data-test-subj="serverlessSearchEditConnectorTypeLabel">
         {i18n.translate('xpack.serverlessSearch.connectors.serviceTypeLabel', {
           defaultMessage: 'Connector type',
         })}
       </EuiFormLabel>
       <EuiSuperSelect
+        data-test-subj="serverlessSearchEditConnectorTypeChoices"
         isLoading={isLoading}
         onChange={(event) => mutate(event)}
         options={options}

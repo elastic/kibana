@@ -25,6 +25,8 @@ import type { SecurityPluginSetup } from '../plugin';
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
 
+const normalize = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
+
 interface AuditServiceSetupParams {
   license: SecurityLicense;
   config: ConfigType['audit'];
@@ -194,8 +196,10 @@ export function filterEvent(
     return !ignoreFilters.some(
       (rule) =>
         (!rule.actions || rule.actions.includes(event.event?.action!)) &&
-        (!rule.categories || event.event?.category?.every((c) => rule.categories?.includes(c))) &&
-        (!rule.types || event.event?.type?.every((t) => rule.types?.includes(t))) &&
+        (!rule.categories ||
+          normalize(event.event?.category)?.every((c) => rule.categories?.includes(c || ''))) &&
+        (!rule.types ||
+          normalize(event.event?.type)?.every((t) => rule.types?.includes(t || ''))) &&
         (!rule.outcomes || rule.outcomes.includes(event.event?.outcome!)) &&
         (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!))
     );

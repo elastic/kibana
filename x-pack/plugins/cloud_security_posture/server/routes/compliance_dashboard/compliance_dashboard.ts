@@ -24,6 +24,7 @@ import { CspRouter } from '../../types';
 import { getTrends, Trends } from './get_trends';
 import { BenchmarkWithoutTrend, getBenchmarks } from './get_benchmarks';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
+import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
 
 export interface KeyDocCount<TKey = string> {
   key: TKey;
@@ -152,6 +153,8 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
 
         try {
           const esClient = cspContext.esClient.asCurrentUser;
+          const encryptedSoClient = cspContext.encryptedSavedObjects;
+          const filteredRules = await getMutedRulesFilterQuery(encryptedSoClient);
 
           const { id: pitId } = await esClient.openPointInTime({
             index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -167,6 +170,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           const query: QueryDslQueryContainer = {
             bool: {
               filter: [{ term: { safe_posture_type: policyTemplate } }],
+              must_not: filteredRules,
             },
           };
 
