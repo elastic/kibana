@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { EmbeddableApiContext, apiCanAddNewPanel } from '@kbn/presentation-publishing';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
 
@@ -16,10 +15,7 @@ import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
 // Create and register an action which allows this embeddable to be created from
 // the dashboard toolbar context menu.
 // -----------------------------------------------------------------------------
-export const registerCreateEuiMarkdownAction = (
-  uiActions: UiActionsStart,
-  serverless?: ServerlessPluginStart
-) => {
+export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_EUI_MARKDOWN_ACTION_ID,
     getIconType: () => 'editorCodeBlock',
@@ -42,7 +38,9 @@ export const registerCreateEuiMarkdownAction = (
       }),
   });
   uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_EUI_MARKDOWN_ACTION_ID);
-  if (!serverless) {
+  if (uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
+    // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
+    // the create action if the Canvas-specific trigger does indeed exist.
     uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', ADD_EUI_MARKDOWN_ACTION_ID);
   }
 };

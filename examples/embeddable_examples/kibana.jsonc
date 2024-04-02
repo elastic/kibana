@@ -16,7 +16,6 @@
       "charts",
       "fieldFormats"
     ],
-    "optionalPlugins": ["serverless"],
     "requiredBundles": ["presentationUtil"],
     "extraPublicDirs": ["public/hello_world"]
   }

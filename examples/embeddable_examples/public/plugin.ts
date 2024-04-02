@@ -60,7 +60,6 @@ export interface EmbeddableExamplesStartDependencies {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
-  serverless?: ServerlessPluginStart;
 }
 
 interface ExampleEmbeddableFactories {
@@ -129,7 +128,7 @@ export class EmbeddableExamplesPlugin
       return getFieldListFactory(core, deps);
     });
 
-    registerCreateEuiMarkdownAction(deps.uiActions, deps.serverless);
+    registerCreateEuiMarkdownAction(deps.uiActions);
     registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
       const { markdownEmbeddableFactory } = await import(
         './react_embeddables/eui_markdown/eui_markdown_react_embeddable'
