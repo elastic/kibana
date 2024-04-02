@@ -120,6 +120,7 @@ const executorParams: ExecutorSubActionPushParams = {
     priority: 'High',
     issueType: '10006',
     parent: null,
+    otherFields: null,
   },
   comments: [
     {

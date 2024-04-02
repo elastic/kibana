@@ -56,7 +56,12 @@ export class AnomalySwimlaneEmbeddableFactory
 
     try {
       const { resolveAnomalySwimlaneUserInput } = await import('./anomaly_swimlane_setup_flyout');
-      return await resolveAnomalySwimlaneUserInput(coreStart, deps.data.dataViews);
+      const userInput = await resolveAnomalySwimlaneUserInput(coreStart, deps.data.dataViews);
+
+      return {
+        ...userInput,
+        title: userInput.panelTitle,
+      };
     } catch (e) {
       return Promise.reject();
     }

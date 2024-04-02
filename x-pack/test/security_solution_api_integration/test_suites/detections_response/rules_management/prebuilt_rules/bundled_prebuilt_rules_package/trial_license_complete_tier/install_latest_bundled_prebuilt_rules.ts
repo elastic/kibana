@@ -61,8 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
         es,
         supertest,
         '99.0.0',
-        retry,
-        log
+        retry
       );
 
       // As opposed to "registry"

@@ -7,36 +7,19 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { SynthtraceClient } from '../services/synthtrace';
-import { generateData } from '../synthtrace_data/apm_data';
+import { generateApmData } from '../synthtrace_data/apm_data';
 
 export const journey = new Journey({
-  beforeSteps: async ({ kbnUrl, log, auth, es }) => {
-    // Install APM Package
-    const synthClient = new SynthtraceClient({
-      kbnBaseUrl: kbnUrl.get(),
-      logger: log,
-      username: auth.getUsername(),
-      password: auth.getPassword(),
-      esClient: es,
-    });
-
-    await synthClient.installApmPackage();
-    // Setup Synthtrace Client
-    await synthClient.initialiseEsClient();
-    // Generate data using Synthtrace
-    const start = Date.now() - 1000 * 60 * 15;
-    const end = Date.now() + 1000 * 60 * 15;
-    await synthClient.index(
-      generateData({
-        from: new Date(start).getTime(),
-        to: new Date(end).getTime(),
-      })
-    );
+  synthtrace: {
+    type: 'apm',
+    generator: generateApmData,
+    options: {
+      from: new Date(Date.now() - 1000 * 60 * 15),
+      to: new Date(Date.now() + 1000 * 60 * 15),
+    },
   },
+
   ftrConfigPath: 'x-pack/performance/configs/apm_config.ts',
-  // FLAKY: https://github.com/elastic/kibana/issues/162813
-  skipped: true,
 })
   .step('Navigate to Service Inventory Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`app/apm/services`));

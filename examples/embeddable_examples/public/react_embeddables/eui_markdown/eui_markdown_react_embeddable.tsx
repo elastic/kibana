@@ -8,20 +8,20 @@
 
 import { EuiMarkdownEditor, EuiMarkdownFormat } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  initializeReactEmbeddableTitles,
-  ReactEmbeddableFactory,
-  registerReactEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useInheritedViewMode, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  initializeTitles,
+  useInheritedViewMode,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
 import { MarkdownEditorSerializedState, MarkdownEditorApi } from './types';
 
-const markdownEmbeddableFactory: ReactEmbeddableFactory<
+export const markdownEmbeddableFactory: ReactEmbeddableFactory<
   MarkdownEditorSerializedState,
   MarkdownEditorApi
 > = {
@@ -40,7 +40,7 @@ const markdownEmbeddableFactory: ReactEmbeddableFactory<
     /**
      * initialize state (source of truth)
      */
-    const { titlesApi, titleComparators, serializeTitles } = initializeReactEmbeddableTitles(state);
+    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
     const content$ = new BehaviorSubject(state.content);
 
     /**
@@ -105,11 +105,3 @@ const markdownEmbeddableFactory: ReactEmbeddableFactory<
     };
   },
 };
-
-/**
- * Register the defined Embeddable Factory - notice that this isn't defined
- * on the plugin. Instead, it's a simple imported function. I.E to register an
- * embeddable, you only need the embeddable plugin in your requiredBundles
- */
-export const registerMarkdownEditorEmbeddable = () =>
-  registerReactEmbeddableFactory(markdownEmbeddableFactory);

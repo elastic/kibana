@@ -17,6 +17,10 @@ import type {
 
 export * from './constants';
 
+/**
+ * @deprecated
+ * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+ */
 export interface JobParamsDownloadCSV {
   browserTimezone: string;
   title: string;
@@ -31,6 +35,14 @@ interface BaseParamsCSV {
 
 export type JobParamsCSV = BaseParamsCSV & BaseParams;
 export type TaskPayloadCSV = BaseParamsCSV & BasePayload;
+
+/**
+ * Public-facing interface
+ * Apps should use this interface to build job params. The browserTimezone and version
+ * fields become automatically provided by Reporting
+ * @public
+ */
+export type JobAppParamsCSV = Omit<JobParamsCSV, 'browserTimezone' | 'version'>;
 
 interface CsvFromSavedObjectBase {
   objectType: 'search';
@@ -47,13 +59,18 @@ export interface TaskPayloadCsvFromSavedObject extends CsvFromSavedObjectBase, B
   pagingStrategy: CsvPagingStrategy;
 }
 
-export const CSV_REPORTING_ACTION = 'downloadCsvReport';
+export const CSV_REPORTING_ACTION = 'generateCsvReport';
 
+/**
+ * @deprecated
+ * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+ */
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
-// This is deprecated because it lacks support for runtime fields
-// but the extension points are still needed for pre-existing scripted automation, until 8.0
-export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
+/**
+ * @deprecated
+ * Supported in case older reports exist in storage
+ */
 export const CSV_JOB_TYPE_DEPRECATED = 'csv';
 
 export { getQueryFromCsvJob, type QueryInspection } from './lib/get_query_from_job';

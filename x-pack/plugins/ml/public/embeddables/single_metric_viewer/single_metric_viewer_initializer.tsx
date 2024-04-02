@@ -22,8 +22,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { SingleMetricViewerServices } from '..';
-import type { TimeRangeBounds } from '../../application/util/time_buckets';
 import { SeriesControls } from '../../application/timeseriesexplorer/components/series_controls';
 import {
   APP_STATE_ACTION,
@@ -137,7 +137,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
         </EuiButtonEmpty>
 
         <EuiButton
-          data-test-subj="mlsingleMetricViewerInitializerConfirmButton"
+          data-test-subj="mlSingleMetricViewerInitializerConfirmButton"
           isDisabled={!isPanelTitleValid}
           onClick={onCreate.bind(null, {
             functionDescription,

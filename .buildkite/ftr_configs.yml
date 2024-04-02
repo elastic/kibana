@@ -305,6 +305,7 @@ enabled:
   - x-pack/test/functional/apps/ml/short_tests/config.ts
   - x-pack/test/functional/apps/ml/stack_management_jobs/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
+  - x-pack/test/functional/apps/navigation/config.ts
   - x-pack/test/functional/apps/observability_logs_explorer/config.ts
   - x-pack/test/functional/apps/dataset_quality/config.ts
   - x-pack/test/functional/apps/painless_lab/config.ts
@@ -447,6 +448,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group4.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group5.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group6.ts
+  - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys_e2e/flight_dashboard.ts

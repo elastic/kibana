@@ -34,6 +34,7 @@ test('set correct defaults', () => {
       "compression": false,
       "customHeaders": Object {},
       "healthCheckDelay": "PT2.5S",
+      "healthCheckStartupDelay": "PT0.5S",
       "hosts": Array [
         "http://localhost:9200",
       ],

@@ -19,19 +19,21 @@ import {
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
+import {
+  createTimeline,
+  deleteTimelines,
+  favoriteTimeline,
+} from '../../../tasks/api_calls/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
+    deleteTimelines();
     createTimeline(getFavoritedTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId) => favoriteTimeline({ timelineId, timelineType: 'default' }));
     createTimeline(getTimeline());
-  });
-
-  beforeEach(() => {
     login();
     visit(TIMELINES_URL);
     cy.get(TIMELINES_OVERVIEW_SEARCH).clear();

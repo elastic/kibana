@@ -27,6 +27,7 @@ import {
   StreamingChatResponseEventType,
   type StreamingChatResponseEventWithoutError,
   type StreamingChatResponseEvent,
+  TokenCountEvent,
 } from '../../common/conversation_complete';
 import {
   FunctionRegistry,
@@ -163,10 +164,17 @@ export async function createChatService({
 
             const subscription = toObservable(response)
               .pipe(
-                map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
+                map(
+                  (line) =>
+                    JSON.parse(line) as
+                      | StreamingChatResponseEvent
+                      | BufferFlushEvent
+                      | TokenCountEvent
+                ),
                 filter(
                   (line): line is StreamingChatResponseEvent =>
-                    line.type !== StreamingChatResponseEventType.BufferFlush
+                    line.type !== StreamingChatResponseEventType.BufferFlush &&
+                    line.type !== StreamingChatResponseEventType.TokenCount
                 ),
                 throwSerializedChatCompletionErrors()
               )
@@ -199,7 +207,15 @@ export async function createChatService({
         shareReplay()
       );
     },
-    complete({ getScreenContexts, connectorId, conversationId, messages, persist, signal }) {
+    complete({
+      getScreenContexts,
+      connectorId,
+      conversationId,
+      messages,
+      persist,
+      signal,
+      responseLanguage,
+    }) {
       return complete(
         {
           getScreenContexts,
@@ -209,6 +225,7 @@ export async function createChatService({
           persist,
           signal,
           client,
+          responseLanguage,
         },
         ({ params }) => {
           return from(

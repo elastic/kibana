@@ -65,6 +65,7 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
     },
     currentUser: {
       username: 'elastic',
+      full_name: '',
     },
   },
   render: (props) => {

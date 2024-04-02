@@ -110,6 +110,7 @@ describe('initNavigation()', () => {
 
     beforeAll(() => {
       projectNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -184,6 +185,7 @@ describe('initNavigation()', () => {
       const { projectNavigation: projNavigation, getNavigationTree: getNavTree } =
         setupInitNavigation();
       projNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -208,6 +210,7 @@ describe('initNavigation()', () => {
       const { projectNavigation: projNavigation } = setupInitNavigation();
 
       projNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -392,6 +395,7 @@ describe('initNavigation()', () => {
 
     // 2. initNavigation() is called
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {
@@ -419,6 +423,7 @@ describe('initNavigation()', () => {
     });
 
     projectNavigation.initNavigation<any>(
+      'foo',
       // @ts-expect-error - We pass a non valid cloudLink that is not TS valid
       of({
         body: [
@@ -524,7 +529,7 @@ describe('breadcrumbs', () => {
     const obs = subj.asObservable();
 
     if (initiateNavigation) {
-      projectNavigation.initNavigation(obs);
+      projectNavigation.initNavigation('foo', obs);
     }
 
     return {
@@ -737,7 +742,7 @@ describe('breadcrumbs', () => {
       { text: 'custom1', href: '/custom1' },
       { text: 'custom2', href: '/custom1/custom2' },
     ]);
-    projectNavigation.initNavigation(of(mockNavigation)); // init navigation
+    projectNavigation.initNavigation('foo', of(mockNavigation)); // init navigation
 
     const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
     expect(breadcrumbs).toHaveLength(4);
@@ -776,6 +781,7 @@ describe('getActiveNodes$()', () => {
     expect(activeNodes).toEqual([]);
 
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {
@@ -831,6 +837,7 @@ describe('getActiveNodes$()', () => {
     expect(activeNodes).toEqual([]);
 
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {

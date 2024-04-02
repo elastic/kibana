@@ -1,0 +1,104 @@
+{
+  "id": "@kbn/solution-nav-oblt",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/solution-nav-oblt",
+        "id": "def-common.definition",
+        "type": "Object",
+        "tags": [],
+        "label": "definition",
+        "description": [],
+        "path": "packages/solution-nav/oblt/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/solution-nav-oblt",
+            "id": "def-common.definition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/solution-nav/oblt/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/solution-nav-oblt",
+            "id": "def-common.definition.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/solution-nav/oblt/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/solution-nav-oblt",
+            "id": "def-common.definition.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "path": "packages/solution-nav/oblt/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/solution-nav-oblt",
+            "id": "def-common.definition.homePage",
+            "type": "string",
+            "tags": [],
+            "label": "homePage",
+            "description": [],
+            "signature": [
+              "\"discover\""
+            ],
+            "path": "packages/solution-nav/oblt/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/solution-nav-oblt",
+            "id": "def-common.definition.navigationTree$",
+            "type": "Object",
+            "tags": [],
+            "label": "navigationTree$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<{ body: { type: \"navGroup\"; id: string; title: string; icon: string; defaultIsCollapsed: false; isCollapsible: false; breadcrumbStatus: \"hidden\"; children: { link: \"discover\"; spaceBefore: \"m\"; }[]; }[]; }>"
+            ],
+            "path": "packages/solution-nav/oblt/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}
