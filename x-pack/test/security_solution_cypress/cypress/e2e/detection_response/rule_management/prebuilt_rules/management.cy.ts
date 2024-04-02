@@ -50,7 +50,7 @@ const rules = Array.from(Array(5)).map((_, i) => {
   });
 });
 
-describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
+describe('Prebuilt rules', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

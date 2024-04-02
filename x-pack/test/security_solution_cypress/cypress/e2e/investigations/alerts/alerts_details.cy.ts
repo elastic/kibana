@@ -180,7 +180,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Localstorage management', { tags: ['@brokenInServerlessQA'] }, () => {
+  describe('Localstorage management', () => {
     const ARCHIVED_RULE_ID = '7015a3e2-e4ea-11ed-8c11-49608884878f';
     const ARCHIVED_RULE_NAME = 'Endpoint Security';
 

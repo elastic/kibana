@@ -93,23 +93,19 @@ describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
     expectManagementTableRules(['Enabled rule to export']);
   });
 
-  it(
-    'shows a modal saying that no rules can be exported if all the selected rules are prebuilt',
-    { tags: ['@brokenInServerlessQA'] },
-    function () {
-      createAndInstallMockedPrebuiltRules(prebuiltRules);
+  it('shows a modal saying that no rules can be exported if all the selected rules are prebuilt', function () {
+    createAndInstallMockedPrebuiltRules(prebuiltRules);
 
-      filterByElasticRules();
-      selectAllRules();
-      bulkExportRules();
+    filterByElasticRules();
+    selectAllRules();
+    bulkExportRules();
 
-      cy.get(MODAL_CONFIRMATION_BODY).contains(
-        `${prebuiltRules.length} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
-      );
-    }
-  );
+    cy.get(MODAL_CONFIRMATION_BODY).contains(
+      `${prebuiltRules.length} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
+    );
+  });
 
-  it('exports only custom rules', { tags: ['@brokenInServerlessQA'] }, function () {
+  it('exports only custom rules', function () {
     const expectedNumberCustomRulesToBeExported = 1;
 
     createAndInstallMockedPrebuiltRules(prebuiltRules);
@@ -138,7 +134,7 @@ describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  context('rules with exceptions', { tags: ['@brokenInServerlessQA'] }, () => {
+  context('rules with exceptions', () => {
     beforeEach(() => {
       deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
       // create rule with exceptions

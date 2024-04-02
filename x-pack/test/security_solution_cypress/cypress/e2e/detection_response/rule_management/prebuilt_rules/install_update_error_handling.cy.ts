@@ -38,7 +38,7 @@ import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Error handling',
-  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
