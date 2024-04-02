@@ -31,6 +31,10 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
    * Utilities to work with URL locators and short URLs.
    */
   url: BrowserUrlService;
+
+  /**
+   * this plugin exposes the kibana version for other plugins needing to pass a Reporting API client
+   */
   kibanaVersion: string;
 
   /**
@@ -43,6 +47,11 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
    * Sets the provider for the anonymous access service; this is consumed by the Security plugin to avoid a circular dependency.
    */
   setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
+  /**
+   * Allows for canvas to register the older versioned way whereas reporting for Discover/Lens/Dashboard
+   * can use the new share version and show the share context modals
+   */
+  isNewVersion: boolean;
 };
 
 /** @public */
@@ -139,6 +148,7 @@ export class SharePlugin
         }
         this.anonymousAccessServiceProvider = provider;
       },
+      isNewVersion: this.config.new_version.enabled,
     };
   }
 

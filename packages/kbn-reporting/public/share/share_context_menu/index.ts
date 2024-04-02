@@ -17,7 +17,7 @@ import { ILicense } from '@kbn/licensing-plugin/public';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { ReportingAPIClient } from '../../reporting_api_client';
 
-export interface ExportPanelShareOpts {
+export interface ExportModalShareOpts {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   uiSettings: IUiSettingsClient;
@@ -29,7 +29,15 @@ export interface ExportPanelShareOpts {
   formatFactoryFn: () => FormatFactory;
 }
 
-export type ExportModalShareOpts = ExportPanelShareOpts;
+export interface ExportPanelShareOpts {
+  apiClient: ReportingAPIClient;
+  toasts: ToastsSetup;
+  uiSettings: IUiSettingsClient;
+  usesUiCapabilities: boolean;
+  license: ILicense;
+  application: ApplicationStart;
+  theme: ThemeServiceSetup;
+}
 
 export interface ReportingSharingData {
   title: string;

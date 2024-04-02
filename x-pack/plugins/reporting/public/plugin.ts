@@ -33,6 +33,7 @@ import {
   getSharedComponents,
   reportingCsvShareProvider,
   reportingScreenshotShareProvider,
+  reportingExportModalProvider,
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -219,29 +220,41 @@ export class ReportingPublicPlugin
             application,
             usesUiCapabilities,
             theme: core.theme,
-            version: this.kibanaVersion,
-            formatFactoryFn: () => fieldFormats.deserialize,
           })
         );
 
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          shareSetup.register(
-            reportingScreenshotShareProvider({
-              apiClient,
-              toasts,
-              uiSettings,
-              license,
-              application,
-              usesUiCapabilities,
-              theme: core.theme,
-              version: this.kibanaVersion,
-              formatFactoryFn: () => fieldFormats.deserialize,
-            })
-          );
+          if (!shareSetup.isNewVersion) {
+            shareSetup.register(
+              reportingScreenshotShareProvider({
+                apiClient,
+                toasts,
+                uiSettings,
+                license,
+                application,
+                usesUiCapabilities,
+                theme: core.theme,
+              })
+            );
+          } else {
+            shareSetup.registerModalOptions(
+              shareSetup.isNewVersion,
+              reportingExportModalProvider({
+                apiClient,
+                toasts,
+                uiSettings,
+                license,
+                application,
+                usesUiCapabilities,
+                theme: core.theme,
+                version: this.kibanaVersion,
+                formatFactoryFn: () => fieldFormats.deserialize,
+              })
+            );
+          }
         }
       });
     });
-
     return reportingStart;
   }
 

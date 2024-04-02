@@ -397,13 +397,16 @@ export class LensPlugin {
       const startServices$ = from(getStartServices());
       startServices$.subscribe(([, { licensing }]) => {
         licensing?.license$.subscribe((license) => {
-          return share.register(
-            downloadCsvShareProvider({
-              uiSettings: core.uiSettings,
-              formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
-              license,
-            })
-          );
+          const atLeastGold = license.hasAtLeast('gold');
+          if (atLeastGold) {
+            return share.register(
+              downloadCsvShareProvider({
+                uiSettings: core.uiSettings,
+                formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+                license,
+              })
+            );
+          }
         });
       });
     }

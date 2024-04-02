@@ -47,7 +47,7 @@ export const LinkContent = ({
   const isMounted = useMountedState();
   const [url, setUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
-  const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
+  const [, setShortUrlCache] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     // propagate url updates upwards to tab

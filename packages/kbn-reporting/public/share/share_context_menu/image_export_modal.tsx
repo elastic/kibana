@@ -26,7 +26,6 @@ import url from 'url';
 import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { BaseParams } from '@kbn/reporting-common/types';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { ReportingAPIClient } from '../..';
@@ -45,12 +44,9 @@ export interface ReportingModalProps {
   onClose: () => void;
   theme: ThemeServiceSetup;
   layoutOption?: 'print' | 'canvas';
-  // canvas breaks if required
   jobProviderOptions?: JobParamsProviderOptions;
-  // needed for canvas
-  getJobParams?: JobAppParamsPDFV2;
   objectType: string;
-  downloadCsvFromLens: () => void;
+  downloadCsvFromLens?: () => void;
 }
 
 type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
@@ -85,7 +81,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const getJobsParams = useCallback(
     (type: AllowedImageExportType, opts?: JobParamsProviderOptions) => {
       if (!opts) {
-        return { ...props.getJobParams };
+        return;
       }
 
       const {
@@ -121,25 +117,20 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       // single URL for PNG
       return { ...baseParams, relativeUrl };
     },
-    [apiClient, objectType, props.getJobParams]
+    [apiClient, objectType]
   );
 
   const getLayout = useCallback((): LayoutParams => {
-    const { layout } = getJobsParams(selectedRadio, jobProviderOptions);
+    const el = document.querySelector('[data-shared-items-container]');
+    const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+    const dimensions = { height, width };
 
-    let dimensions = layout?.dimensions;
-
-    if (!dimensions) {
-      const el = document.querySelector('[data-shared-items-container]');
-      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-      dimensions = { height, width };
-    }
     if (usePrintLayout) {
       return { id: 'print', dimensions };
     }
 
     return { id: 'preserve_layout', dimensions };
-  }, [getJobsParams, jobProviderOptions, selectedRadio, usePrintLayout]);
+  }, [usePrintLayout]);
 
   const getJobParams = useCallback(
     (shareableUrl?: boolean) => {
@@ -172,7 +163,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   }, [markAsStale, getAbsoluteReportGenerationUrl]);
 
   const generateReportingJob = () => {
-    if (selectedRadio === 'csv') {
+    if (selectedRadio === 'csv' && downloadCsvFromLens) {
       return downloadCsvFromLens();
     }
     const decoratedJobParams = apiClient.getDecoratedJobParams(

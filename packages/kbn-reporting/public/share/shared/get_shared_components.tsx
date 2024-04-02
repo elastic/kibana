@@ -14,7 +14,7 @@ import React from 'react';
 import { ReportingAPIClient } from '../..';
 import { CsvModalContent } from '../share_context_menu/csv_export_modal';
 import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
-import { ReportingModalContent } from '../share_context_menu/reporting_panel_content_lazy';
+import { ReportingModalContent } from '../share_context_menu/reporting_modal_content_lazy';
 import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
 /**
  * Properties for displaying a share menu with Reporting features.
@@ -41,7 +41,7 @@ export interface ApplicationProps {
    */
   onClose: () => void;
   objectType: string;
-  downloadCsvFromLens: () => void;
+  downloadCsvFromLens?: () => void;
 }
 
 export interface ReportingPublicComponents {
@@ -92,7 +92,6 @@ export function getSharedComponents(
       }
     },
     ReportingModalPDFV2(props: ApplicationProps) {
-      const getJobParams = props.getJobParams as JobAppParamsPDFV2;
       return (
         <ReportingModalContent
           requiresSavedState={false}
@@ -101,7 +100,6 @@ export function getSharedComponents(
           uiSettings={core.uiSettings}
           theme={core.theme}
           {...props}
-          getJobParams={getJobParams}
         />
       );
     },
@@ -114,7 +112,6 @@ export function getSharedComponents(
           uiSettings={core.uiSettings}
           theme={core.theme}
           {...props}
-          getJobParams={undefined}
         />
       );
     },

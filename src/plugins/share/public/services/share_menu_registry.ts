@@ -29,6 +29,18 @@ export class ShareMenuRegistry {
 
         this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
       },
+      registerModalOptions: (newVersion: boolean, shareMenuProvider: ShareMenuProvider) => {
+        if (newVersion === false) {
+          throw new Error(`Share menu provider is not the updated version.`);
+        }
+
+        if (this.shareMenuProviders.has(shareMenuProvider.id)) {
+          throw new Error(
+            `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
+          );
+        }
+        this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
+      },
     };
   }
 
