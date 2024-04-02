@@ -27,6 +27,7 @@ const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): Ris
         risk_inputs: [],
       },
     },
+
     doc_count: 2,
   },
   ...overrides,

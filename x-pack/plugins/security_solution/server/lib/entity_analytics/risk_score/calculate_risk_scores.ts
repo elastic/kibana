@@ -99,8 +99,8 @@ const formatForResponse = ({
     category_1_count: riskDetails.value.category_1_count,
     notes: riskDetails.value.notes,
     inputs: riskDetails.value.risk_inputs.map((riskInput) => ({
-      id: riskInput.id[0],
-      index: riskInput.index[0],
+      id: riskInput.id,
+      index: riskInput.index,
       description: `Alert from Rule: ${riskInput.rule_name ?? 'RULE_NOT_FOUND'}`,
       category: RiskCategories.category_1,
       risk_score: riskInput.score,
@@ -197,6 +197,7 @@ const buildIdentifierTypeAggregation = ({
         sampler: {
           shard_size: alertSampleSizePerShard,
         },
+
         aggs: {
           risk_details: {
             scripted_metric: {
@@ -208,11 +209,11 @@ const buildIdentifierTypeAggregation = ({
                 double weighted_score = 0.0;
           
                 fields.put('time', doc['@timestamp'].value);
-                fields.put('rule_name', doc['${ALERT_RULE_NAME}']);
+                fields.put('rule_name', doc['${ALERT_RULE_NAME}'].value);
 
                 fields.put('category', category);
-                fields.put('index', doc['_index']);
-                fields.put('id', doc['${ALERT_UUID}']);
+                fields.put('index', doc['_index'].value);
+                fields.put('id', doc['${ALERT_UUID}'].value);
                 fields.put('score', score);
                 
                 ${buildWeightingOfScoreByCategory({ userWeights: weights, identifierType })}
