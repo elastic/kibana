@@ -148,6 +148,7 @@ export class ObservabilityAIAssistantPlugin
         getObsAIClient: async (request: KibanaRequest) => {
           const client = await service.getClient({ request });
           const resources = {
+            request,
             logger: this.logger.get('connector'),
             context: {
               rac: {
@@ -157,14 +158,30 @@ export class ObservabilityAIAssistantPlugin
                 },
               },
             },
-            plugins: { core },
+            plugins: {
+              core,
+              actions: {
+                async start() {
+                  const [_, pluginsStart] = await core.getStartServices();
+                  return pluginsStart.actions;
+                },
+              },
+            },
           } as unknown as RespondFunctionResources;
           const functionClient = await service.getFunctionClient({
             client,
             resources,
             signal: new AbortController().signal,
           });
-          return { client, functionClient, kibanaPublicUrl: core.http.basePath.publicBaseUrl };
+          const actionsClient = await (
+            await resources.plugins.actions.start()
+          ).getActionsClientWithRequest(request);
+          return {
+            client,
+            functionClient,
+            actionsClient,
+            kibanaPublicUrl: core.http.basePath.publicBaseUrl,
+          };
         },
       })
     );

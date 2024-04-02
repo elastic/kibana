@@ -7,6 +7,7 @@
 
 import { filter, lastValueFrom } from 'rxjs';
 import { v4 } from 'uuid';
+import parse from 'joi-to-json';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
@@ -18,6 +19,9 @@ import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
+import { ParamsSchema as SlackConnectorParamsSchema } from '@kbn/stack-connectors-plugin/server/connector_types/slack';
+import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
 import { MessageRole } from '../../common/types';
@@ -53,6 +57,7 @@ export function getConnectorType({
   getObsAIClient: (request: KibanaRequest) => Promise<{
     client: ObservabilityAIAssistantClient | undefined;
     functionClient: ChatFunctionClient | undefined;
+    actionsClient: PublicMethodsOf<ActionsClient>;
     kibanaPublicUrl?: string;
   }>;
 }): ObsAIAssistantConnectorType {
@@ -99,16 +104,19 @@ async function executor(
   getObsAIClient: (request: KibanaRequest) => Promise<{
     client: ObservabilityAIAssistantClient | undefined;
     functionClient: ChatFunctionClient | undefined;
+    actionsClient: PublicMethodsOf<ActionsClient>;
     kibanaPublicUrl?: string;
   }>
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { client, functionClient, kibanaPublicUrl } = await getObsAIClient(execOptions.request!);
+  const { client, functionClient, actionsClient, kibanaPublicUrl } = await getObsAIClient(
+    execOptions.request!
+  );
   if (!client || !functionClient) {
     return { actionId: execOptions.actionId, status: 'error' };
   }
   const conversationId = v4();
-  const assistantResponse = await lastValueFrom(
-    await client
+  await lastValueFrom(
+    client
       .complete({
         functionClient,
         conversationId,
@@ -116,6 +124,13 @@ async function executor(
         isPrecomputedConversationId: true,
         connectorId: 'azure-open-ai',
         signal: new AbortController().signal,
+        // functions: [
+        //   ...connectors.map(connector => ({
+        //     name: connector.name,
+        //     description: 'Call connector ' + connector.name,
+        //     parameters: getJsonSchemaForConnectorType(connector.type)
+        //   }))
+        // ],
         messages: [
           {
             '@timestamp': new Date().toISOString(),
@@ -123,14 +138,10 @@ async function executor(
               role: MessageRole.System,
               content:
                 `You are a helpful assistant for Elastic Observability.
-                  Your task is to create a report for an alert that just fired.
-                  This report should be sent to the appropriate connector (ie
-                  slack, email..) if the user ask for it. The report is aimed
-                  at SRE. You should attempt to include resolved or ongoing issues
-                  of the same alert to help troubleshoot the root cause. Also include
-                  a list of ongoing alerts that could be related. Your next answer
-                  should be the complete alert report. ONLY reply with the report and DO NOT
-                  provide any details on the steps you've followed to get the information.` +
+                 An alert about a specific metric just fired. Your task is to
+                 execute the workflow asked by the user. You can use the function
+                 call_webhook_connector if a webhook needs to be called. When a
+                 webhook is called, include what url was called in your response.` +
                 (kibanaPublicUrl
                   ? ` A link to this
                   conversation should be added at the bottom of the report, the conversation
@@ -152,14 +163,33 @@ async function executor(
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.Assistant,
+              content: '',
               function_call: {
-                name: 'recall',
-                arguments: JSON.stringify({
-                  queries: [],
-                  categories: [],
-                }),
+                name: 'get_connectors',
+                arguments: JSON.stringify({}),
                 trigger: MessageRole.Assistant as const,
               },
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              name: 'get_connectors',
+              content: JSON.stringify({
+                connectors: await actionsClient.getAll().then((connectors) => {
+                  return connectors.map((connector) => {
+                    // getParamsForConnector(connector.actionTypeId);
+                    if (connector.actionTypeId === '.slack') {
+                      return {
+                        ...connector,
+                        params: parse(SlackConnectorParamsSchema.getSchema(), 'json').properties,
+                      };
+                    }
+                    return connector;
+                  });
+                }),
+              }),
             },
           },
         ],
@@ -172,16 +202,6 @@ async function executor(
       )
       .pipe(concatenateChatCompletionChunks())
   );
-
-  // eslint-disable-next-line no-console
-  console.log(assistantResponse);
-
-  //  await axios.post(
-  //    'https://hooks.slack.com/services/...',
-  //    {
-  //      text: response.message.content,
-  //    }
-  //  );
 
   return { actionId: execOptions.actionId, status: 'ok' };
 }

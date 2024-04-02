@@ -423,7 +423,7 @@ export class ObservabilityAIAssistantClient {
         });
 
         const titlePromise =
-          !conversationId && !title && persist
+          (!conversationId || (conversationId && isPrecomputedConversationId)) && !title && persist
             ? this.getGeneratedTitle({
                 messages,
                 connectorId,
