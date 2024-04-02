@@ -118,7 +118,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
           <EuiFlexItem
             style={{
               overflow: 'hidden',
-              marginTop: -16 /* Offset extra padding for card hover drop shadow */,
+              marginTop: -euiTheme.size.base /* Offset extra padding for card hover drop shadow */,
             }}
           >
             {ruleTypesLoading ? (
