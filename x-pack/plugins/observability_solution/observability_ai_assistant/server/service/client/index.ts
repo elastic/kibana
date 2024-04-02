@@ -149,12 +149,20 @@ export class ObservabilityAIAssistantClient {
     responseLanguage?: string;
     conversationId?: string;
     isNewConversation?: boolean;
+    isPublicConversation?: boolean;
     title?: string;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
-        const { messages, connectorId, signal, functionClient, persist, isNewConversation } =
-          params;
+        const {
+          messages,
+          connectorId,
+          signal,
+          functionClient,
+          persist,
+          isNewConversation,
+          isPublicConversation,
+        } = params;
 
         const conversationId = params.conversationId || '';
         const title = params.title || '';
@@ -502,7 +510,7 @@ export class ObservabilityAIAssistantClient {
               messages: nextMessages,
               labels: {},
               numeric_labels: {},
-              public: false,
+              public: isPublicConversation || false,
             });
 
             subscriber.next({

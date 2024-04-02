@@ -463,7 +463,11 @@ describe('Observability AI Assistant client', () => {
   });
 
   describe('when completing a conversation with an initial conversation id', () => {
-    const init = async (conversationId: string, isNewConversation: boolean) => {
+    const init = async (
+      conversationId: string,
+      isNewConversation: boolean,
+      isPublicConversation: boolean
+    ) => {
       client = createClient();
       actionsClientMock.execute.mockImplementationOnce(async () => {
         llmSimulator = createLlmSimulator();
@@ -490,7 +494,7 @@ describe('Observability AI Assistant client', () => {
                   },
                   labels: {},
                   numeric_labels: {},
-                  public: false,
+                  public: isPublicConversation,
                   messages: [
                     system('This is a system message'),
                     user('How many alerts do I have?'),
@@ -515,6 +519,7 @@ describe('Observability AI Assistant client', () => {
           persist: true,
           conversationId,
           isNewConversation,
+          isPublicConversation,
         })
       );
 
@@ -534,7 +539,7 @@ describe('Observability AI Assistant client', () => {
     };
 
     it('updates the conversation', async () => {
-      const dataHandler = await init('my-conversation-id', false);
+      const dataHandler = await init('my-conversation-id', false, false);
       expect(JSON.parse(dataHandler.mock.calls[2])).toEqual({
         conversation: {
           title: 'My stored conversation',
@@ -606,10 +611,10 @@ describe('Observability AI Assistant client', () => {
     });
 
     it('creates a new conversation if specified', async () => {
-      const dataHandler = await init('my-precomputed-conversation-id', true);
+      const dataHandler = await init('my-precomputed-conversation-id', true, true);
       expect(JSON.parse(dataHandler.mock.calls[2])).toEqual({
         conversation: {
-          title: 'My stored conversation',
+          title: 'New conversation',
           id: 'my-precomputed-conversation-id',
           last_updated: expect.any(String),
           token_count: {
