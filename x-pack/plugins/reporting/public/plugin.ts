@@ -224,34 +224,31 @@ export class ReportingPublicPlugin
         );
 
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          if (!shareSetup.isNewVersion) {
-            shareSetup.register(
-              reportingScreenshotShareProvider({
-                apiClient,
-                toasts,
-                uiSettings,
-                license,
-                application,
-                usesUiCapabilities,
-                theme: core.theme,
-              })
-            );
-          } else {
-            shareSetup.registerModalOptions(
-              shareSetup.isNewVersion,
-              reportingExportModalProvider({
-                apiClient,
-                toasts,
-                uiSettings,
-                license,
-                application,
-                usesUiCapabilities,
-                theme: core.theme,
-                version: this.kibanaVersion,
-                formatFactoryFn: () => fieldFormats.deserialize,
-              })
-            );
-          }
+          shareSetup.register(
+            reportingScreenshotShareProvider({
+              apiClient,
+              toasts,
+              uiSettings,
+              license,
+              application,
+              usesUiCapabilities,
+              theme: core.theme,
+            })
+          );
+
+          shareSetup.register(
+            reportingExportModalProvider({
+              apiClient,
+              toasts,
+              uiSettings,
+              license,
+              application,
+              usesUiCapabilities,
+              theme: core.theme,
+              version: this.kibanaVersion,
+              formatFactoryFn: () => fieldFormats.deserialize,
+            })
+          );
         }
       });
     });
