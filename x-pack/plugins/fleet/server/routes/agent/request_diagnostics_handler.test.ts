@@ -50,7 +50,10 @@ describe('request diagnostics handler', () => {
         },
       },
     } as unknown as RequestHandlerContext;
-    mockRequest = httpServerMock.createKibanaRequest({ params: { agentId: 'agent1' } });
+    mockRequest = httpServerMock.createKibanaRequest({
+      params: { agentId: 'agent1' },
+      body: { additional_metrics: ['CPU'] },
+    });
   });
 
   it('should return ok if agent supports request diagnostics', async () => {

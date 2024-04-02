@@ -9,6 +9,8 @@ import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import semverIsValid from 'semver/functions/valid';
 
+import { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
+
 import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
 
 import { NewAgentActionSchema } from '../models';
@@ -163,12 +165,20 @@ export const PostRequestDiagnosticsActionRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
+  body: schema.object({
+    additional_metrics: schema.maybe(
+      schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
+    ),
+  }),
 };
 
 export const PostBulkRequestDiagnosticsActionRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     batchSize: schema.maybe(schema.number()),
+    additional_metrics: schema.maybe(
+      schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
+    ),
   }),
 };
 
