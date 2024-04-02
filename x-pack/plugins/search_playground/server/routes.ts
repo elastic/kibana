@@ -11,6 +11,7 @@ import { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionsClientChatOpenAI } from '@kbn/elastic-assistant-common/impl/llm';
+import { i18n } from '@kbn/i18n';
 import { fetchFields } from './utils/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './utils/conversational_chain';
@@ -20,7 +21,10 @@ import {
   APIRoutes,
   SearchPlaygroundPluginStart,
   SearchPlaygroundPluginStartDependencies,
+  ErrorCode,
 } from './types';
+import { createError, SearchPlaygroundError } from './utils/create_error';
+import { isInvalidApiKeyException } from './utils/exceptions';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -155,10 +159,27 @@ export function defineRoutes({
         pushStreamUpdate();
 
         return response.ok(responseWithHeaders);
-      } catch (e) {
-        log.error('Failed to create the chat stream', e);
-
-        throw Error(e);
+      } catch (error) {
+        log.error('Failed to create the chat stream', error);
+        if (isInvalidApiKeyException(error)) {
+          return createError({
+            errorCode: ErrorCode.INVALID_API_KEY,
+            message: i18n.translate('xpack.searchPlayground.server.routes.invalidApiKeyError', {
+              defaultMessage: 'Incorrect API key provided',
+            }),
+            response,
+            statusCode: 403,
+          });
+        } else {
+          return createError({
+            errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+            message: i18n.translate('xpack.searchPlayground.server.routes.uncaughtExceptionError', {
+              defaultMessage: 'Playground encountered an error.',
+            }),
+            response,
+            statusCode: 502,
+          });
+        }
       }
     })
   );

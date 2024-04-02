@@ -41,3 +41,8 @@ export interface ChatRequestData {
   source_fields: string;
   doc_size: number;
 }
+
+export enum ErrorCode {
+  INVALID_API_KEY = 'invalid_api_key',
+  UNCAUGHT_EXCEPTION = 'uncaught_exception',
+}
