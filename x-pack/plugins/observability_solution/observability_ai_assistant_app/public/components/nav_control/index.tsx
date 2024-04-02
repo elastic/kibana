@@ -98,6 +98,10 @@ export function NavControl({}: {}) {
   return (
     <>
       <EuiButton
+        aria-label={i18n.translate(
+          'xpack.observabilityAiAssistant.navControl.euiButton.openObservabilityAIAssistantLabel',
+          { defaultMessage: 'Open Observability AI Assistant chat' }
+        )}
         data-test-subj="observabilityAiAssistantAppNavControlButton"
         css={buttonCss}
         onClick={() => {

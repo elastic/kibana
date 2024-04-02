@@ -17,7 +17,7 @@ const conversation1 = {
   id: 'conversation1',
   title: 'Conversation 1',
   apiConfig: { connectorId: '123' },
-  replacements: [],
+  replacements: {},
   category: 'default',
   messages: [
     {
