@@ -119,6 +119,19 @@ describe('onFetchContextChanged', () => {
       });
       unsubscribe();
     });
+
+    it('should call onFetch a single time with reload', async () => {
+      const unsubscribe = onFetchContextChanged({
+        api: { parentApi },
+        onFetch: onFetchMock,
+        fetchOnSetup: false,
+      });
+      parentApi.reload$.next();
+      setSearchSession();
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      expect(onFetchMock.mock.calls).toHaveLength(1);
+      unsubscribe();
+    });
   });
 
   describe('no searchSession$', () => {
