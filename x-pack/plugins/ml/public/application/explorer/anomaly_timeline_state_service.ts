@@ -16,7 +16,7 @@ import {
   tap,
   debounceTime,
   filter,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { isEqual, sortBy, uniq } from 'lodash';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
