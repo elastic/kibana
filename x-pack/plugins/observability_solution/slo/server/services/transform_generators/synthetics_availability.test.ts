@@ -6,7 +6,7 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 import { createSLO, createSyntheticsAvailabilityIndicator } from '../fixtures/slo';
 import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availability';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
@@ -319,7 +319,7 @@ describe('Synthetics Availability Transform Generator', () => {
           ...indicator.params,
           tags,
         },
-      } as SLO['indicator'],
+      } as SLODefinition['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 
@@ -349,7 +349,7 @@ describe('Synthetics Availability Transform Generator', () => {
           ...indicator.params,
           monitorIds,
         },
-      } as SLO['indicator'],
+      } as SLODefinition['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 
@@ -379,7 +379,7 @@ describe('Synthetics Availability Transform Generator', () => {
           ...indicator.params,
           projects,
         },
-      } as SLO['indicator'],
+      } as SLODefinition['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 

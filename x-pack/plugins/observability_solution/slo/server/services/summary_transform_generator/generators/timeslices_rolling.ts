@@ -6,7 +6,7 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { SLO } from '../../../domain/models';
+import { SLODefinition } from '../../../domain/models';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
@@ -17,7 +17,7 @@ import {
 import { getGroupBy } from './common';
 
 export function generateSummaryTransformForTimeslicesAndRolling(
-  slo: SLO
+  slo: SLODefinition
 ): TransformPutTransformRequest {
   return {
     transform_id: getSLOSummaryTransformId(slo.id, slo.revision),

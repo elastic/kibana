@@ -10,7 +10,7 @@ import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mock
 import { MockedLogger } from '@kbn/logging-mocks';
 import { sloDefinitionSchema, sloSchema } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
-import { SLO, StoredSLODefinition } from '../domain/models';
+import { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { SLOIdConflict, SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 import { aStoredSLO, createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
@@ -21,7 +21,7 @@ const ANOTHER_SLO = createSLO();
 const INVALID_SLO_ID = 'invalid-slo-id';
 
 function soFindResponse(
-  sloList: SLO[],
+  sloList: SLODefinition[],
   includeInvalidStoredSLO: boolean = false
 ): SavedObjectsFindResponse<StoredSLODefinition> {
   return {

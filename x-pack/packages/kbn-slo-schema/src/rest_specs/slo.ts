@@ -64,10 +64,8 @@ const sloResponseSchema = t.intersection([
 
 const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
-  t.intersection([
-    t.type({ summary: summarySchema, groupings: groupingsSchema }),
-    t.partial({ meta: metaSchema }),
-  ]),
+  t.type({ summary: summarySchema, groupings: groupingsSchema }),
+  t.partial({ meta: metaSchema }),
 ]);
 
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
@@ -93,7 +91,8 @@ type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
 type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
 type QuerySchema = t.TypeOf<typeof querySchema>;
 
-export { sloResponseSchema, sloWithSummaryResponseSchema };
+export { sloWithSummaryResponseSchema };
+
 export type {
   BudgetingMethod,
   SLOResponse,

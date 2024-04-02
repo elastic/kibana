@@ -11,12 +11,15 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 
 export abstract class TransformGenerator {
-  public abstract getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest;
+  public abstract getTransformParams(
+    slo: SLODefinition,
+    spaceId: string
+  ): TransformPutTransformRequest;
 
-  public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
+  public buildCommonRuntimeMappings(slo: SLODefinition): MappingRuntimeFields {
     const groupings = [slo.groupBy].flat().filter((value) => !!value);
     const hasGroupings = !groupings.includes(ALL_VALUE) && groupings.length;
     return {
@@ -52,18 +55,18 @@ export abstract class TransformGenerator {
     };
   }
 
-  public buildInstanceId(slo: SLO): string {
+  public buildInstanceId(slo: SLODefinition): string {
     const groups = [slo.groupBy].flat().filter((value) => !!value);
     const groupings = groups.map((group) => `'${group}:'+doc['${group}'].value`).join(`+'|'+`);
     return `emit(${groupings})`;
   }
 
-  public buildDescription(slo: SLO): string {
+  public buildDescription(slo: SLODefinition): string {
     return `Rolled-up SLI data for SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}]`;
   }
 
   public buildCommonGroupBy(
-    slo: SLO,
+    slo: SLODefinition,
     sourceIndexTimestampField: string | undefined = '@timestamp',
     extraGroupByFields = {}
   ) {
@@ -111,7 +114,7 @@ export abstract class TransformGenerator {
   }
 
   public buildSettings(
-    slo: SLO,
+    slo: SLODefinition,
     sourceIndexTimestampField: string | undefined = '@timestamp'
   ): TransformSettings {
     return {

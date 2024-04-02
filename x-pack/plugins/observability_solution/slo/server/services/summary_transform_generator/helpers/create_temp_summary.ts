@@ -13,7 +13,7 @@ import {
   timeWindowSchema,
 } from '@kbn/slo-schema';
 import * as t from 'io-ts';
-import { SLO, Status } from '../../../domain/models';
+import { SLODefinition, Status } from '../../../domain/models';
 
 export interface EsSummaryDocument {
   service: {
@@ -57,7 +57,7 @@ export interface EsSummaryDocument {
   kibanaUrl?: string;
 }
 
-export function createTempSummaryDocument(slo: SLO, spaceId: string): EsSummaryDocument {
+export function createTempSummaryDocument(slo: SLODefinition, spaceId: string): EsSummaryDocument {
   const apmParams = 'environment' in slo.indicator.params ? slo.indicator.params : null;
 
   return {

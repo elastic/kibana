@@ -23,9 +23,9 @@ import {
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { InvalidTransformError } from '../../errors';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest {
+  public getTransformParams(slo: SLODefinition, spaceId: string): TransformPutTransformRequest {
     if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -42,11 +42,11 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildGroupBy(slo: SLO, indicator: SyntheticsAvailabilityIndicator) {
+  private buildGroupBy(slo: SLODefinition, indicator: SyntheticsAvailabilityIndicator) {
     // These are the group by fields that will be used in `groupings` key
     // in the summary and rollup documents. For Synthetics, we want to use the
     // user-readible `monitor.name` and `observer.geo.name` fields by default,
@@ -98,7 +98,11 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     );
   }
 
-  private buildSource(slo: SLO, indicator: SyntheticsAvailabilityIndicator, spaceId: string) {
+  private buildSource(
+    slo: SLODefinition,
+    indicator: SyntheticsAvailabilityIndicator,
+    spaceId: string
+  ) {
     const queryFilter: estypes.QueryDslQueryContainer[] = [
       { term: { 'summary.final_attempt': true } },
       { term: { 'meta.space_id': spaceId } },
@@ -164,7 +168,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     };
   }
 
-  private buildAggregations(slo: SLO) {
+  private buildAggregations(slo: SLODefinition) {
     if (!occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       throw new Error(
         'The sli.synthetics.availability indicator MUST have an occurances budgeting method.'

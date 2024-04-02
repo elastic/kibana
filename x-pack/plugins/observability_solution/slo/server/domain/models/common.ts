@@ -15,8 +15,10 @@ import {
   groupSummarySchema,
   metaSchema,
   sloSettingsSchema,
+  objectiveSchema,
 } from '@kbn/slo-schema';
 
+type Objective = t.TypeOf<typeof objectiveSchema>;
 type Status = t.TypeOf<typeof statusSchema>;
 type DateRange = t.TypeOf<typeof dateRangeSchema>;
 type HistoricalSummary = t.TypeOf<typeof historicalSummarySchema>;
@@ -27,6 +29,7 @@ type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
 type SloSettings = t.TypeOf<typeof sloSettingsSchema>;
 
 export type {
+  Objective,
   DateRange,
   Groupings,
   HistoricalSummary,

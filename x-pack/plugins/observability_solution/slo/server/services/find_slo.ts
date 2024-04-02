@@ -6,7 +6,7 @@
  */
 
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema, Pagination } from '@kbn/slo-schema';
-import { SLO, SLOWithSummary } from '../domain/models';
+import { SLODefinition, SLOWithSummary } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
 import { SLORepository } from './slo_repository';
 import { SLOSummary, Sort, SummarySearchClient } from './summary_search_client';
@@ -44,7 +44,10 @@ export class FindSLO {
   }
 }
 
-function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOWithSummary[] {
+function mergeSloWithSummary(
+  sloList: SLODefinition[],
+  sloSummaryList: SLOSummary[]
+): SLOWithSummary[] {
   const localSummaryList = sloSummaryList
     .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
     .map((sloSummary) => ({

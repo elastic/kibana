@@ -6,7 +6,7 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DurationUnit, SLO } from '../../../domain/models';
+import { DurationUnit, SLODefinition } from '../../../domain/models';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
@@ -17,7 +17,7 @@ import {
 import { getGroupBy } from './common';
 
 export function generateSummaryTransformForTimeslicesAndCalendarAligned(
-  slo: SLO
+  slo: SLODefinition
 ): TransformPutTransformRequest {
   const isWeeklyAligned = slo.timeWindow.duration.unit === DurationUnit.Week;
   const sliceDurationInSeconds = slo.objective.timesliceWindow!.asSeconds();

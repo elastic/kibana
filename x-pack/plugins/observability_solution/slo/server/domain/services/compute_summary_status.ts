@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ErrorBudget, SLO, Status } from '../models';
+import { ErrorBudget, Objective, Status } from '../models';
 
 export function computeSummaryStatus(
-  objective: SLO['objective'],
+  objective: Objective,
   sliValue: number,
   errorBudget: ErrorBudget
 ): Status {

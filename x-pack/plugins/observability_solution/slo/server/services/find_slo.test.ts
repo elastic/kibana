@@ -7,7 +7,7 @@
 
 import { ALL_VALUE, Paginated } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
-import { SLO } from '../domain/models';
+import { SLODefinition } from '../domain/models';
 import { FindSLO } from './find_slo';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createSummarySearchClientMock } from './mocks';
@@ -158,7 +158,7 @@ describe('FindSLO', () => {
   });
 });
 
-function summarySearchResult(slo: SLO): Paginated<SLOSummary> {
+function summarySearchResult(slo: SLODefinition): Paginated<SLOSummary> {
   return {
     total: 1,
     perPage: 25,

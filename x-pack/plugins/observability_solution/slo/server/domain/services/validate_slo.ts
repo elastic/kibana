@@ -13,16 +13,16 @@ import {
   calendarAlignedTimeWindowSchema,
 } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
-import { SLO } from '../models';
+import { SLODefinition } from '../models';
 
 /**
- * Asserts the SLO is valid from a business invariants point of view.
+ * Asserts the SLO Definition is valid from a business invariants point of view.
  * e.g. a 'target' objective requires a number between ]0, 1]
  * e.g. a 'timeslices' budgeting method requires an objective's timeslice_target to be defined.
  *
- * @param slo {SLO}
+ * @param slo {SLODefinition}
  */
-export function validateSLO(slo: SLO) {
+export function validateSLO(slo: SLODefinition) {
   if (!isValidId(slo.id)) {
     throw new IllegalArgumentError('Invalid id');
   }
@@ -64,7 +64,7 @@ export function validateSLO(slo: SLO) {
   validateSettings(slo);
 }
 
-function validateSettings(slo: SLO) {
+function validateSettings(slo: SLODefinition) {
   if (!isValidFrequencySettings(slo.settings.frequency)) {
     throw new IllegalArgumentError('Invalid settings.frequency');
   }

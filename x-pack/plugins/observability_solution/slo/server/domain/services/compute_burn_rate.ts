@@ -6,13 +6,13 @@
  */
 
 import { toHighPrecision } from '../../utils/number';
-import { IndicatorData, SLO } from '../models';
+import { IndicatorData, SLODefinition } from '../models';
 
 /**
  * A Burn Rate is computed with the Indicator Data retrieved from a specific lookback period
  * It tells how fast we are consumming our error budget during a specific period
  */
-export function computeBurnRate(slo: SLO, sliData: IndicatorData): number {
+export function computeBurnRate(slo: SLODefinition, sliData: IndicatorData): number {
   const { good, total } = sliData;
   if (total === 0 || good >= total) {
     return 0;

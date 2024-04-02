@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
+import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import {
   IBasePath,
   IUiSettingsClient,
@@ -19,43 +23,34 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
-import { MockedLogger } from '@kbn/logging-mocks';
-import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
-import { getRuleExecutor } from './executor';
-import { createSLO } from '../../../services/fixtures/slo';
-import { SLO, StoredSLODefinition } from '../../../domain/models';
-import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import {
-  BurnRateAlertState,
-  BurnRateAlertContext,
-  BurnRateAllowedActionGroups,
-  BurnRateRuleParams,
-  AlertStates,
-} from './types';
-import { SLONotFound } from '../../../errors';
-import { SO_SLO_TYPE } from '../../../saved_objects';
-import { sloSchema } from '@kbn/slo-schema';
-import {
-  ALERT_ACTION,
-  ALERT_ACTION_ID,
-  HIGH_PRIORITY_ACTION_ID,
-} from '../../../../common/constants';
-import { EvaluationBucket } from './lib/evaluate';
-import {
-  SLO_ID_FIELD,
-  SLO_INSTANCE_ID_FIELD,
-  SLO_REVISION_FIELD,
-} from '../../../../common/field_names/slo';
+import { MockedLogger } from '@kbn/logging-mocks';
+import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { sloDefinitionSchema } from '@kbn/slo-schema';
+import { get } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  ALERT_ACTION,
+  ALERT_ACTION_ID,
+  HIGH_PRIORITY_ACTION_ID,
+} from '../../../../common/constants';
+import {
+  SLO_ID_FIELD,
+  SLO_INSTANCE_ID_FIELD,
+  SLO_REVISION_FIELD,
+} from '../../../../common/field_names/slo';
+import { SLODefinition, StoredSLODefinition } from '../../../domain/models';
+import { SLONotFound } from '../../../errors';
+import { SO_SLO_TYPE } from '../../../saved_objects';
+import { createSLO } from '../../../services/fixtures/slo';
+import { getRuleExecutor } from './executor';
 import {
   generateAboveThresholdKey,
   generateBurnRateKey,
@@ -64,9 +59,14 @@ import {
   LONG_WINDOW,
   SHORT_WINDOW,
 } from './lib/build_query';
-import { get } from 'lodash';
-import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
-import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
+import { EvaluationBucket } from './lib/evaluate';
+import {
+  AlertStates,
+  BurnRateAlertContext,
+  BurnRateAlertState,
+  BurnRateAllowedActionGroups,
+  BurnRateRuleParams,
+} from './types';
 
 const commonEsResponse = {
   took: 100,
@@ -82,14 +82,16 @@ const commonEsResponse = {
   },
 };
 
-function createFindResponse(sloList: SLO[]): SavedObjectsFindResponse<StoredSLODefinition> {
+function createFindResponse(
+  sloList: SLODefinition[]
+): SavedObjectsFindResponse<StoredSLODefinition> {
   return {
     page: 1,
     per_page: 25,
     total: sloList.length,
     saved_objects: sloList.map((slo) => ({
       id: slo.id,
-      attributes: sloSchema.encode(slo),
+      attributes: sloDefinitionSchema.encode(slo),
       type: SO_SLO_TYPE,
       references: [],
       score: 1,
