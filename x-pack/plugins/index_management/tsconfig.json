@@ -45,6 +45,7 @@
     "@kbn/code-editor",
     "@kbn/monaco",
     "@kbn/console-plugin",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",

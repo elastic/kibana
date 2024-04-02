@@ -7,7 +7,16 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import {
+  AlertsClientError,
+  GetViewInAppRelativeUrlFnOpts,
+  ActionGroupIdsOf,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  RuleTypeState,
+  RuleExecutorOptions,
+  IRuleTypeAlerts,
+} from '@kbn/alerting-plugin/server';
 import {
   asDuration,
   formatDurationFromTimeUnitChar,
@@ -26,7 +35,7 @@ import {
   ALERT_REASON,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
-import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
+import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
@@ -42,8 +51,12 @@ import {
   APM_SERVER_FEATURE_ID,
   formatTransactionDurationReason,
   RULE_TYPES_CONFIG,
+  THRESHOLD_MET_GROUP,
 } from '../../../../../common/rules/apm_rule_types';
-import { transactionDurationParamsSchema } from '../../../../../common/rules/schema';
+import {
+  transactionDurationParamsSchema,
+  ApmRuleParamsType,
+} from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import {
   getAlertUrlTransaction,
@@ -85,20 +98,29 @@ export const transactionDurationActionVariables = [
   apmActionVariables.viewInAppUrl,
 ];
 
+type TransactionDurationRuleTypeParams =
+  ApmRuleParamsType[ApmRuleType.TransactionDuration];
+type TransactionDurationActionGroups = ActionGroupIdsOf<
+  typeof THRESHOLD_MET_GROUP
+>;
+type TransactionDurationRuleTypeState = RuleTypeState;
+type TransactionDurationAlertState = AlertState;
+type TransactionDurationAlertContext = AlertContext;
+type TransactionDurationAlert = ObservabilityApmAlert;
+
 export function registerTransactionDurationRuleType({
   alerting,
   apmConfig,
-  ruleDataClient,
   getApmIndices,
-  logger,
   basePath,
 }: RegisterRuleDependencies) {
-  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
-    ruleDataClient,
-    logger,
-  });
+  if (!alerting) {
+    throw new Error(
+      'Cannot register transaction duration rule type. Both the actions and alerting plugins need to be enabled.'
+    );
+  }
 
-  const ruleType = createLifecycleRuleType({
+  alerting.registerType({
     id: ApmRuleType.TransactionDuration,
     name: ruleTypeConfig.name,
     actionGroups: ruleTypeConfig.actionGroups,
@@ -117,19 +139,27 @@ export function registerTransactionDurationRuleType({
     producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: async ({
-      params: ruleParams,
-      services,
-      spaceId,
-      getTimeRange,
-    }) => {
+    executor: async (
+      options: RuleExecutorOptions<
+        TransactionDurationRuleTypeParams,
+        TransactionDurationRuleTypeState,
+        TransactionDurationAlertState,
+        TransactionDurationAlertContext,
+        TransactionDurationActionGroups,
+        TransactionDurationAlert
+      >
+    ) => {
+      const { params: ruleParams, services, spaceId, getTimeRange } = options;
+      const { alertsClient, savedObjectsClient, scopedClusterClient } =
+        services;
+      if (!alertsClient) {
+        throw new AlertsClientError();
+      }
+
       const allGroupByFields = getAllGroupByFields(
         ApmRuleType.TransactionDuration,
         ruleParams.groupBy
       );
-
-      const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
-        services;
 
       const indices = await getApmIndices(savedObjectsClient);
 
@@ -275,25 +305,12 @@ export function registerTransactionDurationRuleType({
         });
 
         const alertId = bucketKey.join('_');
-        const alert = services.alertWithLifecycle({
+        const { uuid } = alertsClient.report({
           id: alertId,
-          fields: {
-            [TRANSACTION_NAME]: ruleParams.transactionName,
-            [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-            [ALERT_EVALUATION_VALUE]: transactionDuration,
-            [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
-            [ALERT_REASON]: reason,
-            ...sourceFields,
-            ...groupByFields,
-          },
+          actionGroup: ruleTypeConfig.defaultActionGroupId,
         });
 
-        const alertUuid = getAlertUuid(alertId);
-        const alertDetailsUrl = getAlertDetailsUrl(
-          basePath,
-          spaceId,
-          alertUuid
-        );
+        const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, uuid);
         const viewInAppUrl = addSpaceIdToPath(
           basePath.publicBaseUrl,
           spaceId,
@@ -306,7 +323,8 @@ export function registerTransactionDurationRuleType({
           )
         );
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
-        alert.scheduleActions(ruleTypeConfig.defaultActionGroupId, {
+
+        const context = {
           alertDetailsUrl,
           interval: formatDurationFromTimeUnitChar(
             ruleParams.windowSize,
@@ -319,15 +337,32 @@ export function registerTransactionDurationRuleType({
           triggerValue: transactionDurationFormatted,
           viewInAppUrl,
           ...groupByActionVariables,
+        };
+
+        const payload = {
+          [TRANSACTION_NAME]: ruleParams.transactionName,
+          [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+          [ALERT_EVALUATION_VALUE]: transactionDuration,
+          [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
+          [ALERT_REASON]: reason,
+          ...sourceFields,
+          ...groupByFields,
+        };
+
+        alertsClient.setAlertData({
+          id: alertId,
+          payload,
+          context,
         });
       }
 
       return { state: {} };
     },
-    alerts: ApmRuleTypeAlertDefinition,
+    alerts: {
+      ...ApmRuleTypeAlertDefinition,
+      shouldWrite: true,
+    } as IRuleTypeAlerts<TransactionDurationAlert>,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });
-
-  alerting.registerType(ruleType);
 }
