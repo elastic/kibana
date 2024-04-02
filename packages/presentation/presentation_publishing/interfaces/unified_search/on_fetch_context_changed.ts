@@ -43,23 +43,25 @@ export function onFetchContextChanged({
   fetchOnSetup: boolean;
 }): () => void {
   let fetchSymbol: Symbol | undefined;
+  function fetch() {
+    const currentFetchSymbol = Symbol();
+    fetchSymbol = currentFetchSymbol;
+    onFetch(getFetchContext(api), () => fetchSymbol !== currentFetchSymbol);
+  }
+
   const subscriptions: Subscription[] = [];
 
   if (apiPublishesTimeRange(api)) {
     subscriptions.push(api.timeRange$.pipe(skip(1)).subscribe(() => {
-      const currentFetchSymbol = Symbol();
-      fetchSymbol = currentFetchSymbol;
       console.log('onFetch from timeRange$');
-      onFetch(getFetchContext(api), () => fetchSymbol !== currentFetchSymbol);
+      fetch();
     }));
   }
 
   if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
     subscriptions.push(api.parentApi?.searchSessionId$.pipe(skip(1)).subscribe(() => {
-      const currentFetchSymbol = Symbol();
-      fetchSymbol = currentFetchSymbol;
       console.log('onFetch from searchSessionId$');
-      onFetch(getFetchContext(api), () => fetchSymbol !== currentFetchSymbol);
+      fetch();
     }));
   }
 
@@ -69,20 +71,16 @@ export function onFetchContextChanged({
       if ((api?.parentApi as Partial<PublishesSearchSession>)?.searchSessionId$?.value) {
         return;
       }
-      const currentFetchSymbol = Symbol();
-      fetchSymbol = currentFetchSymbol;
       console.log('onFetch from parentApi.filters$ and parentApi.query$');
-      onFetch(getFetchContext(api), () => fetchSymbol !== currentFetchSymbol);
+      fetch();
     }));
     subscriptions.push(api.parentApi?.timeRange$.pipe(skip(1)).subscribe(() => {
       // Ignore changes when searchSessionId is provided or local time range is provided.
       if ((api?.parentApi as Partial<PublishesSearchSession>)?.searchSessionId$?.value || (api as Partial<PublishesTimeRange>).timeRange$?.value) {
         return;
       }
-      const currentFetchSymbol = Symbol();
-      fetchSymbol = currentFetchSymbol;
       console.log('onFetch from parentApi.timeRange$');
-      onFetch(getFetchContext(api), () => fetchSymbol !== currentFetchSymbol);
+      fetch();
     }));
     if (api.parentApi.timeslice$) {
       subscriptions.push(api.parentApi?.timeslice$.pipe(skip(1)).subscribe(() => {
@@ -90,19 +88,15 @@ export function onFetchContextChanged({
         if ((api?.parentApi as Partial<PublishesSearchSession>)?.searchSessionId$?.value || (api as Partial<PublishesTimeRange>).timeRange$?.value) {
           return;
         }
-        const currentFetchSymbol = Symbol();
-        fetchSymbol = currentFetchSymbol;
         console.log('onFetch from parentApi.timeslice$');
-        onFetch(getFetchContext(api), () => fetchSymbol !== currentFetchSymbol);
+        fetch();
       }));
     }
   }
 
   if (fetchOnSetup) {
-    const currentFetchSymbol = Symbol();
-    fetchSymbol = currentFetchSymbol;
     console.log('onFetch on setup');
-    onFetch(getFetchContext(api), () => fetchSymbol !== currentFetchSymbol);
+    fetch();
   }
   
   return () => {
