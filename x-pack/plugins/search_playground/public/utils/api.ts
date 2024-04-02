@@ -24,7 +24,7 @@ export async function fetchApi({
   headers?: HeadersInit;
   appendMessage: (message: Message) => void;
   abortController?: () => AbortController | null;
-  handleFailure: () => void;
+  handleFailure: (error: string) => void;
   onUpdate: (mergedMessages: Message[]) => void;
 }) {
   const requestInit = {
@@ -43,12 +43,12 @@ export async function fetchApi({
   const apiRequest = typeof api === 'string' ? fetch(api, requestInit) : api(requestInit);
 
   const apiResponse = await apiRequest.catch(async (error) => {
-    handleFailure();
     let errorMessage = 'Failed to fetch the chat messages';
     if (error.response) {
       errorMessage =
         (await error.response?.json())?.message ?? 'Failed to fetch the chat response.';
     }
+    handleFailure(errorMessage);
     throw new Error(errorMessage);
   });
 
