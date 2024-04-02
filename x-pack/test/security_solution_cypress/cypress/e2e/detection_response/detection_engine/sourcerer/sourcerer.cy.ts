@@ -48,7 +48,6 @@ describe('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
     openSourcerer();
     isDataViewSelection(siemDataViewTitle);
     openAdvancedSettings();
-    cy.screenshot();
     isSourcererSelection(`auditbeat-*`);
     isSourcererOptions(DEFAULT_INDEX_PATTERN.filter((pattern) => pattern !== 'auditbeat-*'));
   });
