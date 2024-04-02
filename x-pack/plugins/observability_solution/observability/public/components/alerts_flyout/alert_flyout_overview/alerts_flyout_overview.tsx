@@ -42,7 +42,7 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
   const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
   const dateFormat = useUiSetting<string>('dateFormat');
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
-  const [ruleCriteria, setRuleCriteria] = useState<FlyoutThresholdData[]>([]);
+  const [ruleCriteria, setRuleCriteria] = useState<FlyoutThresholdData[] | undefined>([]);
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
 
