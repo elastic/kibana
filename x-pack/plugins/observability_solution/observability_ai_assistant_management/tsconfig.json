@@ -17,7 +17,6 @@
     "@kbn/serverless",
     "@kbn/translations-plugin",
     "@kbn/enterprise-search-plugin",
-    "@kbn/actions-plugin",
     "@kbn/management-settings-types",
     "@kbn/core-ui-settings-browser",
     "@kbn/shared-ux-utility",
