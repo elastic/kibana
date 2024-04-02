@@ -24,13 +24,18 @@ import { SloListLocatorDefinition } from './locators/slo_list';
 import { SLOS_BASE_PATH } from '../common/locators/paths';
 import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
+import { ExperimentalFeatures, SloConfig } from '../common/config';
 
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private experimentalFeatures: ExperimentalFeatures = { ruleFormV2: { enabled: false } };
 
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext<SloConfig>) {
+    this.experimentalFeatures =
+      this.initContext.config.get().experimental ?? this.experimentalFeatures;
+  }
 
   public setup(
     coreSetup: CoreSetup<SloPublicPluginsStart, SloPublicStart>,
@@ -60,6 +65,7 @@ export class SloPlugin
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         isServerless: !!pluginsStart.serverless,
+        experimentalFeatures: this.experimentalFeatures,
       });
     };
     const appUpdater$ = this.appUpdater$;
@@ -145,6 +151,7 @@ export class SloPlugin
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         isServerless: !!pluginsStart.serverless,
+        experimentalFeatures: this.experimentalFeatures,
       }),
     };
   }

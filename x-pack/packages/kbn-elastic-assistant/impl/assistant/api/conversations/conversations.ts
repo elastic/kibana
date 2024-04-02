@@ -11,7 +11,7 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ApiConfig,
-  Replacement,
+  Replacements,
 } from '@kbn/elastic-assistant-common';
 import { Conversation, Message } from '../../../assistant_context/types';
 
@@ -151,7 +151,7 @@ export interface PutConversationMessageParams {
   title?: string;
   messages?: Message[];
   apiConfig?: ApiConfig;
-  replacements?: Replacement[];
+  replacements?: Replacements;
   excludeFromLastConversationStorage?: boolean;
   signal?: AbortSignal | undefined;
 }

@@ -65,6 +65,8 @@ import {
   PLUGIN_ICON_SOLUTION,
   PLUGIN_ID,
   type ConfigSchema,
+  type ExperimentalFeatures,
+  initExperimentalFeatures,
 } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
 import type { ElasticModels } from './application/services/elastic_models_service';
@@ -127,10 +129,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     dfa: true,
     nlp: true,
   };
+  private experimentalFeatures: ExperimentalFeatures = {
+    ruleFormV2: false,
+  };
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
+    initExperimentalFeatures(this.experimentalFeatures, initializerContext.config.get());
   }
 
   setup(
@@ -183,7 +189,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           },
           params,
           this.isServerless,
-          this.enabledFeatures
+          this.enabledFeatures,
+          this.experimentalFeatures
         );
       },
     });
