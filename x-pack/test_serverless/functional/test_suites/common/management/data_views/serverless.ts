@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from 'expect';
 import { DATA_VIEW_PATH } from '@kbn/data-views-plugin/server';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
@@ -19,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
+  const svlCommonApi = getService('svlCommonApi');
 
   describe('Serverless tests', function () {
     describe('disables scripted fields', function () {
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await esArchiver.load(archivePath);
 
-        const response = await supertest
+        const { body, status } = await supertest
           .post(DATA_VIEW_PATH)
           .set('kbn-xsrf', 'some-xsrf-token')
           .send({
@@ -37,8 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             override: true,
           });
 
-        expect(response.status).toBe(200);
-        dataViewId = response.body.data_view.id;
+        svlCommonApi.assertResponseStatusCode(200, status, body);
+        dataViewId = body.data_view.id;
       });
 
       after(async () => {
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
         );
 
-        const response = await supertest
+        const { body, status } = await supertest
           .post(DATA_VIEW_PATH)
           .set('kbn-xsrf', 'some-xsrf-token')
           .send({
@@ -74,9 +74,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               type: DataViewType.ROLLUP,
             },
             override: true,
-          })
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
-        dataViewId = response.body.data_view.id;
+          });
+        svlCommonApi.assertResponseStatusCode(200, status, body);
+        dataViewId = body.data_view.id;
       });
 
       after(async () => {
