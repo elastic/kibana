@@ -51,6 +51,7 @@ import {
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
   tlog,
+  setClusterInfo,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
 import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -242,6 +243,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.experimentalFeatures = endpointContextService?.experimentalFeatures;
     const elasticsearch = core?.elasticsearch.client as unknown as IScopedClusterClient;
     this.processTreeFetcher = new Fetcher(elasticsearch);
+
+    setClusterInfo(this.clusterInfo);
   }
 
   public getClusterInfo(): ESClusterInfo | undefined {

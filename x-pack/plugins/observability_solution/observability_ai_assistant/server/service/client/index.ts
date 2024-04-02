@@ -61,7 +61,7 @@ import {
 import type { ChatFn, ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { rejectTokenCountEvents } from '../util/reject_token_count_events';
-import { createBedrockClaudeAdapter } from './adapters/bedrock_claude_adapter';
+import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
 
@@ -244,7 +244,7 @@ export class ObservabilityAIAssistantClient {
             return await next(nextMessages.concat(addedMessage));
           } else if (isUserMessage) {
             const functions =
-              numFunctionsCalled >= MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
+              numFunctionsCalled === MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
 
             const response$ = (
               await chatWithTokenCountIncrement(
@@ -436,7 +436,7 @@ export class ObservabilityAIAssistantClient {
             `Token count for conversation: ${JSON.stringify(tokenCountResult)}`
           );
 
-          apm.addLabels({
+          apm.currentTransaction?.addLabels({
             tokenCountPrompt: tokenCountResult.prompt,
             tokenCountCompletion: tokenCountResult.completion,
             tokenCountTotal: tokenCountResult.total,
@@ -632,28 +632,37 @@ export class ObservabilityAIAssistantClient {
       signal.addEventListener('abort', () => response.destroy());
 
       const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
+
       response$
         .pipe(rejectTokenCountEvents(), concatenateChatCompletionChunks(), lastOperator())
         .subscribe({
           error: (error) => {
             this.dependencies.logger.debug('Error in chat response');
             this.dependencies.logger.debug(error);
+            span?.setOutcome('failure');
+            span?.end();
           },
           next: (message) => {
             this.dependencies.logger.debug(`Received message:\n${JSON.stringify(message)}`);
           },
+          complete: () => {
+            span?.setOutcome('success');
+            span?.end();
+          },
         });
 
-      lastValueFrom(response$)
-        .then(() => {
-          span?.setOutcome('success');
-        })
-        .catch(() => {
-          span?.setOutcome('failure');
-        })
-        .finally(() => {
-          span?.end();
-        });
+      response$.subscribe({
+        next: (event) => {
+          if (event.type === StreamingChatResponseEventType.TokenCount) {
+            span?.addLabels({
+              tokenCountPrompt: event.tokens.prompt,
+              tokenCountCompletion: event.tokens.completion,
+              tokenCountTotal: event.tokens.total,
+            });
+          }
+        },
+        error: () => {},
+      });
 
       return response$;
     } catch (error) {
