@@ -13,12 +13,19 @@ import { Logger } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   createTaskRunError,
+  TaskErrorSource,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { ExecutionHandler, RunResult } from './execution_handler';
-import { TaskRunnerContext } from './types';
+import {
+  RuleTaskInstance,
+  RuleTaskRunResult,
+  RuleTaskStateAndMetrics,
+  RunRuleParams,
+  TaskRunnerContext,
+} from './types';
 import { getExecutorServices } from './get_executor_services';
 import {
   ElasticsearchError,
@@ -56,12 +63,6 @@ import {
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
 import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
-import {
-  RuleTaskInstance,
-  RuleTaskRunResult,
-  RuleTaskStateAndMetrics,
-  RunRuleParams,
-} from './types';
 import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -72,7 +73,7 @@ import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status
 import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { getMaintenanceWindows, filterMaintenanceWindowsIds } from './get_maintenance_windows';
+import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 
@@ -574,7 +575,11 @@ export class TaskRunner<
         >(
           stateWithMetrics,
           (ruleRunStateWithMetrics) =>
-            executionStatusFromState(ruleRunStateWithMetrics, this.runDate),
+            executionStatusFromState({
+              stateWithMetrics: ruleRunStateWithMetrics,
+              lastExecutionDate: this.runDate,
+              ruleResultService: this.ruleResult,
+            }),
           (err: ElasticsearchError) => executionStatusFromError(err, this.runDate)
         );
 
@@ -702,11 +707,23 @@ export class TaskRunner<
     };
 
     const getTaskRunError = (state: Result<RuleTaskStateAndMetrics, Error>) => {
-      return isErr(state)
-        ? {
-            taskRunError: createTaskRunError(state.error, getErrorSource(state.error)),
-          }
-        : {};
+      if (isErr(state)) {
+        return {
+          taskRunError: createTaskRunError(state.error, getErrorSource(state.error)),
+        };
+      }
+
+      const { errors: errorsFromLastRun } = this.ruleResult.getLastRunResults();
+      if (errorsFromLastRun.length > 0) {
+        return {
+          taskRunError: createTaskRunError(
+            new Error(errorsFromLastRun.join(',')),
+            TaskErrorSource.FRAMEWORK
+          ),
+        };
+      }
+
+      return {};
     };
 
     return {
