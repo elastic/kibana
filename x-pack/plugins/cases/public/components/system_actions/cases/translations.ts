@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const CASE_ACTION_DESC = i18n.translate(
   'xpack.cases.systemActions.casesConnector.selectMessageText',
   {
-    defaultMessage: 'Create a case.',
+    defaultMessage: 'Create a case in Kibana.',
   }
 );
 
