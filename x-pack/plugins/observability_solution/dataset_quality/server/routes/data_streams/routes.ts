@@ -13,6 +13,7 @@ import {
   DataStreamStat,
   DegradedDocs,
   Integration,
+  IntegrationDashboards,
 } from '../../../common/api_types';
 import { rangeRt, typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
@@ -20,7 +21,7 @@ import { getDataStreamDetails } from './get_data_stream_details';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
-import { getIntegrations } from './get_integrations';
+import { getIntegrationDashboards, getIntegrations } from './get_integrations';
 import { getEstimatedDataInBytes } from './get_estimated_data_in_bytes';
 
 const statsRoute = createDatasetQualityServerRoute({
@@ -163,9 +164,40 @@ const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
   },
 });
 
+const integrationDashboardsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/integrations/{integration}/dashboards',
+  params: t.type({
+    path: t.type({
+      integration: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<IntegrationDashboards> {
+    const { context, params, plugins } = resources;
+    const { integration } = params.path;
+    const { savedObjects } = await context.core;
+
+    const fleetPluginStart = await plugins.fleet.start();
+    const packageClient = fleetPluginStart.packageService.asInternalUser;
+
+    const integrationDashboards = await getIntegrationDashboards(
+      packageClient,
+      savedObjects.client,
+      integration
+    );
+
+    return {
+      dashboards: integrationDashboards,
+    };
+  },
+});
+
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
   ...dataStreamDetailsRoute,
   ...estimatedDataInBytesRoute,
+  ...integrationDashboardsRoute,
 };

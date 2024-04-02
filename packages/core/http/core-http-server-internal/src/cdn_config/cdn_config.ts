@@ -7,7 +7,7 @@
  */
 
 import { URL, format } from 'node:url';
-import type { CspAdditionalConfig } from './csp';
+import type { CspAdditionalConfig } from '../csp';
 
 export interface Input {
   url?: string;
@@ -34,13 +34,16 @@ export class CdnConfig {
   public getCspConfig(): CspAdditionalConfig {
     const host = this.host;
     if (!host) return {};
+    // Since CDN is only used in specific envs we set `connect_src` to allow any
+    // but require https. This hardens security a bit, but allows apps like
+    // maps to still work as expected.
     return {
+      connect_src: ['https:'],
       font_src: [host],
       img_src: [host],
       script_src: [host],
       style_src: [host],
       worker_src: [host],
-      connect_src: [host],
     };
   }
 
