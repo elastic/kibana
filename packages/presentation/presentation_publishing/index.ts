@@ -71,7 +71,7 @@ export {
   type PublishesWritableUnifiedSearch,
 } from './interfaces/unified_search/publishes_unified_search';
 export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
-export { type FetchContext, getFetchContext, subscribeToFetch } from './interfaces/unified_search/subscribe_to_fetch';
+export { type FetchContext, onFetchContextChanged } from './interfaces/unified_search/on_fetch_context_changed';
 export {
   apiPublishesSavedObjectId,
   type PublishesSavedObjectId,

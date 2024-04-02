@@ -20,7 +20,7 @@ export type FetchContext = {
   timeslice: [number, number] | undefined;
 };
 
-export function getFetchContext(api: unknown) {
+function getFetchContext(api: unknown) {
   const typeApi = api as Partial<PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>>;
   return {
     filters: typeApi?.parentApi?.filters$?.value,
@@ -33,10 +33,15 @@ export function getFetchContext(api: unknown) {
   };
 }
 
-export function subscribeToFetch(
-  api: unknown,
-  onFetch: (fetchContext: FetchContext, isCanceled: () =>  boolean) => void,
-): () => void {
+export function onFetchContextChanged({
+  api,
+  onFetch,
+  fetchOnSetup,
+}: {
+  api: unknown;
+  onFetch: (fetchContext: FetchContext, isCanceled: () =>  boolean) => void;
+  fetchOnSetup: boolean;
+}): () => void {
   let fetchSymbol: Symbol | undefined;
   const subscriptions: Subscription[] = [];
 
@@ -91,6 +96,13 @@ export function subscribeToFetch(
         onFetch(getFetchContext(api), () => fetchSymbol !== currentFetchSymbol);
       }));
     }
+  }
+
+  if (fetchOnSetup) {
+    const currentFetchSymbol = Symbol();
+    fetchSymbol = currentFetchSymbol;
+    console.log('onFetch on setup');
+    onFetch(getFetchContext(api), () => fetchSymbol !== currentFetchSymbol);
   }
   
   return () => {

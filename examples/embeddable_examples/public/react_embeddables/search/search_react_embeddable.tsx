@@ -9,7 +9,8 @@
 import { EuiCallOut } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { FetchContext, getFetchContext, initializeTimeRange, subscribeToFetch, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { FetchContext, initializeTimeRange, onFetchContextChanged, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { T } from 'lodash/fp';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
@@ -50,12 +51,10 @@ export const getSearchEmbeddableFactory = (services: Services) => {
       );
 
       let isUnmounted = false;
-      let onFetchCallCount = 0;
       const error$ = new BehaviorSubject<Error | undefined>(undefined);
       const count$ = new BehaviorSubject<number>(0);
       const onFetch = (fetchContext: FetchContext, isCanceled: () => boolean) => {
         console.log('onFetch', fetchContext);
-        onFetchCallCount++;
         error$.next(undefined);
         if (!defaultDataView) {
           return;
@@ -77,7 +76,11 @@ export const getSearchEmbeddableFactory = (services: Services) => {
             error$.next(err);
           });
       }
-      const unsubscribeFromFetch = subscribeToFetch(api, onFetch);
+      const unsubscribeFromFetch = onFetchContextChanged({
+        api,
+        onFetch,
+        fetchOnSetup: true,
+      });
 
       return {
         api,
@@ -86,8 +89,6 @@ export const getSearchEmbeddableFactory = (services: Services) => {
           const error = useStateFromPublishingSubject(error$);
 
           useEffect(() => {
-            onFetch(getFetchContext(api), () => onFetchCallCount > 1);
-
             return () => {
               isUnmounted = true;
               unsubscribeFromFetch();
