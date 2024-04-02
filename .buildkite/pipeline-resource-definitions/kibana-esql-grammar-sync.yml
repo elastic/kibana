@@ -19,7 +19,7 @@ spec:
       description: Opens a PR if anything changes in the ES|QL grammar in Elasticsearch
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-visualizations'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-esql-project-team'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: false
       branch_configuration: main
