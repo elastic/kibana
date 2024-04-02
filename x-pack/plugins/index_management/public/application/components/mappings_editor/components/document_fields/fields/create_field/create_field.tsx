@@ -51,8 +51,12 @@ interface Props {
   isSemanticTextEnabled?: boolean;
 }
 
-const useFieldEffect = (form: FormHook, fieldName: string, setState: any) => {
-  const fieldValue = form.getFields()?.[fieldName]?.value;
+const useFieldEffect = (
+  form: FormHook,
+  fieldName: string,
+  setState: React.Dispatch<React.SetStateAction<string | undefined>>
+) => {
+  const fieldValue = form.getFields()?.[fieldName]?.value as string;
   useEffect(() => {
     if (fieldValue !== undefined) {
       setState(fieldValue);
@@ -98,22 +102,23 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const [referenceFieldComboValue, setReferenceFieldComboValue] = useState<any>();
-  const [nameValue, setNameValue] = useState<any>();
-  const [inferenceIdComboValue, setInferenceIdComboValue] = useState<any>();
-  const [semanticFieldType, setSemanticTextFieldType] = useState<any>();
+  const [referenceFieldComboValue, setReferenceFieldComboValue] = useState<string>();
+  const [nameValue, setNameValue] = useState<string>();
+  const [inferenceIdComboValue, setInferenceIdComboValue] = useState<string>();
+  const [semanticFieldType, setSemanticTextFieldType] = useState<string>();
 
   useFieldEffect(form, 'referenceField', setReferenceFieldComboValue);
   useFieldEffect(form, 'inferenceId', setInferenceIdComboValue);
   useFieldEffect(form, 'name', setNameValue);
 
-  const fieldTypeValue = form.getFields()?.type?.value;
+  const fieldTypeValue = form.getFields()?.type?.value as { value: string }[];
   useEffect(() => {
-    const type = form.getFields()?.type?.value as any;
-    if (type === undefined || type.length === 0) {
+    if (fieldTypeValue === undefined || fieldTypeValue.length === 0) {
       return;
     }
-    setSemanticTextFieldType(type[0]?.value === 'semantic_text' ? type[0].value : undefined);
+    setSemanticTextFieldType(
+      fieldTypeValue[0]?.value === 'semantic_text' ? fieldTypeValue[0].value : undefined
+    );
   }, [form, fieldTypeValue]);
 
   const submitForm = async (e?: React.FormEvent, exitAfter: boolean = false) => {

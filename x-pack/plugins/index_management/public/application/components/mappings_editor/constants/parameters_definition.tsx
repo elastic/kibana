@@ -155,7 +155,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
   },
   type: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt..typeFieldLabel', {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.typeFieldLabel', {
         defaultMessage: 'Field type',
       }),
       defaultValue: 'text',
