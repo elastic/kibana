@@ -358,19 +358,13 @@ describe('Body', () => {
             eventId: '1',
             id: 'timeline-test',
             noteId: expect.anything(),
+            pinEvent: true,
           },
           type: timelineActions.addNoteToEvent({
             eventId: '1',
             id: 'timeline-test',
             noteId: '11',
           }).type,
-        })
-      );
-      expect(mockDispatch).toHaveBeenNthCalledWith(
-        3,
-        timelineActions.pinEvent({
-          eventId: '1',
-          id: 'timeline-test',
         })
       );
     });
@@ -385,7 +379,7 @@ describe('Body', () => {
             [TimelineId.test]: {
               ...mockGlobalState.timeline.timelineById[TimelineId.test],
               id: 'timeline-test',
-              pinnedEventIds: { 1: true }, // we should NOT dispatch a pin event, because it's already pinned
+              pinnedEventIds: { 1: true },
             },
           },
         },
@@ -407,19 +401,13 @@ describe('Body', () => {
             eventId: '1',
             id: 'timeline-test',
             noteId: expect.anything(),
+            pinEvent: false,
           },
           type: timelineActions.addNoteToEvent({
             eventId: '1',
             id: 'timeline-test',
             noteId: '11',
           }).type,
-        })
-      );
-
-      expect(mockDispatch).not.toHaveBeenCalledWith(
-        timelineActions.pinEvent({
-          eventId: '1',
-          id: 'timeline-test',
         })
       );
     });
