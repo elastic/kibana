@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
-import { type TimeRangeBounds, type TimeBucketsInterval, TimeBuckets } from './time_buckets';
+import { type TimeRangeBounds, type TimeBucketsInterval, TimeBuckets } from '@kbn/ml-time-buckets';
 import { useMlKibana } from '../contexts/kibana';
 
 // TODO Consolidate with legacy code in `ml/public/application/util/time_buckets.js`.

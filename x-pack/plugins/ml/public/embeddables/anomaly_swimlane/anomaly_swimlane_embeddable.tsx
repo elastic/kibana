@@ -16,11 +16,13 @@ import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
 import type {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
+  AnomalySwimlaneEmbeddableUserInput,
   AnomalySwimlaneServices,
 } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
+import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import { AnomalyDetectionEmbeddable } from '../common/anomaly_detection_embeddable';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
@@ -43,9 +45,12 @@ export class AnomalySwimlaneEmbeddable extends AnomalyDetectionEmbeddable<
   public readonly type: string = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
   // API
-  public viewBy: BehaviorSubject<string | undefined>;
-  public perPage: BehaviorSubject<number | undefined>;
-  public fromPage: BehaviorSubject<number | undefined>;
+  public readonly jobIds: BehaviorSubject<JobId[] | undefined>;
+  public readonly viewBy: BehaviorSubject<string | undefined>;
+  public readonly swimlaneType: BehaviorSubject<SwimlaneType | undefined>;
+  public readonly perPage: BehaviorSubject<number | undefined>;
+  public readonly fromPage: BehaviorSubject<number | undefined>;
+  public readonly interval: BehaviorSubject<number | undefined>;
 
   private apiSubscriptions = new Subscription();
 
@@ -56,10 +61,22 @@ export class AnomalySwimlaneEmbeddable extends AnomalyDetectionEmbeddable<
   ) {
     super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
 
+    this.jobIds = embeddableInputToSubject<JobId[], AnomalySwimlaneEmbeddableInput>(
+      this.apiSubscriptions,
+      this,
+      'jobIds'
+    );
+
     this.viewBy = embeddableInputToSubject<string, AnomalySwimlaneEmbeddableInput>(
       this.apiSubscriptions,
       this,
       'viewBy'
+    );
+
+    this.swimlaneType = embeddableInputToSubject<SwimlaneType, AnomalySwimlaneEmbeddableInput>(
+      this.apiSubscriptions,
+      this,
+      'swimlaneType'
     );
 
     this.perPage = embeddableOutputToSubject<number, AnomalySwimlaneEmbeddableOutput>(
@@ -73,6 +90,16 @@ export class AnomalySwimlaneEmbeddable extends AnomalyDetectionEmbeddable<
       this,
       'fromPage'
     );
+
+    this.interval = embeddableOutputToSubject<number, AnomalySwimlaneEmbeddableOutput>(
+      this.apiSubscriptions,
+      this,
+      'interval'
+    );
+  }
+
+  public updateUserInput(update: AnomalySwimlaneEmbeddableUserInput) {
+    this.updateInput(update);
   }
 
   public reportsEmbeddableLoad() {

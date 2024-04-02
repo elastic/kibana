@@ -14,11 +14,11 @@ import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
 import { getIndicesSearchResultProvider } from './indices_search_result_provider';
 
 describe('Enterprise Search - indices search provider', () => {
-  const basePathMock = {
-    prepend: (input: string) => `/kbn${input}`,
+  const staticAssetsMock = {
+    getPluginAssetHref: (input: string) => `/kbn/${input}`,
   } as any;
 
-  const indicesSearchResultProvider = getIndicesSearchResultProvider(basePathMock);
+  const indicesSearchResultProvider = getIndicesSearchResultProvider(staticAssetsMock);
 
   const regularIndexResponse = {
     'search-github-api': {
@@ -54,7 +54,7 @@ describe('Enterprise Search - indices search provider', () => {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/search-github-api`,
       prependBasePath: true,
     },
-    icon: '/kbn/plugins/enterpriseSearch/assets/source_icons/index.svg',
+    icon: '/kbn/images/index.svg',
   };
 
   const msftIndex = {
@@ -66,7 +66,7 @@ describe('Enterprise Search - indices search provider', () => {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/search-msft-sql-index`,
       prependBasePath: true,
     },
-    icon: '/kbn/plugins/enterpriseSearch/assets/source_icons/index.svg',
+    icon: '/kbn/images/index.svg',
   };
 
   beforeEach(() => {});

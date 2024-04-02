@@ -18,7 +18,6 @@
     "@kbn/navigation-plugin",
     "@kbn/url-forwarding-plugin",
     "@kbn/visualizations-plugin",
-    "@kbn/dashboard-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/ui-actions-enhanced-plugin",
     "@kbn/share-plugin",

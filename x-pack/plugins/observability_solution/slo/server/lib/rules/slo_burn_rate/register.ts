@@ -10,7 +10,6 @@ import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -50,10 +49,7 @@ const dependency = schema.object({
   actionGroupsToSuppressOn: schema.arrayOf(schema.string()),
 });
 
-type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
-
 export function sloBurnRateRuleType(
-  createLifecycleRuleExecutor: CreateLifecycleExecutor,
   basePath: IBasePath,
   alertsLocator?: LocatorPublic<AlertsLocatorParams>
 ) {
@@ -89,7 +85,7 @@ export function sloBurnRateRuleType(
     producer: sloFeatureId,
     minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,
-    executor: createLifecycleRuleExecutor(getRuleExecutor({ basePath, alertsLocator })),
+    executor: getRuleExecutor({ basePath, alertsLocator }),
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
@@ -111,6 +107,7 @@ export function sloBurnRateRuleType(
       mappings: { fieldMap: { ...legacyExperimentalFieldMap, ...sloRuleFieldMap } },
       useEcs: false,
       useLegacyAlerts: true,
+      shouldWrite: true,
     },
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),

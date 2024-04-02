@@ -6,13 +6,21 @@
  */
 
 import React, { memo, useCallback, useState } from 'react';
-import { EuiButton, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EndpointResponderExtensionComponentProps } from '../types';
 import { ResponseActionsLog } from '../../endpoint_response_actions_list/response_actions_log';
 import { UX_MESSAGES } from '../../endpoint_response_actions_list/translations';
 
 export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((props) => {
+  const { euiTheme } = useEuiTheme();
   const [showActionLogFlyout, setShowActionLogFlyout] = useState<boolean>(false);
   const toggleActionLog = useCallback(() => {
     setShowActionLogFlyout((prevState) => {
@@ -39,6 +47,8 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
           size="m"
           paddingSize="l"
           data-test-subj="responderActionLogFlyout"
+          // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+          maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">

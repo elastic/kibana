@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../monaco_imports';
 
 import { ESQL_LANG_ID } from './lib/constants';
@@ -14,15 +15,16 @@ import type { CustomLangModuleType } from '../types';
 import type { ESQLWorker } from './worker/esql_worker';
 
 import { WorkerProxyService } from '../common/worker_proxy';
-import type { ESQLCallbacks } from './lib/ast/shared/types';
-import { ESQLAstAdapter } from './lib/monaco/esql_ast_provider';
+import { ESQLAstAdapter } from './lib/esql_ast_provider';
+import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
+import { wrapAsMonacoCodeActions } from './lib/converters/actions';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();
 
 export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
-    const { ESQLTokensProvider } = await import('./lib/monaco');
+    const { ESQLTokensProvider } = await import('./lib');
 
     workerProxyService.setup(ESQL_LANG_ID);
 
@@ -98,10 +100,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         );
         const suggestionEntries = await astAdapter.autocomplete(model, position, context);
         return {
-          suggestions: suggestionEntries.suggestions.map((suggestion) => ({
-            ...suggestion,
-            range: undefined as unknown as monaco.IRange,
-          })),
+          suggestions: wrapAsMonacoSuggestions(suggestionEntries.suggestions),
         };
       },
     };
@@ -121,7 +120,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         );
         const actions = await astAdapter.codeAction(model, range, context);
         return {
-          actions,
+          actions: wrapAsMonacoCodeActions(model, actions),
           dispose: () => {},
         };
       },

@@ -55,7 +55,11 @@ export const PresentationPanel = <
 
   if (loading || !value?.Panel || !value?.unwrappedComponent)
     return (
-      <PanelLoader showShadow={props.showShadow} dataTestSubj="embeddablePanelLoadingIndicator" />
+      <PanelLoader
+        showShadow={props.showShadow}
+        showBorder={props.showBorder}
+        dataTestSubj="embeddablePanelLoadingIndicator"
+      />
     );
 
   return (

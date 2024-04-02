@@ -375,6 +375,15 @@ export function getDiscoverStateContainer({
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
   const initializeAndSync = () => {
+    // This needs to be the first thing that's wired up because initAndSync is pulling the current state from the URL which
+    // might change the time filter and thus needs to re-check whether the saved search has changed.
+    const timefilerUnsubscribe = merge(
+      services.timefilter.getTimeUpdate$(),
+      services.timefilter.getRefreshIntervalUpdate$()
+    ).subscribe(() => {
+      savedSearchContainer.updateTimeRange();
+    });
+
     // initialize app state container, syncing with _g and _a part of the URL
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
       savedSearchContainer.getState()
@@ -426,6 +435,7 @@ export function getDiscoverStateContainer({
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
       filterUnsubscribe.unsubscribe();
+      timefilerUnsubscribe.unsubscribe();
     };
   };
 
