@@ -31,11 +31,13 @@ import {
   getOpenAlerts,
   getPreviewAlerts,
   previewRule,
+  previewRuleWithExceptionEntries,
   patchRule,
   setAlertStatus,
   dataGeneratorFactory,
 } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -2053,6 +2055,90 @@ export default ({ getService }: FtrProviderContext) => {
           sort: ['agent.name', ALERT_ORIGINAL_TIME],
         });
         expect(previewAlerts.length).toEqual(100);
+      });
+    });
+
+    describe('with exceptions', () => {
+      beforeEach(async () => {
+        await deleteAllExceptions(supertest, log);
+      });
+
+      it('should apply exceptions when suppression configured during rule execution only', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:45:00.000Z';
+        const laterTimestamp = '2020-10-28T06:50:00.000Z';
+
+        const firstExecutionDocuments = [
+          {
+            host: { name: 'host-a', ip: '127.0.0.3' },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a', ip: '127.0.0.4' },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a', ip: '127.0.0.5' },
+            id,
+            '@timestamp': laterTimestamp,
+          },
+        ];
+
+        await indexListOfDocuments([...firstExecutionDocuments]);
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['host.ip'],
+          query: `id: "${id}"`,
+          index: ['ecs_compliant'],
+          history_window_start: historicalWindowStart,
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRuleWithExceptionEntries({
+          supertest,
+          rule,
+          log,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          entries: [
+            [
+              {
+                field: 'host.ip',
+                operator: 'included',
+                type: 'match',
+                value: '127.0.0.4',
+              },
+            ],
+          ],
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        expect(previewAlerts.length).toEqual(1);
+        expect(previewAlerts[0]._source).toEqual({
+          ...previewAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: ['host-a'],
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_ORIGINAL_TIME]: timestamp,
+          [ALERT_SUPPRESSION_START]: timestamp,
+          [ALERT_SUPPRESSION_END]: laterTimestamp, // suppression ends with later timestamp
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
       });
     });
   });
