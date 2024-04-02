@@ -6,16 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { CodeEditor } from '@kbn/code-editor';
-import { css } from '@emotion/react';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from '@kbn/monaco';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { CodeEditor } from '@kbn/code-editor';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { MonacoSenseEditor, initSenseEditor } from '../../../models/monaco_sense_editor';
-import { useSetInitialValue } from './use_set_initial_value';
-import { useServicesContext, useEditorReadContext } from '../../../contexts';
 import { ConsoleMenu } from '../../../components';
+import {
+  useServicesContext,
+  useEditorReadContext,
+  useRequestActionContext,
+} from '../../../contexts';
+import { useSetInitialValue } from './use_set_initial_value';
+import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 
 export interface EditorProps {
   initialTextValue: string;
@@ -23,12 +27,22 @@ export interface EditorProps {
 
 export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const {
-    services: { notifications, esHostService },
+    services: { notifications, esHostService, trackUiMetric, http },
   } = useServicesContext();
   const { toasts } = notifications;
   const { settings } = useEditorReadContext();
-  const editorInstanceRef = useRef<MonacoSenseEditor | null>(null);
+  const dispatch = useRequestActionContext();
+  const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
 
+  const getCurl = useCallback(async (): Promise<string> => {
+    return actionsProvider.current
+      ? actionsProvider.current.getCurl(esHostService.getHost())
+      : Promise.resolve('');
+  }, [esHostService]);
+
+  const sendRequests = useCallback(async () => {
+    await actionsProvider.current?.sendRequests(toasts, dispatch, trackUiMetric, http);
+  }, [dispatch, http, toasts, trackUiMetric]);
   const [value, setValue] = useState(initialTextValue);
 
   const setInitialValue = useSetInitialValue({ initialTextValue, setValue, toasts });
@@ -57,7 +71,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           >
             <EuiLink
               color="success"
-              onClick={() => {}}
+              onClick={sendRequests}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                 defaultMessage: 'Click to send request',
@@ -69,9 +83,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <ConsoleMenu
-            getCurl={() => {
-              return editorInstanceRef.current!.getRequestsAsCURL(esHostService.getHost());
-            }}
+            getCurl={getCurl}
             getDocumentation={() => {
               return Promise.resolve(null);
             }}
@@ -91,8 +103,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_THEME_ID,
         }}
-        editorDidMount={async (editor) => {
-          editorInstanceRef.current = await initSenseEditor(editor);
+        editorDidMount={(editor) => {
+          actionsProvider.current = new MonacoEditorActionsProvider(editor);
         }}
       />
     </div>

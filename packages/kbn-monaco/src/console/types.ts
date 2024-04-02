@@ -16,7 +16,7 @@ export interface ParsedRequest {
   endOffset: number;
   method: string;
   url: string;
-  data: Array<Record<string, unknown>>;
+  data?: Array<Record<string, unknown>>;
 }
 export interface ConsoleParseResult {
   errors: ErrorAnnotation[];
