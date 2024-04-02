@@ -336,7 +336,7 @@ export class FleetPlugin
                         name: 'All',
                         ui: ['agents_read', 'agents_all'],
                         savedObject: {
-                          all: [],
+                          all: allSavedObjectTypes,
                           read: allSavedObjectTypes,
                         },
                         includeIn: 'all',
@@ -373,7 +373,7 @@ export class FleetPlugin
                         name: 'All',
                         ui: ['agent_policies_read', 'agent_policies_all'],
                         savedObject: {
-                          all: [],
+                          all: allSavedObjectTypes,
                           read: allSavedObjectTypes,
                         },
                         includeIn: 'all',
@@ -407,7 +407,7 @@ export class FleetPlugin
                         name: 'All',
                         ui: ['settings_read', 'settings_all'],
                         savedObject: {
-                          all: [],
+                          all: allSavedObjectTypes,
                           read: allSavedObjectTypes,
                         },
                         includeIn: 'all',

@@ -19,7 +19,7 @@ const mockRequest = {
   subAction: 'invokeAI',
   isEnabledKnowledgeBase: false,
   isEnabledRAGAlerts: false,
-  replacements: [],
+  replacements: {},
 };
 
 export default ({ getService }: FtrProviderContext) => {

@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export const filterStateStore = {
-  APP_STATE: 'appState',
-  GLOBAL_STATE: 'globalState',
-} as const;
-
-export type FilterStateStore = typeof filterStateStore[keyof typeof filterStateStore];
+export * from './v1';
