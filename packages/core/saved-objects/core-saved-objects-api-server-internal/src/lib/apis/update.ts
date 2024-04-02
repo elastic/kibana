@@ -247,9 +247,8 @@ export const executeUpdate = async <T>(
     // therefor we can safely process with the "standard" update sequence.
 
     const updatedAttributes = mergeForUpdate({
-      // @ts-expect-error upgrade typescript v4.9.5
       targetAttributes: {
-        ...migrated!.attributes,
+        ...(migrated!.attributes as Record<string, unknown>),
       },
       updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
         type,

@@ -113,7 +113,7 @@ main () {
 
   git checkout -b "$BRANCH_NAME"
 
-  git add esql/antlr/*
+  git add antlr/*
   git commit -m "Update ES|QL grammars"
 
   report_main_step "Changes committed. Creating pull request."
