@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400, {
             statusCode: 400,
             error: 'Bad Request',
-            message: 'No SentinelOne stack connector found',
+            message: 'No stack connector instance configured for [.sentinelone]',
           });
       });
     });
