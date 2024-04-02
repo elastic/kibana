@@ -32,8 +32,8 @@ import {
   isPackagePolicyList,
   newTelemetryLogger,
   safeValue,
-  type TelemetryLogger,
 } from '../helpers';
+import type { TelemetryLogger } from '../telemetry_logger';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
 
