@@ -127,21 +127,21 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         const formatter = createFormatter(infraType);
         const comparator = criteria.comparator;
         const threshold = criteria.threshold;
-        const thresholdFormattedAsString = criteria.threshold.map((v: number) => {
+        const formatThreshold = threshold.map((v: number) => {
           if (infraType === 'percent') {
             v = Number(v) / 100;
           }
           if (infraType === 'bits') {
             v = Number(v) / 8;
           }
-          return formatter(v);
+          return v;
         });
 
         return {
           observedValue: formatter(observedValue),
-          threshold: thresholdFormattedAsString,
+          threshold: formatThreshold.map(formatter),
           comparator,
-          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
+          pctAboveThreshold: getPctAboveThreshold(observedValue, formatThreshold),
         } as unknown as FlyoutThresholdData;
       });
 
