@@ -25,3 +25,8 @@ export enum APIRoutes {
   POST_CHAT_MESSAGE = '/internal/search_playground/chat',
   POST_QUERY_SOURCE_FIELDS = '/internal/search_playground/query_source_fields',
 }
+
+export enum ErrorCode {
+  INVALID_API_KEY = 'invalid_api_key',
+  UNCAUGHT_EXCEPTION = 'uncaught_exception',
+}

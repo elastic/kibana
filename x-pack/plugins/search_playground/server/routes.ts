@@ -10,12 +10,15 @@ import { ChatOpenAI } from '@langchain/openai';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { Logger } from '@kbn/logging';
 import { IRouter } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { fetchFields } from './utils/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './utils/conversational_chain';
 import { Prompt } from './utils/prompt';
 import { errorHandler } from './utils/error_handler';
-import { APIRoutes } from './types';
+import { APIRoutes, ErrorCode } from './types';
+import { createError, SearchPlaygroundError } from './utils/create_error';
+import { isInvalidApiKeyException } from './utils/exceptions';
 
 export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) {
   router.post(
@@ -51,71 +54,88 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
       },
     },
     errorHandler(async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-
-      const aiClient = Assist({
-        es_client: client.asCurrentUser,
-      } as AssistClientOptionsWithClient);
-
-      const { messages, data } = await request.body;
-
-      const model = new ChatOpenAI({
-        openAIApiKey: data.api_key,
-      });
-
-      let sourceFields = {};
-
       try {
-        sourceFields = JSON.parse(data.source_fields);
-      } catch (e) {
-        log.error('Failed to parse the source fields', e);
-        throw Error(e);
-      }
+        const { client } = (await context.core).elasticsearch;
 
-      const chain = ConversationalChain({
-        model,
-        rag: {
-          index: data.indices,
-          retriever: (question: string) => {
-            try {
-              const query = JSON.parse(data.elasticsearchQuery.replace(/{query}/g, question));
-              return query.query;
-            } catch (e) {
-              log.error('Failed to parse the Elasticsearch query', e);
-              throw Error(e);
-            }
-          },
-          content_field: sourceFields,
-          size: Number(data.docSize),
-        },
-        prompt: Prompt(data.prompt, {
-          citations: data.citations,
-          context: true,
-          type: 'openai',
-        }),
-      });
+        const aiClient = Assist({
+          es_client: client.asCurrentUser,
+        } as AssistClientOptionsWithClient);
 
-      const stream = await chain.stream(aiClient, messages);
+        const { messages, data } = await request.body;
 
-      const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
-
-      const reader = (stream as ReadableStream).getReader();
-      const textDecoder = new TextDecoder();
-
-      async function pushStreamUpdate() {
-        reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-          if (done) {
-            end();
-            return;
-          }
-          push(textDecoder.decode(value));
-          pushStreamUpdate();
+        const model = new ChatOpenAI({
+          openAIApiKey: data.api_key,
         });
+
+        let sourceFields = {};
+
+        sourceFields = JSON.parse(data.source_fields);
+
+        const chain = ConversationalChain({
+          model,
+          rag: {
+            index: data.indices,
+            retriever: (question: string) => {
+              try {
+                const query = JSON.parse(data.elasticsearchQuery.replace(/{query}/g, question));
+                return query.query;
+              } catch (e) {
+                log.error('Failed to parse the Elasticsearch query', e);
+                throw Error(e);
+              }
+            },
+            content_field: sourceFields,
+            size: Number(data.docSize),
+          },
+          prompt: Prompt(data.prompt, {
+            citations: data.citations,
+            context: true,
+            type: 'openai',
+          }),
+        });
+
+        const stream = await chain.stream(aiClient, messages);
+
+        const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
+
+        const reader = (stream as ReadableStream).getReader();
+        const textDecoder = new TextDecoder();
+
+        async function pushStreamUpdate() {
+          reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+            if (done) {
+              end();
+              return;
+            }
+            push(textDecoder.decode(value));
+            pushStreamUpdate();
+          });
+        }
+
+        pushStreamUpdate();
+
+        return response.ok(responseWithHeaders);
+      } catch (error) {
+        if (isInvalidApiKeyException(error)) {
+          return createError({
+            errorCode: ErrorCode.INVALID_API_KEY,
+            message: i18n.translate('xpack.searchPlayground.server.routes.invalidApiKeyError', {
+              defaultMessage: 'Incorrect API key provided',
+            }),
+            response,
+            statusCode: 403,
+          });
+        } else {
+          return createError({
+            errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+            message: i18n.translate('xpack.searchPlayground.server.routes.uncaughtExceptionError', {
+              defaultMessage: 'Playground encountered an error.',
+            }),
+            response,
+            statusCode: 502,
+          });
+        }
       }
-
-      pushStreamUpdate();
-
-      return response.ok(responseWithHeaders);
     })
   );
 
