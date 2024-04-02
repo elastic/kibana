@@ -22,6 +22,7 @@ import {
   EuiBetaBadge,
   EuiSplitPanel,
   EuiCallOut,
+  IconType,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
@@ -223,71 +224,13 @@ export const SystemActionTypeForm = ({
           buttonContentClassName="actAccordionActionForm__button"
           data-test-subj={`alertActionAccordion-${index}`}
           buttonContent={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {showActionGroupErrorIcon() ? (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionTypeForm.actionErrorToolTip',
-                      { defaultMessage: 'Action contains errors.' }
-                    )}
-                  >
-                    <EuiIcon
-                      data-test-subj="action-group-error-icon"
-                      type="warning"
-                      color="danger"
-                      size="m"
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              ) : (
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem>
-                <EuiText>
-                  <div>
-                    <EuiFlexGroup gutterSize="s" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <FormattedMessage
-                          defaultMessage="{actionConnectorName}"
-                          id="xpack.triggersActionsUI.sections.actionTypeForm.existingAlertActionTypeEditTitle"
-                          values={{
-                            actionConnectorName: `${actionConnector.name}`,
-                          }}
-                        />
-                      </EuiFlexItem>
-                      {warning && !isOpen && (
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge
-                            data-test-subj="warning-badge"
-                            iconType="warning"
-                            color="warning"
-                          >
-                            {i18n.translate(
-                              'xpack.triggersActionsUI.sections.actionTypeForm.actionWarningsTitle',
-                              {
-                                defaultMessage: '1 warning',
-                              }
-                            )}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                  </div>
-                </EuiText>
-              </EuiFlexItem>
-              {actionTypeRegistered && actionTypeRegistered.isExperimental && (
-                <EuiFlexItem grow={false}>
-                  <EuiBetaBadge
-                    data-test-subj="action-type-form-beta-badge"
-                    label={betaBadgeProps.label}
-                    tooltipContent={betaBadgeProps.tooltipContent}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <ButtonContent
+              showActionGroupErrorIcon={showActionGroupErrorIcon()}
+              showWarning={Boolean(warning && !isOpen)}
+              connectorName={actionConnector.name}
+              isExperimental={Boolean(actionTypeRegistered && actionTypeRegistered.isExperimental)}
+              iconClass={actionTypeRegistered.iconClass ?? 'empty'}
+            />
           }
           extraAction={
             <EuiButtonIcon
@@ -338,3 +281,75 @@ function getAvailableActionVariables(
     ];
   }, []);
 }
+
+const ButtonContent: React.FC<{
+  showActionGroupErrorIcon: boolean;
+  iconClass: string | IconType;
+  connectorName: string;
+  showWarning: boolean;
+  isExperimental: boolean;
+}> = ({ showActionGroupErrorIcon, iconClass, showWarning, isExperimental, connectorName }) => {
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      {showActionGroupErrorIcon ? (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.triggersActionsUI.sections.actionTypeForm.actionErrorToolTip',
+              { defaultMessage: 'Action contains errors.' }
+            )}
+          >
+            <EuiIcon
+              data-test-subj="action-group-error-icon"
+              type="warning"
+              color="danger"
+              size="m"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={iconClass} size="m" />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem>
+        <EuiText>
+          <div>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  defaultMessage="{actionConnectorName}"
+                  id="xpack.triggersActionsUI.sections.actionTypeForm.existingAlertActionTypeEditTitle"
+                  values={{
+                    actionConnectorName: `${connectorName}`,
+                  }}
+                />
+              </EuiFlexItem>
+              {showWarning && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning">
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionTypeForm.actionWarningsTitle',
+                      {
+                        defaultMessage: '1 warning',
+                      }
+                    )}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </div>
+        </EuiText>
+      </EuiFlexItem>
+      {isExperimental && (
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge
+            data-test-subj="action-type-form-beta-badge"
+            label={betaBadgeProps.label}
+            tooltipContent={betaBadgeProps.tooltipContent}
+          />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};

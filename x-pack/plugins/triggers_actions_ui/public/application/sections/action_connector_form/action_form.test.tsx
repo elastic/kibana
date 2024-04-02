@@ -25,7 +25,7 @@ jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
-const { loadActionTypes } = jest.requireMock('../../lib/action_connector_api');
+const { loadActionTypes, loadAllActions } = jest.requireMock('../../lib/action_connector_api');
 
 const setHasActionsWithBrokenConnector = jest.fn();
 describe('action_form', () => {
@@ -213,7 +213,6 @@ describe('action_form', () => {
   ) {
     const actionTypeRegistry = actionTypeRegistryMock.create();
 
-    const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
     loadAllActions.mockResolvedValueOnce(allActions);
     const mocks = coreMock.createSetup();
     const [
@@ -424,10 +423,18 @@ describe('action_form', () => {
           .find(`EuiToolTip [data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`)
           .exists()
       ).toBeFalsy();
+
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
       expect(loadActionTypes).toBeCalledWith(
         expect.objectContaining({
           featureId: 'alerting',
+          includeSystemActions: true,
+        })
+      );
+
+      expect(loadAllActions).toBeCalledWith(
+        expect.objectContaining({
+          includeSystemActions: true,
         })
       );
     });

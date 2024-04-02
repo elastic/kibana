@@ -395,6 +395,15 @@ export const ActionForm = ({
 
           const actionConnector = connectors.find((field) => field.id === actionItem.id);
 
+          const onDeleteAction = () => {
+            const updatedActions = actions.filter((_item: RuleUiAction, i: number) => i !== index);
+            setActions(updatedActions);
+            setIsAddActionPanelOpen(
+              updatedActions.filter((item: RuleUiAction) => item.id !== actionItem.id).length === 0
+            );
+            setActiveActionItem(undefined);
+          };
+
           if (isSystemActionType && !actionConnector) {
             return (
               <EuiEmptyPrompt
@@ -420,17 +429,7 @@ export const ActionForm = ({
                 actionTypeRegistry={actionTypeRegistry}
                 emptyActionsIds={emptyActionsIds}
                 connectors={connectors}
-                onDeleteConnector={() => {
-                  const updatedActions = actions.filter(
-                    (_item: RuleUiAction, i: number) => i !== index
-                  );
-                  setActions(updatedActions);
-                  setIsAddActionPanelOpen(
-                    updatedActions.filter((item: RuleUiAction) => item.id !== actionItem.id)
-                      .length === 0
-                  );
-                  setActiveActionItem(undefined);
-                }}
+                onDeleteConnector={onDeleteAction}
                 onAddConnector={() => {
                   setActiveActionItem({
                     actionTypeId: actionItem.actionTypeId,
@@ -484,14 +483,7 @@ export const ActionForm = ({
                 summaryMessageVariables={summaryMessageVariables}
                 defaultActionMessage={defaultActionMessage}
                 actionTypeRegistry={actionTypeRegistry}
-                onDeleteAction={() => {
-                  const updatedActions = actions.filter(
-                    (_item: RuleUiAction, i: number) => i !== index
-                  );
-                  setActions(updatedActions);
-                  setIsAddActionPanelOpen(updatedActions.length === 0);
-                  setActiveActionItem(undefined);
-                }}
+                onDeleteAction={onDeleteAction}
                 defaultSummaryMessage={defaultSummaryMessage}
                 featureId={featureId}
                 producerId={producerId}
