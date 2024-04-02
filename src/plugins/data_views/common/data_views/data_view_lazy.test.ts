@@ -690,7 +690,6 @@ describe('DataViewLazy', () => {
       `);
     });
 
-
     test('can customize what attributes to keep', () => {
       const fieldsMap = {
         test1: {
