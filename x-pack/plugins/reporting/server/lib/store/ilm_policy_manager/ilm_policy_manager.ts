@@ -7,7 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ILM_POLICY_NAME } from '@kbn/reporting-common';
-import { REPORTING_DATA_STREAM } from '@kbn/reporting-server';
+import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
+import { REPORTING_DATA_STREAM, REPORTING_DATA_STREAM_WILDCARD } from '@kbn/reporting-server';
 import { reportingIlmPolicy, reportingIndexTemplate } from './constants';
 
 /**
@@ -33,6 +34,27 @@ export class IlmPolicyManager {
       }
       throw e;
     }
+  }
+
+  public async checkIlmMigrationStatus(): Promise<IlmPolicyMigrationStatus> {
+    if (!(await this.doesIlmPolicyExist())) {
+      return 'policy-not-found';
+    }
+
+    // FIXME: should also check that template has link to ILM policy
+    // FIXME: should also check legacy indices, if any exist
+    const reportingIndicesSettings = await this.client.indices.getSettings({
+      index: REPORTING_DATA_STREAM_WILDCARD,
+    });
+
+    const hasUnmanagedIndices = Object.values(reportingIndicesSettings).some((settings) => {
+      return (
+        settings?.settings?.index?.lifecycle?.name !== ILM_POLICY_NAME &&
+        settings?.settings?.['index.lifecycle']?.name !== ILM_POLICY_NAME
+      );
+    });
+
+    return hasUnmanagedIndices ? 'indices-not-managed-by-policy' : 'ok';
   }
 
   /**

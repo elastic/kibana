@@ -9,14 +9,13 @@ import { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { REPORTING_DATA_STREAM_WILDCARD } from '@kbn/reporting-server';
-import { deprecations } from '../lib/deprecations';
+import { IlmPolicyManager } from '../lib/store';
 
 export const getDeprecationsInfo = async ({
   esClient,
 }: GetDeprecationsContext): Promise<DeprecationsDetails[]> => {
-  const migrationStatus = await deprecations.checkIlmMigrationStatus({
-    elasticsearchClient: esClient.asInternalUser,
-  });
+  const ilmPolicyManager = IlmPolicyManager.create({ client: esClient.asInternalUser });
+  const migrationStatus = await ilmPolicyManager.checkIlmMigrationStatus();
 
   if (migrationStatus !== 'ok') {
     return [

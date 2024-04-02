@@ -114,12 +114,6 @@ export interface ReportingServerInfo {
   uuid: string;
 }
 
-export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
-
-export interface IlmPolicyStatusResponse {
-  status: IlmPolicyMigrationStatus;
-}
-
 export interface ReportDocumentHead {
   _id: string;
   _index: string;
@@ -206,4 +200,10 @@ export interface LicenseCheckResults {
   enableLinks: boolean;
   showLinks: boolean;
   message: string;
+}
+
+export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
+
+export interface IlmPolicyStatusResponse {
+  status: IlmPolicyMigrationStatus;
 }

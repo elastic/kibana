@@ -8,10 +8,9 @@ import { errors } from '@elastic/elasticsearch';
 import type { Logger, RequestHandler } from '@kbn/core/server';
 import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { REPORTING_DATA_STREAM, REPORTING_DATA_STREAM_WILDCARD } from '@kbn/reporting-server';
-import type { IlmPolicyStatusResponse } from '@kbn/reporting-common/url';
+import type { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
 import type { ReportingCore } from '../../../core';
 import { IlmPolicyManager } from '../../../lib';
-import { deprecations } from '../../../lib/deprecations';
 import { getCounters } from '../../common';
 
 const getAuthzWrapper =
@@ -64,14 +63,13 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
     authzWrapper(async ({ core }, req, res) => {
       const counters = getCounters(req.route.method, getStatusPath, reporting.getUsageCounter());
 
-      const {
-        elasticsearch: { client: scopedClient },
-      } = await core;
-      const checkIlmMigrationStatus = () => {
-        return deprecations.checkIlmMigrationStatus({
-          // We want to make the current status visible to all reporting users
-          elasticsearchClient: scopedClient.asInternalUser,
-        });
+      const checkIlmMigrationStatus = async () => {
+        const {
+          elasticsearch: { client: scopedClient },
+        } = await core;
+
+        const ilmPolicyManager = IlmPolicyManager.create({ client: scopedClient.asInternalUser });
+        return ilmPolicyManager.checkIlmMigrationStatus();
       };
 
       try {
