@@ -194,6 +194,7 @@
     "@kbn/core-ui-settings-server",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-server-mocks",
-    "@kbn/data-service"
+    "@kbn/data-service",
+    "@kbn/management-plugin"
   ]
 }
