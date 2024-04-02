@@ -27,7 +27,7 @@ export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => (
   },
   excludeFromLastConversationStorage: false,
   messages: [],
-  replacements: [],
+  replacements: {},
 });
 
 const mockUser1 = {
@@ -61,7 +61,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
       timestamp: '2024-02-14T22:29:43.862Z',
     },
   ],
-  replacements: [],
+  replacements: {},
   createdAt: '2020-04-20T15:25:31.830Z',
   namespace: 'default',
   isDefault: false,

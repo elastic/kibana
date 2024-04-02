@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export const filterStateStore = {
-  APP_STATE: 'appState',
-  GLOBAL_STATE: 'globalState',
-} as const;
+import { PluginInitializer } from '@kbn/core/server';
 
-export type FilterStateStore = typeof filterStateStore[keyof typeof filterStateStore];
+export const plugin: PluginInitializer<void, void> = async () => {
+  const { TriggersActionsUiExamplePlugin } = await import('./plugin');
+  return new TriggersActionsUiExamplePlugin();
+};
