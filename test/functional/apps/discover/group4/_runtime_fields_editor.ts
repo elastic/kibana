@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.enableValue();
     await fieldEditor.typeScript("emit('abc')");
     await fieldEditor.save();
+    await fieldEditor.waitUntilClosed();
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
@@ -51,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await security.testUser.restoreDefaults();
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await kibanaServer.savedObjects.clean({ types: ['saved-search'] });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('allows adding custom label to existing fields', async function () {
@@ -60,6 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.enableCustomLabel();
       await fieldEditor.setCustomLabel(customLabel);
       await fieldEditor.save();
+      await fieldEditor.waitUntilClosed();
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect((await PageObjects.unifiedFieldList.getAllFieldNames()).includes(customLabel)).to.be(
         true
@@ -67,11 +69,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
       expect(await PageObjects.discover.getDocHeader()).to.have.string(customLabel);
     });
-
     it('allows creation of a new field', async function () {
       const field = '_runtimefield';
       await createRuntimeField(field);
-      await retry.waitForWithTimeout('fieldNames to include runtimefield', 5000, async () => {
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+      await retry.waitFor('fieldNames to include runtimefield', async () => {
         const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
         return fieldNames.includes(field);
       });
@@ -85,8 +91,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.setName(newFieldName, true);
       await fieldEditor.save();
       await fieldEditor.confirmSave();
+      await fieldEditor.waitUntilClosed();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitForDocTableLoadingComplete();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
         const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
