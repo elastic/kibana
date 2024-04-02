@@ -42,7 +42,7 @@ export const WELCOME_CONVERSATION: Conversation = {
       },
     },
   ],
-  replacements: [],
+  replacements: {},
 };
 
 export const enterpriseMessaging: Message[] = [
