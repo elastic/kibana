@@ -49,7 +49,7 @@ const getPctAboveThreshold = (observedValue: number, threshold: number[]) => {
   return i18n.translate('xpack.observability.alertFlyout.overview.aboveThresholdLabel', {
     defaultMessage: ' ({pctValue}% above the threshold)',
     values: {
-      pctValue: Math.floor((observedValue * 100) / threshold[0]),
+      pctValue: (((observedValue - threshold[0]) * 100) / threshold[0]).toFixed(2),
     },
   });
 };
@@ -152,6 +152,9 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         fields: [],
         comparator,
+        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE]!, [
+          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
+        ]),
       } as unknown as FlyoutThresholdData;
       return [flyoutMap];
 
@@ -160,6 +163,9 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator: '>',
+        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE]!, [
+          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
+        ]),
       } as unknown as FlyoutThresholdData;
       return [APMFlyoutMapErrorCount];
 
@@ -167,8 +173,10 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       const APMFlyoutMapTransactionErrorRate = {
         observedValue: [asPercent(alert.fields[ALERT_EVALUATION_VALUE], 100)],
         threshold: [asPercent(alert.fields[ALERT_EVALUATION_THRESHOLD], 100)],
-        fields: [],
         comparator: '>',
+        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE]!, [
+          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
+        ]),
       } as unknown as FlyoutThresholdData;
       return [APMFlyoutMapTransactionErrorRate];
 
@@ -177,6 +185,9 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         observedValue: [asDuration(alert.fields[ALERT_EVALUATION_VALUE])],
         threshold: [asDuration(alert.fields[ALERT_EVALUATION_THRESHOLD])],
         comparator: '>',
+        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE]!, [
+          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
+        ]),
       } as unknown as FlyoutThresholdData;
       return [APMFlyoutMapTransactionDuration];
 
