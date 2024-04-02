@@ -45,7 +45,15 @@ export interface FilterGroupProps
   featureIds: AlertConsumers[];
   onFilterChange?: (newFilters: Filter[]) => void;
   defaultControls: FilterItemObj[];
+  /**
+   * The controls configuration stored in the URL
+   * (takes precedence over the localStorage configuration)
+   */
   controlsUrlState?: FilterItemObj[];
+  /**
+   * Setter for controlsUrlState
+   */
+  setControlsUrlState?: (controls: FilterItemObj[]) => void;
   onInit?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
   maxControls?: number;
   ControlGroupRenderer: typeof ControlGroupRenderer;

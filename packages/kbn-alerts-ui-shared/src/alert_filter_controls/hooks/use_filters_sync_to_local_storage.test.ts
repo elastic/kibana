@@ -9,6 +9,7 @@
 import type { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
 import { useControlGroupSyncToLocalStorage } from './use_control_group_sync_to_local_storage';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 const TEST_STORAGE_KEY = 'test_key';
 const DEFAULT_STORED_VALUE = {
@@ -39,6 +40,7 @@ describe('Filters Sync to Local Storage', () => {
     global.localStorage.setItem(TEST_STORAGE_KEY, JSON.stringify(DEFAULT_STORED_VALUE));
     const { result, waitForNextUpdate } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
+        Storage,
         storageKey: TEST_STORAGE_KEY,
         shouldSync: true,
       })
@@ -49,6 +51,7 @@ describe('Filters Sync to Local Storage', () => {
   it('should be undefined if localstorage as NO initial value', () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
+        Storage,
         storageKey: TEST_STORAGE_KEY,
         shouldSync: true,
       })
@@ -60,6 +63,7 @@ describe('Filters Sync to Local Storage', () => {
   it('should be update values to local storage when sync is ON', () => {
     const { result, waitFor } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
+        Storage,
         storageKey: TEST_STORAGE_KEY,
         shouldSync: true,
       })
@@ -79,6 +83,7 @@ describe('Filters Sync to Local Storage', () => {
   it('should not update values to local storage when sync is OFF', () => {
     const { waitFor, result, rerender } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
+        Storage,
         storageKey: TEST_STORAGE_KEY,
         shouldSync: true,
       })

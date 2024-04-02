@@ -7,7 +7,7 @@
  */
 
 import { FilterGroup } from './filter_group';
-import type { FC } from 'react';
+import { FC } from 'react';
 import React from 'react';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import {
@@ -30,7 +30,6 @@ import {
 } from './mocks/control_group';
 import { getMockedControlGroupRenderer } from './mocks/control_group_renderer';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
-import { useGetInitialUrlParamValue } from '@kbn/security-solution-plugin/public/common/utils/global_query_string/helpers';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FilterGroupProps } from './types';
@@ -65,7 +64,13 @@ const TestComponent: FC<Partial<FilterGroupProps>> = (props) => {
       spaceId={spaceId}
       dataViewId="alert-filters-test-dv"
       featureIds={featureIds}
-      defaultControls={DEFAULT_CONTROLS}
+      defaultControls={[
+        ...DEFAULT_CONTROLS,
+        {
+          fieldName: 'host.name',
+          title: 'Host',
+        },
+      ]}
       chainingSystem="HIERARCHICAL"
       onFilterChange={onFilterChangeMock}
       onInit={onInitMock}
@@ -463,19 +468,15 @@ describe(' Filter Group Component ', () => {
 
       await openContextMenu();
 
-      await waitFor(() => {
-        expect(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET)).toBeVisible();
-      });
+      await waitFor(() => expect(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET)).toBeVisible());
 
       controlGroupMock.addOptionsListControl.mockClear();
       controlGroupMock.updateInput.mockClear();
       fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET));
 
-      await waitFor(() => {
-        // blanks the input
-        expect(controlGroupMock.updateInput.mock.calls.length).toBe(2);
-        expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(4);
-      });
+      // blanks the input
+      await waitFor(() => expect(controlGroupMock.updateInput.mock.calls.length).toBe(2));
+      expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(5);
     });
 
     it('should restore controls saved in local storage', () => {
@@ -568,16 +569,17 @@ describe(' Filter Group Component ', () => {
     });
 
     it('should show banner if url filter and stored filters are not same', async () => {
-      (useGetInitialUrlParamValue as jest.Mock).mockImplementationOnce(() => {
-        return () => [
-          {
-            fieldName: 'abc',
-          },
-        ];
-      });
       global.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialInputData));
 
-      render(<TestComponent />);
+      render(
+        <TestComponent
+          controlsUrlState={[
+            {
+              fieldName: 'abc',
+            },
+          ]}
+        />
+      );
       updateControlGroupInputMock(initialInputData as ControlGroupInput);
       await waitFor(() => {
         expect(screen.getByTestId(TEST_IDS.FILTERS_CHANGED_BANNER)).toBeVisible();
@@ -585,15 +587,16 @@ describe(' Filter Group Component ', () => {
     });
 
     it('should use url filters if url and stored filters are not same', async () => {
-      (useGetInitialUrlParamValue as jest.Mock).mockImplementationOnce(() => {
-        return () => [
-          {
-            fieldName: 'abc',
-          },
-        ];
-      });
       global.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialInputData));
-      render(<TestComponent />);
+      render(
+        <TestComponent
+          controlsUrlState={[
+            {
+              fieldName: 'abc',
+            },
+          ]}
+        />
+      );
       updateControlGroupInputMock(initialInputData as ControlGroupInput);
       expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
       expect(controlGroupMock.addOptionsListControl.mock.calls[0][1]).toMatchObject({
@@ -612,15 +615,17 @@ describe(' Filter Group Component ', () => {
     });
 
     it('should ignore url params if there is an error in using them', async () => {
-      (useGetInitialUrlParamValue as jest.Mock).mockImplementationOnce(() => {
-        return () => ({
-          fieldName: 'abc',
-        });
-      });
-
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementationOnce(jest.fn());
 
-      render(<TestComponent />);
+      render(
+        <TestComponent
+          controlsUrlState={
+            {
+              fieldName: 'abc',
+            } as any
+          }
+        />
+      );
 
       expect(consoleErrorSpy.mock.calls.length).toBe(1);
       expect(String(consoleErrorSpy.mock.calls[0][0])).toMatch(URL_PARAM_ARRAY_EXCEPTION_MSG);
@@ -695,7 +700,9 @@ describe(' Filter Group Component ', () => {
       jest.clearAllMocks();
       global.localStorage.clear();
     });
+
     it('should restore from localstorage when one of the value is exists and exclude is false', async () => {
+      updateControlGroupInputMock(initialInputData as ControlGroupInput);
       const savedData = {
         ...initialInputData,
         panels: {
@@ -725,6 +732,7 @@ describe(' Filter Group Component ', () => {
         );
       });
     });
+
     it('should restore from localstorage when one of the value has both exists and exclude true', async () => {
       const savedData = {
         ...initialInputData,

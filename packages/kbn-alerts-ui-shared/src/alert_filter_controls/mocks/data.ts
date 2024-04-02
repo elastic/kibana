@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
+
 export const sampleOutputData = {
   loading: false,
   rendered: true,
@@ -45,7 +47,7 @@ export const initialInputData = {
       explicitInput: {
         id: '0',
         dataViewId: 'alert-filters-test-dv',
-        fieldName: 'kibana.alert.workflow_status',
+        fieldName: ALERT_STATUS,
         title: 'Status',
         hideExclude: true,
         hideSort: true,
@@ -64,8 +66,8 @@ export const initialInputData = {
       explicitInput: {
         id: '1',
         dataViewId: 'alert-filters-test-dv',
-        fieldName: 'kibana.alert.severity',
-        title: 'Severity',
+        fieldName: ALERT_RULE_NAME,
+        title: 'Rule',
         hideExclude: true,
         hideSort: true,
         hidePanelTitles: true,
@@ -83,8 +85,8 @@ export const initialInputData = {
       explicitInput: {
         id: '2',
         dataViewId: 'alert-filters-test-dv',
-        fieldName: 'kibana.alert.building_block_type',
-        title: 'Building Block',
+        fieldName: ALERT_START,
+        title: 'Started at',
         hideExclude: true,
         hideSort: true,
         hidePanelTitles: true,
@@ -102,8 +104,8 @@ export const initialInputData = {
       explicitInput: {
         id: '3',
         dataViewId: 'alert-filters-test-dv',
-        fieldName: 'user.name',
-        title: 'User',
+        fieldName: ALERT_DURATION,
+        title: 'Duration',
         hideExclude: true,
         hideSort: true,
         hidePanelTitles: true,

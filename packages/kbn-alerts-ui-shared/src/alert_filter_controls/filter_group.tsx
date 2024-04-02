@@ -43,6 +43,7 @@ import {
 import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
 import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS, TIMEOUTS, URL_PARAM_KEY } from './constants';
+import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
 
 export const convertToBuildEsQuery = ({
   config,
@@ -87,7 +88,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     defaultControls,
     spaceId,
     onInit,
-    controlsUrlState = [],
+    controlsUrlState,
     maxControls = Infinity,
     ControlGroupRenderer,
     Storage,
@@ -96,6 +97,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const filterChangedSubscription = useRef<Subscription>();
   const inputChangedSubscription = useRef<Subscription>();
+
+  const [controlsFromUrl, setControlsFromUrl] = useState(controlsUrlState ?? []);
 
   const defaultControlsObj = useMemo(
     () =>
@@ -218,7 +221,38 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   useEffect(() => {
-    if (!controlGroup) return;
+    if (controlsUrlState) {
+      try {
+        if (!Array.isArray(controlsUrlState)) {
+          throw new Error(URL_PARAM_ARRAY_EXCEPTION_MSG);
+        }
+        const storedControlGroupInput = getStoredControlInput();
+        if (storedControlGroupInput) {
+          const panelsFormatted = getFilterItemObjListFromControlInput(storedControlGroupInput);
+          if (
+            controlsUrlState.length &&
+            !isEqualWith(
+              panelsFormatted,
+              controlsUrlState,
+              getFilterControlsComparator('fieldName', 'title')
+            )
+          ) {
+            setShowFiltersChangedBanner(true);
+            switchToEditMode();
+          }
+        }
+        setControlsFromUrl(controlsUrlState);
+      } catch (err) {
+        // if there is an error ignore url Param
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
+    }
+
+    if (!controlGroup) {
+      return;
+    }
+
     filterChangedSubscription.current = controlGroup.getOutput$().subscribe({
       next: debouncedFilterUpdates,
     });
@@ -227,13 +261,19 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       next: handleInputUpdates,
     });
 
-    const cleanup = () => {
+    return () => {
       [filterChangedSubscription.current, inputChangedSubscription.current].forEach((sub) => {
         if (sub) sub.unsubscribe();
       });
     };
-    return cleanup;
-  }, [controlGroup, debouncedFilterUpdates, handleInputUpdates]);
+  }, [
+    controlGroup,
+    controlsUrlState,
+    debouncedFilterUpdates,
+    getStoredControlInput,
+    handleInputUpdates,
+    switchToEditMode,
+  ]);
 
   const onControlGroupLoadHandler = useCallback(
     (controlGroupContainer: ControlGroupContainer) => {
@@ -254,14 +294,13 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
      *
      * */
 
-    const controlsFromURL = controlsUrlState ?? [];
     let controlsFromLocalStorage: FilterItemObj[] = [];
     const storedControlGroupInput = getStoredControlInput();
     if (storedControlGroupInput) {
       controlsFromLocalStorage = getFilterItemObjListFromControlInput(storedControlGroupInput);
     }
     let overridingControls = mergeControls({
-      controlsWithPriority: [controlsFromURL, controlsFromLocalStorage],
+      controlsWithPriority: [controlsFromUrl, controlsFromLocalStorage],
       defaultControlsObj,
     });
 
@@ -282,7 +321,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       controls: overridingControls,
       defaultControls,
     });
-  }, [controlsUrlState, getStoredControlInput, defaultControlsObj, defaultControls]);
+  }, [getStoredControlInput, controlsFromUrl, defaultControlsObj, defaultControls]);
 
   const fieldFilterPredicate: FieldFilterPredicate = useCallback((f) => f.type !== 'number', []);
 
@@ -442,7 +481,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     >
       <div className="filter-group__wrapper">
         <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
-          {Array.isArray(controlsUrlState) ? (
+          {Array.isArray(controlsFromUrl) ? (
             <EuiFlexItem grow={true} data-test-subj={TEST_IDS.FILTER_CONTROLS}>
               <ControlGroupRenderer
                 ref={onControlGroupLoadHandler}

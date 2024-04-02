@@ -39,11 +39,6 @@ export type AlertFilterControlsProps = Omit<
    */
   dataViewSpec?: DataViewSpec;
   /**
-   * The controls configuration stored in the URL
-   * (takes precedence over the localStorage-stored configuration)
-   */
-  controlsFromUrl?: FilterItemObj[];
-  /**
    * The dependencies needed for the filter bar
    */
   dependencies: {

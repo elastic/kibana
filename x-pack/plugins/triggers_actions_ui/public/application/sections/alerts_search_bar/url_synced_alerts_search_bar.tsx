@@ -70,7 +70,6 @@ export const UrlSyncedAlertsSearchBar = ({
     rangeTo,
     onRangeToChange,
     filterControls,
-    onFilterControlsChange,
     savedQuery,
     setSavedQuery,
     clearSavedQuery,
