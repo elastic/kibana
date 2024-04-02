@@ -13,12 +13,13 @@ import { useLoadRuleTypesQuery } from '../../common/hooks';
 import { RuleTypeModal, type RuleTypeModalProps } from './rule_type_modal';
 import { filterAndCountRuleTypes } from './helpers/filter_and_count_rule_types';
 
-export interface RuleTypeModalComponentProps
-  extends Pick<RuleTypeModalProps, 'onClose' | 'onSelectRuleType'> {
+export interface RuleTypeModalComponentProps {
   http: HttpStart;
   toasts: ToastsStart;
   filteredRuleTypes: string[];
   registeredRuleTypes: Array<{ id: string; description: string }>;
+  onClose: RuleTypeModalProps['onClose'];
+  onSelectRuleType: RuleTypeModalProps['onSelectRuleType'];
 }
 
 const EMPTY_ARRAY: string[] = [];
@@ -28,7 +29,7 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   toasts,
   filteredRuleTypes = EMPTY_ARRAY,
   registeredRuleTypes,
-  ...props
+  ...rest
 }) => {
   const [selectedProducer, setSelectedProducer] = useState<string | null>(null);
   const [searchString, setSearchString] = useState<string>('');
@@ -49,7 +50,7 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
 
   return (
     <RuleTypeModal
-      {...props}
+      {...rest}
       ruleTypes={ruleTypes}
       ruleTypeCountsByProducer={ruleTypeCountsByProducer}
       ruleTypesLoading={ruleTypesLoading}

@@ -25,12 +25,13 @@ export const filterAndCountRuleTypes: (
   const ruleTypeValues = [...ruleTypeIndex.values()];
   if (!ruleTypeValues.length) return [[], { total: 0 }];
 
+  // Filter by search first to preserve totals in the facets
   const ruleTypesFilteredBySearch = ruleTypeValues.filter((ruleType) => {
     if (searchString) {
+      const lowerCaseSearchString = searchString.toLowerCase();
       return (
-        ruleType.name.toLowerCase().includes(searchString.toLowerCase()) ||
-        (ruleType.description &&
-          ruleType.description.toLowerCase().includes(searchString.toLowerCase()))
+        ruleType.name.toLowerCase().includes(lowerCaseSearchString) ||
+        (ruleType.description && ruleType.description.toLowerCase().includes(lowerCaseSearchString))
       );
     }
     return true;
