@@ -453,7 +453,6 @@ describe('alert actions', () => {
             version: null,
             savedSearchId: null,
             savedSearch: null,
-            isDiscoverSavedSearchLoaded: false,
             isDataProviderVisible: false,
           },
           to: '2018-11-05T19:03:25.937Z',
