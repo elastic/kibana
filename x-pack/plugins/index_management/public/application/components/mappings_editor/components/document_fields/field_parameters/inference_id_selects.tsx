@@ -9,6 +9,7 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 
+import { InferenceAPIConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { useComponentTemplatesContext } from '../../../../component_templates/component_templates_context';
 import { getFieldConfig } from '../../../lib';
 import { FieldHook, Form, SuperSelectField, UseField, useForm } from '../../../shared_imports';
@@ -31,7 +32,7 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
   ];
 
   const inferenceIdOptionsFromModels: SuperSelectOption[] =
-    inferenceModels?.data?.map((model: any) => ({
+    inferenceModels?.data?.map((model: InferenceAPIConfigResponse) => ({
       value: model.model_id,
       inputDisplay: model.model_id,
     })) || [];
