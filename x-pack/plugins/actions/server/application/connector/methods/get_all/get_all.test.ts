@@ -557,6 +557,91 @@ describe('getAll()', () => {
         'Error validating connector: 1, Error: [actionTypeId]: expected value of type [string] but got [undefined]'
       );
     });
+
+    test('removes secrets before validation', async () => {
+      const expectedResult = {
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              actionTypeId: 'test',
+              isMissingSecrets: false,
+              config: {
+                foo: 'bar',
+              },
+              secrets: { foo: 'bar' },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+            'system-connector-.cases': { doc_count: 2 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          {
+            id: 'testPreconfigured',
+            actionTypeId: '.slack',
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          },
+          /**
+           * System actions will not
+           * be returned from getAll
+           * if no options are provided
+           */
+          {
+            id: 'system-connector-.cases',
+            actionTypeId: '.cases',
+            name: 'System action: .cases',
+            config: {},
+            secrets: {},
+            isDeprecated: false,
+            isMissingSecrets: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+          },
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+      });
+
+      await actionsClient.getAll();
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
   });
 
   describe('getAllSystemConnectors()', () => {
