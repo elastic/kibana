@@ -80,7 +80,6 @@ export const timelineDefaults: SubsetTimelineModel &
   filters: [],
   savedSearchId: null,
   savedSearch: null,
-  isDiscoverSavedSearchLoaded: false,
   isDataProviderVisible: false,
 };
 

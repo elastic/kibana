@@ -70,6 +70,10 @@ export const isAgentVersionLessThanFleetServer = (
   fleetServerAgents: Agent[],
   force = false
 ) => {
+  // For serverless it should not have any fleet server agents
+  if (fleetServerAgents.length === 0) {
+    return true;
+  }
   const fleetServerVersions = fleetServerAgents.map(
     (agent) => agent.local_metadata.elastic.agent.version
   ) as string[];
