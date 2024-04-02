@@ -30,8 +30,9 @@ import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { RuleAction } from '@kbn/alerting-plugin/common';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
-import type { AlertActionsProps } from './types';
+import type { AlertActionsProps, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { TypeRegistry } from './application/type_registry';
 
@@ -108,7 +109,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
   alertsTableConfigurationRegistry: AlertTableConfigRegistry;
   getActionForm: (
-    props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>
+    props: Omit<ActionAccordionFormProps, 'actionTypeRegistry' | 'setActions'> & {
+      setActions: (actions: RuleAction[]) => void;
+    }
   ) => ReactElement<ActionAccordionFormProps>;
   getAddConnectorFlyout: (
     props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>
@@ -457,9 +460,16 @@ export class Plugin
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
       alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
-      getActionForm: (props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>) => {
+      getActionForm: (
+        props: Omit<ActionAccordionFormProps, 'actionTypeRegistry' | 'setActions'> & {
+          setActions: (actions: RuleAction[]) => void;
+        }
+      ) => {
+        const { setActions, ...restProps } = props;
         return getActionFormLazy({
-          ...props,
+          ...restProps,
+          // TODO remove this cast when every solution is ready to use system actions
+          setActions: setActions as (actions: RuleUiAction[]) => void,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
         });
