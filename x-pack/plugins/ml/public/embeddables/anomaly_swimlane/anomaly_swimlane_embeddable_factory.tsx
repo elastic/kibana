@@ -85,10 +85,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       const interval = new BehaviorSubject<number | undefined>(undefined);
 
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-      const { appliedTimeRange$, serializeTimeRange, timeRangeComparators } = initializeTimeRange(
-        state,
-        parentApi
-      );
+      const { appliedTimeRange$, serializeTimeRange, timeRangeComparators, timeRangeApi } =
+        initializeTimeRange(state, parentApi);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
@@ -105,6 +103,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       const api = buildApi(
         {
           ...titlesApi,
+          ...timeRangeApi,
           query$,
           filters$,
           // @ts-ignore

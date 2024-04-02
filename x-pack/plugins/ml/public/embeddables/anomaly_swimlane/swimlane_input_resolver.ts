@@ -14,7 +14,6 @@ import { BehaviorSubject, combineLatest, from, of } from 'rxjs';
 import {
   catchError,
   debounceTime,
-  distinctUntilChanged,
   map,
   shareReplay,
   skipWhile,
@@ -96,10 +95,7 @@ export function useSwimlaneInputResolver(
       tap(([, , timeRange]) => {
         anomalyTimelineService.setTimeRange(timeRange);
       }),
-      map(([jobs, width]) => anomalyTimelineService.getSwimlaneBucketInterval(jobs!, width)),
-      distinctUntilChanged((prev, curr) => {
-        return prev.asSeconds() === curr.asSeconds();
-      })
+      map(([jobs, width]) => anomalyTimelineService.getSwimlaneBucketInterval(jobs!, width))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
