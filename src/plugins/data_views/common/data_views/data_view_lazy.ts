@@ -122,17 +122,22 @@ export class DataViewLazy extends AbstractDataView {
     // getRuntimeFieldSpecMap flattens composites into a list of fields
     Object.values(this.getRuntimeFieldSpecMap({ fieldName })).reduce<DataViewFieldMap>(
       (col, field) => {
+        if (!fieldMatchesFieldsRequested(field.name, fieldName)) {
+          return col;
+        }
         let cachedField = this.fieldCache.get(field.name);
         // if mapped field, can't be runtime field
         if (cachedField?.isMapped) {
           return col;
         }
-        if (cachedField) {
-          cachedField.runtimeField = field.runtimeField;
-          cachedField.spec.type = castEsToKbnFieldTypeName(field.type);
-          cachedField.spec.esTypes = [field.type];
-        } else {
-          cachedField = new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable });
+        if (!cachedField) {
+          cachedField = new DataViewField({
+            ...field,
+            count: this.fieldAttrs?.[field.name]?.count,
+            customLabel: this.fieldAttrs?.[field.name]?.customLabel,
+            customDescription: this.fieldAttrs?.[field.name]?.customDescription,
+            shortDotsEnable: this.shortDotsEnable,
+          });
           this.fieldCache.set(field.name, cachedField);
         }
         col[field.name] = cachedField;
@@ -379,7 +384,8 @@ export class DataViewLazy extends AbstractDataView {
       }
       let fld = this.fieldCache.get(field.name);
 
-      if (fld && !fld.scripted) {
+      // scripted field overrides mapped field
+      if (fld && !fld.scripted && fld.isMapped) {
         this.fieldCache.delete(field.name);
       }
       fld = new DataViewField({
