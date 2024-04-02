@@ -111,7 +111,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   useFieldEffect(form, 'inferenceId', setInferenceIdComboValue);
   useFieldEffect(form, 'name', setNameValue);
 
-  const fieldTypeValue = form.getFields()?.type?.value as { value: string }[];
+  const fieldTypeValue = form.getFields()?.type?.value as Array<{ value: string }>;
   useEffect(() => {
     if (fieldTypeValue === undefined || fieldTypeValue.length === 0) {
       return;
