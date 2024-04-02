@@ -100,7 +100,7 @@ export function createTelemetryConfigurationTaskConfig() {
         }
 
         if (configArtifact.pagination_config) {
-          log('Updating pagination configuration');
+          log.l('Updating pagination configuration');
           telemetryConfiguration.pagination_config = configArtifact.pagination_config;
           _receiver.setMaxPageSizeBytes(configArtifact.pagination_config.max_page_size_bytes);
           _receiver.setNumDocsToSample(configArtifact.pagination_config.num_docs_to_sample);
