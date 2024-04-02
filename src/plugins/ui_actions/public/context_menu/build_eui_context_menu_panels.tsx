@@ -179,7 +179,11 @@ export async function buildContextMenuForActions({
   for (const panel of Object.values(panels)) {
     const items = panel.items.filter(Boolean) as ItemDescriptor[];
     panel.items = items.sort(
-      ({ _order: orderA }, { _order: orderB }) => (orderB || 0) - (orderA || 0)
+      ({ _order: orderA, _title: titleA }, { _order: orderB, _title: titleB }) => {
+        const orderComparison = (orderB || 0) - (orderA || 0);
+        if (orderComparison !== 0) return orderComparison;
+        return (titleA || '').localeCompare(titleB || '');
+      }
     );
   }
 
