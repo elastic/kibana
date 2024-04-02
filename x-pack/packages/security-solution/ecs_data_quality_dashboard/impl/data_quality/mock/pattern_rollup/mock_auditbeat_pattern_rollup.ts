@@ -49,57 +49,21 @@ export const auditbeatNoResults: PatternRollup = {
   stats: {
     '.ds-auditbeat-8.6.1-2023.02.07-000001': {
       uuid: 'YpxavlUVTw2x_E_QtADrpg',
-      health: 'yellow',
-      primaries: {
-        store: {
-          size_in_bytes: 18791790,
-          total_data_set_size_in_bytes: 18791790,
-          reserved_in_bytes: 0,
-        },
-      },
-      status: 'open',
-      total: {
-        docs: {
-          count: 19123,
-          deleted: 0,
-        },
-      },
+      size_in_bytes: 18791790,
+      num_docs: 19123,
+      name: '.ds-auditbeat-8.6.1-2023.02.07-000001',
     },
     'auditbeat-custom-empty-index-1': {
       uuid: 'Iz5FJjsLQla34mD6kBAQBw',
-      health: 'yellow',
-      primaries: {
-        store: {
-          size_in_bytes: 247,
-          total_data_set_size_in_bytes: 247,
-          reserved_in_bytes: 0,
-        },
-      },
-      status: 'open',
-      total: {
-        docs: {
-          count: 0,
-          deleted: 0,
-        },
-      },
+      size_in_bytes: 247,
+      num_docs: 0,
+      name: 'auditbeat-custom-empty-index-1',
     },
     'auditbeat-custom-index-1': {
       uuid: 'xJvgb2QCQPSjlr7UnW8tFA',
-      health: 'yellow',
-      primaries: {
-        store: {
-          size_in_bytes: 28409,
-          total_data_set_size_in_bytes: 28409,
-          reserved_in_bytes: 0,
-        },
-      },
-      status: 'open',
-      total: {
-        docs: {
-          count: 4,
-          deleted: 0,
-        },
-      },
+      size_in_bytes: 28409,
+      num_docs: 4,
+      name: 'auditbeat-custom-index-1',
     },
   },
 };
