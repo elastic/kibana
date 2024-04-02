@@ -87,8 +87,6 @@ export function App({
     http,
     notifications,
     executionContext,
-    // Temporarily required until the 'by value' paradigm is default.
-    dashboardFeatureFlag,
     locator,
     share,
     serverless,
@@ -167,12 +165,8 @@ export function App({
   }, [setIndicateNoData, indicateNoData, searchSessionId]);
 
   const getIsByValueMode = useCallback(
-    () =>
-      Boolean(
-        // Temporarily required until the 'by value' paradigm is default.
-        dashboardFeatureFlag.allowByValueEmbeddables && isLinkedToOriginatingApp && !savedObjectId
-      ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, savedObjectId]
+    () => Boolean(isLinkedToOriginatingApp && !savedObjectId),
+    [isLinkedToOriginatingApp, savedObjectId]
   );
 
   useEffect(() => {
@@ -304,7 +298,6 @@ export function App({
       chrome.setBreadcrumbs(breadcrumbs);
     }
   }, [
-    dashboardFeatureFlag.allowByValueEmbeddables,
     getOriginatingAppName,
     redirectToOrigin,
     getIsByValueMode,
