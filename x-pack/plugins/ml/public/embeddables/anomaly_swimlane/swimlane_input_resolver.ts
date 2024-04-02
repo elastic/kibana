@@ -163,7 +163,7 @@ export function useSwimlaneInputResolver(
                     isViewBySwimLaneData(swimlaneData)
                       ? swimlaneData.cardinality
                       : ANOMALY_SWIM_LANE_HARD_LIMIT,
-                    perPageInput,
+                    perPageInput!,
                     fromPageInput,
                     undefined,
                     appliedFilters,

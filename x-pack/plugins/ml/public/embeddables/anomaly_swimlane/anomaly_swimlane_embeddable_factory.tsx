@@ -95,6 +95,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       const api = buildApi(
         {
           ...titlesApi,
+          // @ts-ignore
           appliedTimeRange$,
           jobIds,
           swimlaneType,
