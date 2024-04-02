@@ -46,6 +46,6 @@
     "@kbn/actions-plugin",
     "@kbn/management-cards-navigation",
     "@kbn/core-application-browser",
-    "@kbn/discover-plugin"
+    "@kbn/discover-plugin",
   ]
 }

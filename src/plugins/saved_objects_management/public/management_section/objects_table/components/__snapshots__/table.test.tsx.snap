@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Table prevents saved objects from being deleted 1`] = `
+exports[`Table prevents hidden saved objects from being deleted 1`] = `
 <Fragment>
   <EuiSearchBar
     box={
@@ -29,7 +29,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         <EuiToolTip
           content={
             <FormattedMessage
-              defaultMessage="Selected objects can’t be deleted because they are either Elastic managed objects or hidden objects."
+              defaultMessage="Selected objects can’t be deleted because they are hidden objects."
               id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
               values={Object {}}
             />
@@ -275,13 +275,6 @@ exports[`Table should render normally 1`] = `
     toolsRight={
       Array [
         <EuiToolTip
-          content={
-            <FormattedMessage
-              defaultMessage="Selected objects can’t be deleted because they are either Elastic managed objects or hidden objects."
-              id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
-              values={Object {}}
-            />
-          }
           delay="regular"
           display="inlineBlock"
           position="top"

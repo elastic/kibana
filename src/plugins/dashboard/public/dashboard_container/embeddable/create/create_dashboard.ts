@@ -17,12 +17,7 @@ import {
   type ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import {
-  EmbeddableFactory,
-  isErrorEmbeddable,
-  reactEmbeddableRegistryHasKey,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { compareFilters, Filter, TimeRange } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
@@ -340,10 +335,10 @@ export const initializeDashboard = async ({
         const createdEmbeddable = await (async () => {
           // if there is no width or height we can add the panel using the default behaviour.
           if (!incomingEmbeddable.size) {
-            return await container.addNewEmbeddable(
-              incomingEmbeddable.type,
-              incomingEmbeddable.input
-            );
+            return await container.addNewPanel<{ uuid: string }>({
+              panelType: incomingEmbeddable.type,
+              initialState: incomingEmbeddable.input,
+            });
           }
 
           // if the incoming embeddable has an explicit width or height we add the panel to the grid directly.
@@ -370,13 +365,12 @@ export const initializeDashboard = async ({
               [newPanelState.explicitInput.id]: newPanelState,
             },
           });
-          if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
-            return { id: embeddableId };
-          }
 
           return await container.untilEmbeddableLoaded(embeddableId);
         })();
-        scrolltoIncomingEmbeddable(container, createdEmbeddable.id);
+        if (createdEmbeddable) {
+          scrolltoIncomingEmbeddable(container, createdEmbeddable.uuid);
+        }
       });
     }
   }

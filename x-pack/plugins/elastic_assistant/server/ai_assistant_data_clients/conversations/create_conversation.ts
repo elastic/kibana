@@ -86,7 +86,6 @@ export const transformToCreateScheme = (
     api_config: apiConfig
       ? {
           connector_id: apiConfig.connectorId,
-          connector_type_title: apiConfig.connectorTypeTitle,
           default_system_prompt_id: apiConfig.defaultSystemPromptId,
           model: apiConfig.model,
           provider: apiConfig.provider,
@@ -95,7 +94,7 @@ export const transformToCreateScheme = (
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
     is_default: isDefault,
     messages: messages?.map((message) => ({
-      '@timestamp': new Date(message.timestamp).toISOString(),
+      '@timestamp': message.timestamp,
       content: message.content,
       is_error: message.isError,
       reader: message.reader,
@@ -106,7 +105,12 @@ export const transformToCreateScheme = (
       },
     })),
     updated_at: createdAt,
-    replacements,
+    replacements: replacements
+      ? Object.keys(replacements).map((key) => ({
+          uuid: key,
+          value: replacements[key],
+        }))
+      : undefined,
     namespace: spaceId,
   };
 };

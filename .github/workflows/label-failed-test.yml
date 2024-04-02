@@ -23,6 +23,7 @@ jobs:
         working-directory: ./kibana-operations/triage
         env:
           GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+          SLACK_TOKEN: ${{secrets.SLACK_TOKEN_FAILED_TEST_NOTIFIER}}
         run: |
           npm install
           node failed-test-label ${{github.event.issue.number}} || true

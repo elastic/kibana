@@ -116,7 +116,7 @@ export const init: ModelStage<
   });
   // cloning as we may be mutating it in later stages.
   let currentIndexMeta = cloneDeep(currentMappings._meta!);
-  if (currentAlgo === 'v2-compatible') {
+  if (currentAlgo === 'v2-compatible' || currentAlgo === 'v2-partially-migrated') {
     currentIndexMeta = removePropertiesFromV2(currentIndexMeta);
   }
 
@@ -164,7 +164,7 @@ export const init: ModelStage<
     case 'greater':
       const additiveMappingChanges = generateAdditiveMappingDiff({
         types,
-        meta: currentMappings._meta ?? {},
+        mapping: currentMappings,
         deletedTypes: context.deletedTypes,
       });
       return {

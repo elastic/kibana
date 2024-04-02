@@ -7,9 +7,9 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
-import { ApiConfig, Replacement } from '@kbn/elastic-assistant-common';
+import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
-import { getOptionalRequestParams, llmTypeDictionary } from '../helpers';
+import { getOptionalRequestParams } from '../helpers';
 export * from './conversations';
 
 export interface FetchConnectorExecuteAction {
@@ -23,7 +23,7 @@ export interface FetchConnectorExecuteAction {
   apiConfig: ApiConfig;
   http: HttpSetup;
   message?: string;
-  replacements: Replacement[];
+  replacements: Replacements;
   signal?: AbortSignal | undefined;
   size?: number;
 }
@@ -53,7 +53,6 @@ export const fetchConnectorExecuteAction = async ({
   signal,
   size,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
-  const llmType = llmTypeDictionary[apiConfig.connectorTypeTitle];
   // TODO: Remove in part 3 of streaming work for security solution
   // tracked here: https://github.com/elastic/security-team/issues/7363
   // In part 3 I will make enhancements to langchain to introduce streaming
@@ -68,7 +67,6 @@ export const fetchConnectorExecuteAction = async ({
   });
 
   const requestBody = {
-    // only used for openai, azure and bedrock ignore field
     model: apiConfig?.model,
     message,
     subAction: isStream ? 'invokeStream' : 'invokeAI',
@@ -76,7 +74,6 @@ export const fetchConnectorExecuteAction = async ({
     replacements,
     isEnabledKnowledgeBase,
     isEnabledRAGAlerts,
-    llmType,
     ...optionalRequestParams,
   };
 
@@ -117,7 +114,7 @@ export const fetchConnectorExecuteAction = async ({
       connector_id: string;
       status: string;
       data: string;
-      replacements?: Replacement[];
+      replacements?: Replacements;
       service_message?: string;
       trace_data?: {
         transaction_id: string;
