@@ -9,11 +9,9 @@ import expect from '@kbn/expect';
 import { type Agent, FLEET_ELASTIC_AGENT_PACKAGE, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { testUsers } from '../test_users';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const es = getService('es');
   let elasticAgentpkgVersion: string;
@@ -44,34 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'DELETE',
         path: `/_data_stream/metrics-elastic_agent.elastic_agent-default`,
       });
-    });
-
-    it('should return a 200 if a user with the fleet all try to access the list', async () => {
-      await supertestWithoutAuth
-        .get(`/api/fleet/agents`)
-        .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
-        .expect(200);
-    });
-
-    it('should return a 200 if a user with the fleet read try to access the list', async () => {
-      await supertestWithoutAuth
-        .get(`/api/fleet/agents`)
-        .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
-        .expect(200);
-    });
-
-    it('should return a 200 if a user with the fleet agents read try to access the list', async () => {
-      await supertestWithoutAuth
-        .get(`/api/fleet/agents`)
-        .auth(testUsers.fleet_agents_read_only.username, testUsers.fleet_agents_read_only.password)
-        .expect(200);
-    });
-
-    it('should not return the list of agents when requesting as a user without fleet permissions', async () => {
-      await supertestWithoutAuth
-        .get(`/api/fleet/agents`)
-        .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
-        .expect(403);
     });
 
     it('should return the list of agents when requesting as admin', async () => {

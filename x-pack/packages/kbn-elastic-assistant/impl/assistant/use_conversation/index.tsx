@@ -23,7 +23,7 @@ import { WELCOME_CONVERSATION } from './sample_conversations';
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
   id: '',
   messages: [],
-  replacements: [],
+  replacements: {},
   category: 'assistant',
   title: i18n.DEFAULT_CONVERSATION_TITLE,
 };
@@ -39,7 +39,7 @@ interface SetApiConfigProps {
 }
 
 interface UseConversation {
-  clearConversation: (conversationId: string) => Promise<void>;
+  clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
   removeLastMessage: (conversationId: string) => Promise<Message[] | undefined>;
@@ -83,21 +83,20 @@ export const useConversation = (): UseConversation => {
   );
 
   const clearConversation = useCallback(
-    async (conversationId: string) => {
-      const conversation = await getConversationById({ http, id: conversationId, toasts });
-      if (conversation && conversation.apiConfig) {
+    async (conversation: Conversation) => {
+      if (conversation.apiConfig) {
         const defaultSystemPromptId = getDefaultSystemPrompt({
           allSystemPrompts,
           conversation,
         })?.id;
 
-        await updateConversation({
+        return updateConversation({
           http,
           toasts,
-          conversationId,
+          conversationId: conversation.id,
           apiConfig: { ...conversation.apiConfig, defaultSystemPromptId },
           messages: [],
-          replacements: [],
+          replacements: {},
         });
       }
     },
