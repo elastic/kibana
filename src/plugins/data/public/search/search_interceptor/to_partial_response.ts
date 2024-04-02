@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ClusterStatistics, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ClusterDetails } from '@kbn/es-types';
+import {
+  ClusterDetails,
+  ClusterStatistics,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { IEsSearchResponse } from '../../../common';
 
 export function toPartialResponse(response: IEsSearchResponse): IEsSearchResponse {
