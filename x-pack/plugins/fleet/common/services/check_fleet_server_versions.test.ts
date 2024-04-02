@@ -67,9 +67,7 @@ describe('isAgentVersionLessThanFleetServer', () => {
     ] as any;
     expect(isAgentVersionLessThanFleetServer('8.5.0', fleetServers)).toBe(false);
   });
-});
 
-describe('isAgentVersionLessThanFleetServer', () => {
   it('should not throw if version is not a semver', () => {
     const fleetServers = [
       { local_metadata: { elastic: { agent: { version: '8.13.0' } } } },
