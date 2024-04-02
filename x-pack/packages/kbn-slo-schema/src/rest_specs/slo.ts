@@ -9,32 +9,17 @@ import * as t from 'io-ts';
 import {
   allOrAnyString,
   allOrAnyStringOrArray,
-  apmTransactionDurationIndicatorSchema,
-  apmTransactionErrorRateIndicatorSchema,
   budgetingMethodSchema,
   dateType,
   groupingsSchema,
-  groupSummarySchema,
-  histogramIndicatorSchema,
   indicatorSchema,
-  indicatorTypesSchema,
-  kqlCustomIndicatorSchema,
-  kqlWithFiltersSchema,
   metaSchema,
-  metricCustomIndicatorSchema,
   objectiveSchema,
-  querySchema,
   settingsSchema,
   sloIdSchema,
   summarySchema,
-  syntheticsAvailabilityIndicatorSchema,
   tagsSchema,
-  timesliceMetricBasicMetricWithField,
-  timesliceMetricDocCountMetric,
-  timesliceMetricIndicatorSchema,
-  timesliceMetricPercentileMetric,
   timeWindowSchema,
-  timeWindowTypeSchema,
 } from '../schema';
 
 const sloResponseSchema = t.intersection([
@@ -71,48 +56,5 @@ const sloWithSummaryResponseSchema = t.intersection([
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
-type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
-type TimeWindowType = t.OutputOf<typeof timeWindowTypeSchema>;
-type TimeWindow = t.OutputOf<typeof timeWindowSchema>;
-type IndicatorType = t.OutputOf<typeof indicatorTypesSchema>;
-type Indicator = t.OutputOf<typeof indicatorSchema>;
-type Objective = t.OutputOf<typeof objectiveSchema>;
-type APMTransactionErrorRateIndicator = t.OutputOf<typeof apmTransactionErrorRateIndicatorSchema>;
-type APMTransactionDurationIndicator = t.OutputOf<typeof apmTransactionDurationIndicatorSchema>;
-type SyntheticsAvailabilityIndicator = t.OutputOf<typeof syntheticsAvailabilityIndicatorSchema>;
-type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
-type TimesliceMetricIndicator = t.OutputOf<typeof timesliceMetricIndicatorSchema>;
-type TimesliceMetricBasicMetricWithField = t.OutputOf<typeof timesliceMetricBasicMetricWithField>;
-type TimesliceMetricDocCountMetric = t.OutputOf<typeof timesliceMetricDocCountMetric>;
-type TimesclieMetricPercentileMetric = t.OutputOf<typeof timesliceMetricPercentileMetric>;
-type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
-type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
-type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
-type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
-type QuerySchema = t.TypeOf<typeof querySchema>;
-
 export { sloWithSummaryResponseSchema };
-
-export type {
-  BudgetingMethod,
-  SLOResponse,
-  SLOWithSummaryResponse,
-  APMTransactionDurationIndicator,
-  APMTransactionErrorRateIndicator,
-  SyntheticsAvailabilityIndicator,
-  IndicatorType,
-  Indicator,
-  Objective,
-  MetricCustomIndicator,
-  TimesliceMetricIndicator,
-  TimesliceMetricBasicMetricWithField,
-  TimesclieMetricPercentileMetric,
-  TimesliceMetricDocCountMetric,
-  HistogramIndicator,
-  KQLCustomIndicator,
-  TimeWindow,
-  TimeWindowType,
-  GroupSummary,
-  KqlWithFiltersSchema,
-  QuerySchema,
-};
+export type { SLOResponse, SLOWithSummaryResponse };
