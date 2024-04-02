@@ -18,7 +18,7 @@ declare global {
      * We use this global variable to track page history changes to ensure that
      * navigation is done without causing a full page reload.
      */
-    __RENDERING_SESSION__: string[];
+    __RENDERING_SESSION__?: string[];
   }
 }
 
@@ -39,11 +39,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     await appsMenu.clickLink(title);
     return browser.execute(() => {
       if (!('__RENDERING_SESSION__' in window)) {
-        // @ts-expect-error upgrade typescript v4.9.5
         window.__RENDERING_SESSION__ = [];
       }
 
-      window.__RENDERING_SESSION__.push(window.location.pathname);
+      window.__RENDERING_SESSION__!.push(window.location.pathname);
     });
   };
 
@@ -177,6 +176,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildId (string)',
         'telemetry.labels.ciBuildJobId (string)',
         'telemetry.labels.ciBuildNumber (number)',
+        'telemetry.labels.environment (string)',
         'telemetry.labels.ftrConfig (string)',
         'telemetry.labels.gitRev (string)',
         'telemetry.labels.isPr (boolean)',
@@ -403,6 +403,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildId (string)',
         'telemetry.labels.ciBuildJobId (string)',
         'telemetry.labels.ciBuildNumber (number)',
+        'telemetry.labels.environment (string)',
         'telemetry.labels.ftrConfig (string)',
         'telemetry.labels.gitRev (string)',
         'telemetry.labels.isPr (boolean)',

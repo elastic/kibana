@@ -25,6 +25,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 
 jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
@@ -70,6 +71,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
