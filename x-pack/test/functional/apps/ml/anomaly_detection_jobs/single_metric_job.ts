@@ -428,5 +428,11 @@ export default function ({ getService }: FtrProviderContext) {
         'mlValidationCallout-success-Valid and long enough to model',
       ]);
     });
+
+    it('job creation and toggling model change annotation triggers enable annotation recommendation callout', async () => {
+      await ml.jobWizardCommon.goBackToJobDetailsSection();
+      await ml.jobWizardCommon.ensureAdvancedSectionOpen();
+      await ml.jobWizardCommon.togglingModelChangeAnnotationsShowsCalloutAndRemovesCallout();
+    });
   });
 }

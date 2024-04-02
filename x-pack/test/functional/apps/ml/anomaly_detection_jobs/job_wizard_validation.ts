@@ -125,10 +125,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.deleteDataViewByTitle(esIndexPatternString);
     });
 
-    it('job creation and toggling model change annotation triggers enable annotation recommendation callout', async () => {
-      await ml.jobWizardCommon.togglingModelChangeAnnotationsShowsCalloutAndRemovesCallout();
-    });
-
     it('job creation memory limit too large results in validation callout', async () => {
       await ml.jobWizardCommon.goBackToJobDetailsSection();
 
