@@ -27,7 +27,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { datemathStringRt } from '@kbn/io-ts-utils';
 import { Filter } from '@kbn/es-query';
-import type { FilterItemObj } from '@kbn/security-solution-plugin/public/common/components/filter_group/types';
+import { FilterItemObj } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { useKibana } from '../../../common/lib/kibana';
 
 const ALERT_STATUS_ALL = 'all';

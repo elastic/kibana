@@ -22,9 +22,9 @@ import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_ma
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
-import { FilterGroup } from '../../../common/components/filter_group';
+import { FilterGroup } from '@kbn/alerts-ui-shared/src/alert_filter_controls/filter_group';
 import type { AlertsTableComponentProps } from '../../components/alerts_table/alerts_grouping';
-import { getMockedFilterGroupWithCustomFilters } from '../../../common/components/filter_group/mocks';
+import { getMockedFilterGroupWithCustomFilters } from '@kbn/alerts-ui-shared/src/alert_filter_controls/mocks';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
 
@@ -39,7 +39,7 @@ jest.mock('../../../common/components/query_bar', () => ({
 jest.mock('../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'default',
 }));
-jest.mock('../../../common/components/filter_group');
+jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls/filter_group');
 
 const mockStatusCapture = jest.fn();
 const GroupedAlertsTable: React.FC<AlertsTableComponentProps> = ({

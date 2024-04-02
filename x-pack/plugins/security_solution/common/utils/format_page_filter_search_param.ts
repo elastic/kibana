@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FilterItemObj } from '../../public/common/components/filter_group/types';
+import type { FilterItemObj } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 
 export const formatPageFilterSearchParam = (filters: FilterItemObj[]) => {
   return filters.map(
