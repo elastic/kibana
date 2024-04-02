@@ -24,8 +24,6 @@ import {
   UNINSTALL_TOKENS_TAB,
 } from '../screens/fleet';
 
-import { navigateToTab } from '../tasks/fleet';
-
 const rolesToCreate = [FleetAgentsReadIntegrNoneRole];
 const usersToCreate = [FleetAgentsReadIntegrNoneUser];
 
