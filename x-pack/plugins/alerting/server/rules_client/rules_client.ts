@@ -103,6 +103,7 @@ export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParam
   'revision',
   'running',
   'snoozeSchedule',
+  'systemActions',
   'updatedBy',
   'updatedAt',
 ]);
