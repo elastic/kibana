@@ -189,7 +189,7 @@ export const createThreatSignals = async ({
       // TODO - delete this comment
       // FOR PR TESTING PURPOSES ONLY
       // uncomment this line..
-      // const maxClauseCountValue = -1;
+      // const maxClauseCountValue = MAX_CLAUSE_DEFAULT_VALUE;
 
       // and comment out the below reduce function to force the
       // max clause count error to re-appear.
