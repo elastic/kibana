@@ -20,6 +20,12 @@ const navigateToApp = jest.fn();
 describe('Settings Page', () => {
   beforeEach(() => {
     useAppContextMock.mockReturnValue({
+      uiSettings: {
+        get: jest.fn(),
+      },
+      docLinks: {
+        links: {},
+      },
       observabilityAIAssistant: {
         useGenAIConnectors: () => ({ connectors: [] }),
         useUserPreferredLanguage: () => ({
