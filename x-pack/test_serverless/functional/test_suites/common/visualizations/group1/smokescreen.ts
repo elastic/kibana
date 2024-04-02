@@ -355,12 +355,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should transition from bar chart to line chart using layer chart switch', async () => {
+    it('should transition from bar chart to line chart', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchLayerSeriesType('line');
+      await PageObjects.lens.switchToVisualization('line');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
         '@timestamp'

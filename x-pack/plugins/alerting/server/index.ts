@@ -71,6 +71,7 @@ export {
 } from './alerts_service';
 export { sanitizeBulkErrorResponse, AlertsClientError } from './alerts_client';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
+export type { ConnectorAdapter } from './connector_adapters/types';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { AlertingPlugin } = await import('./plugin');

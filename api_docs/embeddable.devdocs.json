@@ -8937,7 +8937,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<StateType>>({ maybeId, type, state, parentApi, onApiAvailable, }: { maybeId?: string | undefined; type: string; state: ",
+          "<StateType>>({ maybeId, type, state, parentApi, onApiAvailable, panelProps, }: { maybeId?: string | undefined; type: string; state: ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
@@ -8953,7 +8953,15 @@
             "section": "def-common.PresentationContainer",
             "text": "PresentationContainer"
           },
-          " | undefined; onApiAvailable?: ((api: ApiType) => void) | undefined; }) => JSX.Element"
+          " | undefined; onApiAvailable?: ((api: ApiType) => void) | undefined; panelProps?: Pick<",
+          {
+            "pluginId": "presentationPanel",
+            "scope": "public",
+            "docId": "kibPresentationPanelPluginApi",
+            "section": "def-public.PresentationPanelProps",
+            "text": "PresentationPanelProps"
+          },
+          "<ApiType, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined; }) => JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
         "deprecated": false,
@@ -8964,7 +8972,7 @@
             "id": "def-public.ReactEmbeddableRenderer.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  maybeId,\n  type,\n  state,\n  parentApi,\n  onApiAvailable,\n}",
+            "label": "{\n  maybeId,\n  type,\n  state,\n  parentApi,\n  onApiAvailable,\n  panelProps,\n}",
             "description": [],
             "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
             "deprecated": false,
@@ -9068,6 +9076,28 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableRenderer.$1.panelProps",
+                "type": "Object",
+                "tags": [],
+                "label": "panelProps",
+                "description": [],
+                "signature": [
+                  "Pick<",
+                  {
+                    "pluginId": "presentationPanel",
+                    "scope": "public",
+                    "docId": "kibPresentationPanelPluginApi",
+                    "section": "def-public.PresentationPanelProps",
+                    "text": "PresentationPanelProps"
+                  },
+                  "<ApiType, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
