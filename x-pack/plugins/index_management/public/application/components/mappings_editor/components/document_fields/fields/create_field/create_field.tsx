@@ -305,7 +305,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   );
 });
 
-function ReferenceFieldCombo({ indexName }: { indexName: string }) {
+function ReferenceFieldCombo({ indexName }: { indexName?: string }) {
   const [{ type }] = useFormData({ watch: 'type' });
 
   if (type === undefined || type[0]?.value !== 'semantic_text') {
