@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { type ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
@@ -45,7 +45,14 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   }
 `;
 
-export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplateProps, 'ref'>> =
+export type SecuritySolutionTemplateWrapperProps = Omit<KibanaPageTemplateProps, 'ref'> & {
+  /**
+   * Combined with isEmptyState, this prop allows complete override of the empty page
+   */
+  emptyPageBody?: ReactNode;
+};
+
+export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateWrapperProps> =
   React.memo(({ children, ...rest }) => {
     const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
@@ -54,6 +61,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
       getTimelineShowStatus(state, TimelineId.active)
     );
     const [routeProps] = useRouteSpy();
+    const isNotEmpty = !rest.isEmptyState;
     const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
@@ -76,25 +84,29 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           restrictWidth={false}
           {...rest}
         >
-          <GlobalKQLHeader />
-          <KibanaPageTemplate.Section
-            className="securityPageWrapper"
-            data-test-subj="pageContainer"
-            paddingSize={rest.paddingSize ?? 'l'}
-            alignment="top"
-            component="div"
-            grow={true}
-          >
-            {children}
-          </KibanaPageTemplate.Section>
-          {isTimelineBottomBarVisible && (
-            <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
-              <EuiThemeProvider colorMode={globalColorMode}>
-                <Timeline />
-              </EuiThemeProvider>
-            </KibanaPageTemplate.BottomBar>
+          {isNotEmpty && (
+            <>
+              <GlobalKQLHeader />
+              <KibanaPageTemplate.Section
+                className="securityPageWrapper"
+                data-test-subj="pageContainer"
+                paddingSize={rest.paddingSize ?? 'l'}
+                alignment="top"
+                component="div"
+                grow={true}
+              >
+                {children}
+              </KibanaPageTemplate.Section>
+              {isTimelineBottomBarVisible && (
+                <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
+                  <EuiThemeProvider colorMode={globalColorMode}>
+                    <Timeline />
+                  </EuiThemeProvider>
+                </KibanaPageTemplate.BottomBar>
+              )}
+              <SecuritySolutionFlyout />
+            </>
           )}
-          <SecuritySolutionFlyout />
         </StyledKibanaPageTemplate>
       </ExpandableFlyoutProvider>
     );
