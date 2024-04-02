@@ -174,9 +174,6 @@ export const createThreatSignals = async ({
 
     while (list.hits.hits.length !== 0) {
       verifyExecutionCanProceed();
-      // refactor calculating the chunks
-      // should be parameterized to allow re-running createSignal map
-      // isn't there a Promise function that returns early once an error occurs?
       const chunks = chunk(chunkPage, list.hits.hits);
       ruleExecutionLogger.debug(`${chunks.length} concurrent indicator searches are starting.`);
       const concurrentSearchesPerformed =
@@ -203,19 +200,26 @@ export const createThreatSignals = async ({
         const found = failureMessage?.match(regex);
 
         if (!isEmpty(found) && found != null) {
-          return parseInt(found.join(''), 10);
+          // minus 1 since it needs to be one less than the max provided by elasticsearch error message.
+          const val = parseInt(found.join(''), 10) - 1;
+          ruleExecutionLogger.warn(
+            `maxClauseCount error received from elasticsearch, setting IM rule page size to ${val}`
+          );
+          return val;
         } else {
           return acc;
         }
       }, -1);
 
       if (maxClauseCountValue > 0) {
-        // parse the error message to acquire the maximum available clauses
-        // allowed by elasticsearch
-
-        chunkPage = maxClauseCountValue - 1;
+        // parse the error message to acquire the number of maximum possible clauses
+        // allowed by elasticsearch. The sliced chunk is used in createSignal to generate
+        // threat filters.
+        chunkPage = maxClauseCountValue;
 
         // only store results + errors that are not related to maxClauseCount
+        // since the maxClauseCount error is not relevant since we will be re-running
+        // the createSignal loop with the updated chunk sizes.
         results = combineConcurrentResults(
           results,
           searchesPerformed.filter((search) =>
@@ -223,6 +227,11 @@ export const createThreatSignals = async ({
               (err) => !err.includes('failed to create query: maxClauseCount is set to')
             )
           )
+        );
+
+        // push warning message to appear in rule execution log
+        results.warningMessages.push(
+          `maxClauseCount error received from elasticsearch, setting IM rule page size to ${maxClauseCountValue}`
         );
       } else {
         results = combineConcurrentResults(results, searchesPerformed);
