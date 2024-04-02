@@ -60,6 +60,7 @@ describe('rule_action_helper', () => {
       const result = isSummaryAction(mockAction);
       expect(result).toBe(false);
     });
+
     test('should return false if the action does not have frequency field', () => {
       const result = isSummaryAction(mockOldAction);
       expect(result).toBe(false);

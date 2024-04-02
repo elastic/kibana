@@ -273,11 +273,6 @@ export const updateSavedSearchId = actionCreator<{
   savedSearchId: string;
 }>('UPDATE_DISCOVER_SAVED_SEARCH_ID');
 
-export const setIsDiscoverSavedSearchLoaded = actionCreator<{
-  id: string;
-  isDiscoverSavedSearchLoaded: boolean;
-}>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
-
 export const initializeSavedSearch = actionCreator<{
   id: string;
   savedSearch: SavedSearch;
@@ -294,6 +289,22 @@ export const setDataProviderVisibility = actionCreator<{
 }>('SET_DATA_PROVIDER_VISIBLITY');
 
 export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');
+
+export const updateColumnWidth = actionCreator<{
+  columnId: string;
+  id: string;
+  width: number;
+}>('UPDATE_COLUMN_WIDTH');
+
+export const updateRowHeight = actionCreator<{
+  id: string;
+  rowHeight: number;
+}>('UPDATE_ROW_HEIGHT');
+
+export const updateSampleSize = actionCreator<{
+  id: string;
+  sampleSize: number;
+}>('UPDATE_SAMPLE_SIZE');
 
 export const setConfirmingNoteId = actionCreator<{
   id: string;
