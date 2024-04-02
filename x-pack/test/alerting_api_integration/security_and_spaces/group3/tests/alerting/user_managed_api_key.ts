@@ -491,7 +491,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           .send({ ids: [ruleId] });
         expect(response.status).to.eql(200);
         expect(response.body.rules[0].enabled).to.eql(true);
-        expect(response.body.rules[0].apiKeyCreatedByUser).to.eql(true);
+        expect(response.body.rules[0].api_key_created_by_user).to.eql(true);
 
         // Ensure AAD isn't broken
         await checkAAD({
@@ -514,7 +514,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           .send({ ids: [ruleId] });
         expect(response.status).to.eql(200);
         expect(response.body.rules[0].enabled).to.eql(true);
-        expect(response.body.rules[0].apiKeyCreatedByUser).to.eql(false);
+        expect(response.body.rules[0].api_key_created_by_user).to.eql(false);
 
         // Ensure AAD isn't broken
         await checkAAD({
