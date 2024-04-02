@@ -6,46 +6,45 @@
  * Side Public License, v 1.
  */
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   EmbeddableSetup,
   EmbeddableStart,
   registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import {
   HelloWorldEmbeddableFactory,
-  HelloWorldEmbeddableFactoryDefinition,
   HELLO_WORLD_EMBEDDABLE,
+  HelloWorldEmbeddableFactoryDefinition,
 } from './hello_world';
 
 import {
-  ListContainerFactory,
-  ListContainerFactoryDefinition,
   LIST_CONTAINER,
+  ListContainerFactoryDefinition,
+  ListContainerFactory,
 } from './list_container';
 
 import {
-  FilterDebuggerEmbeddableFactory,
-  FilterDebuggerEmbeddableFactoryDefinition,
-  FILTER_DEBUGGER_EMBEDDABLE,
-} from './filter_debugger';
-import {
+  SIMPLE_EMBEDDABLE,
   SimpleEmbeddableFactory,
   SimpleEmbeddableFactoryDefinition,
-  SIMPLE_EMBEDDABLE,
 } from './migrations';
-import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
+import {
+  FILTER_DEBUGGER_EMBEDDABLE,
+  FilterDebuggerEmbeddableFactory,
+  FilterDebuggerEmbeddableFactoryDefinition,
+} from './filter_debugger';
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
-import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
-import { SEARCH_EMBEDDABLE_ID } from './react_embeddables/search/constants';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
+import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
+import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
+import { SEARCH_EMBEDDABLE_ID } from './react_embeddables/search/constants';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
