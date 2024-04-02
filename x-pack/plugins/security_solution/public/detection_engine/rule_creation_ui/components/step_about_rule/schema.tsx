@@ -112,7 +112,7 @@ export const schema: FormSchema<AboutStepRule> = {
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMaxAlertsHelpText',
       {
         defaultMessage:
-          'The maximum number of alerts a rule will create per execution. Defaults to 100.',
+          'The maximum number of alerts the rule will create each time it runs. Default is 100.',
       }
     ),
     labelAppend: OptionalFieldLabel,
