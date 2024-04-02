@@ -28,7 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const filterBar = getService('filterBar');
 
-  describe('Dashboard to TSVB to Lens', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/179307
+  describe.skip('Dashboard to TSVB to Lens', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
     });
@@ -85,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('visualizesaveAndReturnButton');
       // save it to library
       const originalPanel = await testSubjects.find('embeddablePanelHeading-');
-      await panelActions.saveToLibrary('My TSVB to Lens viz 2', originalPanel);
+      await panelActions.legacySaveToLibrary('My TSVB to Lens viz 2', originalPanel);
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
