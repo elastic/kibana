@@ -82,7 +82,7 @@ export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
 export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
 
 export const dataStreamsEstimatedDataInBytesRT = rt.type({
-  estimatedDataInBytes: rt.number,
+  estimatedDataInBytes: rt.union([rt.number, rt.null]), // Null in serverless: https://github.com/elastic/kibana/issues/178954
 });
 
 export type DataStreamsEstimatedDataInBytes = rt.TypeOf<typeof dataStreamsEstimatedDataInBytesRT>;

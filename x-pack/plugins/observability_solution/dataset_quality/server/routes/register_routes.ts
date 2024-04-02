@@ -14,7 +14,6 @@ import {
   routeValidationObject,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
-import { UnsupportedFeatureInOfferingError } from '../../common/rest/errors';
 import { DatasetQualityRequestHandlerContext } from '../types';
 import { DatasetQualityRouteHandlerResources } from './types';
 
@@ -93,11 +92,6 @@ export function registerRoutes({
           if (error instanceof errors.RequestAbortedError) {
             opts.statusCode = 499;
             opts.body.message = 'Client closed request';
-          }
-
-          if (error instanceof UnsupportedFeatureInOfferingError) {
-            opts.statusCode = 501;
-            opts.body.message = error.message ?? 'Unsupported feature in offering';
           }
 
           return response.customError(opts);

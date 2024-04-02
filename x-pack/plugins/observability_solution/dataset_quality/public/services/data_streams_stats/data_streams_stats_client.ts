@@ -8,7 +8,6 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { find, merge } from 'lodash';
-import { UnsupportedFeatureInOfferingError } from '../../../common/rest/errors';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   getDataStreamsDegradedDocsStatsResponseRt,
@@ -125,11 +124,6 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         }
       )
       .catch((error) => {
-        if (error.body?.statusCode === 501) {
-          throw new UnsupportedFeatureInOfferingError(
-            `Failed to fetch data streams estimated data in bytes": ${error.body?.message}`
-          );
-        }
         throw new GetDataStreamsStatsError(
           `Failed to fetch data streams estimated data in bytes": ${error}`
         );

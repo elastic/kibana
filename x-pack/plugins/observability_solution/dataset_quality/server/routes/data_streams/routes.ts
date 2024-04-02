@@ -7,10 +7,10 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { UnsupportedFeatureInOfferingError } from '../../../common/rest/errors';
 import { DataStreamType } from '../../../common/types';
 import {
   DataStreamDetails,
+  DataStreamsEstimatedDataInBytes,
   DataStreamStat,
   DegradedDocs,
   Integration,
@@ -145,9 +145,7 @@ const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
-  async handler(resources): Promise<{
-    estimatedDataInBytes: number;
-  }> {
+  async handler(resources): Promise<DataStreamsEstimatedDataInBytes> {
     const { context, params, getEsCapabilities } = resources;
     const coreContext = await context.core;
 
@@ -155,9 +153,9 @@ const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
     const isServerless = (await getEsCapabilities()).serverless;
 
     if (isServerless) {
-      throw new UnsupportedFeatureInOfferingError(
-        'Estimated data is unsupported in serverless mode'
-      );
+      return {
+        estimatedDataInBytes: null,
+      };
     }
 
     const estimatedDataInBytes = await getEstimatedDataInBytes({
