@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import dateMath from '@kbn/datemath';
 import { MAX_OPEN_CASES } from './constants';
+import { TIME_WINDOW_REGEX } from '../../../common/constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
   validate: (value) => {
@@ -53,7 +54,7 @@ export const CasesConnectorRunParamsSchema = schema.object({
        *
        * Example: 20d, 2w, 1M, etc
        */
-      const timeWindowRegex = new RegExp(/^[1-9][0-9]*[d,w,M,y]$/, 'g');
+      const timeWindowRegex = new RegExp(TIME_WINDOW_REGEX, 'g');
 
       if (!timeWindowRegex.test(value)) {
         return 'Not a valid time window';

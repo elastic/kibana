@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-export const DEFAULT_TIME_WINDOW_SIZE = 7;
-
-export const DEFAULT_TIME_WINDOW_UNIT = 'd';
+export const DEFAULT_TIME_WINDOW = '7d';
 
 export enum TIME_UNITS {
   DAYS = 'd',
   WEEKS = 'w',
-  MONTHS = 'm',
+  MONTHS = 'M',
   YEARS = 'y',
 }

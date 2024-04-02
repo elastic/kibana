@@ -219,6 +219,8 @@ export const NONE_CONNECTOR_ID: string = 'none';
 export const CASES_CONNECTOR_ID = '.cases';
 export const CASES_CONNECTOR_TITLE = 'Cases';
 
+export const TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w,M,y]$';
+
 /**
  * This field is used for authorization of the entities within the cases plugin. Each entity within Cases will have the owner field
  * set to a string that represents the plugin that "owns" (i.e. the plugin that originally issued the POST request to

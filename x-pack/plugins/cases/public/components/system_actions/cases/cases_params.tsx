@@ -22,10 +22,10 @@ import {
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
-import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
+import { CASES_CONNECTOR_SUB_ACTION, OWNER_INFO } from '../../../../common/constants';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
-import { DEFAULT_TIME_WINDOW_SIZE, DEFAULT_TIME_WINDOW_UNIT } from './constants';
+import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
 import { getTimeUnitOptions } from './utils';
 import { useAlertDataViews } from '../hooks/use_alert_data_view';
 
@@ -33,7 +33,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   ActionParamsProps<CasesActionParams>
 > = ({ actionParams, editAction, errors, index, producerId }) => {
   const { appId } = useApplication();
-  const owner = getCaseOwnerByAppId(appId);
+  const owner = getCaseOwnerByAppId(appId) ?? OWNER_INFO.cases.id;
 
   const { dataViews, loading: loadingAlertDataViews } = useAlertDataViews(
     producerId ? [producerId as ValidFeatureId] : []
@@ -41,16 +41,22 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
 
   const { timeWindow, reopenClosedCases, groupingBy } = useMemo(
     () =>
-      actionParams.subActionParams ??
-      ({
-        timeWindow: `${DEFAULT_TIME_WINDOW_SIZE}${DEFAULT_TIME_WINDOW_UNIT}`,
+      actionParams.subActionParams ?? {
+        timeWindow: `${DEFAULT_TIME_WINDOW}`,
         reopenClosedCases: false,
         groupingBy: [],
-      } as unknown as CasesActionParams['subActionParams']),
+      },
     [actionParams.subActionParams]
   );
 
-  const [timeWindowSize, timeWindowUnit] = timeWindow.match(/[a-zA-Z]+|-?[0-9]+/g) ?? [];
+  const parsedTimeWindowSize = timeWindow.slice(0, timeWindow.length - 1);
+  const parsedTimeWindowUnit = timeWindow.slice(-1);
+  const timeWindowSize = isNaN(parseInt(parsedTimeWindowSize, 10))
+    ? DEFAULT_TIME_WINDOW[0]
+    : parsedTimeWindowSize.toString();
+  const timeWindowUnit = Object.values(TIME_UNITS).includes(parsedTimeWindowUnit as TIME_UNITS)
+    ? parsedTimeWindowUnit
+    : DEFAULT_TIME_WINDOW[1];
 
   useEffect(() => {
     if (!actionParams.subAction) {
@@ -61,7 +67,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          timeWindow: `${DEFAULT_TIME_WINDOW_SIZE}${DEFAULT_TIME_WINDOW_UNIT}`,
+          timeWindow: `${DEFAULT_TIME_WINDOW}`,
           reopenClosedCases: false,
           groupingBy: [],
           owner,
@@ -90,9 +96,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       }
 
       const newTimeWindow =
-        key === 'timeWindowSize'
-          ? `${parseInt(value, 10)}${timeWindowUnit}`
-          : `${timeWindowSize}${value}`;
+        key === 'timeWindowSize' ? `${value}${timeWindowUnit}` : `${timeWindowSize}${value}`;
 
       editSubActionProperty('timeWindow', newTimeWindow);
     },
@@ -123,7 +127,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       .flat();
   }, [dataViews]);
 
-  const selectedOptions = groupingBy.map((x) => ({ value: x, label: x }));
+  const selectedOptions = groupingBy.map((field) => ({ value: field, label: field }));
 
   return (
     <>
@@ -157,11 +161,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         }
       >
         <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={4}>
             <EuiFieldNumber
               prepend={i18n.TIME_WINDOW}
               data-test-subj="time-window-size-input"
               value={timeWindowSize}
+              min={1}
+              step={1}
               onChange={(e) => {
                 handleTimeWindowChange('timeWindowSize', e.target.value);
               }}

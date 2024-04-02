@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { getConnectorType as getCasesConnectorType } from './cases/cases';
+import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+
+import { getConnectorType } from './cases/cases';
+
+export const registerSystemActions = (triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) =>
+  triggersActionsUi.actionTypeRegistry.register(getConnectorType());

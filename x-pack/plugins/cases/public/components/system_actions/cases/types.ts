@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { CasesConnectorRunParams } from '../../../../server/connectors/cases/types';
-
-export type CasesActionConnector = UserConfiguredActionConnector<{}, {}>;
-
-export type CasesSubActionParams = Pick<
-  CasesConnectorRunParams,
-  'groupingBy' | 'owner' | 'timeWindow' | 'reopenClosedCases'
->;
-
+export interface CasesSubActionParamsUI {
+  timeWindow: string;
+  reopenClosedCases: boolean;
+  groupingBy: string[];
+  owner: string;
+}
 export interface CasesActionParams {
   subAction: string;
-  subActionParams: CasesSubActionParams;
+  subActionParams: CasesSubActionParamsUI;
 }

@@ -36,7 +36,7 @@ import type {
   CasesPublicSetupDependencies,
   CasesPublicStartDependencies,
 } from './types';
-import { getCasesConnectorType } from './components/system_actions';
+import { registerSystemActions } from './components/system_actions';
 
 /**
  * @public
@@ -114,7 +114,7 @@ export class CasesUiPlugin
       });
     }
 
-    plugins.triggersActionsUi.actionTypeRegistry.register(getCasesConnectorType());
+    registerSystemActions(plugins.triggersActionsUi);
 
     return {
       attachmentFramework: {

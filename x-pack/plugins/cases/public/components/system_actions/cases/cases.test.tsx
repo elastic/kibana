@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import type {
-  ActionTypeModel,
-  ActionTypeModel as ConnectorTypeModel,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { getConnectorType } from './cases';
 const CONNECTOR_TYPE_ID = '.cases';
-let connectorTypeModel: ConnectorTypeModel;
+let connectorTypeModel: ActionTypeModel;
 
 beforeAll(() => {
-  const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-
-  actionTypeRegistry.register(getConnectorType());
-
-  const getResult = actionTypeRegistry.get(CONNECTOR_TYPE_ID);
-  if (getResult !== null) {
-    connectorTypeModel = getResult;
-  }
+  connectorTypeModel = getConnectorType();
 });
 
 describe('has correct connector id', () => {
@@ -33,10 +22,25 @@ describe('has correct connector id', () => {
 
 describe('action params validation', () => {
   test('action params validation succeeds when action params is valid', async () => {
-    const actionParams = { subActionParams: { timeWindow: '7d' } };
+    const actionParams = {
+      subActionParams: {
+        timeWindow: '7d',
+        reopenClosedCases: false,
+        groupingBy: [],
+        owner: 'cases',
+      },
+    };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: { timeWindow: [] },
+    });
+  });
+
+  test('params validation succeeds when valid timeWindow', async () => {
+    const actionParams = { subActionParams: { timeWindow: '17w' } };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: { timeWindow: ['Invalid time window.'] },
     });
   });
 
@@ -44,7 +48,7 @@ describe('action params validation', () => {
     const actionParams = { subActionParams: { timeWindow: '' } };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { timeWindow: ['Invalid time size.'] },
+      errors: { timeWindow: ['Invalid time window.'] },
     });
   });
 
@@ -52,7 +56,7 @@ describe('action params validation', () => {
     const actionParams = { subActionParams: { timeWindow: undefined } };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { timeWindow: ['Invalid time size.'] },
+      errors: { timeWindow: ['Invalid time window.'] },
     });
   });
 
@@ -60,7 +64,7 @@ describe('action params validation', () => {
     const actionParams = { subActionParams: { timeWindow: null } };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { timeWindow: ['Invalid time size.'] },
+      errors: { timeWindow: ['Invalid time window.'] },
     });
   });
 
@@ -68,7 +72,7 @@ describe('action params validation', () => {
     const actionParams = { subActionParams: { timeWindow: '0d' } };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { timeWindow: ['Invalid time size.'] },
+      errors: { timeWindow: ['Invalid time window.'] },
     });
   });
 
@@ -76,7 +80,7 @@ describe('action params validation', () => {
     const actionParams = { subActionParams: { timeWindow: '-5w' } };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { timeWindow: ['Invalid time size.'] },
+      errors: { timeWindow: ['Invalid time window.'] },
     });
   });
 });

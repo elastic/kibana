@@ -125,7 +125,7 @@ describe('CasesParamsFields renders', () => {
     });
   });
 
-  it('sets owner as undefined if appId not matched', () => {
+  it('sets owner default if appId not matched', () => {
     useApplicationMock.mockReturnValue({ appId: 'testAppId' });
     const newProps = {
       ...defaultProps,
@@ -134,7 +134,7 @@ describe('CasesParamsFields renders', () => {
       },
     };
     render(<CasesParamsFields {...newProps} />);
-    expect(editAction.mock.calls[0][1].owner).toBeUndefined();
+    expect(editAction.mock.calls[0][1].owner).toEqual('cases');
   });
 
   it('If timeWindow has errors, form row is invalid', async () => {
@@ -229,10 +229,10 @@ describe('CasesParamsFields renders', () => {
       expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
 
       fireEvent.change(await screen.findByTestId('time-window-unit-select'), {
-        target: { value: 'm' },
+        target: { value: 'M' },
       });
 
-      expect(editAction.mock.calls[0][1].timeWindow).toEqual('6m');
+      expect(editAction.mock.calls[0][1].timeWindow).toEqual('6M');
     });
 
     it('updates reopenClosedCases', async () => {

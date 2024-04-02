@@ -31,7 +31,7 @@ export const TIME_WINDOW = i18n.translate(
 export const TIME_WINDOW_SIZE_ERROR = i18n.translate(
   'xpack.cases.systemActions.casesConnector.timeWindowSizeError',
   {
-    defaultMessage: 'Invalid time size.',
+    defaultMessage: 'Invalid time window.',
   }
 );
 

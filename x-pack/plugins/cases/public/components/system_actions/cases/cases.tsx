@@ -11,7 +11,11 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE } from '../../../../common/constants';
+import {
+  CASES_CONNECTOR_ID,
+  CASES_CONNECTOR_TITLE,
+  TIME_WINDOW_REGEX,
+} from '../../../../common/constants';
 import type { CasesActionParams } from './types';
 import * as i18n from './translations';
 
@@ -25,28 +29,26 @@ export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams
     iconClass: 'casesApp',
     selectMessage: i18n.CASE_ACTION_DESC,
     actionTypeTitle: CASES_CONNECTOR_TITLE,
-    actionConnectorFields: lazy(() => import('./cases_connector')),
+    actionConnectorFields: null,
     isExperimental: true,
     validateParams: async (
       actionParams: CasesActionParams
     ): Promise<GenericValidationResult<unknown>> => {
-      const translations = await import('./translations');
       const errors: ValidationErrors = {
         timeWindow: [],
       };
       const validationResult = {
         errors,
       };
+      const timeWindowRegex = new RegExp(TIME_WINDOW_REGEX, 'g');
 
-      const timeWindowData =
+      if (
         actionParams.subActionParams &&
-        actionParams.subActionParams.timeWindow &&
-        actionParams.subActionParams.timeWindow.match(/[a-zA-Z]+|-?[0-9]+/g);
-
-      const timeWindowSize = timeWindowData?.length && Number(timeWindowData[0]);
-
-      if (!timeWindowData?.length || !timeWindowSize || timeWindowSize <= 0) {
-        errors.timeWindow.push(translations.TIME_WINDOW_SIZE_ERROR);
+        (!actionParams.subActionParams.timeWindow ||
+          !actionParams.subActionParams.timeWindow.length ||
+          !timeWindowRegex.test(actionParams.subActionParams.timeWindow))
+      ) {
+        errors.timeWindow.push(i18n.TIME_WINDOW_SIZE_ERROR);
       }
       return validationResult;
     },

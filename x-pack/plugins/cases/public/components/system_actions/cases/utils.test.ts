@@ -13,7 +13,7 @@ describe('getTimeUnitOptions', () => {
     expect(timeUnitValue).toMatchObject([
       { text: 'day', value: 'd' },
       { text: 'week', value: 'w' },
-      { text: 'month', value: 'm' },
+      { text: 'month', value: 'M' },
       { text: 'year', value: 'y' },
     ]);
   });
@@ -23,7 +23,7 @@ describe('getTimeUnitOptions', () => {
     expect(timeUnitValue).toMatchObject([
       { text: 'days', value: 'd' },
       { text: 'weeks', value: 'w' },
-      { text: 'months', value: 'm' },
+      { text: 'months', value: 'M' },
       { text: 'years', value: 'y' },
     ]);
   });
@@ -33,7 +33,7 @@ describe('getTimeUnitOptions', () => {
     expect(timeUnitValue).toMatchObject([
       { text: 'days', value: 'd' },
       { text: 'weeks', value: 'w' },
-      { text: 'months', value: 'm' },
+      { text: 'months', value: 'M' },
       { text: 'years', value: 'y' },
     ]);
   });
@@ -43,7 +43,7 @@ describe('getTimeUnitOptions', () => {
     expect(timeUnitValue).toMatchObject([
       { text: 'days', value: 'd' },
       { text: 'weeks', value: 'w' },
-      { text: 'months', value: 'm' },
+      { text: 'months', value: 'M' },
       { text: 'years', value: 'y' },
     ]);
   });

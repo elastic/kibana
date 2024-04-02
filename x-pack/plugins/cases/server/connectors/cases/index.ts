@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SecurityConnectorFeatureId, UptimeConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  UptimeConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -48,7 +52,11 @@ export const getCasesConnectorType = ({
    * TODO: Limit only to rule types that support
    * alerts-as-data
    */
-  supportedFeatureIds: [SecurityConnectorFeatureId, UptimeConnectorFeatureId],
+  supportedFeatureIds: [
+    SecurityConnectorFeatureId,
+    UptimeConnectorFeatureId,
+    AlertingConnectorFeatureId,
+  ],
   /**
    * TODO: Verify license
    */
