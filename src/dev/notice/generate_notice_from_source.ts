@@ -38,9 +38,17 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
     '!{node_modules,build,dist,data,built_assets,shared_built_assets}/**',
     '!packages/*/{node_modules,build,dist}/**',
     '!src/plugins/*/{node_modules,build,dist}/**',
+    '!src/platform/*/{node_modules,build,dist}/**',
+    '!src/observability/*/{node_modules,build,dist}/**',
+    '!src/search/*/{node_modules,build,dist}/**',
+    '!src/security/*/{node_modules,build,dist}/**',
     '!x-pack/{node_modules,build,dist,data}/**',
     '!x-pack/packages/*/{node_modules,build,dist}/**',
     '!x-pack/plugins/**/{node_modules,build,dist}/**',
+    '!x-pack/platform/**/{node_modules,build,dist}/**',
+    '!x-pack/observability/**/{node_modules,build,dist}/**',
+    '!x-pack/search/**/{node_modules,build,dist}/**',
+    '!x-pack/security/**/{node_modules,build,dist}/**',
     '!**/target/**',
   ];
 
