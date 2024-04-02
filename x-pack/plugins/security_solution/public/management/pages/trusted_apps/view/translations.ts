@@ -159,4 +159,9 @@ export const INPUT_ERRORS = {
       defaultMessage: `[{row}] Using a '*' or a '?' in the value with the 'IS' operator can make the entry ineffective. Change the operator to 'matches' to ensure wildcards run properly.`,
       values: { row: index + 1 },
     }),
+  wildcardWithWrongField: (index: number) =>
+    i18n.translate('xpack.securitySolution.trustedapps.create.conditionWrongFieldMsg', {
+      defaultMessage: `[{row}] Wildcards (? or *) are not supported for hash or signature entries.`,
+      values: { row: index + 1 },
+    }),
 };

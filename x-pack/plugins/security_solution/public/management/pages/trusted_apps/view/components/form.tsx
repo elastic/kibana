@@ -170,13 +170,22 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
           value: (entry as TrustedAppConditionEntry).value,
         })
       ) {
-        extraWarning = true;
-        addResultToValidation(
-          validation,
-          'entries',
-          'warnings',
-          INPUT_ERRORS.wildcardWithWrongOperatorWarning(index)
-        );
+        if (entry.field === ConditionEntryField.PATH) {
+          extraWarning = true;
+          addResultToValidation(
+            validation,
+            'entries',
+            'warnings',
+            INPUT_ERRORS.wildcardWithWrongOperatorWarning(index)
+          );
+        } else {
+          addResultToValidation(
+            validation,
+            'entries',
+            'warnings',
+            INPUT_ERRORS.wildcardWithWrongField(index)
+          );
+        }
       }
 
       if (!entry.field || !(entry as TrustedAppConditionEntry).value.trim()) {
