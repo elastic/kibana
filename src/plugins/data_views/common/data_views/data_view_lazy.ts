@@ -379,7 +379,7 @@ export class DataViewLazy extends AbstractDataView {
       }
       let fld = this.fieldCache.get(field.name);
 
-      if (fld) {
+      if (fld && !fld.scripted) {
         this.fieldCache.delete(field.name);
       }
       fld = new DataViewField({
