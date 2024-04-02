@@ -23,7 +23,7 @@ import {
   SearchPlaygroundPluginStartDependencies,
   ErrorCode,
 } from './types';
-import { createError, SearchPlaygroundError } from './utils/create_error';
+import { createError } from './utils/create_error';
 import { isInvalidApiKeyException } from './utils/exceptions';
 
 export function createRetriever(esQuery: string) {
