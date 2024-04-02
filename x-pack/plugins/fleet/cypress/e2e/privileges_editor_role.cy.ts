@@ -11,12 +11,7 @@ import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
 import { getIntegrationCard } from '../screens/integrations';
 
-import {
-  FLEET_SERVER_MISSING_PRIVILEGES,
-  ADD_AGENT_BUTTON_TOP,
-  AGENT_FLYOUT,
-  LANDING_PAGE_ADD_FLEET_SERVER_BUTTON,
-} from '../screens/fleet';
+import { LANDING_PAGE_ADD_FLEET_SERVER_BUTTON } from '../screens/fleet';
 import { ADD_INTEGRATION_POLICY_BTN } from '../screens/integrations';
 import { scrollToIntegration } from '../tasks/integrations';
 
