@@ -274,6 +274,7 @@ export const createNewTermsAlertType = (
                 wrapSuppressedHits,
                 alertTimestampOverride,
                 alertWithSuppression,
+                experimentalFeatures,
               });
             } else {
               const wrappedAlerts = wrapHits(eventAndTermsChunk);

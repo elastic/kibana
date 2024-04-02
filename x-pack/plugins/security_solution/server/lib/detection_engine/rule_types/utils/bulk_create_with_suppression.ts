@@ -21,6 +21,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { RuleServices } from '../types';
 import { createEnrichEventsFunction } from './enrichments';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
@@ -44,6 +45,7 @@ export const bulkCreateWithSuppression = async <
   alertTimestampOverride,
   isSuppressionPerRuleExecution,
   maxAlerts,
+  experimentalFeatures,
 }: {
   alertWithSuppression: SuppressedAlertService;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
@@ -53,6 +55,7 @@ export const bulkCreateWithSuppression = async <
   alertTimestampOverride: Date | undefined;
   isSuppressionPerRuleExecution?: boolean;
   maxAlerts?: number;
+  experimentalFeatures?: ExperimentalFeatures;
 }): Promise<GenericBulkCreateResponse<T>> => {
   if (wrappedDocs.length === 0) {
     return {
@@ -79,7 +82,7 @@ export const bulkCreateWithSuppression = async <
   const enrichAlertsWrapper: typeof enrichAlerts = async (alerts, params) => {
     enrichmentsTimeStart = performance.now();
     try {
-      const enrichedAlerts = await enrichAlerts(alerts, params);
+      const enrichedAlerts = await enrichAlerts(alerts, params, experimentalFeatures);
       return enrichedAlerts;
     } catch (error) {
       ruleExecutionLogger.error(`Alerts enrichment failed: ${error}`);

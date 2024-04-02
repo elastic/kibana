@@ -17,6 +17,7 @@ import {
   TIMESTAMP,
   ALERT_START,
 } from '@kbn/rule-data-utils';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -38,6 +39,7 @@ import {
 } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -2139,6 +2141,68 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_END]: laterTimestamp, // suppression ends with later timestamp
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
+      });
+    });
+
+    describe('enrichment', () => {
+      const config = getService('config');
+      const isServerless = config.get('serverless');
+      const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+      const path = dataPathBuilder.getPath('auditbeat/hosts');
+      const kibanaServer = getService('kibanaServer');
+
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.load(path);
+        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await kibanaServer.uiSettings.update({
+          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+        });
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.unload(path);
+        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      it('should be enriched with host risk score', async () => {
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['host.name'],
+          from: '2019-02-19T20:42:00.000Z',
+          history_window_start: '2019-01-19T20:42:00.000Z',
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toBe('Low');
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toBe(23);
+      });
+
+      it('should be enriched alert with criticality_level', async () => {
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['host.name'],
+          from: '2019-02-19T20:42:00.000Z',
+          history_window_start: '2019-01-19T20:42:00.000Z',
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const fullAlert = previewAlerts[0]._source;
+
+        expect(fullAlert?.['host.asset.criticality']).toBe('medium_impact');
+        expect(fullAlert?.['user.asset.criticality']).toBe('extreme_impact');
       });
     });
   });

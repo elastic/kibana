@@ -25,6 +25,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { partitionMissingFieldsEvents } from '../utils/partition_missing_fields_events';
 import type { EventsAndTerms } from './types';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
@@ -53,6 +54,7 @@ export interface BulkCreateSuppressedAlertsParams
   >;
   eventsAndTerms: EventsAndTerms[];
   toReturn: SearchAfterAndBulkCreateReturnType;
+  experimentalFeatures: ExperimentalFeatures | undefined;
 }
 /**
  * bulk create and suppress alerts in memory,
@@ -71,6 +73,7 @@ export const bulkCreateSuppressedAlertsInMemoryForNewTerms = async ({
   alertSuppression,
   alertWithSuppression,
   alertTimestampOverride,
+  experimentalFeatures,
 }: BulkCreateSuppressedAlertsParams) => {
   const suppressOnMissingFields =
     (alertSuppression?.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
@@ -104,5 +107,6 @@ export const bulkCreateSuppressedAlertsInMemoryForNewTerms = async ({
     alertSuppression,
     alertWithSuppression,
     alertTimestampOverride,
+    experimentalFeatures,
   });
 };

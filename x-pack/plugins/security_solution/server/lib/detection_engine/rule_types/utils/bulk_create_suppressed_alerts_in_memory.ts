@@ -21,6 +21,7 @@ import { partitionMissingFieldsEvents } from './partition_missing_fields_events'
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { createEnrichEventsFunction } from './enrichments';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 import type {
   BaseFieldsLatest,
@@ -49,6 +50,7 @@ export interface BulkCreateSuppressedAlertsParams
   > {
   enrichedEvents: SignalSourceHit[];
   toReturn: SearchAfterAndBulkCreateReturnType;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 /**
  * bulk create and suppress alerts in memory,
@@ -68,6 +70,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   wrapSuppressedHits,
   alertWithSuppression,
   alertTimestampOverride,
+  experimentalFeatures,
 }: BulkCreateSuppressedAlertsParams) => {
   const suppressOnMissingFields =
     (alertSuppression?.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
@@ -99,6 +102,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     alertSuppression,
     alertWithSuppression,
     alertTimestampOverride,
+    experimentalFeatures,
   });
 };
 
@@ -116,6 +120,7 @@ export interface ExecuteBulkCreateAlertsParams<T extends SuppressionFieldsLatest
   unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   suppressibleWrappedDocs: Array<WrappedFieldsLatest<T>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 /**
@@ -134,6 +139,7 @@ export const executeBulkCreateAlerts = async <
   alertSuppression,
   alertWithSuppression,
   alertTimestampOverride,
+  experimentalFeatures,
 }: ExecuteBulkCreateAlertsParams<T>) => {
   // max signals for suppression includes suppressed and created alerts
   // this allows to lift max signals limitation to higher value
@@ -167,6 +173,7 @@ export const executeBulkCreateAlerts = async <
     alertTimestampOverride,
     isSuppressionPerRuleExecution: !suppressionDuration,
     maxAlerts: tuple.maxSignals - toReturn.createdSignalsCount,
+    experimentalFeatures,
   });
 
   addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
