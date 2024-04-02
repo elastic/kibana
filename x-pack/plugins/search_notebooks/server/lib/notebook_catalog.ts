@@ -10,7 +10,7 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 
-import { NotebookCatalog, NotebookMetadata, NotebookDefinition } from '../types';
+import { NotebookCatalog, NotebookInformation, NotebookDefinition } from '../types';
 
 const NOTEBOOKS_DATA_DIR = '../data';
 
@@ -76,13 +76,11 @@ export const DEFAULT_NOTEBOOKS: NotebookCatalog = {
     },
   ],
 };
-export const NOTEBOOKS_MAP: Record<string, NotebookMetadata> = DEFAULT_NOTEBOOKS.notebooks.reduce(
-  (nbMap, nb) => {
+export const NOTEBOOKS_MAP: Record<string, NotebookInformation> =
+  DEFAULT_NOTEBOOKS.notebooks.reduce((nbMap, nb) => {
     nbMap[nb.id] = nb;
     return nbMap;
-  },
-  {} as Record<string, NotebookMetadata>
-);
+  }, {} as Record<string, NotebookInformation>);
 
 const NOTEBOOK_IDS = DEFAULT_NOTEBOOKS.notebooks.map(({ id }) => id);
 
