@@ -109,20 +109,15 @@ export const cyLoadEndpointDataHandler = async (
   );
 
   if (waitUntilTransformed) {
-    try {
-      await startTransform(esClient, metadataTransformPrefix);
-    } catch (e) {
-      await startTransform(esClient, METADATA_CURRENT_TRANSFORM_V2);
-    }
+    // missing transforms are ignored, start either name
+    await startTransform(esClient, metadataTransformPrefix);
+    await startTransform(esClient, METADATA_CURRENT_TRANSFORM_V2);
 
     const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
     await waitForEndpoints(esClient, 'endpoint_index', metadataIds);
 
-    try {
-      await startTransform(esClient, METADATA_UNITED_TRANSFORM);
-    } catch (e) {
-      await startTransform(esClient, METADATA_UNITED_TRANSFORM_V2);
-    }
+    await startTransform(esClient, METADATA_UNITED_TRANSFORM);
+    await startTransform(esClient, METADATA_UNITED_TRANSFORM_V2);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
