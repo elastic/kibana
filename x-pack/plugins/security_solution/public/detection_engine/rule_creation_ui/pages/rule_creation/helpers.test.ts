@@ -889,6 +889,36 @@ describe('helpers', () => {
 
       expect(result).toEqual(expected);
     });
+
+    test('returns formatted object with default max_signals value if maxSignals is undefined', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        maxSignals: undefined,
+      };
+      const result = formatAboutStepData(mockStepData);
+      const expected: AboutStepRuleJson = {
+        author: ['Elastic'],
+        description: '24/7',
+        false_positives: ['test'],
+        license: 'Elastic License',
+        name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+        investigation_fields: { field_names: ['foo', 'bar'] },
+        threat_indicator_path: undefined,
+        timestamp_override: undefined,
+        timestamp_override_fallback_disabled: undefined,
+        max_signals: 100,
+      };
+
+      expect(result).toEqual(expected);
+    });
   });
 
   describe('formatActionsStepData', () => {

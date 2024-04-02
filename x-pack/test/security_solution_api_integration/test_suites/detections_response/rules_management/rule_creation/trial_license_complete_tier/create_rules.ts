@@ -482,6 +482,62 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('max_signals', () => {
+      beforeEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('creates a rule with max_signals', async () => {
+        const { body } = await securitySolutionApi
+          .createRule({
+            body: getCustomQueryRuleParams({
+              max_signals: 200,
+            }),
+          })
+          .expect(200);
+
+        expect(body.max_signals).toEqual(200);
+      });
+
+      it('creates a rule with max_signals defaulted to 100 when not present', async () => {
+        const { body } = await securitySolutionApi
+          .createRule({
+            body: getCustomQueryRuleParams(),
+          })
+          .expect(200);
+
+        expect(body.max_signals).toEqual(100);
+      });
+
+      it('does NOT create a rule when max_signals is less than 1', async () => {
+        const { body } = await securitySolutionApi
+          .createRule({
+            body: {
+              ...getCustomQueryRuleParams(),
+              max_signals: 0,
+            },
+          })
+          .expect(400);
+
+        expect(body.message).toBe(
+          '[request body]: max_signals: Number must be greater than or equal to 1'
+        );
+      });
+
+      it('does NOT create a rule when max_signals is greater than xpack.alerting.rules.run.alerts.max', async () => {
+        const { body } = await securitySolutionApi
+          .createRule({
+            body: {
+              ...getCustomQueryRuleParams(),
+              max_signals: 5000, // xpack.alerting.rules.run.alerts.max defaults to 1000
+            },
+          })
+          .expect(400);
+
+        expect(body.message).toBe('max_signals value cannot be higher than 1000');
+      });
+    });
+
     describe('@brokenInServerless missing timestamps', () => {
       beforeEach(async () => {
         await es.indices.delete({ index: 'myfakeindex-1', ignore_unavailable: true });

@@ -29,6 +29,7 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
+import { DEFAULT_MAX_ALERTS } from './config';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
@@ -62,6 +63,7 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   uiSettings: uiSettingsServiceMock.createStartContract(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  maxAlertsPerRun: DEFAULT_MAX_ALERTS,
 };
 
 const actionsAuthorization = actionsAuthorizationMock.create();

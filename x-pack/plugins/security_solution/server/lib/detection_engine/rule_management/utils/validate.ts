@@ -131,7 +131,7 @@ export const validateMaxSignals = ({
   maxSignals: number | undefined;
   rulesClient: RulesClient;
 }) => {
-  if (maxSignals) {
+  if (maxSignals !== undefined) {
     if (maxSignals > rulesClient.getMaxAlertsPerRun()) {
       throw new CustomHttpRequestError(
         `max_signals value cannot be higher than ${rulesClient.getMaxAlertsPerRun()}`,

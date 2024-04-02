@@ -263,7 +263,7 @@ describe('description_step', () => {
         mockLicenseService
       );
 
-      expect(result.length).toEqual(12);
+      expect(result.length).toEqual(13);
     });
   });
 
@@ -751,6 +751,21 @@ describe('description_step', () => {
 
             expect(result).toEqual([]);
           });
+        });
+      });
+
+      describe('maxSignals', () => {
+        test('returns default "max signals" description', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'maxSignals',
+            'Max alerts',
+            mockAboutStep,
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result[0].title).toEqual('Max alerts');
+          expect(result[0].description).toEqual(100);
         });
       });
     });

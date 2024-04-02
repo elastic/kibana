@@ -757,6 +757,83 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.investigation_fields).to.eql(undefined);
         });
       });
+
+      describe('max signals', () => {
+        beforeEach(async () => {
+          await createAlertsIndex(supertest, log);
+        });
+
+        afterEach(async () => {
+          await deleteAllAlerts(supertest, log, es);
+          await deleteAllRules(supertest, log);
+        });
+
+        it('should overwrite max_signals field on update', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            max_signals: 100,
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            max_signals: 200,
+          };
+
+          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
+
+          expect(body.max_signals).to.eql(200);
+        });
+
+        it('should reset max_signals field to default value on update when not present', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            max_signals: 200,
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            max_signals: undefined,
+          };
+
+          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
+
+          expect(body.max_signals).to.eql(100);
+        });
+
+        it('does NOT update a rule when max_signals is less than 1', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            max_signals: 100,
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            max_signals: 0,
+          };
+
+          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(400);
+
+          expect(body.message).to.be(
+            '[request body]: max_signals: Number must be greater than or equal to 1'
+          );
+        });
+
+        it('does NOT update a rule when max_signals is greater than xpack.alerting.rules.run.alerts.max', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            max_signals: 100,
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            max_signals: 5000, // xpack.alerting.rules.run.alerts.max defaults to 1000
+          };
+
+          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(400);
+
+          expect(body.message).to.be('max_signals value cannot be higher than 1000');
+        });
+      });
     });
   });
 };
