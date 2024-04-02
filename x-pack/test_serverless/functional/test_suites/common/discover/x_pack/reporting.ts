@@ -84,13 +84,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('is available if new', async () => {
         await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('');
       });
 
       it('becomes available when saved', async () => {
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
         await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('');
       });
     });
 

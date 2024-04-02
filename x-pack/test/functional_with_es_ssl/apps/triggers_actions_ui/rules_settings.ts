@@ -76,7 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('rulesSettingsLink');
       const button = await testSubjects.find('rulesSettingsLink');
       const isDisabled = await button.getAttribute('disabled');
-      expect(isDisabled).to.equal(null);
+      expect(isDisabled).to.equal('');
     });
 
     it('should allow the user to open up the rules settings modal', async () => {
