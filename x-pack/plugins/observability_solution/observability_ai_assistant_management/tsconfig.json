@@ -16,7 +16,9 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/serverless",
     "@kbn/translations-plugin",
-    "@kbn/enterprise-search-plugin"
+    "@kbn/enterprise-search-plugin",
+    "@kbn/config",
+    "@kbn/core-plugins-browser"
   ],
   "exclude": ["target/**/*"]
 }
