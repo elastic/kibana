@@ -16,6 +16,7 @@ const testProps = {
   selectedConversation: undefined,
   isFlyoutMode: false,
   onChange: jest.fn(),
+  refetchConversationsState: jest.fn(),
 };
 
 describe('AssistantTitle', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { CLEAR_CHAT, SUBMIT_MESSAGE } from '../translations';
 
@@ -31,6 +31,12 @@ export const ChatActions: React.FC<Props> = ({
   isFlyoutMode,
   promptValue,
 }) => {
+  const submitTooltipRef = useRef<EuiToolTip | null>(null);
+
+  const closeTooltip = useCallback(() => {
+    submitTooltipRef?.current?.hideToolTip();
+  }, []);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       {!isFlyoutMode && (
@@ -50,10 +56,11 @@ export const ChatActions: React.FC<Props> = ({
       )}
       <EuiFlexItem grow={false}>
         <EuiToolTip
+          ref={submitTooltipRef}
           position="right"
-          content={!isLoading && SUBMIT_MESSAGE}
+          content={SUBMIT_MESSAGE}
           display="block"
-          repositionOnScroll
+          onMouseOut={closeTooltip}
         >
           <EuiButtonIcon
             aria-label={SUBMIT_MESSAGE}

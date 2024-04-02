@@ -69,7 +69,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 
   const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
   const [valueOfSelected, setValueOfSelected] = useState<string | undefined>(
-    selectedPrompt?.id ?? allSystemPrompts[0].id
+    selectedPrompt?.id ?? allSystemPrompts?.[0]?.id
   );
   const handleOnBlur = useCallback(() => setIsOpenLocal(false), []);
 

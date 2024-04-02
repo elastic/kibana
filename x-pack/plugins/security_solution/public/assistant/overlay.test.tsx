@@ -18,6 +18,8 @@ jest.mock('@kbn/elastic-assistant', () => ({
   }),
 }));
 
+jest.mock('../common/hooks/use_experimental_features');
+
 describe('AssistantOverlay', () => {
   beforeEach(() => {
     jest.clearAllMocks();

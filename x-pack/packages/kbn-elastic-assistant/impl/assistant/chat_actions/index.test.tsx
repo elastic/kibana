@@ -17,6 +17,7 @@ const testProps = {
   onChatCleared,
   onSendMessage,
   isFlyoutMode: false,
+  promptValue: 'prompt',
 };
 
 describe('ChatActions', () => {

@@ -79,7 +79,16 @@ export const getBlockBotConversation = (
  */
 export const getDefaultConnector = (
   connectors: AIConnector[] | undefined
-): AIConnector | undefined => (connectors?.length === 1 ? connectors[0] : undefined);
+): AIConnector | undefined => {
+  const validConnectors = connectors?.filter(
+    (connector) => connector.apiProvider && !connector.isMissingSecrets
+  );
+  if (validConnectors?.length) {
+    return validConnectors[0];
+  }
+
+  return undefined;
+};
 
 interface OptionalRequestParams {
   alertsIndexPattern?: string;

@@ -117,7 +117,8 @@ const AssistantComponent: React.FC<Props> = ({
     baseConversations,
   } = useAssistantContext();
 
-  const { getDefaultConversation, getConversation, deleteConversation } = useConversation();
+  const { getDefaultConversation, getConversation, deleteConversation, setApiConfig } =
+    useConversation();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
@@ -189,26 +190,6 @@ const AssistantComponent: React.FC<Props> = ({
     },
     [conversations, getConversation, selectedConversationTitle]
   );
-
-  useEffect(() => {
-    if (!isLoading && Object.keys(conversations).length > 0) {
-      const conversation =
-        conversations[selectedConversationTitle ?? getLastConversationTitle(conversationTitle)];
-      // Set the last conversation as current conversation or use persisted or non-persisted Welcom conversation
-      setCurrentConversation(
-        conversation ??
-          conversations[WELCOME_CONVERSATION_TITLE] ??
-          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE })
-      );
-    }
-  }, [
-    conversationTitle,
-    conversations,
-    getDefaultConversation,
-    getLastConversationTitle,
-    isLoading,
-    selectedConversationTitle,
-  ]);
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(() => {
@@ -476,7 +457,6 @@ const AssistantComponent: React.FC<Props> = ({
     setEditingSystemPromptId,
     selectedPromptContexts,
     setSelectedPromptContexts,
-    // setSelectedConversation: handleOnConversationSelected,
     setCurrentConversation,
   });
 
@@ -564,7 +544,7 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     return chatbotComments;
-  }, [connectorComments, isDisabled, chatbotComments]);
+  }, [isDisabled, chatbotComments, connectorComments]);
 
   const trackPrompt = useCallback(
     (promptTitle: string) => {
@@ -589,6 +569,35 @@ const AssistantComponent: React.FC<Props> = ({
       setCurrentConversation(refetchedConversations[currentConversation.title]);
     }
   }, [currentConversation.id, currentConversation.title, refetchResults]);
+
+  useEffect(() => {
+    if (!isLoading && Object.keys(conversations).length > 0) {
+      const conversation =
+        conversations[selectedConversationTitle ?? getLastConversationTitle(conversationTitle)];
+      const newCurrentConversation =
+        conversation ??
+        conversations[WELCOME_CONVERSATION_TITLE] ??
+        getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
+      // Set the last conversation as current conversation or use persisted or non-persisted Welcome conversation
+      setCurrentConversation(newCurrentConversation);
+      if (!newCurrentConversation?.apiConfig?.connectorId && defaultConnector) {
+        setApiConfig({
+          conversation: newCurrentConversation,
+          apiConfig: { connectorId: defaultConnector.id },
+        }).then(() => refetchConversationsState());
+      }
+    }
+  }, [
+    conversationTitle,
+    conversations,
+    defaultConnector,
+    getDefaultConversation,
+    getLastConversationTitle,
+    isLoading,
+    refetchConversationsState,
+    selectedConversationTitle,
+    setApiConfig,
+  ]);
 
   if (isFlyoutMode) {
     return (
@@ -664,6 +673,15 @@ const AssistantComponent: React.FC<Props> = ({
                   >
                     {comments}
 
+                    <EuiPanel hasShadow={false}>
+                      <BlockBotCallToAction
+                        connectorPrompt={connectorPrompt}
+                        http={http}
+                        isAssistantEnabled={isAssistantEnabled}
+                        isWelcomeSetup={isWelcomeSetup}
+                      />
+                    </EuiPanel>
+
                     {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
                       <>
                         <EuiSpacer />
@@ -689,12 +707,6 @@ const AssistantComponent: React.FC<Props> = ({
                   `}
                 >
                   <EuiPanel paddingSize="m" hasShadow={false}>
-                    <BlockBotCallToAction
-                      connectorPrompt={connectorPrompt}
-                      http={http}
-                      isAssistantEnabled={isAssistantEnabled}
-                      isWelcomeSetup={isWelcomeSetup}
-                    />
                     {!isDisabled &&
                       Object.keys(promptContexts).length !== selectedPromptContextsCount && (
                         <EuiFlexGroup>
