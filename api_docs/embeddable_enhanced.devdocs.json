@@ -755,7 +755,13 @@
               "text": "HasDynamicActions"
             },
             "; dynamicActionsComparator: ",
-            "EmbeddableStateComparators",
+            {
+              "pluginId": "@kbn/presentation-publishing",
+              "scope": "common",
+              "docId": "kibKbnPresentationPublishingPluginApi",
+              "section": "def-common.StateComparators",
+              "text": "StateComparators"
+            },
             "<",
             "DynamicActionsSerializedState",
             ">; serializeDynamicActions: () => ",

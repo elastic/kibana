@@ -91,6 +91,54 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getESQLWithSafeLimit",
+        "type": "Function",
+        "tags": [],
+        "label": "getESQLWithSafeLimit",
+        "description": [],
+        "signature": [
+          "(esql: string, limit: number) => string"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLWithSafeLimit.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLWithSafeLimit.$2",
+            "type": "number",
+            "tags": [],
+            "label": "limit",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getIndexForESQLQuery",
         "type": "Function",
         "tags": [],

@@ -21,14 +21,13 @@ export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => (
   title: 'test',
   apiConfig: {
     connectorId: '1',
-    connectorTypeTitle: 'test-connector',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',
   },
   excludeFromLastConversationStorage: false,
   messages: [],
-  replacements: [],
+  replacements: {},
 });
 
 const mockUser1 = {
@@ -44,7 +43,6 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   title: 'test',
   apiConfig: {
     connectorId: '1',
-    connectorTypeTitle: 'test-connector',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',
@@ -63,7 +61,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
       timestamp: '2024-02-14T22:29:43.862Z',
     },
   ],
-  replacements: [],
+  replacements: {},
   createdAt: '2020-04-20T15:25:31.830Z',
   namespace: 'default',
   isDefault: false,
@@ -164,7 +162,6 @@ describe('transformToUpdateScheme', () => {
       title: 'test',
       api_config: {
         connector_id: '1',
-        connector_type_title: 'test-connector',
         default_system_prompt_id: 'default-system-prompt',
         model: 'test-model',
         provider: 'OpenAI',

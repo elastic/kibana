@@ -55,8 +55,8 @@ import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 import { useAlertSuppression } from '../../logic/use_alert_suppression';
 import {
-  useFiltersStyles,
-  useQueryStyles,
+  filtersStyles,
+  queryStyles,
   useRequiredFieldsStyles,
 } from './rule_definition_section.styles';
 
@@ -86,7 +86,7 @@ const Filters = ({ filters, dataViewId, index, 'data-test-subj': dataTestSubj }:
     dataViewId,
   });
 
-  const styles = useFiltersStyles();
+  const styles = filtersStyles;
 
   return (
     <EuiFlexGroup
@@ -107,7 +107,7 @@ interface QueryProps {
 }
 
 const Query = ({ query, 'data-test-subj': dataTestSubj = 'query' }: QueryProps) => {
-  const styles = useQueryStyles();
+  const styles = queryStyles;
   return (
     <div data-test-subj={dataTestSubj} className={styles.content}>
       {query}
@@ -270,7 +270,7 @@ const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
             <EuiFlexItem grow={false}>
               <EuiText
                 data-test-subj="requiredFieldsPropertyValueItem"
-                className={styles.fieldTypeText}
+                className={styles.fieldNameText}
                 grow={false}
                 size="xs"
               >

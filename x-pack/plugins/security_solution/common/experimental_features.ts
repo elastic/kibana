@@ -74,7 +74,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables Automated Endpoint Process actions
    */
-  automatedProcessActionsEnabled: false,
+  automatedProcessActionsEnabled: true,
 
   /**
    * Enables the ability to send Response actions to SentinelOne and persist the results
@@ -83,7 +83,7 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Release: v8.13.0
    */
-  responseActionsSentinelOneV1Enabled: false,
+  responseActionsSentinelOneV1Enabled: true,
 
   /**
    * Enables use of SentinelOne response actions that complete asynchronously as well as support
@@ -110,6 +110,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables expandable flyout for event type documents
    */
   expandableEventFlyoutEnabled: false,
+
+  /**
+   * Enables expandable flyout in timeline
+   */
+  expandableTimelineFlyoutEnabled: false,
+  /*
 
   /**
    * Enables new Set of filters on the Alerts page.
@@ -177,7 +183,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
-  sentinelOneDataInAnalyzerEnabled: false,
+  sentinelOneDataInAnalyzerEnabled: true,
 
   /**
    * Enables SentinelOne manual host manipulation actions

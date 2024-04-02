@@ -56,8 +56,8 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
           <>
             <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
             <SLOCardItemInstanceBadge slo={slo} />
-            <SloTimeWindowBadge slo={slo} color="default" />
             <SloRulesBadge rules={rules} onClick={handleCreateRule} />
+            <SloTimeWindowBadge slo={slo} color="default" />
             <SloTagsList
               tags={slo.tags}
               numberOfTagsToDisplay={1}
