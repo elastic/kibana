@@ -193,10 +193,16 @@ export const DiscoverTopNav = ({
   ]);
 
   useEffect(() => {
-    console.log('time field', dataView?.getTimeField()?.spec.name);
     saveLsIndex(dataView?.getIndexPattern() || null);
     saveLsIndexTimeField(dataView?.getTimeField()?.spec.name || null);
     saveLsDataViewId(dataView?.id);
+
+    return () => {
+      saveLsIndex(null);
+      saveLsIndexTimeField(null);
+      saveLsDataViewId(null);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataView]);
 
   const savedSearchId = useSavedSearch().id;
