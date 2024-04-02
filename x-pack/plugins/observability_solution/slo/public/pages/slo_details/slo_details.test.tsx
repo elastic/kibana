@@ -332,7 +332,7 @@ describe('SLO Details Page', () => {
     });
   });
 
-  describe('when an Custom KQL SLO is loaded', () => {
+  describe('when an Custom Query SLO is loaded', () => {
     it("does not render a 'Explore in APM' button under actions menu", async () => {
       const slo = buildSlo();
       jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });

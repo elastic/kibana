@@ -329,7 +329,13 @@ function encodeBedrockResponse(completion: string) {
     body: Uint8Array.from(
       Buffer.from(
         JSON.stringify({
-          bytes: Buffer.from(JSON.stringify({ completion })).toString('base64'),
+          bytes: Buffer.from(
+            JSON.stringify({
+              type: 'content_block_delta',
+              index: 0,
+              delta: { type: 'text_delta', text: completion },
+            })
+          ).toString('base64'),
         })
       )
     ),
