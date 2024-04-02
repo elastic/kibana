@@ -47,6 +47,7 @@ export interface ObservabilityAlertSearchBarProps
   showFilterBar?: boolean;
   savedQuery?: SavedQuery;
   services: Services;
+  controlFilters?: Filter[];
 }
 
 interface AlertSearchBarContainerState {

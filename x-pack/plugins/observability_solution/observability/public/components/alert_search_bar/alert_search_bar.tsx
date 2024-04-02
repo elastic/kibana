@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { AlertsStatusFilter } from './components';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
 import { ObservabilityAlertSearchBarProps } from './types';
@@ -39,6 +37,7 @@ export function ObservabilityAlertSearchBar({
   onFiltersChange,
   showFilterBar = false,
   filters = defaultFilters,
+  controlFilters,
   savedQuery,
   setSavedQuery,
   kuery,
@@ -99,7 +98,7 @@ export function ObservabilityAlertSearchBar({
             from: rangeFrom,
           },
           kuery,
-          filters,
+          filters: [...filters, ...(controlFilters ?? [])],
         })
       );
     } catch (error) {
@@ -108,7 +107,7 @@ export function ObservabilityAlertSearchBar({
       });
       onKueryChange(DEFAULT_QUERY_STRING);
     }
-  }, [filters, kuery, onEsQueryChange, onKueryChange, rangeFrom, rangeTo, toasts]);
+  }, [controlFilters, filters, kuery, onEsQueryChange, onKueryChange, rangeFrom, rangeTo, toasts]);
 
   const onSearchBarParamsChange = useCallback<
     (query: {
@@ -135,32 +134,20 @@ export function ObservabilityAlertSearchBar({
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <AlertsSearchBar
-          appName={appName}
-          featureIds={observabilityAlertFeatureIds}
-          rangeFrom={rangeFrom}
-          rangeTo={rangeTo}
-          showFilterBar={showFilterBar}
-          filters={filters}
-          onFiltersUpdated={onFilterUpdated}
-          savedQuery={savedQuery}
-          onSavedQueryUpdated={setSavedQuery}
-          onClearSavedQuery={clearSavedQuery}
-          query={kuery}
-          onQuerySubmit={onSearchBarParamsChange}
-        />
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <AlertsStatusFilter status={status} onChange={onStatusChange} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <AlertsSearchBar
+      appName={appName}
+      featureIds={observabilityAlertFeatureIds}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
+      showFilterBar={showFilterBar}
+      filters={filters}
+      onFiltersUpdated={onFilterUpdated}
+      savedQuery={savedQuery}
+      onSavedQueryUpdated={setSavedQuery}
+      onClearSavedQuery={clearSavedQuery}
+      query={kuery}
+      onQuerySubmit={onSearchBarParamsChange}
+    />
   );
 }
 

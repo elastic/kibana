@@ -78,7 +78,7 @@ export const AlertsFilterControls = memo((props: AlertFilterControlsProps) => {
       if (dataViewSpec?.id) {
         (async () => {
           // Creates an adhoc data view starting from the alert data view
-          // and applying the overrides specified in the dataViewSpec
+          // applying the overrides specified in the dataViewSpec
           const spec = {
             ...(alertDataViews?.[0] ?? {}),
             ...(dataViewSpec ?? {}),
