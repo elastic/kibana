@@ -211,7 +211,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   );
 
   return (
-    <>
+    <div data-test-subj="rule-preview">
       <EuiTitle size="m">
         <h2>{i18n.RULE_PREVIEW_TITLE}</h2>
       </EuiTitle>
@@ -233,7 +233,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         </>
       )}
       <EuiSpacer size="xs" />
-      <EuiFormRow label={i18n.QUERY_PREVIEW_LABEL} data-test-subj="rule-preview">
+      <EuiFormRow label={i18n.QUERY_PREVIEW_LABEL}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
           <EuiFlexItem grow>
             <EuiSuperDatePicker
@@ -274,7 +274,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         />
       )}
       <PreviewLogs logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
-    </>
+    </div>
   );
 };
 
