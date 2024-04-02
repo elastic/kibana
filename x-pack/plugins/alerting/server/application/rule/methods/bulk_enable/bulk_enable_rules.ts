@@ -8,13 +8,18 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
+import {
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
-import { RawRule } from '../../../../types';
-import { RuleParams } from '../../types';
+import { bulkCreateRulesSo } from '../../../../data/rule';
+import { RawRule, RawRuleAction } from '../../../../types';
+import { RuleDomain, RuleParams } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
@@ -22,14 +27,13 @@ import {
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
 } from '../../../../rules_client/common';
-import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
+import { getRuleCircuitBreakerErrorMessage, SanitizedRule } from '../../../../../common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
-  getAlertFromRaw,
-  updateMeta,
   createNewAPIKeySet,
   migrateLegacyActions,
+  updateMetaAttributes,
 } from '../../../../rules_client/lib';
 import { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
@@ -37,6 +41,8 @@ import { RuleAttributes } from '../../../../data/rule/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import { ruleDomainSchema } from '../../schemas';
 
 const getShouldScheduleTask = async (
   context: RulesClientContext,
@@ -104,17 +110,34 @@ export const bulkEnableRules = async <Params extends RuleParams = never>(
   });
 
   const updatedRules = rules.map(({ id, attributes, references }) => {
-    return getAlertFromRaw(
-      context,
-      id,
-      attributes.alertTypeId as string,
-      attributes as RawRule,
-      references,
-      false
+    // TODO (http-versioning): alertTypeId should never be null, but we need to
+    // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
+    // when we are doing the bulk delete and this should fix itself
+    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+    const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
+      attributes as RuleAttributes,
+      {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+      }
     );
+
+    try {
+      ruleDomainSchema.validate(ruleDomain);
+    } catch (e) {
+      context.logger.warn(`Error validating bulk enable rule domain object for id: ${id}, ${e}`);
+    }
+    return ruleDomain;
   });
 
-  return { errors, rules: updatedRules, total, taskIdsFailedToBeEnabled };
+  // // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
+  const updatePublicRules = updatedRules.map((rule: RuleDomain<Params>) => {
+    return transformRuleDomainToRule<Params>(rule);
+  }) as Array<SanitizedRule<Params>>;
+
+  return { errors, rules: updatePublicRules, total, taskIdsFailedToBeEnabled };
 };
 
 const bulkEnableRulesWithOCC = async (
@@ -129,7 +152,7 @@ const bulkEnableRulesWithOCC = async (
       type: 'rules',
     },
     async () =>
-      await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+      await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
         {
           filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
           type: RULE_SAVED_OBJECT_TYPE,
@@ -139,8 +162,8 @@ const bulkEnableRulesWithOCC = async (
       )
   );
 
-  const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];
-  const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const rulesFinderRules: Array<SavedObjectsFindResult<RuleAttributes>> = [];
+  const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
   const tasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -189,14 +212,15 @@ const bulkEnableRulesWithOCC = async (
             ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
           }
 
+          // TODO (http-versioning) Remove RawRuleAction and RawRule casts
           const migratedActions = await migrateLegacyActions(context, {
             ruleId: rule.id,
-            actions: rule.attributes.actions,
+            actions: rule.attributes.actions as RawRuleAction[],
             references: rule.references,
-            attributes: rule.attributes,
+            attributes: rule.attributes as RawRule,
           });
 
-          const updatedAttributes = updateMeta(context, {
+          const updatedAttributes = updateMetaAttributes(context, {
             ...rule.attributes,
             ...(!rule.attributes.apiKey &&
               (await createNewAPIKeySet(context, {
@@ -293,12 +317,21 @@ const bulkEnableRulesWithOCC = async (
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
-      context.unsecuredSavedObjectsClient.bulkCreate(rulesToEnable, {
-        overwrite: true,
+      // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
+      // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
+      // bulk_disable, bulk_enable, etc. to fix this cast
+      bulkCreateRulesSo({
+        savedObjectsClient: context.unsecuredSavedObjectsClient,
+        bulkCreateRuleAttributes: rulesToEnable as Array<
+          SavedObjectsBulkCreateObject<RuleAttributes>
+        >,
+        savedObjectsBulkCreateOptions: {
+          overwrite: true,
+        },
       })
   );
 
-  const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
   const taskIdsToEnable: string[] = [];
 
   result.saved_objects.forEach((rule) => {

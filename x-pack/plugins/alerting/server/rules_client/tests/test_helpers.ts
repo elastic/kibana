@@ -61,6 +61,8 @@ export const defaultRuleForBulkDelete = {
       lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
       status: 'pending',
     },
+    createdAt: new Date('2019-02-12T21:01:22.000Z'),
+    updatedAt: new Date('2019-02-12T21:01:22.000Z'),
   },
   references: [],
   version: '1',
@@ -71,6 +73,10 @@ export const siemRule1 = {
   attributes: {
     ...defaultRule.attributes,
     consumer: AlertConsumers.SIEM,
+    executionStatus: {
+      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
+      status: 'pending',
+    },
   },
   id: 'siem-id1',
 };
@@ -101,6 +107,12 @@ export const enabledRule1 = {
     enabled: true,
     scheduledTaskId: 'id1',
     apiKey: Buffer.from('123:abc').toString('base64'),
+    executionStatus: {
+      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
+      status: 'pending',
+    },
+    createdAt: new Date('2019-02-12T21:01:22.000Z'),
+    updatedAt: new Date('2019-02-12T21:01:22.000Z'),
   },
 };
 
@@ -112,6 +124,12 @@ export const enabledRule2 = {
     enabled: true,
     scheduledTaskId: 'id2',
     apiKey: Buffer.from('321:abc').toString('base64'),
+    executionStatus: {
+      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
+      status: 'pending',
+    },
+    createdAt: new Date('2019-02-12T21:01:22.000Z'),
+    updatedAt: new Date('2019-02-12T21:01:22.000Z'),
   },
 };
 
@@ -167,6 +185,10 @@ export const disabledRule1 = {
     enabled: false,
     scheduledTaskId: 'id1',
     apiKey: Buffer.from('123:abc').toString('base64'),
+    executionStatus: {
+      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
+      status: 'pending',
+    },
   },
 };
 
@@ -178,6 +200,10 @@ export const disabledRule2 = {
     enabled: false,
     scheduledTaskId: 'id2',
     apiKey: Buffer.from('321:abc').toString('base64'),
+    executionStatus: {
+      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
+      status: 'pending',
+    },
   },
 };
 
@@ -273,35 +299,41 @@ export const disabledRuleForBulkWithAction2 = {
 export const returnedRule1 = {
   actions: [],
   alertTypeId: 'fakeType',
-  apiKey: 'MTIzOmFiYw==',
   consumer: 'fakeConsumer',
   enabled: true,
   id: 'id1',
   name: 'fakeName',
-  notifyWhen: undefined,
-  params: undefined,
+  createdAt: new Date('2019-02-12T21:01:22.000Z'),
+  updatedAt: new Date('2019-02-12T21:01:22.000Z'),
   schedule: {
     interval: '5m',
   },
   scheduledTaskId: 'id1',
   snoozeSchedule: [],
+  executionStatus: {
+    lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
+    status: 'pending',
+  },
 };
 
 export const returnedRule2 = {
   actions: [],
   alertTypeId: 'fakeType',
-  apiKey: 'MzIxOmFiYw==',
   consumer: 'fakeConsumer',
   enabled: true,
   id: 'id2',
   name: 'fakeName',
-  notifyWhen: undefined,
-  params: undefined,
+  createdAt: new Date('2019-02-12T21:01:22.000Z'),
+  updatedAt: new Date('2019-02-12T21:01:22.000Z'),
   schedule: {
     interval: '5m',
   },
   scheduledTaskId: 'id2',
   snoozeSchedule: [],
+  executionStatus: {
+    lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
+    status: 'pending',
+  },
 };
 
 export const returnedRuleForBulkDelete1 = {
@@ -315,8 +347,8 @@ export const returnedRuleForBulkDelete1 = {
     lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
     status: 'pending',
   },
-  createdAt: new Date('2019-02-12T21:01:22.479Z'),
-  updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+  createdAt: new Date('2019-02-12T21:01:22.000Z'),
+  updatedAt: new Date('2019-02-12T21:01:22.000Z'),
   schedule: {
     interval: '5m',
   },
@@ -340,8 +372,8 @@ export const returnedRuleForBulkDelete2 = {
     lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
     status: 'pending',
   },
-  createdAt: new Date('2019-02-12T21:01:22.479Z'),
-  updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+  createdAt: new Date('2019-02-12T21:01:22.000Z'),
+  updatedAt: new Date('2019-02-12T21:01:22.000Z'),
   schedule: {
     interval: '5m',
   },
@@ -366,8 +398,8 @@ export const returnedRuleForBulkDelete3 = {
     lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
     status: 'pending',
   },
-  createdAt: new Date('2019-02-12T21:01:22.479Z'),
-  updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+  createdAt: new Date('2019-02-12T21:01:22.000Z'),
+  updatedAt: new Date('2019-02-12T21:01:22.000Z'),
   schedule: {
     interval: '5m',
   },

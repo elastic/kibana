@@ -156,7 +156,7 @@ describe('bulkEnableRules', () => {
     mockUnsecuredSavedObjectFind(2);
   });
 
-  test('should enable two rule', async () => {
+  test('should enable two rules', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [enabledRule1, enabledRule2],
     });

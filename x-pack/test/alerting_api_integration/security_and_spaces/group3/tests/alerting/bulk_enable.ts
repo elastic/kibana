@@ -15,7 +15,12 @@ import {
   getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
-const defaultSuccessfulResponse = { total: 1, rules: [], errors: [], taskIdsFailedToBeEnabled: [] };
+const defaultSuccessfulResponse = {
+  total: 1,
+  rules: [],
+  errors: [],
+  task_ids_failed_to_be_enabled: [],
+};
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -81,38 +86,39 @@ export default ({ getService }: FtrProviderContext) => {
                 rules: [
                   {
                     id: response.body.rules[0].id,
-                    notifyWhen: 'onThrottleInterval',
+                    notify_when: 'onThrottleInterval',
                     enabled: true,
                     name: 'abc',
                     tags: ['foo'],
                     consumer: 'alertsFixture',
                     throttle: '1m',
-                    alertTypeId: 'test.noop',
-                    apiKeyCreatedByUser: false,
-                    apiKeyOwner: response.body.rules[0].apiKeyOwner,
-                    createdBy: 'elastic',
-                    updatedBy: response.body.rules[0].updatedBy,
-                    muteAll: false,
-                    mutedInstanceIds: [],
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
                     schedule: { interval: '1m' },
                     actions: [],
                     params: {},
                     running: false,
-                    snoozeSchedule: [],
-                    updatedAt: response.body.rules[0].updatedAt,
-                    createdAt: response.body.rules[0].createdAt,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
                     revision: 0,
-                    scheduledTaskId: response.body.rules[0].scheduledTaskId,
-                    executionStatus: {
-                      lastDuration: 0,
-                      lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
                       status: 'pending',
                     },
                     monitoring: response.body.rules[0].monitoring,
                   },
                 ],
                 errors: [],
-                taskIdsFailedToBeEnabled: [],
+                task_ids_failed_to_be_enabled: [],
               });
               break;
             default:
