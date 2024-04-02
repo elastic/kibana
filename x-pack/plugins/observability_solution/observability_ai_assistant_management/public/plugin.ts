@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -44,6 +44,8 @@ export class AiAssistantManagementObservabilityPlugin
       StartDependencies
     >
 {
+  constructor(private readonly coreContext: PluginInitializerContext) {}
+
   public setup(
     core: CoreSetup<StartDependencies, AiAssistantManagementObservabilityPluginStart>,
     { home, management, observabilityAIAssistant }: SetupDependencies
@@ -78,6 +80,7 @@ export class AiAssistantManagementObservabilityPlugin
           return mountManagementSection({
             core,
             mountParams,
+            buildFlavor: this.coreContext.env.packageInfo.buildFlavor,
           });
         },
       });

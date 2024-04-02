@@ -22,6 +22,7 @@ import { useAppContext } from '../../hooks/use_app_context';
 export function SettingsTab() {
   const {
     application: { navigateToApp },
+    buildFlavor,
     observabilityAIAssistant,
   } = useAppContext();
 
@@ -41,6 +42,9 @@ export function SettingsTab() {
     value: connector.id,
   }));
 
+  const { selectedLanguage, setSelectedLanguage, LANGUAGE_OPTIONS } =
+    observabilityAIAssistant.useUserPreferredLanguage();
+
   const handleNavigateToConnectors = () => {
     navigateToApp('management', {
       path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
@@ -53,54 +57,55 @@ export function SettingsTab() {
     });
   };
 
-  const { selectedLanguage, setSelectedLanguage, LANGUAGE_OPTIONS } =
-    observabilityAIAssistant.useUserPreferredLanguage();
-
   return (
     <>
-      <EuiPanel hasBorder grow={false}>
-        <EuiForm component="form">
-          <EuiDescribedFormGroup
-            fullWidth
-            title={
-              <h3>
-                {i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.settingsPage.showAIAssistantButtonLabel',
-                  {
-                    defaultMessage:
-                      'Show AI Assistant button and Contextual Insights in Observability apps',
-                  }
-                )}
-              </h3>
-            }
-            description={
-              <p>
-                {i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.settingsPage.showAIAssistantDescriptionLabel',
-                  {
-                    defaultMessage:
-                      'Toggle the AI Assistant button and Contextual Insights on or off in Observability apps by checking or unchecking the AI Assistant feature in Spaces > <your space> > Features.',
-                  }
-                )}
-              </p>
-            }
-          >
-            <EuiFormRow fullWidth>
-              <div css={{ textAlign: 'right' }}>
-                <EuiButton
-                  data-test-subj="settingsTabGoToSpacesButton"
-                  onClick={handleNavigateToSpacesConfiguration}
-                >
-                  {i18n.translate(
-                    'xpack.observabilityAiAssistantManagement.settingsPage.goToFeatureControlsButtonLabel',
-                    { defaultMessage: 'Go to Spaces' }
-                  )}
-                </EuiButton>
-              </div>
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-        </EuiForm>
-      </EuiPanel>
+      {
+        buildFlavor === 'traditional' ? (
+          <EuiPanel hasBorder grow={false}>
+            <EuiForm component="form">
+              <EuiDescribedFormGroup
+                fullWidth
+                title={
+                  <h3>
+                    {i18n.translate(
+                      'xpack.observabilityAiAssistantManagement.settingsPage.showAIAssistantButtonLabel',
+                      {
+                        defaultMessage:
+                          'Show AI Assistant button and Contextual Insights in Observability apps',
+                      }
+                    )}
+                  </h3>
+                }
+                description={
+                  <p>
+                    {i18n.translate(
+                      'xpack.observabilityAiAssistantManagement.settingsPage.showAIAssistantDescriptionLabel',
+                      {
+                        defaultMessage:
+                          'Toggle the AI Assistant button and Contextual Insights on or off in Observability apps by checking or unchecking the AI Assistant feature in Spaces > <your space> > Features.',
+                      }
+                    )}
+                  </p>
+                }
+              >
+                <EuiFormRow fullWidth>
+                  <div css={{ textAlign: 'right' }}>
+                    <EuiButton
+                      data-test-subj="settingsTabGoToSpacesButton"
+                      onClick={handleNavigateToSpacesConfiguration}
+                    >
+                      {i18n.translate(
+                        'xpack.observabilityAiAssistantManagement.settingsPage.goToFeatureControlsButtonLabel',
+                        { defaultMessage: 'Go to Spaces' }
+                      )}
+                    </EuiButton>
+                  </div>
+                </EuiFormRow>
+              </EuiDescribedFormGroup>
+            </EuiForm>
+          </EuiPanel>
+        ) : null /* no spaces in Serverless yet */
+      }
 
       <EuiSpacer size="l" />
 

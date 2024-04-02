@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { AiAssistantManagementObservabilityPlugin as AiAssistantManagementObservabilityPlugin } from './plugin';
 
 export type {
@@ -12,6 +13,6 @@ export type {
   AiAssistantManagementObservabilityPluginStart,
 } from './plugin';
 
-export function plugin() {
-  return new AiAssistantManagementObservabilityPlugin();
+export function plugin(ctx: PluginInitializerContext) {
+  return new AiAssistantManagementObservabilityPlugin(ctx);
 }
