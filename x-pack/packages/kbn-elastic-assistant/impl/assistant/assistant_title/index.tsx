@@ -37,7 +37,16 @@ export const AssistantTitle: React.FC<{
   selectedConversation: Conversation | undefined;
   isFlyoutMode: boolean;
   onChange: (updatedConversation: Conversation) => void;
-}> = ({ isDisabled = false, title, docLinks, selectedConversation, isFlyoutMode, onChange }) => {
+  refetchConversationsState: () => Promise<void>;
+}> = ({
+  isDisabled = false,
+  title,
+  docLinks,
+  selectedConversation,
+  isFlyoutMode,
+  onChange,
+  refetchConversationsState,
+}) => {
   const [newTitle, setNewTitle] = useState(title);
   const [newTitleError, setNewTitleError] = useState(false);
   const { updateConversationTitle } = useConversation();
@@ -80,16 +89,18 @@ export const AssistantTitle: React.FC<{
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const handleUpdateTitle = useCallback(
-    (updatedTitle: string) => {
+    async (updatedTitle: string) => {
       setNewTitleError(false);
 
       if (selectedConversation) {
-        updateConversationTitle({ conversationId: selectedConversation?.id, updatedTitle }).then(
-          onChange
-        );
+        await updateConversationTitle({
+          conversationId: selectedConversation.id,
+          updatedTitle,
+        });
+        await refetchConversationsState();
       }
     },
-    [onChange, selectedConversation, updateConversationTitle]
+    [refetchConversationsState, selectedConversation, updateConversationTitle]
   );
 
   useEffect(() => {

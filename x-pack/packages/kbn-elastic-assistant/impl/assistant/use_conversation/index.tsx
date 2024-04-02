@@ -27,8 +27,6 @@ export const DEFAULT_CONVERSATION_STATE: Conversation = {
   title: i18n.DEFAULT_CONVERSATION_TITLE,
 };
 
-export const NEW_CONVERSATION_PREFIX = 'New conversation';
-
 interface CreateConversationProps {
   cTitle: string;
   messages?: Message[];
@@ -138,7 +136,7 @@ export const useConversation = (): UseConversation => {
    * Create a new conversation with the given conversation
    */
   const createConversation = useCallback(
-    async (conversation: Conversation): Promise<Conversation | undefined> => {
+    async (conversation: Partial<Conversation>): Promise<Conversation | undefined> => {
       return createConversationApi({ http, conversation, toasts });
     },
     [http, toasts]

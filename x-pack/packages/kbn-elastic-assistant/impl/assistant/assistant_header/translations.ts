@@ -35,6 +35,13 @@ export const SHOW_ANONYMIZED = i18n.translate(
   }
 );
 
+export const SHOW_REAL_VALUES = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleRealValuesLabel',
+  {
+    defaultMessage: 'Show real values',
+  }
+);
+
 export const SHOW_ANONYMIZED_TOOLTIP = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.showAnonymizedTooltip',
   {

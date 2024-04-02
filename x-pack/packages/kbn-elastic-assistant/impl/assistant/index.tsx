@@ -23,7 +23,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiCommentList,
-  // EuiSwitchEvent,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutBody,
@@ -32,8 +31,7 @@ import {
   EuiModalBody,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useMeasure } from 'react-use';
-
+import { isEmpty } from 'lodash';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -119,13 +117,7 @@ const AssistantComponent: React.FC<Props> = ({
     baseConversations,
   } = useAssistantContext();
 
-  const {
-    getDefaultConversation,
-    getConversation,
-    deleteConversation,
-    // amendMessage,
-    // createConversation,
-  } = useConversation();
+  const { getDefaultConversation, getConversation, deleteConversation } = useConversation();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
@@ -161,10 +153,6 @@ const AssistantComponent: React.FC<Props> = ({
       return updatedConv.data;
     }
   }, [refetch]);
-
-  let [flyoutCommentsRef, { height }] = useMeasure<HTMLDivElement>();
-
-  console.error('flyoutCommentsRef', flyoutCommentsRef, height);
 
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
@@ -305,20 +293,14 @@ const AssistantComponent: React.FC<Props> = ({
   const commentsContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const parent = isFlyoutMode
-      ? commentsContainerRef.current?.parentElement?.parentElement
-      : commentsContainerRef.current?.parentElement;
+    const parent = commentsContainerRef.current?.parentElement;
 
     if (!parent) {
       return;
     }
     // when scrollHeight changes, parent is scrolled to bottom
     parent.scrollTop = parent.scrollHeight;
-  }, [
-    isFlyoutMode,
-    commentsContainerRef.current?.parentElement?.scrollHeight,
-    commentsContainerRef.current?.parentElement?.parentElement?.scrollHeight,
-  ]);
+  });
 
   const getWrapper = (children: React.ReactNode, isCommentContainer: boolean) =>
     isCommentContainer ? <span ref={commentsContainerRef}>{children}</span> : <>{children}</>;
@@ -376,14 +358,10 @@ const AssistantComponent: React.FC<Props> = ({
 
   const handleOnConversationDeleted = useCallback(
     async (cTitle: string) => {
-      setTimeout(() => {
-        deleteConversation(conversations[cTitle].id);
-      }, 0);
-      const deletedConv = { ...conversations };
-      delete deletedConv[cTitle];
-      setConversations(deletedConv);
+      await deleteConversation(conversations[cTitle].id);
+      await refetchResults();
     },
-    [conversations, deleteConversation]
+    [conversations, deleteConversation, refetchResults]
   );
 
   const handleOnSystemPromptSelectionChange = useCallback((systemPromptId?: string) => {
@@ -602,10 +580,15 @@ const AssistantComponent: React.FC<Props> = ({
 
   const refetchConversationsState = useCallback(async () => {
     const refetchedConversations = await refetchResults();
-    if (refetchedConversations && refetchedConversations[currentConversation.title]) {
+    if (
+      refetchedConversations &&
+      refetchedConversations[
+        !isEmpty(currentConversation.id) ? currentConversation.id : currentConversation.title
+      ]
+    ) {
       setCurrentConversation(refetchedConversations[currentConversation.title]);
     }
-  }, [currentConversation.title, refetchResults]);
+  }, [currentConversation.id, currentConversation.title, refetchResults]);
 
   if (isFlyoutMode) {
     return (
@@ -622,6 +605,7 @@ const AssistantComponent: React.FC<Props> = ({
               currentConversation={currentConversation}
               onConversationSelected={handleOnConversationSelected}
               conversations={conversations}
+              onConversationDeleted={handleOnConversationDeleted}
             />
           </EuiFlexItem>
         )}
@@ -674,8 +658,8 @@ const AssistantComponent: React.FC<Props> = ({
                   <EuiPanel
                     hasShadow={false}
                     panelRef={(element) => {
-                      console.error('element', element);
-                      flyoutCommentsRef = element;
+                      commentsContainerRef.current =
+                        (element?.parentElement as HTMLDivElement) || null;
                     }}
                   >
                     {comments}

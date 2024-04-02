@@ -98,6 +98,7 @@ export const AssistantHeader: React.FC<Props> = ({
             onChange={onConversationChange}
             title={title}
             isFlyoutMode={false}
+            refetchConversationsState={refetchConversationsState}
           />
         </EuiFlexItem>
 

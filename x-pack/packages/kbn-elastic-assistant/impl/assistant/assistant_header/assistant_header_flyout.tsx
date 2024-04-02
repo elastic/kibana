@@ -9,17 +9,17 @@ import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
-  EuiFormRow,
   EuiPopover,
   EuiContextMenu,
   EuiButtonIcon,
   EuiPanel,
   EuiConfirmModal,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { isEmpty } from 'lodash';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
@@ -118,10 +118,6 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
         id: 0,
         items: [
           {
-            name: i18n.ANONYMIZED_VALUES,
-            panel: 2,
-          },
-          {
             name: i18n.RESET_CONVERSATION,
             css: css`
               color: ${euiThemeVars.euiColorDanger};
@@ -131,32 +127,8 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
           },
         ],
       },
-      {
-        id: 2,
-        title: i18n.SHOW_ANONYMIZED,
-        content: (
-          <EuiPanel hasShadow={false}>
-            <EuiFormRow label={i18n.SHOW_ANONYMIZED_TOOLTIP} hasChildLabel={false}>
-              <EuiSwitch
-                data-test-subj="showAnonymizedValues"
-                checked={showAnonymizedValuesChecked}
-                compressed={true}
-                disabled={selectedConversation.replacements == null}
-                label={i18n.SHOW_ANONYMIZED}
-                onChange={onToggleShowAnonymizedValues}
-              />
-            </EuiFormRow>
-          </EuiPanel>
-        ),
-      },
     ],
-
-    [
-      selectedConversation,
-      onToggleShowAnonymizedValues,
-      showAnonymizedValuesChecked,
-      showDestroyModal,
-    ]
+    [showDestroyModal]
   );
 
   const handleReset = useCallback(() => {
@@ -215,6 +187,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
               selectedConversation={selectedConversation}
               onChange={onConversationChange}
               isFlyoutMode={true}
+              refetchConversationsState={refetchConversationsState}
             />
           </EuiFlexItem>
 
@@ -230,17 +203,26 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  css={css`
-                    border-radius: 50%;
-                  `}
-                  display="base"
-                  data-test-subj="showAnonymizedValues"
-                  title={showAnonymizedValuesChecked ? 'Play' : 'Pause'}
-                  aria-label={showAnonymizedValuesChecked ? 'Play' : 'Pause'}
-                  iconType={showAnonymizedValuesChecked ? 'eye' : 'eyeClosed'}
-                  onClick={onToggleShowAnonymizedValues}
-                />
+                <EuiToolTip
+                  content={
+                    showAnonymizedValuesChecked ? i18n.SHOW_REAL_VALUES : i18n.SHOW_ANONYMIZED
+                  }
+                >
+                  <EuiButtonIcon
+                    css={css`
+                      border-radius: 50%;
+                    `}
+                    display="base"
+                    data-test-subj="showAnonymizedValues"
+                    isSelected={showAnonymizedValuesChecked}
+                    aria-label={
+                      showAnonymizedValuesChecked ? i18n.SHOW_ANONYMIZED : i18n.SHOW_REAL_VALUES
+                    }
+                    iconType={showAnonymizedValuesChecked ? 'eye' : 'eyeClosed'}
+                    onClick={onToggleShowAnonymizedValues}
+                    isDisabled={isEmpty(selectedConversation.replacements)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiPopover
