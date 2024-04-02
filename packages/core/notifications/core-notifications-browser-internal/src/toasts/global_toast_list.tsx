@@ -8,7 +8,7 @@
 
 import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToString } from '@kbn/react-to-string';
 import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
@@ -56,7 +56,7 @@ export const GlobalToastList: FunctionComponent<Props> = ({
         reportEvent.onDismissToast({
           toastMessage:
             firstDuplicateToast.title instanceof Function
-              ? renderToStaticMarkup(<MountWrapper mount={firstDuplicateToast.title} />)
+              ? renderToString(<MountWrapper mount={firstDuplicateToast.title} />)
               : firstDuplicateToast.title,
           recurrenceCount: representedToasts.length,
           toastMessageType: firstDuplicateToast.color,

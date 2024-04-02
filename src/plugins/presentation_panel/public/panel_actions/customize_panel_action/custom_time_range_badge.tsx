@@ -13,7 +13,7 @@ import {
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
-import { renderToString } from 'react-dom/server';
+import { renderToString } from '@kbn/react-to-string';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { apiPublishesTimeRange, EmbeddableApiContext } from '@kbn/presentation-publishing';

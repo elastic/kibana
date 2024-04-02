@@ -16,7 +16,7 @@ import React, {
   useRef,
   FunctionComponent,
 } from 'react';
-import { renderToString } from 'react-dom/server';
+import { renderToString } from '@kbn/react-to-string';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';

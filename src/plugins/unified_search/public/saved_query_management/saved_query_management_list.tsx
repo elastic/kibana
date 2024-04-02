@@ -28,7 +28,7 @@ import {
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState, useRef, useEffect, useMemo, RefObject } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToString } from '@kbn/react-to-string';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
@@ -139,7 +139,7 @@ const itemTitle = (attributes: SavedQueryAttributes, services: IUnifiedSearchPlu
       // This is a hack to render the PrettyDuration component to a string since itemTitle
       // is called in a loop, so the usePrettyDuration hook is not an option, and it must
       // return a string, but there is no non-hook alternative that returns a string
-      renderToStaticMarkup(
+      renderToString(
         <KibanaRenderContextProvider {...services}>
           <PrettyDuration
             timeFrom={attributes.timefilter.from}

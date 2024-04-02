@@ -1262,6 +1262,8 @@
       "@kbn/react-kibana-context-theme/*": ["packages/react/kibana_context/theme/*"],
       "@kbn/react-kibana-mount": ["packages/react/kibana_mount"],
       "@kbn/react-kibana-mount/*": ["packages/react/kibana_mount/*"],
+      "@kbn/react-to-string": ["packages/react/to_string"],
+      "@kbn/react-to-string/*": ["packages/react/to_string/*"],
       "@kbn/remote-clusters-plugin": ["x-pack/plugins/remote_clusters"],
       "@kbn/remote-clusters-plugin/*": ["x-pack/plugins/remote_clusters/*"],
       "@kbn/rendering-plugin": ["test/plugin_functional/plugins/rendering_plugin"],

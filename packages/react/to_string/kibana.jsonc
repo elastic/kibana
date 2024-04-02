@@ -1,0 +1,6 @@
+{
+  // It should be "shared-browser", but it's used in a plugin inside the `common` dir
+  "type": "shared-common",
+  "id": "@kbn/react-to-string",
+  "owner": "@elastic/kibana-core"
+}

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom/server';
+import { renderToString } from '@kbn/react-to-string';
 import { EuiIcon } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { getTheme } from '../../services';
@@ -17,7 +17,7 @@ interface Props {
 }
 
 export const touchdownTemplate = ({ wholeBucket }: Props) => {
-  return ReactDOM.renderToStaticMarkup(
+  return renderToString(
     <KibanaThemeProvider theme$={getTheme().theme$}>
       <p className="visTooltip__header">
         <EuiIcon type="iInCircle" className="visTooltip__headerIcon" />

@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import ReactDOM from 'react-dom/server';
+import { renderToString } from '@kbn/react-to-string';
 import { findLast, cloneDeep, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
@@ -60,7 +60,7 @@ export class ColorFormat extends FieldFormat {
     const displayVal = escape(asPrettyString(val, options));
     if (!color) return displayVal;
 
-    return ReactDOM.renderToStaticMarkup(
+    return renderToString(
       <span
         style={{
           color: color.text,

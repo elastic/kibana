@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { renderToString } from 'react-dom/server';
+import { renderToString } from '@kbn/react-to-string';
 import React from 'react';
 import debounce from 'lodash/debounce';
 import { PreviewState, FetchDocError } from './types';

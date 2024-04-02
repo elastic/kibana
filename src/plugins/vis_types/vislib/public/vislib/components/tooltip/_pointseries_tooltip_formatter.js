@@ -8,7 +8,7 @@
 
 import { last } from 'lodash';
 import React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToString } from '@kbn/react-to-string';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
@@ -78,7 +78,7 @@ export function pointSeriesTooltipFormatter() {
       addDetail(datum.tableRaw.title, datum.tableRaw.value);
     }
 
-    return renderToStaticMarkup(
+    return renderToString(
       <table>
         <tbody>
           {details.map((detail, index) => (
