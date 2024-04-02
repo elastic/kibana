@@ -434,5 +434,17 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.ensureAdvancedSectionOpen();
       await ml.jobWizardCommon.togglingModelChangeAnnotationsShowsCalloutAndRemovesCallout();
     });
+
+    it('job creation memory limit too large results in validation callout', async () => {
+      await ml.jobWizardCommon.goBackToJobDetailsSection();
+
+      const tooLarge = '100000000MB';
+      await ml.jobWizardCommon.setModelMemoryLimit(tooLarge);
+
+      await ml.jobWizardCommon.clickNextButton();
+      await ml.jobWizardCommon.assertValidationCallouts([
+        'mlValidationCallout-warning-Job will not be able to run in',
+      ]);
+    });
   });
 }
