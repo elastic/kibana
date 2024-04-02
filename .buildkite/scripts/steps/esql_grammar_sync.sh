@@ -122,7 +122,7 @@ main () {
   git push kibanamachine "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --draft --title "$PR_TITLE" --body "$PR_BODY" --base main --head "kibanamachine:${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:Visualizations' 
+  gh pr create --draft --title "$PR_TITLE" --body "$PR_BODY" --base main --head "kibanamachine:${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
 }
 
 main
