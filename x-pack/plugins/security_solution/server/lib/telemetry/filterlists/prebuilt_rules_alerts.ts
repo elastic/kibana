@@ -202,6 +202,9 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       },
     },
     pid: true,
+    pe: {
+      original_file_name: true,
+    },
     session_leader: true,
     start: true,
     user: true,
