@@ -11,7 +11,6 @@ import {
   EuiPopover,
   EuiIcon,
   EuiContextMenu,
-  EuiBadge,
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
@@ -24,6 +23,7 @@ import type { ExtraAppendLayerArg } from './visualization';
 import { SeriesType, XYState, visualizationTypes } from './types';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
+import { ExperimentalBadge } from '../../shared_components';
 
 interface AddLayerButtonProps {
   state: XYState;
@@ -70,17 +70,12 @@ export function AddLayerButton({
       toolTipContent,
       disabled,
       name: (
-        <EuiFlexGroup gutterSize="m" responsive={false}>
-          <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
             <span className="lnsLayerAddButton__label">{label}</span>
           </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
-            <EuiBadge className="lnsLayerAddButton__techBadge" color="hollow" isDisabled={disabled}>
-              {i18n.translate('xpack.lens.configPanel.experimentalLabel', {
-                defaultMessage: 'Technical preview',
-              })}
-            </EuiBadge>
+            <ExperimentalBadge color={disabled ? 'subdued' : undefined} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),

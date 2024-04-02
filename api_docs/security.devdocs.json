@@ -5309,6 +5309,23 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-server.ROUTE_TAG_AUTH_FLOW",
+        "type": "string",
+        "tags": [],
+        "label": "ROUTE_TAG_AUTH_FLOW",
+        "description": [
+          "\nThe routes that are involved into authentication flows, especially if they are used by the 3rd\nparties, require special handling."
+        ],
+        "signature": [
+          "\"security:authFlow\""
+        ],
+        "path": "x-pack/plugins/security/server/routes/tags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-server.ROUTE_TAG_CAN_REDIRECT",
         "type": "string",
         "tags": [],
