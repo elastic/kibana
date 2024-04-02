@@ -223,6 +223,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables date pickers and sourcerer in analyzer if needed.
    */
   analyzerDatePickersAndSourcererDisabled: false,
+
+  /**
+   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
+   */
+  unifiedManifestEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

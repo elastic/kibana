@@ -20,6 +20,7 @@ import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/co
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { i18n } from '@kbn/i18n';
+import { migrateUserArtifactManifest } from './endpoint/migrations/migrate_user_artifacts_manifest';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
@@ -583,15 +584,20 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       // Migrate artifacts to fleet and then start the manifest task after that is done
       plugins.fleet.fleetSetupCompleted().then(() => {
-        if (this.manifestTask) {
-          logger.info('Dependent plugin setup complete - Starting ManifestTask');
-          this.manifestTask.start({
-            taskManager,
+        migrateUserArtifactManifest(config.experimentalFeatures, manifestManager, logger)
+          .catch((error) => {
+            logger.error(`Error migrating user artifacts manifest: ${error}`);
+          })
+          .then(() => {
+            if (this.manifestTask) {
+              logger.info('Dependent plugin setup complete - Starting ManifestTask');
+              this.manifestTask.start({
+                taskManager,
+              });
+            } else {
+              logger.error(new Error('User artifacts task not available.'));
+            }
           });
-        } else {
-          logger.error(new Error('User artifacts task not available.'));
-        }
-
         turnOffPolicyProtectionsIfNotSupported(
           core.elasticsearch.client.asInternalUser,
           endpointFleetServicesFactory.asInternalUser(),
