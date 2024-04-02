@@ -156,9 +156,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       nowProvider: this.nowProvider,
     });
 
-    const title = i18n.translate('xpack.aiAssistantManagementSecurity.app.title', {
-      defaultMessage: 'AI Assistant for Security',
-    });
+    const assistantManagementTitle = i18n.translate(
+      'xpack.securitySolution.aiAssistantManagementSecurity.app.title',
+      {
+        defaultMessage: 'AI Assistant for Security',
+      }
+    );
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
@@ -175,10 +178,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       plugins.home.featureCatalogue.register({
         id: 'ai_assistant_security',
-        title,
-        description: i18n.translate('aiAssistantManagementSecurity.app.description', {
-          defaultMessage: 'Manage your AI Assistant for Security.',
-        }),
+        title: assistantManagementTitle,
+        description: i18n.translate(
+          'xpack.securitySolution.aiAssistantManagementSecurity.app.description',
+          {
+            defaultMessage: 'Manage your AI Assistant for Security.',
+          }
+        ),
         icon: 'sparkles',
         path: '/app/management/kibana/ai-assistant/security',
         showOnHomePage: false,
@@ -189,7 +195,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (plugins.management) {
       plugins.management.sections.section.kibana.registerApp({
         id: 'aiAssistantManagementSecurity',
-        title,
+        title: assistantManagementTitle,
         hideFromSidebar: true,
         order: 1,
         mount: async (params) => {
