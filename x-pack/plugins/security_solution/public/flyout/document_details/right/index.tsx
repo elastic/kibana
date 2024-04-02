@@ -15,6 +15,7 @@ import { useRightPanelContext } from './context';
 import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
+import { RightPanelTour } from './components/tour';
 import type { RightPanelTabType } from './tabs';
 import * as tabs from './tabs';
 import { PanelFooter } from './footer';
@@ -103,6 +104,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
 
   return (
     <>
+      {flyoutIsExpandable && <RightPanelTour />}
       <PanelNavigation flyoutIsExpandable={flyoutIsExpandable} />
       <PanelHeader
         tabs={tabsDisplayed}
