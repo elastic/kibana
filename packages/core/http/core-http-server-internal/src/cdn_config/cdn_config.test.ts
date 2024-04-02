@@ -41,7 +41,7 @@ describe('CdnConfig', () => {
   it('generates the expected CSP additions', () => {
     const cdnConfig = CdnConfig.from({ url: 'https://foo.bar:9999' });
     expect(cdnConfig.getCspConfig()).toEqual({
-      connect_src: ['foo.bar:9999'],
+      connect_src: ['https:'],
       font_src: ['foo.bar:9999'],
       img_src: ['foo.bar:9999'],
       script_src: ['foo.bar:9999'],
