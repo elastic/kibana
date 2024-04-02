@@ -132,6 +132,30 @@ describe('onFetchContextChanged', () => {
       expect(onFetchMock.mock.calls).toHaveLength(1);
       unsubscribe();
     });
+
+    it('should call onFetch on local time range change and no search session change', async () => {
+      const api = {
+        parentApi,
+        timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+      };
+      const unsubscribe = onFetchContextChanged({
+        api,
+        onFetch: onFetchMock,
+        fetchOnSetup: false,
+      });
+      api.timeRange$.next({
+        from: 'now-15m',
+        to: 'now',
+      });
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      expect(onFetchMock.mock.calls).toHaveLength(1);
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.timeRange).toEqual({
+        from: 'now-15m',
+        to: 'now',
+      });
+      unsubscribe();
+    });
   });
 
   describe('no searchSession$', () => {
