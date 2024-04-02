@@ -44,7 +44,7 @@ const actionFrequencySchema = schema.object({
 /**
  * Unsanitized (domain) action schema, used by internal rules clients
  */
-export const actionDomainSchema = schema.object({
+export const defaultActionDomainSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   group: schema.string(),
   id: schema.string(),
@@ -52,7 +52,14 @@ export const actionDomainSchema = schema.object({
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionDomainAlertsFilterSchema),
-  useAlertDataAsTemplate: schema.maybe(schema.boolean()),
+  useAlertDataForTemplate: schema.maybe(schema.boolean()),
+});
+
+export const systemActionDomainSchema = schema.object({
+  id: schema.string(),
+  actionTypeId: schema.string(),
+  params: actionParamsSchema,
+  uuid: schema.maybe(schema.string()),
 });
 
 export const actionAlertsFilterSchema = schema.object({
@@ -60,7 +67,7 @@ export const actionAlertsFilterSchema = schema.object({
   timeframe: schema.maybe(actionAlertsFilterTimeFrameSchema),
 });
 
-export const actionSchema = schema.object({
+export const defaultActionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   group: schema.string(),
   id: schema.string(),
@@ -69,4 +76,12 @@ export const actionSchema = schema.object({
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
+});
+
+export const systemActionSchema = schema.object({
+  id: schema.string(),
+  actionTypeId: schema.string(),
+  params: actionParamsSchema,
+  uuid: schema.maybe(schema.string()),
+  useAlertDataAsTemplate: schema.maybe(schema.boolean()),
 });
