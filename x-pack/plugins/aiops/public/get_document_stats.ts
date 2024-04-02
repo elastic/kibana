@@ -10,7 +10,10 @@ import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import dateMath from '@kbn/datemath';
-import { getExtendedChangePoint, type DocumentCountStatsChangePoint } from '@kbn/aiops-utils';
+import {
+  getExtendedChangePoint,
+  type DocumentCountStatsChangePoint,
+} from '@kbn/aiops-log-rate-analysis';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
