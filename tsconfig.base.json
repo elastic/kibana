@@ -76,6 +76,8 @@
       "@kbn/apm-config-loader/*": ["packages/kbn-apm-config-loader/*"],
       "@kbn/apm-data-access-plugin": ["x-pack/plugins/apm_data_access"],
       "@kbn/apm-data-access-plugin/*": ["x-pack/plugins/apm_data_access/*"],
+      "@kbn/apm-data-view": ["packages/kbn-apm-data-view"],
+      "@kbn/apm-data-view/*": ["packages/kbn-apm-data-view/*"],
       "@kbn/apm-plugin": ["x-pack/plugins/apm"],
       "@kbn/apm-plugin/*": ["x-pack/plugins/apm/*"],
       "@kbn/apm-synthtrace": ["packages/kbn-apm-synthtrace"],

@@ -164,6 +164,7 @@
     "@kbn/analytics-shippers-fullstory": "link:packages/analytics/shippers/fullstory",
     "@kbn/apm-config-loader": "link:packages/kbn-apm-config-loader",
     "@kbn/apm-data-access-plugin": "link:x-pack/plugins/apm_data_access",
+    "@kbn/apm-data-view": "link:packages/kbn-apm-data-view",
     "@kbn/apm-plugin": "link:x-pack/plugins/apm",
     "@kbn/apm-utils": "link:packages/kbn-apm-utils",
     "@kbn/app-link-test-plugin": "link:test/plugin_functional/plugins/app_link_test",
