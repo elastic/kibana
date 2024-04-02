@@ -5159,6 +5159,11 @@
       "warning": []
     },
     {
+      "query": "from a_index | where stringField == \"a\" or null",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | where avg(numberField)",
       "error": [
         "WHERE does not support function avg"

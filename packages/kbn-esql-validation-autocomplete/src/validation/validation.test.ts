@@ -1107,6 +1107,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field Is nOt NuLL`, []);
       }
 
+      // this is a scenario that was failing because "or" didn't accept "null"
+      testErrorsAndWarnings('from a_index | where stringField == "a" or null', []);
+
       for (const {
         name,
         alias,
