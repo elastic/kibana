@@ -1499,7 +1499,7 @@
             "label": "onNewReplacements",
             "description": [],
             "signature": [
-              "((newReplacements: { value: string; uuid: string; }[]) => void) | undefined"
+              "((newReplacements: Zod.objectOutputType<{}, Zod.ZodString, \"strip\">) => void) | undefined"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -1508,12 +1508,12 @@
               {
                 "parentPluginId": "elasticAssistant",
                 "id": "def-server.AssistantToolParams.onNewReplacements.$1",
-                "type": "Array",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "newReplacements",
                 "description": [],
                 "signature": [
-                  "{ value: string; uuid: string; }[]"
+                  "Zod.objectOutputType<{}, Zod.ZodString, \"strip\">"
                 ],
                 "path": "x-pack/plugins/elastic_assistant/server/types.ts",
                 "deprecated": false,
@@ -1526,12 +1526,12 @@
           {
             "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.replacements",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "replacements",
             "description": [],
             "signature": [
-              "{ value: string; uuid: string; }[] | undefined"
+              "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -1552,7 +1552,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, { subAction: \"invokeAI\" | \"invokeStream\"; replacements: { value: string; uuid: string; }[]; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; }, any>"
+              "<unknown, unknown, { subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; }, any>"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
