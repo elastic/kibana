@@ -35,11 +35,11 @@ spec:
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true
       teams:
-        everyone:
-          access_level: MANAGE_BUILD_AND_READ
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
         appex-qa:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
