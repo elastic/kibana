@@ -10,11 +10,9 @@ import React, { useRef } from 'react';
 import { Provider } from 'react-redux';
 import { RuleFormPage } from './rule_form_page';
 import { initializeStore } from '../store';
-import type { RuleTypeModel } from '../types';
+import type { RuleFormPageProps } from './rule_form_page';
 
-export const RuleFormPageComponent: React.FC<{ ruleTypeModel: RuleTypeModel }> = ({
-  ruleTypeModel,
-}) => {
+export const RuleFormPageComponent: React.FC<RuleFormPageProps> = ({ ruleTypeModel, ...props }) => {
   const store = useRef(
     initializeStore({
       ruleDetails: { name: `${ruleTypeModel.name} rule`, tags: [] },
@@ -23,7 +21,7 @@ export const RuleFormPageComponent: React.FC<{ ruleTypeModel: RuleTypeModel }> =
 
   return (
     <Provider store={store.current}>
-      <RuleFormPage ruleTypeModel={ruleTypeModel} />
+      <RuleFormPage ruleTypeModel={ruleTypeModel} {...props} />
     </Provider>
   );
 };

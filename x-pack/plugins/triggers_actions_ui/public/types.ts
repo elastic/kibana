@@ -386,8 +386,11 @@ export interface RuleTypeParamsExpressionProps<
   ruleThrottle: string;
   alertNotifyWhen: RuleNotifyWhenType;
   setRuleParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
+  /*
+   * @deprecated in favor of setRuleParams. Expression components should never set any properties besides params.
+   */
   setRuleProperty: <Prop extends keyof Rule>(
-    key: Prop,
+    key: 'params',
     value: SanitizedRule<Params>[Prop] | null
   ) => void;
   onChangeMetaData: (metadata: MetaData) => void;

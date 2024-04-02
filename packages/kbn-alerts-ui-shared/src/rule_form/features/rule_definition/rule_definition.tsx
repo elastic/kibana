@@ -8,12 +8,20 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import React, { Suspense, useCallback, useMemo } from 'react';
+import React, { Suspense } from 'react';
 import { useRuleFormSelector, useRuleFormDispatch } from '../../hooks';
-import { RuleTypeModel } from '../../types';
-import { setParams } from './slice';
+import { RuleTypeModel, RuleTypeParamsExpressionPlugins } from '../../types';
+import { setParam, replaceParams } from './slice';
 
-export const RuleDefinition: React.FC<{ ruleTypeModel: RuleTypeModel }> = ({ ruleTypeModel }) => {
+interface RuleDefinitionProps {
+  ruleTypeModel: RuleTypeModel;
+  expressionPlugins: RuleTypeParamsExpressionPlugins;
+}
+
+export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
+  ruleTypeModel,
+  expressionPlugins,
+}) => {
   const ruleId = useRuleFormSelector((state) => state.ruleDefinition.id);
   const ruleParams = useRuleFormSelector((state) => state.ruleDefinition.params);
   const dispatch = useRuleFormDispatch();
@@ -41,16 +49,17 @@ export const RuleDefinition: React.FC<{ ruleTypeModel: RuleTypeModel }> = ({ rul
           ruleThrottle={''}
           alertNotifyWhen={'onActionGroupChange'}
           errors={errors}
-          setRuleParams={(key, value) => dispatch(setParams([key, value]))}
-          setRuleProperty={() => {}}
+          setRuleParams={(key, value) => dispatch(setParam([key, value]))}
+          setRuleProperty={(_, value) => {
+            /* setRuleProperty is only ever used to replace all params */
+            /* Deprecated in favor of defining default parameters */
+            dispatch(replaceParams(value));
+          }}
           defaultActionGroupId={'default'}
           actionGroups={[{ id: 'default', name: 'Default' }]}
           metadata={{}}
-          charts={{}}
-          data={{}}
-          dataViews={{}}
-          unifiedSearch={{}}
           onChangeMetaData={() => {}}
+          {...expressionPlugins}
         />
       </Suspense>
     </div>

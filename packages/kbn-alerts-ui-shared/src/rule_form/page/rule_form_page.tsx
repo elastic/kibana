@@ -8,20 +8,26 @@
 
 import React from 'react';
 import { EuiPageTemplate, EuiSteps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useRuleFormSelector, useRuleFormDispatch } from '../hooks';
 import { setRuleName } from '../features/rule_details/slice';
 import { RuleFormPageHeader } from './header';
 import { RuleDetails } from '../features/rule_details/rule_details';
-import { RuleTypeModel } from '../types';
+import { RuleTypeModel, RuleTypeParamsExpressionPlugins } from '../types';
 import { RuleDefinition } from '../features/rule_definition/rule_definition';
 
 export interface RuleFormPageProps {
-  referrer: string;
   ruleTypeModel: RuleTypeModel;
+  expressionPlugins: RuleTypeParamsExpressionPlugins;
+  onClickReturn: () => void;
+  referrerHref: string;
 }
 
-export const RuleFormPage: React.FC<RuleFormPageProps> = ({ referrer, ruleTypeModel }) => {
+export const RuleFormPage: React.FC<RuleFormPageProps> = ({
+  onClickReturn,
+  referrerHref,
+  ruleTypeModel,
+  expressionPlugins,
+}) => {
   const ruleName = useRuleFormSelector((state) => state.ruleDetails.name);
   const dispatch = useRuleFormDispatch();
 
@@ -30,13 +36,20 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({ referrer, ruleTypeMo
       <RuleFormPageHeader
         ruleName={ruleName}
         onChangeName={(name) => dispatch(setRuleName(name))}
+        onClickReturn={onClickReturn}
+        referrerHref={referrerHref}
       />
       <EuiPageTemplate.Section>
         <EuiSteps
           steps={[
             {
               title: 'Rule definition',
-              children: <RuleDefinition ruleTypeModel={ruleTypeModel} />,
+              children: (
+                <RuleDefinition
+                  ruleTypeModel={ruleTypeModel}
+                  expressionPlugins={expressionPlugins}
+                />
+              ),
             },
             {
               title: 'Actions',

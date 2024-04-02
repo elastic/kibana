@@ -5,19 +5,31 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingLogo, EuiEmptyPrompt } from '@elastic/eui';
 import { RuleFormPage } from '@kbn/alerts-ui-shared';
 import { useKibana } from '../../../common';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
-export const CreateRulePage: React.FC = ({
+interface MatchParams {
+  ruleTypeId: string;
+}
+
+export interface CreateRuleLocationState {
+  referrer: string;
+}
+
+export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { ruleTypeId },
   },
+  location,
+  history,
 }) => {
-  const { setBreadcrumbs, ruleTypeRegistry } = useKibana().services;
+  const { setBreadcrumbs, ruleTypeRegistry, charts, data, dataViews, unifiedSearch } =
+    useKibana().services;
   const {
     ruleTypesState,
     authorizedRuleTypes,
@@ -34,18 +46,21 @@ export const CreateRulePage: React.FC = ({
     [ruleTypeId, ruleTypeRegistry]
   );
 
+  const { referrer } = location.state as CreateRuleLocationState;
+  const onClickReturn = useCallback(() => {
+    history.push(referrer);
+  }, [referrer, history]);
+
   useEffect(() => {
-    setBreadcrumbs(
-      [
-        {
-          text: 'Rules',
-          href: '/rules',
-        },
-        {
-          text: 'Create',
-        },
-      ].concat(ruleTypeFromServer ? [{ text: ruleTypeFromServer.name }] : [])
-    );
+    setBreadcrumbs([
+      {
+        text: 'Rules',
+        href: '/rules',
+      },
+      {
+        text: 'Create',
+      },
+    ]);
   }, [setBreadcrumbs, ruleTypeFromServer]);
 
   if (ruleTypesState.isLoading) {
@@ -112,16 +127,20 @@ export const CreateRulePage: React.FC = ({
       />
     );
   }
-  console.log('RULE TYPE MODEL', {
-    name: ruleTypeFromServer.name,
-    ...registeredRuleType,
-  });
   return (
     <RuleFormPage
       ruleTypeModel={{
         name: ruleTypeFromServer.name,
         ...registeredRuleType,
       }}
+      expressionPlugins={{
+        charts,
+        data,
+        dataViews,
+        unifiedSearch,
+      }}
+      onClickReturn={onClickReturn}
+      referrerHref={referrer}
     />
   );
 };

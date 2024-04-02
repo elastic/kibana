@@ -1005,7 +1005,7 @@ export const RulesList = ({
             onSelectRuleType={(ruleTypeId) => {
               setRuleTypeIdToCreate(ruleTypeId);
               setRuleTypeModalVisibility(false);
-              setRuleFlyoutVisibility(true);
+              history.push(`/rule/create/${ruleTypeId}`, { referrer: window.location.href });
             }}
             http={http}
             toasts={toasts}

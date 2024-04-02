@@ -14,12 +14,14 @@ export interface RuleFormPageHeaderProps {
   ruleName: string;
   onChangeName: (name: string) => void;
   onClickReturn: () => void;
+  referrerHref: string;
 }
 
 export const RuleFormPageHeader: React.FC<RuleFormPageHeaderProps> = ({
   ruleName,
   onChangeName,
   onClickReturn,
+  referrerHref,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const { euiTheme } = useEuiTheme();
@@ -79,8 +81,11 @@ export const RuleFormPageHeader: React.FC<RuleFormPageHeaderProps> = ({
           ),
           color: 'primary',
           'aria-current': false,
-          href: '#',
-          onClick: (e) => e.preventDefault(),
+          href: referrerHref,
+          onClick: (e) => {
+            e.preventDefault();
+            onClickReturn();
+          },
         },
       ]}
     />

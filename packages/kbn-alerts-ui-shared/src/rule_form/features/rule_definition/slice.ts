@@ -21,11 +21,14 @@ export const ruleDefinitionSlice = createSlice({
   name: 'ruleDefinition',
   initialState,
   reducers: {
-    setParams(state, { payload: [key, value] }: PayloadAction<[string, unknown]>) {
+    setParam(state, { payload: [key, value] }: PayloadAction<[string, unknown]>) {
       state.params[key] = value;
+    },
+    replaceParams(state, { payload }: PayloadAction<Record<string, unknown>>) {
+      state.params = payload;
     },
   },
 });
 
 export const ruleDefinitionReducer = ruleDefinitionSlice.reducer;
-export const { setParams } = ruleDefinitionSlice.actions;
+export const { setParam, replaceParams } = ruleDefinitionSlice.actions;
