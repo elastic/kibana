@@ -224,9 +224,8 @@ export const EmbedContent = ({
   const helpText =
     objectType === 'dashboard' ? (
       <FormattedMessage
-        id="share.embed.helpText"
-        defaultMessage="Embed this {objectType} into another webpage. Select which items to include in the embeddable view."
-        values={{ objectType }}
+        id="share.embed.dashbord.helpText"
+        defaultMessage="Embed this dashboard into another webpage. Select which items to include in the embeddable view."
       />
     ) : (
       <FormattedMessage
