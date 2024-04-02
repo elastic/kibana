@@ -32,22 +32,22 @@ export interface FilterContextType {
 export type FilterItemObj = Omit<AddOptionsListControlProps, 'controlId' | 'dataViewId'> & {
   /*
    * Determines the present and order of a control
-   *
    * */
   persist?: boolean;
 };
 
 export type FilterGroupHandler = ControlGroupContainer;
 
-export type FilterGroupProps = {
-  featureIds: AlertConsumers[];
+export interface FilterGroupProps
+  extends Pick<ControlGroupInput, 'timeRange' | 'filters' | 'query' | 'chainingSystem'> {
+  spaceId?: string;
   dataViewId: string | null;
+  featureIds: AlertConsumers[];
   onFilterChange?: (newFilters: Filter[]) => void;
   defaultControls: FilterItemObj[];
   controlsUrlState?: FilterItemObj[];
-  spaceId?: string;
   onInit?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
   maxControls?: number;
   ControlGroupRenderer: typeof ControlGroupRenderer;
   Storage: typeof Storage;
-} & Pick<ControlGroupInput, 'timeRange' | 'filters' | 'query' | 'chainingSystem'>;
+}

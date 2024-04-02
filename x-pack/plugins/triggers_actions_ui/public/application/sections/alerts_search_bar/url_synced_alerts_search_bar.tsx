@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
-import { AlertsFilterControls } from '@kbn/alerts-ui-shared';
+import { AlertsFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
@@ -28,18 +28,21 @@ const INVALID_QUERY_STRING_TOAST_TITLE = i18n.translate(
   }
 );
 
-export type UrlSyncedAlertsSearchBarProps = Omit<
-  AlertsSearchBarProps,
-  'query' | 'rangeFrom' | 'rangeTo' | 'filters' | 'onQuerySubmit'
-> & {
+export interface UrlSyncedAlertsSearchBarProps
+  extends Omit<
+    AlertsSearchBarProps,
+    'query' | 'rangeFrom' | 'rangeTo' | 'filters' | 'onQuerySubmit'
+  > {
+  showFilterControls?: boolean;
   onEsQueryChange: (esQuery: { bool: BoolQuery }) => void;
   onActiveFeatureFiltersChange?: (value: AlertConsumers[]) => void;
-};
+}
 
 /**
  * An abstraction over AlertsSearchBar that syncs the query state with the url
  */
 export const UrlSyncedAlertsSearchBar = ({
+  showFilterControls = false,
   onEsQueryChange,
   onActiveFeatureFiltersChange,
   ...rest
@@ -140,23 +143,26 @@ export const UrlSyncedAlertsSearchBar = ({
         onClearSavedQuery={clearSavedQuery}
         {...rest}
       />
-      <AlertsFilterControls
-        dataViewSpec={{
-          id: 'unified-alerts-dv',
-        }}
-        spaceId={spaceId}
-        chainingSystem="HIERARCHICAL"
-        controlsUrlState={filterControls}
-        filters={filters}
-        onFilterChange={onFiltersChange}
-        dependencies={{
-          http,
-          notifications,
-          dataViews,
-        }}
-        ControlGroupRenderer={ControlGroupRenderer}
-        Storage={Storage}
-      />
+      {showFilterControls && (
+        <AlertsFilterControls
+          dataViewSpec={{
+            id: 'unified-alerts-dv',
+            title: '.alerts-*',
+          }}
+          spaceId={spaceId}
+          chainingSystem="HIERARCHICAL"
+          controlsUrlState={filterControls}
+          filters={filters}
+          onFilterChange={onFiltersChange}
+          dependencies={{
+            http,
+            notifications,
+            dataViews,
+          }}
+          ControlGroupRenderer={ControlGroupRenderer}
+          Storage={Storage}
+        />
+      )}
     </>
   );
 };

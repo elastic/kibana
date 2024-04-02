@@ -32,11 +32,15 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { isEqual } from 'lodash';
-import { AlertsFilterControls } from '@kbn/alerts-ui-shared';
+import { AlertsFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { URL_PARAM_ARRAY_EXCEPTION_MSG } from '@kbn/alerts-ui-shared/src/alerts_filter_controls/translations';
+import { URL_PARAM_ARRAY_EXCEPTION_MSG } from '@kbn/alerts-ui-shared/src/alert_filter_controls/translations';
+import type {
+  FilterGroupHandler,
+  FilterItemObj,
+} from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_group/filter_by_assignees';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';

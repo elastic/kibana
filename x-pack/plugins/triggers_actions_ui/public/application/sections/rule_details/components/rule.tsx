@@ -95,6 +95,11 @@ export function RuleComponent({
   });
 
   const renderRuleAlertList = useCallback(() => {
+    const featureIds = (
+      [ALERTS_FEATURE_ID, AlertConsumers.STACK_ALERTS].includes(rule.consumer)
+        ? [ruleType.producer]
+        : [rule.consumer]
+    ) as AlertConsumers[];
     if (ruleType.hasAlertsMappings || ruleType.hasFieldsForAAD) {
       return (
         <AlertsTable
@@ -103,11 +108,7 @@ export function RuleComponent({
           alertsTableConfigurationRegistry={
             alertsTableConfigurationRegistry as AlertTableConfigRegistry
           }
-          featureIds={
-            (rule.consumer === ALERTS_FEATURE_ID
-              ? [ruleType.producer]
-              : [rule.consumer]) as AlertConsumers[]
-          }
+          featureIds={featureIds}
           query={{ bool: { filter: { term: { [ALERT_RULE_UUID]: rule.id } } } }}
           showAlertStatusWithFlapping
         />

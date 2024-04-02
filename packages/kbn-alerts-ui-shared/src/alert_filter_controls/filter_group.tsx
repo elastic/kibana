@@ -87,7 +87,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     defaultControls,
     spaceId,
     onInit,
-    controlsUrlState,
+    controlsUrlState = [],
     maxControls = Infinity,
     ControlGroupRenderer,
     Storage,

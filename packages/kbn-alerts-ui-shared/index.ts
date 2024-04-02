@@ -17,4 +17,3 @@ export { AlertsSearchBar } from './src/alerts_search_bar';
 export type { AlertsSearchBarProps } from './src/alerts_search_bar/types';
 
 export * from './src/alert_fields_table';
-export * from './src/alerts_filter_controls';

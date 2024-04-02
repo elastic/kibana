@@ -9,7 +9,7 @@
 export const sampleOutputData = {
   loading: false,
   rendered: true,
-  dataViewIds: ['security-solution-default'],
+  dataViewIds: ['alert-filters-test-dv'],
   embeddableLoaded: {
     '0': true,
     '1': true,
@@ -20,7 +20,7 @@ export const sampleOutputData = {
   filters: [
     {
       meta: {
-        index: 'security-solution-default',
+        index: 'alert-filters-test-dv',
         key: 'kibana.alert.building_block_type',
         negate: true,
       },
@@ -44,7 +44,7 @@ export const initialInputData = {
       width: 'small',
       explicitInput: {
         id: '0',
-        dataViewId: 'security-solution-default',
+        dataViewId: 'alert-filters-test-dv',
         fieldName: 'kibana.alert.workflow_status',
         title: 'Status',
         hideExclude: true,
@@ -63,7 +63,7 @@ export const initialInputData = {
       width: 'small',
       explicitInput: {
         id: '1',
-        dataViewId: 'security-solution-default',
+        dataViewId: 'alert-filters-test-dv',
         fieldName: 'kibana.alert.severity',
         title: 'Severity',
         hideExclude: true,
@@ -82,9 +82,9 @@ export const initialInputData = {
       width: 'small',
       explicitInput: {
         id: '2',
-        dataViewId: 'security-solution-default',
+        dataViewId: 'alert-filters-test-dv',
         fieldName: 'kibana.alert.building_block_type',
-        title: 'Bulding Block',
+        title: 'Building Block',
         hideExclude: true,
         hideSort: true,
         hidePanelTitles: true,
@@ -101,7 +101,7 @@ export const initialInputData = {
       width: 'small',
       explicitInput: {
         id: '3',
-        dataViewId: 'security-solution-default',
+        dataViewId: 'alert-filters-test-dv',
         fieldName: 'user.name',
         title: 'User',
         hideExclude: true,
@@ -120,7 +120,7 @@ export const initialInputData = {
       width: 'small',
       explicitInput: {
         id: '4',
-        dataViewId: 'security-solution-default',
+        dataViewId: 'alert-filters-test-dv',
         fieldName: 'host.name',
         title: 'Host',
         hideExclude: true,

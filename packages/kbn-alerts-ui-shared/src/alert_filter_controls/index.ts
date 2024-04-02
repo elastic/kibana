@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './alerts_filter_controls';
+export * from './alert_filter_controls';
