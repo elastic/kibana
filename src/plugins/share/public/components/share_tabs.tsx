@@ -10,7 +10,7 @@ import React, { type FC } from 'react';
 import { TabbedModal } from '@kbn/shared-ux-tabbed-modal';
 
 import { ShareTabsContext, useShareTabsContext, type IShareContext } from './context';
-import { linkTab, embedTab, exportTab } from './tabs';
+import { linkTab, embedTab } from './tabs';
 
 export const ShareMenuV2: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -30,7 +30,7 @@ export const ShareMenuTabs = () => {
 
   const { allowEmbed, objectType, onClose } = shareContext;
 
-  const tabs = [linkTab, exportTab, allowEmbed ? embedTab : null].filter(Boolean);
+  const tabs = [linkTab, allowEmbed ? embedTab : null].filter(Boolean);
 
   return (
     <TabbedModal

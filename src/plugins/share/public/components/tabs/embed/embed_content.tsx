@@ -22,6 +22,7 @@ type EmbedProps = Pick<
   | 'shareableUrl'
   | 'isEmbedded'
   | 'embedUrlParamExtensions'
+  | 'objectType'
 > & {
   onChange: (url: string) => void;
 };
@@ -43,6 +44,7 @@ export const EmbedContent = ({
   shareableUrl,
   isEmbedded,
   onChange,
+  objectType,
 }: EmbedProps) => {
   const isMounted = useMountedState();
   const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
@@ -219,15 +221,25 @@ export const EmbedContent = ({
     );
   };
 
+  const helpText =
+    objectType === 'dashboard' ? (
+      <FormattedMessage
+        id="share.embed.helpText"
+        defaultMessage="Embed this {objectType} into another webpage. Select which items to include in the embeddable view."
+        values={{ objectType }}
+      />
+    ) : (
+      <FormattedMessage
+        id="share.embed.helpText"
+        defaultMessage="Embed this {objectType} into another webpage."
+        values={{ objectType }}
+      />
+    );
+
   return (
     <EuiForm>
       <EuiSpacer size="m" />
-      <EuiText size="s">
-        <FormattedMessage
-          id="share.embed.helpText"
-          defaultMessage="Embed this dashboard into another webpage. Select which items to include in the embeddable view."
-        />
-      </EuiText>
+      <EuiText size="s">{helpText}</EuiText>
       <EuiSpacer />
       {renderUrlParamExtensions()}
       <EuiSpacer />

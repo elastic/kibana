@@ -18,9 +18,8 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/core-chrome-browser",
     "@kbn/shared-ux-prompt-not-found",
-    "@kbn/core-capabilities-common",
-    "@kbn/share-modal",
     "@kbn/react-kibana-mount",
+    "@kbn/shared-ux-tabbed-modal",
   ],
   "exclude": [
     "target/**/*",

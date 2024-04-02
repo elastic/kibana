@@ -15,15 +15,18 @@ import { LinkContent } from './link_content';
 
 type ILinkTab = IModalTabDeclaration<{
   dashboardUrl: string;
+  isNotSaved: boolean;
 }>;
 
 const LINK_TAB_ACTIONS = {
   SET_DASHBOARD_URL: 'SET_DASHBOARD_URL',
+  SET_IS_NOT_SAVED: 'SET_IS_NOT_SAVED',
 };
 
 const linkTabReducer: ILinkTab['reducer'] = (
   state = {
     dashboardUrl: '',
+    isNotSaved: false,
   },
   action
 ) => {
@@ -32,6 +35,11 @@ const linkTabReducer: ILinkTab['reducer'] = (
       return {
         ...state,
         dashboardUrl: action.payload,
+      };
+    case LINK_TAB_ACTIONS.SET_IS_NOT_SAVED:
+      return {
+        ...state,
+        isNotSaved: action.payload,
       };
     default:
       return state;
@@ -57,6 +65,13 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
     [dispatch]
   );
 
+  const setIsNotSaved = useCallback(() => {
+    dispatch({
+      type: LINK_TAB_ACTIONS.SET_IS_NOT_SAVED,
+      payload: objectType === 'lens' ? isDirty : false,
+    });
+  }, [dispatch, objectType, isDirty]);
+
   return (
     <LinkContent
       {...{
@@ -69,7 +84,9 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
         urlService,
         shareableUrlLocatorParams,
         dashboardLink: state.dashboardUrl,
+        isNotSaved: state.isNotSaved,
         setDashboardLink,
+        setIsNotSaved,
       }}
     />
   );
@@ -92,5 +109,6 @@ export const linkTab: ILinkTab = {
     handler: ({ state }) => {
       copyToClipboard(state.dashboardUrl);
     },
+    style: ({ state }) => state.isNotSaved,
   },
 };
