@@ -11,7 +11,6 @@ import { render } from '../../../helpers/test_helper';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab';
 import {
-  aiAssistantDefaultConnector,
   aiAssistantLogsIndexPattern,
   aiAssistantResponseLanguage,
 } from '@kbn/observability-ai-assistant-plugin/server';
@@ -90,13 +89,6 @@ describe('SettingsTab', () => {
 
       await waitFor(() => expect(container.querySelector('.euiLoadingSpinner')).toBeNull());
 
-      fireEvent.change(
-        getByTestId(`management-settings-editField-${aiAssistantDefaultConnector}`),
-        {
-          target: { value: 'bedrock' },
-        }
-      );
-
       fireEvent.input(getByTestId(`management-settings-editField-${aiAssistantLogsIndexPattern}`), {
         target: { value: 'observability-ai-assistant-*' },
       });
@@ -118,7 +110,6 @@ describe('SettingsTab', () => {
     });
 
     it('calls the settings client with correct args', async () => {
-      expect(settingsClientSet).toBeCalledWith(aiAssistantDefaultConnector, 'bedrock');
       expect(settingsClientSet).toBeCalledWith(
         aiAssistantLogsIndexPattern,
         'observability-ai-assistant-*'

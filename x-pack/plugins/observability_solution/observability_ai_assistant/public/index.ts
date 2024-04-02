@@ -76,7 +76,6 @@ export type { UseChatResult } from './hooks/use_chat';
 export { LANGUAGE_OPTIONS, DEFAULT_LANGUAGE_OPTION } from './hooks/use_user_preferred_language';
 export {
   aiAssistantResponseLanguage,
-  aiAssistantDefaultConnector,
   aiAssistantLogsIndexPattern,
 } from '../common/utils/advanced_settings';
 

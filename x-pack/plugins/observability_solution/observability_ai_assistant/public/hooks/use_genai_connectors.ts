@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
-import { aiAssistantDefaultConnector } from '../../common/utils/advanced_settings';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ObservabilityAIAssistantService } from '../types';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
-import { useKibana } from './use_kibana';
 
 export interface UseGenAIConnectorsResult {
   connectors?: FindActionResult[];
@@ -24,59 +22,70 @@ export interface UseGenAIConnectorsResult {
 
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
   const assistant = useObservabilityAIAssistant();
-  const { services } = useKibana();
 
-  return useGenAIConnectorsWithoutContext(assistant, services);
+  return useGenAIConnectorsWithoutContext(assistant);
 }
 
 export function useGenAIConnectorsWithoutContext(
-  assistant: ObservabilityAIAssistantService,
-  coreStart: CoreStart
+  assistant: ObservabilityAIAssistantService
 ): UseGenAIConnectorsResult {
-  const { uiSettings } = coreStart;
   const [connectors, setConnectors] = useState<FindActionResult[] | undefined>(undefined);
 
-  const savedConnector = uiSettings.get<string>(aiAssistantDefaultConnector, '');
-  const [selectedConnector, setSelectedConnector] = useState<string>(savedConnector);
+  const [selectedConnector, setSelectedConnector] = useLocalStorage(
+    `xpack.observabilityAiAssistant.lastUsedConnector`,
+    ''
+  );
 
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState<Error | undefined>(undefined);
 
-  const fetchAndSetConnectors = useCallback(async () => {
+  const controller = useMemo(() => new AbortController(), []);
+  const fetchConnectors = useCallback(async () => {
     setLoading(true);
 
-    try {
-      const results = await assistant.callApi(
-        'GET /internal/observability_ai_assistant/connectors',
-        { signal: null }
-      );
+    assistant
+      .callApi('GET /internal/observability_ai_assistant/connectors', {
+        signal: controller.signal,
+      })
+      .then((results) => {
+        setConnectors(results);
+        setSelectedConnector((connectorId) => {
+          if (connectorId && results.findIndex((result) => result.id === connectorId) === -1) {
+            return '';
+          }
+          return connectorId;
+        });
 
-      setConnectors(results);
-
-      if (!selectedConnector) {
-        const firstConnectorId = results[0]?.id;
-        setSelectedConnector(firstConnectorId);
-      }
-
-      setError(undefined);
-    } catch (err) {
-      setError(err);
-      setConnectors(undefined);
-    } finally {
-      setLoading(false);
-    }
-  }, [assistant, selectedConnector]);
+        setError(undefined);
+      })
+      .catch((err) => {
+        setError(err);
+        setConnectors(undefined);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [assistant, controller.signal, setSelectedConnector]);
 
   useEffect(() => {
-    fetchAndSetConnectors();
-  }, [fetchAndSetConnectors]);
+    fetchConnectors();
+
+    return () => {
+      controller.abort();
+    };
+  }, [assistant, controller, fetchConnectors, setSelectedConnector]);
 
   return {
     connectors,
     loading,
     error,
-    selectedConnector,
-    selectConnector: setSelectedConnector,
-    reloadConnectors: fetchAndSetConnectors,
+    selectedConnector: selectedConnector || connectors?.[0]?.id,
+    selectConnector: (id: string) => {
+      setSelectedConnector(id);
+    },
+    reloadConnectors: () => {
+      fetchConnectors();
+    },
   };
 }

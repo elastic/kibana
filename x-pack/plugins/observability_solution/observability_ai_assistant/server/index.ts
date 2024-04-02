@@ -19,7 +19,6 @@ export type {
 
 export {
   aiAssistantResponseLanguage,
-  aiAssistantDefaultConnector,
   aiAssistantLogsIndexPattern,
 } from '../common/utils/advanced_settings';
 

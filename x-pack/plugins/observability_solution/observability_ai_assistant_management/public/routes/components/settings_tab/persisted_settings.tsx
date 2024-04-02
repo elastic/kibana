@@ -23,8 +23,7 @@ const LazyFieldRow = React.lazy(async () => ({
 const FieldRow = withSuspense(LazyFieldRow);
 
 export function PersistedSettings() {
-  const { observabilityAIAssistant, uiSettings, docLinks, notifications, settings } =
-    useAppContext();
+  const { uiSettings, docLinks, notifications, settings } = useAppContext();
   const [unsavedChanges, setUnsavedChanges] = useState<Record<string, UnsavedFieldChange>>({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -48,13 +47,7 @@ export function PersistedSettings() {
     setUnsavedChanges({});
   }
 
-  const { connectors, loading: isLoadingConnectors } =
-    observabilityAIAssistant.useGenAIConnectors();
-
-  const fieldDefinitions = useMemo(
-    () => getFieldDefinitions(connectors, isLoadingConnectors, uiSettings),
-    [connectors, isLoadingConnectors, uiSettings]
-  );
+  const fieldDefinitions = useMemo(() => getFieldDefinitions(uiSettings), [uiSettings]);
 
   return (
     <>
