@@ -14,10 +14,6 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     () =>
     ({ children }) =>
       <div>{children}</div>,
-  getPageWrapper:
-    () =>
-    ({ children }) =>
-      <div>{children}</div>,
   licenseService: {
     isEnterprise(): boolean {
       return true;
@@ -26,7 +22,14 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
       return true;
     },
   },
+  getPageWrapper:
+    () =>
+    ({ children }) =>
+      <div>{children}</div>,
   sourcererDataView: {
+    sourcererDataView: {
+      id: 'security-solution-default',
+    },
     browserFields: {},
     selectedPatterns: [],
     indexPattern: { fields: [], title: '' },
