@@ -214,6 +214,12 @@ export const DiscoverTopNav = ({
     saveLsIndex(dataView?.getIndexPattern() || null);
     saveLsIndexTimeField(dataView?.getTimeField()?.spec.name || null);
     saveLsDataViewId(dataView?.id);
+
+    return () => {
+      saveLsIndex(null);
+      saveLsIndexTimeField(null);
+      saveLsDataViewId(null);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataView]);
 
