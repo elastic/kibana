@@ -10,12 +10,14 @@ import {
   combineLatest,
   debounceTime,
   distinctUntilChanged,
+  from,
   map,
   Observable,
   of,
   ReplaySubject,
   skipWhile,
   switchMap,
+  take,
   takeUntil,
 } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
@@ -31,11 +33,7 @@ import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
 import { definition as analyticsDefinition } from '@kbn/solution-nav-analytics';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { UserProfileData } from '@kbn/user-profile-components';
-import {
-  ENABLE_SOLUTION_NAV_UI_SETTING_ID,
-  OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID,
-  DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
-} from '../common';
+import { ENABLE_SOLUTION_NAV_UI_SETTING_ID, SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
 import type {
   NavigationPublicSetup,
   NavigationPublicStart,
@@ -43,7 +41,6 @@ import type {
   NavigationPublicStartDependencies,
   ConfigSchema,
   SolutionNavigation,
-  SolutionNavigationOptInStatus,
   SolutionType,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
@@ -88,7 +85,7 @@ export class NavigationPublicPlugin
     this.coreStart = core;
     this.depsStart = depsStart;
 
-    const { unifiedSearch, cloud, security } = depsStart;
+    const { unifiedSearch, cloud, security, cloudExperiments } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
 
@@ -129,38 +126,59 @@ export class NavigationPublicPlugin
 
     const config = this.initializerContext.config.get();
     const {
-      solutionNavigation: { featureOn: isSolutionNavigationFeatureOn },
+      solutionNavigation: { defaultSolution },
     } = config;
 
-    const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
-    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-    const isSolutionNavEnabled = isSolutionNavigationFeatureOn && onCloud && !isServerless;
-    this.isSolutionNavEnabled$ = of(isSolutionNavEnabled);
+    let isFeatureEnabled$ = of(false);
+    this.isSolutionNavEnabled$ = of(false);
 
-    if (isSolutionNavEnabled) {
-      chrome.project.setCloudUrls(cloud);
-      this.addDefaultSolutionNavigation({ chrome });
-
-      this.isSolutionNavEnabled$ = combineLatest([
-        core.settings.globalClient.get$<boolean>(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
-        core.settings.globalClient.get$<SolutionNavigationOptInStatus>(
-          OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID
-        ),
-        this.userProfileOptOut$,
-      ]).pipe(
-        takeUntil(this.stop$),
-        debounceTime(10),
-        map(([enabled, status, userOptedOut]) => {
-          if (!enabled || userOptedOut === true) return false;
-          if (status === 'hidden' && userOptedOut === undefined) return false;
-          return true;
+    if (cloudExperiments) {
+      isFeatureEnabled$ = from(
+        cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
+      ).pipe(
+        map((isFeatureFlagEnabled) => {
+          const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
+          const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+          return isFeatureFlagEnabled && onCloud && !isServerless;
         })
       );
 
-      this.susbcribeToSolutionNavUiSettings({ core, security });
-    } else if (!isServerless) {
-      chrome.setChromeStyle('classic');
+      this.isSolutionNavEnabled$ = isFeatureEnabled$.pipe(
+        switchMap((isFeatureEnabled) => {
+          return !isFeatureEnabled
+            ? of(false)
+            : combineLatest([
+                core.settings.globalClient.get$<boolean>(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
+                this.userProfileOptOut$,
+              ]).pipe(
+                takeUntil(this.stop$),
+                debounceTime(10),
+                map(([enabled, userOptedOut]) => {
+                  if (!enabled || userOptedOut === true) return false;
+                  return true;
+                })
+              );
+        })
+      );
     }
+
+    // Initialize the solution navigation if it is enabled
+    isFeatureEnabled$.pipe(take(1)).subscribe((isFeatureEnabled) => {
+      if (!isFeatureEnabled) {
+        chrome.setChromeStyle('classic');
+        return;
+      }
+
+      chrome.project.setCloudUrls(cloud!);
+      this.addDefaultSolutionNavigation({ chrome });
+      this.susbcribeToSolutionNavUiSettings({ core, security, defaultSolution });
+    });
+
+    // Keep track of the solution navigation enabled state
+    let isSolutionNavEnabled = false;
+    this.isSolutionNavEnabled$.pipe(takeUntil(this.stop$)).subscribe((_isSolutionNavEnabled) => {
+      isSolutionNavEnabled = _isSolutionNavEnabled;
+    });
 
     return {
       ui: {
@@ -190,25 +208,23 @@ export class NavigationPublicPlugin
   private susbcribeToSolutionNavUiSettings({
     core,
     security,
+    defaultSolution,
   }: {
     core: CoreStart;
+    defaultSolution: SolutionType;
     security?: SecurityPluginStart;
   }) {
     const chrome = core.chrome as InternalChromeStart;
 
     combineLatest([
       core.settings.globalClient.get$<boolean>(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
-      core.settings.globalClient.get$<SolutionNavigationOptInStatus>(
-        OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID
-      ),
-      core.settings.globalClient.get$<SolutionType>(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
       this.userProfileOptOut$,
     ])
       .pipe(takeUntil(this.stop$), debounceTime(10))
-      .subscribe(([enabled, status, defaultSolution, userOptedOut]) => {
+      .subscribe(([enabled, userOptedOut]) => {
         if (enabled) {
           // Add menu item in the user profile menu to opt in/out of the new navigation
-          this.addOptInOutUserProfile({ core, security, optInStatusSetting: status, userOptedOut });
+          this.addOptInOutUserProfile({ core, security, userOptedOut });
         } else {
           // TODO. Remove the user profile menu item if the feature is disabled.
           // But first let's wait as maybe there will be a page refresh when opting out.
@@ -218,17 +234,7 @@ export class NavigationPublicPlugin
           chrome.project.changeActiveSolutionNavigation(null);
           chrome.setChromeStyle('classic');
         } else {
-          const changeToSolutionNav =
-            status === 'visible' || (status === 'hidden' && userOptedOut === false);
-
-          if (!changeToSolutionNav) {
-            chrome.setChromeStyle('classic');
-          }
-
-          chrome.project.changeActiveSolutionNavigation(
-            changeToSolutionNav ? defaultSolution : null,
-            { onlyIfNotSet: true }
-          );
+          chrome.project.changeActiveSolutionNavigation(defaultSolution, { onlyIfNotSet: true });
         }
       });
   }
@@ -297,22 +303,15 @@ export class NavigationPublicPlugin
   private addOptInOutUserProfile({
     core,
     security,
-    optInStatusSetting,
     userOptedOut,
   }: {
     core: CoreStart;
     userOptedOut?: boolean;
-    optInStatusSetting?: SolutionNavigationOptInStatus;
     security?: SecurityPluginStart;
   }) {
     if (!security || this.userProfileMenuItemAdded) return;
 
-    let defaultOptOutValue = userOptedOut !== undefined ? userOptedOut : DEFAULT_OPT_OUT_NEW_NAV;
-    if (optInStatusSetting === 'visible' && userOptedOut === undefined) {
-      defaultOptOutValue = false;
-    } else if (optInStatusSetting === 'hidden' && userOptedOut === undefined) {
-      defaultOptOutValue = true;
-    }
+    const defaultOptOutValue = userOptedOut !== undefined ? userOptedOut : DEFAULT_OPT_OUT_NEW_NAV;
 
     const menuLink: UserMenuLink = {
       content: (
