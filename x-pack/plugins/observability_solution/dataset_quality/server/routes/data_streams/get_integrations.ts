@@ -31,6 +31,7 @@ export async function getIntegrationDashboards(
   // Fetch dashboards savedObject
   // We are directly querying the SO here
   // The dashboard service is not exposed from the server side at the moment
+  // https://github.com/elastic/kibana/issues/179759
   const dashboardsSavedObjects = await savedObjectsClient.bulkGet<{
     title?: string;
   }>(
