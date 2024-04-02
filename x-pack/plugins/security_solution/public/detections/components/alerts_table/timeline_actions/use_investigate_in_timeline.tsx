@@ -168,7 +168,12 @@ export const useInvestigateInTimeline = ({
         ruleNote,
       });
     },
-    [updateTimeline, updateTimelineIsLoading, clearActiveTimeline, unifiedComponentsInTimelineEnabled]
+    [
+      updateTimeline,
+      updateTimelineIsLoading,
+      clearActiveTimeline,
+      unifiedComponentsInTimelineEnabled,
+    ]
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {

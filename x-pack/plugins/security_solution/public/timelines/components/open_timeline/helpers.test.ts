@@ -7,6 +7,7 @@
 
 import { cloneDeep, getOr, omit } from 'lodash/fp';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 
 import { mockTimelineResults, mockGetOneTimelineResult } from '../../../common/mock';
 import { timelineDefaults } from '../../store/defaults';
@@ -773,39 +774,34 @@ describe('helpers', () => {
       });
     });
     describe('open a timeline when unifiedComponentsInTimelineEnabled is true', () => {
-      const updateIsLoading = jest.fn();
       const untitledTimeline = { ...mockSelectedTimeline, title: '' };
       const onOpenTimeline = jest.fn();
-
-      const updateTimelineHandler = jest.fn();
-
-      const updateTimeline = jest.fn(() => updateTimelineHandler);
-
       afterEach(() => {
         jest.clearAllMocks();
       });
 
       it('should update timeline correctly when timeline is untitled', async () => {
-        const args: QueryTimelineById<{}> = {
+        const args: QueryTimelineById = {
           duplicate: false,
           graphEventId: '',
           timelineId: undefined,
           timelineType: TimelineType.default,
           onOpenTimeline,
           openTimeline: true,
-          updateIsLoading,
-          updateTimeline,
           unifiedComponentsInTimelineEnabled: true,
         };
         (resolveTimeline as jest.Mock).mockResolvedValue(untitledTimeline);
-        queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
+        renderHook(async () => {
+          const queryTimelineById = useQueryTimelineById();
+          queryTimelineById(args);
+        });
 
-        expect(updateIsLoading).toHaveBeenCalledWith({
+        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
           id: TimelineId.active,
           isLoading: true,
         });
 
-        expect(updateTimeline).toHaveBeenNthCalledWith(
+        expect(mockUpdateTimeline).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({
             id: TimelineId.active,
@@ -814,72 +810,80 @@ describe('helpers', () => {
             }),
           })
         );
-        expect(updateIsLoading).toHaveBeenCalledWith({
+        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
           id: TimelineId.active,
           isLoading: false,
         });
       });
 
       it('should update timeline correctly when timeline is already saved and onOpenTimeline is not provided', async () => {
-        const args: QueryTimelineById<{}> = {
+        const args: QueryTimelineById = {
           duplicate: false,
           graphEventId: '',
           timelineId: TimelineId.active,
           timelineType: TimelineType.default,
           onOpenTimeline: undefined,
           openTimeline: true,
-          updateIsLoading,
-          updateTimeline,
           unifiedComponentsInTimelineEnabled: true,
         };
 
         (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
+        renderHook(async () => {
+          const queryTimelineById = useQueryTimelineById();
+          queryTimelineById(args);
+        });
 
-        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
+        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
+          isLoading: true,
+        });
 
-        expect(updateTimeline).toHaveBeenNthCalledWith(
-          1,
-          expect.objectContaining({
-            timeline: expect.objectContaining({
-              columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
-                columnHeaderType: col.columnHeaderType,
-                id: col.id,
-                initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
-                  ?.initialWidth,
-              })),
-            }),
-          })
-        );
+        await waitFor(() => {
+          expect(mockUpdateTimeline).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+              timeline: expect.objectContaining({
+                columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
+                  columnHeaderType: col.columnHeaderType,
+                  id: col.id,
+                  initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
+                    ?.initialWidth,
+                })),
+              }),
+            })
+          );
+        });
       });
 
       it('should update timeline correctly when timeline is already saved and onOpenTimeline IS provided', async () => {
-        const args: QueryTimelineById<{}> = {
+        const args: QueryTimelineById = {
           duplicate: false,
           graphEventId: '',
           timelineId: TimelineId.active,
           timelineType: TimelineType.default,
           onOpenTimeline,
           openTimeline: true,
-          updateIsLoading,
-          updateTimeline,
           unifiedComponentsInTimelineEnabled: true,
         };
 
         (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
+        renderHook(async () => {
+          const queryTimelineById = useQueryTimelineById();
+          queryTimelineById(args);
+        });
 
-        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
-
-        expect(onOpenTimeline).toHaveBeenNthCalledWith(
-          1,
-          expect.objectContaining({
-            columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
-              columnHeaderType: col.columnHeaderType,
-              id: col.id,
-              initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
-                ?.initialWidth,
-            })),
-          })
-        );
+        waitFor(() => {
+          expect(onOpenTimeline).toHaveBeenCalledWith(
+            expect.objectContaining({
+              columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
+                columnHeaderType: col.columnHeaderType,
+                id: col.id,
+                initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
+                  ?.initialWidth,
+              })),
+            })
+          );
+        });
       });
     });
   });

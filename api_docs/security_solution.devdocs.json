@@ -1832,20 +1832,6 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.TimelineModel.isDiscoverSavedSearchLoaded",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isDiscoverSavedSearchLoaded",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
             "id": "def-public.TimelineModel.isDataProviderVisible",
             "type": "boolean",
             "tags": [],

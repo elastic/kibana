@@ -37,7 +37,13 @@ import { ExitFullScreen } from '../../../../../common/components/exit_full_scree
 import { getDefaultControlColumn } from '../../body/control_columns';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
-import { FullWidthFlexGroup, ScrollableFlexItem, StyledEuiFlyoutBody, StyledEuiFlyoutFooter, VerticalRule } from '../shared/layout';
+import {
+  FullWidthFlexGroup,
+  ScrollableFlexItem,
+  StyledEuiFlyoutBody,
+  StyledEuiFlyoutFooter,
+  VerticalRule,
+} from '../shared/layout';
 import { TimelineTabCommonProps } from '../shared/types';
 
 const ExitFullScreenContainer = styled.div`
