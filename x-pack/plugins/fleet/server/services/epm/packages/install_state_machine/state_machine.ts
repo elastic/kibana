@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { appContextService } from '../../../app_context';
 import type { StateContext, LatestExecutedState } from '../../../../../common/types';
 export interface State {
@@ -69,6 +70,12 @@ export async function handleState(
       updatedContext = { ...updatedContext, latestExecutedState: latestStateWithError };
       logger.warn(errorMessage);
 
+      // execute post transition function when transition failed too
+      if (typeof currentState.onPostTransition === 'function') {
+        await currentState.onPostTransition.call(undefined, updatedContext);
+        logger.debug(`Executing post transition function: ${currentState.onPostTransition.name}`);
+      }
+
       // bubble up the error
       throw errorMessage;
     }
@@ -78,7 +85,7 @@ export async function handleState(
       `Execution of state "${currentStateName}" with status "${currentStatus}": provided onTransition is not a valid function`
     );
   }
-
+  // execute post transition function
   if (typeof currentState.onPostTransition === 'function') {
     try {
       await currentState.onPostTransition.call(undefined, updatedContext);

@@ -421,7 +421,7 @@ describe('handleState', () => {
     );
   });
 
-  it('should not execute postTransition when a transition exits with errors', async () => {
+  it('should execute postTransition correctly also when a transition throws', async () => {
     const error = new Error('Installation failed');
     const mockOnTransitionState1 = jest.fn().mockReturnValue({ result1: 'test' });
     const mockOnTransitionState2 = jest.fn().mockRejectedValue(error);
@@ -436,7 +436,19 @@ describe('handleState', () => {
       mockPostTransition
     );
     try {
-      await handleState('state1', testDefinition, testDefinition.context);
+      const updatedContext = await handleState('state1', testDefinition, testDefinition.context);
+      expect(updatedContext).toEqual(
+        expect.objectContaining({
+          testData: 'test',
+          result1: 'test',
+          latestExecutedState: {
+            name: 'state1',
+            started_at: expect.anything(),
+            error:
+              'Error during execution of state "state2" with status "failed": Installation failed',
+          },
+        })
+      );
     } catch (err) {
       expect(err).toEqual(
         `Error during execution of state \"state2\" with status \"failed\": Installation failed`
@@ -450,6 +462,8 @@ describe('handleState', () => {
         latestExecutedState: {
           name: 'state1',
           started_at: expect.anything(),
+          error:
+            'Error during execution of state "state2" with status "failed": Installation failed',
         },
       })
     );
@@ -467,7 +481,7 @@ describe('handleState', () => {
     expect(mockOnTransitionState3).toHaveBeenCalledTimes(0);
   });
 
-  it('should log a warning when postTransition exits with erros and continue executing the states', async () => {
+  it('should log a warning when postTransition exits with errors and continue executing the states', async () => {
     const error = new Error('Installation failed');
     const mockOnTransitionState1 = jest.fn().mockReturnValue({ result1: 'test' });
     const mockOnTransitionState2 = jest.fn();
