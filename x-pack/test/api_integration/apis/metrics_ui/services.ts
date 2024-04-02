@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ServicesAPIResponseRT } from '@kbn/infra-plugin/common/http_api/host_details';
 import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
-import { FtrProviderContext } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateServicesData, generateServicesLogsOnlyData } from './helpers';
 
 const SERVICES_ENDPOINT = '/api/infra/services';
