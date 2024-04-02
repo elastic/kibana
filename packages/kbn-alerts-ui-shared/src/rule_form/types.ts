@@ -6,14 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DocLinks } from '@kbn/doc-links';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ComponentType } from 'react';
-
-export interface DocLinksStart {
-  readonly DOC_LINK_VERSION: string;
-  readonly ELASTIC_WEBSITE_URL: string;
-  readonly links: DocLinks;
-}
 
 export interface ValidationResult {
   errors: Record<string, any>;

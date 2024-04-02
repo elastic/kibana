@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { EuiPageTemplate, EuiSteps } from '@elastic/eui';
 import { useRuleFormSelector, useRuleFormDispatch } from '../hooks';
 import { setRuleName } from '../features/rule_details/slice';
@@ -19,7 +20,8 @@ export interface RuleFormPageProps {
   ruleTypeModel: RuleTypeModel;
   expressionPlugins: RuleTypeParamsExpressionPlugins;
   onClickReturn: () => void;
-  referrerHref: string;
+  referrerHref?: string;
+  docLinks: DocLinksStart;
 }
 
 export const RuleFormPage: React.FC<RuleFormPageProps> = ({
@@ -27,6 +29,7 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
   referrerHref,
   ruleTypeModel,
   expressionPlugins,
+  docLinks,
 }) => {
   const ruleName = useRuleFormSelector((state) => state.ruleDetails.name);
   const dispatch = useRuleFormDispatch();
@@ -48,6 +51,7 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
                 <RuleDefinition
                   ruleTypeModel={ruleTypeModel}
                   expressionPlugins={expressionPlugins}
+                  docLinks={docLinks}
                 />
               ),
             },

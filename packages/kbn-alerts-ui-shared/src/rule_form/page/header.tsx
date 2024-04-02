@@ -14,7 +14,7 @@ export interface RuleFormPageHeaderProps {
   ruleName: string;
   onChangeName: (name: string) => void;
   onClickReturn: () => void;
-  referrerHref: string;
+  referrerHref?: string;
 }
 
 export const RuleFormPageHeader: React.FC<RuleFormPageHeaderProps> = ({
@@ -72,22 +72,26 @@ export const RuleFormPageHeader: React.FC<RuleFormPageHeaderProps> = ({
   return (
     <EuiPageTemplate.Header
       pageTitle={pageTitle}
-      breadcrumbs={[
-        {
-          text: (
-            <>
-              <EuiIcon size="s" type="arrowLeft" /> Return
-            </>
-          ),
-          color: 'primary',
-          'aria-current': false,
-          href: referrerHref,
-          onClick: (e) => {
-            e.preventDefault();
-            onClickReturn();
-          },
-        },
-      ]}
+      breadcrumbs={
+        referrerHref
+          ? [
+              {
+                text: (
+                  <>
+                    <EuiIcon size="s" type="arrowLeft" /> Return
+                  </>
+                ),
+                color: 'primary',
+                'aria-current': false,
+                href: referrerHref,
+                onClick: (e) => {
+                  e.preventDefault();
+                  onClickReturn();
+                },
+              },
+            ]
+          : []
+      }
     />
   );
 };

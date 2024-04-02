@@ -209,6 +209,7 @@ export const RulesList = ({
   const cloneRuleId = useRef<null | string>(null);
 
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
+  const isRuleFormV2Enabled = getIsExperimentalFeatureEnabled('ruleFormV2');
 
   const [percentileOptions, setPercentileOptions] =
     useState<EuiSelectableOption[]>(initialPercentileOptions);
@@ -1003,9 +1004,13 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
-              setRuleTypeIdToCreate(ruleTypeId);
-              setRuleTypeModalVisibility(false);
-              history.push(`/rule/create/${ruleTypeId}`, { referrer: window.location.href });
+              if (isRuleFormV2Enabled) {
+                history.push(`/rule/create/${ruleTypeId}`, { referrer: window.location.href });
+              } else {
+                setRuleTypeModalVisibility(false);
+                setRuleTypeIdToCreate(ruleTypeId);
+                setRuleFlyoutVisibility(true);
+              }
             }}
             http={http}
             toasts={toasts}

@@ -28,7 +28,7 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
   location,
   history,
 }) => {
-  const { setBreadcrumbs, ruleTypeRegistry, charts, data, dataViews, unifiedSearch } =
+  const { setBreadcrumbs, ruleTypeRegistry, docLinks, charts, data, dataViews, unifiedSearch } =
     useKibana().services;
   const {
     ruleTypesState,
@@ -46,7 +46,7 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
     [ruleTypeId, ruleTypeRegistry]
   );
 
-  const { referrer } = location.state as CreateRuleLocationState;
+  const { referrer } = (location.state ?? {}) as CreateRuleLocationState;
   const onClickReturn = useCallback(() => {
     history.push(referrer);
   }, [referrer, history]);
@@ -139,6 +139,7 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
         dataViews,
         unifiedSearch,
       }}
+      docLinks={docLinks}
       onClickReturn={onClickReturn}
       referrerHref={referrer}
     />
