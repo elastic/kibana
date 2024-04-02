@@ -20,7 +20,9 @@ const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_P
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
 const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
 const COPY_PANEL_TO_DATA_TEST_SUBJ = 'embeddablePanelAction-copyToDashboard';
+const LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-legacySaveToLibrary';
 const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
+const LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-legacyUnlinkFromLibrary';
 const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
@@ -257,6 +259,19 @@ export class DashboardPanelActionsService extends FtrService {
     await this.testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);
   }
 
+  async legacyUnlinkFromLibary(parent?: WebElementWrapper) {
+    this.log.debug('legacyUnlinkFromLibrary');
+    await this.openContextMenu(parent);
+    const exists = await this.testSubjects.exists(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ);
+    if (!exists) {
+      await this.clickContextMenuMoreItem();
+    }
+    await this.testSubjects.click(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ);
+    await this.testSubjects.waitForDeleted(
+      'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+    );
+  }
+
   async unlinkFromLibary(parent?: WebElementWrapper) {
     this.log.debug('unlinkFromLibrary');
     await this.openContextMenu(parent);
@@ -268,6 +283,25 @@ export class DashboardPanelActionsService extends FtrService {
     await this.testSubjects.waitForDeleted(
       'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
     );
+  }
+
+  async legacySaveToLibrary(newTitle: string, parent?: WebElementWrapper) {
+    this.log.debug('legacySaveToLibrary');
+    await this.openContextMenu(parent);
+    const exists = await this.testSubjects.exists(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ);
+    if (!exists) {
+      await this.clickContextMenuMoreItem();
+    }
+    await this.testSubjects.click(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ);
+    await this.testSubjects.setValue('savedObjectTitle', newTitle, {
+      clearWithKeyboard: true,
+    });
+    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+      );
+    });
   }
 
   async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {
