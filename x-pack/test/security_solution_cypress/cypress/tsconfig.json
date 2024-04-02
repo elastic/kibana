@@ -42,5 +42,6 @@
     "@kbn/ml-plugin",
     "@kbn/license-management-plugin",
     "@kbn/actions-plugin",
+    "@kbn/alerts-ui-shared",
   ]
 }
