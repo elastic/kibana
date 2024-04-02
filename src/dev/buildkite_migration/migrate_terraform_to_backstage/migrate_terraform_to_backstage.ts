@@ -329,7 +329,7 @@ function convertBuildkitePipeline(
 
   const providerSettings = pipeline.provider_settings?.[0] || {};
 
-  const pipelineSlug = slugify(pipelineId);
+  const pipelineSlug = slugify(pipeline.name);
   let canonicalPipelineId = `bk-` + pipelineSlug;
   if (canonicalPipelineId.length > 63) {
     canonicalPipelineId = canonicalPipelineId + '-TOO-LONG-FIND-SOMETHING-SHORTER!';
@@ -340,15 +340,13 @@ function convertBuildkitePipeline(
     {} as Record<string, { access_level: string }>
   );
 
-  if (!teams.everyone) {
-    teams.everyone = { access_level: 'BULID_AND_READ' };
-  }
   // https://github.com/elastic/kibana-operations/issues/41
   ['kibana-operations', 'appex-qa', 'kibana-tech-leads'].forEach((team) => {
     if (!teams[team]) {
       teams[team] = { access_level: 'MANAGE_BUILD_AND_READ' };
     }
   });
+  teams.everyone = { access_level: 'BULID_AND_READ' };
 
   const pipelineObj = {
     apiVersion: 'backstage.io/v1alpha1',
