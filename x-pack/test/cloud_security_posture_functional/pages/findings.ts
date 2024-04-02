@@ -17,7 +17,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -146,36 +145,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    // Skipped: tests involving DataView works when running this file on isolation but fails when running all tests
-    // TODO: Discover why it fails when running all tests
-    describe.skip('SearchBar', () => {
-      it('add / remove filter', async () => {
-        // Filter bar uses the field's customLabel in the DataView
-        await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
-
-        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);
-
-        await filterBar.removeFilter('rule.name');
-
-        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(false);
-        expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
-      });
-
-      it('set search query', async () => {
-        await queryBar.setQuery(ruleName1);
-        await queryBar.submitQuery();
-
-        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName2)).to.be(false);
-
-        await queryBar.setQuery('');
-        await queryBar.submitQuery();
-
-        expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
-      });
-    });
-
     describe('Table Sort', () => {
       it('defaults sorting by timestamp DESC', async () => {
         const timestamps = await latestFindingsTable.getColumnValues('@timestamp');
@@ -195,33 +164,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await filterBar.removeFilter('result.evaluation');
         });
-      });
-    });
-
-    // Skipped: tests involving DataView works when running this file on isolation but fails when running all tests
-    // TODO: Discover why it fails when running all tests
-    describe.skip('DataTable features', () => {
-      it('Findings table columns are initialized from DataView', async () => {
-        const headers = await latestFindingsTable.getHeaders();
-        const expectedHeaders = [
-          '',
-          'Result',
-          'Resource ID',
-          'Resource Name',
-          'Resource Type',
-          'Rule Number',
-          'Rule Name',
-          'CIS Section',
-          'Last Checked',
-        ];
-        const headerTexts = await Promise.all(headers.map((header) => header.getVisibleText()));
-        expect(headerTexts).to.eql(expectedHeaders);
-      });
-
-      it('Edit data view field option is Enabled', async () => {
-        await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
-        expect(await testSubjects.find('gridEditFieldButton')).to.be.ok();
-        await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
       });
     });
 
