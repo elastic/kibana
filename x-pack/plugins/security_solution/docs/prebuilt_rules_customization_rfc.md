@@ -172,7 +172,7 @@ Custom rules will have:
 
 In the current application's state, rules with `immutable: false` are rules which are not Elastic Prebuilt Rules, i.e. custom rules, and can be modified. Meanwhile, `immutable: true` rules are Elastic Prebuilt Rules, created by the TRaDE team, distributed via the `security_detection_engine` Fleet package, and cannot be modified once installed.
 
-When successfully implemented, the `rule_source` field should replace the `immutable` field as a mechanism to mark Elastic prebuilt rules, but with one difference: the `rule_source` field will determine if the rule is an Elastic Prebuilt Rule or not, but now all rules will be customizable by the user in Kibana, i.e. independently of the existence (or absence) of `rule_source`.
+When successfully implemented, the `rule_source` field should replace the `immutable` field as a mechanism to mark Elastic prebuilt rules, but with one difference: the `rule_source` field will determine if the rule is an Elastic Prebuilt Rule or not, but now all rules will be customizable by the user in Kibana, i.e. independently of the `type` of `rule_source`.
 
 Because of this difference between the `rule_source` and `immutable` fields, the `immutable` field will lose its original meaning as soon as we allow users to customize prebuilt rules, which might become confusing for those API consumers who interact directly with this field. That's why we want to first deprecate it and later after a large enough deprecation period we could consider removing it completely from the API.
 
@@ -443,7 +443,7 @@ Our migration strategy will consist of two distinct types of migration: a **migr
 | **Perform Rule Upgrade** - `POST /prebuilt_rules/upgrade/_perform` (Internal) | <center>✅</center> | <center>✅</center> | - Current way of upgrading a prebuilt rule |
 | **(LEGACY) Install Prebuilt Rules And Timelines** - `PUT /rules/prepackaged` | <center>✅</center> | <center>✅</center> | - Legacy endpoint for installing prebuilt rules and updating rules. |
 |**Bulk Actions** - `POST /rules/_bulk_action`: | | | This endpoint includes a `dry_run` mode that is executed to evaluate preconditions and warn the user before executing the actual request. No migration logic should take place for dry run requests, i.e when `dry_run=true`, since we never write to ES when this parameter is set to `true`.|
-|  <li>_**Enable and disable action**_</li> | <center>✅</center> | <center>❌</center> | - Migration-on-write is technically possible but should be done on Alerting Framework side. |
+|  <li>_**Enable and disable action**_</li> | <center>✅</center> | <center>❌</center> | - Migration-on-write is technically possible but we have decided to avoid implementing the additional logic in the AF side. Also, logic should be [migrated](https://github.com/elastic/kibana/issues/177634) soon. |
 | <li>_**Delete action**_</li> | <center>✅</center> | <center>❌</center> | - Deletes ES object but returns deleted rules data, so so normalization-on-read is enough. |
 | <li>_**Export action**_</li> | <center>✅</center> | <center>❌</center> | - See section [Exporting rules](#exporting-rules) |
 | <li>_**Duplicate rule action**_</li> | <center>✅</center> | <center>❌</center> | - Per definition, all duplicated rules will be `custom` rules. That means that all duplicated rules (the duplicates) are newly created and should get a `rule_source` of type `internal`, and no migration-on-write is neccessary. |
@@ -547,7 +547,12 @@ Endpoints that perform migration-on-write either fetch the rule before updating 
 
 ### Technical implementation of migration-on-write
 
-The logic for the migration of the rule saved objects, which means the determination of the `immutable` and `rule_source` fields before writing to ES, might differ depending on the action being performed by the user.
+The migration-on-write process implements two changes:
+
+- creates the `ruleSource` field in the SO in Elasticsearch.
+- deletes the `immutable` field in the SO in Elasticsearch (although this field is maintained in the API and calculated via normalization-on-read)
+
+The logic for the migration of the rule saved objects might differ depending on the action being performed by the user.
 
 Let's see all possible use cases that will require migration-on-write, the endpoints that they apply to, and the expected resulting migrated field, based on the action and their input.
 
@@ -603,8 +608,7 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
 {
   ruleSource: {
     type: 'internal'
-  },
-  immutable: false,
+  }
 }
         </pre>
       </td>
@@ -616,8 +620,7 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
 {
   ruleSource: {
     type: 'internal'
-  },
-  immutable: false,
+  }
 }
         </pre>
       </td>
@@ -627,8 +630,7 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
 {
   ruleSource: {
     type: 'internal'
-  },
-  immutable: false,
+  }
 }
         </pre>
       </td>
@@ -650,8 +652,7 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     type: 'external',
     isCustomized: false,
     ...
-  },
-  immutable: true,
+  }
 }
         </pre>
       </td>
@@ -673,8 +674,7 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     type: 'external',
     isCustomized: true,
     ...
-  },
-  immutable: true,
+  }
 }
         </pre>
       </td>
@@ -688,8 +688,7 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     type: 'external',
     isCustomized: false,
     ...
-  },
-  immutable: true,
+  }
 }
         </pre>
       </td>
@@ -701,8 +700,7 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     type: 'external',
     isCustomized: false,
     ...
-  },
-  immutable: true,
+  }
 }
         </pre>
       </td>
@@ -714,10 +712,9 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
 {
   ruleSource: {
     type: 'external',
-    isCustomized: true,
+    isCustomized: false,
     ...
-  },
-  immutable: true,
+  }
 }
         </pre>
       </td>
@@ -729,8 +726,7 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     type: 'external',
     isCustomized: true,
     ...
-  },
-  immutable: true,
+  }
 }
         </pre>
       </td>
@@ -744,8 +740,7 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     type: 'external',
     isCustomized: true,
     ...
-  },
-  immutable: true,
+  }
 }
         </pre>
       </td>
@@ -757,8 +752,7 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
     type: 'external',
     isCustomized: false,
     ...
-  },
-  immutable: true,
+  }
 }
         </pre>
       </td>
@@ -820,13 +814,10 @@ Out of the actions mentioned above, the only use cases that should possibly resu
 
 That means that updating a rule's actions should not be considered a customization of a prebuilt rule.
 
-Secondly, in contrast with other endpoints, the migration for bulk editing rules needs to be carried within the Alerting Framework's `RuleClient` since we need to migrate the rule's `rule_source` and `immutable` parameters before the `RuleClient` does the saving of the rule into Elasticsearch.
+Secondly, in order to migrate the `is_customized` value for rule edits, we can follow two approaches:
 
-This however, gives us the advantage that the `RuleClient` already includes logic to calculate if a rule's attributes or parameters have been modified from its initial values, so we can rely on that to calculate the `rule_source.is_customized` field during the update.
-
-The `RulesClient` class has a `bulkEdit` method, which is called by our **Bulk Actions endpoint** `POST /rules/_bulk_action`. That method includes complex logic, but we can focus on the `updateRuleAttributesAndParamsInMemory` method, where the rule attributes and parameters are updated before being saved to ES. This function also calculates the booleans `isAttributesUpdateSkipped` and `isParamsUpdateSkipped` which we can leverage to calculate the new value of the `rule_source.is_customized` field in our params.
-
-_See Source: [x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/bulk_edit_rules.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/bulk_edit_rules.ts)_
+1. Calculate it in the `paramsModifier` callback that is passed to the `rulesClient.bulkEdit` method. This will need to modify the parameters of the callback to take as parameter the whole rule and the operations on the attributes, in order to have access to the values of the rule's field before and after of the edit.
+2. Calculate it as part of the `validateMutatedRuleTypeParams` method in `x-pack/plugins/alerting/server/lib/validate_mutated_rule_type_params.ts` where we have access to the original params and the modified params.
 
 ----
 
@@ -1796,6 +1787,12 @@ The following use cases should be covered in the calculation of `is_customized`:
 
 Notice the last scenario from the table, which deals with the edge case of the corresponding version of the `security-rule` asset not being found. This would prevent from doing a comparison of the fields to calculate if the rule should be considered customized or not.
 
+Scenarios in which this could happen are:
+
+- A user manually deletes package and assets
+- A user imports a prebuilt rule with matching `rule_id` but no matching version (base version missing)
+- A user imports a prebuilt rule from a newer version of Kibana and the Elastic prebuilt rules package into an older version of Kibana where that `version` of the rule does not exist or hasn't been created yet.
+
 So, if the corresponding rule asset is not found, do not attempt to do any comparisons and mark the rule as `is_customized: true`; ignoring the current values of the rules, the payload and the end result.
 
 Reasons:
@@ -2248,7 +2245,7 @@ Changes to **target** compared against **base**:
 
 Combining both modifications:
 - Added: [windows, host, ml]
-- Removed: [network] (which elements were removed in both?)
+- Removed: [linux, network] (which elements were removed in both?)
 
 Applying these combined modifications to base results in:
 - **[windows, host, ml]**
@@ -2268,12 +2265,12 @@ const removedCurrent = base.difference(current); // [linux, network]
 const addedTarget = target.difference(base); // [ml]
 const removedTarget = base.difference(target); // [network]
 
-const bothRemoved = removedCurrent.intersection(removedTarget); // [network]
+const bothAdded = addedCurrent.union(addedTarget); // [network]
+const bothRemoved = removedCurrent.union(removedTarget); // [network]
 
 const merged = base
-                .difference(bothRemoved)
-                .union(addedCurrent)
                 .union(addedTarget)
+                .difference(bothRemoved);
 
 // Results in: [windows, host, ml]
 ```
@@ -2330,7 +2327,7 @@ The possible scenarios are:
       <td><code>[windows, host]</code></td>
       <td style="border-right:3px solid black"><code>[linux, ml]</code></td>
       <td><code>[windows, host, ml]</code></td>
-      <td><code>NO</code></td>
+      <td><code>SOLVABLE</code></td>
     </tr>
   </tbody>
 </table>
@@ -2703,7 +2700,7 @@ The possible scenarios are:
   },
 ]
       </pre></td>
-      <td><pre>NO</pre></td>
+      <td><pre>SOLVABLE</pre></td>
     </tr>
     <tr>
       <td style="border-right:3px solid black">Customization and upstream update <b>non-solvable conflict</b> (ABC)<br><br> Object A modified in diverging ways, propose <b>current</b> version</td>
@@ -2743,7 +2740,7 @@ The possible scenarios are:
   }
 ]
       </pre></td>
-      <td><pre><b>YES</b></pre></td>
+      <td><pre><b>NON_SOLVABLE</b></pre></td>
     </tr>
   </tbody>
 </table>
