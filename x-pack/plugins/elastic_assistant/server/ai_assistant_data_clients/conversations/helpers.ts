@@ -20,6 +20,8 @@ export const getUpdateScript = ({
       if (ctx._source.api_config != null) {
         if (params.assignEmpty == true || params.api_config.containsKey('connector_id')) {
           ctx._source.api_config.connector_id = params.api_config.connector_id;
+          ctx._source.api_config.remove('model');
+          ctx._source.api_config.remove('provider');
         }
         if (params.assignEmpty == true || params.api_config.containsKey('default_system_prompt_id')) {
           ctx._source.api_config.default_system_prompt_id = params.api_config.default_system_prompt_id;

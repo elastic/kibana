@@ -38,7 +38,7 @@ const fetchConnectorArgs: FetchConnectorExecuteAction = {
   http: mockHttp,
   message: 'This is a test',
   conversationId: 'test',
-  replacements: [],
+  replacements: {},
 };
 describe('API tests', () => {
   beforeEach(() => {
@@ -52,7 +52,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
           signal: undefined,
@@ -72,7 +72,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
           method: 'POST',
           asResponse: true,
           rawResponse: true,
@@ -89,7 +89,7 @@ describe('API tests', () => {
         alertsIndexPattern: '.alerts-security.alerts-default',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        replacements: [{ uuid: 'auuid', value: 'real.hostname' }],
+        replacements: { auuid: 'real.hostname' },
         size: 30,
       };
 
@@ -98,7 +98,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[{"uuid":"auuid","value":"real.hostname"}],"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"size":30}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{"auuid":"real.hostname"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"size":30}',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -121,7 +121,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
