@@ -12,7 +12,6 @@ import type {
   ThemeServiceSetup,
   ToastsSetup,
 } from '@kbn/core/public';
-import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { ReportingAPIClient } from '../../reporting_api_client';
@@ -25,8 +24,6 @@ export interface ExportModalShareOpts {
   license: ILicense;
   application: ApplicationStart;
   theme: ThemeServiceSetup;
-  version: string;
-  formatFactoryFn: () => FormatFactory;
 }
 
 export interface ExportPanelShareOpts {

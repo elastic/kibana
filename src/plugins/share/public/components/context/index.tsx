@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { createContext, useContext } from 'react';
 
 import { AnonymousAccessServiceContract } from '../../../common';
@@ -19,14 +20,14 @@ import type {
 export interface IShareContext extends ShareContext {
   allowEmbed: boolean;
   allowShortUrl: boolean;
-  // lens can return null when the licensing is less than gold
-  shareMenuItems: Array<ShareMenuItem | null>;
+  shareMenuItems: ShareMenuItem[];
   embedUrlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
   objectTypeTitle?: string;
   isEmbedded: boolean;
+  theme: ThemeServiceSetup;
 }
 
 export const ShareTabsContext = createContext<IShareContext | null>(null);

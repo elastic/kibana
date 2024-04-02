@@ -31,7 +31,7 @@ export interface ShareContextMenuProps {
     locator: LocatorPublic<any>;
     params: any;
   };
-  shareMenuItems: Array<ShareMenuItem | null>;
+  shareMenuItems: ShareMenuItem[];
   sharingData: any;
   onClose: () => void;
   embedUrlParamExtensions?: UrlParamExtension[];

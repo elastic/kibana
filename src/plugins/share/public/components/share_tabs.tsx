@@ -10,7 +10,7 @@ import React, { type FC } from 'react';
 import { TabbedModal } from '@kbn/shared-ux-tabbed-modal';
 
 import { ShareTabsContext, useShareTabsContext, type IShareContext } from './context';
-import { linkTab, embedTab } from './tabs';
+import { linkTab, embedTab, ExportContent } from './tabs';
 
 export const ShareMenuV2: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -28,22 +28,40 @@ export const ShareMenuTabs = () => {
     return null;
   }
 
-  const { allowEmbed, objectType, onClose, shareMenuItems } = shareContext;
-
+  const { allowEmbed, objectType, onClose, shareMenuItems, isDirty, objectId, theme } =
+    shareContext;
+  console.log(shareMenuItems);
   const tabs = [linkTab];
   if (shareMenuItems) {
-    shareMenuItems
-      // need to filter out the null shareMenuItem from Lens and just use the reporting image modal that includes CSV for Lens
-      .filter((item) => item !== null)
-      .forEach(({ shareMenuItem, panel }) => {
-        tabs.push({
-          id: panel.id.toString(),
-          name: shareMenuItem.name,
-          // @ts-ignore
-          content: () => panel.content,
-        });
+    shareMenuItems.forEach((shareMenuItem) => {
+      console.log(shareMenuItem);
+      const { getJobParams, createReportingJob, helpText, reportType, reportingAPIClient } =
+        shareMenuItem;
+      const exportContent = (
+        // @ts-ignore showing undefined but there is a check to make sure share menu items exist
+        <ExportContent
+          {...{
+            getJobParams,
+            createReportingJob,
+            helpText,
+            reportType,
+            isDirty,
+            objectType,
+            objectId,
+            theme,
+            onClose,
+            reportingAPIClient,
+          }}
+        />
+      );
+      tabs.push({
+        id: shareMenuItem.tabType,
+        name: shareMenuItem.tabType,
+        content: exportContent,
       });
+    });
   }
+
   if (allowEmbed) {
     tabs.push(embedTab);
   }

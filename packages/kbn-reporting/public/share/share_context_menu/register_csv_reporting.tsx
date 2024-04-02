@@ -13,19 +13,17 @@ import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-c
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
-import type { ExportPanelShareOpts } from '.';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
-import { CsvModalContent } from './csv_export_modal';
+import { generateReportingJobCSV } from '../shared/get_report_generate';
 
 export const reportingCsvShareProvider = ({
   apiClient,
-  toasts,
-  uiSettings,
   application,
   license,
   usesUiCapabilities,
-  theme,
-}: ExportPanelShareOpts): ShareMenuProvider => {
+}: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
@@ -75,7 +73,6 @@ export const reportingCsvShareProvider = ({
     const licenseHasCsvReporting = licenseCheck.showLinks;
     const licenseDisabled = !licenseCheck.enableLinks;
 
-    // TODO: add abstractions in ExportTypeRegistry to use here?
     let capabilityHasCsvReporting = false;
     if (usesUiCapabilities) {
       capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
@@ -93,26 +90,32 @@ export const reportingCsvShareProvider = ({
           name: panelTitle,
           toolTipContent: licenseToolTipContent,
           disabled: licenseDisabled,
-          ['data-test-subj']: 'CSVReports',
+          ['data-test-subj']: 'Export',
         },
-        panel: {
-          id: 'csvReportingPanel',
-          title: panelTitle,
-          content: (
-            <CsvModalContent
-              requiresSavedState={false}
-              apiClient={apiClient}
-              toasts={toasts}
-              uiSettings={uiSettings}
-              reportType={reportType}
-              objectId={objectId}
-              getJobParams={getJobParams}
-              onClose={onClose}
-              theme={theme}
-              objectType={objectType}
-            />
-          ),
+        tabType: 'Export',
+        helpText: (
+          <FormattedMessage
+            id="share.csv.reporting.helpText"
+            defaultMessage="Export a CSV of this {objectType}"
+            values={{ objectType }}
+          />
+        ),
+        reportType: [reportType],
+        copyURLButton: {
+          id: 'reporting.share.modalContent.csv.copyUrlButtonLabel',
+          dataTestSubj: 'shareReportingCopyURL',
+          label: 'Post URL',
         },
+        generateReportButton: (
+          <FormattedMessage
+            id="reporting.share.generateButtonLabel"
+            data-test-subj="generateReportButton"
+            defaultMessage="Generate CSV"
+          />
+        ),
+        getJobParams,
+        createReportingJob: generateReportingJobCSV,
+        reportingAPIClient: apiClient,
       });
     }
 

@@ -403,7 +403,6 @@ export class LensPlugin {
               downloadCsvShareProvider({
                 uiSettings: core.uiSettings,
                 formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
-                license,
               })
             );
           }

@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ComponentType } from 'react';
+import { ComponentType, ReactElement } from 'react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Capabilities } from '@kbn/core/public';
+import type { JobParamsProviderOptions } from '@kbn/reporting-public/share/share_context_menu';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
@@ -72,7 +74,17 @@ export interface ShareContextMenuPanelItem
  * */
 export interface ShareMenuItem {
   shareMenuItem: ShareContextMenuPanelItem;
-  panel: EuiContextMenuPanelDescriptor;
+  // needed for Canvas
+  panel?: EuiContextMenuPanelDescriptor;
+  reportType?: Array<string | JobParamsProviderOptions>;
+  tabType?: string;
+  requresSavedState?: boolean;
+  helpText?: ReactElement;
+  copyURLButton?: { id: string; dataTestSubj: string; label: string };
+  generateReportButton?: ReactElement;
+  getJobParams?: Function;
+  createReportingJob?: Function;
+  reportingAPIClient?: ReportingAPIClient;
 }
 
 /**
@@ -84,10 +96,7 @@ export interface ShareMenuItem {
  * */
 export interface ShareMenuProvider {
   readonly id: string;
-  /**
-   * Null is set for cases where Lens has its less than gold licensing and csv is permitted
-   */
-  getShareMenuItems: (context: ShareContext) => Array<ShareMenuItem | null>;
+  getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
 }
 
 interface UrlParamExtensionProps {

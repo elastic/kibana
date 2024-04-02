@@ -89,7 +89,7 @@ export class SharePlugin
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
-  kibanaVersion: string;
+  private kibanaVersion: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();

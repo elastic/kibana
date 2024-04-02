@@ -71,18 +71,21 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
   };
 
   const renderTabs = () => {
-    return tabs.map((tab, index) => (
-      <EuiTab
-        key={index}
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-        disabled={tab.disabled}
-        prepend={tab.prepend}
-        append={tab.append}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
+    return tabs.map((tab, index) => {
+      console.log(tab);
+      return (
+        <EuiTab
+          key={index}
+          onClick={() => onSelectedTabChanged(tab.id)}
+          isSelected={tab.id === selectedTabId}
+          disabled={tab.disabled}
+          prepend={tab.prepend}
+          append={tab.append}
+        >
+          {tab.name}
+        </EuiTab>
+      );
+    });
   };
 
   return (
@@ -110,7 +113,6 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
             data-test-subj={modalActionBtn.dataTestSubj}
             data-share-url={state.url}
             onClick={() => {
-              // @ts-ignore null for export modal on state since it's not using the buttons
               modalActionBtn!.handler!({ state: selectedTabId });
             }}
           >

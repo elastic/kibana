@@ -32,7 +32,6 @@ import { ReportingAPIClient } from '@kbn/reporting-public';
 import {
   getSharedComponents,
   reportingCsvShareProvider,
-  reportingScreenshotShareProvider,
   reportingExportModalProvider,
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
@@ -224,31 +223,28 @@ export class ReportingPublicPlugin
         );
 
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          shareSetup.register(
-            reportingScreenshotShareProvider({
-              apiClient,
-              toasts,
-              uiSettings,
-              license,
-              application,
-              usesUiCapabilities,
-              theme: core.theme,
-            })
-          );
-
-          shareSetup.register(
-            reportingExportModalProvider({
-              apiClient,
-              toasts,
-              uiSettings,
-              license,
-              application,
-              usesUiCapabilities,
-              theme: core.theme,
-              version: this.kibanaVersion,
-              formatFactoryFn: () => fieldFormats.deserialize,
-            })
-          );
+          // shareSetup.register(
+          //   reportingScreenshotShareProvider({
+          //     apiClient,
+          //     toasts,
+          //     uiSettings,
+          //     license,
+          //     application,
+          //     usesUiCapabilities,
+          //     theme: core.theme,
+          //   })
+          reportingExportModalProvider({
+            apiClient,
+            toasts,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+            version: this.kibanaVersion,
+            formatFactoryFn: () => fieldFormats.deserialize,
+          });
+          // );
         }
       });
     });

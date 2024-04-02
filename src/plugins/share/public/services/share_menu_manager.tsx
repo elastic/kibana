@@ -94,7 +94,7 @@ export class ShareMenuManager {
     newVersionEnabled,
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
-    menuItems: Array<ShareMenuItem | null>;
+    menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
     theme: ThemeServiceStart;
@@ -172,6 +172,7 @@ export class ShareMenuManager {
                 isDirty,
                 isEmbedded: allowEmbed,
                 shareMenuItems: menuItems,
+                theme,
                 onClose: () => {
                   onClose();
                   session.close();

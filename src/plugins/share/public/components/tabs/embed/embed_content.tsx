@@ -53,10 +53,6 @@ export const EmbedContent = ({
   const [anonymousAccessParameters] = useState<AnonymousAccessState['accessURLParameters']>(null);
   const [usePublicUrl] = useState<boolean>(false);
 
-  useEffect(() => {
-    onChange(url);
-  }, [url, onChange]);
-
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
       return urlParams
@@ -193,8 +189,9 @@ export const EmbedContent = ({
     setUrlHelper();
     getUrlParamExtensions(url);
     window.addEventListener('hashchange', resetUrl, false);
+    onChange(url);
     isMounted();
-  }, [getUrlParamExtensions, resetUrl, setUrlHelper, url, isMounted]);
+  }, [getUrlParamExtensions, resetUrl, setUrlHelper, url, isMounted, onChange]);
 
   const renderUrlParamExtensions = () => {
     if (!urlParamExtensions) {

@@ -9,8 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
-import { downloadCSVs } from '@kbn/lens-plugin/public';
-import { TableInspectorAdapter } from '@kbn/lens-plugin/public/editor_frame_service/types';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { checkLicense } from '../../license_check';
 import {
   ExportModalShareOpts,
@@ -18,9 +17,9 @@ import {
   JobParamsProviderOptions,
   ReportingSharingData,
 } from '.';
-import { ReportingModalContent } from './reporting_modal_content_lazy';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 import { ReportingAPIClient } from '../../reporting_api_client';
+import { generateReportingJobPNGPDF } from '../shared/get_report_generate';
 
 const getJobParams =
   (
@@ -64,6 +63,9 @@ const getJobParams =
     return { ...baseParams, relativeUrl };
   };
 
+/**
+ * This is used by Canvas
+ */
 export const reportingScreenshotShareProvider = ({
   apiClient,
   toasts,
@@ -225,13 +227,9 @@ export const isJobV2Params = ({ sharingData }: { sharingData: Record<string, unk
 
 export const reportingExportModalProvider = ({
   apiClient,
-  toasts,
-  uiSettings,
   license,
   application,
   usesUiCapabilities,
-  theme,
-  formatFactoryFn,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -293,11 +291,6 @@ export const reportingExportModalProvider = ({
 
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
-    const { title, activeData, columnsSorting } = sharingData as unknown as {
-      title: string;
-      activeData: TableInspectorAdapter;
-      columnsSorting?: string[];
-    };
 
     shareActions.push({
       shareMenuItem: {
@@ -308,39 +301,20 @@ export const reportingExportModalProvider = ({
         disabled: licenseDisabled || sharingData.reportingDisabled,
         ['data-test-subj']: 'imageExports',
       },
-      panel: {
-        id: 'reportingImageModal',
-        title: i18n.translate('reporting.shareContextMenu.ReportsButtonLabel', {
-          defaultMessage: 'Generate report',
-        }),
-        content: (
-          <ReportingModalContent
-            apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
-            objectId={objectId}
-            requiresSavedState={requiresSavedState}
-            layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            jobProviderOptions={jobProviderOptions}
-            isDirty={isDirty}
-            onClose={() => {
-              onClose();
-            }}
-            theme={theme}
-            objectType={objectType}
-            downloadCsvFromLens={async () => {
-              return await downloadCSVs({
-                title,
-                formatFactory: formatFactoryFn(),
-                activeData,
-                uiSettings,
-                columnsSorting,
-              });
-            }}
-          />
-        ),
-      },
+      tabType: 'Export',
+      reportType: [jobProviderOptions],
+      reportingAPIClient: apiClient,
+      requiresSavedState,
+      generateReportButton: (
+        <FormattedMessage
+          id="reporting.modalContent.generateButtonLabel"
+          defaultMessage="Generate export"
+        />
+      ),
+      createReportingJob: generateReportingJobPNGPDF,
+      getJobParams,
     });
+
     return shareActions;
   };
 
