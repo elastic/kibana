@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +18,7 @@ import {
   EuiText,
   EuiEmptyPrompt,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { PRODUCER_DISPLAY_NAMES } from '../../common/i18n';
@@ -43,7 +45,26 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
   ruleTypeCountsByProducer,
   onClearFilters,
 }) => {
-  const rulesList = [...ruleTypes].sort((a, b) => a.name.localeCompare(b.name));
+  const ruleTypesList = [...ruleTypes].sort((a, b) => a.name.localeCompare(b.name));
+  const { euiTheme } = useEuiTheme();
+
+  const facetList = useMemo(
+    () =>
+      Object.entries(omit(ruleTypeCountsByProducer, 'total'))
+        .sort(([, aCount], [, bCount]) => bCount - aCount)
+        .map(([producer, count]) => (
+          <EuiFacetButton
+            key={producer}
+            fullWidth
+            quantity={count}
+            onClick={() => onFilterByProducer(producer)}
+            isSelected={selectedProducer === producer}
+          >
+            {producerToDisplayName(producer)}
+          </EuiFacetButton>
+        )),
+    [ruleTypeCountsByProducer, onFilterByProducer, selectedProducer]
+  );
 
   return (
     <EuiFlexGroup
@@ -53,45 +74,48 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
     >
       <EuiFlexItem
         grow={1}
-        style={{ paddingTop: 16 /* Match drop shadow padding in the right column */ }}
+        style={{
+          paddingTop: euiTheme.size.base /* Match drop shadow padding in the right column */,
+        }}
       >
         <EuiFacetGroup>
           <EuiFacetButton
             fullWidth
             quantity={ruleTypeCountsByProducer.total}
-            onClick={() => onFilterByProducer(null)}
+            onClick={useCallback(() => onFilterByProducer(null), [onFilterByProducer])}
             isSelected={!selectedProducer}
           >
             All
           </EuiFacetButton>
-          {Object.entries(omit(ruleTypeCountsByProducer, 'total'))
-            .sort(([, aCount], [, bCount]) => bCount - aCount)
-            .map(([producer, count]) => (
-              <EuiFacetButton
-                key={producer}
-                fullWidth
-                quantity={count}
-                onClick={() => onFilterByProducer(producer)}
-                isSelected={selectedProducer === producer}
-              >
-                {producerToDisplayName(producer)}
-              </EuiFacetButton>
-            ))}
+          {facetList}
         </EuiFacetGroup>
       </EuiFlexItem>
       <EuiFlexItem
         grow={3}
         style={{
           overflowY: 'auto',
-          padding: '16px 16px 32px', // Add padding to prevent drop shadow from hovered cards from being cut off
+          padding: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}`, // Add padding to prevent drop shadow from hovered cards from being cut off
         }}
       >
-        {rulesList.length === 0 && (
+        {ruleTypesList.length === 0 && (
           <EuiEmptyPrompt
             color="subdued"
             iconType="search"
-            title={<h2>No rule types found</h2>}
-            body={<p>Try a different search or change your filter settings.</p>}
+            title={
+              <h2>
+                {i18n.translate('alertsUIShared.components.ruleTypeModal.noRuleTypesErrorTitle', {
+                  defaultMessage: 'No rule types found',
+                })}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate('alertsUIShared.components.ruleTypeModal.noRuleTypesErrorBody', {
+                  defaultMessage: 'Try a different search or change your filter settings',
+                })}
+                .
+              </p>
+            }
             actions={
               <EuiButton size="s" color="primary" fill onClick={onClearFilters}>
                 Clear filters
@@ -99,7 +123,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
             }
           />
         )}
-        {rulesList.map((rule) => (
+        {ruleTypesList.map((rule) => (
           <React.Fragment key={rule.id}>
             <EuiCard
               titleSize="xs"
@@ -114,7 +138,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
                   <EuiText
                     color="subdued"
                     size="xs"
-                    style={{ textTransform: 'uppercase', fontWeight: 'bold' }}
+                    style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
                   >
                     {producerToDisplayName(rule.producer)}
                   </EuiText>

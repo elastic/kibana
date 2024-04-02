@@ -41,6 +41,19 @@ export interface RuleTypeModalState {
   ruleTypeCountsByProducer: RuleTypeCountsByProducer;
 }
 
+const loadingPrompt = (
+  <EuiEmptyPrompt
+    title={
+      <h2>
+        {i18n.translate('alertsUIShared.components.ruleTypeModal.loadingRuleTypes', {
+          defaultMessage: 'Loading rule types',
+        })}
+      </h2>
+    }
+    icon={<EuiLoadingSpinner size="xl" />}
+  />
+);
+
 export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = ({
   onClose,
   onSelectRuleType,
@@ -55,10 +68,6 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
   const isFullscreenPortrait = ['s', 'xs'].includes(currentBreakpoint);
-
-  const loadingPrompt = (
-    <EuiEmptyPrompt title={<h2>Loading rule types</h2>} icon={<EuiLoadingSpinner size="xl" />} />
-  );
 
   const onClearFilters = useCallback(() => {
     onFilterByProducer(null);
