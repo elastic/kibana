@@ -14,7 +14,7 @@ import {
   PackageInfo,
 } from '@kbn/core/public';
 import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';

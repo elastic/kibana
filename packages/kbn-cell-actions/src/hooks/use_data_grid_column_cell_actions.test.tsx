@@ -161,22 +161,24 @@ describe('useDataGridColumnsCellActions', () => {
     cellAction1.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
 
     await waitFor(() => {
-      expect(action1.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: [
-            {
-              value: fieldValues[field1.name][1],
-              field: {
-                name: field1.name,
-                type: field1.type,
-                aggregatable: true,
-                searchable: true,
-              },
+      expect(action1.execute).toHaveBeenCalledWith({
+        data: [
+          {
+            value: fieldValues[field1.name][1],
+            field: {
+              name: field1.name,
+              type: field1.type,
+              aggregatable: true,
+              searchable: true,
             },
-          ],
-          trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
-        })
-      );
+          },
+        ],
+        metadata: {
+          some: 'value',
+        },
+        nodeRef: expect.any(Object),
+        trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
+      });
     });
 
     const cellAction2 = renderCellAction(result.current[1][1], { rowIndex: 2 });
@@ -184,22 +186,24 @@ describe('useDataGridColumnsCellActions', () => {
     cellAction2.getByTestId(`dataGridColumnCellAction-${action2.id}`).click();
 
     await waitFor(() => {
-      expect(action2.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: [
-            {
-              value: fieldValues[field2.name][2],
-              field: {
-                name: field2.name,
-                type: field2.type,
-                aggregatable: true,
-                searchable: true,
-              },
+      expect(action2.execute).toHaveBeenCalledWith({
+        data: [
+          {
+            value: fieldValues[field2.name][2],
+            field: {
+              name: field2.name,
+              type: field2.type,
+              aggregatable: true,
+              searchable: true,
             },
-          ],
-          trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
-        })
-      );
+          },
+        ],
+        metadata: {
+          some: 'value',
+        },
+        nodeRef: expect.any(Object),
+        trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
+      });
     });
   });
 
