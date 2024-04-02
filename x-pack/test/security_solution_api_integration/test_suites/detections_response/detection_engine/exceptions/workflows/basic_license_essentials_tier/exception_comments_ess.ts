@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('@serverless @ess @brokenInServerless role_based_add_edit_comments', () => {
+  describe('@ess exception item comments', () => {
     const socManager = ROLES.soc_manager;
     const detectionAdmin = ROLES.detections_admin;
 

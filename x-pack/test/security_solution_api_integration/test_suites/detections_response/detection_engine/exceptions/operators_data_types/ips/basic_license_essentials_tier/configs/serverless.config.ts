@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../../../../../config/serverless/config.base';
+import { createTestConfig } from '../../../../../../../../config/serverless/config.base.essentials';
 
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Detection Engine - Exception Operators Long Types Integration Tests - Serverless Env - Complete Tier',
+      'Detection Engine - Exception Operators IP Types Integration Tests - Serverless Env - Essentials Tier',
   },
 });
