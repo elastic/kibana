@@ -9,27 +9,29 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { useStateDebounced } from '../../../hooks/use_debounce';
+import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
+import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   ServiceInventoryFieldName,
   ServiceListItem,
 } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useStateDebounced } from '../../../hooks/use_debounce';
 import { FETCH_STATUS, isFailure, isPending } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { SortFunction } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
-import { SortFunction } from '../../shared/managed_table';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
@@ -293,9 +295,20 @@ export function ServiceInventory() {
     });
   }, [mainStatisticsStatus, mainStatisticsData.items, setScreenContext]);
 
+  const { fields, isSaving, saveSingleSetting } = useEditableSettings([
+    apmEnableServiceInventoryTableSearchBar,
+  ]);
+
+  const settingsField = fields[apmEnableServiceInventoryTableSearchBar];
+  const isTableSearchBarEnabled =
+    Boolean(settingsField?.savedValue ?? settingsField?.defaultValue) ?? false;
+
   return (
     <>
-      <SearchBar showTimeComparison />
+      {/* keep this div as we're collecting telemetry to track the usage of the table fast search vs KQL bar */}
+      <div data-fastSearch={isTableSearchBarEnabled ? 'enabled' : 'disabled'}>
+        <SearchBar showTimeComparison />
+      </div>
       <EuiFlexGroup direction="column" gutterSize="m">
         {displayMlCallout && mlCallout}
         <EuiFlexItem>
@@ -317,6 +330,14 @@ export function ServiceInventory() {
             onChangeSearchQuery={setDebouncedSearchQuery}
             maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
             onChangeRenderedItems={setRenderedItems}
+            isTableSearchBarEnabled={isTableSearchBarEnabled}
+            isSavingSetting={isSaving}
+            onChangeTableSearchBarVisibility={() => {
+              saveSingleSetting(
+                apmEnableServiceInventoryTableSearchBar,
+                !isTableSearchBarEnabled
+              );
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
