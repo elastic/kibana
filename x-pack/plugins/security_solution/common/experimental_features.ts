@@ -230,6 +230,11 @@ export const allowedExperimentalValues = Object.freeze({
   perFieldPrebuiltRulesDiffingEnabled: true,
 
   /**
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
+   */
+  malwareOnWriteScanOptionAvailable: false,
+
+  /**
    *  Enables Security AI Assistant's Flyout mode
    */
   aiAssistantFlyoutMode: true,
