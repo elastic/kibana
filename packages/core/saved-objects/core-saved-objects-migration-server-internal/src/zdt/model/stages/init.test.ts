@@ -14,6 +14,7 @@ import {
   getAliasActionsMock,
   checkIndexCurrentAlgorithmMock,
   getAliasesMock,
+  getCreationAliasesMock,
 } from './init.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { FetchIndexResponse } from '../../../actions';
@@ -57,6 +58,7 @@ describe('Stage: init', () => {
     checkIndexCurrentAlgorithmMock.mockReset().mockReturnValue('zdt');
     getAliasesMock.mockReset().mockReturnValue(Either.right({}));
     buildIndexMappingsMock.mockReset().mockReturnValue({});
+    getCreationAliasesMock.mockReset().mockReturnValue([]);
 
     context = createContextMock({ indexPrefix: '.kibana', types: ['foo', 'bar'] });
     context.typeRegistry.registerType({
@@ -310,6 +312,20 @@ describe('Stage: init', () => {
         });
       });
 
+      it('calls getCreationAliases with the correct parameters', () => {
+        const state = createState();
+        const fetchIndexResponse = createResponse();
+        const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+
+        init(state, res, context);
+
+        expect(getCreationAliasesMock).toHaveBeenCalledTimes(1);
+        expect(getCreationAliasesMock).toHaveBeenCalledWith({
+          indexPrefix: context.indexPrefix,
+          kibanaVersion: context.kibanaVersion,
+        });
+      });
+
       it('INIT -> CREATE_TARGET_INDEX', () => {
         const state = createState();
         const fetchIndexResponse = createResponse();
@@ -318,6 +334,9 @@ describe('Stage: init', () => {
         const mockMappings = { properties: { someMappings: 'string' } };
         buildIndexMappingsMock.mockReturnValue(mockMappings);
 
+        const creationAliases = ['.foo', '.bar'];
+        getCreationAliasesMock.mockReturnValue(creationAliases);
+
         const newState = init(state, res, context);
 
         expect(newState).toEqual(
@@ -325,6 +344,7 @@ describe('Stage: init', () => {
             controlState: 'CREATE_TARGET_INDEX',
             currentIndex: '.kibana_1',
             indexMappings: mockMappings,
+            creationAliases,
           })
         );
       });

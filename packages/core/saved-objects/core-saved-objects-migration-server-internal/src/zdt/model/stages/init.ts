@@ -18,6 +18,7 @@ import {
   checkVersionCompatibility,
   buildIndexMappings,
   getAliasActions,
+  getCreationAliases,
   generateAdditiveMappingDiff,
   checkIndexCurrentAlgorithm,
   removePropertiesFromV2,
@@ -73,6 +74,10 @@ export const init: ModelStage<
       controlState: 'CREATE_TARGET_INDEX',
       currentIndex: `${context.indexPrefix}_1`,
       indexMappings: buildIndexMappings({ types }),
+      creationAliases: getCreationAliases({
+        indexPrefix: context.indexPrefix,
+        kibanaVersion: context.kibanaVersion,
+      }),
     };
   }
 
