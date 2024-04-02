@@ -6,7 +6,6 @@
  */
 
 import { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
-
 import { EmbeddableInput } from '../../types';
 import { EmbeddableTypes } from './embeddable_types';
 
