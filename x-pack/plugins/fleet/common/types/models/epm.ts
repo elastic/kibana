@@ -549,22 +549,22 @@ export interface InstallFailedAttempt {
   };
 }
 
-const installStateNames = [
-  'create_restart_installation',
-  'install_kibana_assets',
-  'install_ilm_policies',
-  'install_ml_model',
-  'install_index_template_pipelines',
-  'remove_legacy_templates',
-  'update_current_write_indices',
-  'install_transforms',
-  'delete_previous_pipelines',
-  'save_archive_entries_from_assets_map',
-  'update_so',
-] as const;
+export enum INSTALL_STATES {
+  CREATE_RESTART_INSTALLATION = 'create_restart_installation',
+  INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
+  INSTALL_ILM_POLICIES = 'install_ilm_policies',
+  INSTALL_ML_MODEL = 'install_ml_model',
+  INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
+  REMOVE_LEGACY_TEMPLATES = 'remove_legacy_templates',
+  UPDATE_CURRENT_WRITE_INDICES = 'update_current_write_indices',
+  INSTALL_TRANSFORMS = 'install_transforms',
+  DELETE_PREVIOUS_PIPELINES = 'delete_previous_pipelines',
+  SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
+  UPDATE_SO = 'update_so',
+}
+type StatesKeys = keyof typeof INSTALL_STATES;
+export type StateNames = typeof INSTALL_STATES[StatesKeys];
 
-type StateNamesTuple = typeof installStateNames;
-export type StateNames = StateNamesTuple[number];
 export interface LatestExecutedState<T> {
   name: T;
   started_at: string;

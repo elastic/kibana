@@ -333,18 +333,30 @@ describe('handleState', () => {
     );
   });
 
-  it('should throw when a state returns error', async () => {
+  it('should throw and return updated context with latest error when a state returns error', async () => {
     const error = new Error('Installation failed');
     const mockOnTransitionState1 = jest.fn().mockRejectedValue(error);
     const mockOnTransitionState2 = jest.fn();
     const mockOnTransitionState3 = jest.fn();
+    const contextData = { fixedVal: 'something' };
     const testDefinition = getTestDefinition(
       mockOnTransitionState1,
       mockOnTransitionState2,
-      mockOnTransitionState3
+      mockOnTransitionState3,
+      contextData
     );
     try {
-      await handleState('state1', testDefinition, testDefinition.context);
+      const updatedContext = await handleState('state1', testDefinition, testDefinition.context);
+      expect(updatedContext).toEqual(
+        expect.objectContaining({
+          fixedVal: 'something',
+          latestExecutedState: {
+            name: 'state3',
+            started_at: expect.anything(),
+            error: `Error during execution of state "state1" with status "failed": Installation failed`,
+          },
+        })
+      );
     } catch (err) {
       expect(err).toEqual(
         `Error during execution of state "state1" with status "failed": Installation failed`

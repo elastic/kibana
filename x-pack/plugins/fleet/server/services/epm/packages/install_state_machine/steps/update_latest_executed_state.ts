@@ -19,18 +19,21 @@ export const updateLatestExecutedState = async (context: InstallContext) => {
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
-  auditLoggingService.writeCustomSoAuditLog({
-    action: 'update',
-    id: pkgName,
-    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
-  });
   try {
+    // If the error is of type ConcurrentInstallationError, don't save it in the SO
+    if (latestExecutedState?.error?.includes('Concurrent installation or upgrade')) return;
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id: pkgName,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
     return await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       latest_executed_state: latestExecutedState,
     });
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      logger.error(`failed to update package install state to: latest_executed_state  ${err}`);
+      logger.error(`Failed to update package install state to: latest_executed_state  ${err}`);
     }
   }
 };

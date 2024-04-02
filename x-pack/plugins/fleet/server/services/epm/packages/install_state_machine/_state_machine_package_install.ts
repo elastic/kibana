@@ -18,6 +18,7 @@ import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging
 import { PackageSavedObjectConflictError } from '../../../../errors';
 
 import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
+import { INSTALL_STATES } from '../../../../../common/types';
 import type { PackageInstallContext, StateNames, StateContext } from '../../../../../common/types';
 import type { PackageAssetReference } from '../../../../types';
 
@@ -139,7 +140,7 @@ export async function _stateMachineInstallPackage(
   };
   try {
     const { installedKibanaAssetsRefs, esReferences } = await handleState(
-      'create_restart_installation',
+      INSTALL_STATES.CREATE_RESTART_INSTALLATION,
       installStates,
       installStates.context
     );

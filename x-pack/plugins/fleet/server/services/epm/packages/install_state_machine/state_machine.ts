@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+
 import { appContextService } from '../../../app_context';
 import type { StateContext, LatestExecutedState } from '../../../../../common/types';
 export interface State {
@@ -61,6 +63,7 @@ export async function handleState(
         `Executed state: ${currentStateName} with status: ${currentStatus} - nextState: ${currentState.nextState}`
       );
     } catch (error) {
+      console.log('## error', error);
       currentStatus = 'failed';
       const errorMessage = `Error during execution of state "${currentStateName}" with status "${currentStatus}": ${error.message}`;
       const latestStateWithError = {
@@ -71,10 +74,7 @@ export async function handleState(
       logger.warn(errorMessage);
 
       // execute post transition function when transition failed too
-      if (typeof currentState.onPostTransition === 'function') {
-        await currentState.onPostTransition.call(undefined, updatedContext);
-        logger.debug(`Executing post transition function: ${currentState.onPostTransition.name}`);
-      }
+      await executePostTransition(logger, updatedContext, currentState);
 
       // bubble up the error
       throw errorMessage;
@@ -86,6 +86,20 @@ export async function handleState(
     );
   }
   // execute post transition function
+  await executePostTransition(logger, updatedContext, currentState);
+
+  if (currentStatus === 'success' && currentState?.nextState && currentState?.nextState !== 'end') {
+    return await handleState(currentState.nextState, definition, updatedContext);
+  } else {
+    return updatedContext;
+  }
+}
+
+async function executePostTransition(
+  logger: Logger,
+  updatedContext: StateContext<string>,
+  currentState: State
+) {
   if (typeof currentState.onPostTransition === 'function') {
     try {
       await currentState.onPostTransition.call(undefined, updatedContext);
@@ -93,10 +107,5 @@ export async function handleState(
     } catch (error) {
       logger.warn(`Error during execution of post transition function: ${error.message}`);
     }
-  }
-  if (currentStatus === 'success' && currentState?.nextState && currentState?.nextState !== 'end') {
-    return await handleState(currentState.nextState, definition, updatedContext);
-  } else {
-    return updatedContext;
   }
 }
