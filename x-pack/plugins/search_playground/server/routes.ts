@@ -17,7 +17,7 @@ import { ConversationalChain } from './utils/conversational_chain';
 import { Prompt } from './utils/prompt';
 import { errorHandler } from './utils/error_handler';
 import { APIRoutes, ErrorCode } from './types';
-import { createError, SearchPlaygroundError } from './utils/create_error';
+import { createError } from './utils/create_error';
 import { isInvalidApiKeyException } from './utils/exceptions';
 
 export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) {
