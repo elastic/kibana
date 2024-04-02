@@ -52,8 +52,8 @@ import {
 } from '../common/locators/create_index_locator';
 import { ClientConfigType, InitialAppData } from '../common/types';
 
+import { ENGINES_PATH } from './applications/app_search';
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications';
-
 import {
   CONNECTORS_PATH,
   SEARCH_INDICES_PATH,
@@ -145,7 +145,7 @@ const applicationsLinks: AppDeepLink[] = [
 const appSearchLinks: AppDeepLink[] = [
   {
     id: 'engines',
-    path: `/${SEARCH_APPLICATIONS_PATH}`,
+    path: `/${ENGINES_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.appSearchEnginesLinkLabel', {
       defaultMessage: 'Engines',
     }),
