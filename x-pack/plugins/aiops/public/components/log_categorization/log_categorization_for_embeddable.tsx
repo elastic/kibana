@@ -94,7 +94,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   } = useAiopsAppContext();
   // console.log(lastReloadRequestTime);
   // const input = useObservable(embeddableInput)!;
-  const { dataView, savedSearch } = input;
+  const { dataView, savedSearch, setPatternCount } = input;
   const getViewModeToggle: (patternCount: number) => React.ReactElement | undefined =
     input.getViewModeToggle;
 
@@ -169,9 +169,10 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       return () => {
         mounted.current = false;
         cancelRequest();
+        setPatternCount(undefined);
       };
     },
-    [cancelRequest, mounted]
+    [cancelRequest, mounted, setPatternCount]
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
@@ -314,6 +315,10 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     intervalMs,
     toasts,
   ]);
+
+  useEffect(() => {
+    setPatternCount(data?.categories.length ?? 0);
+  }, [data, setPatternCount]);
 
   const onAddFilter = useCallback(
     (values: Filter, alias?: string) => {

@@ -53,6 +53,7 @@ interface EmbeddableLogCategorizationProps<T = Query | AggregateQuery> {
   embeddingOrigin?: string;
   onAddFilter?: () => void;
   getViewModeToggle: (patternCount: number) => React.ReactElement | undefined;
+  setPatternCount: (patternCount: number | undefined) => void;
   /**
    * Callback to add a filter to filter bar
    */
@@ -130,7 +131,8 @@ export interface LogCategorizationTableProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   searchSessionId?: string;
-  getViewModeToggle: (patternCount: number) => React.ReactElement | undefined;
+  getViewModeToggle?: (patternCount: number) => React.ReactElement | undefined;
+  setPatternCount: (patternCount: number | undefined) => void;
 }
 
 export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
@@ -243,7 +245,8 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
             savedSearch,
             query,
             onAddFilter,
-            getViewModeToggle,
+            getViewModeToggle: getViewModeToggle ?? ((p: number) => <></>),
+            setPatternCount: props.setPatternCount,
           });
           if (!unmounted) {
             setEmbeddable(initializedEmbeddable);

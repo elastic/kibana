@@ -52,6 +52,7 @@ interface EmbeddableLogCategorizationProps<T = Query | AggregateQuery> {
    */
   onAddFilter?: () => void;
   getViewModeToggle: () => React.ReactElement | undefined;
+  setPatternCount: (patternCount: number | undefined) => void;
 }
 
 const localStorage = new Storage(window.localStorage);
