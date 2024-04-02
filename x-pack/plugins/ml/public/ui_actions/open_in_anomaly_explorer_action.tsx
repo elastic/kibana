@@ -52,6 +52,7 @@ export function isAnomalyChartsEmbeddableContext(
 }
 
 const getTimeRange = (embeddable: MlEmbeddableBaseApi): TimeRange | undefined => {
+  // @ts-ignore
   return embeddable.timeRange$?.getValue() ?? embeddable.parentApi?.timeRange$?.getValue();
 };
 

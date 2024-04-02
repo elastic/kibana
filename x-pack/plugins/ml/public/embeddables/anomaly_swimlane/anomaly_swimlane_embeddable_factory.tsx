@@ -92,9 +92,21 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
+      const query$ =
+        // @ts-ignore
+        (state.query ? new BehaviorSubject(state.query) : parentApi?.query$) ??
+        new BehaviorSubject(undefined);
+      const filters$ =
+        // @ts-ignore
+
+        (state.query ? new BehaviorSubject(state.filters) : parentApi?.filters$) ??
+        new BehaviorSubject(undefined);
+
       const api = buildApi(
         {
           ...titlesApi,
+          query$,
+          filters$,
           // @ts-ignore
           appliedTimeRange$,
           jobIds,
