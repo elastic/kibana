@@ -195,6 +195,14 @@ export const CreateField = React.memo(function CreateFieldComponent({
     </EuiFlexGroup>
   );
 
+  const isAddFieldButtonDisabled = (): boolean => {
+    if (semanticFieldType) {
+      return !referenceFieldComboValue || !nameValue || !inferenceIdComboValue;
+    }
+
+    return false;
+  };
+
   const renderFormActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       {(isCancelable !== false || isAddingFields) && (
@@ -213,9 +221,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onClick={submitForm}
           type="submit"
           data-test-subj="addButton"
-          isDisabled={
-            semanticFieldType && (!referenceFieldComboValue || !nameValue || !inferenceIdComboValue)
-          }
+          isDisabled={isAddFieldButtonDisabled()}
         >
           {isMultiField
             ? i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel', {
