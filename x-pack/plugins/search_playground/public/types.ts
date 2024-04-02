@@ -60,7 +60,7 @@ export interface ChatForm {
   [ChatFormFields.openAIKey]: string;
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: string;
-  [ChatFormFields.elasticsearchQuery]: QueryDslQueryContainer;
+  [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
   [ChatFormFields.sourceFields]: string[];
   [ChatFormFields.size]: number;
 }
