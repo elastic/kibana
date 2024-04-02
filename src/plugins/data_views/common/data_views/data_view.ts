@@ -11,7 +11,7 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
-import { each, mapValues, omit, pickBy, reject } from 'lodash';
+import { each, mapValues, pick, pickBy, reject  } from 'lodash';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
 import type {
@@ -160,17 +160,24 @@ export class DataView extends AbstractDataView implements DataViewBase {
   /**
    * Creates a minimal static representation of the data view. Fields and popularity scores will be omitted.
    */
-  public toMinimalSpec(): Omit<DataViewSpec, 'fields'> {
+  public toMinimalSpec(params?: {
+    keepFieldAttrs?: Array<'customLabel' | 'customDescription'>;
+  }): Omit<DataViewSpec, 'fields'> {
+    const fieldAttrsToKeep = params?.keepFieldAttrs ?? ['customLabel', 'customDescription'];
+
     // removes `fields`
     const dataViewSpec = this.toSpec(false);
 
+    // removes `fieldAttrs` attributes that are not in `fieldAttrsToKeep`
     if (dataViewSpec.fieldAttrs) {
-      // removes `count` props (popularity scores) from `fieldAttrs`
       dataViewSpec.fieldAttrs = pickBy(
-        mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
+        // removes unnecessary attributes
+        mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => pick(fieldAttrs, fieldAttrsToKeep)),
+        // removes empty objects if all attributes have been removed
         (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
       );
 
+      // removes `fieldAttrs` if it's empty
       if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
         dataViewSpec.fieldAttrs = undefined;
       }

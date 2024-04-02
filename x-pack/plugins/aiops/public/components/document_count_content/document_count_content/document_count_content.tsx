@@ -113,6 +113,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
             autoAnalysisStart={initialAnalysisStart}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            changePoint={documentCountStats.changePoint}
             {...docCountChartProps}
           />
         </EuiFlexItem>

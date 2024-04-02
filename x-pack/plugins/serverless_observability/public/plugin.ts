@@ -60,7 +60,7 @@ export class ServerlessObservabilityPlugin
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled(),
       {
-        aiAssistantManagementObservability: {
+        observabilityAiAssistantManagement: {
           category: appCategories.OTHER,
           title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
             defaultMessage: 'AI assistant for Observability settings',

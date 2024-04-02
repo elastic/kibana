@@ -15,8 +15,6 @@ import { useQueryTimelineByIdOnUrlChange } from './timeline/use_query_timeline_b
 import { useInitFlyoutFromUrlParam } from './flyout/use_init_flyout_url_param';
 import { useSyncFlyoutUrlParam } from './flyout/use_sync_flyout_url_param';
 
-export const EXPANDABLE_FLYOUT_URL_KEY = 'eventFlyout' as const;
-
 export const useUrlState = () => {
   useSyncGlobalQueryString();
   useInitSearchBarFromUrlParams();
@@ -31,7 +29,8 @@ export const useUrlState = () => {
 
 export const URL_PARAM_KEY = {
   appQuery: 'query',
-  eventFlyout: EXPANDABLE_FLYOUT_URL_KEY,
+  eventFlyout: 'eventFlyout',
+  timelineFlyout: 'timelineFlyout',
   filters: 'filters',
   savedQuery: 'savedQuery',
   sourcerer: 'sourcerer',

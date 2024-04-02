@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiCopy,
   EuiCodeBlock,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -48,7 +49,7 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({
   fleetServerHost,
 }) => {
   const core = useStartServices();
-  const { notifications } = core;
+  const { notifications, docLinks } = core;
 
   const [yaml, setYaml] = useState<string>('');
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
@@ -97,7 +98,21 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({
   const downloadDescription = (
     <FormattedMessage
       id="xpack.fleet.agentEnrollment.downloadDescriptionForK8s"
-      defaultMessage="Copy or download the Kubernetes manifest."
+      defaultMessage="Copy or download the Kubernetes manifest. Note that the following manifest contains resource limits that may not be appropriate for a production environment, review our guide on {scalingGuideLink} before deploying this manifest."
+      values={{
+        scalingGuideLink: (
+          <EuiLink
+            external
+            href={docLinks.links.fleet.scalingKubernetesResourcesAndLimits}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.fleet.fleet.agentEnrollment.k8ScalingGuideLinkText"
+              defaultMessage="Scaling Elastic Agent on Kubernetes"
+            />
+          </EuiLink>
+        ),
+      }}
     />
   );
 
@@ -141,7 +156,7 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({
         ) : (
           <FormattedMessage
             id="xpack.fleet.enrollmentInstructions.downloadManifestButtonk8s"
-            defaultMessage="Download Manifest"
+            defaultMessage="Download manifest"
           />
         )}
       </EuiButton>

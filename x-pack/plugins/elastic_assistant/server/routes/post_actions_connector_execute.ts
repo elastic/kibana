@@ -216,9 +216,10 @@ export const postActionsConnectorExecuteRoute = (
                   messages: [...(prevMessages ?? []), ...(newMessage ? [newMessage] : [])],
                   ...(connectors[0]?.actionTypeId === '.gen-ai'
                     ? { n: 1, stop: null, temperature: 0.2 }
-                    : {}),
+                    : { temperature: 0, stopSequences: [] }),
                 },
               },
+              logger,
             });
 
             telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
@@ -264,6 +265,7 @@ export const postActionsConnectorExecuteRoute = (
             connectorId,
             elserId,
             esClient,
+            llmType: connectors[0]?.actionTypeId,
             kbResource: ESQL_RESOURCE,
             langChainMessages,
             logger,

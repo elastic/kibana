@@ -43,6 +43,7 @@ import {
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
   DEFAULT_INDEX_TYPES_MAP,
+  HASH_TO_VERSION_MAP,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsClient,
@@ -389,6 +390,7 @@ export class SavedObjectsService
       soMigrationsConfig,
       kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
+      hashToVersionMap: HASH_TO_VERSION_MAP,
       client,
       docLinks,
       waitForMigrationCompletion,

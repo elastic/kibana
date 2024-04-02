@@ -543,6 +543,7 @@ export interface DocLinks {
     policySecrets: string;
     remoteESOoutput: string;
     performancePresets: string;
+    scalingKubernetesResourcesAndLimits: string;
   }>;
   readonly ecs: {
     readonly guide: string;

@@ -25,6 +25,7 @@ interface TestDataExpectedWithSampleProbability {
   appState: object;
   sampleProbabilityFormatted: string;
   fieldSelectorPopover: string[];
+  prompt: 'empty' | 'change-point';
 }
 
 export function isTestDataExpectedWithSampleProbability(
@@ -47,6 +48,7 @@ interface TestDataExpectedWithoutSampleProbability {
     impact: string;
   }>;
   fieldSelectorPopover: string[];
+  prompt: 'empty' | 'change-point';
 }
 
 export interface TestData {

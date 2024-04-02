@@ -5,7 +5,8 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { newTelemetryLogger, type TelemetryLogger } from './helpers';
+import { newTelemetryLogger } from './helpers';
+import { type TelemetryLogger } from './telemetry_logger';
 import type { TaskMetric, ITaskMetricsService, Trace } from './task_metrics.types';
 import type { ITelemetryEventsSender } from './sender';
 import { TelemetryChannel } from './types';

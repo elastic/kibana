@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: buildkite-pipeline-kibana-serverless-security-solution-quality-gate-gen-ai
+  description: "[MKI] Executes Cypress tests for the Gen AI team"
+spec:
+  type: buildkite-pipeline
+  owner: 'group:security-engineering-productivity'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: "Kibana / Serverless / Security Solution Quality Gate / Gen Ai"
+      description: "[MKI] Executes Cypress tests for the Gen AI team"
+    spec:
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/security_solution_quality_gate/mki_security_solution_gen_ai.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+        build_tags: false
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        security-engineering-productivity:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ

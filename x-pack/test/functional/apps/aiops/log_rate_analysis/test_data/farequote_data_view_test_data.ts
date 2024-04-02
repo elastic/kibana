@@ -42,5 +42,6 @@ export const farequoteDataViewTestData: TestData = {
         },
       },
     },
+    prompt: 'empty',
   },
 };

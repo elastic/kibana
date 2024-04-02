@@ -115,7 +115,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
           {
             params: getDocumentCountStatsRequest(
               { ...searchParams, trackTotalHits: false },
-              randomSamplerWrapper
+              randomSamplerWrapper,
+              false,
+              searchParamsCompare === undefined
             ),
           },
           { abortSignal: abortCtrl.current.signal }

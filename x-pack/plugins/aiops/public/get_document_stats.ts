@@ -8,8 +8,9 @@
 import { get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import dateMath from '@kbn/datemath';
 
+import dateMath from '@kbn/datemath';
+import { getExtendedChangePoint, type DocumentCountStatsChangePoint } from '@kbn/aiops-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
@@ -21,6 +22,7 @@ import type { GroupTableItem } from './components/log_rate_analysis_results_tabl
 export interface DocumentCountStats {
   interval?: number;
   buckets?: { [key: string]: number };
+  changePoint?: DocumentCountStatsChangePoint;
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
   totalCount: number;
@@ -45,7 +47,8 @@ export interface DocumentStatsSearchStrategyParams {
 export const getDocumentCountStatsRequest = (
   params: DocumentStatsSearchStrategyParams,
   randomSamplerWrapper?: RandomSamplerWrapper,
-  skipAggs = false
+  skipAggs = false,
+  changePoints = false
 ) => {
   const {
     index,
@@ -88,6 +91,16 @@ export const getDocumentCountStatsRequest = (
           : {}),
       },
     },
+    ...(changePoints
+      ? {
+          change_point_request: {
+            // @ts-expect-error missing from ES spec
+            change_point: {
+              buckets_path: 'eventRate>_count',
+            },
+          },
+        }
+      : {}),
   };
 
   const aggs = randomSamplerWrapper ? randomSamplerWrapper.wrap(rawAggs) : rawAggs;
@@ -152,6 +165,18 @@ export const processDocumentCountStats = (
     []
   );
 
+  const changePointRaw = get(
+    randomSamplerWrapper && body.aggregations !== undefined
+      ? randomSamplerWrapper.unwrap(body.aggregations)
+      : body.aggregations,
+    ['change_point_request']
+  );
+
+  const changePointBase =
+    changePointRaw && changePointRaw.bucket && Object.keys(changePointRaw.type).length > 0
+      ? { key: Date.parse(changePointRaw.bucket.key), type: Object.keys(changePointRaw.type)[0] }
+      : undefined;
+
   const buckets = dataByTimeBucket.reduce<Record<string, number>>((acc, cur) => {
     acc[cur.key] = cur.doc_count;
     return acc;
@@ -168,5 +193,13 @@ export const processDocumentCountStats = (
     timeRangeLatest: params.latest,
     totalCount,
     lastDocTimeStampMs,
+    ...(changePointBase
+      ? {
+          changePoint: {
+            ...changePointBase,
+            ...getExtendedChangePoint(buckets, changePointBase?.key),
+          },
+        }
+      : {}),
   };
 };

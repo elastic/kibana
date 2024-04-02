@@ -6,27 +6,53 @@
  * Side Public License, v 1.
  */
 
-import { apiCanLinkToLibrary, CanLinkToLibrary } from '@kbn/presentation-library';
+import React from 'react';
 import {
   apiCanAccessViewMode,
+  apiHasLibraryTransforms,
   EmbeddableApiContext,
   getPanelTitle,
   PublishesPanelTitle,
   CanAccessViewMode,
   getInheritedViewMode,
+  HasLibraryTransforms,
+  HasType,
+  HasTypeDisplayName,
+  apiHasType,
+  HasUniqueId,
+  HasParentApi,
+  apiHasUniqueId,
+  apiHasParentApi,
 } from '@kbn/presentation-publishing';
+import {
+  OnSaveProps,
+  SavedObjectSaveModal,
+  SaveResult,
+  showSaveModal,
+} from '@kbn/saved-objects-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
 export type AddPanelToLibraryActionApi = CanAccessViewMode &
-  CanLinkToLibrary &
-  Partial<PublishesPanelTitle>;
+  HasType &
+  HasUniqueId &
+  HasLibraryTransforms &
+  HasParentApi<Pick<PresentationContainer, 'replacePanel'>> &
+  Partial<PublishesPanelTitle & HasTypeDisplayName>;
 
 const isApiCompatible = (api: unknown | null): api is AddPanelToLibraryActionApi =>
-  Boolean(apiCanAccessViewMode(api) && apiCanLinkToLibrary(api));
+  Boolean(
+    apiCanAccessViewMode(api) &&
+      apiHasLibraryTransforms(api) &&
+      apiHasType(api) &&
+      apiHasUniqueId(api) &&
+      apiHasParentApi(api) &&
+      typeof (api.parentApi as PresentationContainer)?.replacePanel === 'function'
+  );
 
 export class AddToLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_ADD_TO_LIBRARY;
@@ -58,18 +84,53 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const panelTitle = getPanelTitle(embeddable);
+    const title = getPanelTitle(embeddable);
+
     try {
-      await embeddable.linkToLibrary();
+      const byRefState = await new Promise<object>((resolve, reject) => {
+        const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
+          await embeddable.checkForDuplicateTitle(
+            props.newTitle,
+            props.isTitleDuplicateConfirmed,
+            props.onTitleDuplicate
+          );
+          try {
+            const { state, savedObjectId } = await embeddable.saveStateToSavedObject(
+              props.newTitle
+            );
+            resolve({ ...state, title: props.newTitle });
+            return { id: savedObjectId };
+          } catch (error) {
+            reject(error);
+            return { error };
+          }
+        };
+        showSaveModal(
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => {}}
+            title={title ?? ''}
+            showCopyOnSave={false}
+            objectType={
+              typeof embeddable.getTypeDisplayName === 'function'
+                ? embeddable.getTypeDisplayName()
+                : embeddable.type
+            }
+            showDescription={false}
+          />
+        );
+      });
+      await embeddable.parentApi.replacePanel(embeddable.uuid, {
+        panelType: embeddable.type,
+        initialState: byRefState,
+      });
       this.toastsService.addSuccess({
-        title: dashboardAddToLibraryActionStrings.getSuccessMessage(
-          panelTitle ? `'${panelTitle}'` : ''
-        ),
+        title: dashboardAddToLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),
         'data-test-subj': 'addPanelToLibrarySuccess',
       });
     } catch (e) {
       this.toastsService.addDanger({
-        title: dashboardAddToLibraryActionStrings.getErrorMessage(panelTitle),
+        title: dashboardAddToLibraryActionStrings.getErrorMessage(title),
         'data-test-subj': 'addPanelToLibraryError',
       });
     }

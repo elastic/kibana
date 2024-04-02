@@ -37,12 +37,12 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('detection_rule')).l;
+      const log = newTelemetryLogger(logger.get('detection_rule'));
       const usageCollector = sender.getTelemetryUsageCluster();
       const usageLabelPrefix: string[] = ['security_telemetry', 'detection-rules'];
       const trace = taskMetricsService.start(taskType);
 
-      log(
+      log.l(
         `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
       );
 
@@ -66,7 +66,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         const { body: prebuiltRules } = await receiver.fetchDetectionRules();
 
         if (!prebuiltRules) {
-          log('no prebuilt rules found');
+          log.l('no prebuilt rules found');
           taskMetricsService.end(trace);
           return 0;
         }
@@ -108,7 +108,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           licenseInfo,
           LIST_DETECTION_RULE_EXCEPTION
         );
-        log(`Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
+        log.l(`Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
 
         usageCollector?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -125,7 +125,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         }
         taskMetricsService.end(trace);
 
-        log(
+        log.l(
           `Task: ${taskId} executed.  Processed ${detectionRuleExceptionsJson.length} exceptions`
         );
 

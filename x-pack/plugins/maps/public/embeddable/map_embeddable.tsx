@@ -77,6 +77,7 @@ import {
   APP_ID,
   getEditPath,
   getFullPath,
+  MAP_EMBEDDABLE_NAME,
   MAP_SAVED_OBJECT_TYPE,
   RawValue,
   RENDER_TIMEOUT,
@@ -85,6 +86,7 @@ import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
   getCharts,
   getCoreI18n,
+  getCoreOverlays,
   getExecutionContextService,
   getHttp,
   getSearchService,
@@ -93,6 +95,7 @@ import {
   getUiActions,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
+import { extractReferences } from '../../common/migrations/references';
 import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
@@ -101,6 +104,7 @@ import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigg
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
 import { getGeoFieldsLabel } from './get_geo_fields_label';
+import { checkForDuplicateTitle, getMapClient } from '../content_management';
 
 import {
   MapByValueInput,
@@ -663,6 +667,58 @@ export class MapEmbeddable
       embeddable: this,
       trigger,
     } as ActionExecutionContext;
+  };
+
+  // remove legacy library tranform methods
+  linkToLibrary = undefined;
+  unlinkFromLibrary = undefined;
+  // add implemenation for library transform methods
+  saveStateToSavedObject = async (title: string) => {
+    const { attributes, references } = extractReferences({
+      attributes: this._savedMap.getAttributes(),
+    });
+
+    const {
+      item: { id: savedObjectId },
+    } = await getMapClient().create({
+      data: {
+        ...attributes,
+        title,
+      },
+      options: { references },
+    });
+    return {
+      state: {
+        ..._.omit(this.getExplicitInput(), 'attributes'),
+        savedObjectId,
+      },
+      savedObjectId,
+    };
+  };
+  savedObjectAttributesToState = () => {
+    return {
+      ..._.omit(this.getExplicitInput(), 'savedObjectId'),
+      attributes: this._savedMap.getAttributes(),
+    };
+  };
+  checkForDuplicateTitle = async (
+    newTitle: string,
+    isTitleDuplicateConfirmed: boolean,
+    onTitleDuplicate: () => void
+  ) => {
+    return checkForDuplicateTitle(
+      {
+        title: newTitle,
+        copyOnSave: false,
+        lastSavedTitle: '',
+        isTitleDuplicateConfirmed,
+        getDisplayName: () => MAP_EMBEDDABLE_NAME,
+        onTitleDuplicate,
+      },
+      {
+        overlays: getCoreOverlays(),
+      }
+    );
   };
 
   // Timing bug for dashboard with multiple maps with synchronized movement and filter by map extent enabled
