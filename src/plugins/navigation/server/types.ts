@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NavigationServerSetup {}
@@ -15,5 +16,6 @@ export interface NavigationServerStart {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NavigationServerSetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface NavigationServerStartDependencies {}
+export interface NavigationServerStartDependencies {
+  cloudExperiments?: CloudExperimentsPluginStart;
+}

@@ -7,6 +7,7 @@
  */
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UiSettingsParams } from '@kbn/core/types';
+import { SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
 
 import type { NavigationConfig } from './config';
 import type {
@@ -28,25 +29,28 @@ export class NavigationServerPlugin
 {
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  setup(core: CoreSetup, plugins: NavigationServerSetupDependencies) {
+  setup(
+    core: CoreSetup<NavigationServerStartDependencies>,
+    plugins: NavigationServerSetupDependencies
+  ) {
     if (!this.isServerless()) {
       const config = this.initializerContext.config.get<NavigationConfig>();
 
-      if (config.solutionNavigation.featureOn) {
-        core.uiSettings.registerGlobal(getUiSettings(config));
-      }
+      core.getStartServices().then(([coreStart, deps]) => {
+        deps.cloudExperiments?.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false).then((value) => {
+          if (value) {
+            core.uiSettings.registerGlobal(getUiSettings(config));
+          } else {
+            this.removeUiSettings(coreStart, getUiSettings(config));
+          }
+        });
+      });
     }
 
     return {};
   }
 
   start(core: CoreStart, plugins: NavigationServerStartDependencies) {
-    const config = this.initializerContext.config.get<NavigationConfig>();
-
-    if (!Boolean(config.solutionNavigation.featureOn)) {
-      this.removeUiSettings(core, getUiSettings(config));
-    }
-
     return {};
   }
 
