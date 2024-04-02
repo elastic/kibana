@@ -89,14 +89,9 @@ export const alertIndexWithAllResults: PatternRollup = {
   sizeInBytes: 29717961631,
   stats: {
     '.internal.alerts-security.alerts-default-000001': {
-      health: 'green',
-      status: 'open',
-      total: {
-        docs: {
-          count: 26093,
-          deleted: 0,
-        },
-      },
+      name: '.internal.alerts-security.alerts-default-000001',
+      num_docs: 26093,
+      size_in_bytes: 0,
     },
   },
 };

@@ -21,4 +21,10 @@ export const mockStatsYellowIndex: Record<string, MeteringStatsIndex> = {
     size_in_bytes: 731583142,
     name: '.ds-packetbeat-8.6.1-2023.02.04-000001',
   },
+  '.ds-packetbeat-8.5.3-2023.02.04-000001': {
+    uuid: 'we0vNWm2Q6iz6uHubyHS6Q',
+    num_docs: 1630289,
+    size_in_bytes: 733175040,
+    name: '.ds-packetbeat-8.5.3-2023.02.04-000001',
+  },
 };
