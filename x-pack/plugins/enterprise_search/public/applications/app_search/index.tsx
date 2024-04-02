@@ -45,8 +45,6 @@ import {
   META_ENGINE_CREATION_PATH,
 } from './routes';
 
-export { ENGINES_PATH } from './routes';
-
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
