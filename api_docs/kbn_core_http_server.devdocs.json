@@ -99,7 +99,66 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.getRequestValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "getRequestValidation",
+        "description": [
+          "\nExtracts {@link RouteValidatorFullConfigRequest} from the validation container.\nThis utility is intended to be used by code introspecting router validation configuration."
+        ],
+        "signature": [
+          "(value: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidator",
+            "text": "RouteValidator"
+          },
+          "<P, Q, B>) => ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidatorFullConfigRequest",
+            "text": "RouteValidatorFullConfigRequest"
+          },
+          "<P, Q, B>"
+        ],
+        "path": "packages/core/http/core-http-server/src/router/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.getRequestValidation.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
+              },
+              "<P, Q, B>"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-http-server",
@@ -11971,8 +12030,8 @@
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.RouteValidatorFullConfig",
-                "text": "RouteValidatorFullConfig"
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
               },
               "<P, Q, B>"
             ],
@@ -12128,6 +12187,22 @@
             ],
             "signature": [
               "{ payload?: (Method extends \"get\" | \"options\" ? undefined : number) | undefined; idleSocket?: number | undefined; } | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteConfigOptions.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "Human-friendly description of this endpoint"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -12314,6 +12389,28 @@
                 "text": "RouteMethod"
               },
               ">"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/router.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouterRoute.validationSchemas",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "validationSchemas",
+            "description": [],
+            "signature": [
+              "false | ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
+              },
+              "<unknown, unknown, unknown> | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/router.ts",
             "deprecated": false,
@@ -12577,6 +12674,66 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.RouteValidatorFullConfigResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "RouteValidatorFullConfigResponse",
+        "description": [
+          "\nMap of status codes to response schemas."
+        ],
+        "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteValidatorFullConfigResponse.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[statusCode: number]: { body: Type<any> | ObjectType<any>; }",
+            "description": [],
+            "signature": [
+              "[statusCode: number]:  { body: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<any> | ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ObjectType",
+                "text": "ObjectType"
+              },
+              "<any>; }"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteValidatorFullConfigResponse.unsafe",
+            "type": "Object",
+            "tags": [],
+            "label": "unsafe",
+            "description": [],
+            "signature": [
+              "{ body?: boolean | undefined; } | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.RouteValidatorOptions",
         "type": "Interface",
         "tags": [],
@@ -12599,6 +12756,81 @@
             ],
             "signature": [
               "{ params?: boolean | undefined; query?: boolean | undefined; body?: boolean | undefined; } | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.RouteValidatorRequestAndResponses",
+        "type": "Interface",
+        "tags": [],
+        "label": "RouteValidatorRequestAndResponses",
+        "description": [
+          "\nAn alternative form to register both request schema and all response schemas."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidatorRequestAndResponses",
+            "text": "RouteValidatorRequestAndResponses"
+          },
+          "<P, Q, B>"
+        ],
+        "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteValidatorRequestAndResponses.request",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidatorConfig",
+                "text": "RouteValidatorConfig"
+              },
+              "<P, Q, B> & ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidatorOptions",
+                "text": "RouteValidatorOptions"
+              }
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteValidatorRequestAndResponses.response",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidatorFullConfigResponse",
+                "text": "RouteValidatorFullConfigResponse"
+              },
+              " | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
             "deprecated": false,
@@ -18139,10 +18371,42 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
-        "id": "def-common.RouteValidatorFullConfig",
+        "id": "def-common.RouteValidator",
         "type": "Type",
         "tags": [],
-        "label": "RouteValidatorFullConfig",
+        "label": "RouteValidator",
+        "description": [
+          "\nType container for schemas used in route related validations"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidatorFullConfigRequest",
+            "text": "RouteValidatorFullConfigRequest"
+          },
+          "<P, Q, B> | ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidatorRequestAndResponses",
+            "text": "RouteValidatorRequestAndResponses"
+          },
+          "<P, Q, B>"
+        ],
+        "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.RouteValidatorFullConfigRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "RouteValidatorFullConfigRequest",
         "description": [
           "\nRoute validations config and options merged into one object"
         ],

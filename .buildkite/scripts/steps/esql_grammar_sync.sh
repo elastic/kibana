@@ -4,7 +4,7 @@ set -euo pipefail
 synchronize_lexer_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseLexer.g4"
-  destination_file="./packages/kbn-monaco/src/esql/antlr/esql_lexer.g4"
+  destination_file="./packages/kbn-esql-ast/src/antlr/esql_lexer.g4"
 
   # Copy the file
   cp "$source_file" "$destination_file" 
@@ -27,7 +27,7 @@ synchronize_lexer_grammar () {
 synchronize_parser_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseParser.g4"
-  destination_file="./packages/kbn-monaco/src/esql/antlr/esql_parser.g4"
+  destination_file="./packages/kbn-esql-ast/src/antlr/esql_parser.g4"
 
   # Copy the file
   cp "$source_file" "$destination_file" 
@@ -105,7 +105,7 @@ main () {
   .buildkite/scripts/bootstrap.sh
 
   # Build ANTLR stuff
-  cd ./packages/kbn-monaco/src  
+  cd ./packages/kbn-esql-ast/src  
   yarn build:antlr4:esql 
 
   # Make a commit
@@ -113,7 +113,7 @@ main () {
 
   git checkout -b "$BRANCH_NAME"
 
-  git add esql/antlr/*
+  git add antlr/*
   git commit -m "Update ES|QL grammars"
 
   report_main_step "Changes committed. Creating pull request."
