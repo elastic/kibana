@@ -92,7 +92,11 @@ export class ActionTypeRegistry {
       (connector) => connector.id === actionId
     );
 
-    return actionTypeEnabled || (!actionTypeEnabled && inMemoryConnector?.isPreconfigured === true);
+    return (
+      actionTypeEnabled ||
+      (!actionTypeEnabled &&
+        (inMemoryConnector?.isPreconfigured === true || inMemoryConnector?.isSystemAction === true))
+    );
   }
 
   /**

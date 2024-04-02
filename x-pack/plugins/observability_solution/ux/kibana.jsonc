@@ -29,7 +29,8 @@
       "observability",
       "security",
       "maps",
-      "lens"
+      "lens",
+      "spaces"
     ],
     "requiredBundles": [
       "kibanaReact",
