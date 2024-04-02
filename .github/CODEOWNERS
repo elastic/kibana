@@ -794,6 +794,7 @@ packages/shared-ux/router/mocks @elastic/appex-sharedux
 packages/shared-ux/router/types @elastic/appex-sharedux
 packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
+packages/shared-ux/modal/tabbed @elastic/appex-sharedux
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
