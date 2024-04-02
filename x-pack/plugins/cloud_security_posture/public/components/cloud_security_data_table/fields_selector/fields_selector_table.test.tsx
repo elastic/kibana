@@ -177,6 +177,7 @@ describe('FieldsSelectorTable', () => {
       expect(searchbox).not.toBeNull();
 
       // await act(async () => userEvent.type(searchbox, 'Label 1'));
+      await userEvent.type(searchbox, 'Label 1');
 
       // debug(screen, 10000);
 
