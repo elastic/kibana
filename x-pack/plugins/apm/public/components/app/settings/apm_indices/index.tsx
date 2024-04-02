@@ -78,9 +78,9 @@ async function saveApmIndices({
       body: apmIndices,
     },
   });
+  clearCache();
   // Reload window to update APM data view with new indices
   window.location.reload();
-  clearCache();
 }
 
 type ApiResponse =
