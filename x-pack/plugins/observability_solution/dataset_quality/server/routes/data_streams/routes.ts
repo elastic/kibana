@@ -10,13 +10,14 @@ import { keyBy, merge, values } from 'lodash';
 import {
   DataStreamDetails,
   DataStreamsEstimatedDataInBytes,
+  DataStreamSettings,
   DataStreamStat,
   DegradedDocs,
 } from '../../../common/api_types';
 import { indexNameToDataStreamParts } from '../../../common/utils';
 import { rangeRt, typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
-import { getDataStreamDetails } from './get_data_stream_details';
+import { getDataStreamDetails, getDataStreamSettings } from './get_data_stream_details';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
@@ -94,6 +95,33 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   },
 });
 
+const dataStreamSettingsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/settings',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<DataStreamSettings> {
+    const { context, params } = resources;
+    const { dataStream } = params.path;
+    const coreContext = await context.core;
+
+    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const dataStreamSettings = await getDataStreamSettings({
+      esClient,
+      dataStream,
+    });
+
+    return dataStreamSettings;
+  },
+});
+
 const dataStreamDetailsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/details',
   params: t.type({
@@ -127,7 +155,6 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     ]);
 
     return {
-      createdOn: dataStreamDetails?.createdOn,
       docsCount: dataStreamDetails?.docsCount,
       degradedDocsCount: dataStreamDetails?.degradedDocsCount,
       services: dataStreamDetails?.services,
@@ -174,5 +201,6 @@ export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
   ...dataStreamDetailsRoute,
+  ...dataStreamSettingsRoute,
   ...estimatedDataInBytesRoute,
 };

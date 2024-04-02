@@ -76,8 +76,13 @@ export const degradedDocsRt = rt.type({
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
 
-export const dataStreamDetailsRt = rt.partial({
+export const dataStreamSettingsRt = rt.partial({
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
+});
+
+export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
+
+export const dataStreamDetailsRt = rt.partial({
   lastActivity: rt.number,
   degradedDocsCount: rt.number,
   docsCount: rt.number,

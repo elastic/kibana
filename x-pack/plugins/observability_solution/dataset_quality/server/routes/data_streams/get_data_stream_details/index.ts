@@ -15,9 +15,25 @@ import {
 import { rangeQuery } from '@kbn/observability-plugin/server';
 
 import { _IGNORED } from '../../../../common/es_fields';
-import { DataStreamDetails } from '../../../../common/api_types';
+import { DataStreamDetails, DataStreamSettings } from '../../../../common/api_types';
 import { createDatasetQualityESClient } from '../../../utils';
 import { dataStreamService } from '../../../services';
+
+export async function getDataStreamSettings({
+  esClient,
+  dataStream,
+}: {
+  esClient: ElasticsearchClient;
+  dataStream: string;
+}): Promise<DataStreamSettings> {
+  throwIfInvalidDataStreamParams(dataStream);
+
+  const createdOn = await getDataStreamCreatedOn(esClient, dataStream);
+
+  return {
+    createdOn,
+  };
+}
 
 export async function getDataStreamDetails({
   esClient,
@@ -32,31 +48,35 @@ export async function getDataStreamDetails({
   end: number;
   sizeStatsAvailable?: boolean; // Only Needed to determine whether `_stats` endpoint is available https://github.com/elastic/kibana/issues/178954
 }): Promise<DataStreamDetails> {
-  if (!dataStream?.trim()) {
-    throw badRequest(`Data Stream name cannot be empty. Received value "${dataStream}"`);
+  throwIfInvalidDataStreamParams(dataStream);
+
+  try {
+    const dataStreamSummaryStats = await getDataStreamSummaryStats(
+      esClient,
+      dataStream,
+      start,
+      end
+    );
+
+    const whenSizeStatsNotAvailable = NaN; // This will indicate size cannot be calculated
+    const avgDocSizeInBytes = sizeStatsAvailable
+      ? dataStreamSummaryStats.docsCount > 0
+        ? await getAvgDocSizeInBytes(esClient, dataStream)
+        : 0
+      : whenSizeStatsNotAvailable;
+    const sizeBytes = Math.ceil(avgDocSizeInBytes * dataStreamSummaryStats.docsCount);
+
+    return {
+      ...dataStreamSummaryStats,
+      sizeBytes,
+    };
+  } catch (e) {
+    // Respond with empty object if data stream does not exist
+    if (e.statusCode === 404) {
+      return {};
+    }
+    throw e;
   }
-
-  const createdOn = await getDataStreamCreatedOn(esClient, dataStream);
-
-  if (createdOn === undefined) {
-    return {};
-  }
-
-  const dataStreamSummaryStats = await getDataStreamSummaryStats(esClient, dataStream, start, end);
-
-  const whenSizeStatsNotAvailable = NaN; // This will indicate size cannot be calculated
-  const avgDocSizeInBytes = sizeStatsAvailable
-    ? dataStreamSummaryStats.docsCount > 0
-      ? await getAvgDocSizeInBytes(esClient, dataStream)
-      : 0
-    : whenSizeStatsNotAvailable;
-  const sizeBytes = Math.ceil(avgDocSizeInBytes * dataStreamSummaryStats.docsCount);
-
-  return {
-    createdOn,
-    ...dataStreamSummaryStats,
-    sizeBytes,
-  };
 }
 
 async function getDataStreamCreatedOn(esClient: ElasticsearchClient, dataStream: string) {
@@ -135,8 +155,14 @@ async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string
 }
 
 function getTermsFromAgg(termAgg: TermAggregation, aggregations: any) {
-  return Object.entries(termAgg).reduce((acc, [key, value]) => {
+  return Object.entries(termAgg).reduce((acc, [key, _value]) => {
     const values = aggregations[key]?.buckets.map((bucket: any) => bucket.key) as string[];
     return { ...acc, [key]: values };
   }, {});
+}
+
+function throwIfInvalidDataStreamParams(dataStream?: string) {
+  if (!dataStream?.trim()) {
+    throw badRequest(`Data Stream name cannot be empty. Received value "${dataStream}"`);
+  }
 }

@@ -10,20 +10,18 @@ import { OnRefreshProps, OnTimeChangeProps, EuiSpacer } from '@elastic/eui';
 
 import { DegradedDocs } from '../degraded_docs_trend/degraded_docs';
 import { DataStreamDetails } from '../../../../common/api_types';
-import { DEFAULT_TIME_RANGE } from '../../../../common/constants';
+import { DEFAULT_TIME_RANGE, DEFAULT_DATEPICKER_REFRESH } from '../../../../common/constants';
 import { useDatasetQualityContext } from '../../dataset_quality/context';
 import { FlyoutDataset, TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { FlyoutSummaryHeader } from './flyout_summary_header';
 import { FlyoutSummaryKpis, FlyoutSummaryKpisLoading } from './flyout_summary_kpis';
-
-const DEFAULT_REFRESH = { value: 60000, pause: false };
 
 export function FlyoutSummary({
   dataStream,
   dataStreamStat,
   dataStreamDetails,
   dataStreamDetailsLoading,
-  timeRange = { ...DEFAULT_TIME_RANGE, refresh: DEFAULT_REFRESH },
+  timeRange = { ...DEFAULT_TIME_RANGE, refresh: DEFAULT_DATEPICKER_REFRESH },
 }: {
   dataStream: string;
   dataStreamStat?: FlyoutDataset;
@@ -34,18 +32,27 @@ export function FlyoutSummary({
   const { service } = useDatasetQualityContext();
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
 
-  const handleTimeChange = useCallback(
-    ({ start, end }: Omit<OnTimeChangeProps, 'isInvalid' | 'isQuickSelection'>) => {
+  const updateTimeRange = useCallback(
+    ({ start, end, refreshInterval }: OnRefreshProps) => {
       service.send({
         type: 'UPDATE_INSIGHTS_TIME_RANGE',
         timeRange: {
           from: start,
           to: end,
-          refresh: timeRange.refresh ?? DEFAULT_REFRESH,
+          refresh: refreshInterval,
         },
       });
     },
-    [service, timeRange.refresh]
+    [service]
+  );
+
+  const handleTimeChange = useCallback(
+    ({ isInvalid, ...timeRangeProps }: OnTimeChangeProps) => {
+      if (!isInvalid) {
+        updateTimeRange({ refreshInterval: timeRange.refresh, ...timeRangeProps });
+      }
+    },
+    [updateTimeRange, timeRange.refresh]
   );
 
   const handleRefresh = useCallback(

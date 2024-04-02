@@ -7,7 +7,7 @@
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { expectToReject } from './utils';
+import { expectToReject, getDataStreamSettingsOfEarliestIndex, rolloverDataStream } from './utils';
 import {
   DatasetQualityApiClient,
   DatasetQualityApiError,
@@ -17,6 +17,7 @@ import { DatasetQualityFtrContextProvider } from './common/services';
 export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const datasetQualityApiClient: DatasetQualityApiClient = getService('datasetQualityApiClient');
   const synthtrace = getService('logSynthtraceEsClient');
+  const esClient = getService('es');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
   const type = 'logs';
@@ -27,20 +28,16 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
 
   async function callApi(dataStream: string) {
     return await datasetQualityApiClient.slsUser({
-      endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/details',
+      endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/settings',
       params: {
         path: {
           dataStream,
-        },
-        query: {
-          start,
-          end,
         },
       },
     });
   }
 
-  describe('gets the data stream details', () => {
+  describe('gets the data stream settings', () => {
     before(async () => {
       await synthtrace.index([
         timerange(start, end)
@@ -78,15 +75,23 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       expect(resp.body).empty();
     });
 
-    it('returns "sizeBytes" as null in serverless', async () => {
+    it('returns "createdOn" correctly', async () => {
+      const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
+        esClient,
+        `${type}-${dataset}-${namespace}`
+      );
       const resp = await callApi(`${type}-${dataset}-${namespace}`);
-      expect(resp.body.sizeBytes).to.be(null);
+      expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
     });
 
-    it('returns service.name and host.name correctly', async () => {
+    it('returns "createdOn" correctly for rolled over dataStream', async () => {
+      await rolloverDataStream(esClient, `${type}-${dataset}-${namespace}`);
+      const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
+        esClient,
+        `${type}-${dataset}-${namespace}`
+      );
       const resp = await callApi(`${type}-${dataset}-${namespace}`);
-      expect(resp.body.services).to.eql({ ['service.name']: [serviceName] });
-      expect(resp.body.hosts?.['host.name']).to.eql([hostName]);
+      expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
     });
 
     after(async () => {
