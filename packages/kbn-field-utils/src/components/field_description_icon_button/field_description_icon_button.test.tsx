@@ -16,19 +16,19 @@ describe('FieldDescriptionIconButton', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should render correctly with a short custom description', async () => {
-    const customDescription = 'test this desc';
-    render(<FieldDescriptionIconButton field={{ name: 'bytes', customDescription }} />);
+  it('should render correctly with a short description', async () => {
+    const description = 'test this desc';
+    render(<FieldDescriptionIconButton field={{ name: 'bytes', description }} />);
     expect(screen.queryByTestId('fieldDescription-bytes')).toBeNull();
     screen.queryByTestId('fieldDescriptionPopoverButton-bytes')?.click();
-    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
+    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(description);
   });
 
-  it('should render correctly with a long custom description', async () => {
-    const customDescription = 'test this long desc '.repeat(8).trim();
-    render(<FieldDescriptionIconButton field={{ name: 'bytes', customDescription }} />);
+  it('should render correctly with a long description', async () => {
+    const description = 'test this long desc '.repeat(8).trim();
+    render(<FieldDescriptionIconButton field={{ name: 'bytes', description }} />);
     expect(screen.queryByTestId('fieldDescription-bytes')).toBeNull();
     screen.queryByTestId('fieldDescriptionPopoverButton-bytes')?.click();
-    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
+    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(description);
   });
 });

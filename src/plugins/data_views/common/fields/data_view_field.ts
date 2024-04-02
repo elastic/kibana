@@ -42,18 +42,23 @@ export class DataViewField implements DataViewFieldBase {
    * Kbn field type, used mainly for formattering.
    */
   private readonly kbnFieldType: KbnFieldType;
-  private readonly fieldList: IIndexPatternFieldList | undefined;
+  /**
+   * Returns the field list the DataViewField is part of
+   * @private
+   */
+  private readonly getParentFieldList: () => IIndexPatternFieldList | undefined;
 
   /**
    * DataView constructor
    * @constructor
    * @param spec Configuration for the field
+   * @param fieldList Field list the field is part of
    */
   constructor(spec: FieldSpec, fieldList?: IIndexPatternFieldList) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
 
     this.kbnFieldType = getKbnFieldType(spec.type);
-    this.fieldList = fieldList;
+    this.getParentFieldList = () => fieldList;
   }
 
   // writable attrs
@@ -195,7 +200,7 @@ export class DataViewField implements DataViewFieldBase {
     if (this.spec.customDescription) {
       return this.spec.customDescription;
     }
-    if (this.fieldList?.hasEcsFields()) {
+    if (this.getParentFieldList()?.hasEcsFields()) {
       const { description } = EcsFlat[this.name as keyof typeof EcsFlat] ?? {};
       return description || '';
     }

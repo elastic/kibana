@@ -18,30 +18,30 @@ describe('FieldDescription', () => {
   });
 
   it('should render correctly with a short custom description', async () => {
-    const customDescription = 'test this desc';
-    render(<FieldDescription field={{ name: 'bytes', customDescription }} />);
+    const description = 'test this desc';
+    render(<FieldDescription field={{ name: 'bytes', description }} />);
     const desc = screen.queryByTestId('fieldDescription-bytes');
-    expect(desc).toHaveTextContent(customDescription);
+    expect(desc).toHaveTextContent(description);
     const button = screen.queryByTestId('toggleFieldDescription-bytes');
     expect(button).toBeNull();
   });
 
   it('should render correctly with a long custom description', async () => {
-    const customDescription = 'test this long desc '.repeat(8).trim();
-    render(<FieldDescription field={{ name: 'bytes', customDescription }} />);
-    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
+    const description = 'test this long desc '.repeat(8).trim();
+    render(<FieldDescription field={{ name: 'bytes', description }} />);
+    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(description);
     screen.queryByTestId('toggleFieldDescription-bytes')?.click();
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(
-      `${customDescription}View less`
+      `${description}View less`
     );
     screen.queryByTestId('toggleFieldDescription-bytes')?.click();
-    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
+    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(description);
   });
 
   it('should render a long custom description without truncation', async () => {
-    const customDescription = 'test this long desc '.repeat(8).trim();
-    render(<FieldDescription field={{ name: 'bytes', customDescription }} truncate={false} />);
-    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
+    const description = 'test this long desc '.repeat(8).trim();
+    render(<FieldDescription field={{ name: 'bytes', description }} truncate={false} />);
+    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(description);
     const button = screen.queryByTestId('toggleFieldDescription-bytes');
     expect(button).toBeNull();
   });

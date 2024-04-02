@@ -15,7 +15,6 @@ const MAX_VISIBLE_LENGTH = 110;
 export interface FieldDescriptionProps {
   field: {
     name: string;
-    customDescription?: string;
     description?: string;
   };
   color?: 'subdued';
@@ -28,8 +27,7 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
   truncate = true,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const customDescription = (field?.customDescription || '').trim();
-  const description = customDescription || field?.description || '';
+  const description = (field?.description || '').trim();
 
   const isTooLong = Boolean(truncate && description.length > MAX_VISIBLE_LENGTH);
   const [isTruncated, setIsTruncated] = useState<boolean>(isTooLong);
