@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { type MlEntityField, ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { type MlResultsService } from '../services/results_service';
 import type { ToastNotificationService } from '../services/toast_notification_service';
 import { getControlsForDetector } from './get_controls_for_detector';
@@ -37,7 +37,7 @@ export const getFunctionDescription = async (
     selectedJob,
   }: {
     selectedDetectorIndex: number;
-    selectedEntities: MlEntityField | undefined;
+    selectedEntities: Record<string, any> | undefined;
     selectedJobId: string;
     selectedJob: CombinedJob;
   },

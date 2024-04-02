@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
-import type { MlEntityFieldType, MlEntityField } from '@kbn/ml-anomaly-utils';
+import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { EntityControl } from '../entity_control';
 import { mlJobService } from '../../../services/job_service';
@@ -76,7 +76,7 @@ interface SeriesControlsProps {
   functionDescription?: string;
   job?: CombinedJob | MlJob;
   selectedDetectorIndex: number;
-  selectedEntities?: MlEntityField;
+  selectedEntities?: Record<string, any>;
   selectedJobId: JobId;
   setFunctionDescription: (func: string) => void;
 }

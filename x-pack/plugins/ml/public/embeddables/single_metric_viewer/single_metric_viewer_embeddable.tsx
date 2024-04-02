@@ -30,10 +30,10 @@ import type {
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 
-export const getDefaultSingleMetricViewerPanelTitle = (jobId: JobId) =>
+export const getDefaultSingleMetricViewerPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.singleMetricViewerEmbeddable.title', {
-    defaultMessage: 'ML single metric viewer chart for {jobId}',
-    values: { jobId },
+    defaultMessage: 'ML single metric viewer chart for {jobIds}',
+    values: { jobIds: jobIds.join(', ') },
   });
 
 export type ISingleMetricViewerEmbeddable = typeof SingleMetricViewerEmbeddable;
@@ -48,10 +48,9 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
 
   // API
   public readonly functionDescription: BehaviorSubject<string | undefined>;
-  public readonly jobId: BehaviorSubject<JobId | undefined>;
+  public readonly jobIds: BehaviorSubject<JobId[] | undefined>;
   public readonly selectedDetectorIndex: BehaviorSubject<number | undefined>;
   public readonly selectedEntities: BehaviorSubject<MlEntityField[] | undefined>;
-  public readonly title: BehaviorSubject<string | undefined>;
 
   private apiSubscriptions = new Subscription();
 
@@ -62,10 +61,10 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
   ) {
     super(initialInput, {} as AnomalyChartsEmbeddableOutput, parent);
 
-    this.jobId = embeddableInputToSubject<JobId, SingleMetricViewerEmbeddableInput>(
+    this.jobIds = embeddableInputToSubject<JobId[], SingleMetricViewerEmbeddableInput>(
       this.apiSubscriptions,
       this,
-      'jobId'
+      'jobIds'
     );
 
     this.functionDescription = embeddableInputToSubject<
@@ -82,12 +81,6 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
       MlEntityField[] | undefined,
       SingleMetricViewerEmbeddableInput
     >(this.apiSubscriptions, this, 'selectedEntities');
-
-    this.title = embeddableInputToSubject<string, SingleMetricViewerEmbeddableInput>(
-      this.apiSubscriptions,
-      this,
-      'title'
-    );
   }
 
   public updateUserInput(update: SingleMetricViewerEmbeddableInput) {

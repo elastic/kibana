@@ -72,7 +72,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
     services[1].data.query.timefilter.timefilter,
     onRenderComplete
   );
-  const selectedJobId = data?.jobId;
+  const selectedJobId = data?.jobIds[0];
   // Need to make sure we fall back to `undefined` if `functionDescription` is an empty string,
   // otherwise anomaly table data will not be loaded.
   const functionDescription =

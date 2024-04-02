@@ -120,12 +120,12 @@ export interface AnomalyChartsEmbeddableCustomInput {
 export type AnomalyChartsEmbeddableInput = EmbeddableInput & AnomalyChartsEmbeddableCustomInput;
 
 export interface SingleMetricViewerEmbeddableCustomInput {
-  jobId: JobId;
+  jobIds: JobId[];
   title: string;
   functionDescription?: string;
   panelTitle: string;
   selectedDetectorIndex: number;
-  selectedEntities?: MlEntityField;
+  selectedEntities?: Record<string, any>;
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
   query: Query;
@@ -137,9 +137,10 @@ export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
   SingleMetricViewerEmbeddableCustomInput;
 
 export interface SingleMetricViewerComponentApi {
-  jobId: PublishingSubject<JobId>;
+  functionDescription?: PublishingSubject<string>;
+  jobIds: PublishingSubject<JobId[]>;
   selectedDetectorIndex: PublishingSubject<number>;
-  selectedEntities?: PublishingSubject<MlEntityField>;
+  selectedEntities?: PublishingSubject<Record<string, any>>;
 
   updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
 }

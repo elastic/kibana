@@ -49,7 +49,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   onCreate,
   onCancel,
 }) => {
-  const isNewJob = initialInput?.jobId !== undefined && initialInput?.jobId !== job.job_id;
+  const isNewJob = initialInput?.jobIds !== undefined && initialInput?.jobIds[0] !== job.job_id;
 
   const [panelTitle, setPanelTitle] = useState<string>(defaultTitle);
   const [functionDescription, setFunctionDescription] = useState<string | undefined>(
@@ -59,7 +59,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   const [selectedDetectorIndex, setSelectedDetectorIndex] = useState<number>(
     !isNewJob && initialInput?.selectedDetectorIndex ? initialInput.selectedDetectorIndex : 0
   );
-  const [selectedEntities, setSelectedEntities] = useState<MlEntityField | undefined>(
+  const [selectedEntities, setSelectedEntities] = useState<Record<string, any> | undefined>(
     !isNewJob && initialInput?.selectedEntities ? initialInput.selectedEntities : undefined
   );
 
@@ -71,7 +71,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   ) => {
     switch (action) {
       case APP_STATE_ACTION.SET_ENTITIES:
-        setSelectedEntities(payload as MlEntityField);
+        setSelectedEntities(payload as Record<string, any>);
         break;
       case APP_STATE_ACTION.SET_FUNCTION_DESCRIPTION:
         setFunctionDescription(payload as string);
