@@ -75,6 +75,7 @@
     "@kbn/code-editor-mock",
     "@kbn/core-security-browser",
     "@kbn/core-security-server",
+    "@kbn/core-http-router-server-internal",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-common",
     "@kbn/core-i18n-browser-mocks",
