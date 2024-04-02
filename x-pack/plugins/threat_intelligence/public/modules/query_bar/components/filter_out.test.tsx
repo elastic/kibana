@@ -17,6 +17,7 @@ import {
   FilterOutCellAction,
   FilterOutContextMenu,
 } from './filter_out';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
 
 jest.mock('../../indicators/hooks/use_filters_context');
 
@@ -33,20 +34,27 @@ describe('<FilterOutButtonIcon /> <FilterOutButtonEmpty /> <FilterOutContextMenu
   });
 
   it('should render an empty component (wrong data input)', () => {
-    const { container } = render(<FilterOutButtonIcon data={''} field={mockField} />);
+    const { container } = render(<FilterOutButtonIcon data={''} field={mockField} />, {
+      wrapper: TestProvidersComponent,
+    });
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should render an empty component (wrong field input)', () => {
-    const { container } = render(<FilterOutButtonIcon data={mockIndicator} field={''} />);
+    const { container } = render(<FilterOutButtonIcon data={mockIndicator} field={''} />, {
+      wrapper: TestProvidersComponent,
+    });
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should render one EuiButtonIcon', () => {
     const { getByTestId } = render(
-      <FilterOutButtonIcon data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />
+      <FilterOutButtonIcon data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />,
+      {
+        wrapper: TestProvidersComponent,
+      }
     );
 
     expect(getByTestId(TEST_ID)).toHaveClass('euiButtonIcon');
@@ -54,7 +62,10 @@ describe('<FilterOutButtonIcon /> <FilterOutButtonEmpty /> <FilterOutContextMenu
 
   it('should render one EuiButtonEmpty', () => {
     const { getByTestId } = render(
-      <FilterOutButtonEmpty data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />
+      <FilterOutButtonEmpty data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />,
+      {
+        wrapper: TestProvidersComponent,
+      }
     );
 
     expect(getByTestId(TEST_ID)).toHaveClass('euiButtonEmpty');
@@ -62,7 +73,10 @@ describe('<FilterOutButtonIcon /> <FilterOutButtonEmpty /> <FilterOutContextMenu
 
   it('should render one EuiContextMenuItem (for EuiContextMenu use)', () => {
     const { getByTestId } = render(
-      <FilterOutContextMenu data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />
+      <FilterOutContextMenu data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />,
+      {
+        wrapper: TestProvidersComponent,
+      }
     );
 
     expect(getByTestId(TEST_ID)).toHaveClass('euiContextMenuItem');
@@ -83,7 +97,10 @@ describe('<FilterOutButtonIcon /> <FilterOutButtonEmpty /> <FilterOutContextMenu
         field={mockField}
         Component={mockComponent}
         data-test-subj={TEST_ID}
-      />
+      />,
+      {
+        wrapper: TestProvidersComponent,
+      }
     );
 
     expect(getByTestId(TEST_ID)).toBeInTheDocument();
