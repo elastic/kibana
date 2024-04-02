@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'visEditor',
   ]);
 
-  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
   describe('Goal', function describeIndexTests() {
