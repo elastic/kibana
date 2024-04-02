@@ -19,6 +19,7 @@ import {
   consoleOutputLexerRules,
   consoleOutputLanguageConfiguration,
 } from './lexer_rules';
+import { buildConsoleTheme, buildConsoleOutputTheme } from './theme';
 
 export {
   CONSOLE_LANG_ID,
@@ -27,8 +28,7 @@ export {
   CONSOLE_OUTPUT_THEME_ID,
 } from './constants';
 
-export { buildConsoleTheme } from './theme';
-export { buildConsoleOutputTheme } from './output_theme';
+export { buildConsoleTheme, buildConsoleOutputTheme } from './theme';
 
 export const ConsoleLang: LangModuleType = {
   ID: CONSOLE_LANG_ID,
