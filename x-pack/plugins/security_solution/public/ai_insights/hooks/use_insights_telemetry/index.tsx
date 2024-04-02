@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { ReportInsightsGeneratedParams } from '../../common/lib/telemetry/events/insights/types';
-import { useKibana } from '../../common/lib/kibana';
+import type { ReportInsightsGeneratedParams } from '../../../common/lib/telemetry/events/insights/types';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface InsightsTelemetry {
   reportInsightsGenerated: (params: ReportInsightsGeneratedParams) => void;
 }
 
-// TODO before merge to main
-// move this file to wherever Insights are within security solution?
+// TODO @andrew implement this hook and call the reportInsightsGenerated function wherever insights are generated
 export const useInsightsTelemetry = (): InsightsTelemetry => {
   const {
     services: { telemetry },
