@@ -664,8 +664,27 @@ export function MachineLearningJobWizardCommonProvider(
       await testSubjects.click('mlJobWizardTimeRangeStep');
     },
 
-    async setEndDate(input: string) {
-      await testSubjects.setValue('mlJobWizardDatePickerRangeEndDate', input);
+    async assertShortDurationTimeRange() {
+      const { startDate: origStartDate } = await this.getSelectedDateRange();
+
+      // calculate the new end datedate
+      const shortDurationEndDate = `${origStartDate.split(':', 1)[0]}:01:00.000`;
+
+      // set the new end date
+      await testSubjects.setValue('mlJobWizardDatePickerRangeEndDate', shortDurationEndDate, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+
+      // click away from time popover
+      await testSubjects.click('mlJobWizardTimeRangeStep');
+      const { endDate: newEndDate } = await this.getSelectedDateRange();
+
+      // assert time is set as expected
+      expect(newEndDate).to.eql(
+        shortDurationEndDate,
+        `Expect [${newEndDate}] to eql [${shortDurationEndDate}]`
+      );
     },
 
     async goBackToJobDetailsSection() {
@@ -680,6 +699,12 @@ export function MachineLearningJobWizardCommonProvider(
         await testSubjects.existOrFail(sel, {
           timeout: 3_000,
         });
+    },
+
+    async cloneJob() {
+      await testSubjects.click('euiCollapsedItemActionsButton');
+      await testSubjects.click('mlActionButtonCloneJob');
+      await testSubjects.existOrFail('mlPageJobWizardHeader-single_metric');
     },
   };
 }

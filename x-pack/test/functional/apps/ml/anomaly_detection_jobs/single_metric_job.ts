@@ -387,5 +387,46 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.api.assertNoJobResultsExist(jobIdClone);
     });
+
+    it('job cloning with too short of a job creation time range results in validation callouts', async () => {
+      await ml.testExecution.logTestStep('job creation loads the job management page');
+      await ml.navigation.navigateToMl();
+      await ml.navigation.navigateToJobManagement();
+
+      await ml.testExecution.logTestStep(`cloning job: [${jobId}]`);
+      await ml.jobWizardCommon.cloneJob();
+
+      await ml.testExecution.logTestStep('job creation displays the time range step');
+      await ml.jobWizardCommon.assertTimeRangeSectionExists();
+
+      await ml.testExecution.logTestStep('job creation sets the time range');
+      await ml.jobWizardCommon.clickUseFullDataButton(
+        'Feb 7, 2016 @ 00:00:00.000',
+        'Feb 11, 2016 @ 23:59:54.000'
+      );
+
+      await ml.jobWizardCommon.goBackToTimeRange();
+
+      await ml.jobWizardCommon.assertShortDurationTimeRange();
+
+      await ml.jobWizardCommon.clickNextButton();
+      await ml.jobWizardCommon.clickNextButton();
+      await ml.jobWizardCommon.assertJobIdInputExists();
+      await ml.jobWizardCommon.setJobId(`${jobIdClone}-again`);
+      await ml.jobWizardCommon.clickNextButton();
+      await ml.jobWizardCommon.assertValidationCallouts([
+        'mlValidationCallout-warning-The selected or available time',
+      ]);
+
+      await ml.jobWizardCommon.goBackToTimeRange();
+      await ml.jobWizardCommon.clickUseFullDataButton(
+        'Feb 7, 2016 @ 00:00:00.000',
+        'Feb 11, 2016 @ 23:59:54.000'
+      );
+      await ml.jobWizardCommon.advanceToValidationSection();
+      await ml.jobWizardCommon.assertValidationCallouts([
+        'mlValidationCallout-success-Valid and long enough to model',
+      ]);
+    });
   });
 }

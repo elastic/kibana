@@ -129,33 +129,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.togglingModelChangeAnnotationsShowsCalloutAndRemovesCallout();
     });
 
-    it('too short of a job creation time range results in validation callouts', async () => {
-      await ml.jobWizardCommon.goBackToTimeRange();
-
-      const tooShort = 'Feb 7, 2016 @ 00:01:00.000';
-      await ml.jobWizardCommon.setEndDate(tooShort);
-
-      await ml.testExecution.logTestStep('job creation displays the validation step');
-      await ml.jobWizardCommon.goBackToJobDetailsSection();
-      await ml.jobWizardCommon.advanceToValidationSection();
-      await ml.jobWizardCommon.assertValidationCallouts([
-        'mlValidationCallout-warning-The selected or available time',
-        'mlValidationCallout-danger-The datafeed preview failed. T',
-        'mlValidationCallout-warning-Job validation has failed, but',
-      ]);
-
-      await ml.jobWizardCommon.goBackToTimeRange();
-      await ml.jobWizardCommon.clickUseFullDataButton(
-        'Feb 7, 2016 @ 00:00:00.000',
-        'Feb 11, 2016 @ 23:59:54.000'
-      );
-      await ml.jobWizardCommon.advanceToValidationSection();
-      await ml.jobWizardCommon.assertValidationCallouts([
-        'mlValidationCallout-success-Valid and long enough to model',
-        'mlValidationCallout-success-Valid and within the estimated',
-      ]);
-    });
-
     it('job creation memory limit too large results in validation callout', async () => {
       await ml.jobWizardCommon.goBackToJobDetailsSection();
 
