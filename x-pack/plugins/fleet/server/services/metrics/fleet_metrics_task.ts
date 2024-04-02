@@ -20,7 +20,7 @@ import { appContextService } from '../app_context';
 import type { AgentMetrics } from './fetch_agent_metrics';
 
 export const TYPE = 'Fleet-Metrics-Task';
-export const VERSION = '1.1.0';
+export const VERSION = '1.1.1';
 const TITLE = 'Fleet Metrics Task';
 const TIMEOUT = '1m';
 const SCOPE = ['fleet'];
