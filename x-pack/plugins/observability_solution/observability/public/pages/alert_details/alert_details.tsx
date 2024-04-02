@@ -8,7 +8,14 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPanel,
+  EuiSpacer,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   AlertStatus,
   ALERT_RULE_CATEGORY,
@@ -21,6 +28,8 @@ import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import dedent from 'dedent';
+import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
+import { css } from '@emotion/react';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -74,6 +83,7 @@ export function AlertDetails() {
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     if (!alertDetail) {
@@ -168,6 +178,50 @@ export function AlertDetails() {
   const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
   const timeZone = getTimeZone(uiSettings);
 
+  const OVERVIEW_TAB_ID = 'overview';
+  const METADATA_TAB_ID = 'metadata';
+
+  const overviewTab = (
+    <>
+      <EuiSpacer size="l" />
+      <AlertSummary alertSummaryFields={summaryFields} />
+      {AlertDetailsAppSection && rule && alertDetail?.formatted && (
+        <AlertDetailsAppSection
+          alert={alertDetail.formatted}
+          rule={rule}
+          timeZone={timeZone}
+          setAlertSummaryFields={setSummaryFields}
+          ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
+        />
+      )}
+    </>
+  );
+
+  const metadataTab = alertDetail?.raw && (
+    <EuiPanel hasShadow={false} data-test-subj="metadataTabPanel">
+      <AlertFieldsTable alert={alertDetail.raw} />
+    </EuiPanel>
+  );
+
+  const tabs: EuiTabbedContentTab[] = [
+    {
+      id: OVERVIEW_TAB_ID,
+      name: i18n.translate('xpack.observability.alertDetails.tab.overviewLabel', {
+        defaultMessage: 'Overview',
+      }),
+      'data-test-subj': 'overviewTab',
+      content: overviewTab,
+    },
+    {
+      id: METADATA_TAB_ID,
+      name: i18n.translate('xpack.observability.alertDetails.tab.metadataLabel', {
+        defaultMessage: 'Metadata',
+      }),
+      'data-test-subj': 'metadataTab',
+      content: metadataTab,
+    },
+  ];
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -191,22 +245,18 @@ export function AlertDetails() {
             />
           </CasesContext>,
         ],
-        bottomBorder: true,
+        bottomBorder: false,
+      }}
+      pageSectionProps={{
+        paddingSize: 'none',
+        css: css`
+          padding: 0 ${euiTheme.size.l} ${euiTheme.size.l} ${euiTheme.size.l};
+        `,
       }}
       data-test-subj="alertDetails"
     >
       <HeaderMenu />
-      <AlertSummary alertSummaryFields={summaryFields} />
-      <EuiSpacer size="l" />
-      {AlertDetailsAppSection && rule && alertDetail?.formatted && (
-        <AlertDetailsAppSection
-          alert={alertDetail.formatted}
-          rule={rule}
-          timeZone={timeZone}
-          setAlertSummaryFields={setSummaryFields}
-          ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
-        />
-      )}
+      <EuiTabbedContent data-test-subj="alertDetailsTabbedContent" tabs={tabs} />
     </ObservabilityPageTemplate>
   );
 }

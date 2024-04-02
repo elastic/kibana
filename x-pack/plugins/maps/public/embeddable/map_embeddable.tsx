@@ -673,7 +673,26 @@ export class MapEmbeddable
   linkToLibrary = undefined;
   unlinkFromLibrary = undefined;
   // add implemenation for library transform methods
-  saveStateToSavedObject = async (title: string) => {
+  checkForDuplicateTitle = async (
+    newTitle: string,
+    isTitleDuplicateConfirmed: boolean,
+    onTitleDuplicate: () => void
+  ) => {
+    await checkForDuplicateTitle(
+      {
+        title: newTitle,
+        copyOnSave: false,
+        lastSavedTitle: '',
+        isTitleDuplicateConfirmed,
+        getDisplayName: () => MAP_EMBEDDABLE_NAME,
+        onTitleDuplicate,
+      },
+      {
+        overlays: getCoreOverlays(),
+      }
+    );
+  };
+  saveToLibrary = async (title: string) => {
     const { attributes, references } = extractReferences({
       attributes: this._savedMap.getAttributes(),
     });
@@ -687,38 +706,19 @@ export class MapEmbeddable
       },
       options: { references },
     });
+    return savedObjectId;
+  };
+  getByReferenceState = (libraryId: string) => {
     return {
-      state: {
-        ..._.omit(this.getExplicitInput(), 'attributes'),
-        savedObjectId,
-      },
-      savedObjectId,
+      ..._.omit(this.getExplicitInput(), 'attributes'),
+      savedObjectId: libraryId,
     };
   };
-  savedObjectAttributesToState = () => {
+  getByValueState = () => {
     return {
       ..._.omit(this.getExplicitInput(), 'savedObjectId'),
       attributes: this._savedMap.getAttributes(),
     };
-  };
-  checkForDuplicateTitle = async (
-    newTitle: string,
-    isTitleDuplicateConfirmed: boolean,
-    onTitleDuplicate: () => void
-  ) => {
-    return checkForDuplicateTitle(
-      {
-        title: newTitle,
-        copyOnSave: false,
-        lastSavedTitle: '',
-        isTitleDuplicateConfirmed,
-        getDisplayName: () => MAP_EMBEDDABLE_NAME,
-        onTitleDuplicate,
-      },
-      {
-        overlays: getCoreOverlays(),
-      }
-    );
   };
 
   // Timing bug for dashboard with multiple maps with synchronized movement and filter by map extent enabled

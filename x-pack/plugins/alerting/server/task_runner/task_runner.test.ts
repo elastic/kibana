@@ -83,6 +83,7 @@ import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
@@ -148,6 +149,7 @@ describe('Task Runner', () => {
   } as DataViewsServerPluginStart;
   const alertsService = alertsServiceMock.create();
   const maintenanceWindowClient = maintenanceWindowClientMock.create();
+  const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -186,6 +188,7 @@ describe('Task Runner', () => {
     },
     getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
     getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+    connectorAdapterRegistry,
   };
 
   const ephemeralTestParams: Array<
@@ -1954,7 +1957,7 @@ describe('Task Runner', () => {
     expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed']);
     expect(loggerMeta?.error?.stack_trace).toBeDefined();
     expect(logger.error).toBeCalledTimes(1);
-    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
   test('recovers gracefully when the Rule Task Runner throws an exception when loading rule to prepare for run', async () => {
