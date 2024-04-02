@@ -125,6 +125,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             params,
             previousStartedAt,
             startedAt,
+            startedAtOverridden,
             services,
             spaceId,
             state,
@@ -354,10 +355,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               alertWithPersistence,
               refresh,
               ruleExecutionLogger,
-              experimentalFeatures
+              experimentalFeatures,
+              startedAtOverridden ? startedAt : undefined
             );
 
-            const alertTimestampOverride = isPreview ? startedAt : undefined;
+            const alertTimestampOverride = isPreview || startedAtOverridden ? startedAt : undefined;
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);
             const wrapHits = wrapHitsFactory({
               ignoreFields: [...ignoreFields, ...legacySignalFields],

@@ -6,28 +6,28 @@
  */
 
 import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import { partiallyUpdateRule } from '../saved_objects/partially_update_rule';
+import { adHocRunStatus } from '../../common/constants';
+import { AdHocRunSchedule } from '../data/ad_hoc_run/types';
+import { partiallyUpdateAdHocRun } from './lib';
 
 const TIME_TO_WAIT = 2000;
 
-export class RunningHandler {
+export class AdHocTaskRunningHandler {
   private client: ISavedObjectsRepository;
   private logger: Logger;
-  private ruleTypeId: string;
 
   private runningTimeoutId?: NodeJS.Timeout;
   private isUpdating: boolean = false;
   private runningPromise?: Promise<void>;
 
-  constructor(client: ISavedObjectsRepository, logger: Logger, ruleTypeId: string) {
+  constructor(client: ISavedObjectsRepository, logger: Logger) {
     this.client = client;
     this.logger = logger;
-    this.ruleTypeId = ruleTypeId;
   }
 
-  public start(ruleId: string, namespace?: string) {
+  public start(adHocRunParamsId: string, schedule: AdHocRunSchedule[], namespace?: string) {
     this.runningTimeoutId = setTimeout(() => {
-      this.setRunning(ruleId, namespace);
+      this.setRunning(adHocRunParamsId, schedule, namespace);
     }, TIME_TO_WAIT);
   }
 
@@ -43,12 +43,12 @@ export class RunningHandler {
     else return Promise.resolve();
   }
 
-  private setRunning(ruleId: string, namespace?: string) {
+  private setRunning(adHocRunParamsId: string, schedule: AdHocRunSchedule[], namespace?: string) {
     this.isUpdating = true;
-    this.runningPromise = partiallyUpdateRule(
+    this.runningPromise = partiallyUpdateAdHocRun(
       this.client,
-      ruleId,
-      { running: true },
+      adHocRunParamsId,
+      { status: adHocRunStatus.RUNNING, schedule },
       {
         ignore404: true,
         namespace,
@@ -64,7 +64,7 @@ export class RunningHandler {
         this.runningPromise = undefined;
         this.isUpdating = false;
         this.logger.error(
-          `error updating running attribute rule for ${this.ruleTypeId}:${ruleId} ${err.message}`
+          `error updating status and schedule attribute for ad hoc run ${adHocRunParamsId} ${err.message}`
         );
       });
   }

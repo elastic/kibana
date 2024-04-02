@@ -12,13 +12,22 @@ import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import {
+  RunContext,
+  TaskInstance,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+  TaskPriority,
+} from '@kbn/task-manager-plugin/server';
 import { isNumber } from 'lodash';
 import {
   ScheduleBackfillError,
   ScheduleBackfillParam,
   ScheduleBackfillParams,
+  ScheduleBackfillResult,
   ScheduleBackfillResults,
 } from '../application/backfill/methods/schedule/types';
+import { Backfill } from '../application/backfill/result/types';
 import {
   transformBackfillParamToAdHocRun,
   transformAdHocRunToBackfillResult,
@@ -26,11 +35,17 @@ import {
 import { RuleDomain } from '../application/rule/types';
 import { AdHocRunSO } from '../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { TaskRunnerFactory } from '../task_runner';
 import { RuleTypeRegistry } from '../types';
 import { createBackfillError } from './lib';
 
+export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
+
 interface ConstructorOpts {
   logger: Logger;
+  taskManagerSetup: TaskManagerSetupContract;
+  taskManagerStartPromise: Promise<TaskManagerStartContract>;
+  taskRunnerFactory: TaskRunnerFactory;
 }
 
 interface BulkQueueOpts {
@@ -43,9 +58,20 @@ interface BulkQueueOpts {
 
 export class BackfillClient {
   private logger: Logger;
+  private readonly taskManagerStartPromise: Promise<TaskManagerStartContract>;
 
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
+    this.taskManagerStartPromise = opts.taskManagerStartPromise;
+
+    // Registers the task that handles the backfill using the ad hoc task runner
+    opts.taskManagerSetup.registerTaskDefinitions({
+      [BACKFILL_TASK_TYPE]: {
+        title: 'Alerting Backfill Rule Run',
+        priority: TaskPriority.Low,
+        createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
+      },
+    });
   }
 
   public async bulkQueue({
@@ -56,12 +82,12 @@ export class BackfillClient {
     unsecuredSavedObjectsClient,
   }: BulkQueueOpts): Promise<ScheduleBackfillResults> {
     const adHocSOsToCreate: Array<SavedObjectsBulkCreateObject<AdHocRunSO>> = [];
-    const resultOrErrorMap: Map<number, number | ScheduleBackfillError> = new Map();
+    const soToCreateOrErrorMap: Map<number, number | ScheduleBackfillError> = new Map();
 
     params.forEach((param: ScheduleBackfillParam, ndx: number) => {
       const { rule, error } = getRuleOrError(param.ruleId, rules, ruleTypeRegistry);
       if (rule) {
-        resultOrErrorMap.set(ndx, adHocSOsToCreate.length);
+        soToCreateOrErrorMap.set(ndx, adHocSOsToCreate.length);
         const reference: SavedObjectReference = {
           id: rule.id,
           name: `rule`,
@@ -73,7 +99,7 @@ export class BackfillClient {
           references: [reference],
         });
       } else if (error) {
-        resultOrErrorMap.set(ndx, error);
+        soToCreateOrErrorMap.set(ndx, error);
         this.logger.warn(
           `No rule found for ruleId ${param.ruleId} - not scheduling backfill for ${JSON.stringify(
             param
@@ -83,25 +109,52 @@ export class BackfillClient {
     });
 
     if (!adHocSOsToCreate.length) {
-      return params.map((_, ndx: number) => resultOrErrorMap.get(ndx) as ScheduleBackfillError);
+      return params.map((_, ndx: number) => soToCreateOrErrorMap.get(ndx) as ScheduleBackfillError);
     }
 
     const bulkCreateResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
       adHocSOsToCreate
     );
 
-    // TODO bulk schedule the underlying tasks
     const transformedResponse: ScheduleBackfillResults = bulkCreateResponse.saved_objects.map(
       transformAdHocRunToBackfillResult
     );
-    return Array.from(resultOrErrorMap.keys()).map((ndx: number) => {
-      const indexOrError = resultOrErrorMap.get(ndx);
+
+    const createSOResult = Array.from(soToCreateOrErrorMap.keys()).map((ndx: number) => {
+      const indexOrError = soToCreateOrErrorMap.get(ndx);
       if (isNumber(indexOrError)) {
         return transformedResponse[indexOrError as number];
       } else {
         return indexOrError as ScheduleBackfillError;
       }
     });
+
+    // Build array of tasks to schedule
+    const adHocTasksToSchedule: TaskInstance[] = [];
+    createSOResult.forEach((result: ScheduleBackfillResult, ndx: number) => {
+      if (!(result as ScheduleBackfillError).error) {
+        const createdSO = result as Backfill;
+
+        const ruleTypeTimeout = ruleTypeRegistry.get(createdSO.rule.alertTypeId).ruleTaskTimeout;
+        adHocTasksToSchedule.push({
+          id: createdSO.id,
+          taskType: BACKFILL_TASK_TYPE,
+          ...(ruleTypeTimeout ? { timeoutOverride: ruleTypeTimeout } : {}),
+          state: {},
+          params: {
+            adHocRunParamsId: createdSO.id,
+            spaceId,
+          },
+        });
+      }
+    });
+
+    if (adHocTasksToSchedule.length > 0) {
+      const taskManager = await this.taskManagerStartPromise;
+      await taskManager.bulkSchedule(adHocTasksToSchedule);
+    }
+
+    return createSOResult;
   }
 }
 

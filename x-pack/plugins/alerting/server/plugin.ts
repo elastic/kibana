@@ -115,6 +115,7 @@ export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
   executeStart: 'execute-start',
   executeAction: 'execute-action',
+  executeBackfill: 'execute-backfill',
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',
@@ -285,6 +286,11 @@ export class AlertingPlugin {
 
     this.backfillClient = new BackfillClient({
       logger: this.logger,
+      taskManagerSetup: plugins.taskManager,
+      taskManagerStartPromise: core
+        .getStartServices()
+        .then(([_, alertingStart]) => alertingStart.taskManager),
+      taskRunnerFactory: this.taskRunnerFactory,
     });
 
     this.eventLogger = plugins.eventLog.getLogger({
@@ -588,9 +594,6 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
-      internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
-        RULE_SAVED_OBJECT_TYPE,
-      ]),
       executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
       alertsService: this.alertsService,
@@ -603,6 +606,7 @@ export class AlertingPlugin {
       usageCounter: this.usageCounter,
       getRulesSettingsClientWithRequest,
       getMaintenanceWindowClientWithRequest,
+      backfillClient: this.backfillClient!,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
     });
 

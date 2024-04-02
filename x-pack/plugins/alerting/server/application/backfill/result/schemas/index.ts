@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { adHocRunStatus } from '../../../../../common/constants';
 
 export const statusSchema = schema.oneOf([
+  schema.literal(adHocRunStatus.COMPLETE),
   schema.literal(adHocRunStatus.PENDING),
   schema.literal(adHocRunStatus.RUNNING),
   schema.literal(adHocRunStatus.ERROR),

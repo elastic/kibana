@@ -19,6 +19,7 @@ import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -60,6 +61,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     '@timestamp',
     'kibana.alert.flapping_history',
     'kibana.alert.rule.execution.uuid',
+    'kibana.alert.rule.execution.timestamp',
   ];
 
   describe('alerts as data', () => {
@@ -145,6 +147,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
         // timestamp should be defined
         expect(source['@timestamp']).to.match(timestampPattern);
+
+        // execution time should be same as timestamp
+        expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).to.equal(source['@timestamp']);
 
         // status should be active
         expect(source[ALERT_STATUS]).to.equal('active');
@@ -233,6 +238,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       // timestamp should be defined and not the same as prior run
       expect(alertADocRun2['@timestamp']).to.match(timestampPattern);
       expect(alertADocRun2['@timestamp']).not.to.equal(alertADocRun1['@timestamp']);
+      // execution time should be same as timestamp
+      expect(alertADocRun2[ALERT_RULE_EXECUTION_TIMESTAMP]).to.equal(alertADocRun2['@timestamp']);
       // status should still be active
       expect(alertADocRun2[ALERT_STATUS]).to.equal('active');
       // flapping false, flapping history updated with additional entry
@@ -266,6 +273,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       // timestamp should be defined and not the same as prior run
       expect(alertBDocRun2['@timestamp']).to.match(timestampPattern);
       expect(alertBDocRun2['@timestamp']).not.to.equal(alertBDocRun1['@timestamp']);
+      // execution time should be same as timestamp
+      expect(alertBDocRun2[ALERT_RULE_EXECUTION_TIMESTAMP]).to.equal(alertBDocRun2['@timestamp']);
       // end time should be defined
       expect(alertBDocRun2[ALERT_END]).to.match(timestampPattern);
       // status should be set to recovered
@@ -303,6 +312,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       // timestamp should be defined and not the same as prior run
       expect(alertCDocRun2['@timestamp']).to.match(timestampPattern);
       expect(alertCDocRun2['@timestamp']).not.to.equal(alertCDocRun1['@timestamp']);
+      // execution time should be same as timestamp
+      expect(alertCDocRun2[ALERT_RULE_EXECUTION_TIMESTAMP]).to.equal(alertCDocRun2['@timestamp']);
       // end time should be defined
       expect(alertCDocRun2[ALERT_END]).to.match(timestampPattern);
       // status should be set to recovered
@@ -372,6 +383,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       // timestamp should be defined and not the same as prior run
       expect(alertADocRun3['@timestamp']).to.match(timestampPattern);
       expect(alertADocRun3['@timestamp']).not.to.equal(alertADocRun2['@timestamp']);
+      // execution time should be same as timestamp
+      expect(alertADocRun3[ALERT_RULE_EXECUTION_TIMESTAMP]).to.equal(alertADocRun3['@timestamp']);
       // status should still be active
       expect(alertADocRun3[ALERT_STATUS]).to.equal('active');
       // flapping false, flapping history updated with additional entry
@@ -428,6 +441,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       expect(alertCDocRun3[ALERT_START]).not.to.equal(alertCDocRun2[ALERT_START]);
       // timestamp should be defined and not the same as prior run
       expect(alertCDocRun3['@timestamp']).to.match(timestampPattern);
+      // execution time should be same as timestamp
+      expect(alertCDocRun3[ALERT_RULE_EXECUTION_TIMESTAMP]).to.equal(alertCDocRun3['@timestamp']);
       // duration should be 0 since this is a new alert
       expect(alertCDocRun3[ALERT_DURATION]).to.equal(0);
       // flapping false, flapping history should be history from prior run with additional entry
