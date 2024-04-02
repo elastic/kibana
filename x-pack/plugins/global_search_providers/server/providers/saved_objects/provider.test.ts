@@ -6,7 +6,7 @@
  */
 
 import { EMPTY } from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import {
   SavedObjectsFindResponse,

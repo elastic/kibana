@@ -653,6 +653,46 @@
       "warning": []
     },
     {
+      "query": "row bool_var = true and false",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = true and null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = null and false",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = null and null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = true or false",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = true or null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = null or false",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = null or null",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = abs(5)",
       "error": [],
       "warning": []
@@ -5115,6 +5155,11 @@
     },
     {
       "query": "from a_index | where geoPointField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField == \"a\" or null",
       "error": [],
       "warning": []
     },
@@ -10584,6 +10629,11 @@
     },
     {
       "query": "from a_index | stats count(`numberField`)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(stringField == \"a\" or null)",
       "error": [],
       "warning": []
     },

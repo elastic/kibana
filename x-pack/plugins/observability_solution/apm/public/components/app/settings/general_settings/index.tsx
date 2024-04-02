@@ -82,7 +82,7 @@ export function GeneralSettings() {
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useEditableSettings('apm', apmSettingsKeys);
+  } = useEditableSettings(apmSettingsKeys);
 
   async function handleSave() {
     try {

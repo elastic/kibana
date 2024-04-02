@@ -10,7 +10,7 @@ import { spawn, ChildProcess } from 'child_process';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { ToolingLog } from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
-import { filter, take, map, tap } from 'rxjs/operators';
+import { filter, take, map, tap } from 'rxjs';
 import { getLatestVersion } from './artifact_manager';
 
 let enterpriseSearchProcess: ChildProcess | undefined;
