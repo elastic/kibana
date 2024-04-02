@@ -74,7 +74,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               type: DataViewType.ROLLUP,
             },
             override: true,
-          });
+          })
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
         svlCommonApi.assertResponseStatusCode(200, status, body);
         dataViewId = body.data_view.id;
       });
