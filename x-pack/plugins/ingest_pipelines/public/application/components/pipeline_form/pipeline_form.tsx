@@ -10,11 +10,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonEmpty, EuiSpacer, EuiPageSection, EuiPageHeader, EuiInlineEditTitle, EuiInlineEditText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { useForm, Form, FormConfig } from '../../../shared_imports';
+import { useForm, Form, FormConfig, UseField } from '../../../shared_imports';
 import { Pipeline, Processor } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
 import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
+import { DeprecatedPipelineBadge, DeprecatedPipelineCallout, ManagedPipelineCallout, ManagedPipelineBadge } from '../pipeline_elements';
 
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
@@ -123,92 +124,146 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   return (
     <>
-      <EuiPageSection paddingSize="none">
-        <EuiButton
-          data-test-subj="pipelineFormBackButton"
-          color="text"
-          iconType="arrowLeft"
-          onClick={() => null}
-        >
-          <FormattedMessage
-            id="xpack.ingestPipelines.form.backButtonLabel"
-            defaultMessage="Back to all pipelines"
-          />
-        </EuiButton>
-      </EuiPageSection>
-
-      <EuiSpacer size="l" />
-
-      <EuiPageHeader bottomBorder>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiInlineEditTitle
-              heading="h1"
-              size="l"
-              inputAriaLabel="Edit title inline"
-              defaultValue=""
-              placeholder={i18nStrings.placeholderPipelineName}
-            />
-            <EuiSpacer size="l" />
-            <EuiInlineEditText
-              size="m"
-              inputAriaLabel="Edit description inline"
-              defaultValue=""
-              placeholder={i18nStrings.placeholderPipelineDescription}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="m" direction="rowReverse">
-              <EuiFlexItem>
-                <EuiButton
-                  fill
-                  onClick={form.submit}
-                  data-test-subj="submitButton"
-                  disabled={form.isSubmitted && form.isValid === false}
-                  isLoading={isSaving}
-                >
-                  {saveButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButton
-                  data-test-subj="showRequestLink"
-                  iconType="console"
-                  onClick={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
-                >
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.form.showRequestButtonLabel"
-                    defaultMessage="Show request"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButtonEmpty
-                  flush="right"
-                  href={services.documentation.getCreatePipelineUrl()}
-                  target="_blank"
-                  data-test-subj="documentationLink"
-                >
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.form.docsButtonLabel"
-                    defaultMessage="Documentation"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageHeader>
-
-      <EuiSpacer size="l" />
-
       <Form
         form={form}
         data-test-subj="pipelineForm"
         isInvalid={form.isSubmitted && !form.isValid}
         error={form.getErrors()}
       >
+        <EuiPageSection paddingSize="none">
+          <EuiButton
+            data-test-subj="pipelineFormBackButton"
+            color="text"
+            iconType="arrowLeft"
+            onClick={() => null}
+          >
+            <FormattedMessage
+              id="xpack.ingestPipelines.form.backButtonLabel"
+              defaultMessage="Back to all pipelines"
+            />
+          </EuiButton>
+        </EuiPageSection>
+
+        <EuiSpacer size="l" />
+
+        <EuiPageHeader bottomBorder>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <UseField<string> path="name">
+                {({ value, setValue } ) => {
+                  return (
+                    <EuiInlineEditTitle
+                      heading="h1"
+                      size="l"
+                      inputAriaLabel="Edit title inline"
+                      onSave={setValue}
+                      defaultValue={value}
+                      placeholder={i18nStrings.placeholderPipelineName}
+                      isReadOnly={isSaving || canEditName === false}
+                    />
+                  );
+                }}
+              </UseField>
+
+              {!isEditing && <EuiSpacer size="l" />}
+              {isEditing && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiFlexGroup gutterSize="s">
+                    {defaultFormValues?.isManaged && (
+                      <EuiFlexItem grow={false}>
+                        <ManagedPipelineBadge />
+                      </EuiFlexItem>
+                    )}
+                    {defaultFormValues?.deprecated && (
+                      <EuiFlexItem grow={false}>
+                        <DeprecatedPipelineBadge />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                </>
+              )}
+
+              <UseField<string> path="description">
+                {({ value, setValue } ) => {
+                  return (
+                    <EuiInlineEditText
+                      size="m"
+                      inputAriaLabel="Edit description inline"
+                      onSave={setValue}
+                      defaultValue={value}
+                      placeholder={i18nStrings.placeholderPipelineDescription}
+                      isReadOnly={isSaving}
+                    />
+                  );
+                }}
+              </UseField>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="m" direction="rowReverse">
+                <EuiFlexItem>
+                  <EuiButton
+                    fill
+                    onClick={form.submit}
+                    data-test-subj="submitButton"
+                    disabled={form.isSubmitted && form.isValid === false}
+                    isLoading={isSaving}
+                  >
+                    {saveButtonLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton
+                    data-test-subj="showRequestLink"
+                    iconType="console"
+                    onClick={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.form.showRequestButtonLabel"
+                      defaultMessage="Show request"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    flush="right"
+                    href={services.documentation.getCreatePipelineUrl()}
+                    target="_blank"
+                    data-test-subj="documentationLink"
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.form.docsButtonLabel"
+                      defaultMessage="Documentation"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageHeader>
+
+        <EuiSpacer size="l" />
+
+        {isEditing && (
+          <>
+            {defaultFormValues?.isManaged && (
+              <>
+                <ManagedPipelineCallout />
+                <EuiSpacer size="l" />
+              </>
+            )}
+            {defaultFormValues?.deprecated && (
+              <>
+                <DeprecatedPipelineCallout />
+                <EuiSpacer size="l" />
+              </>
+            )}
+          </>
+        )}
+
+
         {/* Request error */}
         {saveError && <PipelineFormError error={saveError} />}
 

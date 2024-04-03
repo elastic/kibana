@@ -9,11 +9,8 @@ import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiPageHeader,
   EuiSpacer,
   EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiPageTemplate,
 } from '@elastic/eui';
 
@@ -27,44 +24,6 @@ import { useRedirectToPathOrRedirectPath } from '../../hooks';
 interface MatchParams {
   name: string;
 }
-
-const ManagedPipelineCallout = () => (
-  <EuiCallOut
-    color="danger"
-    iconType="warning"
-    data-test-subj="managedPipelineCallout"
-    title={
-      <FormattedMessage
-        id="xpack.ingestPipelines.edit.managedCalloutTitle"
-        defaultMessage="Editing a managed pipeline can break Kibana."
-      />
-    }
-  >
-    <FormattedMessage
-      id="xpack.ingestPipelines.edit.managedCalloutDescription"
-      defaultMessage="Managed pipelines are critical for internal operations."
-    />
-  </EuiCallOut>
-);
-
-const DeprecatedPipelineCallout = () => (
-  <EuiCallOut
-    color="warning"
-    iconType="warning"
-    data-test-subj="deprecatedPipelineCallout"
-    title={
-      <FormattedMessage
-        id="xpack.ingestPipelines.edit.deprecatedCalloutTitle"
-        defaultMessage="This pipeline is deprecated"
-      />
-    }
-  >
-    <FormattedMessage
-      id="xpack.ingestPipelines.edit.deprecatedCalloutDescription"
-      defaultMessage="This pipeline is no longer supported and might be removed in a future release. Instead, use one of the other pipelines available or create a new one."
-    />
-  </EuiCallOut>
-);
 
 export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
@@ -101,10 +60,6 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
     }
 
     redirectToPathOrRedirectPath(getListPath({ inspectedPipelineName: updatedPipeline.name }));
-  };
-
-  const onCancel = () => {
-    redirectToPathOrRedirectPath(getListPath());
   };
 
   useEffect(() => {
@@ -150,57 +105,12 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
   }
 
   return (
-    <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.ingestPipelines.edit.pageTitle"
-              defaultMessage="Edit pipeline '{name}'"
-              values={{ name: decodedPipelineName }}
-            />
-          </span>
-        }
-        rightSideItems={[
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={services.documentation.getCreatePipelineUrl()}
-            target="_blank"
-            iconType="help"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.ingestPipelines.edit.docsButtonLabel"
-              defaultMessage="Edit pipeline docs"
-            />
-          </EuiButtonEmpty>,
-        ]}
-      />
-
-      <EuiSpacer size="l" />
-      {pipeline?.isManaged && (
-        <>
-          <ManagedPipelineCallout />
-          <EuiSpacer size="l" />
-        </>
-      )}
-      {pipeline?.deprecated && (
-        <>
-          <DeprecatedPipelineCallout />
-          <EuiSpacer size="l" />
-        </>
-      )}
-
-      <PipelineForm
-        onSave={onSave}
-        onCancel={onCancel}
-        isSaving={isSaving}
-        saveError={saveError}
-        defaultValue={pipeline as Pipeline}
-        isEditing={true}
-      />
-    </>
+    <PipelineForm
+      onSave={onSave}
+      isSaving={isSaving}
+      saveError={saveError}
+      defaultValue={pipeline as Pipeline}
+      isEditing={true}
+    />
   );
 };

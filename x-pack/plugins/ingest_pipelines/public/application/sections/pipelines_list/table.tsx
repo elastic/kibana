@@ -16,8 +16,6 @@ import {
   EuiTableFieldDataColumnType,
   EuiPopover,
   EuiContextMenu,
-  EuiBadge,
-  EuiToolTip,
   EuiFilterGroup,
   EuiSelectable,
   EuiFilterButton,
@@ -27,6 +25,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
+import { DeprecatedPipelineBadge, ManagedPipelineBadge } from '../../components/pipeline_elements';
 
 export interface Props {
   pipelines: Pipeline[];
@@ -35,16 +34,6 @@ export interface Props {
   onClonePipelineClick: (pipelineName: string) => void;
   onDeletePipelineClick: (pipelineName: string[]) => void;
 }
-
-export const deprecatedPipelineBadge = {
-  badge: i18n.translate('xpack.ingestPipelines.list.table.deprecatedBadgeLabel', {
-    defaultMessage: 'Deprecated',
-  }),
-  badgeTooltip: i18n.translate('xpack.ingestPipelines.list.table.deprecatedBadgeTooltip', {
-    defaultMessage:
-      'This pipeline is no longer supported and might be removed in a future release. Instead, use one of the other pipelines available or create a new one.',
-  }),
-};
 
 const deprecatedFilterLabel = i18n.translate(
   'xpack.ingestPipelines.list.table.deprecatedFilterLabel',
@@ -270,21 +259,13 @@ export const PipelineTable: FunctionComponent<Props> = ({
             {pipeline.deprecated && (
               <>
                 &nbsp;
-                <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
-                  <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
-                    {deprecatedPipelineBadge.badge}
-                  </EuiBadge>
-                </EuiToolTip>
+                <DeprecatedPipelineBadge />
               </>
             )}
             {pipeline.isManaged && (
               <>
                 &nbsp;
-                <EuiBadge color="hollow" data-test-subj="isManagedBadge">
-                  {i18n.translate('xpack.ingestPipelines.list.table.managedBadgeLabel', {
-                    defaultMessage: 'Managed',
-                  })}
-                </EuiBadge>
+                <ManagedPipelineBadge />
               </>
             )}
           </EuiLink>

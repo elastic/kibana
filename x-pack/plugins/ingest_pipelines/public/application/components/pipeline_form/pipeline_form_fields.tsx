@@ -41,11 +41,9 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   onFailure,
   onLoadJson,
   onProcessorsUpdate,
-  isEditing,
   hasVersion,
   hasMeta,
   onEditorFlyoutOpen,
-  canEditName,
 }) => {
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(hasVersion);
 
@@ -55,14 +53,9 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
     <>
       {/* Name field with optional version field */}
       <FormRow
-        title={<FormattedMessage id="xpack.ingestPipelines.form.nameTitle" defaultMessage="Name" />}
+        title={<FormattedMessage id="xpack.ingestPipelines.form.versionNumber" defaultMessage="Version" />}
         description={
           <>
-            <FormattedMessage
-              id="xpack.ingestPipelines.form.nameDescription"
-              defaultMessage="A unique identifier for this pipeline."
-            />
-            <EuiSpacer size="m" />
             <EuiSwitch
               label={
                 <FormattedMessage
@@ -77,14 +70,6 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           </>
         }
       >
-        <UseField
-          path="name"
-          componentProps={{
-            ['data-test-subj']: 'nameField',
-            euiFieldProps: { disabled: canEditName === false || Boolean(isEditing) },
-          }}
-        />
-
         {isVersionVisible && (
           <UseField
             path="version"
@@ -93,32 +78,6 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
             }}
           />
         )}
-      </FormRow>
-
-      {/* Description field */}
-      <FormRow
-        title={
-          <FormattedMessage
-            id="xpack.ingestPipelines.form.descriptionFieldTitle"
-            defaultMessage="Description"
-          />
-        }
-        description={
-          <FormattedMessage
-            id="xpack.ingestPipelines.form.descriptionFieldDescription"
-            defaultMessage="A description of what this pipeline does."
-          />
-        }
-      >
-        <UseField
-          path="description"
-          componentProps={{
-            ['data-test-subj']: 'descriptionField',
-            euiFieldProps: {
-              compressed: true,
-            },
-          }}
-        />
       </FormRow>
 
       {/* Pipeline Processors Editor */}
