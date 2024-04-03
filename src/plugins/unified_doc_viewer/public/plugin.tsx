@@ -16,14 +16,23 @@ import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart } from '@kbn/core/public';
+import { dynamic } from '@kbn/shared-ux-utility';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
   createGetterSetter<UnifiedDocViewerServices>('UnifiedDocViewerServices');
 
-const DocViewerLegacyTable = React.lazy(() => import('./components/doc_viewer_table/legacy'));
-const DocViewerTable = React.lazy(() => import('./components/doc_viewer_table'));
-const SourceViewer = React.lazy(() => import('./components/doc_viewer_source'));
+const fallback = (
+  <EuiDelayRender delay={300}>
+    <EuiSkeletonText />
+  </EuiDelayRender>
+);
+
+const LazyDocViewerLegacyTable = dynamic(() => import('./components/doc_viewer_table/legacy'), {
+  fallback,
+});
+const LazyDocViewerTable = dynamic(() => import('./components/doc_viewer_table'), { fallback });
+const LazySourceViewer = dynamic(() => import('./components/doc_viewer_source'), { fallback });
 
 export interface UnifiedDocViewerSetup {
   registry: DocViewsRegistry;
@@ -52,19 +61,11 @@ export class UnifiedDocViewerPublicPlugin
       order: 10,
       component: (props) => {
         const { uiSettings } = getUnifiedDocViewerServices();
-        const DocView = uiSettings.get(DOC_TABLE_LEGACY) ? DocViewerLegacyTable : DocViewerTable;
+        const LazyDocView = uiSettings.get(DOC_TABLE_LEGACY)
+          ? LazyDocViewerLegacyTable
+          : LazyDocViewerTable;
 
-        return (
-          <React.Suspense
-            fallback={
-              <EuiDelayRender delay={300}>
-                <EuiSkeletonText />
-              </EuiDelayRender>
-            }
-          >
-            <DocView {...props} />
-          </React.Suspense>
-        );
+        return <LazyDocView {...props} />;
       },
     });
 
@@ -76,22 +77,14 @@ export class UnifiedDocViewerPublicPlugin
       order: 20,
       component: ({ hit, dataView, textBasedHits }) => {
         return (
-          <React.Suspense
-            fallback={
-              <EuiDelayRender delay={300}>
-                <EuiSkeletonText />
-              </EuiDelayRender>
-            }
-          >
-            <SourceViewer
-              index={hit.raw._index}
-              id={hit.raw._id ?? hit.id}
-              dataView={dataView}
-              textBasedHits={textBasedHits}
-              hasLineNumbers
-              onRefresh={() => {}}
-            />
-          </React.Suspense>
+          <LazySourceViewer
+            index={hit.raw._index}
+            id={hit.raw._id ?? hit.id}
+            dataView={dataView}
+            textBasedHits={textBasedHits}
+            hasLineNumbers
+            onRefresh={() => {}}
+          />
         );
       },
     });
