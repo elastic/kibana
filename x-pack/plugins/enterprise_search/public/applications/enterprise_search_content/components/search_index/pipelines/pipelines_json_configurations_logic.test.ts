@@ -61,7 +61,6 @@ describe('IndexPipelinesConfigurationsLogic', () => {
           version: 1,
         },
       };
-      // @ts-expect-error pipeline._meta defined as mandatory
       FetchCustomPipelineApiLogic.actions.apiSuccess(pipelines);
       await nextTick();
 
@@ -73,7 +72,6 @@ describe('IndexPipelinesConfigurationsLogic', () => {
           version: 1,
         },
       };
-      // @ts-expect-error pipeline._meta defined as mandatory
       FetchCustomPipelineApiLogic.actions.apiSuccess(pipelines);
       await nextTick();
 
@@ -94,7 +92,6 @@ describe('IndexPipelinesConfigurationsLogic', () => {
           version: 1,
         },
       };
-      // @ts-expect-error pipeline._meta defined as mandatory
       FetchCustomPipelineApiLogic.actions.apiSuccess(pipelines);
       await nextTick();
 
@@ -115,7 +112,6 @@ describe('IndexPipelinesConfigurationsLogic', () => {
           version: 3,
         },
       };
-      // @ts-expect-error pipeline._meta defined as mandatory
       FetchCustomPipelineApiLogic.actions.apiSuccess(pipelines);
       IndexPipelinesConfigurationsLogic.actions.selectPipeline('foo');
       await nextTick();
