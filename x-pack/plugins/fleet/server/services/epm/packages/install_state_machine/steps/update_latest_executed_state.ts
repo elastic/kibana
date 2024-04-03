@@ -33,7 +33,7 @@ export const updateLatestExecutedState = async (context: InstallContext) => {
     });
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      logger.error(`Failed to update package install state to: latest_executed_state  ${err}`);
+      logger.error(`Failed to update SO with latest executed state: ${err}`);
     }
   }
 };
