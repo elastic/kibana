@@ -53,7 +53,7 @@ export function createEditSingleMetricViewerPanelAction(
         const httpService = new HttpService(coreStart.http);
         const mlApiServices = mlApiServicesProvider(httpService);
 
-        const { jobIds, selectedEntities, selectedDetectorIndex } = context.embeddable;
+        const { jobIds, selectedEntities, selectedDetectorIndex, panelTitle } = context.embeddable;
 
         const result = await resolveEmbeddableSingleMetricViewerUserInput(
           coreStart,
@@ -63,6 +63,7 @@ export function createEditSingleMetricViewerPanelAction(
             jobIds: jobIds.getValue(),
             selectedDetectorIndex: selectedDetectorIndex.getValue(),
             selectedEntities: selectedEntities?.getValue(),
+            title: panelTitle?.getValue(),
           } as SingleMetricViewerEmbeddableInput
         );
 
