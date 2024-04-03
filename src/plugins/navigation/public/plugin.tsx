@@ -134,11 +134,10 @@ export class NavigationPublicPlugin
     this.isSolutionNavEnabled$ = of(false);
 
     if (cloudExperiments) {
-      const loadFeatureFlag$ = from(
+      isFeatureEnabled$ = from(
         cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
-      ).pipe(shareReplay(1));
-
-      isFeatureEnabled$ = loadFeatureFlag$.pipe(
+      ).pipe(
+        shareReplay(1),
         map((isFeatureFlagEnabled) => {
           const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
           const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
