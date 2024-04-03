@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import { once } from 'lodash';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
   CrowdstrikeGetAgentsResponse,
@@ -22,7 +20,6 @@ import type {
   ProcessPendingActionsMethodOptions,
 } from '../../..';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { CrowdstrikeConnectorExecuteOptions } from './types';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type { ActionDetails, LogsEndpointAction } from '../../../../../../common/endpoint/types';
@@ -33,50 +30,24 @@ import type {
   ResponseActionsClientValidateRequestResponse,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
+import type { NormalizedExternalConnectorClientExecuteOptions } from '../lib/normalized_external_connector_client';
+import { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
-  connectorActions: ActionsClient;
+  connectorActions: ActionsClient | IUnsecuredActionsClient;
 };
 
 export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
-  private readonly connectorActionsClient: ActionsClient;
-  private readonly getConnector: () => Promise<ConnectorWithExtraFindData>;
+  private readonly connectorActionsClient: NormalizedExternalConnectorClient;
 
   constructor({ connectorActions, ...options }: CrowdstrikeActionsClientOptions) {
     super(options);
-    this.connectorActionsClient = connectorActions;
-
-    this.getConnector = once(async () => {
-      let connectorList: ConnectorWithExtraFindData[] = [];
-
-      try {
-        connectorList = await this.connectorActionsClient.getAll();
-      } catch (err) {
-        throw new ResponseActionsClientError(
-          `Unable to retrieve list of stack connectors: ${err.message}`,
-          // failure here is likely due to Authz, but because we don't have a good way to determine that,
-          // the `statusCode` below is set to `400` instead of `401`.
-          400,
-          err
-        );
-      }
-      const connector = connectorList.find(({ actionTypeId, isDeprecated, isMissingSecrets }) => {
-        return actionTypeId === CROWDSTRIKE_CONNECTOR_ID && !isDeprecated && !isMissingSecrets;
-      });
-
-      if (!connector) {
-        throw new ResponseActionsClientError(
-          `No Crowdstrike stack connector found`,
-          400,
-          connectorList
-        );
-      }
-
-      this.log.debug(`Using Crowdstrike stack connector: ${connector.name} (${connector.id})`);
-
-      return connector;
-    });
+    this.connectorActionsClient = new NormalizedExternalConnectorClient(
+      CROWDSTRIKE_CONNECTOR_ID,
+      connectorActions,
+      this.log
+    );
   }
 
   protected async writeActionRequestToEndpointIndex(
@@ -101,9 +72,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     actionType: SUB_ACTION,
     actionParams: object
   ): Promise<ActionTypeExecutorResult<unknown>> {
-    const { id: connectorId } = await this.getConnector();
     const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
-      actionId: connectorId,
       params: {
         subAction: actionType,
         subActionParams: actionParams,
@@ -137,9 +106,10 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   private async getAgentDetails(
     id: string
   ): Promise<CrowdstrikeGetAgentsResponse['resources'][number]> {
-    const { id: connectorId } = await this.getConnector();
-    const executeOptions: CrowdstrikeConnectorExecuteOptions<CrowdstrikeGetAgentsParams> = {
-      actionId: connectorId,
+    const executeOptions: NormalizedExternalConnectorClientExecuteOptions<
+      CrowdstrikeGetAgentsParams,
+      SUB_ACTION
+    > = {
       params: {
         subAction: SUB_ACTION.GET_AGENT_DETAILS,
         subActionParams: {

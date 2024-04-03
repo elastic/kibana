@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 
@@ -18,9 +16,3 @@ interface CrowdstrikeConnectorExecuteParams<
   subAction: SUB_ACTION;
   subActionParams: P;
 }
-
-export type CrowdstrikeConnectorExecuteOptions<
-  P extends Record<string, unknown> = Record<string, any>
-> = Omit<ConnectorActionsExecuteOptions, 'params'> & {
-  params: CrowdstrikeConnectorExecuteParams<P> & Record<string, unknown>;
-};
