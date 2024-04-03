@@ -149,9 +149,8 @@ export function VisualizeESQL({
   );
 
   // initialization
-  // adding extra check for columns length, otherwise the suggestion will be invalid
   useEffect(() => {
-    if (lensHelpersAsync.value && dataViewAsync.value && !lensInput && columns.length) {
+    if (lensHelpersAsync.value && dataViewAsync.value && !lensInput) {
       const context = {
         dataViewSpec: dataViewAsync.value?.toSpec(),
         fieldName: '',
@@ -235,7 +234,7 @@ export function VisualizeESQL({
     }
   }, [chatFlyoutSecondSlotHandler, lensInput, lensLoadEvent, onActionClick, query]);
 
-  if (!lensHelpersAsync.value || !dataViewAsync.value) {
+  if (!lensHelpersAsync.value || !dataViewAsync.value || !lensInput) {
     return <EuiLoadingSpinner />;
   }
 
@@ -265,69 +264,60 @@ export function VisualizeESQL({
             </EuiDescriptionList>
           </>
         )}
-        {!errorMessages?.length && lensInput && (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-                <EuiToolTip
-                  content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.edit', {
-                    defaultMessage: 'Edit visualization',
-                  })}
-                >
-                  <EuiButtonIcon
-                    size="xs"
-                    iconType="pencil"
-                    onClick={() => {
-                      chatFlyoutSecondSlotHandler?.setVisibility?.(true);
-                      if (triggerOptions) {
-                        uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
-                      }
-                    }}
-                    data-test-subj="observabilityAiAssistantLensESQLEditButton"
-                    aria-label={i18n.translate(
-                      'xpack.observabilityAiAssistant.lensESQLFunction.edit',
-                      {
-                        defaultMessage: 'Edit visualization',
-                      }
-                    )}
-                  />
-                </EuiToolTip>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.observabilityAiAssistant.lensESQLFunction.save',
-                      {
-                        defaultMessage: 'Save visualization',
-                      }
-                    )}
-                  >
-                    <EuiButtonIcon
-                      size="xs"
-                      iconType="save"
-                      onClick={() => setIsSaveModalOpen(true)}
-                      data-test-subj="observabilityAiAssistantLensESQLSaveButton"
-                      aria-label={i18n.translate(
-                        'xpack.observabilityAiAssistant.lensESQLFunction.save',
-                        {
-                          defaultMessage: 'Save visualization',
-                        }
-                      )}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem data-test-subj="observabilityAiAssistantESQLLensChart">
-              <lens.EmbeddableComponent
-                {...lensInput}
-                style={{
-                  height: 240,
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+            <EuiToolTip
+              content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.edit', {
+                defaultMessage: 'Edit visualization',
+              })}
+            >
+              <EuiButtonIcon
+                size="xs"
+                iconType="pencil"
+                onClick={() => {
+                  chatFlyoutSecondSlotHandler?.setVisibility?.(true);
+                  if (triggerOptions) {
+                    uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
+                  }
                 }}
-                onLoad={onLoad}
+                data-test-subj="observabilityAiAssistantLensESQLEditButton"
+                aria-label={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.edit', {
+                  defaultMessage: 'Edit visualization',
+                })}
               />
+            </EuiToolTip>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.save', {
+                  defaultMessage: 'Save visualization',
+                })}
+              >
+                <EuiButtonIcon
+                  size="xs"
+                  iconType="save"
+                  onClick={() => setIsSaveModalOpen(true)}
+                  data-test-subj="observabilityAiAssistantLensESQLSaveButton"
+                  aria-label={i18n.translate(
+                    'xpack.observabilityAiAssistant.lensESQLFunction.save',
+                    {
+                      defaultMessage: 'Save visualization',
+                    }
+                  )}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
-          </>
-        )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj="observabilityAiAssistantESQLLensChart">
+          <lens.EmbeddableComponent
+            {...lensInput}
+            style={{
+              height: 240,
+            }}
+            onLoad={onLoad}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
       {isSaveModalOpen ? (
         <lens.SaveModalComponent

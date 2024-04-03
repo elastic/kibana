@@ -12,6 +12,20 @@ import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plug
 import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import { FunctionRegistrationParameters } from '.';
 
+const getSystemMessage = (
+  intention: VisualizeESQLUserIntention,
+  query: string,
+  queryErrors: string[]
+) => {
+  if (queryErrors.length) {
+    return 'The query has syntax errors: ```\n' + queryErrors + '\n```';
+  }
+  return intention === VisualizeESQLUserIntention.executeAndReturnResults ||
+    intention === VisualizeESQLUserIntention.generateQueryOnly
+    ? 'These results are not visualized'
+    : 'Only following query is visualized: ```esql\n' + query + '\n```';
+};
+
 export function registerVisualizeESQLFunction({
   functions,
   resources,
@@ -22,22 +36,9 @@ export function registerVisualizeESQLFunction({
       const { errors } = await validateQuery(query, getAstAndSyntaxErrors, {
         ignoreOnMissingCallbacks: true,
       });
-
-      if (errors.length) {
-        const errorMessages = errors.map((error) => {
-          return 'text' in error ? error.text : error.message;
-        });
-
-        return {
-          data: {
-            columns: [],
-            errorMessages,
-          },
-          content: {
-            message: 'The query has syntax errors',
-          },
-        };
-      }
+      const errorMessages = errors?.map((error) => {
+        return 'text' in error ? error.text : error.message;
+      });
       // With limit 0 I get only the columns, it is much more performant
       const performantQuery = `${query} | limit 0`;
       const coreContext = await resources.context.core;
@@ -57,16 +58,16 @@ export function registerVisualizeESQLFunction({
           name,
           meta: { type: esFieldTypeToKibanaFieldType(type) },
         })) ?? [];
+
+      const message = getSystemMessage(query, intention, errorMessages);
+
       return {
         data: {
           columns,
+          errorMessages,
         },
         content: {
-          message:
-            intention === VisualizeESQLUserIntention.executeAndReturnResults ||
-            intention === VisualizeESQLUserIntention.generateQueryOnly
-              ? 'These results are not visualized'
-              : 'Only following query is visualized: ```esql\n' + query + '\n```',
+          message,
         },
       };
     }
