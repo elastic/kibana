@@ -3330,6 +3330,13 @@ describe('Task Runner', () => {
     });
 
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
+    expect(runnerResult.taskRunError?.message).toBe(
+      'Executing Rule test:1 has resulted in the following error(s): an error occurred'
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      'Executing Rule test:1 has resulted in the following error(s): an error occurred',
+      { tags: ['test', '1', 'rule-run-failed'] }
+    );
   });
 
   function testAlertingEventLogCalls({
