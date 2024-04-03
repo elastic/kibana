@@ -77,11 +77,17 @@ export const SentineloneScriptSelector = memo<
       const selectedScript = newOptions.find((opt) => opt.checked === 'on');
 
       if (selectedScript) {
-        onChange({ value: selectedScript, valueText: selectedScript.data.scriptName });
-        handleClosePopover();
+        onChange({
+          value: selectedScript.data,
+          valueText: selectedScript.data.scriptName,
+          store: {
+            ...state,
+            isPopoverOpen: false,
+          },
+        });
       }
     },
-    [handleClosePopover, onChange]
+    [onChange, state]
   );
 
   return (

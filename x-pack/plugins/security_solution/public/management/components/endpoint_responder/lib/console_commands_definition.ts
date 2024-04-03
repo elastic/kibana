@@ -514,9 +514,9 @@ export const getEndpointConsoleCommands = ({
         privileges: endpointPrivileges,
       },
       exampleUsage: 'run --script ...args',
-      exampleInstruction: 'run --script foo --one=1',
+      exampleInstruction: 'run --script=foo --one=1',
       validate: undefined,
-      mustHaveArgs: false,
+      mustHaveArgs: true,
       args: {
         comment: {
           required: false,
@@ -524,7 +524,7 @@ export const getEndpointConsoleCommands = ({
           about: COMMENT_ARG_ABOUT,
         },
         script: {
-          required: false,
+          required: true,
           allowMultiples: false,
           about: 'Select a SentinelOne defined script to run',
           mustHaveValue: 'non-empty-string',
