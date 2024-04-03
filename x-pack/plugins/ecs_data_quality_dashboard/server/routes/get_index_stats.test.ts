@@ -144,7 +144,7 @@ describe('getIndexStatsRoute route', () => {
       'my-index-000001': {
         name: 'my-index-000001',
         num_docs: 2,
-        size_in_bytes: 11462,
+        size_in_bytes: null,
       },
     };
     (fetchMeteringStats as jest.Mock).mockResolvedValue(mockMeteringStatsIndex);

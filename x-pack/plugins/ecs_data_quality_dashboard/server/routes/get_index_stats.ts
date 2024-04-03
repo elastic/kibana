@@ -91,7 +91,12 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
             const availableIndices = indices?.aggregations?.index?.buckets?.reduce(
               (acc: Record<string, MeteringStatsIndex>, { key }: { key: string }) => {
                 if (statsIndices?.[key]) {
-                  acc[key] = statsIndices?.[key];
+                  acc[key] = {
+                    name: statsIndices?.[key].name,
+                    num_docs: statsIndices?.[key].num_docs,
+                    size_in_bytes: null, // We don't have size_in_bytes intentionally when ILM is not available
+                    data_stream: statsIndices?.[key].data_stream,
+                  };
                 }
                 return acc;
               },
