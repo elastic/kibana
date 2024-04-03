@@ -20,10 +20,7 @@ import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es
 import { i18n } from '@kbn/i18n';
 import { asDuration, asPercent } from '../../../../../common';
 import { createFormatter } from '../../../../../common/custom_threshold_rule/formatters';
-import {
-  metricValueFormatter,
-  NO_DATA,
-} from '../../../../../common/custom_threshold_rule/metric_value_formatter';
+import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { METRIC_FORMATTERS } from '../../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../pages/alert_details/alert_details';
 import {
@@ -40,7 +37,8 @@ export interface FlyoutThresholdData {
   pctAboveThreshold: string;
 }
 
-const getPctAboveThreshold = (observedValue: number, threshold: number[]) => {
+const getPctAboveThreshold = (observedValue?: number, threshold?: number[]): string => {
+  if (!observedValue || !threshold) return '';
   if (threshold.length > 1) {
     return i18n.translate('xpack.observability.alertFlyout.overview.rangeThresholdLabel', {
       defaultMessage: ' (Range threshold)',
@@ -85,8 +83,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
-          pctAboveThreshold:
-            formattedValue === NO_DATA ? '' : getPctAboveThreshold(observedValue, threshold),
+          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
         } as unknown as FlyoutThresholdData;
       });
 
@@ -113,8 +110,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
-          pctAboveThreshold:
-            formattedValue === NO_DATA ? '' : getPctAboveThreshold(observedValue, threshold),
+          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
         } as unknown as FlyoutThresholdData;
       });
 
@@ -152,7 +148,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         fields: [],
         comparator,
-        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE]!, [
+        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
           alert.fields[ALERT_EVALUATION_THRESHOLD]!,
         ]),
       } as unknown as FlyoutThresholdData;
@@ -163,7 +159,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator: '>',
-        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE]!, [
+        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
           alert.fields[ALERT_EVALUATION_THRESHOLD]!,
         ]),
       } as unknown as FlyoutThresholdData;
@@ -174,7 +170,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         observedValue: [asPercent(alert.fields[ALERT_EVALUATION_VALUE], 100)],
         threshold: [asPercent(alert.fields[ALERT_EVALUATION_THRESHOLD], 100)],
         comparator: '>',
-        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE]!, [
+        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
           alert.fields[ALERT_EVALUATION_THRESHOLD]!,
         ]),
       } as unknown as FlyoutThresholdData;
@@ -185,7 +181,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         observedValue: [asDuration(alert.fields[ALERT_EVALUATION_VALUE])],
         threshold: [asDuration(alert.fields[ALERT_EVALUATION_THRESHOLD])],
         comparator: '>',
-        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE]!, [
+        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
           alert.fields[ALERT_EVALUATION_THRESHOLD]!,
         ]),
       } as unknown as FlyoutThresholdData;
