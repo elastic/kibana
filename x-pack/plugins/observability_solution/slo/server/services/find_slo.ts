@@ -6,10 +6,11 @@
  */
 
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema, Pagination } from '@kbn/slo-schema';
+import { keyBy } from 'lodash';
 import { SLODefinition, SLOWithSummary } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
 import { SLORepository } from './slo_repository';
-import { SLOSummary, Sort, SummarySearchClient } from './summary_search_client';
+import { SummaryResult, Sort, SummarySearchClient } from './summary_search_client';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
@@ -22,50 +23,54 @@ export class FindSLO {
   ) {}
 
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
-    const sloSummaryList = await this.summarySearchClient.search(
+    const summaryResults = await this.summarySearchClient.search(
       params.kqlQuery ?? '',
       params.filters ?? '',
       toSort(params),
       toPagination(params)
     );
 
-    const sloList = await this.repository.findAllByIds(
-      sloSummaryList.results.filter((slo) => !slo.remoteName).map((slo) => slo.id)
+    const localSloDefinitions = await this.repository.findAllByIds(
+      summaryResults.results
+        .filter((summaryResult) => !summaryResult.remote)
+        .map((summaryResult) => summaryResult.sloId)
     );
 
-    const sloListWithSummary = mergeSloWithSummary(sloList, sloSummaryList.results);
+    const sloListWithSummary = mergeSloWithSummary(localSloDefinitions, summaryResults.results);
 
     return findSLOResponseSchema.encode({
-      page: sloSummaryList.page,
-      perPage: sloSummaryList.perPage,
-      total: sloSummaryList.total,
+      page: summaryResults.page,
+      perPage: summaryResults.perPage,
+      total: summaryResults.total,
       results: sloListWithSummary,
     });
   }
 }
 
 function mergeSloWithSummary(
-  sloList: SLODefinition[],
-  sloSummaryList: SLOSummary[]
+  localSloDefinitions: SLODefinition[],
+  summaryResults: SummaryResult[]
 ): SLOWithSummary[] {
-  const localSummaryList = sloSummaryList
-    .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
-    .map((sloSummary) => ({
-      ...sloList.find((s) => s.id === sloSummary.id)!,
-      instanceId: sloSummary.instanceId,
-      summary: sloSummary.summary,
-      groupings: sloSummary.groupings,
+  const localSloDefinitionsMap = keyBy(localSloDefinitions, (sloDefinition) => sloDefinition.id);
+
+  const localSummaryList = summaryResults
+    .filter((summaryResult) => !!localSloDefinitionsMap[summaryResult.sloId])
+    .map((summaryResult) => ({
+      ...localSloDefinitionsMap[summaryResult.sloId],
+      instanceId: summaryResult.instanceId,
+      summary: summaryResult.summary,
+      groupings: summaryResult.groupings,
     }));
 
-  const remoteSummaryList = sloSummaryList
-    .filter((sloSummary) => sloSummary.remoteName)
-    .map((remoteSloSummary) => ({
-      ...remoteSloSummary.unsafeSlo!,
-      instanceId: remoteSloSummary.instanceId,
-      summary: remoteSloSummary.summary,
-      groupings: remoteSloSummary.groupings,
-      remoteName: remoteSloSummary.remoteName,
-      kibanaUrl: remoteSloSummary.unsafeSlo!.kibanaUrl,
+  const remoteSummaryList = summaryResults
+    .filter((summaryResult) => !!summaryResult.remote)
+    .map((summaryResult) => ({
+      ...summaryResult.remote!.slo,
+      instanceId: summaryResult.instanceId,
+      summary: summaryResult.summary,
+      groupings: summaryResult.groupings,
+      remoteName: summaryResult.remote!.remoteName,
+      kibanaUrl: summaryResult.remote!.kibanaUrl,
     }));
 
   return [...localSummaryList, ...remoteSummaryList];

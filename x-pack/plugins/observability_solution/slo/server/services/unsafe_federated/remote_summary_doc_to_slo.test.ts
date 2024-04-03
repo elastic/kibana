@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { fromRemoteSummaryDocumentToSlo } from './remote_summary_doc_to_slo';
+import { fromRemoteSummaryDocumentToSloDefinition } from './remote_summary_doc_to_slo';
 
 describe('FromRemoteSummaryDocToSlo', () => {
   let loggerMock: jest.Mocked<MockedLogger>;
@@ -18,7 +18,7 @@ describe('FromRemoteSummaryDocToSlo', () => {
 
   describe('with kibana < v8.14', () => {
     it('fallbacks to dummy indicator params and dates', () => {
-      const slo = fromRemoteSummaryDocumentToSlo(
+      const slo = fromRemoteSummaryDocumentToSloDefinition(
         {
           service: {
             environment: null,
@@ -72,7 +72,7 @@ describe('FromRemoteSummaryDocToSlo', () => {
 
   describe('with kibana >= v8.14', () => {
     it('uses the stringified indicator params and dates', () => {
-      const slo = fromRemoteSummaryDocumentToSlo(
+      const slo = fromRemoteSummaryDocumentToSloDefinition(
         {
           service: {
             environment: null,

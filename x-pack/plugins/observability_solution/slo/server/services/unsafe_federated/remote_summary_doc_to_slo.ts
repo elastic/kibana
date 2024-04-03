@@ -7,32 +7,38 @@
 
 import { Logger } from '@kbn/logging';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { Indicator, sloSchema } from '@kbn/slo-schema';
+import { Indicator, sloDefinitionSchema } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { isLeft } from 'fp-ts/lib/Either';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 import { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 
-export function fromRemoteSummaryDocumentToSlo(
+export function fromRemoteSummaryDocumentToSloDefinition(
   summaryDoc: EsSummaryDocument,
   logger: Logger
-): SLO | undefined {
-  const res = sloSchema.decode({
-    ...summaryDoc.slo,
+): SLODefinition | undefined {
+  const res = sloDefinitionSchema.decode({
+    id: summaryDoc.slo.id,
+    name: summaryDoc.slo.name,
+    description: summaryDoc.slo.description,
     indicator: {
       type: summaryDoc.slo.indicator.type,
       params: getIndicatorParams(logger, summaryDoc),
     },
+    timeWindow: summaryDoc.slo.timeWindow,
+    budgetingMethod: summaryDoc.slo.budgetingMethod,
     objective: {
       target: summaryDoc.slo.objective.target,
       timesliceTarget: summaryDoc.slo.objective.timesliceTarget ?? undefined,
       timesliceWindow: summaryDoc.slo.objective.timesliceWindow ?? undefined,
     },
-    kibanaUrl: summaryDoc.kibanaUrl,
     settings: { syncDelay: '1m', frequency: '1m' },
+    revision: summaryDoc.slo.revision,
     enabled: true,
+    tags: summaryDoc.slo.tags,
     createdAt: summaryDoc.slo.createdAt ?? '2024-01-01T00:00:00.000Z',
     updatedAt: summaryDoc.slo.updatedAt ?? '2024-01-01T00:00:00.000Z',
+    groupBy: summaryDoc.slo.groupBy,
     version: 1,
   });
 

@@ -11,25 +11,29 @@ import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { Groupings, SLO, SLOId, Summary } from '../domain/models';
+import { Groupings, SLODefinition, SLOId, Summary } from '../domain/models';
 import { toHighPrecision } from '../utils/number';
 import { createEsParams, typedSearch } from '../utils/queries';
 import { getListOfSummaryIndices } from './slo_settings';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
-import { fromRemoteSummaryDocumentToSlo } from './unsafe_federated/remote_summary_doc_to_slo';
+import { fromRemoteSummaryDocumentToSloDefinition } from './unsafe_federated/remote_summary_doc_to_slo';
 import { getFlattenedGroupings } from './utils';
 
-export interface SLOSummary {
-  id: SLOId;
-  remoteName?: string;
-  unsafeSlo?: SLO;
+export type SummaryResult = {
+  sloId: SLOId;
   instanceId: string;
   summary: Summary;
   groupings: Groupings;
-}
+  remote?: {
+    kibanaUrl: string;
+    remoteName: string;
+    slo: SLODefinition;
+  };
+};
 
-export type SortField = 'error_budget_consumed' | 'error_budget_remaining' | 'sli_value' | 'status';
+type SortField = 'error_budget_consumed' | 'error_budget_remaining' | 'sli_value' | 'status';
+
 export interface Sort {
   field: SortField;
   direction: 'asc' | 'desc';
@@ -41,7 +45,7 @@ export interface SummarySearchClient {
     filters: string,
     sort: Sort,
     pagination: Pagination
-  ): Promise<Paginated<SLOSummary>>;
+  ): Promise<Paginated<SummaryResult>>;
 }
 
 export class DefaultSummarySearchClient implements SummarySearchClient {
@@ -57,7 +61,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     filters: string,
     sort: Sort,
     pagination: Pagination
-  ): Promise<Paginated<SLOSummary>> {
+  ): Promise<Paginated<SummaryResult>> {
     let parsedFilters: any = {};
 
     try {
@@ -109,8 +113,9 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         (doc) => !!doc._source?.isTempDoc
       );
 
+      // TODO filter out remote summary documents from the deletion of outdated summaries
       const summarySloIds = summaryDocuments.map((doc) => doc._source.slo.id);
-      await this.deleteOutdatedSummaries(summarySloIds);
+      await this.deleteOutdatedTemporarySummaries(summarySloIds);
 
       const tempSummaryDocumentsDeduped = tempSummaryDocuments.filter(
         (doc) => !summarySloIds.includes(doc._source.slo.id)
@@ -128,15 +133,22 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         results: finalResults.map((doc) => {
           const summaryDoc = doc._source;
           const remoteName = getRemoteClusterName(doc._index);
-          let unsafeSlo;
-          if (remoteName) {
-            unsafeSlo = fromRemoteSummaryDocumentToSlo(summaryDoc, this.logger);
+          const isRemote = !!remoteName;
+          let remoteSloDefinition;
+          if (isRemote) {
+            remoteSloDefinition = fromRemoteSummaryDocumentToSloDefinition(summaryDoc, this.logger);
           }
 
           return {
-            remoteName,
-            unsafeSlo,
-            id: summaryDoc.slo.id,
+            ...(isRemote &&
+              !!remoteSloDefinition && {
+                remote: {
+                  kibanaUrl: summaryDoc.kibanaUrl!,
+                  remoteName: remoteName,
+                  slo: remoteSloDefinition,
+                },
+              }),
+            sloId: summaryDoc.slo.id,
             instanceId: summaryDoc.slo.instanceId ?? ALL_VALUE,
             summary: {
               errorBudget: {
@@ -161,7 +173,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     }
   }
 
-  private async deleteOutdatedSummaries(summarySloIds: string[]) {
+  private async deleteOutdatedTemporarySummaries(summarySloIds: string[]) {
     // Always attempt to delete temporary summary documents with an existing non-temp summary document
     // The temp summary documents are _eventually_ removed as we get through the real summary documents
 
