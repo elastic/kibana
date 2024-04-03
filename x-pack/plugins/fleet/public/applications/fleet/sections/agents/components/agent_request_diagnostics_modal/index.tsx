@@ -131,6 +131,7 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
       <p>
         <EuiCheckbox
           id="cpuMetricsCheckbox"
+          data-test-subj="cpuMetricsCheckbox"
           label="Collect additional CPU metrics"
           checked={cpuMetricsEnabled}
           onChange={() => setCPUMetricsEnabled(!cpuMetricsEnabled)}
