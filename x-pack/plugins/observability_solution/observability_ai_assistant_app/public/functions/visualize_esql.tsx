@@ -241,7 +241,7 @@ export function VisualizeESQL({
   return (
     <>
       <EuiFlexGroup direction="column">
-        {errorMessages?.length && (
+        {Boolean(errorMessages?.length) && (
           <>
             <EuiText size="s">
               {i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.errorMessage', {
@@ -249,7 +249,7 @@ export function VisualizeESQL({
               })}
             </EuiText>
             <EuiDescriptionList>
-              {errorMessages.map((error, index) => {
+              {errorMessages?.map((error, index) => {
                 return (
                   <EuiDescriptionListDescription key={index}>
                     <EuiFlexGroup gutterSize="s" alignItems="center">

@@ -59,7 +59,7 @@ export function registerVisualizeESQLFunction({
           meta: { type: esFieldTypeToKibanaFieldType(type) },
         })) ?? [];
 
-      const message = getSystemMessage(query, intention, errorMessages);
+      const message = getSystemMessage(intention, query, errorMessages);
 
       return {
         data: {
